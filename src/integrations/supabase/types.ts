@@ -14,7 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          achievements: string[] | null
+          created_at: string
+          display_name: string | null
+          experience_points: number
+          id: string
+          level: number
+          streak_days: number
+          total_sessions: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievements?: string[] | null
+          created_at?: string
+          display_name?: string | null
+          experience_points?: number
+          id?: string
+          level?: number
+          streak_days?: number
+          total_sessions?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievements?: string[] | null
+          created_at?: string
+          display_name?: string | null
+          experience_points?: number
+          id?: string
+          level?: number
+          streak_days?: number
+          total_sessions?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

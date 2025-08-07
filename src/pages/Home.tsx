@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TierBadge } from "@/components/TierBadge";
+import { supabase } from "@/integrations/supabase/client";
 import { Play, Headphones, BookOpen, Zap } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 
@@ -9,14 +11,49 @@ interface HomeProps {
   onNavigate: (tab: string) => void;
 }
 
+interface UserProfile {
+  display_name: string | null;
+  level: number;
+  experience_points: number;
+  streak_days: number;
+  total_sessions: number;
+}
+
 export function Home({ onNavigate }: HomeProps) {
-  const userStats = {
-    name: "Anda",
-    level: 3,
-    xp: 1250,
-    nextLevelXp: 2000,
-    streak: 7,
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      
+      if (user) {
+        await fetchUserProfile(user.id);
+      }
+    };
+
+    getUser();
+  }, []);
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (data) {
+        setUserProfile(data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
+
+  const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
+  const nextLevelXp = userProfile ? userProfile.level * 100 : 100;
 
   const features = [
     {
@@ -83,30 +120,30 @@ export function Home({ onNavigate }: HomeProps) {
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-semibold text-foreground">{userStats.name}</h3>
-                <TierBadge level={userStats.level} />
+                <h3 className="font-semibold text-foreground">{displayName}</h3>
+                <TierBadge level={userProfile?.level || 1} />
               </div>
               <p className="text-sm text-muted-foreground">
-                Streak: {userStats.streak} hari
+                Streak: {userProfile?.streak_days || 0} hari
               </p>
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold font-orbitron text-primary">
-                {userStats.xp} XP
+                {userProfile?.experience_points || 0} XP
               </div>
               <div className="text-xs text-muted-foreground">
-                {userStats.nextLevelXp - userStats.xp} XP to next level
+                {nextLevelXp - (userProfile?.experience_points || 0)} XP to next level
               </div>
             </div>
           </div>
           
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Level {userStats.level} Progress</span>
-              <span>{Math.round((userStats.xp / userStats.nextLevelXp) * 100)}%</span>
+              <span>Level {userProfile?.level || 1} Progress</span>
+              <span>{Math.round(((userProfile?.experience_points || 0) / nextLevelXp) * 100)}%</span>
             </div>
             <Progress 
-              value={(userStats.xp / userStats.nextLevelXp) * 100} 
+              value={((userProfile?.experience_points || 0) / nextLevelXp) * 100} 
               className="h-2"
             />
           </div>
