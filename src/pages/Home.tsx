@@ -118,6 +118,8 @@ export function Home({ onNavigate }: HomeProps) {
               onClick={() => {
                 if (feature.title === "Komunitas") {
                   onNavigate("chat");
+                } else if (feature.title === "Audio Terapi") {
+                  onNavigate("audio-therapy");
                 }
               }}
             >
