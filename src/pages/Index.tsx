@@ -5,6 +5,7 @@ import { Chat } from "./Chat";
 import { Leaderboard } from "./Leaderboard";
 import { Profile } from "./Profile";
 import { AudioTherapy } from "./AudioTherapy";
+import { SpiritualJournal } from "./SpiritualJournal";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
@@ -21,6 +22,8 @@ const Index = () => {
         return <Profile />;
       case "audio-therapy":
         return <AudioTherapy onNavigate={setActiveTab} />;
+      case "spiritual-journal":
+        return <SpiritualJournal onNavigate={setActiveTab} />;
       default:
         return <Home onNavigate={setActiveTab} />;
     }

@@ -120,6 +120,8 @@ export function Home({ onNavigate }: HomeProps) {
                   onNavigate("chat");
                 } else if (feature.title === "Audio Terapi") {
                   onNavigate("audio-therapy");
+                } else if (feature.title === "Jurnal Spiritual") {
+                  onNavigate("spiritual-journal");
                 }
               }}
             >
