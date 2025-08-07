@@ -175,7 +175,12 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
               {/* Status/Button */}
               {verse.unlocked ? (
                 <Button
-                  className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium px-8 py-2 rounded-full glow-primary"
+                  variant="outline"
+                  className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium px-8 py-2 rounded-full glow-primary border-primary hover:border-primary"
+                  onClick={() => {
+                    // Add tutorial functionality here
+                    console.log('Opening tutorial for', verse.title);
+                  }}
                 >
                   READ TUTORIAL
                 </Button>
