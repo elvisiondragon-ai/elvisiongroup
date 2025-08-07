@@ -79,16 +79,9 @@ export function Profile({ onLogout }: ProfileProps) {
   };
 
   const handleLogout = async () => {
-    console.log('🔴 LOGOUT BUTTON CLICKED - Starting logout process');
-    console.log('Current user:', user);
-    console.log('Browser:', navigator.userAgent);
-    
     try {
-      console.log('🔴 Calling supabase.auth.signOut()');
       const { error } = await supabase.auth.signOut();
-      
       if (error) {
-        console.error('🔴 Supabase logout error:', error);
         toast({
           title: "Error",
           description: error.message,
@@ -97,22 +90,19 @@ export function Profile({ onLogout }: ProfileProps) {
         return;
       }
       
-      console.log('🔴 Supabase logout successful, calling onLogout()');
       toast({
         title: "Success", 
         description: "Logged out successfully",
       });
       
-      // Always call onLogout regardless
       onLogout();
     } catch (error) {
-      console.error('🔴 Logout error:', error);
+      console.error('Logout error:', error);
       toast({
         title: "Error",
         description: "Failed to logout",
         variant: "destructive",
       });
-      // Still try to logout locally
       onLogout();
     }
   };
@@ -292,6 +282,12 @@ export function Profile({ onLogout }: ProfileProps) {
         <Button 
           variant="outline" 
           className="w-full justify-start gap-3 border-border hover:border-primary"
+          onClick={() => {
+            toast({
+              title: "Edit Profil",
+              description: "Fitur edit profil akan segera tersedia",
+            });
+          }}
         >
           <User className="w-4 h-4" />
           Edit Profil
@@ -300,6 +296,12 @@ export function Profile({ onLogout }: ProfileProps) {
         <Button 
           variant="outline" 
           className="w-full justify-start gap-3 border-border hover:border-primary"
+          onClick={() => {
+            toast({
+              title: "Preferensi",
+              description: "Fitur pengaturan preferensi akan segera tersedia",
+            });
+          }}
         >
           <Settings className="w-4 h-4" />
           Preferensi
@@ -313,20 +315,13 @@ export function Profile({ onLogout }: ProfileProps) {
           Upgrade ke VIP
         </Button>
 
-        {/* ALWAYS VISIBLE LOGOUT BUTTON */}
         <Button 
           variant="destructive"
           onClick={handleLogout}
-          className="!w-full !flex !items-center !justify-start !gap-3 !bg-red-600 !text-white !hover:bg-red-700 !border-2 !border-red-600 !min-h-[48px] !font-bold !text-base"
-          style={{ 
-            display: 'flex',
-            opacity: '1',
-            backgroundColor: '#dc2626',
-            color: '#ffffff'
-          } as React.CSSProperties}
+          className="w-full justify-start gap-3"
         >
-          <LogOut className="w-5 h-5" />
-          🔴 LOGOUT BUTTON 🔴
+          <LogOut className="w-4 h-4" />
+          Logout
         </Button>
       </div>
     </div>

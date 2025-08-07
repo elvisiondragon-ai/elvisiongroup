@@ -211,13 +211,13 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         </div>
       )}
 
-      {/* Audio Tracks Section */}
+      {/* Audio Tracks Section - Show only first 2 tracks */}
       {audioTracks.length > 0 && (
         <div className="px-6 space-y-4">
           <h2 className="text-xl font-semibold font-orbitron text-foreground">
             Available Tracks
           </h2>
-          {audioTracks.map((track) => (
+          {audioTracks.slice(0, 2).map((track) => (
             <AudioPlayer
               key={track.id}
               title={track.title}
