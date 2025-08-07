@@ -303,12 +303,12 @@ export function Profile({ onLogout }: ProfileProps) {
         </Button>
 
         <Button 
-          variant="outline" 
+          variant="destructive"
           onClick={handleLogout}
-          className="w-full justify-start gap-3 border-destructive hover:border-destructive text-destructive hover:text-destructive"
+          className="w-full justify-start gap-3 bg-destructive text-destructive-foreground hover:bg-destructive/90"
         >
           <LogOut className="w-4 h-4" />
-          Logout
+          LOGOUT
         </Button>
       </div>
     </div>
