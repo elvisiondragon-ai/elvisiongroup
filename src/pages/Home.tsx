@@ -55,16 +55,23 @@ export function Home({ onNavigate }: HomeProps) {
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
           <div className="relative h-full flex items-end p-6">
-            <div>
-              <h1 className="text-3xl font-bold font-orbitron text-foreground mb-2">
-                Selamat Datang di
-                <span className="block bg-gradient-primary bg-clip-text text-transparent">
-                  eL Vision Group
-                </span>
-              </h1>
-              <p className="text-muted-foreground">
-                Transformasi diri melalui teknologi spiritual
-              </p>
+            <div className="flex items-center gap-4">
+              <img 
+                src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" 
+                alt="eL Vision Group Logo" 
+                className="w-16 h-16 object-contain"
+              />
+              <div>
+                <h1 className="text-3xl font-bold font-orbitron text-foreground mb-2">
+                  Selamat Datang di
+                  <span className="block bg-gradient-primary bg-clip-text text-transparent">
+                    eL Vision Group
+                  </span>
+                </h1>
+                <p className="text-muted-foreground">
+                  Transformasi diri melalui teknologi spiritual
+                </p>
+              </div>
             </div>
           </div>
         </div>

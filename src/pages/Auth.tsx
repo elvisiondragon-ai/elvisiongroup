@@ -161,13 +161,12 @@ export function Auth({ onLogin }: AuthProps) {
       <div className="w-full max-w-md">
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center glow-primary">
-              <Sparkles className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-accent flex items-center justify-center glow-accent">
-              <Zap className="w-4 h-4 text-background" />
-            </div>
+          <div className="flex items-center justify-center mb-4">
+            <img 
+              src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" 
+              alt="eL Vision Group Logo" 
+              className="w-24 h-24 object-contain"
+            />
           </div>
           <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
             eL Vision Group
