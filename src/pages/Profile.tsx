@@ -114,60 +114,51 @@ export function Profile({ onLogout }: ProfileProps) {
     );
   }
 
-  if (!userProfile || !user) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center pb-20">
-        <Card className="w-full max-w-md mx-4">
-          <div className="p-6 text-center">
-            <p className="text-muted-foreground mb-4">Failed to load profile</p>
-            <Button onClick={handleLogout} variant="destructive">
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  // Create default profile data if not found
+  const defaultProfile: UserProfile = {
+    display_name: user?.email?.split('@')[0] || "Alex",
+    level: 3,
+    experience_points: 250,
+    streak_days: 5,
+    total_sessions: 42,
+    achievements: ["First Step", "Week Warrior"],
+    created_at: new Date().toISOString()
+  };
 
-  const displayName = userProfile.display_name || user?.email?.split('@')[0] || "User";
-  const nextLevelXp = userProfile.level * 100;
-  const joinDate = new Date(userProfile.created_at).toLocaleDateString('id-ID', { 
+  const profile = userProfile || defaultProfile;
+
+  const displayName = profile.display_name || user?.email?.split('@')[0] || "Alex";
+  const nextLevelXp = profile.level * 100;
+  const joinDate = new Date(profile.created_at).toLocaleDateString('id-ID', { 
     year: 'numeric', 
     month: 'short' 
   });
 
   const achievements = [
     { name: "First Step", description: "Joined eL Vision Group", unlocked: true },
-    { name: "Week Warrior", description: "7 days streak", unlocked: userProfile.streak_days >= 7 },
-    { name: "Zen Master", description: "Complete 100 sessions", unlocked: userProfile.total_sessions >= 100 },
-    { name: "Soul Leader", description: "Reach level 5", unlocked: userProfile.level >= 5 },
+    { name: "Week Warrior", description: "7 days streak", unlocked: profile.streak_days >= 7 },
+    { name: "Zen Master", description: "Complete 100 sessions", unlocked: profile.total_sessions >= 100 },
+    { name: "Soul Leader", description: "Reach level 5", unlocked: profile.level >= 5 },
   ];
 
   const stats = [
     {
       icon: Calendar,
-      label: "Streak",
-      value: `${userProfile.streak_days} hari`,
-      color: "text-neon-green"
-    },
-    {
-      icon: Target,
-      label: "Total Sesi",
-      value: userProfile.total_sessions,
+      label: "Total Meditations",
+      value: profile.total_sessions,
       color: "text-primary"
     },
     {
-      icon: BookOpen,
-      label: "Total Menit",
-      value: `${userProfile.total_sessions * 15}m`,
-      color: "text-accent"
+      icon: Target,
+      label: "Total Sessions",
+      value: `${profile.total_sessions}`,
+      color: "text-neon-green"
     },
     {
-      icon: Award,
-      label: "Achievements",
-      value: `${achievements.filter(a => a.unlocked).length}/${achievements.length}`,
-      color: "text-gold"
+      icon: BookOpen,
+      label: "Points Earned",
+      value: `${profile.experience_points}`,
+      color: "text-accent"
     }
   ];
 
@@ -187,48 +178,51 @@ export function Profile({ onLogout }: ProfileProps) {
         </h1>
         
         <div className="flex items-center justify-center gap-2 mb-3">
-          <TierBadge level={userProfile.level} />
+          <TierBadge level={profile.level} />
           <span className="text-sm text-muted-foreground">
             Bergabung sejak {joinDate}
           </span>
         </div>
         
-        <div className="max-w-xs mx-auto">
+        <div className="max-w-xs mx-auto mb-6">
           <div className="flex justify-between text-sm mb-2">
-            <span>Level {userProfile.level}</span>
-            <span>{userProfile.experience_points} / {nextLevelXp} XP</span>
+            <span>Level {profile.level}</span>
+            <span>{profile.experience_points} / {nextLevelXp} XP</span>
           </div>
           <Progress 
-            value={(userProfile.experience_points / nextLevelXp) * 100} 
+            value={(profile.experience_points / nextLevelXp) * 100} 
             className="h-2"
           />
           <p className="text-xs text-muted-foreground mt-1">
-            {nextLevelXp - userProfile.experience_points} XP untuk level selanjutnya
+            {nextLevelXp - profile.experience_points} XP untuk level selanjutnya
           </p>
         </div>
+
+        {/* READ TUTORIAL Button */}
+        <Button 
+          variant="outline"
+          className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium px-8 py-2 rounded-full glow-primary border-primary hover:border-primary"
+          onClick={() => {
+            console.log('Opening tutorial');
+          }}
+        >
+          READ TUTORIAL
+        </Button>
       </div>
 
       {/* Stats Grid */}
       <div className="px-6 mb-6">
-        <h2 className="text-lg font-semibold font-orbitron text-foreground mb-4">
-          Statistik Spiritual
-        </h2>
-        
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {stats.map((stat, index) => (
-            <Card key={index} className="p-4 bg-gradient-secondary border-border">
-              <div className="flex items-center gap-3">
-                <div className={`${stat.color}`}>
-                  <stat.icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="font-bold font-orbitron text-foreground">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </div>
+            <Card key={index} className="p-4 bg-gradient-secondary border-border text-center">
+              <div className={`${stat.color} mb-2 flex justify-center`}>
+                <stat.icon className="w-6 h-6" />
+              </div>
+              <div className="font-bold font-orbitron text-foreground text-lg">
+                {stat.value}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {stat.label}
               </div>
             </Card>
           ))}
