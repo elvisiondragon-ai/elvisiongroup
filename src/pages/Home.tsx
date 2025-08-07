@@ -116,11 +116,13 @@ export function Home({ onNavigate }: HomeProps) {
               key={index}
               className="p-4 bg-card hover:bg-card/80 border-border hover:border-primary transition-all duration-300 cursor-pointer"
               onClick={() => {
+                console.log("Feature clicked:", feature.title);
                 if (feature.title === "Komunitas") {
                   onNavigate("chat");
                 } else if (feature.title === "Audio Terapi") {
                   onNavigate("audio-therapy");
                 } else if (feature.title === "Jurnal Spiritual") {
+                  console.log("Navigating to spiritual-journal");
                   onNavigate("spiritual-journal");
                 }
               }}

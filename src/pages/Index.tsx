@@ -11,6 +11,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
 
   const renderContent = () => {
+    console.log("Current activeTab:", activeTab);
     switch (activeTab) {
       case "home":
         return <Home onNavigate={setActiveTab} />;
@@ -23,6 +24,7 @@ const Index = () => {
       case "audio-therapy":
         return <AudioTherapy onNavigate={setActiveTab} />;
       case "spiritual-journal":
+        console.log("Rendering SpiritualJournal component");
         return <SpiritualJournal onNavigate={setActiveTab} />;
       default:
         return <Home onNavigate={setActiveTab} />;
