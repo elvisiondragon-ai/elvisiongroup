@@ -1,12 +1,34 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { BottomNavigation } from "@/components/BottomNavigation";
+import { Home } from "./Home";
+import { Chat } from "./Chat";
+import { Leaderboard } from "./Leaderboard";
+import { Profile } from "./Profile";
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState("home");
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "home":
+        return <Home onNavigate={setActiveTab} />;
+      case "chat":
+        return <Chat />;
+      case "leaderboard":
+        return <Leaderboard />;
+      case "profile":
+        return <Profile />;
+      default:
+        return <Home onNavigate={setActiveTab} />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <main className="relative">
+        {renderContent()}
+      </main>
+      <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 };

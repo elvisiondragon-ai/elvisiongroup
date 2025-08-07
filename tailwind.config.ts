@@ -18,12 +18,19 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				orbitron: ['Orbitron', 'monospace'],
+				exo: ['Exo 2', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				gold: 'hsl(var(--gold))',
+				silver: 'hsl(var(--silver))',
+				'neon-green': 'hsl(var(--neon-green))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'

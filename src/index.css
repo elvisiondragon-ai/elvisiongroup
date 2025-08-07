@@ -2,41 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Import futuristic fonts */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600;700&display=swap');
 
+/* Futuristic Meditation App Design System */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Background - Deep Space Black */
+    --background: 240 10% 3.9%;
+    --foreground: 280 5% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card Systems - Dark with subtle purple tint */
+    --card: 240 10% 6%;
+    --card-foreground: 280 5% 90%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Popover */
+    --popover: 240 15% 8%;
+    --popover-foreground: 280 5% 95%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Electric Purple */
+    --primary: 262 83% 58%;
+    --primary-foreground: 280 5% 95%;
+    --primary-glow: 262 83% 70%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Deep Purple */
+    --secondary: 260 50% 15%;
+    --secondary-foreground: 280 5% 85%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Dark Purple Gray */
+    --muted: 240 15% 12%;
+    --muted-foreground: 280 5% 60%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Neon Cyan */
+    --accent: 192 95% 55%;
+    --accent-foreground: 240 10% 3.9%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive - Neon Red */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 280 5% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Border & Input - Purple tinted */
+    --border: 260 30% 18%;
+    --input: 260 30% 18%;
+    --ring: 262 83% 58%;
 
-    --radius: 0.5rem;
+    /* Special Colors */
+    --gold: 43 96% 56%;
+    --silver: 210 20% 75%;
+    --neon-green: 123 92% 65%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(282 85% 65%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(240 10% 6%) 0%, hsl(260 50% 15%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(192 95% 55%) 0%, hsl(262 83% 58%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(38 92% 50%) 100%);
+    
+    /* Effects */
+    --glow-primary: 0 0 20px hsl(262 83% 58% / 0.5);
+    --glow-accent: 0 0 20px hsl(192 95% 55% / 0.5);
+    --glow-gold: 0 0 20px hsl(43 96% 56% / 0.5);
+    
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +126,92 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-exo;
+  }
+}
+
+@layer components {
+  /* Glow Effects */
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+  
+  .glow-accent {
+    box-shadow: var(--glow-accent);
+  }
+  
+  .glow-gold {
+    box-shadow: var(--glow-gold);
+  }
+
+  /* Gradient Backgrounds */
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .bg-gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .bg-gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .bg-gradient-gold {
+    background: var(--gradient-gold);
+  }
+
+  /* Animated Elements */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: var(--glow-primary);
+    }
+    50% {
+      box-shadow: 0 0 30px hsl(262 83% 58% / 0.8);
+    }
+  }
+
+  /* Tier Badge Styles */
+  .tier-badge {
+    @apply px-2 py-1 rounded-full text-xs font-semibold font-orbitron;
+  }
+  
+  .tier-basic {
+    @apply bg-muted text-muted-foreground;
+  }
+  
+  .tier-premium {
+    @apply bg-gradient-primary text-primary-foreground glow-primary;
+  }
+  
+  .tier-vip {
+    @apply bg-gradient-gold text-background glow-gold;
+  }
+  
+  .tier-master {
+    @apply bg-gradient-accent text-background glow-accent;
+  }
+
+  /* Futuristic Input */
+  .cyber-input {
+    @apply bg-card border-border focus:border-primary focus:ring-1 focus:ring-primary;
+    transition: all 0.3s ease;
+  }
+  
+  .cyber-input:focus {
+    box-shadow: var(--glow-primary);
+  }
+
+  /* Level Progress Bar */
+  .level-progress {
+    @apply w-full h-2 bg-muted rounded-full overflow-hidden;
+  }
+  
+  .level-progress-fill {
+    @apply h-full bg-gradient-primary transition-all duration-500;
   }
 }
