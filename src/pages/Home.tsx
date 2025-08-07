@@ -124,6 +124,8 @@ export function Home({ onNavigate }: HomeProps) {
                 } else if (feature.title === "Jurnal Spiritual") {
                   console.log("Navigating to spiritual-journal");
                   onNavigate("spiritual-journal");
+                } else if (feature.title === "Sesi Meditasi") {
+                  onNavigate("meditation-sessions");
                 }
               }}
             >

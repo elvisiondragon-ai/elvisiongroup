@@ -6,6 +6,7 @@ import { Leaderboard } from "./Leaderboard";
 import { Profile } from "./Profile";
 import { AudioTherapy } from "./AudioTherapy";
 import { SpiritualJournal } from "./SpiritualJournal";
+import { MeditationSessions } from "./MeditationSessions";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
@@ -26,6 +27,8 @@ const Index = () => {
       case "spiritual-journal":
         console.log("Rendering SpiritualJournal component");
         return <SpiritualJournal onNavigate={setActiveTab} />;
+      case "meditation-sessions":
+        return <MeditationSessions onNavigate={setActiveTab} />;
       default:
         return <Home onNavigate={setActiveTab} />;
     }
