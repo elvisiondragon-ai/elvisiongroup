@@ -26,8 +26,8 @@ export function Home({ onNavigate }: HomeProps) {
       color: "text-primary",
     },
     {
-      title: "Audio Terapi",
-      description: "Healing sounds dan frequency therapy",
+      title: "Verse of Secret Decree",
+      description: "Rahasia Frekuensi alam untuk mengubah realitasmu",
       icon: Headphones,
       color: "text-accent",
     },
@@ -59,7 +59,7 @@ export function Home({ onNavigate }: HomeProps) {
               <h1 className="text-3xl font-bold font-orbitron text-foreground mb-2">
                 Selamat Datang di
                 <span className="block bg-gradient-primary bg-clip-text text-transparent">
-                  Nexus Spiritual
+                  eL Vision Group
                 </span>
               </h1>
               <p className="text-muted-foreground">
@@ -119,7 +119,7 @@ export function Home({ onNavigate }: HomeProps) {
                 console.log("Feature clicked:", feature.title);
                 if (feature.title === "Komunitas") {
                   onNavigate("chat");
-                } else if (feature.title === "Audio Terapi") {
+                } else if (feature.title === "Verse of Secret Decree") {
                   onNavigate("audio-therapy");
                 } else if (feature.title === "Jurnal Spiritual") {
                   console.log("Navigating to spiritual-journal");
