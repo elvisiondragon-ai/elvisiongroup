@@ -128,7 +128,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
               {/* Artwork or Lock */}
               <div className="flex justify-center">
                 {verse.unlocked && verse.artwork ? (
-                  <div className="relative">
+                  <div className="relative group cursor-pointer">
                     <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary/50 glow-primary">
                       <img
                         src={verse.artwork}
@@ -137,6 +137,33 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                       />
                     </div>
                     <div className="absolute inset-0 rounded-full bg-gradient-primary opacity-20"></div>
+                    
+                    {/* Play Button Overlay */}
+                    <div 
+                      className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      onClick={() => {
+                        if (isAdmin) {
+                          setShowUpload(true);
+                        } else {
+                          // For users, find and play the corresponding audio track
+                          const verseTrack = audioTracks.find(track => 
+                            track.title.toLowerCase().includes(verse.title.toLowerCase())
+                          );
+                          if (verseTrack) {
+                            // You can implement audio playback logic here
+                            console.log('Playing:', verseTrack.title);
+                          }
+                        }
+                      }}
+                    >
+                      {isAdmin ? (
+                        <UploadIcon className="w-8 h-8 text-white" />
+                      ) : (
+                        <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                          <div className="w-0 h-0 border-l-[8px] border-l-white border-y-[6px] border-y-transparent ml-1"></div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center border-2 border-border">
