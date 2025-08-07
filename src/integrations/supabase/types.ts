@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      audio_tracks: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duration: number | null
+          file_path: string
+          file_url: string | null
+          id: string
+          is_public: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration?: number | null
+          file_path: string
+          file_url?: string | null
+          id?: string
+          is_public?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration?: number | null
+          file_path?: string
+          file_url?: string | null
+          id?: string
+          is_public?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           achievements: string[] | null

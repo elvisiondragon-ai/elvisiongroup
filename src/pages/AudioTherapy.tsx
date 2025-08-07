@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Lock, ArrowLeft } from "lucide-react";
+import { AudioPlayer } from "@/components/AudioPlayer";
+import { AudioUpload } from "@/components/AudioUpload";
+import { Lock, ArrowLeft, Music, Upload as UploadIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
@@ -12,15 +14,45 @@ interface AudioTherapyProps {
 export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [userLevel] = useState(3); // Mock user level
   const [isAdmin, setIsAdmin] = useState(false);
+  const [audioTracks, setAudioTracks] = useState<any[]>([]);
+  const [showUpload, setShowUpload] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAdminAccess = async () => {
+    const initializeData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setIsAdmin(user?.email === "elvisiondragon@gmail.com");
+      await fetchAudioTracks();
+      setLoading(false);
     };
     
-    checkAdminAccess();
+    initializeData();
   }, []);
+
+  const fetchAudioTracks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('audio_tracks')
+        .select('*')
+        .eq('category', 'verse')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching audio tracks:', error);
+        return;
+      }
+
+      setAudioTracks(data || []);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleUploadComplete = () => {
+    fetchAudioTracks(); // Refresh the tracks list
+    setShowUpload(false);
+  };
 
   const verses = [
     {
@@ -62,6 +94,17 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
             Chamber of eL Vision
           </h1>
+          {isAdmin && (
+            <Button
+              onClick={() => setShowUpload(!showUpload)}
+              variant="outline"
+              size="sm"
+              className="ml-auto"
+            >
+              <UploadIcon className="h-4 w-4 mr-2" />
+              {showUpload ? "Cancel" : "Upload Audio"}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -128,6 +171,59 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           </Card>
         ))}
       </div>
+
+      {/* Admin Upload Section */}
+      {isAdmin && showUpload && (
+        <div className="px-6 mb-6">
+          <AudioUpload onUploadComplete={handleUploadComplete} />
+        </div>
+      )}
+
+      {/* Audio Tracks Section */}
+      {audioTracks.length > 0 && (
+        <div className="px-6 space-y-4">
+          <h2 className="text-xl font-semibold font-orbitron text-foreground">
+            Available Tracks
+          </h2>
+          {audioTracks.map((track) => (
+            <AudioPlayer
+              key={track.id}
+              title={track.title}
+              description={track.description}
+              src={track.file_url}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="px-6">
+          <Card className="p-6 bg-gradient-secondary border-border">
+            <div className="text-center">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+              <p className="text-muted-foreground">Loading audio tracks...</p>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* No Tracks Message */}
+      {!loading && audioTracks.length === 0 && (
+        <div className="px-6">
+          <Card className="p-6 bg-gradient-secondary border-border text-center">
+            <Music className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+            <p className="text-muted-foreground">
+              No audio tracks available yet
+            </p>
+            {isAdmin && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Upload some MP3 files to get started
+              </p>
+            )}
+          </Card>
+        </div>
+      )}
 
       {/* Atmospheric Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
