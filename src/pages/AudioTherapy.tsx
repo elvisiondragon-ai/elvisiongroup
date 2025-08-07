@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Lock, ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
 
 interface AudioTherapyProps {
@@ -10,6 +11,16 @@ interface AudioTherapyProps {
 
 export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [userLevel] = useState(3); // Mock user level
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdminAccess = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAdmin(user?.email === "elvisiondragon@gmail.com");
+    };
+    
+    checkAdminAccess();
+  }, []);
 
   const verses = [
     {
