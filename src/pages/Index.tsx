@@ -7,9 +7,15 @@ import { Profile } from "./Profile";
 import { AudioTherapy } from "./AudioTherapy";
 import { SpiritualJournal } from "./SpiritualJournal";
 import { MeditationSessions } from "./MeditationSessions";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/auth';
+  };
 
   const renderContent = () => {
     console.log("Current activeTab:", activeTab);
@@ -21,7 +27,7 @@ const Index = () => {
       case "leaderboard":
         return <Leaderboard />;
       case "profile":
-        return <Profile />;
+        return <Profile onLogout={handleLogout} />;
       case "audio-therapy":
         return <AudioTherapy onNavigate={setActiveTab} />;
       case "spiritual-journal":

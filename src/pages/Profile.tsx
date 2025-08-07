@@ -11,10 +11,15 @@ import {
   Calendar, 
   Target,
   BookOpen,
-  Award
+  Award,
+  LogOut
 } from "lucide-react";
 
-export function Profile() {
+interface ProfileProps {
+  onLogout: () => void;
+}
+
+export function Profile({ onLogout }: ProfileProps) {
   const userProfile = {
     name: "Anda",
     email: "spiritual.seeker@nexus.app",
@@ -195,6 +200,15 @@ export function Profile() {
         >
           <Crown className="w-4 h-4" />
           Upgrade ke VIP
+        </Button>
+
+        <Button 
+          variant="outline" 
+          onClick={onLogout}
+          className="w-full justify-start gap-3 border-destructive hover:border-destructive text-destructive hover:text-destructive"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout
         </Button>
       </div>
     </div>
