@@ -1,7 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Bell, BellRing } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { SchedulePicker } from "@/components/SchedulePicker";
+import { ArrowLeft, Bell, BellRing, Plus, Calendar } from "lucide-react";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface MeditationSessionsProps {
   onNavigate: (tab: string) => void;
@@ -47,12 +55,33 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
     },
   ]);
 
+  const [showScheduler, setShowScheduler] = useState(false);
+  const { toast } = useToast();
+
   const handleNotification = (sessionId: number) => {
     setSessions(sessions.map(session => 
       session.id === sessionId 
         ? { ...session, notificationSet: !session.notificationSet }
         : session
     ));
+  };
+
+  const handleScheduleSelect = (date: Date, time: string) => {
+    const newSession: Session = {
+      id: sessions.length + 1,
+      coach: "Personal Session",
+      date: date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' }),
+      time: `${time} WIB`,
+      notificationSet: false,
+    };
+    
+    setSessions([...sessions, newSession]);
+    setShowScheduler(false);
+    
+    toast({
+      title: "Sesi Dijadwalkan!",
+      description: `Sesi meditasi pada ${newSession.date} jam ${newSession.time} telah ditambahkan.`,
+    });
   };
 
   return (
@@ -71,6 +100,14 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
           <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
             Sesi Meditasi
           </h1>
+          <Button
+            onClick={() => setShowScheduler(true)}
+            className="ml-auto bg-gradient-primary hover:opacity-90"
+            size="sm"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Jadwalkan
+          </Button>
         </div>
       </div>
 
@@ -156,6 +193,16 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
         {/* Indigo flowing effects */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/1 via-transparent to-accent/1"></div>
       </div>
+
+      {/* Schedule Dialog */}
+      <Dialog open={showScheduler} onOpenChange={setShowScheduler}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-orbitron">Jadwalkan Sesi Meditasi</DialogTitle>
+          </DialogHeader>
+          <SchedulePicker onScheduleSelect={handleScheduleSelect} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
