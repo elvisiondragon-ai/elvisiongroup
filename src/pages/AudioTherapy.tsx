@@ -102,7 +102,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
               className="ml-auto"
             >
               <UploadIcon className="h-4 w-4 mr-2" />
-              {showUpload ? "Cancel" : "Upload Audio"}
+              {showUpload ? "Cancel" : ""}
             </Button>
           )}
         </div>
@@ -240,22 +240,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         </div>
       )}
 
-      {/* No Tracks Message */}
-      {!loading && audioTracks.length === 0 && (
-        <div className="px-6">
-          <Card className="p-6 bg-gradient-secondary border-border text-center">
-            <Music className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-            <p className="text-muted-foreground">
-              No audio tracks available yet
-            </p>
-            {isAdmin && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Upload some MP3 files to get started
-              </p>
-            )}
-          </Card>
-        </div>
-      )}
 
       {/* Atmospheric Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
