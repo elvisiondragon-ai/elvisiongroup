@@ -23,9 +23,9 @@ interface AudioTherapyProps {
 export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [userLevel] = useState(3); // Mock user level
   const [isAdmin, setIsAdmin] = useState(false);
-  const [audioTracks, setAudioTracks] = useState<any[]>([]);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingVerseId, setPlayingVerseId] = useState<number | null>(null);
+  const [audioTracks, setAudioTracks] = useState<any[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -205,13 +205,19 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     <div 
                       className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 cursor-pointer"
                        onClick={() => {
-                         if (isPlaying && currentAudio) {
-                           // Stop current audio
+                         if (playingVerseId === verse.id && currentAudio) {
+                           // Stop current audio if this verse is playing
                            currentAudio.pause();
                            currentAudio.currentTime = 0;
                            setCurrentAudio(null);
-                           setIsPlaying(false);
+                           setPlayingVerseId(null);
                          } else {
+                           // Stop any currently playing audio first
+                           if (currentAudio) {
+                             currentAudio.pause();
+                             currentAudio.currentTime = 0;
+                           }
+                           
                            // Play new audio based on verse ID
                            const audioUrl = verse.id === 1 
                              ? 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3'
@@ -223,7 +229,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                              const audio = new Audio(audioUrl);
                              audio.play().then(() => {
                                setCurrentAudio(audio);
-                               setIsPlaying(true);
+                               setPlayingVerseId(verse.id);
                              }).catch(error => {
                                console.error('Error playing audio:', error);
                              });
@@ -231,14 +237,14 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                              // Handle audio end
                              audio.addEventListener('ended', () => {
                                setCurrentAudio(null);
-                               setIsPlaying(false);
+                               setPlayingVerseId(null);
                              });
                            }
                          }
                        }}
                     >
                        <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform group-hover:scale-110 transition-transform duration-300">
-                         {isPlaying ? (
+                         {playingVerseId === verse.id ? (
                            // Pause icon (two rectangles)
                            <div className="flex gap-1">
                              <div className="w-1 h-4 bg-white rounded-sm"></div>
