@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
 import verse2Artwork from "@/assets/verse-2-cosmic.jpg";
 import verse3Artwork from "@/assets/verse-3-cosmic.jpg";
-import verse4Artwork from "@/assets/verse-4-cosmic.jpg";
+import verse4Artwork from "@/assets/verse-4-gold-coins.jpg";
 import verse5Artwork from "@/assets/verse-5-cosmic.jpg";
 import verse6Artwork from "@/assets/verse-6-cosmic.jpg";
 import verse7Artwork from "@/assets/verse-7-cosmic.jpg";
@@ -90,7 +90,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     {
       id: 4,
       title: "Verse 4",
-      unlocked: userLevel >= 15,
+      unlocked: true,
       requiredLevel: 15,
       artwork: verse4Artwork,
     },
@@ -212,20 +212,28 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                            setCurrentAudio(null);
                            setIsPlaying(false);
                          } else {
-                           // Play new audio
-                           const audio = new Audio('https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3');
-                           audio.play().then(() => {
-                             setCurrentAudio(audio);
-                             setIsPlaying(true);
-                           }).catch(error => {
-                             console.error('Error playing audio:', error);
-                           });
+                           // Play new audio based on verse ID
+                           const audioUrl = verse.id === 1 
+                             ? 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3'
+                             : verse.id === 4
+                             ? 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse-4-Prosperity%20Stream-Vol.-1.mp3'
+                             : null;
                            
-                           // Handle audio end
-                           audio.addEventListener('ended', () => {
-                             setCurrentAudio(null);
-                             setIsPlaying(false);
-                           });
+                           if (audioUrl) {
+                             const audio = new Audio(audioUrl);
+                             audio.play().then(() => {
+                               setCurrentAudio(audio);
+                               setIsPlaying(true);
+                             }).catch(error => {
+                               console.error('Error playing audio:', error);
+                             });
+                             
+                             // Handle audio end
+                             audio.addEventListener('ended', () => {
+                               setCurrentAudio(null);
+                               setIsPlaying(false);
+                             });
+                           }
                          }
                        }}
                     >
