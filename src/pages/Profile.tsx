@@ -20,6 +20,7 @@ import {
 
 interface ProfileProps {
   onLogout: () => void;
+  onNavigate: (tab: string) => void;
 }
 
 interface UserProfile {
@@ -32,7 +33,7 @@ interface UserProfile {
   created_at: string;
 }
 
-export function Profile({ onLogout }: ProfileProps) {
+export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -204,7 +205,7 @@ export function Profile({ onLogout }: ProfileProps) {
           variant="outline"
           className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium px-8 py-2 rounded-full glow-primary border-primary hover:border-primary"
           onClick={() => {
-            window.open('/tutorial', '_blank');
+            onNavigate('tutorial');
           }}
         >
           READ TUTORIAL

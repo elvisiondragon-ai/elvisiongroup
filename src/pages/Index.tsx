@@ -7,6 +7,7 @@ import { Profile } from "./Profile";
 import { AudioTherapy } from "./AudioTherapy";
 import { SpiritualJournal } from "./SpiritualJournal";
 import { MeditationSessions } from "./MeditationSessions";
+import { Tutorial } from "./Tutorial";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
@@ -27,7 +28,7 @@ const Index = () => {
       case "leaderboard":
         return <Leaderboard />;
       case "profile":
-        return <Profile onLogout={handleLogout} />;
+        return <Profile onLogout={handleLogout} onNavigate={setActiveTab} />;
       case "audio-therapy":
         return <AudioTherapy onNavigate={setActiveTab} />;
       case "spiritual-journal":
@@ -35,6 +36,8 @@ const Index = () => {
         return <SpiritualJournal onNavigate={setActiveTab} />;
       case "meditation-sessions":
         return <MeditationSessions onNavigate={setActiveTab} />;
+      case "tutorial":
+        return <Tutorial />;
       default:
         return <Home onNavigate={setActiveTab} />;
     }
