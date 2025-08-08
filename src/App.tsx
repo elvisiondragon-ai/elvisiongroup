@@ -27,6 +27,11 @@ const App = () => {
           setUser(session.user);
           setIsLoading(false);
           
+          // Clear OAuth hash from URL after successful login
+          if (window.location.hash) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
+          
           // For Google OAuth, this handles both new signups and existing logins
           setTimeout(() => {
             console.log('User authenticated successfully:', session.user.email);
