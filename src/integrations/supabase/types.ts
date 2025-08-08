@@ -56,6 +56,36 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_vip: boolean | null
+          message: string
+          user_id: string
+          user_level: number
+          user_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_vip?: boolean | null
+          message: string
+          user_id: string
+          user_level?: number
+          user_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_vip?: boolean | null
+          message?: string
+          user_id?: string
+          user_level?: number
+          user_name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           achievements: string[] | null

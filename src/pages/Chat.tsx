@@ -1,57 +1,120 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ChatMessage } from "@/components/ChatMessage";
 import { Send, Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-const mockMessages = [
-  {
-    id: "1",
-    user: { id: "1", name: "Andrew", level: 3, avatar: "" },
-    message: "Selamat pagi semua! Gimana meditasi pagi kalian hari ini?",
-    timestamp: new Date("2024-01-15T08:30:00"),
-  },
-  {
-    id: "2",
-    user: { id: "2", name: "Budi", level: 1, avatar: "" },
-    message: "Pagi Andrew! Baru aja selesai 10 menit breathing exercise. Feeling fresh banget 🧘‍♂️",
-    timestamp: new Date("2024-01-15T08:32:00"),
-  },
-  {
-    id: "3",
-    user: { id: "3", name: "Jason", level: 3, isVip: true, avatar: "" },
-    message: "Morning ritual completed! 30 minutes focused meditation + journaling. Energi cosmic flowing through 💜",
-    timestamp: new Date("2024-01-15T08:35:00"),
-  },
-  {
-    id: "4",
-    user: { id: "4", name: "Andin", level: 9, avatar: "" },
-    message: "Beautiful energy di group ini hari ini. Remember, consistency is key untuk spiritual growth. Keep shining your light! ✨",
-    timestamp: new Date("2024-01-15T08:40:00"),
-  },
-  {
-    id: "5",
-    user: { id: "5", name: "Sari", level: 2, avatar: "" },
-    message: "Ada yang punya tips untuk focus meditation? Masih sering distracted nih mind-nya",
-    timestamp: new Date("2024-01-15T08:45:00"),
-  },
-];
+interface ChatMessageData {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_level: number;
+  is_vip: boolean;
+  message: string;
+  created_at: string;
+}
 
 export function Chat() {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState(mockMessages);
+  const [messages, setMessages] = useState<ChatMessageData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { toast } = useToast();
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      const newMessage = {
-        id: Date.now().toString(),
-        user: { id: "current", name: "Anda", level: 3, avatar: "" },
-        message: message.trim(),
-        timestamp: new Date(),
-      };
-      setMessages([...messages, newMessage]);
-      setMessage("");
+  useEffect(() => {
+    // Get current user
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // Get user profile for level info
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        setCurrentUser({
+          id: session.user.id,
+          name: profile?.display_name || session.user.email?.split('@')[0] || 'Anonymous',
+          level: profile?.level || 1,
+          isVip: profile?.level >= 5 // VIP if level 5 or higher
+        });
+      }
+    };
+
+    getCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    // Load chat history
+    const loadMessages = async () => {
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .order('created_at', { ascending: true })
+        .limit(100); // Limit to recent 100 messages
+
+      if (error) {
+        console.error('Error loading messages:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load chat history",
+          variant: "destructive"
+        });
+      } else {
+        setMessages(data || []);
+      }
+      setIsLoading(false);
+    };
+
+    loadMessages();
+
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('chat-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages'
+        },
+        (payload) => {
+          setMessages(current => [...current, payload.new as ChatMessageData]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
+
+  const handleSendMessage = async () => {
+    if (message.trim() && currentUser) {
+      const { error } = await supabase
+        .from('chat_messages')
+        .insert({
+          user_id: currentUser.id,
+          user_name: currentUser.name,
+          user_level: currentUser.level,
+          is_vip: currentUser.isVip,
+          message: message.trim()
+        });
+
+      if (error) {
+        console.error('Error sending message:', error);
+        toast({
+          title: "Error",
+          description: "Failed to send message",
+          variant: "destructive"
+        });
+      } else {
+        setMessage("");
+      }
     }
   };
 
@@ -83,16 +146,28 @@ export function Chat() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
-        <div className="divide-y divide-border">
-          {messages.map((msg) => (
-            <ChatMessage
-              key={msg.id}
-              user={msg.user}
-              message={msg.message}
-              timestamp={msg.timestamp}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center p-8">
+            <p className="text-muted-foreground">Loading chat history...</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            {messages.map((msg) => (
+              <ChatMessage
+                key={msg.id}
+                user={{
+                  id: msg.user_id,
+                  name: msg.user_name,
+                  level: msg.user_level,
+                  isVip: msg.is_vip,
+                  avatar: ""
+                }}
+                message={msg.message}
+                timestamp={new Date(msg.created_at)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Message Input */}
