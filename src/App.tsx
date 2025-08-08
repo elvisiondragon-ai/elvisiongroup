@@ -15,7 +15,6 @@ const queryClient = new QueryClient();
 const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showRoleSelection, setShowRoleSelection] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -26,7 +25,6 @@ const App = () => {
         if (event === 'SIGNED_IN' && session?.user) {
           // Handle successful sign in (both login and signup)
           setUser(session.user);
-          setShowRoleSelection(true); // Show role selection for new logins
           setIsLoading(false);
           
           // For Google OAuth, this handles both new signups and existing logins
@@ -44,11 +42,7 @@ const App = () => {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-        // Don't show role selection for existing sessions unless needed
-        setShowRoleSelection(false);
-      }
+      setUser(session?.user ?? null);
       setIsLoading(false);
     });
 
@@ -72,30 +66,11 @@ const App = () => {
           <Routes>
             <Route 
               path="/" 
-              element={
-                user ? (
-                  showRoleSelection ? (
-                    <Auth onLogin={(user, role) => {
-                      setUser(user);
-                      setShowRoleSelection(false);
-                    }} />
-                  ) : (
-                    <Index />
-                  )
-                ) : (
-                  <Auth onLogin={(user, role) => {
-                    setUser(user);
-                    setShowRoleSelection(false);
-                  }} />
-                )
-              } 
+              element={user ? <Index /> : <Auth onLogin={setUser} />} 
             />
             <Route 
               path="/auth" 
-              element={<Auth onLogin={(user, role) => {
-                setUser(user);
-                setShowRoleSelection(false);
-              }} />} 
+              element={user ? <Index /> : <Auth onLogin={setUser} />} 
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
