@@ -10,17 +10,15 @@ interface RoleSelectionProps {
 export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
   const [selectedRole, setSelectedRole] = useState<'ignis' | 'genesis' | null>(null);
 
-  const handleContinue = () => {
-    console.log('Continue clicked with role:', selectedRole);
-    if (selectedRole) {
-      console.log('Calling onRoleSelect with:', selectedRole);
-      onRoleSelect(selectedRole);
-    }
-  };
-
   const handleRoleClick = (role: 'ignis' | 'genesis') => {
     console.log('Role clicked:', role);
     setSelectedRole(role);
+    
+    // Add a small delay for visual feedback, then navigate
+    setTimeout(() => {
+      console.log('Navigating with role:', role);
+      onRoleSelect(role);
+    }, 300);
   };
 
   return (
@@ -39,7 +37,7 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
             What are you?
           </h1>
           <p className="text-muted-foreground text-lg">
-            Pilih peran Anda dalam perjalanan spiritual
+            Klik untuk memilih peran Anda dalam perjalanan spiritual
           </p>
         </div>
 
@@ -134,18 +132,6 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
               </div>
             </div>
           </Card>
-        </div>
-
-        {/* Continue Button */}
-        <div className="text-center">
-          <Button
-            onClick={handleContinue}
-            disabled={!selectedRole}
-            className="px-8 py-3 text-lg font-medium bg-gradient-primary hover:opacity-90 text-primary-foreground disabled:opacity-50"
-            size="lg"
-          >
-            {selectedRole ? `Lanjutkan sebagai ${selectedRole === 'ignis' ? 'eL Vision Ignis' : 'eL Vision Genesis'}` : 'Pilih peran Anda'}
-          </Button>
         </div>
       </div>
     </div>
