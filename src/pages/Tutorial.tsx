@@ -176,14 +176,6 @@ export function Tutorial() {
             </div>
           </div>
         </Card>
-
-        {/* Action Button */}
-        <Button 
-          onClick={() => navigate("/meditation-sessions")}
-          className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground"
-        >
-          Mulai Sesi Meditasi
-        </Button>
       </div>
     </div>
   );
