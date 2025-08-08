@@ -2,15 +2,29 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Play, ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface SpiritualJournalProps {
   onNavigate: (tab: string) => void;
 }
 
+interface Reflection {
+  id: string;
+  question: string;
+  reflection: string;
+  created_at: string;
+}
+
 export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
   const [playingJournal, setPlayingJournal] = useState<number | null>(null);
+  const [reflections, setReflections] = useState<Reflection[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { toast } = useToast();
+
+  const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
   const handlePlay = (journalId: number) => {
     setPlayingJournal(playingJournal === journalId ? null : journalId);
@@ -60,9 +74,66 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     }
   ];
 
-  const handleSaveReflection = () => {
-    // Here you would save the reflection
-    console.log("Saving reflection:", reflection);
+  useEffect(() => {
+    // Get current user and load reflections
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUser(session.user);
+        loadReflections(session.user.id);
+      }
+    };
+
+    getCurrentUser();
+  }, []);
+
+  const loadReflections = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('reflections')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading reflections:', error);
+    } else {
+      setReflections(data || []);
+    }
+  };
+
+  const handleSaveReflection = async () => {
+    if (!reflection.trim() || !currentUser) {
+      toast({
+        title: "Error",
+        description: "Silakan tulis renungan Anda terlebih dahulu",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('reflections')
+      .insert({
+        user_id: currentUser.id,
+        question: currentQuestion,
+        reflection: reflection.trim()
+      });
+
+    if (error) {
+      console.error('Error saving reflection:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan renungan",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Tersimpan",
+        description: "Renungan Anda telah disimpan",
+      });
+      setReflection("");
+      loadReflections(currentUser.id);
+    }
   };
 
   return (
@@ -135,7 +206,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
             
             <div className="p-4 rounded-lg bg-card/50 border border-border">
               <p className="text-foreground leading-relaxed">
-                "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?"
+                "{currentQuestion}"
               </p>
             </div>
             
@@ -159,6 +230,39 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
             </div>
           </div>
         </Card>
+
+        {/* Reflection History */}
+        {reflections.length > 0 && (
+          <Card className="p-6 bg-gradient-subtle border-2 border-muted/30">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold font-orbitron text-foreground">
+                Riwayat Renungan
+              </h3>
+              
+              <div className="space-y-4 max-h-64 overflow-y-auto">
+                {reflections.map((refl) => (
+                  <div key={refl.id} className="p-4 rounded-lg bg-card/30 border border-border space-y-2">
+                    <div className="text-sm text-muted-foreground">
+                      {new Date(refl.created_at).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      })}
+                    </div>
+                    <div className="text-xs text-muted-foreground italic mb-2">
+                      "{refl.question}"
+                    </div>
+                    <div className="text-foreground leading-relaxed">
+                      {refl.reflection}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Done Button */}
