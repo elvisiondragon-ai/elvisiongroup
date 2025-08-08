@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Play, ArrowLeft, Save } from "lucide-react";
+import { Play, ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 interface SpiritualJournalProps {
@@ -10,12 +10,55 @@ interface SpiritualJournalProps {
 
 export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingJournal, setPlayingJournal] = useState<number | null>(null);
 
-  const handlePlay = () => {
-    setIsPlaying(!isPlaying);
+  const handlePlay = (journalId: number) => {
+    setPlayingJournal(playingJournal === journalId ? null : journalId);
     // Here you would integrate audio playback
   };
+
+  const journals = [
+    {
+      id: 1,
+      title: "Guide to Inner Silence",
+      subtitle: "Audio Pembuka Renungan",
+      duration: "2 menit",
+      icon: Sparkles,
+      gradient: "bg-gradient-primary",
+      borderColor: "border-primary/30",
+      glowClass: "glow-primary"
+    },
+    {
+      id: 2,
+      title: "Nafasmu lebih berharga dari kesulitanmu",
+      subtitle: "Audio Pembuka Renungan",
+      duration: "5 menit",
+      icon: Wind,
+      gradient: "bg-gradient-to-br from-blue-500/20 via-cyan-500/10 to-teal-500/20",
+      borderColor: "border-cyan-400/30",
+      glowClass: "glow-accent"
+    },
+    {
+      id: 3,
+      title: "Cinta Adalah Kesehatan",
+      subtitle: "Audio Pembuka Renungan",
+      duration: "10 menit",
+      icon: Heart,
+      gradient: "bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-red-500/20",
+      borderColor: "border-pink-400/30",
+      glowClass: "hover:shadow-pink-500/20"
+    },
+    {
+      id: 4,
+      title: "Uang adalah Frekuensi Energi",
+      subtitle: "Audio Pembuka Renungan",
+      duration: "7 menit",
+      icon: DollarSign,
+      gradient: "bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-orange-500/20",
+      borderColor: "border-amber-400/30",
+      glowClass: "hover:shadow-amber-500/20"
+    }
+  ];
 
   const handleSaveReflection = () => {
     // Here you would save the reflection
@@ -41,37 +84,47 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         </div>
       </div>
 
-      <div className="px-6 space-y-8">
-        {/* Audio Guide Section */}
-        <Card className="relative p-6 bg-gradient-secondary border-2 border-primary/30 glow-primary overflow-hidden">
-          {/* Animated background ripple */}
-          <div className="absolute inset-0 opacity-20">
-            <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-primary/30 ${isPlaying ? 'animate-ping' : ''}`}></div>
-            <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-primary/20 ${isPlaying ? 'animate-pulse' : ''}`}></div>
-          </div>
+      <div className="px-6 space-y-6">
+        {/* Journal Audio Sections */}
+        {journals.map((journal) => {
+          const Icon = journal.icon;
+          const isCurrentlyPlaying = playingJournal === journal.id;
           
-          <div className="relative z-10 text-center space-y-4">
-            <h2 className="text-xl font-semibold font-orbitron text-foreground">
-              Guide to Inner Silence
-            </h2>
-            <p className="text-muted-foreground">
-              Audio Pembuka Renungan
-            </p>
-            
-            <div className="flex justify-center py-4">
-              <Button
-                onClick={handlePlay}
-                className={`w-16 h-16 rounded-full bg-gradient-primary hover:opacity-90 transition-all duration-300 ${isPlaying ? 'glow-primary scale-110' : ''}`}
-              >
-                <Play className={`w-6 h-6 text-primary-foreground ${isPlaying ? 'animate-pulse' : ''}`} />
-              </Button>
-            </div>
-            
-            <p className="text-sm text-muted-foreground">
-              Dengarkan dan renungkan selama 2 menit
-            </p>
-          </div>
-        </Card>
+          return (
+            <Card key={journal.id} className={`relative p-6 ${journal.gradient} border-2 ${journal.borderColor} ${journal.glowClass} overflow-hidden transition-all duration-300`}>
+              {/* Animated background ripple */}
+              <div className="absolute inset-0 opacity-20">
+                <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-white/20 ${isCurrentlyPlaying ? 'animate-ping' : ''}`}></div>
+                <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-white/10 ${isCurrentlyPlaying ? 'animate-pulse' : ''}`}></div>
+              </div>
+              
+              <div className="relative z-10 text-center space-y-4">
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <Icon className="w-6 h-6 text-foreground" />
+                  <h2 className="text-xl font-semibold font-orbitron text-foreground">
+                    {journal.title}
+                  </h2>
+                </div>
+                <p className="text-muted-foreground">
+                  {journal.subtitle}
+                </p>
+                
+                <div className="flex justify-center py-4">
+                  <Button
+                    onClick={() => handlePlay(journal.id)}
+                    className={`w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'scale-110 shadow-lg' : ''}`}
+                  >
+                    <Play className={`w-6 h-6 text-foreground ${isCurrentlyPlaying ? 'animate-pulse' : ''}`} />
+                  </Button>
+                </div>
+                
+                <p className="text-sm text-muted-foreground">
+                  Dengarkan dan renungkan selama {journal.duration}
+                </p>
+              </div>
+            </Card>
+          );
+        })}
 
         {/* Daily Reflection Section */}
         <Card className="p-6 bg-gradient-secondary border-2 border-accent/30 glow-accent">
