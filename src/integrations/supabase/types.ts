@@ -89,6 +89,7 @@ export type Database = {
       profiles: {
         Row: {
           achievements: string[] | null
+          avatar_url: string | null
           created_at: string
           display_name: string | null
           experience_points: number
@@ -101,6 +102,7 @@ export type Database = {
         }
         Insert: {
           achievements?: string[] | null
+          avatar_url?: string | null
           created_at?: string
           display_name?: string | null
           experience_points?: number
@@ -113,6 +115,7 @@ export type Database = {
         }
         Update: {
           achievements?: string[] | null
+          avatar_url?: string | null
           created_at?: string
           display_name?: string | null
           experience_points?: number

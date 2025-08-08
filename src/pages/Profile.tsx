@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { TierBadge } from "@/components/TierBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EditProfile } from "@/components/EditProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -31,12 +32,14 @@ interface UserProfile {
   total_sessions: number;
   achievements: string[];
   created_at: string;
+  avatar_url?: string;
 }
 
 export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -164,14 +167,31 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     }
   ];
 
+  // Show edit component if editing
+  if (isEditing) {
+    return (
+      <div className="pb-20">
+        <EditProfile
+          user={user}
+          userProfile={userProfile}
+          onSave={() => {
+            setIsEditing(false);
+            if (user) fetchUserProfile(user.id);
+          }}
+          onCancel={() => setIsEditing(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="pb-20">
       {/* Profile Header */}
       <div className="p-6 text-center">
         <Avatar className="w-24 h-24 mx-auto mb-4 border-2 border-primary glow-primary">
-          <AvatarImage src="" />
+          <AvatarImage src={profile.avatar_url} />
           <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xl font-orbitron">
-            A
+            {displayName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         
@@ -283,12 +303,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         <Button 
           variant="outline" 
           className="w-full justify-start gap-3 border-border hover:border-primary"
-          onClick={() => {
-            toast({
-              title: "Edit Profil",
-              description: "Fitur edit profil akan segera tersedia",
-            });
-          }}
+          onClick={() => setIsEditing(true)}
         >
           <User className="w-4 h-4" />
           Edit Profil
