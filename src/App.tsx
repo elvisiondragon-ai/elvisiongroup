@@ -66,11 +66,11 @@ const App = () => {
           <Routes>
             <Route 
               path="/" 
-              element={user ? <Index /> : <Auth onLogin={setUser} />} 
+              element={user ? <Index /> : <Auth onLogin={(user, role) => setUser(user)} />} 
             />
             <Route 
               path="/auth" 
-              element={user ? <Index /> : <Auth onLogin={setUser} />} 
+              element={user ? <Index /> : <Auth onLogin={(user, role) => setUser(user)} />} 
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

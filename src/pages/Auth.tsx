@@ -8,9 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff, Sparkles, Zap } from "lucide-react";
 import type { User } from '@supabase/supabase-js';
+import { RoleSelection } from "@/components/RoleSelection";
 
 interface AuthProps {
-  onLogin: (user: User) => void;
+  onLogin: (user: User, role?: 'ignis' | 'genesis') => void;
 }
 
 export function Auth({ onLogin }: AuthProps) {
@@ -38,18 +39,20 @@ export function Auth({ onLogin }: AuthProps) {
   });
 
   // Track current view
-  const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent'>('auth');
+  const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent' | 'role-selection'>('auth');
+  const [pendingUser, setPendingUser] = useState<User | null>(null);
 
   // Check if user is already logged in
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        onLogin(session.user);
+        setPendingUser(session.user);
+        setCurrentView('role-selection');
       }
     };
     checkUser();
-  }, [onLogin]);
+  }, []);
 
   // Helper function to clean up auth state
   const cleanupAuthState = () => {
@@ -78,7 +81,8 @@ export function Auth({ onLogin }: AuthProps) {
           title: "Welcome back!",
           description: "You have successfully logged in.",
         });
-        onLogin(data.user);
+        setPendingUser(data.user);
+        setCurrentView('role-selection');
       }
     } catch (error: any) {
       toast({
@@ -256,8 +260,8 @@ export function Auth({ onLogin }: AuthProps) {
           description: "Anda telah berhasil masuk.",
         });
         
-        // Force page reload for clean state
-        window.location.href = '/';
+        setPendingUser(data.user);
+        setCurrentView('role-selection');
       }
     } catch (error: any) {
       toast({
@@ -321,6 +325,9 @@ export function Auth({ onLogin }: AuthProps) {
           password: '',
           confirmPassword: ''
         });
+        
+        setPendingUser(data.user);
+        setCurrentView('role-selection');
       }
     } catch (error: any) {
       toast({
@@ -443,6 +450,19 @@ export function Auth({ onLogin }: AuthProps) {
         </div>
       </div>
     );
+  }
+
+  // Role Selection View
+  if (currentView === 'role-selection' && pendingUser) {
+    const handleRoleSelect = (role: 'ignis' | 'genesis') => {
+      toast({
+        title: `Selamat datang, ${role === 'ignis' ? 'eL Vision Ignis' : 'eL Vision Genesis'}!`,
+        description: "Perjalanan spiritual Anda dimulai sekarang.",
+      });
+      onLogin(pendingUser, role);
+    };
+
+    return <RoleSelection onRoleSelect={handleRoleSelect} />;
   }
 
   // Main Auth View
