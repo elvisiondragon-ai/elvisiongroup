@@ -11,9 +11,16 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
   const [selectedRole, setSelectedRole] = useState<'ignis' | 'genesis' | null>(null);
 
   const handleContinue = () => {
+    console.log('Continue clicked with role:', selectedRole);
     if (selectedRole) {
+      console.log('Calling onRoleSelect with:', selectedRole);
       onRoleSelect(selectedRole);
     }
+  };
+
+  const handleRoleClick = (role: 'ignis' | 'genesis') => {
+    console.log('Role clicked:', role);
+    setSelectedRole(role);
   };
 
   return (
@@ -45,7 +52,7 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
                 ? 'border-primary bg-gradient-primary/10 shadow-glow' 
                 : 'border-border bg-gradient-secondary hover:border-primary/50'
             }`}
-            onClick={() => setSelectedRole('ignis')}
+            onClick={() => handleRoleClick('ignis')}
           >
             <div className="text-center space-y-6">
               <div className="flex justify-center">
@@ -90,7 +97,7 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
                 ? 'border-primary bg-gradient-primary/10 shadow-glow' 
                 : 'border-border bg-gradient-secondary hover:border-primary/50'
             }`}
-            onClick={() => setSelectedRole('genesis')}
+            onClick={() => handleRoleClick('genesis')}
           >
             <div className="text-center space-y-6">
               <div className="flex justify-center">
