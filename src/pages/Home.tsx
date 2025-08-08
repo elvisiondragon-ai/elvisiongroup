@@ -213,7 +213,7 @@ export function Home({ onNavigate }: HomeProps) {
         <Card className="p-4 bg-gradient-secondary border-border">
           <div className="text-center">
             <div className="text-2xl font-bold font-orbitron text-primary mb-2">
-              127
+              825
             </div>
             <p className="text-sm text-muted-foreground mb-4">
               Anggota online sekarang
