@@ -52,7 +52,7 @@ export function Home({ onNavigate }: HomeProps) {
     }
   };
 
-  const displayName = userProfile?.display_name || "Renata";
+  const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
   const nextLevelXp = userProfile ? userProfile.level * 100 : 100;
 
   const features = [
