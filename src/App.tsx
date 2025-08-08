@@ -20,8 +20,23 @@ const App = () => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setUser(session?.user ?? null);
-        setIsLoading(false);
+        console.log('Auth state change:', event, session?.user?.email);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Handle successful sign in (both login and signup)
+          setUser(session.user);
+          setIsLoading(false);
+          
+          // For Google OAuth, this handles both new signups and existing logins
+          setTimeout(() => {
+            console.log('User authenticated successfully:', session.user.email);
+          }, 0);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setIsLoading(false);
+        } else if (event === 'TOKEN_REFRESHED') {
+          setUser(session?.user ?? null);
+        }
       }
     );
 

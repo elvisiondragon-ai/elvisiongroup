@@ -141,22 +141,44 @@ export function Auth({ onLogin }: AuthProps) {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleAuth = async () => {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out to ensure clean state
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+      }
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
 
       if (error) throw error;
-    } catch (error: any) {
+
+      // The actual user data will be handled by the auth state change listener
       toast({
-        title: "Google Login Failed",
-        description: error.message || "An error occurred during Google login.",
+        title: "Redirecting to Google...",
+        description: "You'll be redirected to complete authentication.",
+      });
+
+    } catch (error: any) {
+      console.error('Google auth error:', error);
+      toast({
+        title: "Google Authentication Failed",
+        description: error.message || "An error occurred during Google authentication.",
         variant: "destructive",
       });
     } finally {
@@ -529,7 +551,7 @@ export function Auth({ onLogin }: AuthProps) {
               </div>
 
               <Button
-                onClick={handleGoogleLogin}
+                onClick={handleGoogleAuth}
                 variant="outline"
                 className="w-full h-11 border-border hover:bg-muted"
                 disabled={isLoading}
@@ -646,7 +668,7 @@ export function Auth({ onLogin }: AuthProps) {
               </div>
 
               <Button
-                onClick={handleGoogleLogin}
+                onClick={handleGoogleAuth}
                 variant="outline"
                 className="w-full h-11 border-border hover:bg-muted"
                 disabled={isLoading}
