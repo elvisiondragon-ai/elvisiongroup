@@ -2,13 +2,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { AudioUpload } from "@/components/AudioUpload";
-import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown } from "lucide-react";
+import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown, Shield, Gem, Flame, Eye, Sparkles, Globe, Infinity } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
 import verse2Artwork from "@/assets/verse-2-cosmic.jpg";
 import verse3Artwork from "@/assets/verse-3-cosmic.jpg";
 import verse4Artwork from "@/assets/verse-4-cosmic.jpg";
+import verse5Artwork from "@/assets/verse-5-cosmic.jpg";
+import verse6Artwork from "@/assets/verse-6-cosmic.jpg";
+import verse7Artwork from "@/assets/verse-7-cosmic.jpg";
+import verse8Artwork from "@/assets/verse-8-cosmic.jpg";
+import verse9Artwork from "@/assets/verse-9-cosmic.jpg";
+import verse10Artwork from "@/assets/verse-10-cosmic.jpg";
 
 interface AudioTherapyProps {
   onNavigate: (tab: string) => void;
@@ -85,6 +91,48 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: userLevel >= 15,
       requiredLevel: 15,
       artwork: verse4Artwork,
+    },
+    {
+      id: 5,
+      title: "Verse 5",
+      unlocked: userLevel >= 20,
+      requiredLevel: 20,
+      artwork: verse5Artwork,
+    },
+    {
+      id: 6,
+      title: "Verse 6",
+      unlocked: userLevel >= 25,
+      requiredLevel: 25,
+      artwork: verse6Artwork,
+    },
+    {
+      id: 7,
+      title: "Verse 7",
+      unlocked: userLevel >= 30,
+      requiredLevel: 30,
+      artwork: verse7Artwork,
+    },
+    {
+      id: 8,
+      title: "Verse 8",
+      unlocked: userLevel >= 35,
+      requiredLevel: 35,
+      artwork: verse8Artwork,
+    },
+    {
+      id: 9,
+      title: "Verse 9",
+      unlocked: userLevel >= 40,
+      requiredLevel: 40,
+      artwork: verse9Artwork,
+    },
+    {
+      id: 10,
+      title: "Verse 10",
+      unlocked: userLevel >= 45,
+      requiredLevel: 45,
+      artwork: verse10Artwork,
     },
   ];
 
@@ -178,7 +226,19 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                         ? "bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-400/40 shadow-lg shadow-amber-500/20"
                         : verse.requiredLevel === 10
                         ? "bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-400/40 shadow-lg shadow-purple-500/20"
-                        : "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/40 shadow-lg shadow-rose-500/20"
+                        : verse.requiredLevel === 15
+                        ? "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/40 shadow-lg shadow-rose-500/20"
+                        : verse.requiredLevel === 20
+                        ? "bg-gradient-to-br from-emerald-500/20 to-green-500/20 border-emerald-400/40 shadow-lg shadow-emerald-500/20"
+                        : verse.requiredLevel === 25
+                        ? "bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border-cyan-400/40 shadow-lg shadow-cyan-500/20"
+                        : verse.requiredLevel === 30
+                        ? "bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border-yellow-400/40 shadow-lg shadow-yellow-500/20"
+                        : verse.requiredLevel === 35
+                        ? "bg-gradient-to-br from-red-500/20 to-orange-500/20 border-red-400/40 shadow-lg shadow-red-500/20"
+                        : verse.requiredLevel === 40
+                        ? "bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border-indigo-400/40 shadow-lg shadow-indigo-500/20"
+                        : "bg-gradient-to-br from-violet-500/20 to-purple-500/20 border-violet-400/40 shadow-lg shadow-violet-500/20"
                     }`}>
                       <div className="text-center space-y-3">
                         {/* Dynamic Icon based on level */}
@@ -186,8 +246,20 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                           <Star className="w-12 h-12 text-amber-400 mx-auto animate-pulse" />
                         ) : verse.requiredLevel === 10 ? (
                           <Zap className="w-12 h-12 text-purple-400 mx-auto animate-pulse" />
-                        ) : (
+                        ) : verse.requiredLevel === 15 ? (
                           <Crown className="w-12 h-12 text-rose-400 mx-auto animate-pulse" />
+                        ) : verse.requiredLevel === 20 ? (
+                          <Shield className="w-12 h-12 text-emerald-400 mx-auto animate-pulse" />
+                        ) : verse.requiredLevel === 25 ? (
+                          <Gem className="w-12 h-12 text-cyan-400 mx-auto animate-pulse" />
+                        ) : verse.requiredLevel === 30 ? (
+                          <Flame className="w-12 h-12 text-yellow-400 mx-auto animate-pulse" />
+                        ) : verse.requiredLevel === 35 ? (
+                          <Eye className="w-12 h-12 text-red-400 mx-auto animate-pulse" />
+                        ) : verse.requiredLevel === 40 ? (
+                          <Sparkles className="w-12 h-12 text-indigo-400 mx-auto animate-pulse" />
+                        ) : (
+                          <Infinity className="w-12 h-12 text-violet-400 mx-auto animate-pulse" />
                         )}
                         
                         {/* Lock overlay */}
@@ -200,7 +272,19 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                             ? "text-amber-400"
                             : verse.requiredLevel === 10
                             ? "text-purple-400" 
-                            : "text-rose-400"
+                            : verse.requiredLevel === 15
+                            ? "text-rose-400"
+                            : verse.requiredLevel === 20
+                            ? "text-emerald-400"
+                            : verse.requiredLevel === 25
+                            ? "text-cyan-400"
+                            : verse.requiredLevel === 30
+                            ? "text-yellow-400"
+                            : verse.requiredLevel === 35
+                            ? "text-red-400"
+                            : verse.requiredLevel === 40
+                            ? "text-indigo-400"
+                            : "text-violet-400"
                         }`}>
                           LOCKED
                         </div>
@@ -213,7 +297,19 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                         ? "bg-gradient-to-r from-amber-500/10 to-orange-500/10"
                         : verse.requiredLevel === 10
                         ? "bg-gradient-to-r from-purple-500/10 to-violet-500/10"
-                        : "bg-gradient-to-r from-rose-500/10 to-pink-500/10"
+                        : verse.requiredLevel === 15
+                        ? "bg-gradient-to-r from-rose-500/10 to-pink-500/10"
+                        : verse.requiredLevel === 20
+                        ? "bg-gradient-to-r from-emerald-500/10 to-green-500/10"
+                        : verse.requiredLevel === 25
+                        ? "bg-gradient-to-r from-cyan-500/10 to-teal-500/10"
+                        : verse.requiredLevel === 30
+                        ? "bg-gradient-to-r from-yellow-500/10 to-amber-500/10"
+                        : verse.requiredLevel === 35
+                        ? "bg-gradient-to-r from-red-500/10 to-orange-500/10"
+                        : verse.requiredLevel === 40
+                        ? "bg-gradient-to-r from-indigo-500/10 to-blue-500/10"
+                        : "bg-gradient-to-r from-violet-500/10 to-purple-500/10"
                     } blur-xl`}></div>
                   </div>
                 )}
@@ -244,14 +340,38 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                       ? "bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/40 text-amber-300"
                       : verse.requiredLevel === 10
                       ? "bg-gradient-to-r from-purple-500/20 to-violet-500/20 border-purple-400/40 text-purple-300"
-                      : "bg-gradient-to-r from-rose-500/20 to-pink-500/20 border-rose-400/40 text-rose-300"
+                      : verse.requiredLevel === 15
+                      ? "bg-gradient-to-r from-rose-500/20 to-pink-500/20 border-rose-400/40 text-rose-300"
+                      : verse.requiredLevel === 20
+                      ? "bg-gradient-to-r from-emerald-500/20 to-green-500/20 border-emerald-400/40 text-emerald-300"
+                      : verse.requiredLevel === 25
+                      ? "bg-gradient-to-r from-cyan-500/20 to-teal-500/20 border-cyan-400/40 text-cyan-300"
+                      : verse.requiredLevel === 30
+                      ? "bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400/40 text-yellow-300"
+                      : verse.requiredLevel === 35
+                      ? "bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-400/40 text-red-300"
+                      : verse.requiredLevel === 40
+                      ? "bg-gradient-to-r from-indigo-500/20 to-blue-500/20 border-indigo-400/40 text-indigo-300"
+                      : "bg-gradient-to-r from-violet-500/20 to-purple-500/20 border-violet-400/40 text-violet-300"
                   }`}>
                     {verse.requiredLevel === 5 ? (
                       <Star className="w-4 h-4" />
                     ) : verse.requiredLevel === 10 ? (
                       <Zap className="w-4 h-4" />
-                    ) : (
+                    ) : verse.requiredLevel === 15 ? (
                       <Crown className="w-4 h-4" />
+                    ) : verse.requiredLevel === 20 ? (
+                      <Shield className="w-4 h-4" />
+                    ) : verse.requiredLevel === 25 ? (
+                      <Gem className="w-4 h-4" />
+                    ) : verse.requiredLevel === 30 ? (
+                      <Flame className="w-4 h-4" />
+                    ) : verse.requiredLevel === 35 ? (
+                      <Eye className="w-4 h-4" />
+                    ) : verse.requiredLevel === 40 ? (
+                      <Sparkles className="w-4 h-4" />
+                    ) : (
+                      <Infinity className="w-4 h-4" />
                     )}
                     <span className="font-semibold text-sm">
                       🔒 Requires Level {verse.requiredLevel}
@@ -264,7 +384,19 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                       ? "⭐ Continue your journey to unlock"
                       : verse.requiredLevel === 10
                       ? "⚡ Advance further to access"
-                      : "👑 Master level required"
+                      : verse.requiredLevel === 15
+                      ? "👑 Master level required"
+                      : verse.requiredLevel === 20
+                      ? "🛡️ Guardian level needed"
+                      : verse.requiredLevel === 25
+                      ? "💎 Sage wisdom required"
+                      : verse.requiredLevel === 30
+                      ? "🔥 Flame keeper level"
+                      : verse.requiredLevel === 35
+                      ? "👁️ Seer vision required"
+                      : verse.requiredLevel === 40
+                      ? "✨ Cosmic master level"
+                      : "♾️ Infinite wisdom required"
                     }
                   </div>
                 </div>
