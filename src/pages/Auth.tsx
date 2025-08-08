@@ -32,6 +32,14 @@ export function Auth({ onLogin }: AuthProps) {
     confirmPassword: ''
   });
 
+  // Forgot password form state
+  const [forgotPasswordData, setForgotPasswordData] = useState({
+    email: ''
+  });
+
+  // Track current view
+  const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent'>('auth');
+
   // Check if user is already logged in
   useEffect(() => {
     const checkUser = async () => {
@@ -156,6 +164,264 @@ export function Auth({ onLogin }: AuthProps) {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        forgotPasswordData.email,
+        {
+          redirectTo: `${window.location.origin}/reset-password`,
+        }
+      );
+
+      if (error) throw error;
+
+      toast({
+        title: "Reset Email Sent!",
+        description: "Check your email for password reset instructions.",
+      });
+      
+      setCurrentView('reset-sent');
+    } catch (error: any) {
+      toast({
+        title: "Reset Failed",
+        description: error.message || "An error occurred while sending reset email.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const cleanupAuthState = () => {
+    // Clear all auth-related localStorage items
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+  };
+
+  const enhancedHandleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Clean up any existing auth state
+      cleanupAuthState();
+      
+      // Attempt global sign out first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        toast({
+          title: "Selamat datang kembali!",
+          description: "Anda telah berhasil masuk.",
+        });
+        
+        // Force page reload for clean state
+        window.location.href = '/';
+      }
+    } catch (error: any) {
+      toast({
+        title: "Login Gagal",
+        description: error.message || "Terjadi kesalahan saat login.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const enhancedHandleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (signupData.password !== signupData.confirmPassword) {
+      toast({
+        title: "Password Tidak Cocok",
+        description: "Password dan konfirmasi password harus sama.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (signupData.password.length < 6) {
+      toast({
+        title: "Password Terlalu Pendek",
+        description: "Password harus minimal 6 karakter.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Clean up existing state first
+      cleanupAuthState();
+      
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: signupData.email,
+        password: signupData.password,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        toast({
+          title: "Akun Berhasil Dibuat!",
+          description: "Silakan cek email Anda untuk konfirmasi akun.",
+        });
+        
+        // Clear form
+        setSignupData({
+          email: '',
+          password: '',
+          confirmPassword: ''
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Pendaftaran Gagal",
+        description: error.message || "Terjadi kesalahan saat mendaftar.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Forgot Password View
+  if (currentView === 'forgot-password') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Logo/Brand Section */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <img 
+                src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" 
+                alt="eL Vision Group Logo" 
+                className="w-24 h-24 object-contain"
+              />
+            </div>
+            <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+              eL Vision Group
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Reset Password Anda
+            </p>
+          </div>
+
+          <Card className="p-6 bg-gradient-secondary border-border">
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email" className="text-foreground">
+                  Email
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={forgotPasswordData.email}
+                    onChange={(e) => setForgotPasswordData(prev => ({ ...prev, email: e.target.value }))}
+                    className="pl-10 cyber-input"
+                    required
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
+                disabled={isLoading}
+              >
+                {isLoading ? "Mengirim..." : "Kirim Reset Email"}
+              </Button>
+            </form>
+
+            <div className="mt-4 text-center">
+              <Button
+                onClick={() => setCurrentView('auth')}
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Kembali ke Login
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Reset Email Sent View
+  if (currentView === 'reset-sent') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Logo/Brand Section */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <img 
+                src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" 
+                alt="eL Vision Group Logo" 
+                className="w-24 h-24 object-contain"
+              />
+            </div>
+            <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+              eL Vision Group
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Email Reset Telah Dikirim
+            </p>
+          </div>
+
+          <Card className="p-6 bg-gradient-secondary border-border text-center">
+            <div className="mb-4">
+              <Mail className="h-12 w-12 mx-auto text-primary mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Cek Email Anda
+              </h3>
+              <p className="text-muted-foreground">
+                Kami telah mengirimkan link reset password ke email Anda. 
+                Silakan cek kotak masuk dan ikuti instruksi yang diberikan.
+              </p>
+            </div>
+
+            <Button
+              onClick={() => setCurrentView('auth')}
+              className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
+            >
+              Kembali ke Login
+            </Button>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Main Auth View
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -189,7 +455,7 @@ export function Auth({ onLogin }: AuthProps) {
 
             {/* Login Tab */}
             <TabsContent value="login" className="space-y-4">
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={enhancedHandleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="login-email" className="text-foreground">
                     Email
@@ -238,9 +504,20 @@ export function Auth({ onLogin }: AuthProps) {
                   className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Logging in..." : "Masuk"}
+                  {isLoading ? "Masuk..." : "Masuk"}
                 </Button>
               </form>
+
+              {/* Forgot Password Link */}
+              <div className="text-center">
+                <Button
+                  onClick={() => setCurrentView('forgot-password')}
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-foreground text-sm"
+                >
+                  Lupa Password?
+                </Button>
+              </div>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -281,7 +558,7 @@ export function Auth({ onLogin }: AuthProps) {
 
             {/* Signup Tab */}
             <TabsContent value="signup" className="space-y-4">
-              <form onSubmit={handleSignup} className="space-y-4">
+              <form onSubmit={enhancedHandleSignup} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-email" className="text-foreground">
                     Email
@@ -355,7 +632,7 @@ export function Auth({ onLogin }: AuthProps) {
                   className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Creating Account..." : "Buat Akun"}
+                  {isLoading ? "Membuat Akun..." : "Buat Akun"}
                 </Button>
               </form>
 
