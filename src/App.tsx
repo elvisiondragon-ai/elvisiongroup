@@ -27,9 +27,10 @@ const App = () => {
           setUser(session.user);
           setIsLoading(false);
           
-          // Clear OAuth hash from URL after successful login
-          if (window.location.hash) {
-            window.history.replaceState(null, '', window.location.pathname);
+          // Clear OAuth hash and query params from URL after successful login - Safari fix
+          if (window.location.hash || window.location.search.includes('access_token')) {
+            const cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+            window.history.replaceState(null, '', cleanUrl);
           }
           
           // For Google OAuth, this handles both new signups and existing logins
