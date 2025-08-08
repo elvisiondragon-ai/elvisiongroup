@@ -8,18 +8,15 @@ import { AudioTherapy } from "./AudioTherapy";
 import { SpiritualJournal } from "./SpiritualJournal";
 import { MeditationSessions } from "./MeditationSessions";
 import { Tutorial } from "./Tutorial";
-// import { supabase } from "@/integrations/supabase/client"; // Dihapus karena tidak lagi diperlukan
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
 
-  // Fungsi handleLogout dihapus karena tidak ada lagi proses login/logout
-  /*
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.href = '/auth';
   };
-  */
 
   const renderContent = () => {
     console.log("Current activeTab:", activeTab);
@@ -31,8 +28,7 @@ const Index = () => {
       case "leaderboard":
         return <Leaderboard />;
       case "profile":
-        // Properti onLogout dihapus dari komponen Profile
-        return <Profile onNavigate={setActiveTab} />;
+        return <Profile onLogout={handleLogout} onNavigate={setActiveTab} />;
       case "audio-therapy":
         return <AudioTherapy onNavigate={setActiveTab} />;
       case "spiritual-journal":
