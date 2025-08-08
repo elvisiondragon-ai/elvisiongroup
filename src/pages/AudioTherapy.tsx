@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { AudioUpload } from "@/components/AudioUpload";
-import { Lock, ArrowLeft, Music, Upload as UploadIcon } from "lucide-react";
+import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
@@ -75,15 +75,15 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     {
       id: 3,
       title: "Verse 3",
-      unlocked: userLevel >= 8,
-      requiredLevel: 8,
+      unlocked: userLevel >= 10,
+      requiredLevel: 10,
       artwork: verse3Artwork,
     },
     {
       id: 4,
       title: "Verse 4",
-      unlocked: userLevel >= 10,
-      requiredLevel: 10,
+      unlocked: userLevel >= 15,
+      requiredLevel: 15,
       artwork: verse4Artwork,
     },
   ];
@@ -172,13 +172,49 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                   </div>
                 ) : (
                   <div className="relative">
-                    <div className="w-36 h-36 rounded-full bg-gradient-to-br from-muted/40 to-muted/20 flex items-center justify-center border-2 border-dashed border-muted-foreground/30">
-                      <div className="text-center space-y-2">
-                        <Lock className="w-10 h-10 text-muted-foreground mx-auto" />
-                        <div className="text-xs text-muted-foreground font-medium">LOCKED</div>
+                    {/* Locked Container with Gradient */}
+                    <div className={`w-36 h-36 rounded-full flex items-center justify-center border-2 border-dashed transition-all duration-500 ${
+                      verse.requiredLevel === 5 
+                        ? "bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-400/40 shadow-lg shadow-amber-500/20"
+                        : verse.requiredLevel === 10
+                        ? "bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-400/40 shadow-lg shadow-purple-500/20"
+                        : "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/40 shadow-lg shadow-rose-500/20"
+                    }`}>
+                      <div className="text-center space-y-3">
+                        {/* Dynamic Icon based on level */}
+                        {verse.requiredLevel === 5 ? (
+                          <Star className="w-12 h-12 text-amber-400 mx-auto animate-pulse" />
+                        ) : verse.requiredLevel === 10 ? (
+                          <Zap className="w-12 h-12 text-purple-400 mx-auto animate-pulse" />
+                        ) : (
+                          <Crown className="w-12 h-12 text-rose-400 mx-auto animate-pulse" />
+                        )}
+                        
+                        {/* Lock overlay */}
+                        <div className="relative">
+                          <Lock className="w-6 h-6 text-muted-foreground mx-auto" />
+                        </div>
+                        
+                        <div className={`text-xs font-bold ${
+                          verse.requiredLevel === 5 
+                            ? "text-amber-400"
+                            : verse.requiredLevel === 10
+                            ? "text-purple-400" 
+                            : "text-rose-400"
+                        }`}>
+                          LOCKED
+                        </div>
                       </div>
                     </div>
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-t from-muted/10 to-transparent"></div>
+                    
+                    {/* Animated glow ring */}
+                    <div className={`absolute inset-0 rounded-full animate-pulse ${
+                      verse.requiredLevel === 5 
+                        ? "bg-gradient-to-r from-amber-500/10 to-orange-500/10"
+                        : verse.requiredLevel === 10
+                        ? "bg-gradient-to-r from-purple-500/10 to-violet-500/10"
+                        : "bg-gradient-to-r from-rose-500/10 to-pink-500/10"
+                    } blur-xl`}></div>
                   </div>
                 )}
               </div>
@@ -201,20 +237,36 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                   <div className="text-xs text-primary/80 font-medium">✨ UNLOCKED ✨</div>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <div className="px-6 py-3 bg-gradient-to-r from-muted/20 to-muted/10 rounded-full border border-muted-foreground/20">
-                    <p className="text-muted-foreground text-sm font-medium">
-                      {verse.requiredLevel <= 5 
-                        ? "🔒 Level up to unlock" 
-                        : "🔒 Locked"
-                      }
-                    </p>
+                <div className="space-y-4">
+                  {/* Level requirement badge */}
+                  <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full border shadow-lg ${
+                    verse.requiredLevel === 5 
+                      ? "bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/40 text-amber-300"
+                      : verse.requiredLevel === 10
+                      ? "bg-gradient-to-r from-purple-500/20 to-violet-500/20 border-purple-400/40 text-purple-300"
+                      : "bg-gradient-to-r from-rose-500/20 to-pink-500/20 border-rose-400/40 text-rose-300"
+                  }`}>
+                    {verse.requiredLevel === 5 ? (
+                      <Star className="w-4 h-4" />
+                    ) : verse.requiredLevel === 10 ? (
+                      <Zap className="w-4 h-4" />
+                    ) : (
+                      <Crown className="w-4 h-4" />
+                    )}
+                    <span className="font-semibold text-sm">
+                      🔒 Requires Level {verse.requiredLevel}
+                    </span>
                   </div>
-                  {verse.requiredLevel <= 5 && (
-                    <div className="text-xs text-muted-foreground/80 bg-muted/20 px-4 py-2 rounded-full">
-                      Requires Level {verse.requiredLevel}
-                    </div>
-                  )}
+                  
+                  {/* Progress hint */}
+                  <div className="text-xs text-muted-foreground/80 bg-muted/20 px-4 py-2 rounded-full">
+                    {verse.requiredLevel === 5 
+                      ? "⭐ Continue your journey to unlock"
+                      : verse.requiredLevel === 10
+                      ? "⚡ Advance further to access"
+                      : "👑 Master level required"
+                    }
+                  </div>
                 </div>
               )}
             </div>
