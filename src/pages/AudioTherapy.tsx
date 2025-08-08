@@ -202,16 +202,13 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     {/* Play Button Overlay */}
                     <div 
                       className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 cursor-pointer"
-                      onClick={() => {
-                        // For users, find and play the corresponding audio track
-                        const verseTrack = audioTracks.find(track => 
-                          track.title.toLowerCase().includes(verse.title.toLowerCase())
-                        );
-                        if (verseTrack) {
-                          // You can implement audio playback logic here
-                          console.log('Playing:', verseTrack.title);
-                        }
-                      }}
+                       onClick={() => {
+                         // Play the audio file
+                         const audio = new Audio('https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3');
+                         audio.play().catch(error => {
+                           console.error('Error playing audio:', error);
+                         });
+                       }}
                     >
                       <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform group-hover:scale-110 transition-transform duration-300">
                         <div className="w-0 h-0 border-l-[12px] border-l-white border-y-[8px] border-y-transparent ml-1 drop-shadow-lg"></div>
