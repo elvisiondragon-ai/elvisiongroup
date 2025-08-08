@@ -128,7 +128,7 @@ export function Profile({ onLogout }: ProfileProps) {
 
   const profile = userProfile || defaultProfile;
 
-  const displayName = profile.display_name || user?.email?.split('@')[0] || "Alex";
+  const displayName = profile.display_name || "Renata";
   const nextLevelXp = profile.level * 100;
   const joinDate = new Date(profile.created_at).toLocaleDateString('id-ID', { 
     year: 'numeric', 
