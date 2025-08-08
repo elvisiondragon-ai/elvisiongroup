@@ -51,6 +51,16 @@ export function Auth({ onLogin }: AuthProps) {
     checkUser();
   }, [onLogin]);
 
+  // Helper function to clean up auth state
+  const cleanupAuthState = () => {
+    // Clear all auth-related localStorage items
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -217,14 +227,6 @@ export function Auth({ onLogin }: AuthProps) {
     }
   };
 
-  const cleanupAuthState = () => {
-    // Clear all auth-related localStorage items
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-  };
 
   const enhancedHandleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
