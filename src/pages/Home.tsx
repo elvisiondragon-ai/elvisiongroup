@@ -122,6 +122,11 @@ export function Home({ onNavigate }: HomeProps) {
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-semibold text-foreground">{displayName}</h3>
                 <TierBadge level={userProfile?.level || 1} />
+                {(userProfile?.streak_days || 0) >= 7 && (
+                  <span className="px-2 py-1 text-xs font-medium bg-gradient-primary text-primary-foreground rounded-full">
+                    Week Warrior
+                  </span>
+                )}
               </div>
               <p className="text-sm text-muted-foreground">
                 Streak: {userProfile?.streak_days || 0} hari
