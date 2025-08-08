@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Play, ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles } from "lucide-react";
+import { Play, Pause, ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,13 +22,72 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [playingJournal, setPlayingJournal] = useState<number | null>(null);
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
   const handlePlay = (journalId: number) => {
-    setPlayingJournal(playingJournal === journalId ? null : journalId);
-    // Here you would integrate audio playback
+    const audioUrl = "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Jurnalsyukur1.MP3";
+    
+    // If currently playing this journal, stop it
+    if (playingJournal === journalId) {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        setCurrentAudio(null);
+      }
+      setPlayingJournal(null);
+      return;
+    }
+
+    // Stop any currently playing audio
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+
+    // Create and play new audio
+    const audio = new Audio(audioUrl);
+    audio.preload = 'auto';
+    
+    audio.addEventListener('loadstart', () => {
+      console.log('Audio loading started');
+    });
+    
+    audio.addEventListener('canplay', () => {
+      console.log('Audio can start playing');
+      audio.play().catch(error => {
+        console.error('Error playing audio:', error);
+        toast({
+          title: "Error",
+          description: "Gagal memutar audio",
+          variant: "destructive"
+        });
+        setPlayingJournal(null);
+        setCurrentAudio(null);
+      });
+    });
+    
+    audio.addEventListener('ended', () => {
+      console.log('Audio ended');
+      setPlayingJournal(null);
+      setCurrentAudio(null);
+    });
+    
+    audio.addEventListener('error', (e) => {
+      console.error('Audio error:', e);
+      toast({
+        title: "Error",
+        description: "Gagal memuat audio",
+        variant: "destructive"
+      });
+      setPlayingJournal(null);
+      setCurrentAudio(null);
+    });
+
+    setCurrentAudio(audio);
+    setPlayingJournal(journalId);
   };
 
   const journals = [
@@ -85,7 +144,15 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     };
 
     getCurrentUser();
-  }, []);
+
+    // Cleanup audio on unmount
+    return () => {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+    };
+  }, [currentAudio]);
 
   const loadReflections = async (userId: string) => {
     const { data, error } = await supabase
@@ -185,7 +252,11 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                     onClick={() => handlePlay(journal.id)}
                     className={`w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'scale-110 shadow-lg' : ''}`}
                   >
-                    <Play className={`w-6 h-6 text-foreground ${isCurrentlyPlaying ? 'animate-pulse' : ''}`} />
+                    {isCurrentlyPlaying ? (
+                      <Pause className="w-6 h-6 text-foreground animate-pulse" />
+                    ) : (
+                      <Play className="w-6 h-6 text-foreground" />
+                    )}
                   </Button>
                 </div>
                 
