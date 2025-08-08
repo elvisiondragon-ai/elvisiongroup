@@ -204,7 +204,7 @@ export function Profile({ onLogout }: ProfileProps) {
           variant="outline"
           className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium px-8 py-2 rounded-full glow-primary border-primary hover:border-primary"
           onClick={() => {
-            console.log('Opening tutorial');
+            window.open('/tutorial', '_blank');
           }}
         >
           READ TUTORIAL

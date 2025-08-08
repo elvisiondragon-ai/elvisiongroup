@@ -321,8 +321,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                   <Button
                     className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-semibold px-10 py-3 rounded-full shadow-lg shadow-primary/40 transform hover:scale-105 transition-all duration-300 border border-white/20"
                     onClick={() => {
-                      // Add tutorial functionality here
-                      console.log('Opening tutorial for', verse.title);
+                      window.open('/tutorial', '_blank');
                     }}
                   >
                     <span className="flex items-center gap-2">
