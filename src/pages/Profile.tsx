@@ -1,25 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { TierBadge } from "@/components/TierBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  User, 
-  Settings, 
-  Crown, 
-  Zap, 
-  Calendar, 
+import {
+  User,
+  Settings,
+  Crown,
+  Zap,
+  Calendar,
   Target,
   BookOpen,
   Award,
   LogOut
 } from "lucide-react";
 
+// Interface props diubah, onLogout tidak lagi diperlukan
 interface ProfileProps {
-  onLogout: () => void;
   onNavigate: (tab: string) => void;
 }
 
@@ -33,92 +32,16 @@ interface UserProfile {
   created_at: string;
 }
 
-export function Profile({ onLogout, onNavigate }: ProfileProps) {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+// Komponen Profile dimodifikasi untuk tidak memerlukan onLogout
+export function Profile({ onNavigate }: ProfileProps) {
   const { toast } = useToast();
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      if (user) {
-        await fetchUserProfile(user.id);
-      }
-      setLoading(false);
-    };
+  // Semua state dan useEffect untuk mengambil data user dari Supabase dihapus
+  // karena kita tidak lagi bergantung pada user yang login.
 
-    getUser();
-  }, []);
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load profile data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (data) {
-        setUserProfile(data);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      toast({
-        title: "Success", 
-        description: "Logged out successfully",
-      });
-      
-      onLogout();
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to logout",
-        variant: "destructive",
-      });
-      onLogout();
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center pb-20">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  // Create default profile data if not found
+  // Data profil default akan selalu digunakan
   const defaultProfile: UserProfile = {
-    display_name: user?.email?.split('@')[0] || "Alex",
+    display_name: "Alex", // Nama bisa diubah sesuai keinginan
     level: 3,
     experience_points: 250,
     streak_days: 5,
@@ -127,13 +50,13 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     created_at: new Date().toISOString()
   };
 
-  const profile = userProfile || defaultProfile;
+  const profile = defaultProfile; // Langsung gunakan data default
 
   const displayName = profile.display_name || "Renata";
   const nextLevelXp = profile.level * 100;
-  const joinDate = new Date(profile.created_at).toLocaleDateString('id-ID', { 
-    year: 'numeric', 
-    month: 'short' 
+  const joinDate = new Date(profile.created_at).toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'short'
   });
 
   const achievements = [
@@ -164,6 +87,8 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     }
   ];
 
+  // Fungsi handleLogout dihapus
+  
   return (
     <div className="pb-20">
       {/* Profile Header */}
@@ -191,8 +116,8 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
             <span>Level {profile.level}</span>
             <span>{profile.experience_points} / {nextLevelXp} XP</span>
           </div>
-          <Progress 
-            value={(profile.experience_points / nextLevelXp) * 100} 
+          <Progress
+            value={(profile.experience_points / nextLevelXp) * 100}
             className="h-2"
           />
           <p className="text-xs text-muted-foreground mt-1">
@@ -201,7 +126,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </div>
 
         {/* READ TUTORIAL Button */}
-        <Button 
+        <Button
           variant="outline"
           className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium px-8 py-2 rounded-full glow-primary border-primary hover:border-primary"
           onClick={() => {
@@ -239,18 +164,18 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         
         <div className="space-y-3">
           {achievements.map((achievement, index) => (
-            <Card 
-              key={index} 
+            <Card
+              key={index}
               className={`p-4 border-border ${
-                achievement.unlocked 
-                  ? "bg-gradient-secondary opacity-100" 
+                achievement.unlocked
+                  ? "bg-gradient-secondary opacity-100"
                   : "bg-muted/30 opacity-50"
               }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  achievement.unlocked 
-                    ? "bg-gradient-primary text-primary-foreground glow-primary" 
+                  achievement.unlocked
+                    ? "bg-gradient-primary text-primary-foreground glow-primary"
                     : "bg-muted text-muted-foreground"
                 }`}>
                   <Award className="w-5 h-5" />
@@ -280,8 +205,8 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           Pengaturan
         </h2>
         
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="w-full justify-start gap-3 border-border hover:border-primary"
           onClick={() => {
             toast({
@@ -294,8 +219,8 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           Edit Profil
         </Button>
         
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="w-full justify-start gap-3 border-border hover:border-primary"
           onClick={() => {
             toast({
@@ -308,22 +233,15 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           Preferensi
         </Button>
         
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="w-full justify-start gap-3 border-yellow-400 bg-gradient-to-r from-yellow-400/10 to-amber-500/10 text-yellow-400 hover:border-yellow-300 hover:bg-gradient-to-r hover:from-yellow-400/20 hover:to-amber-500/20 hover:text-yellow-300 transition-all duration-300"
         >
           <Crown className="w-4 h-4 text-yellow-400" />
           Upgrade ke VIP
         </Button>
 
-        <Button 
-          variant="destructive"
-          onClick={handleLogout}
-          className="w-full justify-start gap-3"
-        >
-          <LogOut className="w-4 h-4" />
-          Logout
-        </Button>
+        {/* Tombol Logout dihapus karena tidak ada sesi login */}
       </div>
     </div>
   );
