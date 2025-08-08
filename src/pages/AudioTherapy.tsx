@@ -6,6 +6,8 @@ import { Lock, ArrowLeft, Music, Upload as UploadIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
+import verse2Artwork from "@/assets/verse-2-cosmic.jpg";
+import verse4Artwork from "@/assets/verse-4-cosmic.jpg";
 
 interface AudioTherapyProps {
   onNavigate: (tab: string) => void;
@@ -67,7 +69,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 2",
       unlocked: userLevel >= 5,
       requiredLevel: 5,
-      artwork: null,
+      artwork: verse2Artwork,
     },
     {
       id: 3,
@@ -75,6 +77,13 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: userLevel >= 8,
       requiredLevel: 8,
       artwork: null,
+    },
+    {
+      id: 4,
+      title: "Verse 4",
+      unlocked: userLevel >= 10,
+      requiredLevel: 10,
+      artwork: verse4Artwork,
     },
   ];
 
@@ -94,17 +103,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
             Chamber of eL Vision
           </h1>
-          {isAdmin && (
-            <Button
-              onClick={() => setShowUpload(!showUpload)}
-              variant="outline"
-              size="sm"
-              className="ml-auto"
-            >
-              <UploadIcon className="h-4 w-4 mr-2" />
-              {showUpload ? "Cancel" : ""}
-            </Button>
-          )}
         </div>
       </div>
 
@@ -142,27 +140,19 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     <div 
                       className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                       onClick={() => {
-                        if (isAdmin) {
-                          setShowUpload(true);
-                        } else {
-                          // For users, find and play the corresponding audio track
-                          const verseTrack = audioTracks.find(track => 
-                            track.title.toLowerCase().includes(verse.title.toLowerCase())
-                          );
-                          if (verseTrack) {
-                            // You can implement audio playback logic here
-                            console.log('Playing:', verseTrack.title);
-                          }
+                        // For users, find and play the corresponding audio track
+                        const verseTrack = audioTracks.find(track => 
+                          track.title.toLowerCase().includes(verse.title.toLowerCase())
+                        );
+                        if (verseTrack) {
+                          // You can implement audio playback logic here
+                          console.log('Playing:', verseTrack.title);
                         }
                       }}
                     >
-                      {isAdmin ? (
-                        <UploadIcon className="w-8 h-8 text-white" />
-                      ) : (
-                        <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                          <div className="w-0 h-0 border-l-[8px] border-l-white border-y-[6px] border-y-transparent ml-1"></div>
-                        </div>
-                      )}
+                      <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <div className="w-0 h-0 border-l-[8px] border-l-white border-y-[6px] border-y-transparent ml-1"></div>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -204,12 +194,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         ))}
       </div>
 
-      {/* Admin Upload Section */}
-      {isAdmin && showUpload && (
-        <div className="px-6 mb-6">
-          <AudioUpload onUploadComplete={handleUploadComplete} />
-        </div>
-      )}
 
       {/* Audio Tracks Section - Show only first 2 tracks */}
       {audioTracks.length > 0 && (
