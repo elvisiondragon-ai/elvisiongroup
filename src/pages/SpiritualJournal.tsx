@@ -63,10 +63,12 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
     const audioUrl = "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Jurnalsyukur1.MP3";
     
-    // If currently playing this journal, stop it completely
+    // If currently playing this journal, stop it completely and reset
     if (playingJournal === journalId && currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
+      currentAudio.removeEventListener('ended', () => {});
+      currentAudio.removeEventListener('error', () => {});
       setCurrentAudio(null);
       setPlayingJournal(null);
       return;
@@ -76,7 +78,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
+      currentAudio.removeEventListener('ended', () => {});
+      currentAudio.removeEventListener('error', () => {});
       setCurrentAudio(null);
+      setPlayingJournal(null);
     }
 
     // Create and configure new audio with security features
@@ -88,8 +93,12 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     audio.setAttribute('disablePictureInPicture', 'true');
     audio.addEventListener('contextmenu', (e) => e.preventDefault());
     
+    // Set playing state immediately to show loading state
+    setPlayingJournal(journalId);
+    setCurrentAudio(audio);
+    
     // Event listeners
-    audio.addEventListener('canplay', () => {
+    const handleCanPlay = () => {
       audio.play().catch(error => {
         console.error('Error playing audio:', error);
         toast({
@@ -100,14 +109,14 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         setPlayingJournal(null);
         setCurrentAudio(null);
       });
-    });
+    };
     
-    audio.addEventListener('ended', () => {
+    const handleEnded = () => {
       setPlayingJournal(null);
       setCurrentAudio(null);
-    });
+    };
     
-    audio.addEventListener('error', () => {
+    const handleError = () => {
       toast({
         title: "Error",
         description: "Gagal memuat audio",
@@ -115,10 +124,11 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       });
       setPlayingJournal(null);
       setCurrentAudio(null);
-    });
+    };
 
-    setCurrentAudio(audio);
-    setPlayingJournal(journalId);
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
   };
 
   const journals = [
