@@ -210,7 +210,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     
                     {/* Play Button Overlay */}
                     <div 
-                      className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center opacity-30 group-hover:opacity-100 transition-all duration-500 cursor-pointer"
+                      className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center transition-all duration-500 cursor-pointer"
                        onClick={() => {
                          if (playingVerseId === verse.id && currentAudio) {
                            // Stop current audio if this verse is playing
