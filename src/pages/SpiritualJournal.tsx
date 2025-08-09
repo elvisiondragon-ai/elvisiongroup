@@ -60,35 +60,36 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       });
       return;
     }
+
     const audioUrl = "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Jurnalsyukur1.MP3";
     
-    // If currently playing this journal, stop it
-    if (playingJournal === journalId) {
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-        setCurrentAudio(null);
-      }
+    // If currently playing this journal, stop it completely
+    if (playingJournal === journalId && currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
       setPlayingJournal(null);
       return;
     }
 
-    // Stop any currently playing audio
+    // Stop any other currently playing audio
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
+      setCurrentAudio(null);
     }
 
-    // Create and play new audio
+    // Create and configure new audio with security features
     const audio = new Audio(audioUrl);
-    audio.preload = 'auto';
+    audio.preload = 'metadata';
     
-    audio.addEventListener('loadstart', () => {
-      console.log('Audio loading started');
-    });
+    // Prevent download and right-click context menu
+    audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+    audio.setAttribute('disablePictureInPicture', 'true');
+    audio.addEventListener('contextmenu', (e) => e.preventDefault());
     
+    // Event listeners
     audio.addEventListener('canplay', () => {
-      console.log('Audio can start playing');
       audio.play().catch(error => {
         console.error('Error playing audio:', error);
         toast({
@@ -102,13 +103,11 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     });
     
     audio.addEventListener('ended', () => {
-      console.log('Audio ended');
       setPlayingJournal(null);
       setCurrentAudio(null);
     });
     
-    audio.addEventListener('error', (e) => {
-      console.error('Audio error:', e);
+    audio.addEventListener('error', () => {
       toast({
         title: "Error",
         description: "Gagal memuat audio",
@@ -436,19 +435,32 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         </Button>
       </div>
 
-      {/* Atmospheric Background */}
+      {/* Enhanced Atmospheric Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        {/* Cosmic particles */}
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary rounded-full opacity-60 animate-pulse"></div>
-        <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-accent rounded-full opacity-40 animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/6 w-1 h-1 bg-primary rounded-full opacity-50 animate-pulse delay-500"></div>
-        <div className="absolute bottom-1/4 left-1/2 w-2 h-2 bg-accent rounded-full opacity-30 animate-pulse delay-1500"></div>
-        <div className="absolute top-1/6 right-1/3 w-1 h-1 bg-primary rounded-full opacity-70 animate-pulse delay-700"></div>
+        {/* Dynamic gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/3 to-transparent animate-pulse"></div>
         
-        {/* Glowing ambient areas */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/3 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-accent/3 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
+        {/* Floating cosmic particles */}
+        <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-primary rounded-full opacity-60 animate-bounce" style={{animationDelay: '0s', animationDuration: '3s'}}></div>
+        <div className="absolute top-3/4 right-1/4 w-2 h-2 bg-accent rounded-full opacity-40 animate-bounce" style={{animationDelay: '1s', animationDuration: '4s'}}></div>
+        <div className="absolute top-1/2 left-1/6 w-1 h-1 bg-primary rounded-full opacity-50 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+        <div className="absolute bottom-1/4 left-1/2 w-3 h-3 bg-accent rounded-full opacity-30 animate-bounce" style={{animationDelay: '1.5s', animationDuration: '5s'}}></div>
+        <div className="absolute top-1/6 right-1/3 w-2 h-2 bg-primary rounded-full opacity-70 animate-pulse" style={{animationDelay: '0.7s'}}></div>
+        <div className="absolute bottom-1/3 left-1/4 w-1 h-1 bg-accent rounded-full opacity-50 animate-bounce" style={{animationDelay: '2s', animationDuration: '3.5s'}}></div>
+        <div className="absolute top-2/3 right-1/6 w-2 h-2 bg-primary rounded-full opacity-40 animate-pulse" style={{animationDelay: '1.2s'}}></div>
+        
+        {/* Glowing ambient areas with enhanced effects */}
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-gradient-to-r from-primary/4 to-transparent rounded-full blur-3xl animate-pulse" style={{animationDuration: '6s'}}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-to-l from-accent/4 to-transparent rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s', animationDuration: '8s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-gradient-radial from-primary/6 to-transparent rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s', animationDuration: '7s'}}></div>
+        <div className="absolute top-1/6 right-1/5 w-40 h-40 bg-gradient-to-br from-accent/3 to-transparent rounded-full blur-2xl animate-pulse" style={{animationDelay: '3s', animationDuration: '5s'}}></div>
+        
+        {/* Moving energy streams */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-1/4 w-0.5 h-full bg-gradient-to-b from-transparent via-primary/20 to-transparent animate-pulse" style={{animationDuration: '4s'}}></div>
+          <div className="absolute top-0 right-1/3 w-0.5 h-full bg-gradient-to-b from-transparent via-accent/15 to-transparent animate-pulse" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
+        </div>
       </div>
     </div>
   );
