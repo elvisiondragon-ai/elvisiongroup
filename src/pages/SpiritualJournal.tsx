@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Play, Pause, ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles } from "lucide-react";
+import { Play, Pause, ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,12 +22,44 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [playingJournal, setPlayingJournal] = useState<number | null>(null);
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
+  // Check if user has access to a journal
+  const hasAccess = (journal: any) => {
+    if (!userProfile) return false;
+    const userLevel = userProfile.level || 1;
+    const isVip = userProfile.is_vip || false;
+    
+    // Always allow access to level 1 journals
+    if (journal.levelRequired <= 1) return true;
+    
+    // Check VIP requirement
+    if (journal.isVipRequired && !isVip) return false;
+    
+    // Check level requirement
+    return userLevel >= journal.levelRequired;
+  };
+
   const handlePlay = (journalId: number) => {
+    // Check if journal is locked
+    const journal = journals.find(j => j.id === journalId);
+    if (!journal || !userProfile) return;
+    
+    const isLocked = !hasAccess(journal);
+    
+    if (isLocked) {
+      const vipMessage = journal.isVipRequired ? " atau beli VIP" : "";
+      toast({
+        title: "Akses Terbatas",
+        description: `Level mu belum cukup (butuh level ${journal.levelRequired})${vipMessage}`,
+        variant: "destructive"
+      });
+      return;
+    }
     const audioUrl = "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Jurnalsyukur1.MP3";
     
     // If currently playing this journal, stop it
@@ -99,7 +131,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       icon: Sparkles,
       gradient: "bg-gradient-primary",
       borderColor: "border-primary/30",
-      glowClass: "glow-primary"
+      glowClass: "glow-primary",
+      levelRequired: 1,
+      isVipRequired: false
     },
     {
       id: 2,
@@ -109,7 +143,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       icon: Wind,
       gradient: "bg-gradient-to-br from-blue-500/20 via-cyan-500/10 to-teal-500/20",
       borderColor: "border-cyan-400/30",
-      glowClass: "glow-accent"
+      glowClass: "glow-accent",
+      levelRequired: 3,
+      isVipRequired: false
     },
     {
       id: 3,
@@ -119,7 +155,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       icon: Heart,
       gradient: "bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-red-500/20",
       borderColor: "border-pink-400/30",
-      glowClass: "hover:shadow-pink-500/20"
+      glowClass: "hover:shadow-pink-500/20",
+      levelRequired: 5,
+      isVipRequired: false
     },
     {
       id: 4,
@@ -129,7 +167,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       icon: DollarSign,
       gradient: "bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-orange-500/20",
       borderColor: "border-amber-400/30",
-      glowClass: "hover:shadow-amber-500/20"
+      glowClass: "hover:shadow-amber-500/20",
+      levelRequired: 4,
+      isVipRequired: true
     }
   ];
 
@@ -140,6 +180,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       if (session?.user) {
         setCurrentUser(session.user);
         loadReflections(session.user.id);
+        loadUserProfile(session.user.id);
       }
     };
 
@@ -153,6 +194,31 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       }
     };
   }, [currentAudio]);
+
+  const loadUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
+
+      if (data) {
+        setUserProfile(data);
+      } else {
+        // Default profile if not found
+        setUserProfile({ level: 1, is_vip: false });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setUserProfile({ level: 1, is_vip: false });
+    }
+  };
 
   const loadReflections = async (userId: string) => {
     const { data, error } = await supabase
@@ -227,9 +293,27 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         {journals.map((journal) => {
           const Icon = journal.icon;
           const isCurrentlyPlaying = playingJournal === journal.id;
+          const isLocked = !hasAccess(journal);
           
           return (
-            <Card key={journal.id} className={`relative p-6 ${journal.gradient} border-2 ${journal.borderColor} ${journal.glowClass} overflow-hidden transition-all duration-300`}>
+            <Card key={journal.id} className={`relative p-6 ${journal.gradient} border-2 ${journal.borderColor} ${journal.glowClass} overflow-hidden transition-all duration-300 ${isLocked ? 'opacity-60' : ''}`}>
+              {/* Lock overlay for locked journals */}
+              {isLocked && (
+                <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-20 rounded-lg flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <Lock className="w-8 h-8 text-white mx-auto" />
+                    <div className="text-white text-sm font-medium">
+                      Level {journal.levelRequired} Required
+                    </div>
+                    {journal.isVipRequired && (
+                      <div className="text-yellow-400 text-xs">
+                        VIP Access
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
               {/* Animated background ripple */}
               <div className="absolute inset-0 opacity-20">
                 <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-white/20 ${isCurrentlyPlaying ? 'animate-ping' : ''}`}></div>
@@ -250,9 +334,12 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                 <div className="flex justify-center py-4">
                   <Button
                     onClick={() => handlePlay(journal.id)}
-                    className={`w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'scale-110 shadow-lg' : ''}`}
+                    disabled={isLocked}
+                    className={`w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'scale-110 shadow-lg' : ''} ${isLocked ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
-                    {isCurrentlyPlaying ? (
+                    {isLocked ? (
+                      <Lock className="w-6 h-6 text-foreground" />
+                    ) : isCurrentlyPlaying ? (
                       <Pause className="w-6 h-6 text-foreground animate-pulse" />
                     ) : (
                       <Play className="w-6 h-6 text-foreground" />
@@ -261,7 +348,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                 </div>
                 
                 <p className="text-sm text-muted-foreground">
-                  Dengarkan dan renungkan selama {journal.duration}
+                  {isLocked 
+                    ? `Level ${journal.levelRequired} required${journal.isVipRequired ? ' • VIP' : ''}`
+                    : `Dengarkan dan renungkan selama ${journal.duration}`
+                  }
                 </p>
               </div>
             </Card>
