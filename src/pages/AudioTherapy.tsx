@@ -68,7 +68,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const verses = [
     {
       id: 1,
-      title: "Verse 1",
+      title: "Verse 1 - The Space Hill",
+      subtitle: "Kedamaian Batin",
       unlocked: true,
       requiredLevel: 1,
       artwork: verseArtwork,
@@ -89,7 +90,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     },
     {
       id: 4,
-      title: "Verse 4",
+      title: "Verse 4 - Prosperity Stream",
+      subtitle: "Audio Frekuensi Kaya Raya",
       unlocked: true,
       requiredLevel: 15,
       artwork: verse4Artwork,
@@ -181,6 +183,11 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                 <h3 className="text-2xl font-bold font-orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {verse.title}
                 </h3>
+                {verse.subtitle && (
+                  <p className="text-sm text-muted-foreground/80 font-medium">
+                    {verse.subtitle}
+                  </p>
+                )}
                 <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto"></div>
               </div>
 
@@ -203,7 +210,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     
                     {/* Play Button Overlay */}
                     <div 
-                      className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 cursor-pointer"
+                      className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center opacity-30 group-hover:opacity-100 transition-all duration-500 cursor-pointer"
                        onClick={() => {
                          if (playingVerseId === verse.id && currentAudio) {
                            // Stop current audio if this verse is playing
