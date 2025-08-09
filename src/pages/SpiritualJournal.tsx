@@ -67,19 +67,26 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     if (playingJournal === journalId && currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
-      currentAudio.removeEventListener('ended', () => {});
-      currentAudio.removeEventListener('error', () => {});
+      // Clean up all event listeners properly
+      currentAudio.oncanplay = null;
+      currentAudio.onended = null;
+      currentAudio.onerror = null;
+      currentAudio.onloadstart = null;
+      currentAudio.onloadeddata = null;
       setCurrentAudio(null);
       setPlayingJournal(null);
       return;
     }
 
-    // Stop any other currently playing audio
+    // Stop and cleanup any existing audio completely
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
-      currentAudio.removeEventListener('ended', () => {});
-      currentAudio.removeEventListener('error', () => {});
+      currentAudio.oncanplay = null;
+      currentAudio.onended = null;
+      currentAudio.onerror = null;
+      currentAudio.onloadstart = null;
+      currentAudio.onloadeddata = null;
       setCurrentAudio(null);
       setPlayingJournal(null);
     }
@@ -93,42 +100,47 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     audio.setAttribute('disablePictureInPicture', 'true');
     audio.addEventListener('contextmenu', (e) => e.preventDefault());
     
-    // Set playing state immediately to show loading state
+    // Set playing state and current audio reference first
     setPlayingJournal(journalId);
     setCurrentAudio(audio);
     
-    // Event listeners
-    const handleCanPlay = () => {
-      audio.play().catch(error => {
-        console.error('Error playing audio:', error);
+    // Setup event handlers using direct property assignment (easier cleanup)
+    audio.oncanplay = () => {
+      // Double check this is still the current audio to prevent race conditions
+      if (audio === currentAudio) {
+        audio.play().catch(error => {
+          console.error('Error playing audio:', error);
+          toast({
+            title: "Error",
+            description: "Gagal memutar audio",
+            variant: "destructive"
+          });
+          if (audio === currentAudio) {
+            setPlayingJournal(null);
+            setCurrentAudio(null);
+          }
+        });
+      }
+    };
+    
+    audio.onended = () => {
+      if (audio === currentAudio) {
+        setPlayingJournal(null);
+        setCurrentAudio(null);
+      }
+    };
+    
+    audio.onerror = () => {
+      if (audio === currentAudio) {
         toast({
           title: "Error",
-          description: "Gagal memutar audio",
+          description: "Gagal memuat audio",
           variant: "destructive"
         });
         setPlayingJournal(null);
         setCurrentAudio(null);
-      });
+      }
     };
-    
-    const handleEnded = () => {
-      setPlayingJournal(null);
-      setCurrentAudio(null);
-    };
-    
-    const handleError = () => {
-      toast({
-        title: "Error",
-        description: "Gagal memuat audio",
-        variant: "destructive"
-      });
-      setPlayingJournal(null);
-      setCurrentAudio(null);
-    };
-
-    audio.addEventListener('canplay', handleCanPlay);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
   };
 
   const journals = [
