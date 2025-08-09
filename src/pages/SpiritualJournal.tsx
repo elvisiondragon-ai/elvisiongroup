@@ -352,12 +352,66 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                   {journal.subtitle}
                 </p>
                 
-                <div className="flex justify-center py-4">
-                  <Button
-                    onClick={() => handlePlay(journal.id)}
-                    disabled={isLocked}
-                    className={`w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'scale-110 shadow-lg' : ''} ${isLocked ? 'cursor-not-allowed opacity-50' : ''}`}
-                  >
+                 <div className="flex justify-center py-4">
+                   <Button
+                     onClick={() => {
+                       if (playingJournal === journal.id && currentAudio) {
+                         // Stop current audio if this journal is playing
+                         currentAudio.pause();
+                         currentAudio.currentTime = 0;
+                         setCurrentAudio(null);
+                         setPlayingJournal(null);
+                       } else {
+                         // Stop any currently playing audio first
+                         if (currentAudio) {
+                           currentAudio.pause();
+                           currentAudio.currentTime = 0;
+                         }
+                         
+                         // Play audio for Journal Spiritual 1
+                         const audioUrl = journal.id === 1 
+                           ? 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Jurnalsyukur1.MP3'
+                           : null;
+                         
+                         if (audioUrl) {
+                           const audio = new Audio(audioUrl);
+                           
+                           // Prevent download and right-click context menu
+                           audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+                           audio.setAttribute('disablePictureInPicture', 'true');
+                           audio.preload = 'metadata';
+                           
+                           // Add security attributes
+                           audio.addEventListener('contextmenu', (e) => e.preventDefault());
+                           
+                           audio.play().then(() => {
+                             setCurrentAudio(audio);
+                             setPlayingJournal(journal.id);
+                           }).catch(error => {
+                             console.error('Error playing audio:', error);
+                           });
+                           
+                           // Handle audio end
+                           audio.addEventListener('ended', () => {
+                             setCurrentAudio(null);
+                             setPlayingJournal(null);
+                           });
+                           
+                           // Prevent seeking beyond current position when paused
+                           audio.addEventListener('pause', () => {
+                             const currentTime = audio.currentTime;
+                             audio.addEventListener('seeked', () => {
+                               if (audio.paused && audio.currentTime > currentTime + 1) {
+                                 audio.currentTime = currentTime;
+                               }
+                             });
+                           });
+                         }
+                       }
+                     }}
+                     disabled={isLocked}
+                     className={`w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'scale-110 shadow-lg' : ''} ${isLocked ? 'cursor-not-allowed opacity-50' : ''}`}
+                   >
                     {isLocked ? (
                       <Lock className="w-6 h-6 text-foreground" />
                     ) : isCurrentlyPlaying ? (
