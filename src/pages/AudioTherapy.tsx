@@ -225,21 +225,40 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                              ? 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse-4-Prosperity%20Stream-Vol.-1.mp3'
                              : null;
                            
-                           if (audioUrl) {
-                             const audio = new Audio(audioUrl);
-                             audio.play().then(() => {
-                               setCurrentAudio(audio);
-                               setPlayingVerseId(verse.id);
-                             }).catch(error => {
-                               console.error('Error playing audio:', error);
-                             });
-                             
-                             // Handle audio end
-                             audio.addEventListener('ended', () => {
-                               setCurrentAudio(null);
-                               setPlayingVerseId(null);
-                             });
-                           }
+                            if (audioUrl) {
+                              const audio = new Audio(audioUrl);
+                              
+                              // Prevent download and right-click context menu
+                              audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+                              audio.setAttribute('disablePictureInPicture', 'true');
+                              audio.preload = 'metadata';
+                              
+                              // Add security attributes
+                              audio.addEventListener('contextmenu', (e) => e.preventDefault());
+                              
+                              audio.play().then(() => {
+                                setCurrentAudio(audio);
+                                setPlayingVerseId(verse.id);
+                              }).catch(error => {
+                                console.error('Error playing audio:', error);
+                              });
+                              
+                              // Handle audio end
+                              audio.addEventListener('ended', () => {
+                                setCurrentAudio(null);
+                                setPlayingVerseId(null);
+                              });
+                              
+                              // Prevent seeking beyond current position when paused
+                              audio.addEventListener('pause', () => {
+                                const currentTime = audio.currentTime;
+                                audio.addEventListener('seeked', () => {
+                                  if (audio.paused && audio.currentTime > currentTime + 1) {
+                                    audio.currentTime = currentTime;
+                                  }
+                                });
+                              });
+                            }
                          }
                        }}
                     >
