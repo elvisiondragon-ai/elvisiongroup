@@ -160,7 +160,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     },
     {
       id: 2,
-      title: "Nafasmu lebih berharga dari kesulitanmu",
+      title: "Nafasmu lebih berharga",
       subtitle: "Audio Pembuka Renungan",
       duration: "5 menit",
       icon: Wind,
