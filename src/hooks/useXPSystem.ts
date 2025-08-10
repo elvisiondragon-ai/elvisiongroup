@@ -111,11 +111,11 @@ export function useXPSystem(): XPSystemHook {
         break;
       case 2:
         totalXPForLevel = 100;
-        xpForNextLevel = 1500;
+        xpForNextLevel = 150;
         break;
       case 3:
-        totalXPForLevel = 500;
-        xpForNextLevel = 3000;
+        totalXPForLevel = 150;
+        xpForNextLevel = 1500;
         break;
       case 4:
         totalXPForLevel = 1500;

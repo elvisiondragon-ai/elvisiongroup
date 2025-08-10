@@ -45,7 +45,7 @@ export function XPRules() {
 
   const levelRequirements = [
     { levels: "1", xp: 100 },
-    { levels: "2", xp: 500 },
+    { levels: "2", xp: 150 },
     { levels: "3", xp: 1500 },
     { levels: "4", xp: 3000 }
   ];
