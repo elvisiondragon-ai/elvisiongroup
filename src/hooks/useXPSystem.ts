@@ -107,7 +107,7 @@ export function useXPSystem(): XPSystemHook {
     switch (level) {
       case 1:
         totalXPForLevel = 0;
-        xpForNextLevel = 500;
+        xpForNextLevel = 150;
         break;
       case 2:
         totalXPForLevel = 100;
