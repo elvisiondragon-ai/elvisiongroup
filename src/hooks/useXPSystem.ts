@@ -100,7 +100,7 @@ export function useXPSystem(): XPSystemHook {
   }, [toast]);
 
   const calculateXPProgress = useCallback((currentXP: number, level: number) => {
-    // New level requirements: 1=100, 2=500, 3=1500, 4=3000
+    // Extended level requirements to support level 9
     let totalXPForLevel = 0;
     let xpForNextLevel = 0;
 
@@ -119,18 +119,38 @@ export function useXPSystem(): XPSystemHook {
         break;
       case 4:
         totalXPForLevel = 1500;
-        xpForNextLevel = 3000; // Max level
+        xpForNextLevel = 4000;
+        break;
+      case 5:
+        totalXPForLevel = 3000;
+        xpForNextLevel = 5000;
+        break;
+      case 6:
+        totalXPForLevel = 4000;
+        xpForNextLevel = 7500;
+        break;
+      case 7:
+        totalXPForLevel = 5000;
+        xpForNextLevel = 10000;
+        break;
+      case 8:
+        totalXPForLevel = 7500;
+        xpForNextLevel = 15000;
+        break;
+      case 9:
+        totalXPForLevel = 10000;
+        xpForNextLevel = 15000; // Max level
         break;
       default:
-        totalXPForLevel = 3000;
-        xpForNextLevel = 3000; // Max level
+        totalXPForLevel = 15000;
+        xpForNextLevel = 15000; // Max level
     }
 
     // XP for current level progress
     const currentLevelXP = currentXP - totalXPForLevel;
     
     // Progress percentage (for max level, show 100%)
-    const progress = level >= 4 ? 100 : Math.min((currentLevelXP / (xpForNextLevel - totalXPForLevel)) * 100, 100);
+    const progress = level >= 9 ? 100 : Math.min((currentLevelXP / (xpForNextLevel - totalXPForLevel)) * 100, 100);
 
     return {
       currentLevelXP,
