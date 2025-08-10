@@ -24,7 +24,7 @@ export function useXPSystem(): XPSystemHook {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Check daily chat limit if it's a chat message
+      // Check daily limits
       if (activityType === 'chat_message') {
         const { data: canChat } = await supabase.rpc('check_daily_chat_limit', {
           p_user_id: user.id
@@ -34,6 +34,36 @@ export function useXPSystem(): XPSystemHook {
           toast({
             title: "Daily chat limit reached",
             description: "You've reached the daily limit of 10 chat messages for XP.",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      if (activityType === 'journal_entry') {
+        const { data: canJournal } = await supabase.rpc('check_daily_journal_limit', {
+          p_user_id: user.id
+        });
+        
+        if (!canJournal) {
+          toast({
+            title: "Daily journal limit reached",
+            description: "You've reached the daily limit of 5 XP from journal entries.",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      if (activityType === 'audio_completed') {
+        const { data: canAudio } = await supabase.rpc('check_daily_audio_limit', {
+          p_user_id: user.id
+        });
+        
+        if (!canAudio) {
+          toast({
+            title: "Daily audio limit reached",
+            description: "You've reached the daily limit of 20 XP from audio listening.",
             variant: "destructive"
           });
           return;
@@ -70,31 +100,41 @@ export function useXPSystem(): XPSystemHook {
   }, [toast]);
 
   const calculateXPProgress = useCallback((currentXP: number, level: number) => {
-    // Calculate XP needed for current level
+    // New level requirements: 1=100, 2=500, 3=1500, 4=3000
     let totalXPForLevel = 0;
-    for (let i = 1; i < level; i++) {
-      if (i <= 3) totalXPForLevel += 100;
-      else if (i <= 6) totalXPForLevel += 150;
-      else if (i <= 10) totalXPForLevel += 200;
-      else totalXPForLevel += 250;
+    let xpForNextLevel = 0;
+
+    switch (level) {
+      case 1:
+        totalXPForLevel = 0;
+        xpForNextLevel = 500;
+        break;
+      case 2:
+        totalXPForLevel = 100;
+        xpForNextLevel = 1500;
+        break;
+      case 3:
+        totalXPForLevel = 500;
+        xpForNextLevel = 3000;
+        break;
+      case 4:
+        totalXPForLevel = 1500;
+        xpForNextLevel = 3000; // Max level
+        break;
+      default:
+        totalXPForLevel = 3000;
+        xpForNextLevel = 3000; // Max level
     }
 
     // XP for current level progress
     const currentLevelXP = currentXP - totalXPForLevel;
     
-    // XP needed for next level
-    let xpForNextLevel: number;
-    if (level <= 3) xpForNextLevel = 100;
-    else if (level <= 6) xpForNextLevel = 150;
-    else if (level <= 10) xpForNextLevel = 200;
-    else xpForNextLevel = 250;
-
-    // Progress percentage
-    const progress = Math.min((currentLevelXP / xpForNextLevel) * 100, 100);
+    // Progress percentage (for max level, show 100%)
+    const progress = level >= 4 ? 100 : Math.min((currentLevelXP / (xpForNextLevel - totalXPForLevel)) * 100, 100);
 
     return {
       currentLevelXP,
-      xpForNextLevel,
+      xpForNextLevel: xpForNextLevel - totalXPForLevel,
       progress
     };
   }, []);

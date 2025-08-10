@@ -288,7 +288,15 @@ export type Database = {
         Args: { total_xp: number }
         Returns: number
       }
+      check_daily_audio_limit: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       check_daily_chat_limit: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      check_daily_journal_limit: {
         Args: { p_user_id: string }
         Returns: boolean
       }

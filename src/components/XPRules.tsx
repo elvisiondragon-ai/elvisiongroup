@@ -8,14 +8,16 @@ export function XPRules() {
       xp: 10,
       icon: Music,
       color: "text-purple-400",
-      bgColor: "bg-purple-500/10"
+      bgColor: "bg-purple-500/10",
+      limit: "Max 20 XP/day"
     },
     {
       action: "Complete spiritual journal entry",
       xp: 5,
       icon: BookOpen,
       color: "text-blue-400",
-      bgColor: "bg-blue-500/10"
+      bgColor: "bg-blue-500/10",
+      limit: "Max 5 XP/day"
     },
     {
       action: "Send message in community chat",
@@ -42,10 +44,10 @@ export function XPRules() {
   ];
 
   const levelRequirements = [
-    { levels: "1-3", xp: 100 },
-    { levels: "4-6", xp: 150 },
-    { levels: "7-10", xp: 200 },
-    { levels: "11+", xp: 250 }
+    { levels: "1", xp: 100 },
+    { levels: "2", xp: 500 },
+    { levels: "3", xp: 1500 },
+    { levels: "4", xp: 3000 }
   ];
 
   return (
