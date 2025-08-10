@@ -334,24 +334,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           const isLocked = !hasAccess(journal);
           
           return (
-            <Card key={journal.id} className={`relative p-6 ${journal.gradient} border-2 ${journal.borderColor} ${journal.glowClass} overflow-hidden transition-all duration-300 ${isLocked ? 'opacity-60' : ''}`}>
-              {/* Lock overlay for locked journals */}
-              {isLocked && (
-                <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-20 rounded-lg flex items-center justify-center">
-                  <div className="text-center space-y-2">
-                    <Lock className="w-8 h-8 text-white mx-auto" />
-                    <div className="text-white text-sm font-medium">
-                      Level {journal.levelRequired} Required
-                    </div>
-                    {journal.isVipRequired && (
-                      <div className="text-yellow-400 text-xs">
-                        VIP Access
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-              
+            <Card key={journal.id} className={`relative p-6 ${journal.gradient} border-2 ${journal.borderColor} ${journal.glowClass} overflow-hidden transition-all duration-300 ${isLocked ? 'opacity-75' : ''}`}>
               {/* Animated background ripple */}
               <div className="absolute inset-0 opacity-20">
                 <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-white/20 ${isCurrentlyPlaying ? 'animate-ping' : ''}`}></div>
@@ -364,6 +347,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                   <h2 className="text-xl font-semibold font-orbitron text-foreground">
                     {journal.title}
                   </h2>
+                  {isLocked && (
+                    <Lock className="w-5 h-5 text-muted-foreground ml-2" />
+                  )}
                 </div>
                 <p className="text-muted-foreground">
                   {journal.subtitle}
