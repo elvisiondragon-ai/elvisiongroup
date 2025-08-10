@@ -24,6 +24,7 @@ interface UserProfile {
 export function Home({ onNavigate }: HomeProps) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [onlineCount, setOnlineCount] = useState(825); // Base count of 825
   const { calculateXPProgress } = useXPSystem();
 
   useEffect(() => {
@@ -33,11 +34,50 @@ export function Home({ onNavigate }: HomeProps) {
       
       if (user) {
         await fetchUserProfile(user.id);
+        // Track user presence in online community
+        trackOnlinePresence(user.id);
       }
     };
 
     getUser();
   }, []);
+
+  // Track online users using Supabase presence
+  useEffect(() => {
+    const channel = supabase.channel('online_users');
+    
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const presenceState = channel.presenceState();
+        const onlineUsers = Object.keys(presenceState).length;
+        setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
+      })
+      .on('presence', { event: 'join' }, ({ newPresences }) => {
+        console.log('User joined:', newPresences);
+      })
+      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+        console.log('User left:', leftPresences);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const trackOnlinePresence = async (userId: string) => {
+    const channel = supabase.channel('online_users');
+    
+    await channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        const presenceTrackStatus = await channel.track({
+          user_id: userId,
+          online_at: new Date().toISOString(),
+        });
+        console.log('Presence tracked:', presenceTrackStatus);
+      }
+    });
+  };
 
   const fetchUserProfile = async (userId: string) => {
     try {
@@ -221,7 +261,7 @@ export function Home({ onNavigate }: HomeProps) {
         <Card className="p-4 bg-gradient-secondary border-border">
           <div className="text-center">
             <div className="text-2xl font-bold font-orbitron text-primary mb-2">
-              825
+              {onlineCount}
             </div>
             <p className="text-sm text-muted-foreground mb-4">
               Anggota online sekarang
