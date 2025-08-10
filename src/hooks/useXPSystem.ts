@@ -110,35 +110,35 @@ export function useXPSystem(): XPSystemHook {
         xpForNextLevel = 150;
         break;
       case 2:
-        totalXPForLevel = 100;
-        xpForNextLevel = 150;
-        break;
-      case 3:
         totalXPForLevel = 150;
         xpForNextLevel = 1500;
         break;
-      case 4:
+      case 3:
         totalXPForLevel = 1500;
+        xpForNextLevel = 3000;
+        break;
+      case 4:
+        totalXPForLevel = 3000;
         xpForNextLevel = 4000;
         break;
       case 5:
-        totalXPForLevel = 3000;
+        totalXPForLevel = 4000;
         xpForNextLevel = 5000;
         break;
       case 6:
-        totalXPForLevel = 4000;
+        totalXPForLevel = 5000;
         xpForNextLevel = 7500;
         break;
       case 7:
-        totalXPForLevel = 5000;
+        totalXPForLevel = 7500;
         xpForNextLevel = 10000;
         break;
       case 8:
-        totalXPForLevel = 7500;
+        totalXPForLevel = 10000;
         xpForNextLevel = 15000;
         break;
       case 9:
-        totalXPForLevel = 10000;
+        totalXPForLevel = 15000;
         xpForNextLevel = 15000; // Max level
         break;
       default:
