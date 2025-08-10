@@ -160,7 +160,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     },
     {
       id: 2,
-      title: "Nafasmu lebih berharga",
+      title: "Nafasmu lebih berharga dari masalahmu",
       subtitle: "Audio Pembuka Renungan",
       duration: "5 menit",
       icon: Wind,
@@ -172,6 +172,18 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     },
     {
       id: 3,
+      title: "Cinta Pasanganmu adalah Cerminan Frekuensi mu",
+      subtitle: "Audio Pembuka Renungan",
+      duration: "8 menit",
+      icon: Heart,
+      gradient: "bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-red-500/20",
+      borderColor: "border-pink-400/30",
+      glowClass: "hover:shadow-pink-500/20",
+      levelRequired: 4,
+      isVipRequired: false
+    },
+    {
+      id: 4,
       title: "Cinta Adalah Kesehatan",
       subtitle: "Audio Pembuka Renungan",
       duration: "10 menit",
@@ -183,7 +195,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       isVipRequired: false
     },
     {
-      id: 4,
+      id: 5,
       title: "Uang adalah Frekuensi Energi",
       subtitle: "Audio Pembuka Renungan",
       duration: "7 menit",
