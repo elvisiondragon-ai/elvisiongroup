@@ -6,6 +6,7 @@ import { ChatMessage } from "@/components/ChatMessage";
 import { Send, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useXPSystem } from "@/hooks/useXPSystem";
 
 interface ChatMessageData {
   id: string;
@@ -23,6 +24,7 @@ export function Chat() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
+  const { awardXP } = useXPSystem();
 
   useEffect(() => {
     // Get current user
@@ -220,6 +222,8 @@ export function Chat() {
         });
       } else {
         console.log('Message sent successfully');
+        // Award XP for chat message
+        awardXP('chat_message', 1, 'Sent a chat message');
         setMessage("");
       }
     } catch (err) {
