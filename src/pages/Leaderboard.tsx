@@ -5,9 +5,9 @@ import { Trophy, Zap, Crown } from "lucide-react";
 const mockLeaderboard = [
   { id: "1", name: "Andin", level: 9, xp: 12500, rank: 1, avatar: "" },
   { id: "2", name: "Master Yoga", level: 8, xp: 11200, rank: 2, avatar: "" },
-  { id: "3", name: "Jason", level: 3, xp: 8900, rank: 3, isVip: true, avatar: "" },
+  { id: "3", name: "Jason", level: 7, xp: 8900, rank: 3, isVip: true, avatar: "" },
   { id: "4", name: "Spiritual Seeker", level: 7, xp: 7800, rank: 4, avatar: "" },
-  { id: "coach-senz", name: "Coach Senz", level: 6, xp: 6600, rank: 5, avatar: "" },
+  { id: "coach-senz", name: "Senz", level: 6, xp: 4500, rank: 5, avatar: "" },
   { id: "5", name: "Andrew", level: 6, xp: 6500, rank: 6, avatar: "" },
   { id: "6", name: "Meditation Pro", level: 5, xp: 5200, rank: 7, avatar: "" },
   { id: "7", name: "Zen Master", level: 4, xp: 4100, rank: 8, avatar: "" },
