@@ -144,7 +144,8 @@ export function Chat() {
           { id: '39', user_id: '39', user_name: 'AsepSunandar', user_level: 1, is_vip: false, message: 'bener kang, pada ramah semua disini', created_at: new Date('2024-01-20T15:09:00').toISOString() },
           { id: '40', user_id: '40', user_name: 'BungaCitra', user_level: 3, is_vip: false, message: 'pokoknya aplot konten baru terus ya min, jangan kasih kendor', created_at: new Date('2024-01-20T15:12:00').toISOString() },
           { id: '41', user_id: '41', user_name: 'CandraWijaya', user_level: 4, is_vip: true, message: 'setiap hari pasti buka aplikasi ini, udah jadi kebiasaan', created_at: new Date('2024-01-20T15:20:00').toISOString() },
-          { id: '42', user_id: '42', user_name: 'DoniSaputra', user_level: 4, is_vip: true, message: 'sama, pagi2 dengerin audio disini bikin semangat kerja', created_at: new Date('2024-01-20T15:21:00').toISOString() }
+          { id: '42', user_id: '42', user_name: 'DoniSaputra', user_level: 4, is_vip: true, message: 'sama, pagi2 dengerin audio disini bikin semangat kerja', created_at: new Date('2024-01-20T15:21:00').toISOString() },
+          { id: '43', user_id: '38625adb-dcfb-4bac-b473-2e6ee37af72e', user_name: 'Senz', user_level: 6, is_vip: true, message: 'mantap komunitas ini makin rame ya, semangat terus semua!', created_at: new Date('2024-01-20T15:25:00').toISOString() }
         ];
         setMessages(mockMessages);
       } else {
