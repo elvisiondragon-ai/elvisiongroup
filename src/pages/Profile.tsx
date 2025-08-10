@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { TierBadge } from "@/components/TierBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
+import { NotificationSettings } from "@/components/NotificationSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -16,7 +17,8 @@ import {
   Target,
   BookOpen,
   Award,
-  LogOut
+  LogOut,
+  Bell
 } from "lucide-react";
 
 interface ProfileProps {
@@ -40,6 +42,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -184,6 +187,25 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     );
   }
 
+  if (showNotifications) {
+    return (
+      <div className="max-w-2xl mx-auto p-4 space-y-6 pb-20">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowNotifications(false)}
+            className="p-2"
+          >
+            ←
+          </Button>
+          <h1 className="text-2xl font-bold">Pengaturan Notifikasi</h1>
+        </div>
+        <NotificationSettings />
+      </div>
+    );
+  }
+
   return (
     <div className="pb-20">
       {/* Profile Header */}
@@ -312,15 +334,10 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         <Button 
           variant="outline" 
           className="w-full justify-start gap-3 border-border hover:border-primary"
-          onClick={() => {
-            toast({
-              title: "Preferensi",
-              description: "Fitur pengaturan preferensi akan segera tersedia",
-            });
-          }}
+          onClick={() => setShowNotifications(true)}
         >
-          <Settings className="w-4 h-4" />
-          Preferensi
+          <Bell className="w-4 h-4" />
+          Notifikasi
         </Button>
         
         <Button 

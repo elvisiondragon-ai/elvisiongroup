@@ -17,6 +17,9 @@ const config: CapacitorConfig = {
       iosSpinnerStyle: "small",
       splashFullScreen: true,
       splashImmersive: true
+    },
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"]
     }
   }
 };

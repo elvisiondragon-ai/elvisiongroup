@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { Auth } from "./pages/Auth";
 import Index from "./pages/Index";
 import { Tutorial } from "./pages/Tutorial";
@@ -16,6 +17,9 @@ const queryClient = new QueryClient();
 const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Initialize push notifications for authenticated users
+  const { registerForNotifications } = usePushNotifications();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -37,7 +41,9 @@ const App = () => {
           // For Google OAuth, this handles both new signups and existing logins
           setTimeout(() => {
             console.log('User authenticated successfully:', session.user.email);
-          }, 0);
+            // Register for push notifications after successful login
+            registerForNotifications();
+          }, 1000);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setIsLoading(false);
