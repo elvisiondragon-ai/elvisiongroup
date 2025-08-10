@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TierBadge } from "@/components/TierBadge";
 import { XPRules } from "@/components/XPRules";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { Play, Headphones, BookOpen, Zap } from "lucide-react";
@@ -22,6 +24,7 @@ interface UserProfile {
 }
 
 export function Home({ onNavigate }: HomeProps) {
+  const { t } = useTranslation();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [user, setUser] = useState<any>(null);
   const [onlineCount, setOnlineCount] = useState(825); // Base count of 825
@@ -102,28 +105,32 @@ export function Home({ onNavigate }: HomeProps) {
 
   const features = [
     {
-      title: "Sesi Meditasi",
-      description: "Guided meditation dalam bahasa Indonesia",
+      title: t('home.meditationSessions'),
+      description: "Guided meditation sessions",
       icon: Play,
       color: "text-primary",
+      key: "meditation-sessions"
     },
     {
-      title: "Verse of Secret Decree",
-      description: "Rahasia Frekuensi alam untuk mengubah realitasmu",
+      title: t('home.audioTherapy'),
+      description: "Spiritual frequency healing",
       icon: Headphones,
       color: "text-accent",
+      key: "audio-therapy"
     },
     {
-      title: "Jurnal Spiritual",
-      description: "Catat perjalanan transformasi Anda",
+      title: t('home.spiritualJournal'),
+      description: "Track your transformation journey",
       icon: BookOpen,
       color: "text-gold",
+      key: "spiritual-journal"
     },
     {
-      title: "Komunitas",
-      description: "Bergabung dengan soul tribe",
+      title: "Community",
+      description: "Join the soul tribe",
       icon: Zap,
       color: "text-neon-green",
+      key: "chat"
     },
   ];
 
@@ -136,6 +143,9 @@ export function Home({ onNavigate }: HomeProps) {
           style={{ backgroundImage: `url(${heroImage})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+          <div className="absolute top-4 right-4">
+            <LanguageSwitcher />
+          </div>
           <div className="relative h-full flex items-end p-6">
             <div className="flex items-center gap-4">
               <img 
@@ -145,13 +155,13 @@ export function Home({ onNavigate }: HomeProps) {
               />
               <div>
                 <h1 className="text-3xl font-bold font-orbitron text-foreground mb-2">
-                  Selamat Datang di
+                  {t('home.welcome')}
                   <span className="block bg-gradient-primary bg-clip-text text-transparent">
                     eL Vision Group
                   </span>
                 </h1>
                 <p className="text-muted-foreground">
-                  Transformasi diri melalui teknologi spiritual
+                  {t('home.subtitle')}
                 </p>
               </div>
             </div>
@@ -174,7 +184,7 @@ export function Home({ onNavigate }: HomeProps) {
                 )}
               </div>
               <p className="text-sm text-muted-foreground">
-                Streak: {userProfile?.streak_days || 0} hari
+                Streak: {userProfile?.streak_days || 0} days
               </p>
             </div>
             <div className="text-right">
@@ -202,7 +212,7 @@ export function Home({ onNavigate }: HomeProps) {
 
       {/* Quick Actions */}
       <div className="px-6 space-y-4">
-        <h2 className="text-xl font-semibold font-orbitron">Jelajahi</h2>
+        <h2 className="text-xl font-semibold font-orbitron">Explore</h2>
         
         <div className="grid grid-cols-2 gap-4">
           {features.map((feature, index) => (
@@ -210,17 +220,8 @@ export function Home({ onNavigate }: HomeProps) {
               key={index}
               className="p-4 bg-card hover:bg-card/80 border-border hover:border-primary transition-all duration-300 cursor-pointer"
               onClick={() => {
-                console.log("Feature clicked:", feature.title);
-                if (feature.title === "Komunitas") {
-                  onNavigate("chat");
-                } else if (feature.title === "Verse of Secret Decree") {
-                  onNavigate("audio-therapy");
-                } else if (feature.title === "Jurnal Spiritual") {
-                  console.log("Navigating to spiritual-journal");
-                  onNavigate("spiritual-journal");
-                } else if (feature.title === "Sesi Meditasi") {
-                  onNavigate("meditation-sessions");
-                }
+                console.log("Feature clicked:", feature.key);
+                onNavigate(feature.key);
               }}
             >
               <div className="flex flex-col items-center text-center space-y-3">
@@ -247,14 +248,14 @@ export function Home({ onNavigate }: HomeProps) {
       {/* Community Preview */}
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold font-orbitron">Komunitas Aktif</h2>
+          <h2 className="text-xl font-semibold font-orbitron">Active Community</h2>
           <Button 
             variant="ghost" 
             size="sm"
             onClick={() => onNavigate("chat")}
             className="text-primary hover:text-primary/80"
           >
-            Lihat Semua
+            View All
           </Button>
         </div>
         
@@ -264,13 +265,13 @@ export function Home({ onNavigate }: HomeProps) {
               {onlineCount}
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Anggota online sekarang
+              Members online now
             </p>
             <Button 
               onClick={() => onNavigate("chat")}
               className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium"
             >
-              Bergabung di Chat
+              Join Chat
             </Button>
           </div>
         </Card>

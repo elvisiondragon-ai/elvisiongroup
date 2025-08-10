@@ -1,0 +1,92 @@
+{
+  "nav": {
+    "home": "Beranda",
+    "chat": "Obrolan",
+    "leaderboard": "Papan Peringkat",
+    "profile": "Profil"
+  },
+  "home": {
+    "welcome": "Selamat datang di eL Vision Group",
+    "subtitle": "Transformasi diri melalui teknologi spiritual",
+    "audioTherapy": "Terapi Audio",
+    "spiritualJournal": "Jurnal Spiritual",
+    "meditationSessions": "Sesi Meditasi",
+    "xpSystem": "Sistem XP"
+  },
+  "audioTherapy": {
+    "title": "Terapi Audio",
+    "subtitle": "Buka ayat spiritual seiring dengan kemajuan Anda",
+    "locked": "Terkunci",
+    "unlocked": "Terbuka",
+    "levelRequired": "Level {{level}} diperlukan",
+    "readTutorial": "BACA TUTORIAL",
+    "availableTracks": "Trek Tersedia",
+    "loading": "Memuat terapi audio..."
+  },
+  "verses": {
+    "verse1": {
+      "title": "Ayat 1: Fondasi",
+      "subtitle": "Mulai perjalanan spiritual Anda"
+    },
+    "verse2": {
+      "title": "Ayat 2: Kedamaian Batin",
+      "subtitle": "Temukan ketenangan di dalam"
+    },
+    "verse3": {
+      "title": "Ayat 3: Koneksi Ilahi",
+      "subtitle": "Terhubung dengan yang ilahi"
+    },
+    "verse4": {
+      "title": "Ayat 4: Kebangkitan Spiritual",
+      "subtitle": "Bangunkan kesadaran spiritual Anda"
+    },
+    "verse5": {
+      "title": "Ayat 5: Harmoni Kosmik",
+      "subtitle": "Sejajarkan dengan frekuensi kosmik"
+    },
+    "verse6": {
+      "title": "Ayat 6: Cinta Universal",
+      "subtitle": "Rangkul cinta universal"
+    },
+    "verse7": {
+      "title": "Ayat 7: Pencerahan",
+      "subtitle": "Raih pencerahan spiritual"
+    },
+    "verse8": {
+      "title": "Ayat 8: Dimensi yang Lebih Tinggi",
+      "subtitle": "Akses dimensi yang lebih tinggi"
+    },
+    "verse9": {
+      "title": "Ayat 9: Kesadaran Kesatuan",
+      "subtitle": "Alami kesadaran kesatuan"
+    },
+    "verse10": {
+      "title": "Ayat 10: Penguasaan Ilahi",
+      "subtitle": "Kuasai sifat ilahi Anda"
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "level": "Level",
+    "experience": "Pengalaman",
+    "settings": "Pengaturan",
+    "logout": "Keluar",
+    "editProfile": "Edit Profil",
+    "notifications": "Notifikasi",
+    "language": "Bahasa"
+  },
+  "language": {
+    "english": "Inggris",
+    "indonesian": "Indonesia",
+    "auto": "Deteksi Otomatis",
+    "switchLanguage": "Ganti Bahasa"
+  },
+  "common": {
+    "loading": "Memuat...",
+    "error": "Kesalahan",
+    "success": "Berhasil",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "back": "Kembali"
+  }
+}

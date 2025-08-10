@@ -2,8 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { AudioUpload } from "@/components/AudioUpload";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown, Shield, Gem, Flame, Eye, Sparkles, Globe, Infinity } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
@@ -22,6 +24,7 @@ interface AudioTherapyProps {
 }
 
 export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
+  const { t, i18n } = useTranslation();
   const [userLevel] = useState(3); // Mock user level
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
@@ -42,6 +45,11 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     initializeData();
   }, []);
 
+  // Refetch audio tracks when language changes
+  useEffect(() => {
+    fetchAudioTracks();
+  }, [i18n.language]);
+
   const fetchAudioTracks = async () => {
     try {
       const { data, error } = await supabase
@@ -49,6 +57,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         .select('*')
         .eq('category', 'verse')
         .eq('is_public', true)
+        .eq('language', i18n.language) // Filter by current language
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -70,72 +79,80 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const verses = [
     {
       id: 1,
-      title: "Verse 1 - The Space Hill",
-      subtitle: "Kedamaian Batin",
+      title: t('verses.verse1.title'),
+      subtitle: t('verses.verse1.subtitle'),
       unlocked: true,
       requiredLevel: 1,
       artwork: verseArtwork,
     },
     {
       id: 2,
-      title: "Verse 2",
+      title: t('verses.verse2.title'),
+      subtitle: t('verses.verse2.subtitle'),
       unlocked: userLevel >= 5,
       requiredLevel: 5,
       artwork: verse2Artwork,
     },
     {
       id: 3,
-      title: "Verse 3",
+      title: t('verses.verse3.title'),
+      subtitle: t('verses.verse3.subtitle'),
       unlocked: userLevel >= 10,
       requiredLevel: 10,
       artwork: verse3Artwork,
     },
     {
       id: 4,
-      title: "Verse 4 - Prosperity Stream",
-      subtitle: "Audio Frekuensi Kaya Raya",
+      title: t('verses.verse4.title'),
+      subtitle: t('verses.verse4.subtitle'),
       unlocked: true,
       requiredLevel: 15,
       artwork: verse4Artwork,
     },
     {
       id: 5,
-      title: "Verse 5",
+      title: t('verses.verse5.title'),
+      subtitle: t('verses.verse5.subtitle'),
       unlocked: userLevel >= 20,
       requiredLevel: 20,
       artwork: verse5Artwork,
     },
     {
       id: 6,
-      title: "Verse 6",
+      title: t('verses.verse6.title'),
+      subtitle: t('verses.verse6.subtitle'),
       unlocked: userLevel >= 25,
       requiredLevel: 25,
       artwork: verse6Artwork,
     },
     {
       id: 7,
-      title: "Verse 7",
+      title: t('verses.verse7.title'),
+      subtitle: t('verses.verse7.subtitle'),
       unlocked: userLevel >= 30,
       requiredLevel: 30,
       artwork: verse7Artwork,
     },
     {
       id: 8,
-      title: "Verse 8",
+      title: t('verses.verse8.title'),
+      subtitle: t('verses.verse8.subtitle'),
       unlocked: userLevel >= 35,
       requiredLevel: 35,
       artwork: verse8Artwork,
     },
     {
       id: 9,
-      title: "Verse 9",
+      title: t('verses.verse9.title'),
+      subtitle: t('verses.verse9.subtitle'),
       unlocked: userLevel >= 40,
       requiredLevel: 40,
       artwork: verse9Artwork,
     },
     {
       id: 10,
-      title: "Verse 10",
+      title: t('verses.verse10.title'),
+      subtitle: t('verses.verse10.subtitle'),
       unlocked: userLevel >= 45,
       requiredLevel: 45,
       artwork: verse10Artwork,
@@ -146,19 +163,25 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="p-6 pb-4">
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onNavigate("home")}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
-            Chamber of eL Vision
-          </h1>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onNavigate("home")}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+              {t('audioTherapy.title')}
+            </h1>
+          </div>
+          <LanguageSwitcher />
         </div>
+        <p className="text-muted-foreground text-center">
+          {t('audioTherapy.subtitle')}
+        </p>
       </div>
 
       {/* Verses */}
@@ -341,7 +364,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                           <Lock className="w-6 h-6 text-muted-foreground mx-auto" />
                         </div>
                         
-                        <div className={`text-xs font-bold ${
+                         <div className={`text-xs font-bold ${
                           verse.requiredLevel === 5 
                             ? "text-amber-400"
                             : verse.requiredLevel === 10
@@ -360,8 +383,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                             ? "text-indigo-400"
                             : "text-violet-400"
                         }`}>
-                          LOCKED
-                        </div>
+                           {t('audioTherapy.locked')}
+                         </div>
                       </div>
                     </div>
                     
@@ -400,10 +423,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                   >
                     <span className="flex items-center gap-2">
                       <Music className="w-4 h-4" />
-                      READ TUTORIAL
+                      {t('audioTherapy.readTutorial')}
                     </span>
                   </Button>
-                  <div className="text-xs text-primary/80 font-medium">✨ UNLOCKED ✨</div>
+                  <div className="text-xs text-primary/80 font-medium">✨ {t('audioTherapy.unlocked')} ✨</div>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -447,7 +470,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                       <Infinity className="w-4 h-4" />
                     )}
                     <span className="font-semibold text-sm">
-                      🔒 Requires Level {verse.requiredLevel}
+                      🔒 {t('audioTherapy.levelRequired', { level: verse.requiredLevel })}
                     </span>
                   </div>
                   
@@ -484,7 +507,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       {audioTracks.length > 0 && (
         <div className="px-6 space-y-4">
           <h2 className="text-xl font-semibold font-orbitron text-foreground">
-            Available Tracks
+            {t('audioTherapy.availableTracks')}
           </h2>
           {audioTracks.slice(0, 2).map((track) => (
             <AudioPlayer
@@ -503,7 +526,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           <Card className="p-6 bg-gradient-secondary border-border">
             <div className="text-center">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-              <p className="text-muted-foreground">Loading audio tracks...</p>
+              <p className="text-muted-foreground">{t('audioTherapy.loading')}</p>
             </div>
           </Card>
         </div>

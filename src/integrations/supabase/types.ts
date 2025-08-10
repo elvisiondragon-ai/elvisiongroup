@@ -25,6 +25,7 @@ export type Database = {
           file_url: string | null
           id: string
           is_public: boolean | null
+          language: string | null
           title: string
           updated_at: string
         }
@@ -38,6 +39,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           is_public?: boolean | null
+          language?: string | null
           title: string
           updated_at?: string
         }
@@ -51,6 +53,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           is_public?: boolean | null
+          language?: string | null
           title?: string
           updated_at?: string
         }
@@ -152,6 +155,7 @@ export type Database = {
           experience_points: number
           id: string
           level: number
+          preferred_language: string | null
           streak_days: number
           total_sessions: number
           updated_at: string
@@ -165,6 +169,7 @@ export type Database = {
           experience_points?: number
           id?: string
           level?: number
+          preferred_language?: string | null
           streak_days?: number
           total_sessions?: number
           updated_at?: string
@@ -178,6 +183,7 @@ export type Database = {
           experience_points?: number
           id?: string
           level?: number
+          preferred_language?: string | null
           streak_days?: number
           total_sessions?: number
           updated_at?: string
