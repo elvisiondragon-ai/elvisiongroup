@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TierBadge } from "@/components/TierBadge";
+import { XPRules } from "@/components/XPRules";
 import { supabase } from "@/integrations/supabase/client";
+import { useXPSystem } from "@/hooks/useXPSystem";
 import { Play, Headphones, BookOpen, Zap } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 
@@ -22,6 +24,7 @@ interface UserProfile {
 export function Home({ onNavigate }: HomeProps) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [user, setUser] = useState<any>(null);
+  const { calculateXPProgress } = useXPSystem();
 
   useEffect(() => {
     const getUser = async () => {
@@ -53,7 +56,9 @@ export function Home({ onNavigate }: HomeProps) {
   };
 
   const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
-  const nextLevelXp = userProfile ? userProfile.level * 100 : 100;
+  
+  // Calculate XP progress using the XP system
+  const xpProgress = userProfile ? calculateXPProgress(userProfile.experience_points, userProfile.level) : { currentLevelXP: 0, xpForNextLevel: 100, progress: 0 };
 
   const features = [
     {
@@ -137,7 +142,7 @@ export function Home({ onNavigate }: HomeProps) {
                 {userProfile?.experience_points || 0} XP
               </div>
               <div className="text-xs text-muted-foreground">
-                {nextLevelXp - (userProfile?.experience_points || 0)} XP to next level
+                {xpProgress.xpForNextLevel - xpProgress.currentLevelXP} XP to next level
               </div>
             </div>
           </div>
@@ -145,10 +150,10 @@ export function Home({ onNavigate }: HomeProps) {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Level {userProfile?.level || 1} Progress</span>
-              <span>{Math.round(((userProfile?.experience_points || 0) / nextLevelXp) * 100)}%</span>
+              <span>{Math.round(xpProgress.progress)}%</span>
             </div>
             <Progress 
-              value={((userProfile?.experience_points || 0) / nextLevelXp) * 100} 
+              value={xpProgress.progress} 
               className="h-2"
             />
           </div>
@@ -194,6 +199,9 @@ export function Home({ onNavigate }: HomeProps) {
             </Card>
           ))}
         </div>
+        
+        {/* XP Rules */}
+        <XPRules />
       </div>
 
       {/* Community Preview */}

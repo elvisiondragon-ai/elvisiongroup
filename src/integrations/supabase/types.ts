@@ -155,12 +155,90 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
+      xp_transactions: {
+        Row: {
+          activity_id: string | null
+          created_at: string
+          id: string
+          reason: string | null
+          transaction_type: string
+          user_id: string
+          xp_amount: number
+        }
+        Insert: {
+          activity_id?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          transaction_type: string
+          user_id: string
+          xp_amount: number
+        }
+        Update: {
+          activity_id?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          transaction_type?: string
+          user_id?: string
+          xp_amount?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      award_xp: {
+        Args: {
+          p_user_id: string
+          p_xp_amount: number
+          p_activity_type: string
+          p_reason?: string
+          p_metadata?: Json
+        }
+        Returns: undefined
+      }
+      calculate_level_from_xp: {
+        Args: { total_xp: number }
+        Returns: number
+      }
+      check_daily_chat_limit: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      get_xp_for_next_level: {
+        Args: { current_level: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

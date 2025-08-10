@@ -5,6 +5,7 @@ import { Play, Pause, ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles, Lock }
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useXPSystem } from "@/hooks/useXPSystem";
 
 interface SpiritualJournalProps {
   onNavigate: (tab: string) => void;
@@ -25,6 +26,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const { toast } = useToast();
+  const { awardXP } = useXPSystem();
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
@@ -281,6 +283,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         variant: "destructive"
       });
     } else {
+      // Award XP for completing spiritual journal reflection
+      awardXP('journal_completion', 5, 'Completed spiritual journal reflection');
+      
       toast({
         title: "Tersimpan",
         description: "Renungan Anda telah disimpan",
@@ -391,11 +396,17 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                              console.error('Error playing audio:', error);
                            });
                            
-                           // Handle audio end
-                           audio.addEventListener('ended', () => {
-                             setCurrentAudio(null);
-                             setPlayingJournal(null);
-                           });
+                            // Handle audio end
+                            audio.addEventListener('ended', () => {
+                              setCurrentAudio(null);
+                              setPlayingJournal(null);
+                              
+                              // Award XP for completing spiritual journal audio
+                              awardXP('audio_completion', 10, `Completed ${journal.title}`, {
+                                journalId: journal.id,
+                                journalTitle: journal.title
+                              });
+                            });
                            
                            // Prevent seeking beyond current position when paused
                            audio.addEventListener('pause', () => {

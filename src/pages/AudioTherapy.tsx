@@ -5,6 +5,7 @@ import { AudioUpload } from "@/components/AudioUpload";
 import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown, Shield, Gem, Flame, Eye, Sparkles, Globe, Infinity } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useXPSystem } from "@/hooks/useXPSystem";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
 import verse2Artwork from "@/assets/verse-2-cosmic.jpg";
 import verse3Artwork from "@/assets/verse-3-cosmic.jpg";
@@ -28,6 +29,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [audioTracks, setAudioTracks] = useState<any[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { awardXP } = useXPSystem();
 
   useEffect(() => {
     const initializeData = async () => {
@@ -250,11 +252,18 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                                 console.error('Error playing audio:', error);
                               });
                               
-                              // Handle audio end
-                              audio.addEventListener('ended', () => {
-                                setCurrentAudio(null);
-                                setPlayingVerseId(null);
+                            // Handle audio end
+                            audio.addEventListener('ended', () => {
+                              setCurrentAudio(null);
+                              setPlayingVerseId(null);
+                              
+                              // Award XP for completing audio
+                              const verseTitle = verse.id === 1 ? "Verse 1 - The Space Hill" : "Verse 4 - Prosperity Stream";
+                              awardXP('audio_completion', 10, `Completed ${verseTitle}`, {
+                                verseId: verse.id,
+                                verseTitle: verseTitle
                               });
+                            });
                               
                               // Prevent seeking beyond current position when paused
                               audio.addEventListener('pause', () => {
