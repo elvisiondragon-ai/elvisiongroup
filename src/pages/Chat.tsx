@@ -29,26 +29,67 @@ export function Chat() {
   useEffect(() => {
     // Get current user
     const getCurrentUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        // Get user profile for level info
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Auth session:', session);
         
-        setCurrentUser({
-          id: session.user.id,
-          name: profile?.display_name || session.user.email?.split('@')[0] || 'Anonymous',
-          level: profile?.level || 1,
-          isVip: profile?.level >= 5 // VIP if level 5 or higher
+        if (session?.user) {
+          // Get user profile for level info
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+          
+          console.log('User profile:', profile, 'Error:', profileError);
+          
+          // If no profile exists, create one
+          if (!profile && !profileError) {
+            console.log('Creating profile for user:', session.user.id);
+            const { data: newProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert({
+                user_id: session.user.id,
+                display_name: session.user.email?.split('@')[0] || 'Anonymous',
+                level: 1,
+                experience_points: 0,
+                total_sessions: 0,
+                streak_days: 0
+              })
+              .select()
+              .single();
+            
+            if (createError) {
+              console.error('Error creating profile:', createError);
+            } else {
+              console.log('Profile created:', newProfile);
+            }
+          }
+          
+          const currentUserObj = {
+            id: session.user.id, // Always use session user ID
+            name: profile?.display_name || session.user.email?.split('@')[0] || 'Anonymous',
+            level: profile?.level || 1,
+            isVip: (profile?.level || 1) >= 5 // VIP if level 5 or higher
+          };
+          
+          console.log('Setting currentUser:', currentUserObj);
+          setCurrentUser(currentUserObj);
+        } else {
+          console.log('No authenticated user found');
+        }
+      } catch (error) {
+        console.error('Error getting current user:', error);
+        toast({
+          title: "Authentication Error",
+          description: "Please try logging in again",
+          variant: "destructive"
         });
       }
     };
 
     getCurrentUser();
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     // Load messages from database
@@ -137,7 +178,31 @@ export function Chat() {
   }, [toast]);
 
   const handleSendMessage = async () => {
-    if (message.trim() && currentUser) {
+    if (!message.trim()) {
+      console.log('Message is empty, not sending');
+      return;
+    }
+
+    if (!currentUser) {
+      console.log('No current user found, cannot send message');
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to send messages",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    console.log('Attempting to send message with user:', currentUser);
+    console.log('Message data:', {
+      user_id: currentUser.id,
+      user_name: currentUser.name,
+      user_level: currentUser.level,
+      is_vip: currentUser.isVip,
+      message: message.trim()
+    });
+
+    try {
       const { error } = await supabase
         .from('chat_messages')
         .insert({
@@ -152,14 +217,22 @@ export function Chat() {
         console.error('Error sending message:', error);
         toast({
           title: "Error",
-          description: "Failed to send message",
+          description: `Failed to send message: ${error.message}`,
           variant: "destructive"
         });
       } else {
+        console.log('Message sent successfully');
         // Award XP for chat message
         awardXP('chat_message', 1, 'Sent a chat message');
         setMessage("");
       }
+    } catch (err) {
+      console.error('Unexpected error sending message:', err);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
     }
   };
 
