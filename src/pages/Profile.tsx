@@ -210,7 +210,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h1 className="text-xl font-semibold">VIP Membership</h1>
+            <h1 className="text-xl font-semibold">Pro Membership</h1>
           </div>
           <VIPUpgrade onClose={() => setShowVIPUpgrade(false)} />
         </div>
@@ -358,7 +358,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           onClick={() => setShowVIPUpgrade(true)}
         >
           <Crown className="w-4 h-4 mr-2" />
-          {vipStatus.isVip ? 'VIP Membership' : 'Upgrade ke VIP'}
+          {vipStatus.isVip ? 'Pro Membership' : 'Upgrade ke Pro'}
         </Button>
 
         <Button 

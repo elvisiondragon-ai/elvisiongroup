@@ -25,8 +25,8 @@ export function VIPUpgrade({ onClose }: VIPUpgradeProps) {
     try {
       await startTrial();
       toast({
-        title: "VIP Trial Started!",
-        description: "You now have 3 days of VIP access. Enjoy premium features!",
+        title: "Pro Trial Started!",
+        description: "You now have 3 days of Pro access. Enjoy premium features!",
       });
       onClose?.();
     } catch (error: any) {
@@ -109,7 +109,7 @@ export function VIPUpgrade({ onClose }: VIPUpgradeProps) {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Crown className="w-6 h-6 text-vip" />
-            <CardTitle className="text-vip">VIP Active</CardTitle>
+            <CardTitle className="text-vip">Pro Active</CardTitle>
           </div>
           <CardDescription>
             {vipStatus.subscriptionType === 'trial' ? (
@@ -138,18 +138,18 @@ export function VIPUpgrade({ onClose }: VIPUpgradeProps) {
           {vipStatus.subscriptionType === 'trial' && (
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-3">
-                Upgrade to continue VIP access after trial
+                Upgrade to continue Pro access after trial
               </p>
               <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
                 <DialogTrigger asChild>
                   <Button className="w-full" variant="default">
                     <Crown className="w-4 h-4 mr-2" />
-                    Upgrade to VIP
+                    Upgrade to Pro
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Choose Your VIP Plan</DialogTitle>
+                    <DialogTitle>Choose Your Pro Plan</DialogTitle>
                     <DialogDescription>
                       Select a subscription plan and payment method
                     </DialogDescription>
@@ -217,7 +217,7 @@ export function VIPUpgrade({ onClose }: VIPUpgradeProps) {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Star className="w-6 h-6 text-primary" />
-            <CardTitle>Upgrade to VIP</CardTitle>
+            <CardTitle>Upgrade to Pro</CardTitle>
           </div>
           <CardDescription>
             Unlock premium features and exclusive content
@@ -261,7 +261,7 @@ export function VIPUpgrade({ onClose }: VIPUpgradeProps) {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Choose Your VIP Plan</DialogTitle>
+                <DialogTitle>Choose Your Pro Plan</DialogTitle>
                 <DialogDescription>
                   Select a subscription plan and payment method
                 </DialogDescription>
