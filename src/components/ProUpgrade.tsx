@@ -236,7 +236,7 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
                     <div>
                       <h4 className="font-medium mb-3">Payment Method</h4>
                       <RadioGroup value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
-                        <div className="space-y-2">
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
                           {paymentMethods.map((method) => (
                             <div key={method.id} className="flex items-center justify-between p-3 border rounded-lg">
                               <div className="flex items-center space-x-3">
@@ -373,7 +373,7 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
                 <div>
                   <h4 className="font-medium mb-3">Payment Method</h4>
                   <RadioGroup value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
-                    <div className="space-y-2">
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
                       {paymentMethods.map((method) => (
                         <div key={method.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center space-x-3">
