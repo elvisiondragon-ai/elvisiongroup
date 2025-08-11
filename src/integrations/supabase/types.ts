@@ -63,7 +63,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          is_vip: boolean | null
+          is_pro: boolean | null
           message: string
           user_id: string
           user_level: number
@@ -72,7 +72,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          is_vip?: boolean | null
+          is_pro?: boolean | null
           message: string
           user_id: string
           user_level?: number
@@ -81,7 +81,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          is_vip?: boolean | null
+          is_pro?: boolean | null
           message?: string
           user_id?: string
           user_level?: number
