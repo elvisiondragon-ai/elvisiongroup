@@ -64,7 +64,7 @@ serve(async (req) => {
         .join('')
     );
 
-    // Create payment request to Tripay
+    // Create payment request to Tripay via VPS proxy (static IP)
     const tripayPayload = {
       method: paymentMethod,
       merchant_ref: merchantRef,
@@ -83,10 +83,10 @@ serve(async (req) => {
       signature: signature
     };
 
-    const tripayResponse = await fetch('https://tripay.co.id/api/transaction/create', {
+    console.log('Calling VPS proxy server for Tripay payment...');
+    const tripayResponse = await fetch('http://103.67.244.250:3000/api/tripay/create-transaction', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(tripayPayload)

@@ -90,32 +90,20 @@ export function usePro() {
           throw new Error(data.error || 'Failed to create payment');
         }
       } else {
-        // Use Cloudflare Worker for Tripay (other payment methods)
-        console.log('Calling Cloudflare Worker for Tripay payment...');
-        const response = await fetch('https://elvisiongroup.com/api/tripay-create-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            subscriptionType,
-            paymentMethod,
-            userId: user.id,
-            userEmail: user.email,
-            authToken: session.access_token
-          })
-        }).catch(error => {
-          console.error('Fetch to Cloudflare Worker failed:', error);
-          throw new Error('Failed to connect to payment service. Please check your internet connection.');
+        // Use Supabase function for Tripay (via VPS proxy with static IP)
+        console.log('Calling Supabase function for Tripay payment...');
+        const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
+          body: { subscriptionType, paymentMethod }
         });
-
-        const data = await response.json();
         
-        if (!response.ok || !data.success) {
+        if (error) throw error;
+        
+        if (data.success) {
+          return data;
+        } else {
           throw new Error(data.error || 'Failed to create payment');
         }
-        
-        return data;
+
       }
     } catch (error) {
       console.error('Payment creation failed:', error);
