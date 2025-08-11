@@ -179,8 +179,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       gradient: "bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-red-500/20",
       borderColor: "border-pink-400/30",
       glowClass: "hover:shadow-pink-500/20",
-      levelRequired: 4,
-      isProRequired: false
+      levelRequired: 7,
+      isProRequired: true
     },
     {
       id: 4,
