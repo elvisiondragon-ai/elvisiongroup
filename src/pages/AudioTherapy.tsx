@@ -87,7 +87,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     },
     {
       id: 2,
-      title: t('verses.verse2.title'),
+      title: t('Verse2 - Lucid Beach'),
       subtitle: t('verses.verse2.subtitle'),
       unlocked: userLevel >= 5,
       requiredLevel: 5,
@@ -95,7 +95,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     },
     {
       id: 3,
-      title: t('verses.verse3.title'),
+      title: t('Verse 3 - Meditasi Syukur Powerful'),
       subtitle: t('verses.verse3.subtitle'),
       unlocked: userLevel >= 10,
       requiredLevel: 10,
