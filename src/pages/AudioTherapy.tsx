@@ -79,7 +79,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const verses = [
     {
       id: 1,
-      title: t('verses.verse1.title'),
+      title: t('verses.verse1.Renungan'),
       subtitle: t('verses.verse1.subtitle'),
       unlocked: true,
       requiredLevel: 1,
