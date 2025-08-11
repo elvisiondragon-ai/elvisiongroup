@@ -69,19 +69,49 @@ export function usePro() {
 
   const createPayment = async (subscriptionType: 'monthly' | 'yearly', paymentMethod: string) => {
     try {
-      // Route to correct payment processor based on payment method
-      const functionName = paymentMethod === 'BCA_MANUAL' ? 'moota-create-payment' : 'tripay-create-payment';
-      
-      const { data, error } = await supabase.functions.invoke(functionName, {
-        body: { subscriptionType, paymentMethod }
-      });
-      
-      if (error) throw error;
-      
-      if (data.success) {
-        return data;
+      // Get current user for authentication
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+
+      if (paymentMethod === 'BCA_MANUAL') {
+        // Use Supabase function for Moota (BCA Manual)
+        const { data, error } = await supabase.functions.invoke('moota-create-payment', {
+          body: { subscriptionType, paymentMethod }
+        });
+        
+        if (error) throw error;
+        
+        if (data.success) {
+          return data;
+        } else {
+          throw new Error(data.error || 'Failed to create payment');
+        }
       } else {
-        throw new Error(data.error || 'Failed to create payment');
+        // Use Cloudflare Worker for Tripay (other payment methods)
+        const response = await fetch('https://elvisiongroup.com/api/tripay-create-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            subscriptionType,
+            paymentMethod,
+            userId: user.id,
+            userEmail: user.email,
+            authToken: session.access_token
+          })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to create payment');
+        }
+        
+        return data;
       }
     } catch (error) {
       console.error('Payment creation failed:', error);

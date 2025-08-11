@@ -52,16 +52,18 @@ serve(async (req) => {
     // For BCA Manual, we'll create a virtual account number
     const virtualAccount = `88808${Date.now().toString().slice(-8)}`;
     
-    // Create VIP subscription record
+    // Create or update VIP subscription record using UPSERT
     const { data: subscription, error: subError } = await supabaseClient
       .from('vip_subscriptions')
-      .insert({
+      .upsert({
         user_id: user.id,
         email: user.email,
         subscription_type: subscriptionType,
         status: 'pending',
         currency: 'IDR',
         amount_paid: amount
+      }, {
+        onConflict: 'user_id'
       })
       .select('id')
       .single();
