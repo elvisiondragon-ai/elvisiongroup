@@ -79,8 +79,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const verses = [
     {
       id: 1,
-      title: t('verses.verse1.Renungan'),
-      subtitle: t('verses.verse1.subtitle'),
+      title: t('Verse1:The Space Hill'),
+      subtitle: t('Kedamaian Batin'),
       unlocked: true,
       requiredLevel: 1,
       artwork: verseArtwork,
