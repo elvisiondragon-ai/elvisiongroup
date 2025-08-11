@@ -49,9 +49,9 @@ serve(async (req)=>{
       callback_url: "https://elvisiongroup.com/tripay/process",
       return_url: `${req.headers.get("origin")}/profile?payment=success`
     };
-    // 6. Panggil VPS Proxy dengan IP BARU
+    // 6. Panggil VPS Proxy dengan Domain Stabil
     console.log('[OK] Calling VPS proxy server with unsigned data...');
-    const vpsProxyUrl = 'http://31.97.105.79:3000/api/tripay/create-transaction';
+    const vpsProxyUrl = 'https://payment.elvisiongroup.com/api/tripay/create-transaction';
     const tripayResponse = await fetch(vpsProxyUrl, {
       method: 'POST',
       headers: {
