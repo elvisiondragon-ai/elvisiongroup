@@ -188,7 +188,7 @@
     @apply bg-gradient-primary text-primary-foreground glow-primary;
   }
   
-  .tier-vip {
+  .tier-pro {
     @apply bg-gradient-gold text-background glow-gold;
   }
   

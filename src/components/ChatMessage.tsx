@@ -7,7 +7,7 @@ interface ChatMessageProps {
     name: string;
     avatar?: string;
     level: number;
-    isVip?: boolean;
+    isPro?: boolean;
   };
   message: string;
   timestamp: Date;
@@ -35,7 +35,7 @@ export function ChatMessage({ user, message, timestamp }: ChatMessageProps) {
       <div className="flex-1 space-y-1">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-foreground">{user.name}</span>
-          <TierBadge level={user.level} isVip={user.isVip} />
+          <TierBadge level={user.level} isPro={user.isPro} />
         </div>
         
         <p className="text-muted-foreground leading-relaxed">{message}</p>

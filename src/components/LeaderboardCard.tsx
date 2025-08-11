@@ -8,7 +8,7 @@ interface LeaderboardUser {
   avatar?: string;
   level: number;
   xp: number;
-  isVip?: boolean;
+  isPro?: boolean;
   rank: number;
 }
 
@@ -50,7 +50,7 @@ export function LeaderboardCard({ user }: LeaderboardCardProps) {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-semibold text-foreground">{user.name}</span>
-            <TierBadge level={user.level} isVip={user.isVip} />
+            <TierBadge level={user.level} isPro={user.isPro} />
           </div>
           
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
