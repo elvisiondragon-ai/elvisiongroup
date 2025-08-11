@@ -167,8 +167,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       gradient: "bg-gradient-to-br from-blue-500/20 via-cyan-500/10 to-teal-500/20",
       borderColor: "border-cyan-400/30",
       glowClass: "glow-accent",
-      levelRequired: 3,
-      isProRequired: false
+      levelRequired: 5,
+      isProRequired: true
     },
     {
       id: 3,
@@ -191,8 +191,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       gradient: "bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-red-500/20",
       borderColor: "border-pink-400/30",
       glowClass: "hover:shadow-pink-500/20",
-      levelRequired: 5,
-      isProRequired: false
+      levelRequired: 8,
+      isProRequired: true
     },
     {
       id: 5,
@@ -203,7 +203,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       gradient: "bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-orange-500/20",
       borderColor: "border-amber-400/30",
       glowClass: "hover:shadow-amber-500/20",
-      levelRequired: 4,
+      levelRequired: 9,
       isProRequired: true
     }
   ];
