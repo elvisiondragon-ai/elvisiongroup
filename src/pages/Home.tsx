@@ -112,7 +112,7 @@ export function Home({ onNavigate }: HomeProps) {
       key: "meditation-sessions"
     },
     {
-      title: t('home.audioTherapy'),
+      title: t('home.Verse of eL Vision'),
       description: "Spiritual frequency healing",
       icon: Headphones,
       color: "text-accent",
