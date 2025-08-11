@@ -103,8 +103,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     },
     {
       id: 4,
-      title: t('verses.verse4.title'),
-      subtitle: t('verses.verse4.subtitle'),
+      title: t('Prosperity Stream'),
+      subtitle: t('Frekuensi Kaya Raya'),
       unlocked: true,
       requiredLevel: 15,
       artwork: verse4Artwork,
