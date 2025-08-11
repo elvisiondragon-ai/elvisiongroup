@@ -69,7 +69,10 @@ export function usePro() {
 
   const createPayment = async (subscriptionType: 'monthly' | 'yearly', paymentMethod: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
+      // Route to correct payment processor based on payment method
+      const functionName = paymentMethod === 'BCA_MANUAL' ? 'moota-create-payment' : 'tripay-create-payment';
+      
+      const { data, error } = await supabase.functions.invoke(functionName, {
         body: { subscriptionType, paymentMethod }
       });
       
