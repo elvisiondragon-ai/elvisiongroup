@@ -345,7 +345,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           className="w-full justify-start gap-3 border-yellow-400 bg-gradient-to-r from-yellow-400/10 to-amber-500/10 text-yellow-400 hover:border-yellow-300 hover:bg-gradient-to-r hover:from-yellow-400/20 hover:to-amber-500/20 hover:text-yellow-300 transition-all duration-300"
         >
           <Crown className="w-4 h-4 text-yellow-400" />
-          Upgrade ke VIP
+          Upgrade ke Pro
         </Button>
 
         <Button 
