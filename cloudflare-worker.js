@@ -22,7 +22,7 @@ export default {
 
     try {
       // Route webhooks based on path
-      if (path === '/api/tripay-callback') {
+      if (path === '/tripay/process') {
         return await handleTripayWebhook(request, env);
       } else if (path === '/api/moota-webhook') {
         return await handleMootaWebhook(request, env);
