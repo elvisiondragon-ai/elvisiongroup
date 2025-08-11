@@ -79,7 +79,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const verses = [
     {
       id: 1,
-      title: t('Verse1:The Space Hill'),
+      title: t('Verse 1 - The Space Hill'),
       subtitle: t('Kedamaian Batin'),
       unlocked: true,
       requiredLevel: 1,
@@ -87,7 +87,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     },
     {
       id: 2,
-      title: t('Verse2 - Lucid Beach'),
+      title: t('Verse 2 - Lucid Beach'),
       subtitle: t('verses.verse2.subtitle'),
       unlocked: userLevel >= 5,
       requiredLevel: 5,
@@ -103,7 +103,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     },
     {
       id: 4,
-      title: t('Prosperity Stream'),
+      title: t('Verse 4 - Prosperity Stream'),
       subtitle: t('Frekuensi Kaya Raya'),
       unlocked: true,
       requiredLevel: 15,
