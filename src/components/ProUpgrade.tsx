@@ -97,6 +97,12 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
 
   const paymentMethods = [
     { 
+      id: 'BCA_MANUAL', 
+      name: 'BCA Manual', 
+      icon: Building,
+      description: 'Transfer manual ke rekening BCA'
+    },
+    { 
       id: 'BRIVA', 
       name: 'BRI Virtual Account', 
       icon: Building,
