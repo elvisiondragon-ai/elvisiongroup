@@ -91,6 +91,7 @@ export function usePro() {
         }
       } else {
         // Use Cloudflare Worker for Tripay (other payment methods)
+        console.log('Calling Cloudflare Worker for Tripay payment...');
         const response = await fetch('https://elvisiongroup.com/api/tripay-create-payment', {
           method: 'POST',
           headers: {
@@ -103,6 +104,9 @@ export function usePro() {
             userEmail: user.email,
             authToken: session.access_token
           })
+        }).catch(error => {
+          console.error('Fetch to Cloudflare Worker failed:', error);
+          throw new Error('Failed to connect to payment service. Please check your internet connection.');
         });
 
         const data = await response.json();

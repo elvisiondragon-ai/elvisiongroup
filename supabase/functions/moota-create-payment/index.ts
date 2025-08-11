@@ -125,7 +125,8 @@ serve(async (req) => {
         bank_account: '0881234567890',
         account_name: 'PT ELVISION GROUP',
         expires_at: expiresAt.toISOString(),
-        payment_instructions: transaction.payment_instructions
+        payment_instructions: transaction.payment_instructions,
+        payment_url: `https://app.lovableproject.com/manual-transfer?ref=${merchantRef}&va=${virtualAccount}&amount=${amount}` // Manual transfer instructions page
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
