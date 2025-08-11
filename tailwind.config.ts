@@ -31,6 +31,10 @@ export default {
 				gold: 'hsl(var(--gold))',
 				silver: 'hsl(var(--silver))',
 				'neon-green': 'hsl(var(--neon-green))',
+				vip: 'hsl(var(--vip))',
+				'vip-foreground': 'hsl(var(--vip-foreground))',
+				'vip-muted': 'hsl(var(--vip-muted))',
+				'vip-accent': 'hsl(var(--vip-accent))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -69,6 +73,11 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			borderColor: {
+				DEFAULT: "hsl(var(--border))",
+				input: "hsl(var(--input))",
+				vip: "hsl(var(--vip))",
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

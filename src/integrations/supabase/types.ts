@@ -146,6 +146,71 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          callback_data: Json | null
+          created_at: string
+          currency: string | null
+          expires_at: string | null
+          id: string
+          paid_at: string | null
+          payment_instructions: Json | null
+          payment_method: string | null
+          payment_url: string | null
+          status: string
+          subscription_id: string
+          tripay_merchant_ref: string
+          tripay_reference: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          callback_data?: Json | null
+          created_at?: string
+          currency?: string | null
+          expires_at?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_instructions?: Json | null
+          payment_method?: string | null
+          payment_url?: string | null
+          status?: string
+          subscription_id: string
+          tripay_merchant_ref: string
+          tripay_reference: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          callback_data?: Json | null
+          created_at?: string
+          currency?: string | null
+          expires_at?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_instructions?: Json | null
+          payment_method?: string | null
+          payment_url?: string | null
+          status?: string
+          subscription_id?: string
+          tripay_merchant_ref?: string
+          tripay_reference?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "vip_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           achievements: string[] | null
@@ -245,6 +310,60 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_subscriptions: {
+        Row: {
+          amount_paid: number | null
+          created_at: string
+          currency: string | null
+          email: string
+          id: string
+          ip_address: string | null
+          status: string
+          subscription_end_date: string | null
+          subscription_start_date: string | null
+          subscription_type: string
+          trial_end_date: string | null
+          trial_start_date: string | null
+          tripay_reference: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string
+          currency?: string | null
+          email: string
+          id?: string
+          ip_address?: string | null
+          status?: string
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          tripay_reference?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string
+          currency?: string | null
+          email?: string
+          id?: string
+          ip_address?: string | null
+          status?: string
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          tripay_reference?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       xp_transactions: {
         Row: {
           activity_id: string | null
@@ -306,9 +425,23 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      check_vip_status: {
+        Args: { p_user_id: string }
+        Returns: {
+          is_vip: boolean
+          subscription_type: string
+          status: string
+          expires_at: string
+          days_remaining: number
+        }[]
+      }
       get_xp_for_next_level: {
         Args: { current_level: number }
         Returns: number
+      }
+      start_vip_trial: {
+        Args: { p_user_id: string; p_email: string; p_ip_address?: string }
+        Returns: string
       }
     }
     Enums: {

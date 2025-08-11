@@ -6,6 +6,8 @@ import { TierBadge } from "@/components/TierBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
 import { NotificationSettings } from "@/components/NotificationSettings";
+import { VIPUpgrade } from "@/components/VIPUpgrade";
+import { useVIP } from "@/hooks/useVIP";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -18,7 +20,8 @@ import {
   BookOpen,
   Award,
   LogOut,
-  Bell
+  Bell,
+  ArrowLeft
 } from "lucide-react";
 
 interface ProfileProps {
@@ -41,8 +44,10 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showVIPUpgrade, setShowVIPUpgrade] = useState(false);
+  const { vipStatus } = useVIP();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -125,17 +130,17 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   // Create default profile data if not found
   const defaultProfile: UserProfile = {
     display_name: user?.email?.split('@')[0] || "Alex",
-    level: 3,
-    experience_points: 250,
-    streak_days: 5,
-    total_sessions: 42,
-    achievements: ["First Step", "Week Warrior"],
+    level: 1,
+    experience_points: 0,
+    streak_days: 0,
+    total_sessions: 0,
+    achievements: [],
     created_at: new Date().toISOString()
   };
 
   const profile = userProfile || defaultProfile;
 
-  const displayName = profile.display_name || "Renata";
+  const displayName = profile.display_name || user?.email?.split('@')[0] || "User";
   const nextLevelXp = profile.level * 100;
   const joinDate = new Date(profile.created_at).toLocaleDateString('id-ID', { 
     year: 'numeric', 
@@ -171,17 +176,17 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   ];
 
   // Show edit component if editing
-  if (isEditing) {
+  if (editingProfile) {
     return (
       <div className="pb-20">
         <EditProfile
           user={user}
           userProfile={userProfile}
           onSave={() => {
-            setIsEditing(false);
+            setEditingProfile(false);
             if (user) fetchUserProfile(user.id);
           }}
-          onCancel={() => setIsEditing(false)}
+          onCancel={() => setEditingProfile(false)}
         />
       </div>
     );
@@ -189,19 +194,26 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
 
   if (showNotifications) {
     return (
-      <div className="max-w-2xl mx-auto p-4 space-y-6 pb-20">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowNotifications(false)}
-            className="p-2"
-          >
-            ←
-          </Button>
-          <h1 className="text-2xl font-bold">Pengaturan Notifikasi</h1>
+      <NotificationSettings />
+    );
+  }
+
+  if (showVIPUpgrade) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center gap-4 mb-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowVIPUpgrade(false)}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-xl font-semibold">VIP Membership</h1>
+          </div>
+          <VIPUpgrade onClose={() => setShowVIPUpgrade(false)} />
         </div>
-        <NotificationSettings />
       </div>
     );
   }
@@ -222,7 +234,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </h1>
         
         <div className="flex items-center justify-center gap-2 mb-3">
-          <TierBadge level={profile.level} />
+          <TierBadge level={profile.level} className="mb-2" />
           <span className="text-sm text-muted-foreground">
             Bergabung sejak {joinDate}
           </span>
@@ -234,11 +246,11 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
             <span>{profile.experience_points} / {nextLevelXp} XP</span>
           </div>
           <Progress 
-            value={(profile.experience_points / nextLevelXp) * 100} 
+            value={Math.min((profile.experience_points / nextLevelXp) * 100, 100)} 
             className="h-2"
           />
           <p className="text-xs text-muted-foreground mt-1">
-            {nextLevelXp - profile.experience_points} XP untuk level selanjutnya
+            {Math.max(nextLevelXp - profile.experience_points, 0)} XP untuk level selanjutnya
           </p>
         </div>
 
@@ -324,36 +336,37 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         
         <Button 
           variant="outline" 
-          className="w-full justify-start gap-3 border-border hover:border-primary"
-          onClick={() => setIsEditing(true)}
+          className="w-full"
+          onClick={() => setEditingProfile(true)}
         >
-          <User className="w-4 h-4" />
+          <User className="w-4 h-4 mr-2" />
           Edit Profil
         </Button>
         
         <Button 
           variant="outline" 
-          className="w-full justify-start gap-3 border-border hover:border-primary"
+          className="w-full"
           onClick={() => setShowNotifications(true)}
         >
-          <Bell className="w-4 h-4" />
+          <Bell className="w-4 h-4 mr-2" />
           Notifikasi
         </Button>
-        
+
         <Button 
           variant="outline" 
-          className="w-full justify-start gap-3 border-yellow-400 bg-gradient-to-r from-yellow-400/10 to-amber-500/10 text-yellow-400 hover:border-yellow-300 hover:bg-gradient-to-r hover:from-yellow-400/20 hover:to-amber-500/20 hover:text-yellow-300 transition-all duration-300"
+          className={`w-full ${vipStatus.isVip ? 'border-vip text-vip' : 'tier-vip'}`}
+          onClick={() => setShowVIPUpgrade(true)}
         >
-          <Crown className="w-4 h-4 text-yellow-400" />
-          Upgrade ke Pro
+          <Crown className="w-4 h-4 mr-2" />
+          {vipStatus.isVip ? 'VIP Membership' : 'Upgrade ke VIP'}
         </Button>
 
         <Button 
           variant="destructive"
           onClick={handleLogout}
-          className="w-full justify-start gap-3"
+          className="w-full"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-4 h-4 mr-2" />
           Logout
         </Button>
       </div>
