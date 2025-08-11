@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export interface VIPStatus {
-  isVip: boolean;
+export interface ProStatus {
+  isPro: boolean;
   subscriptionType: string | null;
   status: string | null;
   expiresAt: string | null;
@@ -10,9 +10,9 @@ export interface VIPStatus {
   loading: boolean;
 }
 
-export function useVIP() {
-  const [vipStatus, setVipStatus] = useState<VIPStatus>({
-    isVip: false,
+export function usePro() {
+  const [proStatus, setProStatus] = useState<ProStatus>({
+    isPro: false,
     subscriptionType: null,
     status: null,
     expiresAt: null,
@@ -20,16 +20,16 @@ export function useVIP() {
     loading: true
   });
 
-  const checkVIPStatus = async () => {
+  const checkProStatus = async () => {
     try {
-      setVipStatus(prev => ({ ...prev, loading: true }));
+      setProStatus(prev => ({ ...prev, loading: true }));
       
       const { data, error } = await supabase.functions.invoke('vip-status-check');
       
       if (error) throw error;
       
-      setVipStatus({
-        isVip: data.is_vip || false,
+      setProStatus({
+        isPro: data.is_vip || false,
         subscriptionType: data.subscription_type,
         status: data.status,
         expiresAt: data.expires_at,
@@ -37,9 +37,9 @@ export function useVIP() {
         loading: false
       });
     } catch (error) {
-      console.error('VIP status check failed:', error);
-      setVipStatus({
-        isVip: false,
+      console.error('Pro status check failed:', error);
+      setProStatus({
+        isPro: false,
         subscriptionType: null,
         status: null,
         expiresAt: null,
@@ -56,7 +56,7 @@ export function useVIP() {
       if (error) throw error;
       
       if (data.success) {
-        await checkVIPStatus(); // Refresh status
+        await checkProStatus(); // Refresh status
         return { success: true, data };
       } else {
         throw new Error(data.error || 'Failed to start trial');
@@ -87,13 +87,13 @@ export function useVIP() {
   };
 
   useEffect(() => {
-    checkVIPStatus();
+    checkProStatus();
   }, []);
 
   return {
-    vipStatus,
+    proStatus,
     startTrial,
     createPayment,
-    refreshStatus: checkVIPStatus
+    refreshStatus: checkProStatus
   };
 }

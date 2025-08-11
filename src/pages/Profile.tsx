@@ -6,8 +6,8 @@ import { TierBadge } from "@/components/TierBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
 import { NotificationSettings } from "@/components/NotificationSettings";
-import { VIPUpgrade } from "@/components/VIPUpgrade";
-import { useVIP } from "@/hooks/useVIP";
+import { ProUpgrade } from "@/components/ProUpgrade";
+import { usePro } from "@/hooks/usePro";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -46,8 +46,8 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [loading, setLoading] = useState(true);
   const [editingProfile, setEditingProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showVIPUpgrade, setShowVIPUpgrade] = useState(false);
-  const { vipStatus } = useVIP();
+  const [showProUpgrade, setShowProUpgrade] = useState(false);
+  const { proStatus } = usePro();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -198,21 +198,21 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     );
   }
 
-  if (showVIPUpgrade) {
+  if (showProUpgrade) {
     return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="max-w-md mx-auto">
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-4 mb-6">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setShowVIPUpgrade(false)}
+              onClick={() => setShowProUpgrade(false)}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <h1 className="text-xl font-semibold">Pro Membership</h1>
           </div>
-          <VIPUpgrade onClose={() => setShowVIPUpgrade(false)} />
+          <ProUpgrade onClose={() => setShowProUpgrade(false)} />
         </div>
       </div>
     );
@@ -354,11 +354,11 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
 
         <Button 
           variant="outline" 
-          className={`w-full ${vipStatus.isVip ? 'border-vip text-vip' : 'tier-vip'}`}
-          onClick={() => setShowVIPUpgrade(true)}
+          className={`w-full ${proStatus.isPro ? 'border-pro text-pro' : 'tier-pro'}`}
+          onClick={() => setShowProUpgrade(true)}
         >
           <Crown className="w-4 h-4 mr-2" />
-          {vipStatus.isVip ? 'Pro Membership' : 'Upgrade ke Pro'}
+          {proStatus.isPro ? 'Pro Membership' : 'Upgrade ke Pro'}
         </Button>
 
         <Button 

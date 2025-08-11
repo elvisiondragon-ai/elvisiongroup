@@ -34,13 +34,13 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const hasAccess = (journal: any) => {
     if (!userProfile) return false;
     const userLevel = userProfile.level || 1;
-    const isVip = userProfile.is_vip || false;
+    const isPro = userProfile.is_vip || false;
     
     // Always allow access to level 1 journals
     if (journal.levelRequired <= 1) return true;
     
-    // Check VIP requirement
-    if (journal.isVipRequired && !isVip) return false;
+      // Check Pro requirement
+      if (journal.isProRequired && !isPro) return false;
     
     // Check level requirement
     return userLevel >= journal.levelRequired;
@@ -54,10 +54,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     const isLocked = !hasAccess(journal);
     
     if (isLocked) {
-      const vipMessage = journal.isVipRequired ? " atau beli VIP" : "";
+      const proMessage = journal.isProRequired ? " atau beli Pro" : "";
       toast({
         title: "Akses Terbatas",
-        description: `Level mu belum cukup (butuh level ${journal.levelRequired})${vipMessage}`,
+        description: `Level mu belum cukup (butuh level ${journal.levelRequired})${proMessage}`,
         variant: "destructive"
       });
       return;
@@ -156,7 +156,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       borderColor: "border-primary/30",
       glowClass: "glow-primary",
       levelRequired: 1,
-      isVipRequired: false
+      isProRequired: false
     },
     {
       id: 2,
@@ -168,7 +168,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       borderColor: "border-cyan-400/30",
       glowClass: "glow-accent",
       levelRequired: 3,
-      isVipRequired: false
+      isProRequired: false
     },
     {
       id: 3,
@@ -180,7 +180,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       borderColor: "border-pink-400/30",
       glowClass: "hover:shadow-pink-500/20",
       levelRequired: 4,
-      isVipRequired: false
+      isProRequired: false
     },
     {
       id: 4,
@@ -192,7 +192,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       borderColor: "border-pink-400/30",
       glowClass: "hover:shadow-pink-500/20",
       levelRequired: 5,
-      isVipRequired: false
+      isProRequired: false
     },
     {
       id: 5,
@@ -204,7 +204,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       borderColor: "border-amber-400/30",
       glowClass: "hover:shadow-amber-500/20",
       levelRequired: 4,
-      isVipRequired: true
+      isProRequired: true
     }
   ];
 
@@ -431,12 +431,12 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                   </Button>
                 </div>
                 
-                <p className="text-sm text-muted-foreground">
-                  {isLocked 
-                    ? `Level ${journal.levelRequired} required${journal.isVipRequired ? ' • VIP' : ''}`
-                    : `Dengarkan dan renungkan selama ${journal.duration}`
-                  }
-                </p>
+                 <p className="text-sm text-muted-foreground">
+                   {isLocked 
+                     ? `Level ${journal.levelRequired} required${journal.isProRequired ? ' • Pro' : ''}`
+                     : `Dengarkan dan renungkan selama ${journal.duration}`
+                   }
+                 </p>
               </div>
             </Card>
           );

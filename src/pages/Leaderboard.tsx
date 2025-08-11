@@ -5,7 +5,7 @@ import { Trophy, Zap, Crown } from "lucide-react";
 const mockLeaderboard = [
   { id: "1", name: "Andin", level: 9, xp: 12500, rank: 1, avatar: "" },
   { id: "2", name: "Master Yoga", level: 8, xp: 11200, rank: 2, avatar: "" },
-  { id: "3", name: "Jason", level: 7, xp: 8900, rank: 3, isVip: true, avatar: "" },
+  { id: "3", name: "Jason", level: 7, xp: 8900, rank: 3, isPro: true, avatar: "" },
   { id: "4", name: "Spiritual Seeker", level: 7, xp: 7800, rank: 4, avatar: "" },
   { id: "coach-senz", name: "Senz", level: 6, xp: 4500, rank: 5, avatar: "" },
   { id: "5", name: "Andrew", level: 6, xp: 6500, rank: 6, avatar: "" },
@@ -44,7 +44,7 @@ export function Leaderboard() {
           <Card className="p-4 text-center bg-gradient-secondary border-border">
             <Zap className="w-6 h-6 mx-auto mb-2 text-primary" />
             <div className="text-lg font-bold font-orbitron text-primary">47</div>
-            <div className="text-xs text-muted-foreground">VIP Members</div>
+            <div className="text-xs text-muted-foreground">Pro Members</div>
           </Card>
           
           <Card className="p-4 text-center bg-gradient-secondary border-border">

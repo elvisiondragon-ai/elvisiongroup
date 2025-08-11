@@ -51,11 +51,11 @@
     --silver: 210 20% 75%;
     --neon-green: 123 92% 65%;
 
-    /* VIP Colors */
-    --vip: 45 93% 58%;
-    --vip-foreground: 0 0% 9%;
-    --vip-muted: 45 30% 95%;
-    --vip-accent: 45 100% 70%;
+    /* Pro Colors */
+    --pro: 45 93% 58%;
+    --pro-foreground: 0 0% 9%;
+    --pro-muted: 45 30% 95%;
+    --pro-accent: 45 100% 70%;
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(282 85% 65%) 100%);
@@ -202,7 +202,7 @@
     @apply bg-gradient-accent text-background glow-accent;
   }
 
-  .tier-vip {
+  .tier-pro {
     @apply bg-gradient-to-r from-yellow-400 to-yellow-600 text-black glow-gold;
   }
 
