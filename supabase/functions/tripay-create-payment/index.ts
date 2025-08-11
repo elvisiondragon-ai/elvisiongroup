@@ -84,6 +84,8 @@ serve(async (req) => {
     };
 
     console.log('Calling VPS proxy server for Tripay payment...');
+    console.log('Payload being sent to VPS proxy:', JSON.stringify(tripayPayload, null, 2));
+    
     const tripayResponse = await fetch('http://103.67.244.250:3000/api/tripay/create-transaction', {
       method: 'POST',
       headers: {
@@ -92,10 +94,28 @@ serve(async (req) => {
       body: JSON.stringify(tripayPayload)
     });
 
-    const tripayResult = await tripayResponse.json();
+    console.log('VPS proxy response status:', tripayResponse.status);
+    console.log('VPS proxy response headers:', Object.fromEntries(tripayResponse.headers.entries()));
+    
+    let tripayResult;
+    try {
+      tripayResult = await tripayResponse.json();
+      console.log('VPS proxy response body:', JSON.stringify(tripayResult, null, 2));
+    } catch (parseError) {
+      const responseText = await tripayResponse.text();
+      console.error('Failed to parse VPS proxy response as JSON:', parseError);
+      console.error('Raw response text:', responseText);
+      throw new Error(`VPS proxy returned invalid JSON. Status: ${tripayResponse.status}, Body: ${responseText}`);
+    }
+
+    if (!tripayResponse.ok) {
+      throw new Error(`VPS proxy error (${tripayResponse.status}): ${JSON.stringify(tripayResult)}`);
+    }
 
     if (!tripayResult.success) {
-      throw new Error(`Tripay API error: ${tripayResult.message}`);
+      const errorMsg = tripayResult.message || tripayResult.error || 'Unknown error from VPS proxy';
+      console.error('VPS proxy returned error:', errorMsg);
+      throw new Error(`Tripay API error: ${errorMsg}`);
     }
 
     const transaction = tripayResult.data;
