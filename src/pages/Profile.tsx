@@ -21,7 +21,8 @@ import {
   Award,
   LogOut,
   Bell,
-  ArrowLeft
+  ArrowLeft,
+  Trash2
 } from "lucide-react";
 
 interface ProfileProps {
@@ -47,6 +48,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [editingProfile, setEditingProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { proStatus } = usePro();
   const { toast } = useToast();
 
@@ -116,6 +118,51 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         variant: "destructive",
       });
       onLogout();
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    
+    try {
+      // Delete all user data first
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (profileError) {
+        console.error('Error deleting profile:', profileError);
+      }
+
+      // Delete related data
+      await Promise.all([
+        supabase.from('chat_messages').delete().eq('user_id', user.id),
+        supabase.from('reflections').delete().eq('user_id', user.id),
+        supabase.from('user_activities').delete().eq('user_id', user.id),
+        supabase.from('xp_transactions').delete().eq('user_id', user.id),
+        supabase.from('device_tokens').delete().eq('user_id', user.id),
+        supabase.from('notification_settings').delete().eq('user_id', user.id),
+        supabase.from('vip_subscriptions').delete().eq('user_id', user.id),
+        supabase.from('payment_transactions').delete().eq('user_id', user.id),
+      ]);
+
+      // Sign out the user after data deletion
+      await supabase.auth.signOut();
+
+      toast({
+        title: "Account Deleted",
+        description: "Your account has been permanently deleted",
+      });
+
+      onLogout();
+    } catch (error) {
+      console.error('Delete account error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete account. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -369,6 +416,46 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           <LogOut className="w-4 h-4 mr-2" />
           Logout
         </Button>
+
+        {/* Delete Account Section */}
+        <div className="border-t border-border pt-4 mt-6">
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">
+            Zona Bahaya
+          </h3>
+          
+          {!showDeleteConfirm ? (
+            <Button 
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Hapus Akun
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Apakah Anda yakin ingin menghapus akun Anda? Tindakan ini tidak dapat dibatalkan dan semua data Anda akan hilang permanen.
+              </p>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1"
+                >
+                  Batal
+                </Button>
+                <Button 
+                  variant="destructive"
+                  onClick={handleDeleteAccount}
+                  className="flex-1"
+                >
+                  Ya, Hapus Akun
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
