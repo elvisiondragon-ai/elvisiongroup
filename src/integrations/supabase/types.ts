@@ -61,6 +61,7 @@ export type Database = {
       }
       chat_messages: {
         Row: {
+          channel_id: string | null
           created_at: string
           id: string
           is_pro: boolean | null
@@ -70,6 +71,7 @@ export type Database = {
           user_name: string
         }
         Insert: {
+          channel_id?: string | null
           created_at?: string
           id?: string
           is_pro?: boolean | null
@@ -79,6 +81,7 @@ export type Database = {
           user_name: string
         }
         Update: {
+          channel_id?: string | null
           created_at?: string
           id?: string
           is_pro?: boolean | null
@@ -149,11 +152,14 @@ export type Database = {
       payment_transactions: {
         Row: {
           amount: number
+          bank_account: string | null
           callback_data: Json | null
           created_at: string
           currency: string | null
           expires_at: string | null
           id: string
+          moota_mutation_id: string | null
+          moota_webhook_data: Json | null
           paid_at: string | null
           payment_instructions: Json | null
           payment_method: string | null
@@ -162,16 +168,20 @@ export type Database = {
           subscription_id: string
           tripay_merchant_ref: string
           tripay_reference: string
+          unique_code: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
           amount: number
+          bank_account?: string | null
           callback_data?: Json | null
           created_at?: string
           currency?: string | null
           expires_at?: string | null
           id?: string
+          moota_mutation_id?: string | null
+          moota_webhook_data?: Json | null
           paid_at?: string | null
           payment_instructions?: Json | null
           payment_method?: string | null
@@ -180,16 +190,20 @@ export type Database = {
           subscription_id: string
           tripay_merchant_ref: string
           tripay_reference: string
+          unique_code?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
           amount?: number
+          bank_account?: string | null
           callback_data?: Json | null
           created_at?: string
           currency?: string | null
           expires_at?: string | null
           id?: string
+          moota_mutation_id?: string | null
+          moota_webhook_data?: Json | null
           paid_at?: string | null
           payment_instructions?: Json | null
           payment_method?: string | null
@@ -198,6 +212,7 @@ export type Database = {
           subscription_id?: string
           tripay_merchant_ref?: string
           tripay_reference?: string
+          unique_code?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -256,6 +271,36 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit_log: {
+        Row: {
+          action: string
+          attempts: number | null
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          user_id: string | null
+          window_start: string | null
+        }
+        Insert: {
+          action: string
+          attempts?: number | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          action?: string
+          attempts?: number | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       reflections: {
         Row: {
           created_at: string
@@ -280,6 +325,42 @@ export type Database = {
           reflection?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          record_id: string | null
+          table_name: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -425,6 +506,15 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      check_rate_limit: {
+        Args: {
+          p_user_id: string
+          p_action: string
+          p_max_attempts?: number
+          p_window_minutes?: number
+        }
+        Returns: boolean
+      }
       check_vip_status: {
         Args: { p_user_id: string }
         Returns: {
@@ -439,9 +529,31 @@ export type Database = {
         Args: { current_level: number }
         Returns: number
       }
+      log_data_access: {
+        Args: {
+          p_table_name: string
+          p_operation: string
+          p_record_id?: string
+          p_metadata?: Json
+        }
+        Returns: undefined
+      }
+      log_sensitive_action: {
+        Args: {
+          p_action: string
+          p_table_name?: string
+          p_record_id?: string
+          p_metadata?: Json
+        }
+        Returns: undefined
+      }
       start_vip_trial: {
         Args: { p_user_id: string; p_email: string; p_ip_address?: string }
         Returns: string
+      }
+      validate_payment_access: {
+        Args: { p_user_id: string; p_transaction_id: string }
+        Returns: boolean
       }
     }
     Enums: {
