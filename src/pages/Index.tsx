@@ -8,6 +8,7 @@ import { AudioTherapy } from "./AudioTherapy";
 import { SpiritualJournal } from "./SpiritualJournal";
 import { MeditationSessions } from "./MeditationSessions";
 import { Tutorial } from "./Tutorial";
+import { IgnisQuest } from "./IgnisQuest";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
@@ -38,6 +39,8 @@ const Index = () => {
         return <MeditationSessions onNavigate={setActiveTab} />;
       case "tutorial":
         return <Tutorial />;
+      case "ignis-quest":
+        return <IgnisQuest onNavigate={setActiveTab} />;
       default:
         return <Home onNavigate={setActiveTab} />;
     }
