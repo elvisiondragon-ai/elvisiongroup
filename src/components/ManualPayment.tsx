@@ -105,9 +105,9 @@ export const ManualPayment: React.FC<ManualPaymentProps> = ({ onClose }) => {
   const currentPlan = selectedPlan === 'monthly' ? paymentDetails.monthly : paymentDetails.yearly;
 
   return (
-    <div className="space-y-6">
+    <div className="max-h-[75vh] overflow-y-auto space-y-4">
       {/* Plan Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <Card 
           className={`cursor-pointer transition-all ${
             selectedPlan === 'monthly' ? 'ring-2 ring-primary' : 'hover:shadow-md'
@@ -115,9 +115,9 @@ export const ManualPayment: React.FC<ManualPaymentProps> = ({ onClose }) => {
           onClick={() => setSelectedPlan('monthly')}
         >
           <CardHeader className="text-center pb-2">
-            <CardTitle className="text-lg">Bulanan</CardTitle>
-            <div className="text-3xl font-bold text-primary">Rp 100.000</div>
-            <CardDescription>per bulan</CardDescription>
+            <CardTitle className="text-base">Bulanan</CardTitle>
+            <div className="text-xl font-bold text-primary">Rp 100k</div>
+            <CardDescription className="text-xs">per bulan</CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <Badge variant={selectedPlan === 'monthly' ? 'default' : 'secondary'}>
@@ -133,9 +133,9 @@ export const ManualPayment: React.FC<ManualPaymentProps> = ({ onClose }) => {
           onClick={() => setSelectedPlan('yearly')}
         >
           <CardHeader className="text-center pb-2">
-            <CardTitle className="text-lg">Tahunan</CardTitle>
-            <div className="text-3xl font-bold text-primary">Rp 800.000</div>
-            <CardDescription>per tahun</CardDescription>
+            <CardTitle className="text-base">Tahunan</CardTitle>
+            <div className="text-xl font-bold text-primary">Rp 800k</div>
+            <CardDescription className="text-xs">per tahun</CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <Badge variant={selectedPlan === 'yearly' ? 'default' : 'secondary'}>
@@ -156,47 +156,45 @@ export const ManualPayment: React.FC<ManualPaymentProps> = ({ onClose }) => {
             Transfer manual ke rekening BCA berikut
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="bg-muted p-4 rounded-lg space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Bank:</span>
+        <CardContent className="space-y-3">
+          <div className="bg-muted p-3 rounded-lg space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span>Bank:</span>
               <span className="font-bold text-blue-600">{paymentDetails.bankName}</span>
             </div>
             
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Nomor Rekening:</span>
+            <div className="flex justify-between items-center text-sm">
+              <span>Rekening:</span>
               <div className="flex items-center gap-2">
                 <span className="font-mono font-bold">{paymentDetails.accountNumber}</span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleCopyAccountNumber}
-                  className="h-8 w-8 p-0"
+                  className="h-6 w-6 p-0"
                 >
-                  <Copy className="h-4 w-4" />
+                  <Copy className="h-3 w-3" />
                 </Button>
               </div>
             </div>
             
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Atas Nama:</span>
+            <div className="flex justify-between items-center text-sm">
+              <span>Atas Nama:</span>
               <span className="font-bold">{paymentDetails.accountName}</span>
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="font-medium">Jumlah Transfer:</span>
-              <span className="font-bold text-2xl text-primary">{currentPlan.displayAmount}</span>
+              <span className="font-medium">Transfer:</span>
+              <span className="font-bold text-xl text-primary">{currentPlan.displayAmount}</span>
             </div>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
-            <h4 className="font-medium text-amber-800 mb-2">Langkah Pembayaran:</h4>
-            <ol className="text-sm text-amber-700 space-y-1 list-decimal list-inside">
-              <li>Transfer sejumlah {currentPlan.displayAmount} ke rekening di atas</li>
+          <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg">
+            <h4 className="font-medium text-amber-800 mb-1 text-sm">Langkah:</h4>
+            <ol className="text-xs text-amber-700 space-y-0.5 list-decimal list-inside">
+              <li>Transfer {currentPlan.displayAmount}</li>
               <li>Simpan bukti transfer</li>
-              <li>Klik tombol WhatsApp di bawah untuk konfirmasi</li>
-              <li>Kirim bukti transfer ke Kak Renata</li>
-              <li>Tunggu aktivasi akun VIP (maks 24 jam)</li>
+              <li>Klik "Pay Now" untuk konfirmasi</li>
             </ol>
           </div>
         </CardContent>
