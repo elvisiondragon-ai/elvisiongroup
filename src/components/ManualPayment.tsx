@@ -199,17 +199,9 @@ export const ManualPayment: React.FC<ManualPaymentProps> = ({ onClose }) => {
           </div>
         </CardContent>
         <CardFooter className="flex gap-3">
-          <Button 
-            onClick={handleCreateManualPayment}
-            disabled={isProcessing}
-            className="flex-1"
-          >
-            {isProcessing ? 'Memproses...' : 'Buat Instruksi Pembayaran'}
-          </Button>
-          
           <Button
             asChild
-            className="flex items-center gap-2"
+            className="flex-1 items-center gap-2"
           >
             <a href="https://wa.me/62895325633487?text=Kak%20Renata%20saya%20sudah%20bayar%20aplikasi%20ini%20bukti%20transfernya" target="_blank" rel="noopener noreferrer">
               <MessageCircle className="h-4 w-4" />
