@@ -226,15 +226,16 @@ export function Home({ onNavigate }: HomeProps) {
         <div className="grid grid-cols-2 gap-4">
           {features.map((feature, index) => {
             const isLocked = feature.levelRequired && (userProfile?.level || 1) < feature.levelRequired;
+            const isIgnisQuest = feature.key === 'ignis-quest';
             
             return (
               <Card 
                 key={index}
                 className={`p-4 border-border transition-all duration-300 relative ${
                   isLocked 
-                    ? 'bg-card/50 opacity-75 cursor-not-allowed' 
+                    ? 'bg-card/50 cursor-not-allowed' 
                     : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'
-                } ${feature.isNew ? 'relative' : ''}`}
+                } ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`}
                 onClick={() => {
                   if (isLocked) {
                     return; // Do nothing if locked
@@ -249,28 +250,27 @@ export function Home({ onNavigate }: HomeProps) {
                   </div>
                 )}
                 
-                {isLocked && (
-                  <div className="absolute inset-0 bg-background/60 backdrop-blur-sm rounded-lg flex items-center justify-center z-20">
-                    <div className="text-center">
-                      <Lock className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <div className="text-xs font-medium text-muted-foreground">
-                        Level {feature.levelRequired} Required
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className={`p-3 rounded-full bg-muted ${feature.color} ${isLocked ? 'opacity-50' : ''}`}>
+                  <div className={`p-3 rounded-full bg-muted ${feature.color} relative`}>
                     <feature.icon className="w-6 h-6" />
+                    {isLocked && (
+                      <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
+                        <Lock className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
                   </div>
                   <div>
-                    <h3 className={`font-medium mb-1 ${isLocked ? 'text-muted-foreground' : 'text-foreground'}`}>
+                    <h3 className="font-medium text-foreground mb-1">
                       {feature.title}
                     </h3>
                     <p className="text-xs text-muted-foreground">
                       {feature.description}
                     </p>
+                    {isLocked && (
+                      <div className="text-xs font-medium text-muted-foreground mt-2">
+                        Level {feature.levelRequired} Required
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>
