@@ -12,8 +12,9 @@ const mockLeaderboard = [
   { id: "6", name: "Meditation Pro", level: 5, xp: 5200, rank: 7, avatar: "" },
   { id: "7", name: "Zen Master", level: 4, xp: 4100, rank: 8, avatar: "" },
   { id: "8", name: "Cosmic Soul", level: 4, xp: 3800, rank: 9, avatar: "" },
-  { id: "9", name: "Light Worker", level: 3, xp: 2900, rank: 10, avatar: "" },
-  { id: "10", name: "Inner Peace", level: 2, xp: 1800, rank: 11, avatar: "" },
+  { id: "9", name: "Sam_165", level: 3, xp: 3200, rank: 10, avatar: "" },
+  { id: "10", name: "Light Worker", level: 3, xp: 2900, rank: 11, avatar: "" },
+  { id: "11", name: "Inner Peace", level: 2, xp: 1800, rank: 12, avatar: "" },
 ];
 
 export function Leaderboard() {
