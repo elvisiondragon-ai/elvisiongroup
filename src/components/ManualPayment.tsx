@@ -210,12 +210,13 @@ export const ManualPayment: React.FC<ManualPaymentProps> = ({ onClose }) => {
           </Button>
           
           <Button
-            variant="outline"
-            onClick={() => window.open(whatsappUrl, '_blank')}
+            asChild
             className="flex items-center gap-2"
           >
-            <MessageCircle className="h-4 w-4" />
-            WhatsApp
+            <a href="https://wa.me/62895325633487?text=Kak%20Renata%20saya%20sudah%20bayar%20aplikasi%20ini%20bukti%20transfernya" target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="h-4 w-4" />
+              Pay Now
+            </a>
           </Button>
           
           <Button variant="ghost" onClick={onClose}>

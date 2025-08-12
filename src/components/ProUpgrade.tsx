@@ -140,22 +140,14 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>Access to all premium audio content</span>
+              <span>Premium audio content</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>Exclusive spiritual journals</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>Advanced meditation techniques</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>Priority support</span>
+              <span>Exclusive journals & priority support</span>
             </div>
           </div>
           
