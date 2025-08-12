@@ -248,13 +248,6 @@ export type Database = {
             foreignKeyName: "payment_transactions_subscription_id_fkey"
             columns: ["subscription_id"]
             isOneToOne: false
-            referencedRelation: "subscription_summary"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payment_transactions_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
             referencedRelation: "vip_subscriptions"
             referencedColumns: ["id"]
           },
@@ -535,51 +528,7 @@ export type Database = {
       }
     }
     Views: {
-      subscription_summary: {
-        Row: {
-          amount_paid: number | null
-          created_at: string | null
-          currency: string | null
-          id: string | null
-          status: string | null
-          subscription_end_date: string | null
-          subscription_start_date: string | null
-          subscription_type: string | null
-          trial_end_date: string | null
-          trial_start_date: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          amount_paid?: never
-          created_at?: string | null
-          currency?: never
-          id?: string | null
-          status?: string | null
-          subscription_end_date?: string | null
-          subscription_start_date?: string | null
-          subscription_type?: string | null
-          trial_end_date?: string | null
-          trial_start_date?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          amount_paid?: never
-          created_at?: string | null
-          currency?: never
-          id?: string | null
-          status?: string | null
-          subscription_end_date?: string | null
-          subscription_start_date?: string | null
-          subscription_type?: string | null
-          trial_end_date?: string | null
-          trial_start_date?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       award_xp: {
@@ -633,6 +582,21 @@ export type Database = {
           status: string
           expires_at: string
           days_remaining: number
+        }[]
+      }
+      get_safe_subscription_data: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          subscription_type: string
+          status: string
+          trial_start_date: string
+          trial_end_date: string
+          subscription_start_date: string
+          subscription_end_date: string
+          masked_currency: string
+          masked_amount: number
         }[]
       }
       get_user_email_secure: {
