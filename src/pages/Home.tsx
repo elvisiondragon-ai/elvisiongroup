@@ -156,13 +156,13 @@ export function Home({
               <img src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" alt="eL Vision Group Logo" className="w-16 h-16 object-contain" />
               <div>
                 <h1 className="text-3xl font-bold font-orbitron text-foreground mb-2">
-                  {t('home.welcome')}
+                  {t('Welcome to eL Vision Group Ecosystem')}
                   <span className="block bg-gradient-primary bg-clip-text text-transparent">
                     eL Vision Group
                   </span>
                 </h1>
                 <p className="text-muted-foreground">
-                  {t('home.subtitle')}
+                  {t('Self-Transformation Through Spiritual Technology')}
                 </p>
               </div>
             </div>
