@@ -225,17 +225,32 @@ export function Home({
                 
                 <div className="flex flex-col items-center text-center space-y-3">
                   <div className={`p-3 rounded-full bg-muted ${feature.color} relative`}>
-                    {feature.key === 'ignis-quest' ? <img src={`${supabase.storage.from('admin-image').getPublicUrl('ignis-logo.gif').data.publicUrl}`} alt="Ignis Quest Logo" className="w-6 h-6 object-contain" onError={e => {
-                  // Fallback to Target icon if image fails to load
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.removeAttribute('style');
-                }} /> : <feature.icon className="w-6 h-6" />}
-                    {feature.key === 'ignis-quest' && <feature.icon className="w-6 h-6" style={{
-                  display: 'none'
-                }} />}
-                    {isLocked && <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
-                        <Lock className="w-4 h-4 text-muted-foreground" />
-                      </div>}
+                    {feature.key === 'ignis-quest' ? (
+                      <img 
+                        src={`${supabase.storage.from('admin-image').getPublicUrl('ignis-logo.gif').data.publicUrl}`} 
+                        alt="Ignis Quest Logo" 
+                        className="w-6 h-6 object-contain" 
+                        onError={e => {
+                          // Fallback to Target icon if image fails to load
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.removeAttribute('style');
+                        }} 
+                      />
+                    ) : (
+                      <feature.icon className="w-6 h-6" />
+                    )}
+                    {feature.key === 'ignis-quest' && (
+                      <feature.icon className="w-6 h-6" style={{ display: 'none' }} />
+                    )}
+                    {isLocked && (
+                      <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
+                        <img 
+                          src={`${supabase.storage.from('admin-image').getPublicUrl('ignis-logo.gif').data.publicUrl}`} 
+                          alt="Locked" 
+                          className="w-4 h-4 object-contain opacity-50" 
+                        />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <h3 className="font-medium text-foreground mb-1">
