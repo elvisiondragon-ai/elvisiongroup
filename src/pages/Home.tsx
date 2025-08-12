@@ -10,11 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { Play, Headphones, BookOpen, Zap, Target, Lock } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
-
 interface HomeProps {
   onNavigate: (tab: string) => void;
 }
-
 interface UserProfile {
   display_name: string | null;
   level: number;
@@ -22,74 +20,79 @@ interface UserProfile {
   streak_days: number;
   total_sessions: number;
 }
-
-export function Home({ onNavigate }: HomeProps) {
-  const { t } = useTranslation();
+export function Home({
+  onNavigate
+}: HomeProps) {
+  const {
+    t
+  } = useTranslation();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [user, setUser] = useState<any>(null);
   const [onlineCount, setOnlineCount] = useState(825); // Base count of 825
-  const { calculateXPProgress } = useXPSystem();
-
+  const {
+    calculateXPProgress
+  } = useXPSystem();
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       setUser(user);
-      
       if (user) {
         await fetchUserProfile(user.id);
         // Track user presence in online community
         trackOnlinePresence(user.id);
       }
     };
-
     getUser();
   }, []);
 
   // Track online users using Supabase presence
   useEffect(() => {
     const channel = supabase.channel('online_users');
-    
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const presenceState = channel.presenceState();
-        const onlineUsers = Object.keys(presenceState).length;
-        setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
-      })
-      .on('presence', { event: 'join' }, ({ newPresences }) => {
-        console.log('User joined:', newPresences);
-      })
-      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-        console.log('User left:', leftPresences);
-      })
-      .subscribe();
-
+    channel.on('presence', {
+      event: 'sync'
+    }, () => {
+      const presenceState = channel.presenceState();
+      const onlineUsers = Object.keys(presenceState).length;
+      setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
+    }).on('presence', {
+      event: 'join'
+    }, ({
+      newPresences
+    }) => {
+      console.log('User joined:', newPresences);
+    }).on('presence', {
+      event: 'leave'
+    }, ({
+      leftPresences
+    }) => {
+      console.log('User left:', leftPresences);
+    }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, []);
-
   const trackOnlinePresence = async (userId: string) => {
     const channel = supabase.channel('online_users');
-    
-    await channel.subscribe(async (status) => {
+    await channel.subscribe(async status => {
       if (status === 'SUBSCRIBED') {
         const presenceTrackStatus = await channel.track({
           user_id: userId,
-          online_at: new Date().toISOString(),
+          online_at: new Date().toISOString()
         });
         console.log('Presence tracked:', presenceTrackStatus);
       }
     });
   };
-
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
+      const {
+        data,
+        error
+      } = await supabase.from('profiles').select('*').eq('user_id', userId).maybeSingle();
       if (data) {
         setUserProfile(data);
       }
@@ -97,71 +100,60 @@ export function Home({ onNavigate }: HomeProps) {
       console.error('Error:', error);
     }
   };
-
   const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
-  
+
   // Calculate XP progress using the XP system
-  const xpProgress = userProfile ? calculateXPProgress(userProfile.experience_points, userProfile.level) : { currentLevelXP: 0, xpForNextLevel: 100, progress: 0 };
-
-  const features = [
-    {
-      title: t('home.meditationSessions'),
-      description: "Guided meditation sessions",
-      icon: Play,
-      color: "text-primary",
-      key: "meditation-sessions"
-    },
-    {
-      title: t('Verse of eL Vision'),
-      description: "Spiritual frequency healing",
-      icon: Headphones,
-      color: "text-accent",
-      key: "audio-therapy"
-    },
-    {
-      title: t('home.spiritualJournal'),
-      description: "Track your transformation journey",
-      icon: BookOpen,
-      color: "text-gold",
-      key: "spiritual-journal"
-    },
-    {
-      title: "Community",
-      description: "Join the soul tribe",
-      icon: Zap,
-      color: "text-neon-green",
-      key: "chat"
-    },
-    {
-      title: "Ignis Quest",
-      description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
-      icon: Target,
-      color: "text-orange-500",
-      key: "ignis-quest",
-      isNew: true,
-      levelRequired: 5
-    },
-  ];
-
-  return (
-    <div className="pb-20">
+  const xpProgress = userProfile ? calculateXPProgress(userProfile.experience_points, userProfile.level) : {
+    currentLevelXP: 0,
+    xpForNextLevel: 100,
+    progress: 0
+  };
+  const features = [{
+    title: t('home.meditationSessions'),
+    description: "Guided meditation sessions",
+    icon: Play,
+    color: "text-primary",
+    key: "meditation-sessions"
+  }, {
+    title: t('Verse of eL Vision'),
+    description: "Spiritual frequency healing",
+    icon: Headphones,
+    color: "text-accent",
+    key: "audio-therapy"
+  }, {
+    title: t('home.spiritualJournal'),
+    description: "Track your transformation journey",
+    icon: BookOpen,
+    color: "text-gold",
+    key: "spiritual-journal"
+  }, {
+    title: "Community",
+    description: "Join the soul tribe",
+    icon: Zap,
+    color: "text-neon-green",
+    key: "chat"
+  }, {
+    title: "Ignis Quest",
+    description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
+    icon: Target,
+    color: "text-orange-500",
+    key: "ignis-quest",
+    isNew: true,
+    levelRequired: 5
+  }];
+  return <div className="pb-20">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div 
-          className="h-64 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        >
+        <div className="h-64 bg-cover bg-center bg-no-repeat" style={{
+        backgroundImage: `url(${heroImage})`
+      }}>
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
           <div className="absolute top-4 right-4">
             <LanguageSwitcher />
           </div>
           <div className="relative h-full flex items-end p-6">
             <div className="flex items-center gap-4">
-              <img 
-                src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" 
-                alt="eL Vision Group Logo" 
-                className="w-16 h-16 object-contain"
-              />
+              <img src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" alt="eL Vision Group Logo" className="w-16 h-16 object-contain" />
               <div>
                 <h1 className="text-3xl font-bold font-orbitron text-foreground mb-2">
                   {t('home.welcome')}
@@ -186,11 +178,9 @@ export function Home({ onNavigate }: HomeProps) {
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-semibold text-foreground">{displayName}</h3>
                 <TierBadge level={userProfile?.level || 1} />
-                {(userProfile?.streak_days || 0) >= 7 && (
-                  <span className="px-2 py-1 text-xs font-medium bg-gradient-primary text-primary-foreground rounded-full">
+                {(userProfile?.streak_days || 0) >= 7 && <span className="px-2 py-1 text-xs font-medium bg-gradient-primary text-primary-foreground rounded-full">
                     Week Warrior
-                  </span>
-                )}
+                  </span>}
               </div>
               <p className="text-sm text-muted-foreground">
                 Streak: {userProfile?.streak_days || 0} days
@@ -211,10 +201,7 @@ export function Home({ onNavigate }: HomeProps) {
               <span>Level {userProfile?.level || 1} Progress</span>
               <span>{Math.round(xpProgress.progress)}%</span>
             </div>
-            <Progress 
-              value={xpProgress.progress} 
-              className="h-2"
-            />
+            <Progress value={xpProgress.progress} className="h-2" />
           </div>
         </Card>
       </div>
@@ -225,55 +212,30 @@ export function Home({ onNavigate }: HomeProps) {
         
         <div className="grid grid-cols-2 gap-4">
           {features.map((feature, index) => {
-            const isLocked = feature.levelRequired && (userProfile?.level || 1) < feature.levelRequired;
-            const isIgnisQuest = feature.key === 'ignis-quest';
-            
-            return (
-              <Card 
-                key={index}
-                className={`p-4 border-border transition-all duration-300 relative ${
-                  isLocked 
-                    ? 'bg-card/50 cursor-not-allowed' 
-                    : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'
-                } ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`}
-                onClick={() => {
-                  if (isLocked) {
-                    return; // Do nothing if locked
-                  }
-                  console.log("Feature clicked:", feature.key);
-                  onNavigate(feature.key);
-                }}
-              >
-                {feature.isNew && (
-                  <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-2 py-1 rounded-full z-10">
-                    NEW
-                  </div>
-                )}
+          const isLocked = feature.levelRequired && (userProfile?.level || 1) < feature.levelRequired;
+          const isIgnisQuest = feature.key === 'ignis-quest';
+          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${isLocked ? 'bg-card/50 cursor-not-allowed' : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'} ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`} onClick={() => {
+            if (isLocked) {
+              return; // Do nothing if locked
+            }
+            console.log("Feature clicked:", feature.key);
+            onNavigate(feature.key);
+          }}>
+                {feature.isNew}
                 
                 <div className="flex flex-col items-center text-center space-y-3">
                   <div className={`p-3 rounded-full bg-muted ${feature.color} relative`}>
-                    {feature.key === 'ignis-quest' ? (
-                      <img 
-                        src={`${supabase.storage.from('admin-image').getPublicUrl('ignis-logo.gif').data.publicUrl}`}
-                        alt="Ignis Quest Logo" 
-                        className="w-6 h-6 object-contain"
-                        onError={(e) => {
-                          // Fallback to Target icon if image fails to load
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.removeAttribute('style');
-                        }}
-                      />
-                    ) : (
-                      <feature.icon className="w-6 h-6" />
-                    )}
-                    {feature.key === 'ignis-quest' && (
-                      <feature.icon className="w-6 h-6" style={{ display: 'none' }} />
-                    )}
-                    {isLocked && (
-                      <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
+                    {feature.key === 'ignis-quest' ? <img src={`${supabase.storage.from('admin-image').getPublicUrl('ignis-logo.gif').data.publicUrl}`} alt="Ignis Quest Logo" className="w-6 h-6 object-contain" onError={e => {
+                  // Fallback to Target icon if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.removeAttribute('style');
+                }} /> : <feature.icon className="w-6 h-6" />}
+                    {feature.key === 'ignis-quest' && <feature.icon className="w-6 h-6" style={{
+                  display: 'none'
+                }} />}
+                    {isLocked && <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
                         <Lock className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                    )}
+                      </div>}
                   </div>
                   <div>
                     <h3 className="font-medium text-foreground mb-1">
@@ -282,16 +244,13 @@ export function Home({ onNavigate }: HomeProps) {
                     <p className="text-xs text-muted-foreground">
                       {feature.description}
                     </p>
-                    {isLocked && (
-                      <div className="text-xs font-medium text-muted-foreground mt-2">
+                    {isLocked && <div className="text-xs font-medium text-muted-foreground mt-2">
                         Level {feature.levelRequired} Required
-                      </div>
-                    )}
+                      </div>}
                   </div>
                 </div>
-              </Card>
-            );
-          })}
+              </Card>;
+        })}
         </div>
         
         {/* XP Rules */}
@@ -302,12 +261,7 @@ export function Home({ onNavigate }: HomeProps) {
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold font-orbitron">Active Community</h2>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => onNavigate("chat")}
-            className="text-primary hover:text-primary/80"
-          >
+          <Button variant="ghost" size="sm" onClick={() => onNavigate("chat")} className="text-primary hover:text-primary/80">
             View All
           </Button>
         </div>
@@ -320,15 +274,11 @@ export function Home({ onNavigate }: HomeProps) {
             <p className="text-sm text-muted-foreground mb-4">
               Members online now
             </p>
-            <Button 
-              onClick={() => onNavigate("chat")}
-              className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium"
-            >
+            <Button onClick={() => onNavigate("chat")} className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium">
               Join Chat
             </Button>
           </div>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
