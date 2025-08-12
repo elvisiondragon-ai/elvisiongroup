@@ -682,6 +682,20 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: string
       }
+      get_user_payment_transactions: {
+        Args: { p_limit?: number }
+        Returns: {
+          id: string
+          tripay_reference: string
+          payment_method: string
+          masked_amount: string
+          currency: string
+          status: string
+          created_at: string
+          paid_at: string
+          expires_at: string
+        }[]
+      }
       get_xp_for_next_level: {
         Args: { current_level: number }
         Returns: number
@@ -740,6 +754,10 @@ export type Database = {
       }
       validate_payment_access: {
         Args: { p_user_id: string; p_transaction_id: string }
+        Returns: boolean
+      }
+      validate_payment_transaction_access: {
+        Args: { p_transaction_id: string; p_access_type?: string }
         Returns: boolean
       }
     }
