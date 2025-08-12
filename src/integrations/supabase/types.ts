@@ -629,6 +629,23 @@ export type Database = {
         }
         Returns: string
       }
+      encrypt_payment_field: {
+        Args: { p_data: string; p_field_type: string }
+        Returns: string
+      }
+      enhanced_payment_access_control: {
+        Args: { p_user_id: string; p_transaction_id: string }
+        Returns: boolean
+      }
+      get_payment_access_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          access_count: number
+          last_access: string
+          suspicious_activity: boolean
+        }[]
+      }
       get_safe_subscription_data: {
         Args: { p_user_id: string }
         Returns: {
@@ -642,6 +659,23 @@ export type Database = {
           subscription_end_date: string
           masked_currency: string
           masked_amount: number
+        }[]
+      }
+      get_secure_payment_transaction: {
+        Args: { p_transaction_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          tripay_reference: string
+          payment_method: string
+          masked_amount: string
+          currency: string
+          status: string
+          created_at: string
+          updated_at: string
+          paid_at: string
+          expires_at: string
+          security_metadata: Json
         }[]
       }
       get_user_email_secure: {
@@ -658,6 +692,10 @@ export type Database = {
           p_role: string
           p_expires_at?: string
         }
+        Returns: boolean
+      }
+      is_super_admin_user: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       is_verified_admin: {
@@ -681,6 +719,16 @@ export type Database = {
           p_metadata?: Json
         }
         Returns: undefined
+      }
+      mask_sensitive_payment_data: {
+        Args: {
+          p_bank_account: string
+          p_amount: number
+          p_payment_instructions: Json
+          p_callback_data: Json
+          p_moota_webhook_data: Json
+        }
+        Returns: Json
       }
       revoke_admin_role: {
         Args: { p_target_user_id: string }
