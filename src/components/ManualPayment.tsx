@@ -20,7 +20,7 @@ export const ManualPayment: React.FC<ManualPaymentProps> = ({ onClose }) => {
   const paymentDetails = {
     bankName: 'BCA',
     accountNumber: '7751146578',
-    accountName: 'Renata Ekosistem',
+    accountName: 'Delia',
     monthly: {
       amount: 100000,
       displayAmount: 'Rp 100.000'
