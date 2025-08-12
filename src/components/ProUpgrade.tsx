@@ -2,23 +2,19 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Crown, Star, Clock, CreditCard, Building, Banknote, ArrowRight } from 'lucide-react';
+import { Crown, Star, Clock, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { usePro } from '@/hooks/usePro';
+import { ManualPayment } from './ManualPayment';
 
 interface ProUpgradeProps {
   onClose?: () => void;
 }
 
 export function ProUpgrade({ onClose }: ProUpgradeProps) {
-  const { proStatus, startTrial, createPayment } = usePro();
+  const { proStatus, startTrial } = usePro();
   const [loading, setLoading] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [showManualPayment, setShowManualPayment] = useState(false);
   const { toast } = useToast();
 
   const handleStartTrial = async () => {
@@ -41,42 +37,6 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
     }
   };
 
-  const handlePayment = async () => {
-    if (!selectedPaymentMethod) {
-      toast({
-        title: "Error",
-        description: "Please select a payment method",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const result = await createPayment(selectedPlan, selectedPaymentMethod);
-      
-      if (result.payment_url) {
-        // Redirect to payment URL
-        window.open(result.payment_url, '_blank');
-        toast({
-          title: "Payment Created",
-          description: "You've been redirected to complete your payment.",
-        });
-        setShowPaymentDialog(false);
-        onClose?.();
-      } else {
-        throw new Error("Payment URL not received");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error", 
-        description: error.message || "Failed to create payment. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -95,50 +55,11 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
     });
   };
 
-  const paymentMethods = [
-    { 
-      id: 'BCA_MANUAL', 
-      name: 'BCA Manual', 
-      icon: Building,
-      description: 'Transfer manual ke rekening BCA'
-    },
-    { 
-      id: 'BRIVA', 
-      name: 'BRI Virtual Account', 
-      icon: Building,
-      description: 'Transfer via BRI Virtual Account'
-    },
-    { 
-      id: 'BCAVA', 
-      name: 'BCA Virtual Account', 
-      icon: Building,
-      description: 'Transfer via BCA Virtual Account'
-    },
-    { 
-      id: 'BNIVA', 
-      name: 'BNI Virtual Account', 
-      icon: Building,
-      description: 'Transfer via BNI Virtual Account'
-    },
-    { 
-      id: 'MANDIRIVA', 
-      name: 'Mandiri Virtual Account', 
-      icon: Building,
-      description: 'Transfer via Mandiri Virtual Account'
-    },
-    { 
-      id: 'ALFAMART', 
-      name: 'Alfamart', 
-      icon: Banknote,
-      description: 'Bayar di Alfamart terdekat'
-    },
-    { 
-      id: 'INDOMARET', 
-      name: 'Indomaret', 
-      icon: Banknote,
-      description: 'Bayar di Indomaret terdekat'
-    }
-  ];
+
+  // Show manual payment interface
+  if (showManualPayment) {
+    return <ManualPayment onClose={() => setShowManualPayment(false)} />;
+  }
 
   // Show loading state
   if (proStatus.loading) {
@@ -190,88 +111,14 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
               <p className="text-sm text-muted-foreground mb-3">
                 Upgrade to continue Pro access after trial
               </p>
-              <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-                <DialogTrigger asChild>
-                  <Button className="w-full" variant="default">
-                    <Crown className="w-4 h-4 mr-2" />
-                    Upgrade to Pro
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Choose Your Pro Plan</DialogTitle>
-                    <DialogDescription>
-                      Select a subscription plan and payment method
-                    </DialogDescription>
-                  </DialogHeader>
-                  
-                  <div className="space-y-6">
-                    {/* Plan Selection */}
-                    <div>
-                      <h4 className="font-medium mb-3">Select Plan</h4>
-                      <RadioGroup value={selectedPlan} onValueChange={(value: 'monthly' | 'yearly') => setSelectedPlan(value)}>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between p-3 border rounded-lg">
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="monthly" id="monthly" />
-                              <Label htmlFor="monthly">Monthly</Label>
-                            </div>
-                            <span className="font-semibold">{formatCurrency(100000)}/month</span>
-                          </div>
-                          <div className="flex items-center justify-between p-3 border rounded-lg">
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="yearly" id="yearly" />
-                              <Label htmlFor="yearly">Yearly</Label>
-                            </div>
-                            <div className="text-right">
-                              <span className="font-semibold">{formatCurrency(800000)}/year</span>
-                              <p className="text-xs text-muted-foreground">Save 33%</p>
-                            </div>
-                          </div>
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    {/* Payment Method Selection */}
-                    <div>
-                      <h4 className="font-medium mb-3">Payment Method</h4>
-                      <RadioGroup value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {paymentMethods.map((method) => (
-                            <div key={method.id} className="flex items-center justify-between p-3 border rounded-lg">
-                              <div className="flex items-center space-x-3">
-                                <RadioGroupItem value={method.id} id={method.id} />
-                                <method.icon className="w-5 h-5 text-muted-foreground" />
-                                <div>
-                                  <Label htmlFor={method.id} className="cursor-pointer">
-                                    {method.name}
-                                  </Label>
-                                  <p className="text-xs text-muted-foreground">
-                                    {method.description}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    <Button 
-                      onClick={handlePayment} 
-                      disabled={loading || !selectedPaymentMethod}
-                      className="w-full"
-                    >
-                      {loading ? (
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                      ) : (
-                        <CreditCard className="w-4 h-4 mr-2" />
-                      )}
-                      {loading ? 'Processing...' : 'Create Payment'}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <Button 
+                onClick={() => setShowManualPayment(true)}
+                className="w-full"
+                variant="default"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade to Pro
+              </Button>
             </div>
           )}
         </CardContent>
@@ -326,89 +173,14 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
             {loading ? 'Starting...' : 'Start 3-Day Free Trial'}
           </Button>
           
-          <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-            <DialogTrigger asChild>
-              <Button className="w-full">
-                <Crown className="w-4 h-4 mr-2" />
-                Subscribe Now
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Choose Your Pro Plan</DialogTitle>
-                <DialogDescription>
-                  Select a subscription plan and payment method
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-6">
-                {/* Plan Selection */}
-                <div>
-                  <h4 className="font-medium mb-3">Select Plan</h4>
-                  <RadioGroup value={selectedPlan} onValueChange={(value: 'monthly' | 'yearly') => setSelectedPlan(value)}>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="monthly" id="monthly" />
-                          <Label htmlFor="monthly">Monthly</Label>
-                        </div>
-                        <span className="font-semibold">{formatCurrency(100000)}/month</span>
-                      </div>
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="yearly" id="yearly" />
-                          <Label htmlFor="yearly">Yearly</Label>
-                        </div>
-                        <div className="text-right">
-                          <span className="font-semibold">{formatCurrency(800000)}/year</span>
-                          <p className="text-xs text-muted-foreground">Save 33%</p>
-                        </div>
-                      </div>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                {/* Payment Method Selection */}
-                <div>
-                  <h4 className="font-medium mb-3">Payment Method</h4>
-                  <RadioGroup value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {paymentMethods.map((method) => (
-                        <div key={method.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <RadioGroupItem value={method.id} id={method.id} />
-                            <method.icon className="w-5 h-5 text-muted-foreground" />
-                            <div>
-                              <Label htmlFor={method.id} className="cursor-pointer">
-                                {method.name}
-                              </Label>
-                              <p className="text-xs text-muted-foreground">
-                                {method.description}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <Button 
-                  onClick={handlePayment} 
-                  disabled={loading || !selectedPaymentMethod}
-                  className="w-full"
-                >
-                  {loading ? (
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                  ) : (
-                    <CreditCard className="w-4 h-4 mr-2" />
-                  )}
-                  {loading ? 'Processing...' : 'Create Payment'}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            onClick={() => setShowManualPayment(true)}
+            className="w-full"
+          >
+            <Crown className="w-4 h-4 mr-2" />
+            Subscribe Now
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
         </CardContent>
       </Card>
     </div>
