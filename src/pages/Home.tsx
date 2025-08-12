@@ -8,7 +8,7 @@ import { XPRules } from "@/components/XPRules";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
-import { Play, Headphones, BookOpen, Zap } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Angry, Heart, Home as HomeIcon } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 
 interface HomeProps {
@@ -132,6 +132,14 @@ export function Home({ onNavigate }: HomeProps) {
       color: "text-neon-green",
       key: "chat"
     },
+    {
+      title: "Ignis Quest",
+      description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
+      icon: Target,
+      color: "text-orange-500",
+      key: "ignis-quest",
+      isNew: true
+    },
   ];
 
   return (
@@ -218,12 +226,19 @@ export function Home({ onNavigate }: HomeProps) {
           {features.map((feature, index) => (
             <Card 
               key={index}
-              className="p-4 bg-card hover:bg-card/80 border-border hover:border-primary transition-all duration-300 cursor-pointer"
+              className={`p-4 bg-card hover:bg-card/80 border-border hover:border-primary transition-all duration-300 cursor-pointer ${
+                feature.isNew ? 'relative' : ''
+              }`}
               onClick={() => {
                 console.log("Feature clicked:", feature.key);
                 onNavigate(feature.key);
               }}
             >
+              {feature.isNew && (
+                <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
+                  NEW
+                </div>
+              )}
               <div className="flex flex-col items-center text-center space-y-3">
                 <div className={`p-3 rounded-full bg-muted ${feature.color}`}>
                   <feature.icon className="w-6 h-6" />
@@ -239,6 +254,75 @@ export function Home({ onNavigate }: HomeProps) {
               </div>
             </Card>
           ))}
+        </div>
+
+        {/* Ignis Quest Section */}
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold font-orbitron mb-4 text-center">Ignis Quest</h2>
+          <p className="text-center text-muted-foreground mb-6">
+            Ignis Quest adalah perjalanan terstruktur untuk mengubah keinginan menjadi kenyataan. 
+            Melalui tiga fase utama, kamu akan belajar memanfaatkan energi terdesak, menjaga fokus, 
+            dan mengarahkan tujuan hidup dengan cara yang sehat dan efektif.
+          </p>
+          
+          <div className="space-y-4">
+            {/* Fase 1 */}
+            <Card className="p-4 bg-gradient-secondary border-border">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-red-500/20 text-red-500">
+                  <Angry className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">
+                    Fase 1 – Aktifkan Ignis Memory Keadaan Terdesak
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Sadarilah kondisi terdesak setiap hari. Keadaan ini adalah pemicu awal untuk bergerak. 
+                    Fase ini bisa digabungkan dengan elite habit seperti berenang, olahraga lari, 
+                    atau aktivitas fisik lainnya yang menyalakan kesadaran penuh.
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Fase 2 */}
+            <Card className="p-4 bg-gradient-secondary border-border">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-blue-500/20 text-blue-500">
+                  <Headphones className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">
+                    Fase 2 – Karantina Energi dengan Audio
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Energi terdesak harus dijaga dan tidak boleh langsung digunakan. Jika dibiarkan, 
+                    energi marah atau panik bisa merusak dan membuat pekerjaan sia-sia. 
+                    Dengarkan audio Verse of eL Vision sampai hati tenang dan tubuh kembali berenergi positif.
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Fase 3 */}
+            <Card className="p-4 bg-gradient-secondary border-border">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-green-500/20 text-green-500">
+                  <HomeIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">
+                    Fase 3 – Arahkan & Lepaskan
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Setelah tenang, arahkan energimu ke tujuan yang diinginkan. Visualisasikan dengan jelas, 
+                    lalu lepaskan visi itu dengan sikap pasrah. Kombinasi fokus dan penerimaan ini akan 
+                    membuka jalan untuk hasil nyata.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
         
         {/* XP Rules */}
