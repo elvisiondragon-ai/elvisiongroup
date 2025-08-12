@@ -16,7 +16,7 @@ serve(async (req)=>{
   try {
     // 2. Inisialisasi Supabase Client (menggunakan secrets dari environment Loveable AI)
     const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("payment_supabase") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { persistSession: false } }
     );
