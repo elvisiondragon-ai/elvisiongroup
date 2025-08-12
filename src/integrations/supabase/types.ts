@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity_log: {
+        Row: {
+          action: string
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          requires_approval: boolean | null
+          resource_id: string | null
+          risk_score: number | null
+          target_resource: string | null
+          target_user_id: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          requires_approval?: boolean | null
+          resource_id?: string | null
+          risk_score?: number | null
+          target_resource?: string | null
+          target_user_id?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          requires_approval?: boolean | null
+          resource_id?: string | null
+          risk_score?: number | null
+          target_resource?: string | null
+          target_user_id?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_roles: {
         Row: {
           expires_at: string | null
@@ -567,6 +618,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_system_health_check: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       award_xp: {
         Args: {
           p_user_id: string
@@ -620,6 +675,10 @@ export type Database = {
           days_remaining: number
         }[]
       }
+      cleanup_expired_admin_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       create_chat_message: {
         Args: {
           p_message: string
@@ -628,6 +687,10 @@ export type Database = {
           p_allowed_users?: string[]
         }
         Returns: string
+      }
+      emergency_revoke_admin_role: {
+        Args: { p_target_user_id: string; p_reason: string }
+        Returns: Json
       }
       encrypt_payment_field: {
         Args: { p_data: string; p_field_type: string }
@@ -748,6 +811,15 @@ export type Database = {
         Args: { p_target_user_id: string }
         Returns: boolean
       }
+      secure_admin_role_grant: {
+        Args: {
+          p_target_user_id: string
+          p_role: string
+          p_expires_at?: string
+          p_justification?: string
+        }
+        Returns: Json
+      }
       start_vip_trial: {
         Args: { p_user_id: string; p_email: string; p_ip_address?: string }
         Returns: string
@@ -763,6 +835,10 @@ export type Database = {
       validate_payment_transaction_access: {
         Args: { p_transaction_id: string; p_access_type?: string }
         Returns: boolean
+      }
+      verify_admin_with_failsafe: {
+        Args: { p_user_id: string; p_required_role?: string }
+        Returns: Json
       }
     }
     Enums: {
