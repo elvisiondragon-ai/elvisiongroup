@@ -8,7 +8,7 @@ import { XPRules } from "@/components/XPRules";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
-import { Play, Headphones, BookOpen, Zap, Target } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Lock } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 
 interface HomeProps {
@@ -138,7 +138,8 @@ export function Home({ onNavigate }: HomeProps) {
       icon: Target,
       color: "text-orange-500",
       key: "ignis-quest",
-      isNew: true
+      isNew: true,
+      levelRequired: 5
     },
   ];
 
@@ -223,37 +224,58 @@ export function Home({ onNavigate }: HomeProps) {
         <h2 className="text-xl font-semibold font-orbitron">Explore</h2>
         
         <div className="grid grid-cols-2 gap-4">
-          {features.map((feature, index) => (
-            <Card 
-              key={index}
-              className={`p-4 bg-card hover:bg-card/80 border-border hover:border-primary transition-all duration-300 cursor-pointer ${
-                feature.isNew ? 'relative' : ''
-              }`}
-              onClick={() => {
-                console.log("Feature clicked:", feature.key);
-                onNavigate(feature.key);
-              }}
-            >
-              {feature.isNew && (
-                <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
-                  NEW
+          {features.map((feature, index) => {
+            const isLocked = feature.levelRequired && (userProfile?.level || 1) < feature.levelRequired;
+            
+            return (
+              <Card 
+                key={index}
+                className={`p-4 border-border transition-all duration-300 relative ${
+                  isLocked 
+                    ? 'bg-card/50 opacity-75 cursor-not-allowed' 
+                    : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'
+                } ${feature.isNew ? 'relative' : ''}`}
+                onClick={() => {
+                  if (isLocked) {
+                    return; // Do nothing if locked
+                  }
+                  console.log("Feature clicked:", feature.key);
+                  onNavigate(feature.key);
+                }}
+              >
+                {feature.isNew && (
+                  <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-2 py-1 rounded-full z-10">
+                    NEW
+                  </div>
+                )}
+                
+                {isLocked && (
+                  <div className="absolute inset-0 bg-background/60 backdrop-blur-sm rounded-lg flex items-center justify-center z-20">
+                    <div className="text-center">
+                      <Lock className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                      <div className="text-xs font-medium text-muted-foreground">
+                        Level {feature.levelRequired} Required
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className={`p-3 rounded-full bg-muted ${feature.color} ${isLocked ? 'opacity-50' : ''}`}>
+                    <feature.icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className={`font-medium mb-1 ${isLocked ? 'text-muted-foreground' : 'text-foreground'}`}>
+                      {feature.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {feature.description}
+                    </p>
+                  </div>
                 </div>
-              )}
-              <div className="flex flex-col items-center text-center space-y-3">
-                <div className={`p-3 rounded-full bg-muted ${feature.color}`}>
-                  <feature.icon className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-foreground mb-1">
-                    {feature.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
         
         {/* XP Rules */}
