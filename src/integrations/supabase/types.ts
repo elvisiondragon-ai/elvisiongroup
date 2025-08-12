@@ -92,6 +92,33 @@ export type Database = {
         }
         Relationships: []
       }
+      data_classification: {
+        Row: {
+          audit_required: boolean | null
+          classification: string
+          created_at: string
+          pii_fields: string[] | null
+          retention_days: number | null
+          table_name: string
+        }
+        Insert: {
+          audit_required?: boolean | null
+          classification: string
+          created_at?: string
+          pii_fields?: string[] | null
+          retention_days?: number | null
+          table_name: string
+        }
+        Update: {
+          audit_required?: boolean | null
+          classification?: string
+          created_at?: string
+          pii_fields?: string[] | null
+          retention_days?: number | null
+          table_name?: string
+        }
+        Relationships: []
+      }
       device_tokens: {
         Row: {
           created_at: string
@@ -217,6 +244,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payment_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_summary"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payment_transactions_subscription_id_fkey"
             columns: ["subscription_id"]
@@ -391,12 +425,38 @@ export type Database = {
         }
         Relationships: []
       }
+      user_contact_info: {
+        Row: {
+          created_at: string
+          email_encrypted: string
+          email_hash: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_encrypted: string
+          email_hash: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_encrypted?: string
+          email_hash?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vip_subscriptions: {
         Row: {
           amount_paid: number | null
           created_at: string
           currency: string | null
-          email: string
           id: string
           ip_address: string | null
           status: string
@@ -413,7 +473,6 @@ export type Database = {
           amount_paid?: number | null
           created_at?: string
           currency?: string | null
-          email: string
           id?: string
           ip_address?: string | null
           status?: string
@@ -430,7 +489,6 @@ export type Database = {
           amount_paid?: number | null
           created_at?: string
           currency?: string | null
-          email?: string
           id?: string
           ip_address?: string | null
           status?: string
@@ -477,7 +535,51 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      subscription_summary: {
+        Row: {
+          amount_paid: number | null
+          created_at: string | null
+          currency: string | null
+          id: string | null
+          status: string | null
+          subscription_end_date: string | null
+          subscription_start_date: string | null
+          subscription_type: string | null
+          trial_end_date: string | null
+          trial_start_date: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_paid?: never
+          created_at?: string | null
+          currency?: never
+          id?: string | null
+          status?: string | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_paid?: never
+          created_at?: string | null
+          currency?: never
+          id?: string | null
+          status?: string | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       award_xp: {
@@ -493,6 +595,10 @@ export type Database = {
       calculate_level_from_xp: {
         Args: { total_xp: number }
         Returns: number
+      }
+      can_access_payment_transaction: {
+        Args: { p_user_id: string; p_transaction_id: string }
+        Returns: boolean
       }
       check_daily_audio_limit: {
         Args: { p_user_id: string }
@@ -515,6 +621,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_sensitive_data_rate_limit: {
+        Args: { p_user_id: string; p_table_name: string }
+        Returns: boolean
+      }
       check_vip_status: {
         Args: { p_user_id: string }
         Returns: {
@@ -525,9 +635,17 @@ export type Database = {
           days_remaining: number
         }[]
       }
+      get_user_email_secure: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
       get_xp_for_next_level: {
         Args: { current_level: number }
         Returns: number
+      }
+      is_verified_admin: {
+        Args: { p_user_id: string }
+        Returns: boolean
       }
       log_data_access: {
         Args: {
