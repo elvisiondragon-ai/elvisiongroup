@@ -178,9 +178,36 @@ export function Chat() {
     };
   }, [toast]);
 
+  // Enhanced input validation function
+  const validateMessage = (input: string): string | null => {
+    const trimmed = input.trim();
+    
+    // Length validation
+    if (trimmed.length === 0) return "Message cannot be empty";
+    if (trimmed.length > 500) return "Message must be 500 characters or less";
+    
+    // Basic sanitization - remove potentially harmful characters
+    const sanitized = trimmed
+      .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remove script tags
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/javascript:/gi, '') // Remove javascript: URLs
+      .replace(/on\w+\s*=/gi, ''); // Remove event handlers
+    
+    // Check for excessive repetition (spam detection)
+    const repeated = /(.)\1{10,}/.test(sanitized);
+    if (repeated) return "Message contains excessive repeated characters";
+    
+    return null;
+  };
+
   const handleSendMessage = async () => {
-    if (!message.trim()) {
-      console.log('Message is empty, not sending');
+    const validationError = validateMessage(message);
+    if (validationError) {
+      toast({
+        title: "Invalid Message",
+        description: validationError,
+        variant: "destructive"
+      });
       return;
     }
 
@@ -298,6 +325,7 @@ export function Chat() {
             onKeyPress={handleKeyPress}
             placeholder="Bagikan energi positif Anda..."
             className="cyber-input"
+            maxLength={500}
           />
           <Button
             onClick={handleSendMessage}

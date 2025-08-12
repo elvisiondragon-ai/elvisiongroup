@@ -22,15 +22,30 @@ export function AudioUpload({ onUploadComplete }: AudioUploadProps) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
-      // Check if it's an audio file
-      if (!selectedFile.type.startsWith('audio/')) {
+      // Enhanced file validation
+      const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a'];
+      const maxSize = 50 * 1024 * 1024; // 50MB limit
+      
+      // Check file type
+      if (!selectedFile.type.startsWith('audio/') || !allowedTypes.includes(selectedFile.type)) {
         toast({
           title: "Invalid file type",
-          description: "Please select an MP3 or other audio file",
+          description: "Please select a valid audio file (MP3, WAV, OGG, M4A)",
           variant: "destructive",
         });
         return;
       }
+      
+      // Check file size
+      if (selectedFile.size > maxSize) {
+        toast({
+          title: "File too large",
+          description: "Audio file must be 50MB or smaller",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       setFile(selectedFile);
       if (!title) {
         setTitle(selectedFile.name.replace(/\.[^/.]+$/, "")); // Remove extension
@@ -38,11 +53,30 @@ export function AudioUpload({ onUploadComplete }: AudioUploadProps) {
     }
   };
 
+  // Enhanced input validation
+  const validateInputs = (): string | null => {
+    if (!file) return "Please select an audio file";
+    
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return "Please enter a title";
+    if (trimmedTitle.length > 100) return "Title must be 100 characters or less";
+    
+    const trimmedDescription = description.trim();
+    if (trimmedDescription.length > 500) return "Description must be 500 characters or less";
+    
+    // Basic sanitization check
+    const hasHtml = /<[^>]*>/.test(trimmedTitle) || /<[^>]*>/.test(trimmedDescription);
+    if (hasHtml) return "Title and description cannot contain HTML tags";
+    
+    return null;
+  };
+
   const handleUpload = async () => {
-    if (!file || !title.trim()) {
+    const validationError = validateInputs();
+    if (validationError) {
       toast({
-        title: "Missing information",
-        description: "Please select a file and enter a title",
+        title: "Validation Error",
+        description: validationError,
         variant: "destructive",
       });
       return;
@@ -167,6 +201,7 @@ export function AudioUpload({ onUploadComplete }: AudioUploadProps) {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter track title"
               className="mt-1"
+              maxLength={100}
             />
           </div>
 
@@ -179,6 +214,7 @@ export function AudioUpload({ onUploadComplete }: AudioUploadProps) {
               placeholder="Optional description"
               className="mt-1"
               rows={3}
+              maxLength={500}
             />
           </div>
 
