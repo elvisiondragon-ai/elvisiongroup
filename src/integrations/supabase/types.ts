@@ -752,6 +752,10 @@ export type Database = {
         Args: { p_user_id: string; p_email: string; p_ip_address?: string }
         Returns: string
       }
+      validate_admin_role_operation: {
+        Args: { p_target_user_id: string; p_role: string; p_operation: string }
+        Returns: boolean
+      }
       validate_payment_access: {
         Args: { p_user_id: string; p_transaction_id: string }
         Returns: boolean
