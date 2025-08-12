@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_roles: {
+        Row: {
+          expires_at: string | null
+          granted_at: string
+          granted_by: string
+          id: string
+          is_active: boolean
+          role: string
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          granted_at?: string
+          granted_by: string
+          id?: string
+          is_active?: boolean
+          role: string
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          is_active?: boolean
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audio_tracks: {
         Row: {
           category: string | null
@@ -61,9 +91,11 @@ export type Database = {
       }
       chat_messages: {
         Row: {
+          allowed_users: string[] | null
           channel_id: string | null
           created_at: string
           id: string
+          is_private: boolean | null
           is_pro: boolean | null
           message: string
           user_id: string
@@ -71,9 +103,11 @@ export type Database = {
           user_name: string
         }
         Insert: {
+          allowed_users?: string[] | null
           channel_id?: string | null
           created_at?: string
           id?: string
+          is_private?: boolean | null
           is_pro?: boolean | null
           message: string
           user_id: string
@@ -81,9 +115,11 @@ export type Database = {
           user_name: string
         }
         Update: {
+          allowed_users?: string[] | null
           channel_id?: string | null
           created_at?: string
           id?: string
+          is_private?: boolean | null
           is_pro?: boolean | null
           message?: string
           user_id?: string
@@ -584,6 +620,15 @@ export type Database = {
           days_remaining: number
         }[]
       }
+      create_chat_message: {
+        Args: {
+          p_message: string
+          p_channel_id?: string
+          p_is_private?: boolean
+          p_allowed_users?: string[]
+        }
+        Returns: string
+      }
       get_safe_subscription_data: {
         Args: { p_user_id: string }
         Returns: {
@@ -607,6 +652,14 @@ export type Database = {
         Args: { current_level: number }
         Returns: number
       }
+      grant_admin_role: {
+        Args: {
+          p_target_user_id: string
+          p_role: string
+          p_expires_at?: string
+        }
+        Returns: boolean
+      }
       is_verified_admin: {
         Args: { p_user_id: string }
         Returns: boolean
@@ -628,6 +681,10 @@ export type Database = {
           p_metadata?: Json
         }
         Returns: undefined
+      }
+      revoke_admin_role: {
+        Args: { p_target_user_id: string }
+        Returns: boolean
       }
       start_vip_trial: {
         Args: { p_user_id: string; p_email: string; p_ip_address?: string }
