@@ -49,6 +49,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [tripayLoading, setTripayLoading] = useState(false);
   const { proStatus } = usePro();
   const { toast } = useToast();
 
@@ -163,6 +164,48 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         description: "Failed to delete account. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleTripayPayment = async () => {
+    if (!user) return;
+    
+    setTripayLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
+        body: {
+          subscriptionType: 'monthly',
+          paymentMethod: 'BRIVA',
+          userEmail: user.email,
+          userName: userProfile?.display_name || user.email?.split('@')[0] || 'User'
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.checkoutUrl) {
+        window.open(data.checkoutUrl, '_blank');
+        toast({
+          title: "Payment Created",
+          description: "Payment link opened in new tab",
+        });
+      } else {
+        toast({
+          title: "Payment Created",
+          description: "Payment has been created successfully",
+        });
+      }
+    } catch (error) {
+      console.error('Tripay payment error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create payment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setTripayLoading(false);
     }
   };
 
@@ -397,6 +440,16 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         >
           <Bell className="w-4 h-4 mr-2" />
           Notifikasi
+        </Button>
+
+        <Button 
+          variant="outline" 
+          className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium border-primary hover:border-primary"
+          onClick={handleTripayPayment}
+          disabled={tripayLoading}
+        >
+          <Zap className="w-4 h-4 mr-2" />
+          {tripayLoading ? 'Creating Payment...' : 'Tripay Payment'}
         </Button>
 
         <Button 
