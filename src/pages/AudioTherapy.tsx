@@ -311,52 +311,67 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                              return;
                            }
 
-                           // Start new audio
-                           if (verse.audioUrl) {
-                             const audio = new Audio(verse.audioUrl);
-                             
-                             // Prevent download and right-click context menu
-                             audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-                             audio.setAttribute('disablePictureInPicture', 'true');
-                             audio.preload = 'metadata';
-                             
-                             // Add security attributes
-                             audio.addEventListener('contextmenu', (e) => e.preventDefault());
-                             
-                             // Set playing state immediately
-                             setCurrentAudio(audio);
-                             setPlayingVerseId(verse.id);
-                             
-                             audio.play().catch(error => {
-                               console.error('Error playing audio:', error);
-                               // Reset state if play fails
-                               setCurrentAudio(null);
-                               setPlayingVerseId(null);
-                             });
-                             
-                             // Handle audio end
-                             audio.addEventListener('ended', () => {
-                               setCurrentAudio(null);
-                               setPlayingVerseId(null);
-                               
-                               // Award XP for completing audio
-                               const verseTitle = verse.title;
-                               awardXP('audio_completion', 10, `Completed ${verseTitle}`, {
-                                 verseId: verse.id,
-                                 verseTitle: verseTitle
-                               });
-                             });
-                             
-                             // Prevent seeking beyond current position when paused
-                             audio.addEventListener('pause', () => {
-                               const currentTime = audio.currentTime;
-                               audio.addEventListener('seeked', () => {
-                                 if (audio.paused && audio.currentTime > currentTime + 1) {
-                                   audio.currentTime = currentTime;
-                                 }
-                               });
-                             });
-                           }
+                            // Start new audio
+                            if (verse.audioUrl) {
+                              const audio = new Audio();
+                              
+                              // Set CORS and security attributes before setting src
+                              audio.crossOrigin = 'anonymous';
+                              audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+                              audio.setAttribute('disablePictureInPicture', 'true');
+                              audio.preload = 'metadata';
+                              
+                              // Add security attributes
+                              audio.addEventListener('contextmenu', (e) => e.preventDefault());
+                              
+                              // Set source after configuration
+                              audio.src = verse.audioUrl;
+                              
+                              // Set playing state immediately
+                              setCurrentAudio(audio);
+                              setPlayingVerseId(verse.id);
+                              
+                              // Load and play with better error handling
+                              audio.load();
+                              audio.play().catch(error => {
+                                console.error('Error playing audio:', error);
+                                console.error('Audio URL:', verse.audioUrl);
+                                console.error('Audio readyState:', audio.readyState);
+                                
+                                // Reset state if play fails
+                                setCurrentAudio(null);
+                                setPlayingVerseId(null);
+                                
+                                // Try alternative approach
+                                if (error.name === 'NotSupportedError') {
+                                  // Try opening in new tab as fallback
+                                  window.open(verse.audioUrl, '_blank');
+                                }
+                              });
+                              
+                              // Handle audio end
+                              audio.addEventListener('ended', () => {
+                                setCurrentAudio(null);
+                                setPlayingVerseId(null);
+                                
+                                // Award XP for completing audio
+                                const verseTitle = verse.title;
+                                awardXP('audio_completion', 10, `Completed ${verseTitle}`, {
+                                  verseId: verse.id,
+                                  verseTitle: verseTitle
+                                });
+                              });
+                              
+                              // Prevent seeking beyond current position when paused
+                              audio.addEventListener('pause', () => {
+                                const currentTime = audio.currentTime;
+                                audio.addEventListener('seeked', () => {
+                                  if (audio.paused && audio.currentTime > currentTime + 1) {
+                                    audio.currentTime = currentTime;
+                                  }
+                                });
+                              });
+                            }
                          }}
                       >
                          <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform group-hover:scale-110 transition-transform duration-300">
