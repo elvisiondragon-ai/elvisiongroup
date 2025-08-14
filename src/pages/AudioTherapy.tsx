@@ -116,6 +116,66 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse4-English.MP3',
       language: 'en'
     },
+    {
+      id: 5,
+      title: "Verse 5 - Vitality Vortex",
+      subtitle: "Memperbaiki ulang fisik dan mental untuk hidup yang sehat",
+      unlocked: false,
+      requiredLevel: 5,
+      artwork: verse5Artwork,
+      audioUrl: null,
+      language: 'id'
+    },
+    {
+      id: 6,
+      title: "Verse 6 - Momentum Matrix",
+      subtitle: "Mengaktifkan semangat dan fokus untuk menyelesaikan tugas tanpa menunda",
+      unlocked: false,
+      requiredLevel: 6,
+      artwork: verse6Artwork,
+      audioUrl: null,
+      language: 'id'
+    },
+    {
+      id: 7,
+      title: "Verse 7 - Confidence Core",
+      subtitle: "Menumbuhkan keyakinan diri agar berani mengambil langkah penting",
+      unlocked: false,
+      requiredLevel: 7,
+      artwork: verse7Artwork,
+      audioUrl: null,
+      language: 'id'
+    },
+    {
+      id: 8,
+      title: "Verse 8 - Love Magnet",
+      subtitle: "Menarik cinta dan kasih sayang dari orang-orang di sekitar",
+      unlocked: false,
+      requiredLevel: 8,
+      artwork: verse8Artwork,
+      audioUrl: null,
+      language: 'id'
+    },
+    {
+      id: 9,
+      title: "Verse 9 - Family Harmony",
+      subtitle: "Menenangkan emosi dan memperkuat hubungan keluarga",
+      unlocked: false,
+      requiredLevel: 9,
+      artwork: verse9Artwork,
+      audioUrl: null,
+      language: 'id'
+    },
+    {
+      id: 10,
+      title: "Verse 10 - Healing Heart",
+      subtitle: "Menyembuhkan luka batin dan memulihkan kedamaian hati",
+      unlocked: false,
+      requiredLevel: 10,
+      artwork: verse10Artwork,
+      audioUrl: null,
+      language: 'id'
+    },
   ];
 
   return (
