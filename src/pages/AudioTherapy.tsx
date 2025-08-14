@@ -87,13 +87,23 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       language: 'en'
     },
     {
+      id: 2,
+      title: "Verse 2 - Lucid Beach",
+      subtitle: "Relaksasi seperti berada di pantai, membantu tidur nyenyak dan pikiran jernih",
+      unlocked: userLevel >= 2,
+      requiredLevel: 2,
+      artwork: verse2Artwork,
+      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse2%20-%20Lucid%20Beach%20-%20low%20env.MP3',
+      language: 'id'
+    },
+    {
       id: 3,
-      title: "Verse 3 - Meditasi Syukur Powerful",
-      subtitle: "Divine Connection",
-      unlocked: userLevel >= 10,
-      requiredLevel: 10,
+      title: "Verse 3 - Syukur Meditation",
+      subtitle: "Menumbuhkan rasa syukur pada titik saraf seluruh tubuh",
+      unlocked: userLevel >= 3,
+      requiredLevel: 3,
       artwork: verse3Artwork,
-      audioUrl: null, // No audio available yet
+      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Indonesia/Verse-3-Meditasi-Syukur-Powerful.mp3',
       language: 'id'
     },
     {
