@@ -90,7 +90,7 @@ serve(async (req) => {
       customer_name: userName || userEmail.split('@')[0],
       customer_email: userEmail,
       order_items: orderItems,
-      callback_url: `https://elvisiongroup.com/tripay/process`,
+      callback_url: `https://payment.elvisiongroup.com/api/create-payment`,
       return_url: `${req.headers.get('origin') || 'https://elvisiongroup.com'}/profile?payment=success`,
       expired_time: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
       signature: signature
