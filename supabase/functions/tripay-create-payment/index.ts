@@ -118,7 +118,7 @@ serve(async (req) => {
     });
 
     // Send request to VPS proxy instead of directly to Tripay
-    const proxyResponse = await fetch('http://payment.elvisiongroup.com/api/create-payment', {
+    const proxyResponse = await fetch('https://payment.elvisiongroup.com/api/create-payment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
