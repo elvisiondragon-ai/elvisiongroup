@@ -87,94 +87,34 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       language: 'en'
     },
     {
-      id: 2,
-      title: "Verse 2",
-      subtitle: "Coming Soon",
-      unlocked: false,
-      requiredLevel: 5,
-      artwork: verse2Artwork,
-      audioUrl: null,
-      language: 'id'
-    },
-    {
       id: 3,
       title: "Verse 3 - Meditasi Syukur Powerful",
       subtitle: "Divine Connection",
       unlocked: userLevel >= 10,
-      requiredLevel: 6,
+      requiredLevel: 10,
       artwork: verse3Artwork,
-      audioUrl: null,
+      audioUrl: null, // No audio available yet
       language: 'id'
     },
     {
       id: 4,
-      title: "Verse 4: Vitality Vortex",
-      subtitle: "Mengisi ulang energi fisik dan mental untuk hari yang produktif",
-      unlocked: false,
-      requiredLevel: 6,
+      title: "Verse 4 - Prosperity Stream",
+      subtitle: "Frekuensi Kaya Raya",
+      unlocked: true,
+      requiredLevel: 15,
       artwork: verse4Artwork,
-      audioUrl: null,
+      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%204%20-%20Prosperity%20Stream%20Vol.%201.MP3',
       language: 'id'
     },
     {
-      id: 5,
-      title: "Verse 5: Momentum Matrix",
-      subtitle: "Mengaktifkan semangat dan fokus untuk menyelesaikan tugas tanpa menunda",
-      unlocked: false,
-      requiredLevel: 7,
-      artwork: verse5Artwork,
-      audioUrl: null,
-      language: 'id'
-    },
-    {
-      id: 6,
-      title: "Verse 6: Confidence Core",
-      subtitle: "Menumbuhkan keyakinan diri agar berani mengambil langkah penting",
-      unlocked: false,
-      requiredLevel: 8,
-      artwork: verse6Artwork,
-      audioUrl: null,
-      language: 'id'
-    },
-    {
-      id: 7,
-      title: "Verse 7: Love Magnet",
-      subtitle: "Menarik cinta dan kasih sayang dari orang-orang di sekitar",
-      unlocked: false,
-      requiredLevel: 9,
-      artwork: verse7Artwork,
-      audioUrl: null,
-      language: 'id'
-    },
-    {
-      id: 8,
-      title: "Verse 8: Family Harmony",
-      subtitle: "Menenangkan emosi dan memperkuat hubungan keluarga",
-      unlocked: false,
-      requiredLevel: 10,
-      artwork: verse8Artwork,
-      audioUrl: null,
-      language: 'id'
-    },
-    {
-      id: 9,
-      title: "Verse 9: Stress Release",
-      subtitle: "Melepaskan ketegangan dan beban pikiran, membawa rasa lega",
-      unlocked: false,
-      requiredLevel: 11,
-      artwork: verse9Artwork,
-      audioUrl: null,
-      language: 'id'
-    },
-    {
-      id: 10,
-      title: "Verse 10: Healing Heart",
-      subtitle: "Menyembuhkan luka batin dan memulihkan kedamaian hati",
-      unlocked: false,
-      requiredLevel: 12,
-      artwork: verse10Artwork,
-      audioUrl: null,
-      language: 'id'
+      id: 41,
+      title: "Verse 4 - Prosperity Stream (English)",
+      subtitle: "Prosperity Stream",
+      unlocked: true,
+      requiredLevel: 15,
+      artwork: verse4Artwork,
+      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse4-English.MP3',
+      language: 'en'
     },
   ];
 
