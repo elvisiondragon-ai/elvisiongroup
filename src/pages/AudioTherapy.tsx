@@ -124,7 +124,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: userLevel >= 3,
       requiredLevel: 3,
       artwork: verse3Artwork,
-      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Indonesia/Verse-3-Meditasi-Syukur-Powerful.mp3',
+      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse-3-Meditasi-Syukur-Powerful.mp3',
       language: 'id'
     },
     {
