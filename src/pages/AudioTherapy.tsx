@@ -57,7 +57,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         .select('*')
         .eq('category', 'verse')
         .eq('is_public', true)
-        .eq('language', i18n.language) // Filter by current language
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -79,83 +78,43 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const verses = [
     {
       id: 1,
-      title: t('Verse 1 - The Space Hill'),
-      subtitle: t('Kedamaian Batin'),
+      title: "Verse 1 - The Space Hill",
+      subtitle: "Kedamaian Batin",
       unlocked: true,
       requiredLevel: 1,
       artwork: verseArtwork,
-    },
-    {
-      id: 2,
-      title: t('Verse 2 - Lucid Beach'),
-      subtitle: t('verses.verse2.subtitle'),
-      unlocked: userLevel >= 5,
-      requiredLevel: 5,
-      artwork: verse2Artwork,
+      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3',
+      language: 'en'
     },
     {
       id: 3,
-      title: t('Verse 3 - Meditasi Syukur Powerful'),
-      subtitle: t('verses.verse3.subtitle'),
+      title: "Verse 3 - Meditasi Syukur Powerful",
+      subtitle: "Divine Connection",
       unlocked: userLevel >= 10,
       requiredLevel: 10,
       artwork: verse3Artwork,
+      audioUrl: null, // No audio available yet
+      language: 'id'
     },
     {
       id: 4,
-      title: t('Verse 4 - Prosperity Stream'),
-      subtitle: t('Frekuensi Kaya Raya'),
+      title: "Verse 4 - Prosperity Stream",
+      subtitle: "Frekuensi Kaya Raya",
       unlocked: true,
       requiredLevel: 15,
       artwork: verse4Artwork,
+      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse-4-Prosperity%20Stream-Vol.-1.mp3',
+      language: 'id'
     },
     {
-      id: 5,
-      title: t('verses.verse5.title'),
-      subtitle: t('verses.verse5.subtitle'),
-      unlocked: userLevel >= 20,
-      requiredLevel: 20,
-      artwork: verse5Artwork,
-    },
-    {
-      id: 6,
-      title: t('verses.verse6.title'),
-      subtitle: t('verses.verse6.subtitle'),
-      unlocked: userLevel >= 25,
-      requiredLevel: 25,
-      artwork: verse6Artwork,
-    },
-    {
-      id: 7,
-      title: t('verses.verse7.title'),
-      subtitle: t('verses.verse7.subtitle'),
-      unlocked: userLevel >= 30,
-      requiredLevel: 30,
-      artwork: verse7Artwork,
-    },
-    {
-      id: 8,
-      title: t('verses.verse8.title'),
-      subtitle: t('verses.verse8.subtitle'),
-      unlocked: userLevel >= 35,
-      requiredLevel: 35,
-      artwork: verse8Artwork,
-    },
-    {
-      id: 9,
-      title: t('verses.verse9.title'),
-      subtitle: t('verses.verse9.subtitle'),
-      unlocked: userLevel >= 40,
-      requiredLevel: 40,
-      artwork: verse9Artwork,
-    },
-    {
-      id: 10,
-      title: t('verses.verse10.title'),
-      subtitle: t('verses.verse10.subtitle'),
-      unlocked: userLevel >= 45,
-      requiredLevel: 45,
-      artwork: verse10Artwork,
+      id: 41,
+      title: "Verse 4 - Prosperity Stream (English)",
+      subtitle: "Prosperity Stream",
+      unlocked: true,
+      requiredLevel: 15,
+      artwork: verse4Artwork,
+      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse4-English.MP3',
+      language: 'en'
     },
   ];
 
@@ -187,18 +146,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       {/* Verses */}
       <div className="px-6 space-y-8">
         {verses.map((verse) => {
-          // Get the appropriate audio URL based on verse ID and language
-          const getAudioUrl = (verseId: number, language: string) => {
-            if (verseId === 1) {
-              return 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3';
-            } else if (verseId === 4) {
-              // Use the English version for Verse 4 when language is English, otherwise use the default
-              return language === 'en' 
-                ? 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse4-English.MP3'
-                : 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse-4-Prosperity%20Stream-Vol.-1.mp3';
-            }
-            return null;
-          };
 
           return (
             <Card
@@ -219,9 +166,18 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
               <div className="relative z-10 text-center space-y-6 p-8">
                 {/* Title */}
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-bold font-orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    {verse.title}
-                  </h3>
+                  <div className="flex items-center justify-center gap-2">
+                    <h3 className="text-2xl font-bold font-orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                      {verse.title}
+                    </h3>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      verse.language === 'en' 
+                        ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' 
+                        : 'bg-green-500/20 text-green-300 border border-green-500/30'
+                    }`}>
+                      {verse.language === 'en' ? 'EN' : 'ID'}
+                    </span>
+                  </div>
                   {verse.subtitle && (
                     <p className="text-sm text-muted-foreground/80 font-medium">
                       {verse.subtitle}
@@ -263,12 +219,9 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                                currentAudio.pause();
                                currentAudio.currentTime = 0;
                              }
-                             
-                             // Get the appropriate audio URL based on verse and language
-                             const audioUrl = getAudioUrl(verse.id, i18n.language);
-                             
-                              if (audioUrl) {
-                                const audio = new Audio(audioUrl);
+                              
+                               if (verse.audioUrl) {
+                                const audio = new Audio(verse.audioUrl);
                                 
                                 // Prevent download and right-click context menu
                                 audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
@@ -325,99 +278,55 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                          </div>
                       </div>
                     </div>
-                  ) : (
+                   ) : (
                     <div className="relative">
-                      {/* Locked Container with Gradient */}
+                      {/* Locked or No Audio Container */}
                       <div className={`w-36 h-36 rounded-full flex items-center justify-center border-2 border-dashed transition-all duration-500 ${
-                        verse.requiredLevel === 5 
-                          ? "bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-400/40 shadow-lg shadow-amber-500/20"
-                          : verse.requiredLevel === 10
-                          ? "bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-400/40 shadow-lg shadow-purple-500/20"
-                          : verse.requiredLevel === 15
-                          ? "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/40 shadow-lg shadow-rose-500/20"
-                          : verse.requiredLevel === 20
-                          ? "bg-gradient-to-br from-emerald-500/20 to-green-500/20 border-emerald-400/40 shadow-lg shadow-emerald-500/20"
-                          : verse.requiredLevel === 25
-                          ? "bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border-cyan-400/40 shadow-lg shadow-cyan-500/20"
-                          : verse.requiredLevel === 30
-                          ? "bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border-yellow-400/40 shadow-lg shadow-yellow-500/20"
-                          : verse.requiredLevel === 35
-                          ? "bg-gradient-to-br from-red-500/20 to-orange-500/20 border-red-400/40 shadow-lg shadow-red-500/20"
-                          : verse.requiredLevel === 40
-                          ? "bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border-indigo-400/40 shadow-lg shadow-indigo-500/20"
-                          : "bg-gradient-to-br from-violet-500/20 to-purple-500/20 border-violet-400/40 shadow-lg shadow-violet-500/20"
+                        !verse.unlocked
+                          ? verse.requiredLevel === 10
+                            ? "bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-400/40 shadow-lg shadow-purple-500/20"
+                            : "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/40 shadow-lg shadow-rose-500/20"
+                          : "bg-gradient-to-br from-muted/20 to-background border-muted-foreground/40"
                       }`}>
                         <div className="text-center space-y-3">
-                          {/* Dynamic Icon based on level */}
-                          {verse.requiredLevel === 5 ? (
-                            <Star className="w-12 h-12 text-amber-400 mx-auto animate-pulse" />
-                          ) : verse.requiredLevel === 10 ? (
-                            <Zap className="w-12 h-12 text-purple-400 mx-auto animate-pulse" />
-                          ) : verse.requiredLevel === 15 ? (
-                            <Crown className="w-12 h-12 text-rose-400 mx-auto animate-pulse" />
-                          ) : verse.requiredLevel === 20 ? (
-                            <Shield className="w-12 h-12 text-emerald-400 mx-auto animate-pulse" />
-                          ) : verse.requiredLevel === 25 ? (
-                            <Gem className="w-12 h-12 text-cyan-400 mx-auto animate-pulse" />
-                          ) : verse.requiredLevel === 30 ? (
-                            <Flame className="w-12 h-12 text-yellow-400 mx-auto animate-pulse" />
-                          ) : verse.requiredLevel === 35 ? (
-                            <Eye className="w-12 h-12 text-red-400 mx-auto animate-pulse" />
-                          ) : verse.requiredLevel === 40 ? (
-                            <Sparkles className="w-12 h-12 text-indigo-400 mx-auto animate-pulse" />
+                          {!verse.unlocked ? (
+                            <>
+                              {verse.requiredLevel === 10 ? (
+                                <Zap className="w-12 h-12 text-purple-400 mx-auto animate-pulse" />
+                              ) : (
+                                <Crown className="w-12 h-12 text-rose-400 mx-auto animate-pulse" />
+                              )}
+                              <div className="relative">
+                                <Lock className="w-6 h-6 text-muted-foreground mx-auto" />
+                              </div>
+                            </>
                           ) : (
-                            <Infinity className="w-12 h-12 text-violet-400 mx-auto animate-pulse" />
+                            <>
+                              <Music className="w-12 h-12 text-muted-foreground mx-auto" />
+                              <div className="text-xs text-muted-foreground font-medium">
+                                Coming Soon
+                              </div>
+                            </>
                           )}
-                          
-                          {/* Lock overlay */}
-                          <div className="relative">
-                            <Lock className="w-6 h-6 text-muted-foreground mx-auto" />
-                          </div>
-                          
-                           <div className={`text-xs font-bold ${
-                            verse.requiredLevel === 5 
-                              ? "text-amber-400"
-                              : verse.requiredLevel === 10
-                              ? "text-purple-400" 
-                              : verse.requiredLevel === 15
-                              ? "text-rose-400"
-                              : verse.requiredLevel === 20
-                              ? "text-emerald-400"
-                              : verse.requiredLevel === 25
-                              ? "text-cyan-400"
-                              : verse.requiredLevel === 30
-                              ? "text-yellow-400"
-                              : verse.requiredLevel === 35
-                              ? "text-red-400"
-                              : verse.requiredLevel === 40
-                              ? "text-indigo-400"
-                              : "text-violet-400"
-                          }`}>
-                             {t('audioTherapy.locked')}
-                           </div>
                         </div>
                       </div>
                       
-                      {/* Animated glow ring */}
-                      <div className={`absolute inset-0 rounded-full animate-pulse ${
-                        verse.requiredLevel === 5 
-                          ? "bg-gradient-to-r from-amber-500/10 to-orange-500/10"
-                          : verse.requiredLevel === 10
-                          ? "bg-gradient-to-r from-purple-500/10 to-violet-500/10"
-                          : verse.requiredLevel === 15
-                          ? "bg-gradient-to-r from-rose-500/10 to-pink-500/10"
-                          : verse.requiredLevel === 20
-                          ? "bg-gradient-to-r from-emerald-500/10 to-green-500/10"
-                          : verse.requiredLevel === 25
-                          ? "bg-gradient-to-r from-cyan-500/10 to-teal-500/10"
-                          : verse.requiredLevel === 30
-                          ? "bg-gradient-to-r from-yellow-500/10 to-amber-500/10"
-                          : verse.requiredLevel === 35
-                          ? "bg-gradient-to-r from-red-500/10 to-orange-500/10"
-                          : verse.requiredLevel === 40
-                          ? "bg-gradient-to-r from-indigo-500/10 to-blue-500/10"
-                          : "bg-gradient-to-r from-violet-500/10 to-purple-500/10"
-                      } blur-xl`}></div>
+                      {!verse.unlocked && (
+                        <>
+                          <div className={`text-xs font-bold mt-3 ${
+                            verse.requiredLevel === 10 ? "text-purple-400" : "text-rose-400"
+                          }`}>
+                            {t('audioTherapy.locked')}
+                          </div>
+                          
+                          {/* Animated glow ring */}
+                          <div className={`absolute inset-0 rounded-full animate-pulse ${
+                            verse.requiredLevel === 10
+                              ? "bg-gradient-to-r from-purple-500/10 to-violet-500/10"
+                              : "bg-gradient-to-r from-rose-500/10 to-pink-500/10"
+                          } blur-xl`}></div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
