@@ -206,61 +206,65 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                       {/* Play Button Overlay */}
                       <div 
                         className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center transition-all duration-500 cursor-pointer"
-                         onClick={() => {
-                           if (playingVerseId === verse.id && currentAudio) {
-                             // Stop current audio if this verse is playing
+                        onClick={() => {
+                           // Always stop any currently playing audio first
+                           if (currentAudio) {
                              currentAudio.pause();
                              currentAudio.currentTime = 0;
                              setCurrentAudio(null);
                              setPlayingVerseId(null);
-                           } else {
-                             // Stop any currently playing audio first
-                             if (currentAudio) {
-                               currentAudio.pause();
-                               currentAudio.currentTime = 0;
-                             }
-                              
-                               if (verse.audioUrl) {
-                                const audio = new Audio(verse.audioUrl);
-                                
-                                // Prevent download and right-click context menu
-                                audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-                                audio.setAttribute('disablePictureInPicture', 'true');
-                                audio.preload = 'metadata';
-                                
-                                // Add security attributes
-                                audio.addEventListener('contextmenu', (e) => e.preventDefault());
-                                
-                                audio.play().then(() => {
-                                  setCurrentAudio(audio);
-                                  setPlayingVerseId(verse.id);
-                                }).catch(error => {
-                                  console.error('Error playing audio:', error);
-                                });
-                                
-                              // Handle audio end
-                              audio.addEventListener('ended', () => {
-                                setCurrentAudio(null);
-                                setPlayingVerseId(null);
-                                
-                                // Award XP for completing audio
-                                const verseTitle = verse.title;
-                                awardXP('audio_completion', 10, `Completed ${verseTitle}`, {
-                                  verseId: verse.id,
-                                  verseTitle: verseTitle
-                                });
-                              });
-                                
-                                // Prevent seeking beyond current position when paused
-                                audio.addEventListener('pause', () => {
-                                  const currentTime = audio.currentTime;
-                                  audio.addEventListener('seeked', () => {
-                                    if (audio.paused && audio.currentTime > currentTime + 1) {
-                                      audio.currentTime = currentTime;
-                                    }
-                                  });
-                                });
-                              }
+                           }
+
+                           if (playingVerseId === verse.id) {
+                             // If this verse was playing, just stop it (already handled above)
+                             return;
+                           }
+
+                           // Start new audio
+                           if (verse.audioUrl) {
+                             const audio = new Audio(verse.audioUrl);
+                             
+                             // Prevent download and right-click context menu
+                             audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+                             audio.setAttribute('disablePictureInPicture', 'true');
+                             audio.preload = 'metadata';
+                             
+                             // Add security attributes
+                             audio.addEventListener('contextmenu', (e) => e.preventDefault());
+                             
+                             // Set playing state immediately
+                             setCurrentAudio(audio);
+                             setPlayingVerseId(verse.id);
+                             
+                             audio.play().catch(error => {
+                               console.error('Error playing audio:', error);
+                               // Reset state if play fails
+                               setCurrentAudio(null);
+                               setPlayingVerseId(null);
+                             });
+                             
+                             // Handle audio end
+                             audio.addEventListener('ended', () => {
+                               setCurrentAudio(null);
+                               setPlayingVerseId(null);
+                               
+                               // Award XP for completing audio
+                               const verseTitle = verse.title;
+                               awardXP('audio_completion', 10, `Completed ${verseTitle}`, {
+                                 verseId: verse.id,
+                                 verseTitle: verseTitle
+                               });
+                             });
+                             
+                             // Prevent seeking beyond current position when paused
+                             audio.addEventListener('pause', () => {
+                               const currentTime = audio.currentTime;
+                               audio.addEventListener('seeked', () => {
+                                 if (audio.paused && audio.currentTime > currentTime + 1) {
+                                   audio.currentTime = currentTime;
+                                 }
+                               });
+                             });
                            }
                          }}
                       >
