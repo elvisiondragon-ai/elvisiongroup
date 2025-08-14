@@ -177,6 +177,19 @@ export function Chat() {
       )
       .subscribe();
 
+    // Also listen for DELETE events
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'chat_messages'
+      },
+      (payload) => {
+        setMessages(current => current.filter(msg => msg.id !== payload.old.id));
+      }
+    );
+
     return () => {
       supabase.removeChannel(channel);
     };
@@ -362,6 +375,10 @@ export function Chat() {
     }
   };
 
+  const handleDeleteMessage = (messageId: string) => {
+    setMessages(current => current.filter(msg => msg.id !== messageId));
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -418,6 +435,7 @@ export function Chat() {
             {messages.map((msg) => (
               <ChatMessage
                 key={msg.id}
+                id={msg.id}
                 user={{
                   id: msg.user_id,
                   name: msg.user_name,
@@ -427,6 +445,8 @@ export function Chat() {
                 }}
                 message={showTranslated && msg.translatedMessage ? msg.translatedMessage : msg.message}
                 timestamp={new Date(msg.created_at)}
+                currentUserId={currentUser?.id}
+                onDelete={handleDeleteMessage}
               />
             ))}
           </div>
