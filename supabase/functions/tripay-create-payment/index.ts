@@ -36,6 +36,7 @@ serve(async (req) => {
     const tripayPrivateKey = Deno.env.get('TRIPAY_PRIVATE_KEY');
     const tripayMerchantCode = Deno.env.get('TRIPAY_MERCHANT_CODE');
     const proxyIP = Deno.env.get('PROXY_IP');
+    const proxyApiKey = Deno.env.get('PROXY_API_KEY');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -43,15 +44,17 @@ serve(async (req) => {
       tripayApiKey: tripayApiKey ? 'SET' : 'MISSING',
       tripayPrivateKey: tripayPrivateKey ? 'SET' : 'MISSING',
       tripayMerchantCode: tripayMerchantCode ? 'SET' : 'MISSING',
-      proxyIP: proxyIP ? 'SET' : 'MISSING'
+      proxyIP: proxyIP ? 'SET' : 'MISSING',
+      proxyApiKey: proxyApiKey ? 'SET' : 'MISSING'
     });
 
-    if (!tripayApiKey || !tripayPrivateKey || !tripayMerchantCode || !proxyIP) {
+    if (!tripayApiKey || !tripayPrivateKey || !tripayMerchantCode || !proxyIP || !proxyApiKey) {
       const missingVars = [];
       if (!tripayApiKey) missingVars.push('TRIPAY_API_KEY');
       if (!tripayPrivateKey) missingVars.push('TRIPAY_PRIVATE_KEY');
       if (!tripayMerchantCode) missingVars.push('TRIPAY_MERCHANT_CODE');
       if (!proxyIP) missingVars.push('PROXY_IP');
+      if (!proxyApiKey) missingVars.push('PROXY_API_KEY');
       
       console.error('Missing environment variables:', missingVars);
       throw new Error(`Missing required credentials: ${missingVars.join(', ')}`);
@@ -122,6 +125,7 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-API-Key': proxyApiKey,
       },
       body: JSON.stringify(tripayPayload)
     });
