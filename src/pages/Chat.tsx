@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ChatMessage } from "@/components/ChatMessage";
-import { Send, Users, Languages, Globe } from "lucide-react";
+import { Send, Users, Languages, Globe, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
@@ -33,6 +33,8 @@ export function Chat() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [showTranslated, setShowTranslated] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
   const { i18n, t } = useTranslation();
@@ -102,9 +104,13 @@ export function Chat() {
     getCurrentUser();
   }, [toast]);
 
-  useEffect(() => {
-    // Load messages from database
-    const loadMessages = async () => {
+  // Load messages from database
+  const loadMessages = useCallback(async (showRefreshState = false) => {
+    if (showRefreshState) {
+      setIsRefreshing(true);
+    }
+    
+    try {
       const { data: chatMessages, error } = await supabase
         .from('chat_messages')
         .select('*')
@@ -164,52 +170,34 @@ export function Chat() {
         setMessages(chatMessages || []);
       }
       
+      setLastUpdate(new Date());
       setIsLoading(false);
-    };
-
-    loadMessages();
-
-    // Set up realtime subscription
-    const channel = supabase
-      .channel('chat-messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages'
-        },
-        (payload) => {
-          const newMessage = payload.new as ChatMessageData;
-          // Auto-translate new message if English is selected
-          if (i18n.language === 'en') {
-            translateSingleMessage(newMessage).then(translatedMsg => {
-              setMessages(current => [...current, translatedMsg]);
-            });
-          } else {
-            setMessages(current => [...current, newMessage]);
-          }
-        }
-      )
-      .subscribe();
-
-    // Also listen for DELETE events
-    channel.on(
-      'postgres_changes',
-      {
-        event: 'DELETE',
-        schema: 'public',
-        table: 'chat_messages'
-      },
-      (payload) => {
-        setMessages(current => current.filter(msg => msg.id !== payload.old.id));
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load messages",
+        variant: "destructive"
+      });
+    } finally {
+      if (showRefreshState) {
+        setIsRefreshing(false);
       }
-    );
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    }
   }, [toast]);
+
+  useEffect(() => {
+    loadMessages();
+  }, [loadMessages]);
+
+  useEffect(() => {
+    // Set up 60-minute polling interval
+    const interval = setInterval(() => {
+      loadMessages(true);
+    }, 60 * 60 * 1000); // 60 minutes in milliseconds
+
+    return () => clearInterval(interval);
+  }, [loadMessages]);
 
   // Enhanced input validation function
   const validateMessage = (input: string): string | null => {
@@ -458,43 +446,60 @@ export function Chat() {
                 Komunitas Spiritual
               </h1>
               <p className="text-sm text-muted-foreground">
-                127 anggota online
+                127 anggota • Updates every 60 min
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Last update: {lastUpdate.toLocaleTimeString()}
               </p>
             </div>
           </div>
           
-          {/* Translate Button with Language Options */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={isTranslating}
-                className="gap-2 bg-gradient-primary text-primary-foreground hover:opacity-90"
-              >
-                <Globe className="w-4 h-4" />
-                {isTranslating ? "Translating..." : (
-                  i18n.language === 'en' ? "English" : "Indonesia"
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onClick={() => changeLanguage('id')}
-                className="flex items-center justify-between"
-              >
-                <span>🇮🇩 Indonesia</span>
-                {i18n.language === 'id' && <div className="w-2 h-2 bg-primary rounded-full" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => changeLanguage('en')}
-                className="flex items-center justify-between"
-              >
-                <span>🇺🇸 English</span>
-                {i18n.language === 'en' && <div className="w-2 h-2 bg-primary rounded-full" />}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            {/* Manual Refresh Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadMessages(true)}
+              disabled={isRefreshing}
+              className="gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </Button>
+            
+            {/* Translate Button with Language Options */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isTranslating}
+                  className="gap-2 bg-gradient-primary text-primary-foreground hover:opacity-90"
+                >
+                  <Globe className="w-4 h-4" />
+                  {isTranslating ? "Translating..." : (
+                    i18n.language === 'en' ? "English" : "Indonesia"
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => changeLanguage('id')}
+                  className="flex items-center justify-between"
+                >
+                  <span>🇮🇩 Indonesia</span>
+                  {i18n.language === 'id' && <div className="w-2 h-2 bg-primary rounded-full" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => changeLanguage('en')}
+                  className="flex items-center justify-between"
+                >
+                  <span>🇺🇸 English</span>
+                  {i18n.language === 'en' && <div className="w-2 h-2 bg-primary rounded-full" />}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
