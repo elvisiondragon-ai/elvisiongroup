@@ -230,7 +230,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           <LanguageSwitcher />
         </div>
         <p className="text-muted-foreground text-center">
-          {t('audioTherapy.subtitle')}
+          {t('Dengarkan Pakai Headphone')}
         </p>
       </div>
 
