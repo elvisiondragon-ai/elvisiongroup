@@ -25,7 +25,7 @@ interface AudioTherapyProps {
 
 export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { t, i18n } = useTranslation();
-  const [userLevel] = useState(3); // Mock user level
+  const [userLevel, setUserLevel] = useState(1);
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [playingVerseId, setPlayingVerseId] = useState<number | null>(null);
@@ -38,6 +38,11 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     const initializeData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setIsAdmin(user?.email === "elvisiondragon@gmail.com");
+      
+      if (user) {
+        await fetchUserProfile(user.id);
+      }
+      
       await fetchAudioTracks();
       setLoading(false);
     };
@@ -49,6 +54,22 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   useEffect(() => {
     fetchAudioTracks();
   }, [i18n.language]);
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('level')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (data) {
+        setUserLevel(data.level);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
 
   const fetchAudioTracks = async () => {
     try {
