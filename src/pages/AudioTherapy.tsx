@@ -101,7 +101,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 1,
       title: "Verse 1 - The Space Hill",
       subtitle: "Kedamaian Batin",
-      unlocked: false,
+      unlocked: true,
       requiredLevel: 1,
       artwork: verseArtwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3',
@@ -111,7 +111,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 2,
       title: "Verse 2 - Lucid Beach",
       subtitle: "Relaksasi seperti berada di pantai, membantu tidur nyenyak dan pikiran jernih",
-      unlocked: userLevel >= 3,
+      unlocked: userLevel >= 2,
       requiredLevel: 2,
       artwork: verse2Artwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse2%20-%20Lucid%20Beach%20-%20low%20env.MP3',
@@ -230,7 +230,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           <LanguageSwitcher />
         </div>
         <p className="text-muted-foreground text-center">
-          {t('Untuk Trial dan Rezeki di Verse 4 dibawah')}
+          {t('Dengarkan Pakai Headphone')}
         </p>
       </div>
 
