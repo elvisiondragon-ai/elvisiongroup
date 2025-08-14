@@ -175,9 +175,14 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
           <Input
             id="display-name"
             value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
+            onChange={(e) => {
+              // Sanitize input to prevent XSS
+              const sanitized = e.target.value.replace(/<[^>]*>?/gm, '').substring(0, 50);
+              setDisplayName(sanitized);
+            }}
             placeholder="Enter your display name"
             className="bg-background border-border focus:border-primary"
+            maxLength={50}
           />
         </div>
 
@@ -189,9 +194,14 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              // Basic email validation and sanitization
+              const sanitized = e.target.value.replace(/[<>]/g, '').toLowerCase();
+              setEmail(sanitized);
+            }}
             placeholder="Enter your email address"
             className="bg-background border-border focus:border-primary"
+            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
           />
         </div>
       </Card>

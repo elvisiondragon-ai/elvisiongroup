@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -624,11 +624,11 @@ export type Database = {
       }
       award_xp: {
         Args: {
+          p_activity_type: string
+          p_metadata?: Json
+          p_reason?: string
           p_user_id: string
           p_xp_amount: number
-          p_activity_type: string
-          p_reason?: string
-          p_metadata?: Json
         }
         Returns: undefined
       }
@@ -637,7 +637,7 @@ export type Database = {
         Returns: number
       }
       can_access_payment_transaction: {
-        Args: { p_user_id: string; p_transaction_id: string }
+        Args: { p_transaction_id: string; p_user_id: string }
         Returns: boolean
       }
       check_daily_audio_limit: {
@@ -654,25 +654,25 @@ export type Database = {
       }
       check_rate_limit: {
         Args: {
-          p_user_id: string
           p_action: string
           p_max_attempts?: number
+          p_user_id: string
           p_window_minutes?: number
         }
         Returns: boolean
       }
       check_sensitive_data_rate_limit: {
-        Args: { p_user_id: string; p_table_name: string }
+        Args: { p_table_name: string; p_user_id: string }
         Returns: boolean
       }
       check_vip_status: {
         Args: { p_user_id: string }
         Returns: {
-          is_vip: boolean
-          subscription_type: string
-          status: string
-          expires_at: string
           days_remaining: number
+          expires_at: string
+          is_vip: boolean
+          status: string
+          subscription_type: string
         }[]
       }
       cleanup_expired_admin_roles: {
@@ -681,65 +681,91 @@ export type Database = {
       }
       create_chat_message: {
         Args: {
-          p_message: string
+          p_allowed_users?: string[]
           p_channel_id?: string
           p_is_private?: boolean
-          p_allowed_users?: string[]
+          p_message: string
         }
         Returns: string
       }
+      decrypt_email: {
+        Args: { p_encrypted_email: string }
+        Returns: string
+      }
       emergency_revoke_admin_role: {
-        Args: { p_target_user_id: string; p_reason: string }
+        Args: { p_reason: string; p_target_user_id: string }
         Returns: Json
+      }
+      encrypt_email: {
+        Args: { p_email: string }
+        Returns: string
       }
       encrypt_payment_field: {
         Args: { p_data: string; p_field_type: string }
         Returns: string
       }
       enhanced_payment_access_control: {
-        Args: { p_user_id: string; p_transaction_id: string }
+        Args: { p_transaction_id: string; p_user_id: string }
         Returns: boolean
+      }
+      get_masked_payment_transaction: {
+        Args: { p_transaction_id: string }
+        Returns: {
+          created_at: string
+          currency: string
+          expires_at: string
+          id: string
+          masked_amount: string
+          paid_at: string
+          payment_method: string
+          status: string
+          tripay_reference: string
+        }[]
       }
       get_payment_access_summary: {
         Args: Record<PropertyKey, never>
         Returns: {
-          user_id: string
           access_count: number
           last_access: string
           suspicious_activity: boolean
+          user_id: string
         }[]
       }
       get_safe_subscription_data: {
         Args: { p_user_id: string }
         Returns: {
           id: string
-          user_id: string
-          subscription_type: string
-          status: string
-          trial_start_date: string
-          trial_end_date: string
-          subscription_start_date: string
-          subscription_end_date: string
-          masked_currency: string
           masked_amount: number
+          masked_currency: string
+          status: string
+          subscription_end_date: string
+          subscription_start_date: string
+          subscription_type: string
+          trial_end_date: string
+          trial_start_date: string
+          user_id: string
         }[]
       }
       get_secure_payment_transaction: {
         Args: { p_transaction_id: string }
         Returns: {
-          id: string
-          user_id: string
-          tripay_reference: string
-          payment_method: string
-          masked_amount: string
-          currency: string
-          status: string
           created_at: string
-          updated_at: string
-          paid_at: string
+          currency: string
           expires_at: string
+          id: string
+          masked_amount: string
+          paid_at: string
+          payment_method: string
           security_metadata: Json
+          status: string
+          tripay_reference: string
+          updated_at: string
+          user_id: string
         }[]
+      }
+      get_user_email_safe: {
+        Args: { p_user_id: string }
+        Returns: string
       }
       get_user_email_secure: {
         Args: { p_user_id: string }
@@ -748,15 +774,15 @@ export type Database = {
       get_user_payment_transactions: {
         Args: { p_limit?: number }
         Returns: {
-          id: string
-          tripay_reference: string
-          payment_method: string
-          masked_amount: string
-          currency: string
-          status: string
           created_at: string
-          paid_at: string
+          currency: string
           expires_at: string
+          id: string
+          masked_amount: string
+          paid_at: string
+          payment_method: string
+          status: string
+          tripay_reference: string
         }[]
       }
       get_xp_for_next_level: {
@@ -765,9 +791,9 @@ export type Database = {
       }
       grant_admin_role: {
         Args: {
-          p_target_user_id: string
-          p_role: string
           p_expires_at?: string
+          p_role: string
+          p_target_user_id: string
         }
         Returns: boolean
       }
@@ -781,29 +807,29 @@ export type Database = {
       }
       log_data_access: {
         Args: {
-          p_table_name: string
+          p_metadata?: Json
           p_operation: string
           p_record_id?: string
-          p_metadata?: Json
+          p_table_name: string
         }
         Returns: undefined
       }
       log_sensitive_action: {
         Args: {
           p_action: string
-          p_table_name?: string
-          p_record_id?: string
           p_metadata?: Json
+          p_record_id?: string
+          p_table_name?: string
         }
         Returns: undefined
       }
       mask_sensitive_payment_data: {
         Args: {
-          p_bank_account: string
           p_amount: number
-          p_payment_instructions: Json
+          p_bank_account: string
           p_callback_data: Json
           p_moota_webhook_data: Json
+          p_payment_instructions: Json
         }
         Returns: Json
       }
@@ -813,31 +839,31 @@ export type Database = {
       }
       secure_admin_role_grant: {
         Args: {
-          p_target_user_id: string
-          p_role: string
           p_expires_at?: string
           p_justification?: string
+          p_role: string
+          p_target_user_id: string
         }
         Returns: Json
       }
       start_vip_trial: {
-        Args: { p_user_id: string; p_email: string; p_ip_address?: string }
+        Args: { p_email: string; p_ip_address?: string; p_user_id: string }
         Returns: string
       }
       validate_admin_role_operation: {
-        Args: { p_target_user_id: string; p_role: string; p_operation: string }
+        Args: { p_operation: string; p_role: string; p_target_user_id: string }
         Returns: boolean
       }
       validate_payment_access: {
-        Args: { p_user_id: string; p_transaction_id: string }
+        Args: { p_transaction_id: string; p_user_id: string }
         Returns: boolean
       }
       validate_payment_transaction_access: {
-        Args: { p_transaction_id: string; p_access_type?: string }
+        Args: { p_access_type?: string; p_transaction_id: string }
         Returns: boolean
       }
       verify_admin_with_failsafe: {
-        Args: { p_user_id: string; p_required_role?: string }
+        Args: { p_required_role?: string; p_user_id: string }
         Returns: Json
       }
     }

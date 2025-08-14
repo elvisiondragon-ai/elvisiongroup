@@ -54,9 +54,32 @@ export const ManualPayment: React.FC<ManualPaymentProps> = ({ onClose }) => {
         return;
       }
 
-      // Generate unique reference for manual payment
-      const merchantRef = `MANUAL_${Date.now()}_${user.id.slice(0, 8)}`;
-      const amount = selectedPlan === 'monthly' ? paymentDetails.monthly.amount : paymentDetails.yearly.amount;
+      // Validate payment plan
+      if (!['monthly', 'yearly'].includes(selectedPlan)) {
+        toast({
+          title: 'Error',
+          description: 'Invalid payment plan selected',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Generate unique reference for manual payment with timestamp validation
+      const timestamp = Date.now();
+      const merchantRef = `MANUAL_${timestamp}_${user.id.slice(0, 8)}`;
+      
+      // Validate amount against expected values
+      const expectedAmount = selectedPlan === 'monthly' ? paymentDetails.monthly.amount : paymentDetails.yearly.amount;
+      if (![100000, 800000].includes(expectedAmount)) {
+        toast({
+          title: 'Error',
+          description: 'Invalid payment amount',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      const amount = expectedAmount;
 
       // Create a dummy subscription ID for the transaction
       const dummySubscriptionId = '00000000-0000-0000-0000-000000000000';
