@@ -103,7 +103,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: true,
       requiredLevel: 15,
       artwork: verse4Artwork,
-      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse-4-Prosperity%20Stream-Vol.-1.mp3',
+      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse4-Prosperity%20Stream.png',
       language: 'id'
     },
     {
