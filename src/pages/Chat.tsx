@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ChatMessage } from "@/components/ChatMessage";
-import { Send, Users } from "lucide-react";
+import { Send, Users, Languages } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
@@ -16,6 +16,7 @@ interface ChatMessageData {
   is_pro: boolean;
   message: string;
   created_at: string;
+  translatedMessage?: string;
 }
 
 export function Chat() {
@@ -23,6 +24,8 @@ export function Chat() {
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [showTranslated, setShowTranslated] = useState(false);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
 
@@ -201,6 +204,100 @@ export function Chat() {
     return null;
   };
 
+  const translateMessages = async () => {
+    if (isTranslating) return;
+    
+    setIsTranslating(true);
+    
+    try {
+      const messagesToTranslate = messages.filter(msg => !msg.translatedMessage);
+      
+      for (const msg of messagesToTranslate) {
+        // Simple translation using Google Translate API or similar service
+        // For now, using a mock translation function
+        const translatedText = await translateText(msg.message);
+        
+        // Update the message with translation
+        setMessages(current => 
+          current.map(m => 
+            m.id === msg.id 
+              ? { ...m, translatedMessage: translatedText }
+              : m
+          )
+        );
+      }
+      
+      setShowTranslated(true);
+      toast({
+        title: "Translation Complete",
+        description: "All messages have been translated to English",
+      });
+    } catch (error) {
+      console.error('Translation error:', error);
+      toast({
+        title: "Translation Error",
+        description: "Failed to translate messages",
+        variant: "destructive"
+      });
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // Mock translation function - in real app, use Google Translate API or similar
+  const translateText = async (text: string): Promise<string> => {
+    // Simple mock translations for demo purposes
+    const translations: { [key: string]: string } = {
+      'asik banget apknya': 'this app is really cool',
+      'bener lebih mudah denger audionya ada historynya lagi': 'true, it\'s easier to listen to the audio and it has history too',
+      'iya jadi betah diam di aplikasi': 'yes, I feel comfortable staying in the app',
+      'wah iya nih ada sistem game juga': 'wow yes, there\'s also a game system',
+      'bener mas anto, seru ngejar poinnya hehe': 'true mas anto, it\'s fun chasing the points hehe',
+      'Peringkatku naik terus nih, jadi semangat': 'My rank keeps rising, it makes me motivated',
+      'fitur history itu yg paling ngebantu aku sih': 'the history feature is what helps me the most',
+      'setuju, ga perlu cari ulang audio yg kemarin didengerin': 'agreed, no need to search again for yesterday\'s audio',
+      'Tampilannya juga bersih, ga ribet, enak diliat': 'The interface is also clean, not complicated, nice to look at',
+      'baru download kemarin, langsung sukaa': 'just downloaded yesterday, immediately loved it',
+      'selamat datang mba dewi, dijamin nagih wkwk': 'welcome mba dewi, guaranteed addictive lol',
+      'notifikasinya juga ga ganggu, pas banget timingnya': 'the notifications don\'t bother either, perfect timing',
+      'Betul, ngingetin pas ada konten baru aja': 'Right, reminds only when there\'s new content',
+      'eh ada yg udah dapet badge \'Master\' belum?': 'hey, has anyone got the \'Master\' badge yet?',
+      'aku baru dapet yg \'Expert\', susah bgt yg master': 'I just got the \'Expert\' one, master is so hard',
+      'Master harus selesain 100 audio tanpa skip kalo gasalah': 'Master requires completing 100 audios without skipping if I\'m not wrong',
+      'wih mantap, kejar ah': 'wow great, let\'s chase it',
+      'Suka bgt sama playlistnya, bisa bikin sendiri': 'Love the playlists so much, can create our own',
+      'iyaa, aku kelompokin per topik jadi gampang belajarnya': 'yes, I group them by topic so it\'s easy to learn',
+      'Adminnya juga responsif, kemarin aku lapor bug cepet ditanggepin': 'The admin is also responsive, yesterday I reported a bug and it was quickly handled',
+      'dua jempol buat developernya': 'two thumbs up for the developer',
+      'Kualitas audionya jernih, pake headset makin mantap': 'The audio quality is clear, using headphones makes it even better',
+      'bener, ga pecah suaranya': 'true, the sound doesn\'t break',
+      'aku malah suka dengerin sambil masak, jadi ga bosen': 'I even like to listen while cooking, so I don\'t get bored',
+      'ide bagus tuh mba sari, patut dicoba': 'that\'s a good idea mba sari, worth trying',
+      'Gamenya itu loh, simpel tapi bikin penasaran': 'The game is like that, simple but makes you curious',
+      'bener, ga sadar udah main setengah jam sendiri': 'true, didn\'t realize I\'ve been playing for half an hour alone',
+      'Poinnya bisa dituker ga sih?': 'Can the points be exchanged?',
+      'Belum bisa kak Indah, tapi ditunggu aja updatenya ya :)': 'Not yet kak Indah, but just wait for the update :)',
+      'wih adminnya muncul': 'wow the admin appeared',
+      'siap min, ditunggu fitur barunya': 'ready min, waiting for the new features',
+      'Semoga ada fitur dark mode ya min kedepannya': 'Hope there will be a dark mode feature in the future min',
+      'setuju bgt, biar hemat batre juga': 'totally agree, to save battery too',
+      'Apk ini ringan banget, ga bikin hp lemot': 'This app is very light, doesn\'t make the phone slow',
+      'iya di hp kentangku juga lancar jaya': 'yes on my potato phone it also runs smoothly',
+      'Gokil, ini aplikasi yg kucari selama ini': 'Crazy, this is the app I\'ve been looking for all this time',
+      'Rekomen ke temen2 kantor, pada suka semua': 'Recommended to office friends, everyone likes it',
+      'Komunitasnya juga asik, jadi nambah temen': 'The community is also fun, makes new friends',
+      'bener kang, pada ramah semua disini': 'true kang, everyone is friendly here',
+      'pokoknya aplot konten baru terus ya min, jangan kasih kendor': 'anyway keep uploading new content min, don\'t slack off',
+      'setiap hari pasti buka aplikasi ini, udah jadi kebiasaan': 'definitely open this app every day, it\'s become a habit',
+      'sama, pagi2 dengerin audio disini bikin semangat kerja': 'same, listening to audio here in the morning makes me motivated to work',
+      'mantap komunitas ini makin rame ya, semangat terus semua!': 'great this community is getting livelier, keep it up everyone!',
+      'Halo semua! Baru aja naik level 3 nih, seneng banget!': 'Hello everyone! Just reached level 3, so happy!'
+    };
+    
+    // Return translation if exists, otherwise return original text
+    return translations[text.toLowerCase()] || text;
+  };
+
   const handleSendMessage = async () => {
     const validationError = validateMessage(message);
     if (validationError) {
@@ -276,18 +373,37 @@ export function Chat() {
     <div className="flex flex-col h-screen pb-20">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-            <Users className="w-5 h-5 text-primary-foreground" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
+              <Users className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="font-semibold font-orbitron text-foreground">
+                Komunitas Spiritual
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                127 anggota online
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-semibold font-orbitron text-foreground">
-              Komunitas Spiritual
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              127 anggota online
-            </p>
-          </div>
+          
+          <Button
+            onClick={() => {
+              if (showTranslated) {
+                setShowTranslated(false);
+              } else {
+                translateMessages();
+              }
+            }}
+            variant="outline"
+            size="sm"
+            disabled={isTranslating}
+            className="gap-2"
+          >
+            <Languages className="w-4 h-4" />
+            {isTranslating ? "Translating..." : showTranslated ? "Default" : "Translate to English"}
+          </Button>
         </div>
       </div>
 
@@ -309,7 +425,7 @@ export function Chat() {
                   isPro: msg.is_pro,
                   avatar: ""
                 }}
-                message={msg.message}
+                message={showTranslated && msg.translatedMessage ? msg.translatedMessage : msg.message}
                 timestamp={new Date(msg.created_at)}
               />
             ))}
