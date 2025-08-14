@@ -267,13 +267,23 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                          <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform group-hover:scale-110 transition-transform duration-300">
                            {playingVerseId === verse.id ? (
                              // Pause icon (two rectangles)
-                             <div className="flex gap-1">
-                               <div className="w-1 h-4 bg-white rounded-sm"></div>
-                               <div className="w-1 h-4 bg-white rounded-sm"></div>
+                             <div className="flex gap-1 items-center justify-center">
+                               <div className="w-1.5 h-5 bg-white rounded-sm"></div>
+                               <div className="w-1.5 h-5 bg-white rounded-sm"></div>
                              </div>
                            ) : (
-                             // Play icon (triangle)
-                             <div className="w-0 h-0 border-l-[12px] border-l-white border-y-[8px] border-y-transparent ml-1 drop-shadow-lg"></div>
+                             // Play icon (triangle) - incline pattern
+                             <div className="relative flex items-center justify-center">
+                               <div 
+                                 className="w-0 h-0 ml-1"
+                                 style={{
+                                   borderLeft: '14px solid white',
+                                   borderTop: '10px solid transparent',
+                                   borderBottom: '10px solid transparent',
+                                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                                 }}
+                               />
+                             </div>
                            )}
                          </div>
                       </div>
