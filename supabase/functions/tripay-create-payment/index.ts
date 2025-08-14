@@ -110,31 +110,30 @@ serve(async (req) => {
       signature: signature
     };
 
-    console.log('Creating Tripay payment:', {
+    console.log('Sending request to VPS proxy:', {
       merchantRef,
       amount,
       method: 'BRIVA',
       customer: userEmail
     });
 
-    // Call Tripay API
-    const tripayResponse = await fetch('https://tripay.co.id/api/transaction/create', {
+    // Send request to VPS proxy instead of directly to Tripay
+    const proxyResponse = await fetch(`http://${proxyIP}/tripay/create-payment`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${tripayApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(tripayPayload)
     });
 
-    if (!tripayResponse.ok) {
-      const errorText = await tripayResponse.text();
-      console.error('Tripay API error:', errorText);
-      throw new Error(`Tripay API error: ${tripayResponse.status}`);
+    if (!proxyResponse.ok) {
+      const errorText = await proxyResponse.text();
+      console.error('VPS proxy error:', errorText);
+      throw new Error(`Payment gateway error: ${proxyResponse.status}`);
     }
 
-    const tripayData = await tripayResponse.json();
-    console.log('Tripay response:', tripayData);
+    const tripayData = await proxyResponse.json();
+    console.log('VPS proxy response:', tripayData);
 
     if (!tripayData.success) {
       throw new Error(`Tripay error: ${tripayData.message}`);
