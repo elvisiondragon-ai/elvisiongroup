@@ -29,7 +29,23 @@ enabled = true
 port = 54328
 
 [edge_functions]
-enabled = false
+enabled = true
+port = 54329
 
 [analytics]
 enabled = false
+
+[functions.send-chat-notification]
+verify_jwt = false
+
+[functions.tripay-create-payment]
+verify_jwt = true
+
+[functions.tripay-callback]
+verify_jwt = false
+
+[functions.vip-trial-start]
+verify_jwt = true
+
+[functions.vip-status-check]
+verify_jwt = true
