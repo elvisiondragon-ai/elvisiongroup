@@ -7,6 +7,7 @@ import { Send, Users, Languages } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
+import { useTranslation } from "react-i18next";
 
 interface ChatMessageData {
   id: string;
@@ -28,6 +29,7 @@ export function Chat() {
   const [showTranslated, setShowTranslated] = useState(false);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
+  const { i18n } = useTranslation();
 
   useEffect(() => {
     // Get current user
@@ -172,7 +174,15 @@ export function Chat() {
           table: 'chat_messages'
         },
         (payload) => {
-          setMessages(current => [...current, payload.new as ChatMessageData]);
+          const newMessage = payload.new as ChatMessageData;
+          // Auto-translate new message if English is selected
+          if (i18n.language === 'en') {
+            translateSingleMessage(newMessage).then(translatedMsg => {
+              setMessages(current => [...current, translatedMsg]);
+            });
+          } else {
+            setMessages(current => [...current, newMessage]);
+          }
         }
       )
       .subscribe();
@@ -217,7 +227,28 @@ export function Chat() {
     return null;
   };
 
-  const translateMessages = async () => {
+  // Auto-translate when language changes to English
+  useEffect(() => {
+    if (i18n.language === 'en' && messages.length > 0) {
+      translateAllMessages();
+    } else if (i18n.language === 'id') {
+      // Show original messages when switching back to Indonesian
+      setShowTranslated(false);
+    }
+  }, [i18n.language, messages.length]);
+
+  // Translate a single message
+  const translateSingleMessage = async (msg: ChatMessageData): Promise<ChatMessageData> => {
+    try {
+      const translatedText = await translateText(msg.message);
+      return { ...msg, translatedMessage: translatedText };
+    } catch (error) {
+      console.error('Translation error for single message:', error);
+      return msg;
+    }
+  };
+
+  const translateAllMessages = async () => {
     if (isTranslating) return;
     
     setIsTranslating(true);
@@ -226,8 +257,6 @@ export function Chat() {
       const messagesToTranslate = messages.filter(msg => !msg.translatedMessage);
       
       for (const msg of messagesToTranslate) {
-        // Simple translation using Google Translate API or similar service
-        // For now, using a mock translation function
         const translatedText = await translateText(msg.message);
         
         // Update the message with translation
@@ -241,20 +270,24 @@ export function Chat() {
       }
       
       setShowTranslated(true);
-      toast({
-        title: "Translation Complete",
-        description: "All messages have been translated to English",
-      });
     } catch (error) {
       console.error('Translation error:', error);
       toast({
         title: "Translation Error",
-        description: "Failed to translate messages",
+        description: "Failed to translate some messages",
         variant: "destructive"
       });
     } finally {
       setIsTranslating(false);
     }
+  };
+
+  const translateMessages = async () => {
+    await translateAllMessages();
+    toast({
+      title: "Translation Complete",
+      description: "All messages have been translated to English",
+    });
   };
 
   // Mock translation function - in real app, use Google Translate API or similar
@@ -405,22 +438,26 @@ export function Chat() {
             </div>
           </div>
           
-          <Button
-            onClick={() => {
-              if (showTranslated) {
-                setShowTranslated(false);
-              } else {
-                translateMessages();
-              }
-            }}
-            variant="outline"
-            size="sm"
-            disabled={isTranslating}
-            className="gap-2"
-          >
-            <Languages className="w-4 h-4" />
-            {isTranslating ? "Translating..." : showTranslated ? "Default" : "Translate to English"}
-          </Button>
+          {/* Auto-translate info when English is selected */}
+          {i18n.language === 'en' && (
+            <div className="text-xs text-muted-foreground bg-primary/10 px-2 py-1 rounded">
+              🌐 Auto-translation enabled
+            </div>
+          )}
+
+          {/* Manual translate button for Indonesian */}
+          {i18n.language === 'id' && (
+            <Button
+              onClick={translateMessages}
+              variant="outline"
+              size="sm"
+              disabled={isTranslating}
+              className="gap-2"
+            >
+              <Languages className="w-4 h-4" />
+              {isTranslating ? "Translating..." : "Translate"}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -443,7 +480,7 @@ export function Chat() {
                   isPro: msg.is_pro,
                   avatar: ""
                 }}
-                message={showTranslated && msg.translatedMessage ? msg.translatedMessage : msg.message}
+                message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
                 timestamp={new Date(msg.created_at)}
                 currentUserId={currentUser?.id}
                 onDelete={handleDeleteMessage}
