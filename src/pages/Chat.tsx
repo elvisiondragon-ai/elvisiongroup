@@ -3,11 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ChatMessage } from "@/components/ChatMessage";
-import { Send, Users, Languages } from "lucide-react";
+import { Send, Users, Languages, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { useTranslation } from "react-i18next";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ChatMessageData {
   id: string;
@@ -29,7 +35,7 @@ export function Chat() {
   const [showTranslated, setShowTranslated] = useState(false);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
 
   useEffect(() => {
     // Get current user
@@ -290,6 +296,25 @@ export function Chat() {
     });
   };
 
+  const changeLanguage = async (lang: string) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('preferred_language', lang);
+    
+    if (lang === 'en') {
+      await translateAllMessages();
+      toast({
+        title: "Language Changed",
+        description: "All messages translated to English",
+      });
+    } else {
+      setShowTranslated(false);
+      toast({
+        title: "Bahasa Diubah", 
+        description: "Semua pesan ditampilkan dalam bahasa asli",
+      });
+    }
+  };
+
   // Mock translation function - in real app, use Google Translate API or similar
   const translateText = async (text: string): Promise<string> => {
     // Simple mock translations for demo purposes
@@ -438,26 +463,38 @@ export function Chat() {
             </div>
           </div>
           
-          {/* Auto-translate info when English is selected */}
-          {i18n.language === 'en' && (
-            <div className="text-xs text-muted-foreground bg-primary/10 px-2 py-1 rounded">
-              🌐 Auto-translation enabled
-            </div>
-          )}
-
-          {/* Manual translate button for Indonesian */}
-          {i18n.language === 'id' && (
-            <Button
-              onClick={translateMessages}
-              variant="outline"
-              size="sm"
-              disabled={isTranslating}
-              className="gap-2"
-            >
-              <Languages className="w-4 h-4" />
-              {isTranslating ? "Translating..." : "Translate"}
-            </Button>
-          )}
+          {/* Translate Button with Language Options */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isTranslating}
+                className="gap-2 bg-gradient-primary text-primary-foreground hover:opacity-90"
+              >
+                <Globe className="w-4 h-4" />
+                {isTranslating ? "Translating..." : (
+                  i18n.language === 'en' ? "English" : "Indonesia"
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem
+                onClick={() => changeLanguage('id')}
+                className="flex items-center justify-between"
+              >
+                <span>🇮🇩 Indonesia</span>
+                {i18n.language === 'id' && <div className="w-2 h-2 bg-primary rounded-full" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => changeLanguage('en')}
+                className="flex items-center justify-between"
+              >
+                <span>🇺🇸 English</span>
+                {i18n.language === 'en' && <div className="w-2 h-2 bg-primary rounded-full" />}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
