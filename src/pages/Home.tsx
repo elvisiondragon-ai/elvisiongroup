@@ -244,11 +244,7 @@ export function Home({
                     )}
                     {isLocked && (
                       <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
-                        <img 
-                          src={`${supabase.storage.from('admin-image').getPublicUrl('ignis-logo.gif').data.publicUrl}`} 
-                          alt="Locked" 
-                          className="w-4 h-4 object-contain opacity-50" 
-                        />
+                        <Lock className="w-4 h-4 text-muted-foreground" />
                       </div>
                     )}
                   </div>
