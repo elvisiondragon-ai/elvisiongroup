@@ -15,7 +15,7 @@ export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationPro
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
+    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
       <div className="flex items-center justify-around p-2">
         {navItems.map((item) => (
           <button
