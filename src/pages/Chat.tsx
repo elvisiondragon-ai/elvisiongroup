@@ -445,9 +445,9 @@ export function Chat() {
               <h1 className="font-semibold font-orbitron text-foreground">
                 Komunitas Spiritual
               </h1>
-              <p className="text-sm text-muted-foreground">
-                127 anggota • Updates every 60 min
-              </p>
+               <p className="text-sm text-muted-foreground">
+                21.482 anggota • Updates every 60 min
+               </p>
               <p className="text-xs text-muted-foreground">
                 Last update: {lastUpdate.toLocaleTimeString()}
               </p>
