@@ -449,9 +449,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
               Tutorial
             </h3>
             <div className="space-y-3">
-              <p className="text-foreground font-medium leading-relaxed">
-                Apa yang kamu lepaskan paling banyaklah yang akan terjadi di hidupmu.
-              </p>
+            <p className="text-foreground font-medium leading-relaxed">
+              Keinginan yang kamu lepaskan, terwujud ke hidupmu.. Emosi negatif yang kamu lepaskan, akan Menjadi Energi Ignis Memory mu..
+            </p>
               <p className="text-muted-foreground text-sm">
                 Riwayat Jurnal eL Vision Ini alat ukurmu setiap bulan
               </p>
