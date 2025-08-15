@@ -450,7 +450,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
             </h3>
             <div className="space-y-3">
             <p className="text-foreground font-medium leading-relaxed">
-              Keinginan yang kamu lepaskan, terwujud ke hidupmu.. Emosi negatif yang kamu lepaskan, akan Menjadi Energi Ignis Memory mu..
+              Keinginan yang kamu lepaskan, terwujud ke hidupmu..<br></br> Emosi negatif yang kamu lepaskan, akan Menjadi Energi Ignis Memory mu..
             </p>
               <p className="text-muted-foreground text-sm">
                 Riwayat Jurnal eL Vision Ini alat ukurmu setiap bulan
