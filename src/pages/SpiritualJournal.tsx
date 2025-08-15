@@ -442,6 +442,23 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           );
         })}
 
+        {/* Tutorial Section */}
+        <Card className="p-6 bg-gradient-to-r from-primary/10 to-accent/10 border-2 border-primary/20">
+          <div className="space-y-4 text-center">
+            <h3 className="text-lg font-semibold font-orbitron text-foreground">
+              Tutorial
+            </h3>
+            <div className="space-y-3">
+              <p className="text-foreground font-medium leading-relaxed">
+                Apa yang kamu lepaskan paling banyaklah yang akan terjadi di hidupmu.
+              </p>
+              <p className="text-muted-foreground text-sm">
+                Riwayat Jurnal eL Vision Ini alat ukurmu setiap bulan
+              </p>
+            </div>
+          </div>
+        </Card>
+
         {/* Daily Reflection Section */}
         <Card className="p-6 bg-gradient-secondary border-2 border-accent/30 glow-accent">
           <div className="space-y-4">
