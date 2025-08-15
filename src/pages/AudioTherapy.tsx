@@ -101,7 +101,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 1,
       title: "Verse 1 - The Space Hill",
       subtitle: "Kedamaian Batin",
-      unlocked: false,
+      unlocked: true,
       requiredLevel: 1,
       artwork: verseArtwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3',
