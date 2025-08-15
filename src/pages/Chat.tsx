@@ -443,7 +443,7 @@ export function Chat() {
             </div>
             <div>
               <h1 className="font-semibold font-orbitron text-foreground">
-                Komunitas Spiritual
+                Komunitas eL Vision Group
               </h1>
                <p className="text-sm text-muted-foreground">
                 21.482 anggota • Updates every 60 min
