@@ -201,11 +201,6 @@
   .tier-master {
     @apply bg-gradient-accent text-background glow-accent;
   }
-  
-  .tier-admin {
-    @apply bg-gradient-to-r from-emerald-400 to-green-500 text-background font-bold;
-    box-shadow: 0 0 20px hsl(142 76% 36% / 0.6);
-  }
 
   .tier-pro {
     @apply bg-gradient-to-r from-yellow-400 to-yellow-600 text-black glow-gold;

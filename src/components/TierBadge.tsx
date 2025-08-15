@@ -1,16 +1,14 @@
-import { Crown, Star, Zap, Shield } from "lucide-react";
+import { Crown, Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TierBadgeProps {
   level: number;
   isPro?: boolean;
-  isAdmin?: boolean;
   className?: string;
 }
 
-export function TierBadge({ level, isPro = false, isAdmin = false, className }: TierBadgeProps) {
+export function TierBadge({ level, isPro = false, className }: TierBadgeProps) {
   const getTierStyle = () => {
-    if (isAdmin) return "tier-admin";
     if (level >= 9) return "tier-master";
     if (isPro || level >= 6) return "tier-pro";
     if (level >= 3) return "tier-premium";
@@ -18,24 +16,17 @@ export function TierBadge({ level, isPro = false, isAdmin = false, className }: 
   };
 
   const getTierIcon = () => {
-    if (isAdmin) return <Shield className="w-3 h-3" />;
     if (level >= 9) return <Crown className="w-3 h-3" />;
     if (isPro) return <Star className="w-3 h-3" />;
     if (level >= 3) return <Zap className="w-3 h-3" />;
     return null;
   };
 
-  const getLevelDisplay = () => {
-    if (isAdmin) return "N/A";
-    return level.toString();
-  };
-
   return (
     <div className={cn("tier-badge", getTierStyle(), className)}>
       <div className="flex items-center gap-1">
-        <span>Lv {getLevelDisplay()}</span>
-        {isAdmin && <span>- Admin</span>}
-        {isPro && level < 9 && !isAdmin && <span>- Pro</span>}
+        <span>Lv {level}</span>
+        {isPro && level < 9 && <span>- Pro</span>}
         {getTierIcon()}
       </div>
     </div>
