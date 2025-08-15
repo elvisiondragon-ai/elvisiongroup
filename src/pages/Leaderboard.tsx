@@ -44,13 +44,13 @@ export function Leaderboard() {
           
           <Card className="p-4 text-center bg-gradient-secondary border-border">
             <Zap className="w-6 h-6 mx-auto mb-2 text-primary" />
-            <div className="text-lg font-bold font-orbitron text-primary">47</div>
+            <div className="text-lg font-bold font-orbitron text-primary">10.927</div>
             <div className="text-xs text-muted-foreground">Pro Members</div>
           </Card>
           
           <Card className="p-4 text-center bg-gradient-secondary border-border">
             <Trophy className="w-6 h-6 mx-auto mb-2 text-accent" />
-            <div className="text-lg font-bold font-orbitron text-accent">342</div>
+            <div className="text-lg font-bold font-orbitron text-accent">18.719</div>
             <div className="text-xs text-muted-foreground">Active Souls</div>
           </Card>
         </div>
