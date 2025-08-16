@@ -13,6 +13,7 @@ interface ChatMessageProps {
     avatar?: string;
     level: number;
     isPro?: boolean;
+    isAdmin?: boolean;
   };
   message: string;
   timestamp: Date;
@@ -81,7 +82,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-foreground">{user.name}</span>
-            <TierBadge level={user.level} isPro={user.isPro} />
+            <TierBadge level={user.level} isPro={user.isPro} isAdmin={user.isAdmin} />
           </div>
           
           {canDelete && (
