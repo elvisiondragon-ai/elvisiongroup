@@ -675,6 +675,10 @@ export type Database = {
           subscription_type: string
         }[]
       }
+      cleanup_chat_message_user_names: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       cleanup_expired_admin_roles: {
         Args: Record<PropertyKey, never>
         Returns: number
