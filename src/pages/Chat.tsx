@@ -163,9 +163,8 @@ export function Chat() {
           { id: '41', user_id: '41', user_name: 'CandraWijaya', user_level: 4, is_pro: true, message: 'setiap hari pasti buka aplikasi ini, udah jadi kebiasaan', created_at: new Date('2024-01-20T15:20:00').toISOString() },
           { id: '42', user_id: '42', user_name: 'DoniSaputra', user_level: 4, is_pro: true, message: 'sama, pagi2 dengerin audio disini bikin semangat kerja', created_at: new Date('2024-01-20T15:21:00').toISOString() },
           { id: '43', user_id: '38625adb-dcfb-4bac-b473-2e6ee37af72e', user_name: 'Senz', user_level: 6, is_pro: true, message: 'mantap komunitas ini makin rame ya, semangat terus semua!', created_at: new Date('2024-01-20T15:25:00').toISOString() },
-          { id: '44', user_id: 'sam-165-user-id', user_name: 'Sam_165', user_level: 3, is_pro: false, message: 'Halo semua! Baru aja naik level 3 nih, seneng banget!', created_at: new Date('2024-01-20T15:30:00').toISOString() }
-          { id: '44', user_id: '[Admin_Renata]', user_name: '[Admin_Renata]', user_level: Admin, is_pro: true, message: 'Halo semua! Baru aja naik level 3 nih, seneng banget!', created_at: new Date('2024-01-20T15:30:00').toISOString() }
-
+          { id: '44', user_id: 'sam-165-user-id', user_name: 'Sam_165', user_level: 3, is_pro: false, message: 'Halo semua! Baru aja naik level 3 nih, seneng banget!', created_at: new Date('2024-01-20T15:30:00').toISOString() },
+          { id: '45', user_id: 'dragon-admin-id', user_name: 'dragon', user_level: 1, is_pro: false, message: 'Selamat datang di komunitas! Jangan ragu untuk bertanya atau berbagi pengalaman.', created_at: new Date('2024-01-20T15:35:00').toISOString() }
         ];
         setMessages(mockMessages);
       } else {
@@ -513,23 +512,30 @@ export function Chat() {
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {messages.map((msg) => (
-              <ChatMessage
-                key={msg.id}
-                id={msg.id}
-                user={{
-                  id: msg.user_id,
-                  name: msg.user_name,
-                  level: msg.user_level,
-                  isPro: msg.is_pro,
-                  avatar: ""
-                }}
-                message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
-                timestamp={new Date(msg.created_at)}
-                currentUserId={currentUser?.id}
-                onDelete={handleDeleteMessage}
-              />
-            ))}
+            {messages.map((msg) => {
+              const isAdmin = msg.user_level === 999 || 
+                msg.user_name === 'dragon' || 
+                msg.user_name === 'dragon@yahoo.com';
+              
+              return (
+                <ChatMessage
+                  key={msg.id}
+                  id={msg.id}
+                  user={{
+                    id: msg.user_id,
+                    name: msg.user_name,
+                    level: msg.user_level,
+                    isPro: msg.is_pro,
+                    isAdmin: isAdmin,
+                    avatar: ""
+                  }}
+                  message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
+                  timestamp={new Date(msg.created_at)}
+                  currentUserId={currentUser?.id}
+                  onDelete={handleDeleteMessage}
+                />
+              );
+            })}
           </div>
         )}
       </div>
