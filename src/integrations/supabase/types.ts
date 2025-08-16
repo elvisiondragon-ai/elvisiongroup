@@ -679,6 +679,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      cleanup_user_display_names: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       create_chat_message: {
         Args: {
           p_allowed_users?: string[]
