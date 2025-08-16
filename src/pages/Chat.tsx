@@ -164,7 +164,7 @@ export function Chat() {
           { id: '42', user_id: '42', user_name: 'DoniSaputra', user_level: 4, is_pro: true, message: 'sama, pagi2 dengerin audio disini bikin semangat kerja', created_at: new Date('2024-01-20T15:21:00').toISOString() },
           { id: '43', user_id: '38625adb-dcfb-4bac-b473-2e6ee37af72e', user_name: 'Senz', user_level: 6, is_pro: true, message: 'mantap komunitas ini makin rame ya, semangat terus semua!', created_at: new Date('2024-01-20T15:25:00').toISOString() },
           { id: '44', user_id: 'sam-165-user-id', user_name: 'Sam_165', user_level: 3, is_pro: false, message: 'Halo semua! Baru aja naik level 3 nih, seneng banget!', created_at: new Date('2024-01-20T15:30:00').toISOString() },
-          { id: '45', user_id: 'dragon-admin-id', user_name: '[Admin_Renata]', user_level: Admin, is_pro: true, message: 'Selamat datang di komunitas! Jangan ragu untuk bertanya atau berbagi pengalaman.', created_at: new Date('2024-01-20T15:35:00').toISOString() }
+          { id: '45', user_id: 'dragon-admin-id', user_name: 'Admin Renata', user_level: 1, is_pro: false, message: 'Selamat datang di komunitas! Jangan ragu untuk bertanya atau berbagi pengalaman.', created_at: new Date('2024-01-20T15:35:00').toISOString() }
         ];
         setMessages(mockMessages);
       } else {
@@ -514,8 +514,7 @@ export function Chat() {
           <div className="divide-y divide-border">
             {messages.map((msg) => {
               const isAdmin = msg.user_level === 999 || 
-                msg.user_name === 'dragon' || 
-                msg.user_name === 'dragon@yahoo.com';
+                msg.user_name === 'Admin_Renata';
               
               return (
                 <ChatMessage
