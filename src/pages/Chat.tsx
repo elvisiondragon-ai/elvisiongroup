@@ -148,7 +148,7 @@ export function Chat() {
           { id: '26', user_id: '26', user_name: 'DianPermata', user_level: 2, is_pro: false, message: 'Gamenya itu loh, simpel tapi bikin penasaran', created_at: new Date('2024-01-20T11:54:00').toISOString() },
           { id: '27', user_id: '27', user_name: 'FajarNugroho', user_level: 2, is_pro: false, message: 'bener, ga sadar udah main setengah jam sendiri', created_at: new Date('2024-01-20T11:55:00').toISOString() },
           { id: '28', user_id: '28', user_name: 'IndahPermatasari', user_level: 1, is_pro: false, message: 'Poinnya bisa dituker ga sih?', created_at: new Date('2024-01-20T11:58:00').toISOString() },
-          { id: '29', user_id: '29', user_name: 'Admin_Renata', user_level: 10, is_pro: true, message: 'Belum bisa kak Indah, tapi ditunggu aja updatenya ya :)', created_at: new Date('2024-01-20T12:05:00').toISOString() },
+          { id: '29', user_id: 'dragon@yahoo.com', user_name: 'Admin_Renata', user_level: 10, is_pro: true, message: 'Belum bisa kak Indah, tapi ditunggu aja updatenya ya :)', created_at: new Date('2024-01-20T12:05:00').toISOString() },
           { id: '30', user_id: '30', user_name: 'AndiMalaka', user_level: 1, is_pro: false, message: 'wih adminnya muncul', created_at: new Date('2024-01-20T13:30:00').toISOString() },
           { id: '31', user_id: '31', user_name: 'BayuPradana', user_level: 2, is_pro: false, message: 'siap min, ditunggu fitur barunya', created_at: new Date('2024-01-20T13:31:00').toISOString() },
           { id: '32', user_id: '32', user_name: 'KartikaSari', user_level: 3, is_pro: false, message: 'Semoga ada fitur dark mode ya min kedepannya', created_at: new Date('2024-01-20T13:35:00').toISOString() },
@@ -520,7 +520,8 @@ export function Chat() {
                   name: msg.user_name,
                   level: msg.user_level,
                   isPro: msg.is_pro,
-                  avatar: ""
+                  avatar: "",
+                  isAdmin: msg.user_id === 'srcindocs@gmail.com' && msg.user_name === 'Admin_Renata'
                 }}
                 message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
                 timestamp={new Date(msg.created_at)}
