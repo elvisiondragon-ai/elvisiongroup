@@ -103,37 +103,11 @@ export function Auth({ onLogin }: AuthProps) {
       return;
     }
 
-    // Enhanced password validation for security
-    if (signupData.password.length < 12) {
+    // Simple password validation - minimum 6 characters
+    if (signupData.password.length < 6) {
       toast({
         title: "Password Too Short",
-        description: "Password must be at least 12 characters long for security.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check password complexity
-    const hasUppercase = /[A-Z]/.test(signupData.password);
-    const hasLowercase = /[a-z]/.test(signupData.password);
-    const hasNumbers = /\d/.test(signupData.password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(signupData.password);
-
-    if (!hasUppercase || !hasLowercase || !hasNumbers || !hasSpecialChar) {
-      toast({
-        title: "Password Too Weak",
-        description: "Password must contain uppercase, lowercase, numbers, and special characters.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check for common weak passwords
-    const commonPasswords = ['password123', '123456789', 'qwerty123'];
-    if (commonPasswords.some(common => signupData.password.toLowerCase().includes(common.toLowerCase()))) {
-      toast({
-        title: "Password Too Common",
-        description: "Please choose a more unique password.",
+        description: "Password must be at least 6 characters long.",
         variant: "destructive",
       });
       return;
@@ -309,37 +283,11 @@ export function Auth({ onLogin }: AuthProps) {
       return;
     }
 
-    // Enhanced password validation for security
-    if (signupData.password.length < 12) {
+    // Simple password validation - minimum 6 characters
+    if (signupData.password.length < 6) {
       toast({
         title: "Password Terlalu Pendek",
-        description: "Password harus minimal 12 karakter untuk keamanan.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check password complexity
-    const hasUppercase = /[A-Z]/.test(signupData.password);
-    const hasLowercase = /[a-z]/.test(signupData.password);
-    const hasNumbers = /\d/.test(signupData.password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(signupData.password);
-
-    if (!hasUppercase || !hasLowercase || !hasNumbers || !hasSpecialChar) {
-      toast({
-        title: "Password Terlalu Lemah",
-        description: "Password harus mengandung huruf besar, kecil, angka, dan simbol.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check for common weak passwords
-    const commonPasswords = ['password123', '123456789', 'qwerty123'];
-    if (commonPasswords.some(common => signupData.password.toLowerCase().includes(common.toLowerCase()))) {
-      toast({
-        title: "Password Terlalu Umum",
-        description: "Silakan pilih password yang lebih unik.",
+        description: "Password harus minimal 6 karakter.",
         variant: "destructive",
       });
       return;

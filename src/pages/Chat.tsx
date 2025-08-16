@@ -520,8 +520,7 @@ export function Chat() {
                   name: msg.user_name,
                   level: msg.user_level,
                   isPro: msg.is_pro,
-                  avatar: "",
-                  isAdmin: msg.user_id === 'srcindocs@gmail.com' && msg.user_name === 'Admin_Renata'
+                  avatar: ""
                 }}
                 message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
                 timestamp={new Date(msg.created_at)}
