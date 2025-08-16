@@ -164,6 +164,8 @@ export function Chat() {
           { id: '42', user_id: '42', user_name: 'DoniSaputra', user_level: 4, is_pro: true, message: 'sama, pagi2 dengerin audio disini bikin semangat kerja', created_at: new Date('2024-01-20T15:21:00').toISOString() },
           { id: '43', user_id: '38625adb-dcfb-4bac-b473-2e6ee37af72e', user_name: 'Senz', user_level: 6, is_pro: true, message: 'mantap komunitas ini makin rame ya, semangat terus semua!', created_at: new Date('2024-01-20T15:25:00').toISOString() },
           { id: '44', user_id: 'sam-165-user-id', user_name: 'Sam_165', user_level: 3, is_pro: false, message: 'Halo semua! Baru aja naik level 3 nih, seneng banget!', created_at: new Date('2024-01-20T15:30:00').toISOString() }
+          { id: '44', user_id: '[Admin_Renata]', user_name: '[Admin_Renata]', user_level: Admin, is_pro: true, message: 'Halo semua! Baru aja naik level 3 nih, seneng banget!', created_at: new Date('2024-01-20T15:30:00').toISOString() }
+
         ];
         setMessages(mockMessages);
       } else {
