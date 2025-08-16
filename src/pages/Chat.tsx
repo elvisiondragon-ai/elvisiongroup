@@ -514,8 +514,7 @@ export function Chat() {
           <div className="divide-y divide-border">
             {messages.map((msg) => {
               const isAdmin = msg.user_level === 999 || 
-                msg.user_name === 'dragon' || 
-                msg.user_name === 'dragon@yahoo.com';
+                msg.user_name === 'Admin_Renata';
               
               return (
                 <ChatMessage
