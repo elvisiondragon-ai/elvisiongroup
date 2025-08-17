@@ -1,155 +1,146 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-proxy-key'
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-serve(async (req)=>{
-  // Handle CORS preflight requests
+serve(async (req) => {
+  console.log('🚀 Edge Function started');
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.url);
+
+  // Handle CORS
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: corsHeaders
-    });
+    console.log('✅ CORS preflight handled');
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    // Get the authorization header to identify the user
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('No authorization header');
-    }
-
-    // Create Supabase client with service role for admin operations
-    const supabaseClient = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
-    
-    // Get the user from the auth header
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError || !user) {
-      throw new Error('Invalid authentication');
-    }
-
-    // Parse the request body
-    const { subscriptionType, paymentMethod, userEmail, userName } = await req.json();
-    if (!subscriptionType || !paymentMethod || !userEmail) {
-      throw new Error('Missing required parameters');
-    }
-    console.log('Creating payment for user:', user.id, 'subscription:', subscriptionType, 'method:', paymentMethod);
-
-    // Calculate amounts based on subscription type
-    const amounts = {
-      monthly: 50000,
-      yearly: 500000
-    };
-    const amount = amounts[subscriptionType];
-    if (!amount) {
-      throw new Error('Invalid subscription type');
-    }
-    
-    // Prepare data for the VPS proxy
-    const proxyPayload = {
-      method: paymentMethod,
-      customer_name: userName || userEmail.split('@')[0],
-      customer_email: userEmail,
-      order_items: [
-        {
-          sku: `ELVISION_${subscriptionType.toUpperCase()}`,
-          name: `eL Vision Group - ${subscriptionType === 'monthly' ? 'Monthly' : 'Yearly'} Subscription`,
-          price: amount,
-          quantity: 1,
+    // Hanya terima POST
+    if (req.method !== 'POST') {
+      console.log('❌ Method not allowed:', req.method);
+      return new Response(
+        JSON.stringify({ error: 'Method not allowed' }), 
+        { 
+          status: 405,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
-      ],
-      // Menggunakan URL dari Nginx yang sudah kita perbaiki
-      callback_url: "https://elvisiongroup.com/api/tripay-callback", 
-      return_url: `${req.headers.get('origin') || 'https://elvisiongroup.com'}/profile?payment=success`,
+      );
+    }
+
+    // Parse request body
+    console.log('📥 Parsing request body...');
+    const body = await req.json();
+    console.log('✅ Received body:', JSON.stringify(body));
+
+    // Tambahkan signature ke body request
+    const bodyWithSignature = {
+      ...body,
+      // Tambahkan credentials untuk VPS
+      akses_curl: aksesKey,
+      signa1: signa1,
+      signa2: signa2,
+      // Atau format signature yang VPS expect
+      signature: {
+        key: aksesKey,
+        sig1: signa1,
+        sig2: signa2
+      }
     };
 
-    console.log('Sending request to VPS proxy:', proxyPayload);
+    console.log('📦 Body with signature prepared');
 
-    // --- PERUBAHAN UTAMA ADA DI SINI ---
-    // Mengubah URL agar sesuai dengan konfigurasi Nginx yang baru
-    const vpsProxyUrl = 'https://elvisiongroup.com/api/create-payment';
-
-    const tripayResponse = await fetch(vpsProxyUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-proxy-key': Deno.env.get("PROXY_API_KEY") ?? "" // Kunci rahasia untuk VPS
-      },
-      body: JSON.stringify(proxyPayload)
-    });
-
-    if (!tripayResponse.ok) {
-      const errorText = await tripayResponse.text();
-      console.error('VPS proxy error:', errorText);
-      throw new Error(`Payment gateway error: ${tripayResponse.status}`);
-    }
-
-    const tripayData = await tripayResponse.json();
-    console.log('Tripay response received:', tripayData);
-
-    // Store payment transaction
-    const { error: transactionError } = await supabaseClient.from('payment_transactions').insert({
-      user_id: user.id,
-      tripay_reference: tripayData.data?.reference,
-      merchant_ref: tripayData.data?.merchant_ref,
-      payment_method: paymentMethod,
-      amount: amount,
-      status: 'UNPAID',
-      payment_url: tripayData.data?.checkout_url,
-      pay_code: tripayData.data?.pay_code,
-      qr_string: tripayData.data?.qr_string,
-      qr_url: tripayData.data?.qr_url,
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-    });
-
-    if (transactionError) {
-      console.error('Transaction creation error:', transactionError);
-      throw new Error('Failed to store payment transaction');
-    }
-
-    console.log('Payment transaction created successfully.');
+    // URL VPS
+    const vpsUrl = "https://payment.elvisiongroup.com/api/create-payment";
+    const aksesKey = Deno.env.get('AKSES_CURL');
+    const signa1 = Deno.env.get('SIGNA1');
+    const signa2 = Deno.env.get('SIGNA2');
     
-    // Return success response
-    return new Response(JSON.stringify(tripayData), {
+    console.log('🔑 Access key loaded:', aksesKey ? 'YES' : 'NO');
+    console.log('🔐 SIGNA1 loaded:', signa1 ? 'YES' : 'NO');
+    console.log('🔐 SIGNA2 loaded:', signa2 ? 'YES' : 'NO');
+
+    // Forward ke VPS dengan signatures
+    console.log('🌐 Sending request to VPS:', vpsUrl);
+    const vpsResponse = await fetch(vpsUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(aksesKey && { "X-Access-Key": aksesKey }),
+        ...(signa1 && { "X-Signature-1": signa1 }),
+        ...(signa2 && { "X-Signature-2": signa2 }),
+        // Atau jika VPS expect signature di header berbeda:
+        // ...(signa1 && { "SIGNA1": signa1 }),
+        // ...(signa2 && { "SIGNA2": signa2 }),
+      },
+      body: JSON.stringify(bodyWithSignature)
+    });
+
+    console.log('📡 VPS Response status:', vpsResponse.status);
+    console.log('📡 VPS Response ok:', vpsResponse.ok);
+
+    // Baca response sebagai text dulu
+    const responseText = await vpsResponse.text();
+    console.log('📄 VPS Response text length:', responseText.length);
+    console.log('📄 VPS Response preview:', responseText.substring(0, 200));
+
+    // Coba parse sebagai JSON
+    let result;
+    try {
+      result = JSON.parse(responseText);
+      console.log('✅ Parsed JSON successfully');
+      console.log('📋 Result keys:', Object.keys(result));
+    } catch (parseError) {
+      console.log('⚠️ JSON parse failed:', parseError.message);
+      // Jika bukan JSON, bungkus dalam object
+      result = {
+        success: vpsResponse.ok,
+        status: vpsResponse.status,
+        data: responseText
+      };
+    }
+
+    // Jika VPS return 502, berikan error yang jelas
+    if (vpsResponse.status === 502) {
+      console.log('💥 502 Bad Gateway detected');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Payment service temporarily unavailable',
+          message: 'VPS backend service is down. Please check your payment server.',
+          vps_response: responseText
+        }), 
+        {
+          status: 503, // Service Unavailable
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log('✅ Returning successful response');
+    // Return response normal
+    return new Response(JSON.stringify(result), {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/json'
       },
-      status: 200
+      status: vpsResponse.status
     });
 
   } catch (error) {
-    console.error('Tripay create payment error:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: error.message || 'Payment creation failed',
-    }), {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json'
-      },
-      status: 400
-    });
-  }
-});
-    console.error('Tripay create payment error:', error)
+    console.error('💥 Edge Function error:', error.message);
+    console.error('💥 Error stack:', error.stack);
     
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message || 'Payment creation failed',
-        message: 'Failed to create payment. Please try again.'
-      }),
+      JSON.stringify({ 
+        error: 'Internal server error',
+        message: error.message 
+      }), 
       {
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        },
-        status: 400
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
-    )
+    );
   }
-})
+});
