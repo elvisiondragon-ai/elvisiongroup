@@ -172,24 +172,18 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     
     setTripayLoading(true);
     try {
-      const response = await fetch('https://payment.elvisiongroup.com/api/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
+        body: {
           subscriptionType: 'monthly',
           paymentMethod: 'BRIVA',
           userEmail: user.email,
           userName: userProfile?.display_name || user.email?.split('@')[0] || 'User'
-        })
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        throw error;
       }
-
-      const data = await response.json();
 
       if (data?.checkoutUrl) {
         window.open(data.checkoutUrl, '_blank');
