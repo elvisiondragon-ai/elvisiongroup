@@ -1,12 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// Ambil environment variable dari secret keys Supabase
-const ENDPOINT = Deno.env.get("URL_PAYMENT") || "https://payment.elvisiongroup.com/api/create-payment";
+// URL endpoint VPS Anda
+const ENDPOINT = "https://payment.elvisiongroup.com/api/create-payment";
 const ACCESS_KEY = Deno.env.get("AKSES_CURL") || "";
 const SIGNA1 = Deno.env.get("SIGNA1") || "";
 const SIGNA2 = Deno.env.get("SIGNA2") || "";
 
-// Fungsi untuk generate signature HMAC-SHA256
+// Fungsi generate signature HMAC-SHA256
 async function generateSignature(payload: object, keyString: string) {
   const encoder = new TextEncoder();
   const key = encoder.encode(keyString);
@@ -24,29 +24,56 @@ async function generateSignature(payload: object, keyString: string) {
 }
 
 serve(async (req) => {
+  console.log("Received request:", req.method, req.url);
+
+  // Handler untuk CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, x-access-key, x-callback-signature",
+      },
+    });
+  }
+
   if (req.method !== "POST") {
+    console.log("Method not allowed");
     return new Response("Only POST allowed", { status: 405 });
   }
 
   const payload = await req.json();
+  console.log("Payload:", payload);
 
-  // Pilih key yang akan dipakai (misal: gunakan SIGNA1 jika ada field "pakai1" di payload, SIGNA2 jika ada "pakai2")
+  // Pilih key sesuai kebutuhan (misal: SIGNA1 default, SIGNA2 jika payload.pakai2)
   let keyToUse = SIGNA1;
   if (payload.pakai2) keyToUse = SIGNA2;
+  console.log("Using key:", keyToUse === SIGNA1 ? "SIGNA1" : "SIGNA2");
 
   const signature = await generateSignature(payload, keyToUse);
+  console.log("Generated signature:", signature);
 
-  const res = await fetch(ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-access-key": ACCESS_KEY,
-      "x-callback-signature": signature,
-    },
-    body: JSON.stringify(payload),
-  });
+  try {
+    const res = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-key": ACCESS_KEY,
+        "x-callback-signature": signature,
+      },
+      body: JSON.stringify(payload),
+    });
 
-  const text = await res.text();
-  console.log('VPS Response:', text);
-  return new Response(text, { status: res.status });
+    const text = await res.text();
+    console.log('VPS Response:', text);
+
+    return new Response(text, {
+      status: res.status,
+      headers: { "Access-Control-Allow-Origin": "*" },
+    });
+  } catch (err) {
+    console.error("Fetch to VPS failed:", err);
+    return new Response("VPS fetch error", { status: 500 });
+  }
 });
