@@ -121,8 +121,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 3,
       title: "Verse 3 - Syukur Meditation",
       subtitle: "Menumbuhkan rasa syukur pada titik saraf seluruh tubuh",
-      unlocked: userLevel >= 3,
-      requiredLevel: 3,
+      unlocked: userLevel >= 2,
+      requiredLevel: 2,
       artwork: verse3Artwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%203%20-%20Syukur.MP3',
       language: 'id'
