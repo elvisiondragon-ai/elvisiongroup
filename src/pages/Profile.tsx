@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { ProUpgrade } from "@/components/ProUpgrade";
+import { TripaySubscription } from "@/components/TripaySubscription";
 import { usePro } from "@/hooks/usePro";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +49,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [editingProfile, setEditingProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
+  const [showTripaySubscription, setShowTripaySubscription] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [tripayLoading, setTripayLoading] = useState(false);
   const { proStatus } = usePro();
@@ -167,46 +169,8 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     }
   };
 
-  const handleTripayPayment = async () => {
-    if (!user) return;
-    
-    setTripayLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
-        body: {
-          subscriptionType: 'monthly',
-          paymentMethod: 'BRIVA',
-          userEmail: user.email,
-          userName: userProfile?.display_name || user.email?.split('@')[0] || 'User'
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data?.checkoutUrl) {
-        window.open(data.checkoutUrl, '_blank');
-        toast({
-          title: "Payment Created",
-          description: "Payment link opened in new tab",
-        });
-      } else {
-        toast({
-          title: "Payment Created",
-          description: "Payment has been created successfully",
-        });
-      }
-    } catch (error) {
-      console.error('Tripay payment error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create payment. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setTripayLoading(false);
-    }
+  const handleTripayPayment = () => {
+    setShowTripaySubscription(true);
   };
 
   if (loading) {
@@ -305,6 +269,16 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           <ProUpgrade onClose={() => setShowProUpgrade(false)} />
         </div>
       </div>
+    );
+  }
+
+  if (showTripaySubscription) {
+    return (
+      <TripaySubscription
+        user={user}
+        userProfile={userProfile}
+        onClose={() => setShowTripaySubscription(false)}
+      />
     );
   }
 
@@ -446,10 +420,9 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           variant="outline" 
           className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium border-primary hover:border-primary"
           onClick={handleTripayPayment}
-          disabled={tripayLoading}
         >
           <Zap className="w-4 h-4 mr-2" />
-          {tripayLoading ? 'Creating Payment...' : 'Tripay Payment'}
+          Tripay Payment
         </Button>
 
         <Button 

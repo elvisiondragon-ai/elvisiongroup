@@ -1,0 +1,202 @@
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, CreditCard, Calendar } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface TripaySubscriptionProps {
+  user: any;
+  userProfile: any;
+  onClose: () => void;
+}
+
+export function TripaySubscription({ user, userProfile, onClose }: TripaySubscriptionProps) {
+  const [selectedPlan, setSelectedPlan] = useState('yearly');
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const subscriptionPlans = [
+    {
+      id: 'yearly',
+      name: '1 Year Subscription',
+      description: 'Annual subscription with full access',
+      price: 800000,
+      currency: 'IDR',
+      paymentMethodCode: 'BCAVA',
+      paymentMethod: 'BCA Virtual Account',
+      duration: '12 months'
+    }
+  ];
+
+  const handleCreatePayment = async () => {
+    if (!user || !selectedPlan) return;
+    
+    setLoading(true);
+    try {
+      const plan = subscriptionPlans.find(p => p.id === selectedPlan);
+      if (!plan) throw new Error('Plan not found');
+
+      // Generate merchant reference
+      const timestamp = Date.now();
+      const merchantRef = `INV1_YEAR_${timestamp}`;
+      const reference = `TT442721${timestamp}`;
+
+      const paymentData = {
+        reference: reference,
+        merchant_ref: merchantRef,
+        payment_method: plan.paymentMethod,
+        payment_method_code: plan.paymentMethodCode,
+        total_amount: plan.price,
+        fee_merchant: 20000,
+        fee_customer: 0,
+        total_fee: 20000,
+        amount_received: plan.price - 20000,
+        is_closed_payment: 1,
+        status: "UNPAID",
+        paid_at: null,
+        note: null,
+        action: "check_payment"
+      };
+
+      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
+        body: {
+          subscriptionType: 'yearly',
+          paymentMethod: plan.paymentMethodCode,
+          userEmail: user.email,
+          userName: userProfile?.display_name || user.email?.split('@')[0] || 'User',
+          paymentData: paymentData
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.checkoutUrl) {
+        window.open(data.checkoutUrl, '_blank');
+        toast({
+          title: "Payment Created",
+          description: "Payment link opened in new tab",
+        });
+      } else {
+        toast({
+          title: "Payment Created",
+          description: "Payment has been created successfully",
+        });
+      }
+
+      onClose();
+    } catch (error) {
+      console.error('Tripay payment error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create payment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-xl font-semibold">Subscription Plans</h1>
+        </div>
+
+        <div className="max-w-md mx-auto space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Choose Your Plan
+              </CardTitle>
+              <CardDescription>
+                Select a subscription plan to unlock premium features
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan}>
+                {subscriptionPlans.map((plan) => (
+                  <div key={plan.id} className="flex items-start space-x-3">
+                    <RadioGroupItem value={plan.id} id={plan.id} className="mt-1" />
+                    <Label htmlFor={plan.id} className="flex-1 cursor-pointer">
+                      <Card className="p-4 hover:bg-muted/50 transition-colors">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="font-medium">{plan.name}</h3>
+                          <div className="text-right">
+                            <div className="font-bold text-lg">{formatCurrency(plan.price)}</div>
+                            <div className="text-sm text-muted-foreground">{plan.duration}</div>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">{plan.description}</p>
+                        <div className="flex items-center gap-2 text-sm text-primary">
+                          <Calendar className="w-4 h-4" />
+                          {plan.paymentMethod}
+                        </div>
+                      </Card>
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+
+              <div className="pt-4 space-y-3">
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2">Payment Details:</h4>
+                  <div className="text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span>Subscription:</span>
+                      <span>{subscriptionPlans.find(p => p.id === selectedPlan)?.price ? formatCurrency(subscriptionPlans.find(p => p.id === selectedPlan)!.price) : ''}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Merchant Fee:</span>
+                      <span>{formatCurrency(20000)}</span>
+                    </div>
+                    <div className="flex justify-between font-medium border-t pt-1">
+                      <span>You Receive:</span>
+                      <span>{subscriptionPlans.find(p => p.id === selectedPlan)?.price ? formatCurrency(subscriptionPlans.find(p => p.id === selectedPlan)!.price - 20000) : ''}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleCreatePayment}
+                  disabled={loading || !selectedPlan}
+                  className="w-full"
+                  size="lg"
+                >
+                  {loading ? (
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                  ) : (
+                    <CreditCard className="w-4 h-4 mr-2" />
+                  )}
+                  {loading ? 'Creating Payment...' : 'Create Payment'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
