@@ -446,10 +446,9 @@ export function Chat() {
                 Komunitas eL Vision Group
               </h1>
                <p className="text-sm text-muted-foreground">
-                21.482 anggota • Updates every 60 min
+                21.482 anggota 
                </p>
               <p className="text-xs text-muted-foreground">
-                Last update: {lastUpdate.toLocaleTimeString()}
               </p>
             </div>
           </div>
