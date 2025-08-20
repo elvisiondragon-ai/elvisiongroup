@@ -263,6 +263,75 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          amount: number
+          created_at: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          end_date: string | null
+          id: string
+          merchant_ref: string
+          payment_method: string | null
+          payment_status: string | null
+          start_date: string | null
+          subscription_type: string
+          tripay_reference: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          end_date?: string | null
+          id?: string
+          merchant_ref: string
+          payment_method?: string | null
+          payment_status?: string | null
+          start_date?: string | null
+          subscription_type: string
+          tripay_reference?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          end_date?: string | null
+          id?: string
+          merchant_ref?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          start_date?: string | null
+          subscription_type?: string
+          tripay_reference?: string | null
+        }
+        Relationships: []
+      }
+      packages: {
+        Row: {
+          duration_days: number | null
+          id: string
+          name: string | null
+          price: number | null
+        }
+        Insert: {
+          duration_days?: number | null
+          id: string
+          name?: string | null
+          price?: number | null
+        }
+        Update: {
+          duration_days?: number | null
+          id?: string
+          name?: string | null
+          price?: number | null
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount: number
@@ -339,6 +408,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          amount_received: number | null
+          created_at: string | null
+          fee_customer: number | null
+          fee_merchant: number | null
+          id: number
+          merchant_ref: string
+          paid_at: string | null
+          payment_method: string | null
+          payment_method_code: string | null
+          reference: string
+          status: string
+          tripay_data: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          amount_received?: number | null
+          created_at?: string | null
+          fee_customer?: number | null
+          fee_merchant?: number | null
+          id?: number
+          merchant_ref: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_method_code?: string | null
+          reference: string
+          status?: string
+          tripay_data?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          amount_received?: number | null
+          created_at?: string | null
+          fee_customer?: number | null
+          fee_merchant?: number | null
+          id?: number
+          merchant_ref?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_method_code?: string | null
+          reference?: string
+          status?: string
+          tripay_data?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -478,6 +598,131 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          duration_days: number
+          id: string
+          is_active: boolean | null
+          name: string
+          payment_method: string | null
+          payment_method_code: string | null
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          duration_days: number
+          id: string
+          is_active?: boolean | null
+          name: string
+          payment_method?: string | null
+          payment_method_code?: string | null
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          duration_days?: number
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          payment_method?: string | null
+          payment_method_code?: string | null
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          customer_email: string
+          id: number
+          merchant_ref: string
+          package_type: string
+          paid_at: number | null
+          status: string | null
+          tripay_reference: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          customer_email: string
+          id?: number
+          merchant_ref: string
+          package_type: string
+          paid_at?: number | null
+          status?: string | null
+          tripay_reference?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          customer_email?: string
+          id?: number
+          merchant_ref?: string
+          package_type?: string
+          paid_at?: number | null
+          status?: string | null
+          tripay_reference?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          expired_at: string | null
+          id: number
+          merchant_ref: string | null
+          package_id: string | null
+          status: string | null
+          tripay_reference: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          expired_at?: string | null
+          id?: number
+          merchant_ref?: string | null
+          package_id?: string | null
+          status?: string | null
+          tripay_reference?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          expired_at?: string | null
+          id?: number
+          merchant_ref?: string | null
+          package_id?: string | null
+          status?: string | null
+          tripay_reference?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_activities: {
         Row: {
           activity_type: string
@@ -528,6 +773,24 @@ export type Database = {
           email_hash?: string
           id?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_memberships: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
           user_id?: string
         }
         Relationships: []
