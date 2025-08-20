@@ -150,7 +150,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     {
       id: 5,
       title: "Verse 5 - Vitality Vortex",
-      subtitle: "Memperbaiki ulang fisik dan mental untuk hidup yang sehat",
+      subtitle: "Memperbaiki ulang finansial, fisik dan mental untuk hidup yang sehat",
       unlocked: false,
       requiredLevel: 5,
       artwork: verse5Artwork,
