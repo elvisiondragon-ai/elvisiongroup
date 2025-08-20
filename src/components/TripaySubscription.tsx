@@ -21,46 +21,46 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
   const [subscriptionPlans, setSubscriptionPlans] = useState([
     {
       id: '1_year',
-      name: '1 Year Subscription',
-      description: 'Annual subscription with full access',
+      name: 'Berlangganan 1 Tahun',
+      description: 'Berlangganan tahunan dengan akses penuh',
       price: 800000,
       currency: 'IDR',
       paymentMethodCode: 'BCAVA',
       paymentMethod: 'BCA Virtual Account',
-      duration: '365 days',
+      duration: '365 hari',
       durationDays: 365
     },
     {
       id: '1_month',
-      name: '1 Month Subscription', 
-      description: 'Monthly subscription with full access',
+      name: 'Berlangganan 1 Bulan', 
+      description: 'Berlangganan bulanan dengan akses penuh',
       price: 100000,
       currency: 'IDR',
       paymentMethodCode: 'BCAVA',
       paymentMethod: 'BCA Virtual Account',
-      duration: '30 days',
+      duration: '30 hari',
       durationDays: 30
     },
     {
       id: '1_week',
-      name: '1 Week Subscription',
-      description: 'Weekly subscription with full access', 
+      name: 'Berlangganan 1 Minggu',
+      description: 'Berlangganan mingguan dengan akses penuh', 
       price: 30000,
       currency: 'IDR',
       paymentMethodCode: 'BCAVA',
       paymentMethod: 'BCA Virtual Account',
-      duration: '7 days',
+      duration: '7 hari',
       durationDays: 7
     },
     {
       id: '1_day',
-      name: '1 Day Subscription',
-      description: 'Daily subscription with full access',
+      name: 'Berlangganan 1 Hari',
+      description: 'Berlangganan harian dengan akses penuh',
       price: 4000,
       currency: 'IDR',
       paymentMethodCode: 'BCAVA', 
       paymentMethod: 'BCA Virtual Account',
-      duration: '1 day',
+      duration: '1 hari',
       durationDays: 1
     }
   ]);
@@ -83,7 +83,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
             currency: plan.currency,
             paymentMethodCode: plan.payment_method_code,
             paymentMethod: plan.payment_method,
-            duration: `${plan.duration_days} ${plan.duration_days === 1 ? 'day' : 'days'}`,
+            duration: `${plan.duration_days} ${plan.duration_days === 1 ? 'hari' : 'hari'}`,
             durationDays: plan.duration_days
           }));
           setSubscriptionPlans(formattedPlans);
@@ -144,13 +144,13 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       if (data?.checkoutUrl) {
         window.open(data.checkoutUrl, '_blank');
         toast({
-          title: "Payment Created",
-          description: "Payment link opened in new tab",
+          title: "Pembayaran Dibuat",
+          description: "Link pembayaran dibuka di tab baru",
         });
       } else {
         toast({
-          title: "Payment Created",
-          description: "Payment has been created successfully",
+          title: "Pembayaran Dibuat",
+          description: "Pembayaran berhasil dibuat",
         });
       }
 
@@ -159,7 +159,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       console.error('Tripay payment error:', error);
       toast({
         title: "Error",
-        description: "Failed to create payment. Please try again.",
+        description: "Gagal membuat pembayaran. Silakan coba lagi.",
         variant: "destructive",
       });
     } finally {
@@ -177,10 +177,10 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
   };
 
   return (
-    <div className="fixed inset-0 bg-background z-50 overflow-hidden">
-      <div className="h-full flex flex-col">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div className="w-full max-w-md mx-4 h-[50vh] bg-background border rounded-lg shadow-lg flex flex-col">
         {/* Header */}
-        <div className="flex items-center gap-4 p-4 border-b bg-background/95 backdrop-blur">
+        <div className="flex items-center gap-4 p-4 border-b">
           <Button
             variant="ghost"
             size="icon"
@@ -188,63 +188,61 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-xl font-semibold">Subscription Plans</h1>
+          <h1 className="text-xl font-semibold">Paket Berlangganan</h1>
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="container mx-auto px-4 py-6 max-w-md">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5" />
-                  Choose Your Plan
-                </CardTitle>
-                <CardDescription>
-                  Select a subscription plan to unlock premium features
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan}>
-                  {subscriptionPlans.map((plan) => (
-                    <div key={plan.id} className="flex items-start space-x-3">
-                      <RadioGroupItem value={plan.id} id={plan.id} className="mt-1" />
-                      <Label htmlFor={plan.id} className="flex-1 cursor-pointer">
-                        <Card className="p-4 hover:bg-muted/50 transition-colors">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-medium">{plan.name}</h3>
-                            <div className="text-right">
-                              <div className="font-bold text-lg">{formatCurrency(plan.price)}</div>
-                              <div className="text-sm text-muted-foreground">{plan.duration}</div>
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">{plan.description}</p>
-                          <div className="flex items-center gap-2 text-sm text-primary">
-                            <Calendar className="w-4 h-4" />
-                            {plan.paymentMethod}
-                          </div>
-                        </Card>
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-lg font-medium flex items-center justify-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Pilih Paket Anda
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Pilih paket berlangganan untuk membuka fitur premium
+              </p>
+            </div>
 
-                <Button 
-                  onClick={handleCreatePayment}
-                  disabled={loading || !selectedPlan}
-                  className="w-full mt-6"
-                  size="lg"
-                >
-                  {loading ? (
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                  ) : (
-                    <CreditCard className="w-4 h-4 mr-2" />
-                  )}
-                  {loading ? 'Creating Payment...' : 'Create Payment'}
-                </Button>
-              </CardContent>
-            </Card>
+            <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan} className="space-y-3">
+              {subscriptionPlans.map((plan) => (
+                <div key={plan.id} className="flex items-start space-x-3">
+                  <RadioGroupItem value={plan.id} id={plan.id} className="mt-3" />
+                  <Label htmlFor={plan.id} className="flex-1 cursor-pointer">
+                    <Card className="p-3 hover:bg-muted/50 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-sm">{plan.name}</h3>
+                          <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
+                        </div>
+                        <div className="text-right ml-3">
+                          <div className="font-bold text-base">{formatCurrency(plan.price)}</div>
+                          <div className="text-xs text-muted-foreground">{plan.duration}</div>
+                        </div>
+                      </div>
+                    </Card>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
           </div>
+        </div>
+
+        {/* Footer Button */}
+        <div className="p-4 border-t">
+          <Button 
+            onClick={handleCreatePayment}
+            disabled={loading || !selectedPlan}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? (
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+            ) : (
+              <CreditCard className="w-4 h-4 mr-2" />
+            )}
+            {loading ? 'Membuat Pembayaran...' : 'Buat Pembayaran'}
+          </Button>
         </div>
       </div>
     </div>
