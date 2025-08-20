@@ -428,7 +428,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         <Button 
           variant="outline" 
           className={`w-full ${proStatus.isPro ? 'border-pro text-pro' : 'tier-pro'}`}
-          onClick={() => setShowProUpgrade(true)}
+          onClick={handleTripayPayment}
         >
           <Crown className="w-4 h-4 mr-2" />
           {proStatus.isPro ? 'Pro Membership' : 'Upgrade ke Pro'}

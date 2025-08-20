@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -14,22 +14,87 @@ interface TripaySubscriptionProps {
 }
 
 export function TripaySubscription({ user, userProfile, onClose }: TripaySubscriptionProps) {
-  const [selectedPlan, setSelectedPlan] = useState('yearly');
+  const [selectedPlan, setSelectedPlan] = useState('1_year');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const subscriptionPlans = [
+  const [subscriptionPlans, setSubscriptionPlans] = useState([
     {
-      id: 'yearly',
+      id: '1_year',
       name: '1 Year Subscription',
       description: 'Annual subscription with full access',
       price: 800000,
       currency: 'IDR',
       paymentMethodCode: 'BCAVA',
       paymentMethod: 'BCA Virtual Account',
-      duration: '12 months'
+      duration: '365 days',
+      durationDays: 365
+    },
+    {
+      id: '1_month',
+      name: '1 Month Subscription', 
+      description: 'Monthly subscription with full access',
+      price: 100000,
+      currency: 'IDR',
+      paymentMethodCode: 'BCAVA',
+      paymentMethod: 'BCA Virtual Account',
+      duration: '30 days',
+      durationDays: 30
+    },
+    {
+      id: '1_week',
+      name: '1 Week Subscription',
+      description: 'Weekly subscription with full access', 
+      price: 30000,
+      currency: 'IDR',
+      paymentMethodCode: 'BCAVA',
+      paymentMethod: 'BCA Virtual Account',
+      duration: '7 days',
+      durationDays: 7
+    },
+    {
+      id: '1_day',
+      name: '1 Day Subscription',
+      description: 'Daily subscription with full access',
+      price: 4000,
+      currency: 'IDR',
+      paymentMethodCode: 'BCAVA', 
+      paymentMethod: 'BCA Virtual Account',
+      duration: '1 day',
+      durationDays: 1
     }
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('subscription_plans')
+          .select('*')
+          .eq('is_active', true)
+          .order('price', { ascending: false });
+        
+        if (data && !error) {
+          const formattedPlans = data.map(plan => ({
+            id: plan.id,
+            name: plan.name,
+            description: plan.description,
+            price: plan.price,
+            currency: plan.currency,
+            paymentMethodCode: plan.payment_method_code,
+            paymentMethod: plan.payment_method,
+            duration: `${plan.duration_days} ${plan.duration_days === 1 ? 'day' : 'days'}`,
+            durationDays: plan.duration_days
+          }));
+          setSubscriptionPlans(formattedPlans);
+        }
+      } catch (error) {
+        console.error('Error fetching subscription plans:', error);
+      }
+    };
+
+    fetchPlans();
+  }, []);
 
   const handleCreatePayment = async () => {
     if (!user || !selectedPlan) return;
@@ -41,7 +106,8 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
 
       // Generate merchant reference
       const timestamp = Date.now();
-      const merchantRef = `INV1_YEAR_${timestamp}`;
+      const planType = plan.id.toUpperCase().replace('_', '');
+      const merchantRef = `INV${planType}_${timestamp}`;
       const reference = `TT442721${timestamp}`;
 
       const paymentData = {
@@ -63,7 +129,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
 
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
-          subscriptionType: 'yearly',
+          subscriptionType: plan.id,
           paymentMethod: plan.paymentMethodCode,
           userEmail: user.email,
           userName: userProfile?.display_name || user.email?.split('@')[0] || 'User',
