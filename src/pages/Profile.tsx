@@ -51,7 +51,6 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [showTripaySubscription, setShowTripaySubscription] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [tripayLoading, setTripayLoading] = useState(false);
   const { proStatus } = usePro();
   const { toast } = useToast();
 
@@ -169,9 +168,6 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     }
   };
 
-  const handleTripayPayment = () => {
-    setShowTripaySubscription(true);
-  };
 
   if (loading) {
     return (
@@ -416,19 +412,11 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           Notifikasi
         </Button>
 
-        <Button 
-          variant="outline" 
-          className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium border-primary hover:border-primary"
-          onClick={handleTripayPayment}
-        >
-          <Zap className="w-4 h-4 mr-2" />
-          Tripay Payment
-        </Button>
 
         <Button 
           variant="outline" 
           className={`w-full ${proStatus.isPro ? 'border-pro text-pro' : 'tier-pro'}`}
-          onClick={handleTripayPayment}
+          onClick={() => setShowTripaySubscription(true)}
         >
           <Crown className="w-4 h-4 mr-2" />
           {proStatus.isPro ? 'Pro Membership' : 'Upgrade ke Pro'}
