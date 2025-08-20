@@ -177,9 +177,10 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center gap-4 mb-6">
+    <div className="fixed inset-0 bg-background z-50 overflow-hidden">
+      <div className="h-full flex flex-col">
+        {/* Header */}
+        <div className="flex items-center gap-4 p-4 border-b bg-background/95 backdrop-blur">
           <Button
             variant="ghost"
             size="icon"
@@ -190,65 +191,48 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
           <h1 className="text-xl font-semibold">Subscription Plans</h1>
         </div>
 
-        <div className="max-w-md mx-auto space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Choose Your Plan
-              </CardTitle>
-              <CardDescription>
-                Select a subscription plan to unlock premium features
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan}>
-                {subscriptionPlans.map((plan) => (
-                  <div key={plan.id} className="flex items-start space-x-3">
-                    <RadioGroupItem value={plan.id} id={plan.id} className="mt-1" />
-                    <Label htmlFor={plan.id} className="flex-1 cursor-pointer">
-                      <Card className="p-4 hover:bg-muted/50 transition-colors">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-medium">{plan.name}</h3>
-                          <div className="text-right">
-                            <div className="font-bold text-lg">{formatCurrency(plan.price)}</div>
-                            <div className="text-sm text-muted-foreground">{plan.duration}</div>
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="container mx-auto px-4 py-6 max-w-md">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5" />
+                  Choose Your Plan
+                </CardTitle>
+                <CardDescription>
+                  Select a subscription plan to unlock premium features
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan}>
+                  {subscriptionPlans.map((plan) => (
+                    <div key={plan.id} className="flex items-start space-x-3">
+                      <RadioGroupItem value={plan.id} id={plan.id} className="mt-1" />
+                      <Label htmlFor={plan.id} className="flex-1 cursor-pointer">
+                        <Card className="p-4 hover:bg-muted/50 transition-colors">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-medium">{plan.name}</h3>
+                            <div className="text-right">
+                              <div className="font-bold text-lg">{formatCurrency(plan.price)}</div>
+                              <div className="text-sm text-muted-foreground">{plan.duration}</div>
+                            </div>
                           </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">{plan.description}</p>
-                        <div className="flex items-center gap-2 text-sm text-primary">
-                          <Calendar className="w-4 h-4" />
-                          {plan.paymentMethod}
-                        </div>
-                      </Card>
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-
-              <div className="pt-4 space-y-3">
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Payment Details:</h4>
-                  <div className="text-sm space-y-1">
-                    <div className="flex justify-between">
-                      <span>Subscription:</span>
-                      <span>{subscriptionPlans.find(p => p.id === selectedPlan)?.price ? formatCurrency(subscriptionPlans.find(p => p.id === selectedPlan)!.price) : ''}</span>
+                          <p className="text-sm text-muted-foreground mb-2">{plan.description}</p>
+                          <div className="flex items-center gap-2 text-sm text-primary">
+                            <Calendar className="w-4 h-4" />
+                            {plan.paymentMethod}
+                          </div>
+                        </Card>
+                      </Label>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Merchant Fee:</span>
-                      <span>{formatCurrency(20000)}</span>
-                    </div>
-                    <div className="flex justify-between font-medium border-t pt-1">
-                      <span>You Receive:</span>
-                      <span>{subscriptionPlans.find(p => p.id === selectedPlan)?.price ? formatCurrency(subscriptionPlans.find(p => p.id === selectedPlan)!.price - 20000) : ''}</span>
-                    </div>
-                  </div>
-                </div>
+                  ))}
+                </RadioGroup>
 
                 <Button 
                   onClick={handleCreatePayment}
                   disabled={loading || !selectedPlan}
-                  className="w-full"
+                  className="w-full mt-6"
                   size="lg"
                 >
                   {loading ? (
@@ -258,9 +242,9 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
                   )}
                   {loading ? 'Creating Payment...' : 'Create Payment'}
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
