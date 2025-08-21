@@ -404,7 +404,7 @@ export type Database = {
             foreignKeyName: "payment_transactions_subscription_id_fkey"
             columns: ["subscription_id"]
             isOneToOne: false
-            referencedRelation: "vip_subscriptions"
+            referencedRelation: "pro_subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -457,6 +457,57 @@ export type Database = {
           status?: string
           tripay_data?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      pro_subscriptions: {
+        Row: {
+          amount_paid: number | null
+          created_at: string
+          currency: string | null
+          id: string
+          ip_address: string | null
+          status: string
+          subscription_end_date: string | null
+          subscription_start_date: string | null
+          subscription_type: string
+          trial_end_date: string | null
+          trial_start_date: string | null
+          tripay_reference: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          ip_address?: string | null
+          status?: string
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          tripay_reference?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          ip_address?: string | null
+          status?: string
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          tripay_reference?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -791,57 +842,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           expires_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      vip_subscriptions: {
-        Row: {
-          amount_paid: number | null
-          created_at: string
-          currency: string | null
-          id: string
-          ip_address: string | null
-          status: string
-          subscription_end_date: string | null
-          subscription_start_date: string | null
-          subscription_type: string
-          trial_end_date: string | null
-          trial_start_date: string | null
-          tripay_reference: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          amount_paid?: number | null
-          created_at?: string
-          currency?: string | null
-          id?: string
-          ip_address?: string | null
-          status?: string
-          subscription_end_date?: string | null
-          subscription_start_date?: string | null
-          subscription_type?: string
-          trial_end_date?: string | null
-          trial_start_date?: string | null
-          tripay_reference?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          amount_paid?: number | null
-          created_at?: string
-          currency?: string | null
-          id?: string
-          ip_address?: string | null
-          status?: string
-          subscription_end_date?: string | null
-          subscription_start_date?: string | null
-          subscription_type?: string
-          trial_end_date?: string | null
-          trial_start_date?: string | null
-          tripay_reference?: string | null
-          updated_at?: string
           user_id?: string
         }
         Relationships: []
