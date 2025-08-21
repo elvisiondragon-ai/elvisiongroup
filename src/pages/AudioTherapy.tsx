@@ -103,7 +103,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 1,
       title: "Verse 1 - The Space Hill",
       subtitle: "Kedamaian Batin",
-      unlocked: userLevel >= 2 || proStatus.isPro
+      unlocked: userLevel >= 2 || proStatus.isPro,
       requiredLevel: 2,
       artwork: verseArtwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3',
@@ -123,7 +123,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 3,
       title: "Verse 3 - Syukur Meditation",
       subtitle: "Menumbuhkan rasa syukur pada titik saraf seluruh tubuh",
-      unlocked: userLevel >= 4 || proStatus.isPro
+      unlocked: userLevel >= 4 || proStatus.isPro,
       requiredLevel: 4,
       artwork: verse3Artwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%203%20-%20Syukur.MP3',
@@ -153,7 +153,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 5,
       title: "Verse 5 - Vitality Vortex",
       subtitle: "Memperbaiki ulang finansial, fisik dan mental untuk hidup yang sehat",
-      unlocked: userLevel >= 5 || proStatus.isPro
+      unlocked: userLevel >= 5 || proStatus.isPro,
       requiredLevel: 5,
       artwork: verse5Artwork,
       audioUrl: null,
@@ -163,7 +163,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 6,
       title: "Verse 6 - Beautify",
       subtitle: "Memfokuskan Kecantikan fisik yang mempesona setiap orang",
-      unlocked: userLevel >= 6 || proStatus.isPro
+      unlocked: userLevel >= 6 || proStatus.isPro,
       requiredLevel: 6,
       artwork: verse6Artwork,
       audioUrl: null,
@@ -173,7 +173,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 7,
       title: "Verse 7 - Confidence Core",
       subtitle: "Menumbuhkan keyakinan diri agar berani mengambil langkah penting",
-      unlocked: userLevel >= 7 || proStatus.isPro
+      unlocked: userLevel >= 7 || proStatus.isPro,
       requiredLevel: 7,
       artwork: verse7Artwork,
       audioUrl: null,
