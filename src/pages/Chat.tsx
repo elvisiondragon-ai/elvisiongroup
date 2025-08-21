@@ -83,7 +83,7 @@ export function Chat() {
             id: session.user.id, // Always use session user ID
             name: profile?.display_name || session.user.email?.split('@')[0] || 'Anonymous',
             level: profile?.level || 1,
-            isPro: (profile?.level || 1) >= 5 // Pro if level 5 or higher
+            isPro: profile?.achievements?.includes('pro') || false // Pro based on achievements array
           };
           
           console.log('Setting currentUser:', currentUserObj);
@@ -518,7 +518,7 @@ export function Chat() {
                   id: msg.user_id,
                   name: msg.user_name,
                   level: msg.user_level,
-                  isPro: msg.is_pro,
+                  isPro: msg.is_pro || false,
                   avatar: ""
                 }}
                 message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}

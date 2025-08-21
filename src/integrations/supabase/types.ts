@@ -1068,6 +1068,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      grant_pro_status: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      has_pro_achievement: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       is_super_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1108,6 +1116,10 @@ export type Database = {
         Args: { p_target_user_id: string }
         Returns: boolean
       }
+      revoke_pro_status: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       secure_admin_role_grant: {
         Args: {
           p_expires_at?: string
@@ -1120,6 +1132,10 @@ export type Database = {
       start_vip_trial: {
         Args: { p_email: string; p_ip_address?: string; p_user_id: string }
         Returns: string
+      }
+      sync_pro_status_from_subscription: {
+        Args: { p_user_id: string }
+        Returns: boolean
       }
       validate_admin_role_operation: {
         Args: { p_operation: string; p_role: string; p_target_user_id: string }
