@@ -1158,6 +1158,10 @@ export type Database = {
         }
         Returns: Json
       }
+      start_pro_trial: {
+        Args: { p_email: string; p_ip_address?: string; p_user_id: string }
+        Returns: string
+      }
       start_vip_trial: {
         Args: { p_email: string; p_ip_address?: string; p_user_id: string }
         Returns: string
