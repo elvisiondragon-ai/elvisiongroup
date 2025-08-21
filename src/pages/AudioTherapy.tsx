@@ -102,7 +102,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 1 - The Space Hill",
       subtitle: "Kedamaian Batin",
       unlocked: true,
-      requiredLevel: 1,
+      requiredLevel: 2,
       artwork: verseArtwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3',
       language: 'en'
@@ -112,7 +112,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 2 - Lucid Beach",
       subtitle: "Relaksasi seperti berada di pantai, membantu tidur nyenyak dan pikiran jernih",
       unlocked: userLevel >= 3,
-      requiredLevel: 2,
+      requiredLevel: 3,
       artwork: verse2Artwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse2%20-%20Lucid%20Beach%20-%20low%20env.MP3',
       language: 'id'
@@ -122,7 +122,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 3 - Syukur Meditation",
       subtitle: "Menumbuhkan rasa syukur pada titik saraf seluruh tubuh",
       unlocked: userLevel >= 2,
-      requiredLevel: 2,
+      requiredLevel: 4,
       artwork: verse3Artwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%203%20-%20Syukur.MP3',
       language: 'id'
@@ -132,7 +132,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 4 - Prosperity Stream",
       subtitle: "Frekuensi Kaya Raya",
       unlocked: true,
-      requiredLevel: 15,
+      requiredLevel: 1,
       artwork: verse4Artwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%204%20-%20Prosperity%20Stream%20Vol.%201.MP3',
       language: 'id'
@@ -142,7 +142,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 4 - Prosperity Stream (English)",
       subtitle: "Prosperity Stream",
       unlocked: true,
-      requiredLevel: 15,
+      requiredLevel: 1,
       artwork: verse4Artwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse4-English.MP3',
       language: 'en'
