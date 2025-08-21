@@ -69,31 +69,33 @@ serve(async (req)=>{
       throw transactionError;
     }
     // Update VIP subscription
-    const { data: subscription, error: subError } = await supabaseClient.from('pro_subscriptions').select('subscription_type, subscription_end_date') // ambil end_date jika ada
-    .eq('id', transaction.subscription_id).single();
-      if (subError) throw new Error('Subscription not found for this transaction.');
-      if (subscription) {
-        // Logika untuk perpanjangan: basis tanggal adalah end_date yang ada
-        const startDate = new Date(subscription.subscription_end_date || Date.now());
-        const endDate = new Date(startDate);
-        if (subscription.subscription_type === 'monthly') {
-          endDate.setMonth(endDate.getMonth() + 1);
-        } else if (subscription.subscription_type === 'yearly') {
-          endDate.setFullYear(endDate.getFullYear() + 1);
-        }
-        await supabaseClient.from('pro_subscriptions').update({
-          status: 'active',
-          subscription_end_date: endDate.toISOString()
-        }).eq('id', transaction.subscription_id);
-        
-        // Sync pro status for the user after subscription is activated
-        await supabaseClient.rpc('sync_pro_status_from_subscription', {
-          p_user_id: transaction.user_id
-        });
-        
-        console.log(`Pro subscription ${transaction.subscription_id} extended/activated for user ${transaction.user_id}`);
+    const { data: subscription, error: subError } = await supabaseClient.from('pro_subscriptions').select('subscription_type, subscription_end_date')
+      .eq('id', transaction.subscription_id).single();
+    
+    if (subError) throw new Error('Subscription not found for this transaction.');
+    
+    if (subscription) {
+      // Logika untuk perpanjangan: basis tanggal adalah end_date yang ada
+      const startDate = new Date(subscription.subscription_end_date || Date.now());
+      const endDate = new Date(startDate);
+      if (subscription.subscription_type === 'monthly') {
+        endDate.setMonth(endDate.getMonth() + 1);
+      } else if (subscription.subscription_type === 'yearly') {
+        endDate.setFullYear(endDate.getFullYear() + 1);
       }
+      await supabaseClient.from('pro_subscriptions').update({
+        status: 'active',
+        subscription_end_date: endDate.toISOString()
+      }).eq('id', transaction.subscription_id);
+      
+      // Sync pro status for the user after subscription is activated
+      await supabaseClient.rpc('sync_pro_status_from_subscription', {
+        p_user_id: transaction.user_id
+      });
+      
+      console.log(`Pro subscription ${transaction.subscription_id} extended/activated for user ${transaction.user_id}`);
     }
+    
     return new Response(JSON.stringify({
       success: true
     }), {
@@ -101,7 +103,7 @@ serve(async (req)=>{
         ...corsHeaders,
         "Content-Type": "application/json"
       },
-      status: 200 // Selalu kembalikan 200 OK jika proses berhasil
+      status: 200
     });
   } catch (error) {
     console.error('Callback processing error:', error);
