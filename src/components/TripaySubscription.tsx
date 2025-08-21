@@ -339,7 +339,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
                                 <span className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full text-xs flex items-center justify-center font-medium">
                                   {stepIndex + 1}
                                 </span>
-                                <p className="text-sm leading-relaxed">{step.replace(/<[^>]*>/g, '')}</p>
+                                <p className="text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: step }} />
                               </div>
                             ))}
                           </div>
