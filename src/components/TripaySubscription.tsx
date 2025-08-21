@@ -212,7 +212,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50">
-      <div className="w-full max-w-md h-[60vh] bg-background border rounded-lg shadow-lg flex flex-col fixed top-0 left-1/2 transform -translate-x-1/2">
+      <div className="w-full max-w-md mx-4 h-[60vh] bg-background border rounded-lg shadow-lg flex flex-col fixed top-0 left-1/2 transform -translate-x-1/2">
         {showPaymentInstructions ? (
           // Modern Premium Payment Instructions View
           <>
