@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, CreditCard, Calendar } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -15,8 +16,25 @@ interface TripaySubscriptionProps {
 
 export function TripaySubscription({ user, userProfile, onClose }: TripaySubscriptionProps) {
   const [selectedPlan, setSelectedPlan] = useState('1_year');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('BCAVA');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [fullName, setFullName] = useState(userProfile?.display_name || '');
+  const [email, setEmail] = useState(user?.email || '');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  const paymentMethods = [
+    {
+      code: 'BCAVA',
+      name: 'BCA Virtual Account',
+      description: 'Transfer via BCA Virtual Account'
+    },
+    {
+      code: 'QRIS_SHOPEEPAY',
+      name: 'QRIS ShopeePay',
+      description: 'Bayar dengan QRIS ShopeePay'
+    }
+  ];
 
   const [subscriptionPlans, setSubscriptionPlans] = useState([
     {
@@ -97,7 +115,14 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
   }, []);
 
   const handleCreatePayment = async () => {
-    if (!user || !selectedPlan) return;
+    if (!user || !selectedPlan || !phoneNumber.trim() || !fullName.trim()) {
+      toast({
+        title: "Data Tidak Lengkap",
+        description: "Mohon lengkapi nama lengkap dan nomor telepon",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setLoading(true);
     try {
@@ -114,7 +139,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
         reference: reference,
         merchant_ref: merchantRef,
         payment_method: plan.paymentMethod,
-        payment_method_code: plan.paymentMethodCode,
+        payment_method_code: selectedPaymentMethod,
         total_amount: plan.price,
         fee_merchant: 20000,
         fee_customer: 0,
@@ -130,9 +155,10 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: plan.id,
-          paymentMethod: plan.paymentMethodCode,
-          userEmail: user.email,
-          userName: userProfile?.display_name || user.email?.split('@')[0] || 'User',
+          paymentMethod: selectedPaymentMethod,
+          userEmail: email,
+          userName: fullName,
+          phoneNumber: phoneNumber,
           paymentData: paymentData
         }
       });
@@ -178,7 +204,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="w-full max-w-md mx-4 h-[50vh] bg-background border rounded-lg shadow-lg flex flex-col">
+      <div className="w-full max-w-md mx-4 h-[90vh] bg-background border rounded-lg shadow-lg flex flex-col">
         {/* Header */}
         <div className="flex items-center gap-4 p-4 border-b">
           <Button
@@ -193,38 +219,112 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-4">
-          <div className="space-y-4">
-            <div className="text-center mb-4">
-              <h2 className="text-lg font-medium flex items-center justify-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Pilih Paket Anda
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Pilih paket berlangganan untuk membuka fitur premium
-              </p>
+          <div className="space-y-6">
+            {/* User Information */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Informasi Pengguna
+              </h3>
+              
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="fullName" className="text-xs text-muted-foreground">Nama Lengkap</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="Masukkan nama lengkap"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="email" className="text-xs text-muted-foreground">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="email@contoh.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="phoneNumber" className="text-xs text-muted-foreground">Nomor Telepon</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="phoneNumber"
+                      type="tel"
+                      placeholder="08123456789"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan} className="space-y-3">
-              {subscriptionPlans.map((plan) => (
-                <div key={plan.id} className="flex items-start space-x-3">
-                  <RadioGroupItem value={plan.id} id={plan.id} className="mt-3" />
-                  <Label htmlFor={plan.id} className="flex-1 cursor-pointer">
-                    <Card className="p-3 hover:bg-muted/50 transition-colors">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="font-medium text-sm">{plan.name}</h3>
-                          <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
-                        </div>
-                        <div className="text-right ml-3">
-                          <div className="font-bold text-base">{formatCurrency(plan.price)}</div>
-                          <div className="text-xs text-muted-foreground">{plan.duration}</div>
-                        </div>
+            {/* Payment Method Selection */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium">Metode Pembayaran</h3>
+              <RadioGroup value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod} className="space-y-2">
+                {paymentMethods.map((method) => (
+                  <div key={method.code} className="flex items-center space-x-3">
+                    <RadioGroupItem value={method.code} id={method.code} />
+                    <Label htmlFor={method.code} className="flex-1 cursor-pointer">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">{method.name}</span>
+                        <span className="text-xs text-muted-foreground">{method.description}</span>
                       </div>
-                    </Card>
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+
+            {/* Subscription Plans */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <CreditCard className="w-4 h-4" />
+                Paket Berlangganan
+              </h3>
+
+              <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan} className="space-y-3">
+                {subscriptionPlans.map((plan) => (
+                  <div key={plan.id} className="flex items-start space-x-3">
+                    <RadioGroupItem value={plan.id} id={plan.id} className="mt-3" />
+                    <Label htmlFor={plan.id} className="flex-1 cursor-pointer">
+                      <Card className="p-3 hover:bg-muted/50 transition-colors">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-medium text-sm">{plan.name}</h3>
+                            <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
+                          </div>
+                          <div className="text-right ml-3">
+                            <div className="font-bold text-base">{formatCurrency(plan.price)}</div>
+                            <div className="text-xs text-muted-foreground">{plan.duration}</div>
+                          </div>
+                        </div>
+                      </Card>
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
           </div>
         </div>
 
@@ -232,7 +332,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
         <div className="p-4 border-t">
           <Button 
             onClick={handleCreatePayment}
-            disabled={loading || !selectedPlan}
+            disabled={loading || !selectedPlan || !phoneNumber.trim() || !fullName.trim()}
             className="w-full"
             size="lg"
           >
