@@ -129,29 +129,6 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       const plan = subscriptionPlans.find(p => p.id === selectedPlan);
       if (!plan) throw new Error('Plan not found');
 
-      // Generate merchant reference
-      const timestamp = Date.now();
-      const planType = plan.id.toUpperCase().replace('_', '');
-      const merchantRef = `INV${planType}_${timestamp}`;
-      const reference = `TT442721${timestamp}`;
-
-      const paymentData = {
-        reference: reference,
-        merchant_ref: merchantRef,
-        payment_method: plan.paymentMethod,
-        payment_method_code: selectedPaymentMethod,
-        total_amount: plan.price,
-        fee_merchant: 20000,
-        fee_customer: 0,
-        total_fee: 20000,
-        amount_received: plan.price - 20000,
-        is_closed_payment: 1,
-        status: "UNPAID",
-        paid_at: null,
-        note: null,
-        action: "check_payment"
-      };
-
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: plan.id,
@@ -159,7 +136,8 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
           userEmail: email,
           userName: fullName,
           phoneNumber: phoneNumber,
-          paymentData: paymentData
+          amount: plan.price,
+          currency: plan.currency
         }
       });
 
@@ -167,25 +145,29 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
         throw error;
       }
 
-      if (data?.checkoutUrl) {
-        window.open(data.checkoutUrl, '_blank');
+      if (data?.success && data?.checkoutUrl) {
+        // Open checkout URL in new tab
+        window.open(data.checkoutUrl, '_blank', 'noopener,noreferrer');
+        
         toast({
-          title: "Pembayaran Dibuat",
-          description: "Link pembayaran dibuka di tab baru",
+          title: "Pembayaran Dibuat ✅",
+          description: "Anda akan diarahkan ke halaman pembayaran Tripay",
         });
+        
+        // Optional: Store payment reference for status checking
+        if (data.reference) {
+          localStorage.setItem('lastPaymentReference', data.reference);
+        }
       } else {
-        toast({
-          title: "Pembayaran Dibuat",
-          description: "Pembayaran berhasil dibuat",
-        });
+        throw new Error(data?.error || 'Gagal membuat pembayaran');
       }
 
       onClose();
     } catch (error) {
       console.error('Tripay payment error:', error);
       toast({
-        title: "Error",
-        description: "Gagal membuat pembayaran. Silakan coba lagi.",
+        title: "Error ❌",
+        description: error.message || "Gagal membuat pembayaran. Silakan coba lagi.",
         variant: "destructive",
       });
     } finally {

@@ -67,43 +67,50 @@ export function usePro() {
     }
   };
 
-  const createPayment = async (subscriptionType: 'monthly' | 'yearly', paymentMethod: string) => {
+  const createPayment = async (
+    subscriptionType: string, 
+    paymentMethod: string, 
+    userEmail: string, 
+    userName: string, 
+    phoneNumber: string,
+    amount: number,
+    currency: string = 'IDR'
+  ) => {
     try {
       // Get current user for authentication
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No active session');
-
       if (paymentMethod === 'BCA_MANUAL') {
         // Use Supabase function for Moota (BCA Manual)
         const { data, error } = await supabase.functions.invoke('moota-create-payment', {
-          body: { subscriptionType, paymentMethod }
+          body: { subscriptionType, paymentMethod, userEmail, userName, phoneNumber, amount, currency }
         });
         
         if (error) throw error;
-        
-        if (data.success) {
-          return data;
-        } else {
-          throw new Error(data.error || 'Failed to create payment');
-        }
+        return data;
       } else {
-        // Use Supabase function for Tripay (via VPS proxy with static IP)
-        console.log('Calling Supabase function for Tripay payment...');
+        // Use Supabase function for Tripay
         const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
-          body: { subscriptionType, paymentMethod }
+          body: { 
+            subscriptionType, 
+            paymentMethod, 
+            userEmail, 
+            userName, 
+            phoneNumber,
+            amount,
+            currency
+          }
         });
         
         if (error) throw error;
         
-        if (data.success) {
-          return data;
-        } else {
-          throw new Error(data.error || 'Failed to create payment');
+        // Open checkout URL if available
+        if (data?.success && data?.checkoutUrl) {
+          window.open(data.checkoutUrl, '_blank', 'noopener,noreferrer');
         }
-
+        
+        return data;
       }
     } catch (error) {
       console.error('Payment creation failed:', error);

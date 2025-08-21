@@ -35,47 +35,17 @@ serve(async (req) => {
     const body = await req.json();
     console.log('✅ Received body:', JSON.stringify(body));
 
-    // Tambahkan signature ke body request
-    const bodyWithSignature = {
-      ...body,
-      // Tambahkan credentials untuk VPS
-      akses_curl: aksesKey,
-      signa1: signa1,
-      signa2: signa2,
-      // Atau format signature yang VPS expect
-      signature: {
-        key: aksesKey,
-        sig1: signa1,
-        sig2: signa2
-      }
-    };
-
-    console.log('📦 Body with signature prepared');
-
     // URL VPS
     const vpsUrl = "https://payment.elvisiongroup.com/api/create-payment";
-    const aksesKey = Deno.env.get('AKSES_CURL');
-    const signa1 = Deno.env.get('SIGNA1');
-    const signa2 = Deno.env.get('SIGNA2');
     
-    console.log('🔑 Access key loaded:', aksesKey ? 'YES' : 'NO');
-    console.log('🔐 SIGNA1 loaded:', signa1 ? 'YES' : 'NO');
-    console.log('🔐 SIGNA2 loaded:', signa2 ? 'YES' : 'NO');
-
-    // Forward ke VPS dengan signatures
+    // Forward ke VPS langsung tanpa signature
     console.log('🌐 Sending request to VPS:', vpsUrl);
     const vpsResponse = await fetch(vpsUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        ...(aksesKey && { "X-Access-Key": aksesKey }),
-        ...(signa1 && { "X-Signature-1": signa1 }),
-        ...(signa2 && { "X-Signature-2": signa2 }),
-        // Atau jika VPS expect signature di header berbeda:
-        // ...(signa1 && { "SIGNA1": signa1 }),
-        // ...(signa2 && { "SIGNA2": signa2 }),
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify(bodyWithSignature)
+      body: JSON.stringify(body)
     });
 
     console.log('📡 VPS Response status:', vpsResponse.status);
