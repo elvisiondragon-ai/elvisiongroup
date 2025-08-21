@@ -129,19 +129,13 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       const plan = subscriptionPlans.find(p => p.id === selectedPlan);
       if (!plan) throw new Error('Plan not found');
 
-      // Generate merchant reference
-      const timestamp = Date.now();
-      const planType = plan.id.toUpperCase().replace('_', '');
-      const merchantRef = `INV${planType}_${timestamp}`;
-      const reference = `TT442721${timestamp}`;
-
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: plan.id,
           paymentMethod: selectedPaymentMethod,
-          userEmail: email,
           userName: fullName,
-          phoneNumber: phoneNumber,
+          userEmail: email,
+          phoneNumber: phoneNumber
         }
       });
 
@@ -149,7 +143,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
         throw error;
       }
 
-      if (data?.checkoutUrl) {
+      if (data?.success && data?.checkoutUrl) {
         window.open(data.checkoutUrl, '_blank');
         toast({
           title: "Pembayaran Dibuat",
@@ -157,8 +151,9 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
         });
       } else {
         toast({
-          title: "Pembayaran Dibuat",
-          description: "Pembayaran berhasil dibuat",
+          title: "Error",
+          description: "Gagal membuat pembayaran. Silakan coba lagi.",
+          variant: "destructive",
         });
       }
 
