@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
+import { usePro } from "@/hooks/usePro";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
 import verse2Artwork from "@/assets/verse-2-cosmic.jpg";
 import verse3Artwork from "@/assets/verse-3-cosmic.jpg";
@@ -33,6 +34,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [showUpload, setShowUpload] = useState(false);
   const [loading, setLoading] = useState(true);
   const { awardXP } = useXPSystem();
+  const { proStatus } = usePro();
 
   useEffect(() => {
     const initializeData = async () => {
@@ -111,7 +113,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 2,
       title: "Verse 2 - Lucid Beach",
       subtitle: "Relaksasi seperti berada di pantai, membantu tidur nyenyak dan pikiran jernih",
-      unlocked: userLevel >= 3,
+      unlocked: userLevel >= 3 || proStatus.isPro,
       requiredLevel: 3,
       artwork: verse2Artwork,
       audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse2%20-%20Lucid%20Beach%20-%20low%20env.MP3',
@@ -508,9 +510,9 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                       ) : (
                         <Infinity className="w-4 h-4" />
                       )}
-                      <span className="font-semibold text-sm">
-                        🔒 {t('audioTherapy.levelRequired', { level: verse.requiredLevel })}
-                      </span>
+                       <span className="font-semibold text-sm">
+                         🔒 {t('audioTherapy.levelRequired', { level: verse.requiredLevel })} {verse.id === 2 && "or PRO"}
+                       </span>
                     </div>
                     
                     {/* Progress hint */}
