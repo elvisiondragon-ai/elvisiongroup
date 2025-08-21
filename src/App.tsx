@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { Auth } from "./pages/Auth";
+import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
 import { Tutorial } from "./pages/Tutorial";
 import NotFound from "./pages/NotFound";
@@ -88,6 +89,10 @@ const App = () => {
             <Route 
               path="/tutorial" 
               element={user ? <Tutorial /> : <Auth onLogin={setUser} />} 
+            />
+            <Route 
+              path="/reset-password" 
+              element={<ResetPassword />} 
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
