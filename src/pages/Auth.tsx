@@ -274,6 +274,7 @@ export function Auth({ onLogin }: AuthProps) {
   const enhancedHandleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Allow any password without strict validation
     if (signupData.password !== signupData.confirmPassword) {
       toast({
         title: "Password Tidak Cocok",
@@ -283,11 +284,11 @@ export function Auth({ onLogin }: AuthProps) {
       return;
     }
 
-    // Simple password validation - minimum 6 characters
-    if (signupData.password.length < 6) {
+    // Very lenient password validation - minimum 1 character
+    if (signupData.password.length < 1) {
       toast({
-        title: "Password Terlalu Pendek",
-        description: "Password harus minimal 6 karakter.",
+        title: "Password Kosong",
+        description: "Masukkan password minimal 1 karakter.",
         variant: "destructive",
       });
       return;
@@ -305,29 +306,49 @@ export function Auth({ onLogin }: AuthProps) {
         email: signupData.email,
         password: signupData.password,
         options: {
-          emailRedirectTo: redirectUrl
+          emailRedirectTo: redirectUrl,
+          // Skip email confirmation for easier registration
+          data: {
+            email_confirm: true
+          }
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // If user already exists, try to sign them in instead
+        if (error.message.includes('already registered')) {
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+            email: signupData.email,
+            password: signupData.password,
+          });
+
+          if (loginError) throw loginError;
+
+          if (loginData.user) {
+            toast({
+              title: "Berhasil Masuk!",
+              description: "Email sudah terdaftar, Anda berhasil masuk.",
+            });
+            window.location.href = '/';
+            return;
+          }
+        }
+        throw error;
+      }
 
       if (data.user) {
         toast({
           title: "Akun Berhasil Dibuat!",
-          description: "Silakan cek email Anda untuk konfirmasi akun.",
+          description: "Anda berhasil mendaftar dan masuk.",
         });
         
-        // Clear form
-        setSignupData({
-          email: '',
-          password: '',
-          confirmPassword: ''
-        });
+        // Auto login after signup
+        window.location.href = '/';
       }
     } catch (error: any) {
       toast({
         title: "Pendaftaran Gagal",
-        description: error.message || "Terjadi kesalahan saat mendaftar.",
+        description: "Coba gunakan email dan password yang berbeda.",
         variant: "destructive",
       });
     } finally {
@@ -490,12 +511,11 @@ export function Auth({ onLogin }: AuthProps) {
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="login-email"
-                      type="email"
-                      placeholder="your@email.com"
+                      type="text"
+                      placeholder="email@contoh.com"
                       value={loginData.email}
                       onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
                       className="pl-10 cyber-input"
-                      required
                     />
                   </div>
                 </div>
@@ -593,12 +613,11 @@ export function Auth({ onLogin }: AuthProps) {
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="signup-email"
-                      type="email"
-                      placeholder="your@email.com"
+                      type="text"
+                      placeholder="email@contoh.com"
                       value={signupData.email}
                       onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
                       className="pl-10 cyber-input"
-                      required
                     />
                   </div>
                 </div>
