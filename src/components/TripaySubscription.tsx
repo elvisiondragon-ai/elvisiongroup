@@ -15,7 +15,7 @@ interface TripaySubscriptionProps {
 }
 
 export function TripaySubscription({ user, userProfile, onClose }: TripaySubscriptionProps) {
-  const [selectedPlan, setSelectedPlan] = useState('1_year');
+  const [selectedPlan, setSelectedPlan] = useState('1_month');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('BCAVA');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [fullName, setFullName] = useState(userProfile?.display_name || '');
@@ -38,17 +38,6 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
 
   const [subscriptionPlans, setSubscriptionPlans] = useState([
     {
-      id: '1_year',
-      name: 'Berlangganan 1 Tahun',
-      description: 'Berlangganan tahunan dengan akses penuh',
-      price: 800000,
-      currency: 'IDR',
-      paymentMethodCode: 'BCAVA',
-      paymentMethod: 'BCA Virtual Account',
-      duration: '365 hari',
-      durationDays: 365
-    },
-    {
       id: '1_month',
       name: 'Berlangganan 1 Bulan', 
       description: 'Berlangganan bulanan dengan akses penuh',
@@ -60,17 +49,6 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       durationDays: 30
     },
     {
-      id: '1_week',
-      name: 'Berlangganan 1 Minggu',
-      description: 'Berlangganan mingguan dengan akses penuh', 
-      price: 30000,
-      currency: 'IDR',
-      paymentMethodCode: 'BCAVA',
-      paymentMethod: 'BCA Virtual Account',
-      duration: '7 hari',
-      durationDays: 7
-    },
-    {
       id: '1_day',
       name: 'Berlangganan 1 Hari',
       description: 'Berlangganan harian dengan akses penuh',
@@ -80,6 +58,28 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       paymentMethod: 'BCA Virtual Account',
       duration: '1 hari',
       durationDays: 1
+    },
+    {
+      id: '1_year',
+      name: 'Berlangganan 1 Tahun',
+      description: 'Berlangganan tahunan dengan akses penuh',
+      price: 800000,
+      currency: 'IDR',
+      paymentMethodCode: 'BCAVA',
+      paymentMethod: 'BCA Virtual Account',
+      duration: '365 hari',
+      durationDays: 365
+    },
+    {
+      id: '1_week',
+      name: 'Berlangganan 1 Minggu',
+      description: 'Berlangganan mingguan dengan akses penuh', 
+      price: 30000,
+      currency: 'IDR',
+      paymentMethodCode: 'BCAVA',
+      paymentMethod: 'BCA Virtual Account',
+      duration: '7 hari',
+      durationDays: 7
     }
   ]);
 
@@ -181,7 +181,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="w-full max-w-md mx-4 h-[90vh] bg-background border rounded-lg shadow-lg flex flex-col">
+      <div className="w-full max-w-md mx-4 h-[50vh] bg-background border rounded-lg shadow-lg flex flex-col">
         {/* Header */}
         <div className="flex items-center gap-4 p-4 border-b">
           <Button
