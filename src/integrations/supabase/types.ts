@@ -906,6 +906,40 @@ export type Database = {
           user_email: string | null
           user_id: string | null
         }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string | null
+          currency?: string | null
+          display_name?: never
+          id?: string | null
+          readable_status?: never
+          status?: string | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string | null
+          currency?: string | null
+          display_name?: never
+          id?: string | null
+          readable_status?: never
+          status?: string | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
         Relationships: []
       }
     }
@@ -1173,6 +1207,15 @@ export type Database = {
       sync_pro_status_from_subscription: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      update_subscription_status_manually: {
+        Args: {
+          p_duration_type?: string
+          p_status: string
+          p_subscription_id: string
+          p_subscription_type: string
+        }
+        Returns: Json
       }
       validate_admin_role_operation: {
         Args: { p_operation: string; p_role: string; p_target_user_id: string }
