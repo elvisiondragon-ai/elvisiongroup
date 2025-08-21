@@ -129,6 +129,12 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       const plan = subscriptionPlans.find(p => p.id === selectedPlan);
       if (!plan) throw new Error('Plan not found');
 
+      // Generate merchant reference
+      const timestamp = Date.now();
+      const planType = plan.id.toUpperCase().replace('_', '');
+      const merchantRef = `INV${planType}_${timestamp}`;
+      const reference = `TT442721${timestamp}`;
+
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: plan.id,
@@ -136,8 +142,6 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
           userEmail: email,
           userName: fullName,
           phoneNumber: phoneNumber,
-          amount: plan.price,
-          currency: plan.currency
         }
       });
 
@@ -145,29 +149,25 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
         throw error;
       }
 
-      if (data?.success && data?.checkoutUrl) {
-        // Open checkout URL in new tab
-        window.open(data.checkoutUrl, '_blank', 'noopener,noreferrer');
-        
+      if (data?.checkoutUrl) {
+        window.open(data.checkoutUrl, '_blank');
         toast({
-          title: "Pembayaran Dibuat ✅",
-          description: "Anda akan diarahkan ke halaman pembayaran Tripay",
+          title: "Pembayaran Dibuat",
+          description: "Link pembayaran dibuka di tab baru",
         });
-        
-        // Optional: Store payment reference for status checking
-        if (data.reference) {
-          localStorage.setItem('lastPaymentReference', data.reference);
-        }
       } else {
-        throw new Error(data?.error || 'Gagal membuat pembayaran');
+        toast({
+          title: "Pembayaran Dibuat",
+          description: "Pembayaran berhasil dibuat",
+        });
       }
 
       onClose();
     } catch (error) {
       console.error('Tripay payment error:', error);
       toast({
-        title: "Error ❌",
-        description: error.message || "Gagal membuat pembayaran. Silakan coba lagi.",
+        title: "Error",
+        description: "Gagal membuat pembayaran. Silakan coba lagi.",
         variant: "destructive",
       });
     } finally {
