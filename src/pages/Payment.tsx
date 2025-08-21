@@ -32,9 +32,9 @@ export function Payment({ onNavigate }: PaymentProps) {
       description: 'Transfer via BCA Virtual Account'
     },
     {
-      code: 'QRIS_SHOPEEPAY',
-      name: 'QRIS ShopeePay',
-      description: 'Bayar dengan QRIS ShopeePay'
+      code: 'QRIS',
+      name: 'QRIS',
+      description: 'Bayar dengan QRIS'
     }
   ];
 
