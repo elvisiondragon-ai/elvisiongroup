@@ -9,6 +9,7 @@ import { SpiritualJournal } from "./SpiritualJournal";
 import { MeditationSessions } from "./MeditationSessions";
 import { Tutorial } from "./Tutorial";
 import { IgnisQuest } from "./IgnisQuest";
+import { Payment } from "./Payment";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
@@ -41,6 +42,8 @@ const Index = () => {
         return <Tutorial />;
       case "ignis-quest":
         return <IgnisQuest onNavigate={setActiveTab} />;
+      case "payment":
+        return <Payment onNavigate={setActiveTab} />;
       default:
         return <Home onNavigate={setActiveTab} />;
     }

@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { ProUpgrade } from "@/components/ProUpgrade";
-import { TripaySubscription } from "@/components/TripaySubscription";
 import { usePro } from "@/hooks/usePro";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -49,7 +48,6 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [editingProfile, setEditingProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
-  const [showTripaySubscription, setShowTripaySubscription] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { proStatus } = usePro();
   const { toast } = useToast();
@@ -268,16 +266,6 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     );
   }
 
-  if (showTripaySubscription) {
-    return (
-      <TripaySubscription
-        user={user}
-        userProfile={userProfile}
-        onClose={() => setShowTripaySubscription(false)}
-      />
-    );
-  }
-
   return (
     <div className="pb-20">
       {/* Profile Header */}
@@ -416,7 +404,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         <Button 
           variant="outline" 
           className={`w-full ${proStatus.isPro ? 'border-pro text-pro' : 'tier-pro'}`}
-          onClick={() => setShowTripaySubscription(true)}
+          onClick={() => onNavigate("payment")}
         >
           <Crown className="w-4 h-4 mr-2" />
           {proStatus.isPro ? 'Pro Membership' : 'Upgrade ke Pro'}
