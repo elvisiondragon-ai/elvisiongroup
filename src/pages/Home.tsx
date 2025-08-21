@@ -10,9 +10,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { Play, Headphones, BookOpen, Zap, Target, Lock } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
+
 interface HomeProps {
   onNavigate: (tab: string) => void;
 }
+
 interface UserProfile {
   display_name: string | null;
   level: number;
@@ -20,6 +22,7 @@ interface UserProfile {
   streak_days: number;
   total_sessions: number;
 }
+
 export function Home({
   onNavigate
 }: HomeProps) {
@@ -32,6 +35,7 @@ export function Home({
   const {
     calculateXPProgress
   } = useXPSystem();
+
   useEffect(() => {
     const getUser = async () => {
       const {
@@ -75,6 +79,7 @@ export function Home({
       supabase.removeChannel(channel);
     };
   }, []);
+
   const trackOnlinePresence = async (userId: string) => {
     const channel = supabase.channel('online_users');
     await channel.subscribe(async status => {
@@ -87,6 +92,7 @@ export function Home({
       }
     });
   };
+
   const fetchUserProfile = async (userId: string) => {
     try {
       const {
@@ -100,6 +106,7 @@ export function Home({
       console.error('Error:', error);
     }
   };
+
   const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
 
   // Calculate XP progress using the XP system
@@ -108,6 +115,7 @@ export function Home({
     xpForNextLevel: 100,
     progress: 0
   };
+
   const features = [{
     title: t('home.meditationSessions'),
     description: "Guided meditation sessions",
@@ -119,7 +127,8 @@ export function Home({
     description: "Spiritual frequency healing",
     icon: Headphones,
     color: "text-accent",
-    key: "audio-therapy"
+    key: "audio-therapy",
+    isLocked: true
   }, {
     title: t('home.spiritualJournal'),
     description: "Track your transformation journey",
@@ -141,6 +150,7 @@ export function Home({
     isNew: true,
     levelRequired: 5
   }];
+
   return <div className="pb-20">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
@@ -212,7 +222,7 @@ export function Home({
         
         <div className="grid grid-cols-2 gap-4">
           {features.map((feature, index) => {
-          const isLocked = feature.levelRequired && (userProfile?.level || 1) < feature.levelRequired;
+          const isLocked = feature.isLocked || (feature.levelRequired && (userProfile?.level || 1) < feature.levelRequired);
           const isIgnisQuest = feature.key === 'ignis-quest';
           return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${isLocked ? 'bg-card/50 cursor-not-allowed' : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'} ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`} onClick={() => {
             if (isLocked) {
@@ -244,8 +254,11 @@ export function Home({
                     <p className="text-xs text-muted-foreground">
                       {feature.description}
                     </p>
-                    {isLocked && <div className="text-xs font-medium text-muted-foreground mt-2">
+                    {isLocked && feature.levelRequired && <div className="text-xs font-medium text-muted-foreground mt-2">
                         Level {feature.levelRequired} Required
+                      </div>}
+                    {isLocked && !feature.levelRequired && <div className="text-xs font-medium text-muted-foreground mt-2">
+                        Locked
                       </div>}
                   </div>
                 </div>
