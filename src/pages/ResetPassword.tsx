@@ -23,21 +23,23 @@ export function ResetPassword() {
   });
 
   useEffect(() => {
-    // Check for access token in the URL hash or query params
-    const checkForToken = () => {
+    // Check for password reset flow indicators in URL
+    const checkResetFlow = () => {
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const queryParams = new URLSearchParams(window.location.search);
       
+      // Check for reset-related parameters
+      const type = hashParams.get('type') || queryParams.get('type');
       const accessToken = hashParams.get('access_token') || queryParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token');
       
-      if (accessToken) {
+      // If this is a recovery type with access token, it's a valid reset flow
+      if (type === 'recovery' && accessToken) {
         setHasToken(true);
-        // Set the session with the tokens from the URL
-        supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken || '',
-        });
+        // Supabase automatically handles the session when user clicks email link
+        // We just need to listen for the auth state change
+      } else if (type === 'recovery') {
+        // Recovery type but no token means it might have been processed already
+        setHasToken(true);
       } else {
         setHasToken(false);
         toast({
@@ -48,7 +50,24 @@ export function ResetPassword() {
       }
     };
 
-    checkForToken();
+    // Listen for auth state changes to detect successful token verification
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state change in reset:', event, session?.user?.email);
+        
+        if (event === 'PASSWORD_RECOVERY' && session?.user) {
+          setHasToken(true);
+          console.log('Password recovery session established');
+        } else if (event === 'SIGNED_IN' && session?.user) {
+          // User is signed in, which means token was valid
+          setHasToken(true);
+        }
+      }
+    );
+
+    checkResetFlow();
+
+    return () => subscription.unsubscribe();
   }, [toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
