@@ -82,6 +82,11 @@ serve(async (req) => {
     const { data: vipStatus } = await supabaseClient
       .rpc('check_vip_status', { p_user_id: user.id });
 
+    // Sync pro status for the user after trial starts
+    await supabaseClient.rpc('sync_pro_status_from_subscription', {
+      p_user_id: user.id
+    });
+
     const status = vipStatus?.[0];
 
     return new Response(JSON.stringify({

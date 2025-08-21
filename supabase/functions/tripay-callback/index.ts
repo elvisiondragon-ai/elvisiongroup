@@ -86,6 +86,12 @@ serve(async (req)=>{
           status: 'active',
           subscription_end_date: endDate.toISOString()
         }).eq('id', transaction.subscription_id);
+        
+        // Sync pro status for the user after subscription is activated
+        await supabaseClient.rpc('sync_pro_status_from_subscription', {
+          p_user_id: transaction.user_id
+        });
+        
         console.log(`VIP subscription ${transaction.subscription_id} extended/activated for user ${transaction.user_id}`);
       }
     }

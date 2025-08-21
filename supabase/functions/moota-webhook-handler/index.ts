@@ -126,6 +126,11 @@ serve(async (req) => {
       throw new Error('Failed to update subscription');
     }
 
+    // Sync pro status for the user after subscription is activated
+    await supabaseClient.rpc('sync_pro_status_from_subscription', {
+      p_user_id: transaction.user_id
+    });
+
     console.log('Payment processed successfully:', {
       transactionId: transaction.id,
       subscriptionId: transaction.subscription_id,
