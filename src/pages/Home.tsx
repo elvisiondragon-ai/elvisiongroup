@@ -121,14 +121,14 @@ export function Home({
     description: "Guided meditation sessions",
     icon: Play,
     color: "text-primary",
-    key: "meditation-sessions"
+    key: "meditation-sessions",
+    isLocked: true
   }, {
     title: t('Verse of eL Vision'),
     description: "Spiritual frequency healing",
     icon: Headphones,
     color: "text-accent",
-    key: "audio-therapy",
-    isLocked: true
+    key: "audio-therapy"
   }, {
     title: t('home.spiritualJournal'),
     description: "Track your transformation journey",
