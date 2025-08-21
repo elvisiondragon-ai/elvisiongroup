@@ -4,10 +4,6 @@ const config: CapacitorConfig = {
   appId: 'app.lovable.8fda2b2072ff449cbd0b71d9a561716d',
   appName: 'eL Vision Group',
   webDir: 'dist',
-  server: {
-    url: 'https://8fda2b20-72ff-449c-bd0b-71d9a561716d.lovableproject.com?forceHideBadge=true',
-    cleartext: true
-  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
