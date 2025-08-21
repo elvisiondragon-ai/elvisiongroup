@@ -475,6 +475,7 @@ export type Database = {
           trial_start_date: string | null
           tripay_reference: string | null
           updated_at: string
+          user_email: string | null
           user_id: string
         }
         Insert: {
@@ -491,6 +492,7 @@ export type Database = {
           trial_start_date?: string | null
           tripay_reference?: string | null
           updated_at?: string
+          user_email?: string | null
           user_id: string
         }
         Update: {
@@ -507,6 +509,7 @@ export type Database = {
           trial_start_date?: string | null
           tripay_reference?: string | null
           updated_at?: string
+          user_email?: string | null
           user_id?: string
         }
         Relationships: []
