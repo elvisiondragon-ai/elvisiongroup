@@ -102,7 +102,7 @@ serve(async (req) => {
       throw new Error('Failed to update transaction');
     }
 
-    // Update VIP subscription
+    // Update Pro subscription
     const subscriptionEndDate = new Date();
     if (transaction.subscription_type === 'yearly') {
       subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1);
@@ -111,7 +111,7 @@ serve(async (req) => {
     }
 
     const { error: updateSubError } = await supabaseClient
-      .from('vip_subscriptions')
+      .from('pro_subscriptions')
       .update({
         status: 'active',
         subscription_start_date: new Date().toISOString(),

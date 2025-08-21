@@ -24,12 +24,12 @@ export function usePro() {
     try {
       setProStatus(prev => ({ ...prev, loading: true }));
       
-      const { data, error } = await supabase.functions.invoke('vip-status-check');
+      const { data, error } = await supabase.functions.invoke('pro-status-check');
       
       if (error) throw error;
       
       setProStatus({
-        isPro: data.is_vip || false,
+        isPro: data.is_pro || false,
         subscriptionType: data.subscription_type,
         status: data.status,
         expiresAt: data.expires_at,
@@ -51,7 +51,7 @@ export function usePro() {
 
   const startTrial = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('vip-trial-start');
+      const { data, error } = await supabase.functions.invoke('pro-trial-start');
       
       if (error) throw error;
       

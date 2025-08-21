@@ -34,7 +34,7 @@ serve(async (req) => {
 
     // Check if user already has an active subscription or trial
     const { data: existingSub } = await supabaseClient
-      .from('vip_subscriptions')
+      .from('pro_subscriptions')
       .select('*')
       .eq('user_id', user.id)
       .single();
@@ -42,7 +42,7 @@ serve(async (req) => {
     if (existingSub && existingSub.status === 'active') {
       return new Response(JSON.stringify({
         success: false,
-        error: 'User already has an active VIP subscription'
+        error: 'User already has an active Pro subscription'
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
@@ -51,7 +51,7 @@ serve(async (req) => {
 
     // Check if IP address already used trial (anti-abuse)
     const { data: ipSubs } = await supabaseClient
-      .from('vip_subscriptions')
+      .from('pro_subscriptions')
       .select('id')
       .eq('ip_address', userIP)
       .eq('subscription_type', 'trial');
@@ -68,7 +68,7 @@ serve(async (req) => {
 
     // Start trial using database function
     const { data: subscriptionId, error } = await supabaseClient
-      .rpc('start_vip_trial', {
+      .rpc('start_pro_trial', {
         p_user_id: user.id,
         p_email: user.email,
         p_ip_address: userIP
@@ -80,7 +80,7 @@ serve(async (req) => {
 
     // Get trial details
     const { data: vipStatus } = await supabaseClient
-      .rpc('check_vip_status', { p_user_id: user.id });
+      .rpc('check_pro_status', { p_user_id: user.id });
 
     // Sync pro status for the user after trial starts
     await supabaseClient.rpc('sync_pro_status_from_subscription', {

@@ -68,10 +68,9 @@ serve(async (req)=>{
       }
       throw transactionError;
     }
-    // Jika pembayaran sukses, update subscription
-    if (status === 'PAID' && transaction) {
-      const { data: subscription, error: subError } = await supabaseClient.from('vip_subscriptions').select('subscription_type, subscription_end_date') // ambil end_date jika ada
-      .eq('id', transaction.subscription_id).single();
+    // Update VIP subscription
+    const { data: subscription, error: subError } = await supabaseClient.from('pro_subscriptions').select('subscription_type, subscription_end_date') // ambil end_date jika ada
+    .eq('id', transaction.subscription_id).single();
       if (subError) throw new Error('Subscription not found for this transaction.');
       if (subscription) {
         // Logika untuk perpanjangan: basis tanggal adalah end_date yang ada
@@ -82,7 +81,7 @@ serve(async (req)=>{
         } else if (subscription.subscription_type === 'yearly') {
           endDate.setFullYear(endDate.getFullYear() + 1);
         }
-        await supabaseClient.from('vip_subscriptions').update({
+        await supabaseClient.from('pro_subscriptions').update({
           status: 'active',
           subscription_end_date: endDate.toISOString()
         }).eq('id', transaction.subscription_id);
@@ -92,7 +91,7 @@ serve(async (req)=>{
           p_user_id: transaction.user_id
         });
         
-        console.log(`VIP subscription ${transaction.subscription_id} extended/activated for user ${transaction.user_id}`);
+        console.log(`Pro subscription ${transaction.subscription_id} extended/activated for user ${transaction.user_id}`);
       }
     }
     return new Response(JSON.stringify({

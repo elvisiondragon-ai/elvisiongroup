@@ -143,7 +143,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         supabase.from('xp_transactions').delete().eq('user_id', user.id),
         supabase.from('device_tokens').delete().eq('user_id', user.id),
         supabase.from('notification_settings').delete().eq('user_id', user.id),
-        supabase.from('vip_subscriptions').delete().eq('user_id', user.id),
+        supabase.from('pro_subscriptions').delete().eq('user_id', user.id),
         supabase.from('payment_transactions').delete().eq('user_id', user.id),
       ]);
 

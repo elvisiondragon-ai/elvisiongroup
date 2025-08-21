@@ -407,6 +407,13 @@ export type Database = {
             referencedRelation: "pro_subscriptions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "payment_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "pro_subscriptions_admin_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       payments: {
@@ -881,7 +888,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      pro_subscriptions_admin_view: {
+        Row: {
+          amount_paid: number | null
+          created_at: string | null
+          currency: string | null
+          display_name: string | null
+          id: string | null
+          readable_status: string | null
+          status: string | null
+          subscription_end_date: string | null
+          subscription_start_date: string | null
+          subscription_type: string | null
+          trial_end_date: string | null
+          trial_start_date: string | null
+          updated_at: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_system_health_check: {
