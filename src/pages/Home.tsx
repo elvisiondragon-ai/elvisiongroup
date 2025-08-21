@@ -5,12 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TierBadge } from "@/components/TierBadge";
 import { XPRules } from "@/components/XPRules";
-import { TrialReminder } from "@/components/TrialReminder";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
-import { useVerseAccess } from "@/hooks/useVerseAccess";
-import { usePro } from "@/hooks/usePro";
 import { Play, Headphones, BookOpen, Zap, Target, Lock } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 interface HomeProps {
@@ -29,8 +26,6 @@ export function Home({
   const {
     t
   } = useTranslation();
-  const { checkVerseAccess, handleVerseClick } = useVerseAccess();
-  const { proStatus } = usePro();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [user, setUser] = useState<any>(null);
   const [onlineCount, setOnlineCount] = useState(825); // Base count of 825
@@ -115,42 +110,38 @@ export function Home({
   };
   const features = [{
     title: t('home.meditationSessions'),
-    description: "Guided meditation sessions - Verse 1",
+    description: "Guided meditation sessions",
     icon: Play,
     color: "text-primary",
-    key: "meditation-sessions",
-    verseNumber: 1
+    key: "meditation-sessions"
   }, {
     title: t('Verse of eL Vision'),
-    description: "Spiritual frequency healing - Verse 2",
+    description: "Spiritual frequency healing",
     icon: Headphones,
     color: "text-accent",
-    key: "audio-therapy",
-    verseNumber: 2
+    key: "audio-therapy"
   }, {
     title: t('home.spiritualJournal'),
-    description: "Track your transformation journey - Verse 3",
+    description: "Track your transformation journey",
     icon: BookOpen,
     color: "text-gold",
-    key: "spiritual-journal",
-    verseNumber: 3
+    key: "spiritual-journal"
   }, {
     title: "Community",
-    description: "Join the soul tribe - Verse 4",
+    description: "Join the soul tribe",
     icon: Zap,
     color: "text-neon-green",
-    key: "chat",
-    verseNumber: 4
+    key: "chat"
   }, {
     title: "Ignis Quest",
     description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
     icon: Target,
     color: "text-orange-500",
     key: "ignis-quest",
-    isNew: true
+    isNew: true,
+    levelRequired: 5
   }];
   return <div className="pb-20">
-      <TrialReminder />
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="h-64 bg-cover bg-center bg-no-repeat" style={{
@@ -221,16 +212,14 @@ export function Home({
         
         <div className="grid grid-cols-2 gap-4">
           {features.map((feature, index) => {
+          const isLocked = feature.levelRequired && (userProfile?.level || 1) < feature.levelRequired;
           const isIgnisQuest = feature.key === 'ignis-quest';
-          const access = feature.verseNumber ? checkVerseAccess(feature.verseNumber) : { canAccess: true };
-          const isLocked = !access.canAccess;
-          
-          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${isLocked ? 'bg-card/50 cursor-not-allowed opacity-60' : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'} ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`} onClick={() => {
-            if (feature.verseNumber) {
-              handleVerseClick(feature.verseNumber, () => onNavigate(feature.key));
-            } else {
-              onNavigate(feature.key);
+          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${isLocked ? 'bg-card/50 cursor-not-allowed' : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'} ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`} onClick={() => {
+            if (isLocked) {
+              return; // Do nothing if locked
             }
+            console.log("Feature clicked:", feature.key);
+            onNavigate(feature.key);
           }}>
                 {feature.isNew}
                 
@@ -255,11 +244,8 @@ export function Home({
                     <p className="text-xs text-muted-foreground">
                       {feature.description}
                     </p>
-                    {isLocked && 'requiredLevel' in access && access.requiredLevel && <div className="text-xs font-medium text-muted-foreground mt-2">
-                        Level {access.requiredLevel} Required
-                      </div>}
-                    {isLocked && !proStatus.isPro && feature.verseNumber && feature.verseNumber <= 4 && <div className="text-xs text-amber-600 mt-1">
-                        💡 Pro: Instant Access
+                    {isLocked && <div className="text-xs font-medium text-muted-foreground mt-2">
+                        Level {feature.levelRequired} Required
                       </div>}
                   </div>
                 </div>

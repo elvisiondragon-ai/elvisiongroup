@@ -932,10 +932,6 @@ export type Database = {
         Args: { p_transaction_id: string; p_user_id: string }
         Returns: boolean
       }
-      can_access_verse: {
-        Args: { p_user_id: string; p_verse_number: number }
-        Returns: boolean
-      }
       check_daily_audio_limit: {
         Args: { p_user_id: string }
         Returns: boolean
