@@ -15,10 +15,10 @@
   },
   "audioTherapy": {
     "title": "Terapi Audio",
-    "subtitle": "Buka ayat spiritual seiring dengan kemajuan Anda",
+    "subtitle": "Buka Audio Frekuensi seiring dengan kemajuan Anda",
     "locked": "Terkunci",
     "unlocked": "Terbuka",
-    "levelRequired": "Level {{level}} diperlukan",
+    "levelRequired": "Level {{level}} diperlukan atau Upgrade to Pro",
     "readTutorial": "BACA TUTORIAL",
     "availableTracks": "Trek Tersedia",
     "loading": "Memuat terapi audio..."
@@ -33,11 +33,11 @@
       "subtitle": "Temukan ketenangan di dalam"
     },
     "verse3": {
-      "title": "Ayat 3: Koneksi Ilahi",
+      "title": "Ayat 3: Meditasi Syukur",
       "subtitle": "Terhubung dengan yang ilahi"
     },
     "verse4": {
-      "title": "Ayat 4: Kebangkitan Spiritual",
+      "title": "Ayat 4: Prosperity Stream",
       "subtitle": "Bangunkan kesadaran spiritual Anda"
     },
     "verse5": {
