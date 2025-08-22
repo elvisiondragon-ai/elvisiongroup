@@ -10,6 +10,8 @@ interface TierBadgeProps {
 }
 
 export function TierBadge({ level, isPro = false, className, showProBadge = true }: TierBadgeProps) {
+  // Don't show ProBadge if isPro is undefined (loading state)
+  const shouldShowProBadge = showProBadge && isPro === true;
   const getTierStyle = () => {
     if (level >= 9) return "tier-master";
     if (isPro || level >= 6) return "tier-pro";
@@ -33,7 +35,7 @@ export function TierBadge({ level, isPro = false, className, showProBadge = true
           {getTierIcon()}
         </div>
       </div>
-      {showProBadge && isPro && <ProBadge size="sm" />}
+      {shouldShowProBadge && <ProBadge size="sm" />}
     </div>
   );
 }
