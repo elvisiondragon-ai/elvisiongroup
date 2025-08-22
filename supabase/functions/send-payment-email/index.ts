@@ -198,7 +198,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: "ElVision Group <noreply@elvisiongroup.com>",
+      from: "ElVision Group <support@elvisiongroup.com>",
       to: [email],
       subject: subject,
       html: html,
