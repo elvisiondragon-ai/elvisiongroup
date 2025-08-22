@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { ProUpgrade } from "@/components/ProUpgrade";
-import { TestEmailSender } from "@/components/TestEmailSender";
+
 import { usePro } from "@/hooks/usePro";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -284,7 +284,13 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </h1>
         
         <div className="flex items-center justify-center gap-2 mb-3">
-          <TierBadge level={profile.level} isPro={proStatus.isPro} />
+          <TierBadge level={profile.level} isPro={true} />
+          {true && (
+            <span className="px-2 py-1 text-xs font-medium bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full flex items-center gap-1">
+              <span className="text-xs">⭐</span>
+              PRO
+            </span>
+          )}
         </div>
         
         <div className="flex items-center justify-center gap-2 mb-3">
@@ -425,10 +431,6 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           }
         </Button>
 
-        {/* Test Email Component - Only for development */}
-        <div className="w-full">
-          <TestEmailSender />
-        </div>
 
         <Button
           variant="destructive"

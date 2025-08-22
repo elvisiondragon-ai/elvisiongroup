@@ -187,7 +187,13 @@ export function Home({
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-semibold text-foreground">{displayName}</h3>
-                <TierBadge level={userProfile?.level || 1} />
+                <TierBadge level={userProfile?.level || 1} isPro={true} />
+                {true && (
+                  <span className="px-2 py-1 text-xs font-medium bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full flex items-center gap-1">
+                    <span className="text-xs">⭐</span>
+                    PRO
+                  </span>
+                )}
                 {(userProfile?.streak_days || 0) >= 7 && <span className="px-2 py-1 text-xs font-medium bg-gradient-primary text-primary-foreground rounded-full">
                     Week Warrior
                   </span>}
