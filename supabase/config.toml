@@ -49,3 +49,6 @@ verify_jwt = true
 
 [functions.vip-status-check]
 verify_jwt = true
+
+[functions.test-payment-email]
+verify_jwt = false

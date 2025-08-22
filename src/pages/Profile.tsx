@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { ProUpgrade } from "@/components/ProUpgrade";
+import { TestEmailSender } from "@/components/TestEmailSender";
 import { usePro } from "@/hooks/usePro";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -424,7 +425,12 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           }
         </Button>
 
-        <Button 
+        {/* Test Email Component - Only for development */}
+        <div className="w-full">
+          <TestEmailSender />
+        </div>
+
+        <Button
           variant="destructive"
           onClick={handleLogout}
           className="w-full"
