@@ -44,11 +44,20 @@ verify_jwt = true
 [functions.tripay-callback]
 verify_jwt = false
 
-[functions.vip-trial-start]
-verify_jwt = true
+[functions.send-payment-email]
+verify_jwt = false
 
-[functions.vip-status-check]
-verify_jwt = true
+[functions.send-payment-created-notification]
+verify_jwt = false
+
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.send-reset-password-email]
+verify_jwt = false
+
+[functions.auth-webhook]
+verify_jwt = false
 
 [functions.test-payment-email]
 verify_jwt = false

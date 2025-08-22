@@ -19,6 +19,7 @@ interface PaymentEmailRequest {
     expiresAt?: string;
     virtualAccount?: string;
     qrCode?: string;
+    endDate?: string;
   };
 }
 
@@ -152,6 +153,16 @@ const handler = async (req: Request): Promise<Response> => {
                 <span style="color: #666;">Status:</span>
                 <span style="font-weight: bold; color: #00c851;">✅ AKTIF</span>
               </div>
+              ${paymentData.endDate ? `
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #666;">Berakhir Pada:</span>
+                <span style="font-weight: bold; color: #e74c3c;">${new Date(paymentData.endDate).toLocaleDateString('id-ID', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric'
+                })}</span>
+              </div>
+              ` : ''}
             </div>
             
             <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">

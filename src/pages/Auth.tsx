@@ -202,6 +202,7 @@ export function Auth({ onLogin }: AuthProps) {
     setIsLoading(true);
 
     try {
+      // Use Supabase's built-in reset password function
       const { error } = await supabase.auth.resetPasswordForEmail(
         forgotPasswordData.email,
         {

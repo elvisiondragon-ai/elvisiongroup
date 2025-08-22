@@ -132,7 +132,8 @@ serve(async (req) => {
               currency: subscription.currency || 'IDR',
               reference: reference,
               subscriptionType: subscription.subscription_type,
-              paymentMethod: payload.payment_method || 'Tripay'
+              paymentMethod: payload.payment_method || 'Tripay',
+              endDate: endDateResult
             }
           }
         });
