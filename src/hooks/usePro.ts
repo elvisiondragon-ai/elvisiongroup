@@ -26,26 +26,36 @@ export function usePro() {
       
       const { data, error } = await supabase.functions.invoke('pro-status-check');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error checking pro status:', error);
+        setProStatus(prev => ({ ...prev, loading: false }));
+        return;
+      }
       
-      setProStatus({
-        isPro: data.is_pro || false,
-        subscriptionType: data.subscription_type,
-        status: data.status,
-        expiresAt: data.expires_at,
-        daysRemaining: data.days_remaining,
-        loading: false
-      });
+      console.log('Pro status response:', data);
+      
+      if (data?.success && data?.data) {
+        setProStatus({
+          isPro: data.data.is_pro || false,
+          subscriptionType: data.data.subscription_type,
+          status: data.data.status,
+          expiresAt: data.data.expires_at,
+          daysRemaining: data.data.days_remaining,
+          loading: false
+        });
+      } else {
+        setProStatus({
+          isPro: false,
+          subscriptionType: null,
+          status: null,
+          expiresAt: null,
+          daysRemaining: null,
+          loading: false
+        });
+      }
     } catch (error) {
-      console.error('Pro status check failed:', error);
-      setProStatus({
-        isPro: false,
-        subscriptionType: null,
-        status: null,
-        expiresAt: null,
-        daysRemaining: null,
-        loading: false
-      });
+      console.error('Error in checkProStatus:', error);
+      setProStatus(prev => ({ ...prev, loading: false }));
     }
   };
 

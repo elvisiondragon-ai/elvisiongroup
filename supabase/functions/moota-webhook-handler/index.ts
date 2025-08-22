@@ -102,34 +102,41 @@ serve(async (req) => {
       throw new Error('Failed to update transaction');
     }
 
-    // Update Pro subscription
-    const subscriptionEndDate = new Date();
-    if (transaction.subscription_type === 'yearly') {
-      subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1);
-    } else {
-      subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
-    }
-
-    const { error: updateSubError } = await supabaseClient
+    // Update Pro subscription and create pro_user record
+    const { data: subscription, error: subscriptionError } = await supabaseClient
       .from('pro_subscriptions')
-      .update({
-        status: 'active',
-        subscription_start_date: new Date().toISOString(),
-        subscription_end_date: subscriptionEndDate.toISOString(),
-        amount_paid: receivedAmount,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', transaction.subscription_id);
-
-    if (updateSubError) {
-      console.error('Failed to update subscription:', updateSubError);
-      throw new Error('Failed to update subscription');
+      .select('user_email, subscription_type, amount_paid, currency')
+      .eq('id', transaction.subscription_id)
+      .single();
+    
+    if (subscriptionError || !subscription) {
+      console.error('Error fetching subscription:', subscriptionError);
+      throw new Error('Subscription not found');
     }
-
-    // Sync pro status for the user after subscription is activated
-    await supabaseClient.rpc('sync_pro_status_from_subscription', {
-      p_user_id: transaction.user_id
+    
+    // Calculate subscription dates using the database function
+    const startDate = new Date();
+    const { data: endDateResult } = await supabaseClient.rpc('calculate_subscription_end_date', {
+      p_subscription_type: subscription.subscription_type,
+      p_start_date: startDate.toISOString()
     });
+    
+    // Insert or update pro_user record
+    await supabaseClient.from('pro_user').upsert({
+      email: subscription.user_email,
+      status: 'active',
+      subscription_type: subscription.subscription_type,
+      start_date: startDate.toISOString(),
+      end_date: endDateResult,
+      amount: subscription.amount_paid,
+      currency: subscription.currency || 'IDR',
+      payment_method: 'BCA Manual Transfer'
+    }, { 
+      onConflict: 'email',
+      ignoreDuplicates: false 
+    });
+
+    console.log(`Pro user subscription activated for email: ${subscription.user_email}, type: ${subscription.subscription_type}`);
 
     console.log('Payment processed successfully:', {
       transactionId: transaction.id,

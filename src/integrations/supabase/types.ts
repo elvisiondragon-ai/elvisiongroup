@@ -521,6 +521,51 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_user: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string | null
+          email: string
+          end_date: string | null
+          id: string
+          payment_method: string | null
+          start_date: string | null
+          status: string
+          subscription_type: string
+          tripay_reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          email: string
+          end_date?: string | null
+          id?: string
+          payment_method?: string | null
+          start_date?: string | null
+          status?: string
+          subscription_type?: string
+          tripay_reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          email?: string
+          end_date?: string | null
+          id?: string
+          payment_method?: string | null
+          start_date?: string | null
+          status?: string
+          subscription_type?: string
+          tripay_reference?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           achievements: string[] | null
@@ -962,6 +1007,10 @@ export type Database = {
         Args: { total_xp: number }
         Returns: number
       }
+      calculate_subscription_end_date: {
+        Args: { p_start_date?: string; p_subscription_type: string }
+        Returns: string
+      }
       can_access_payment_transaction: {
         Args: { p_transaction_id: string; p_user_id: string }
         Returns: boolean
@@ -981,6 +1030,16 @@ export type Database = {
       check_daily_journal_limit: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      check_pro_status: {
+        Args: { p_user_id: string }
+        Returns: {
+          days_remaining: number
+          expires_at: string
+          is_pro: boolean
+          status: string
+          subscription_type: string
+        }[]
       }
       check_rate_limit: {
         Args: {

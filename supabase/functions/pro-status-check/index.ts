@@ -11,65 +11,81 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
-  );
-
   try {
-    const authHeader = req.headers.get("Authorization")!;
-    const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
-    const user = data.user;
-    
-    if (!user?.email) {
-      throw new Error("User not authenticated");
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      {
+        auth: {
+          persistSession: false,
+        },
+      }
+    );
+
+    // Get user from JWT token
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      throw new Error('No authorization header');
     }
 
-    // Check VIP status using database function
-    const { data: vipStatus, error } = await supabaseClient
-      .rpc('check_vip_status', { p_user_id: user.id });
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
 
-    if (error) {
-      throw error;
+    if (userError || !user) {
+      throw new Error('Invalid user token');
     }
 
-    const status = vipStatus?.[0] || {
-      is_vip: false,
-      subscription_type: null,
-      status: null,
-      expires_at: null,
-      days_remaining: null
-    };
+    console.log('Checking pro status for user:', user.id);
 
-    // Auto-kick logic: if trial expired, block access
-    if (status.subscription_type === 'trial' && status.status === 'expired') {
-      // Could implement IP blocking logic here if needed
-      console.log(`Trial expired for user ${user.id}, IP blocking could be implemented`);
+    // Call the database function to check pro status
+    const { data: proStatusData, error: proStatusError } = await supabaseClient
+      .rpc('check_pro_status', {
+        p_user_id: user.id
+      });
+
+    if (proStatusError) {
+      console.error('Pro status check error:', proStatusError);
+      throw proStatusError;
     }
 
-    return new Response(JSON.stringify({
-      success: true,
-      is_vip: status.is_vip,
-      subscription_type: status.subscription_type,
-      status: status.status,
-      expires_at: status.expires_at,
-      days_remaining: status.days_remaining
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    console.log('Pro status result:', proStatusData);
+
+    // Return the pro status data
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: proStatusData && proStatusData.length > 0 ? proStatusData[0] : {
+          is_pro: false,
+          subscription_type: null,
+          status: null,
+          expires_at: null,
+          days_remaining: null
+        }
+      }),
+      {
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json" 
+        },
+        status: 200,
+      }
+    );
 
   } catch (error) {
-    console.error('VIP status check error:', error);
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: error.message,
-      is_vip: false
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    console.error('Error checking pro status:', error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message
+      }),
+      {
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json" 
+        },
+        status: 500,
+      }
+    );
   }
 });

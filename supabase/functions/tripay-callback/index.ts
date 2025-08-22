@@ -51,8 +51,8 @@ serve(async (req)=>{
     const { data: transaction, error: transactionError } = await supabaseClient.from('payment_transactions').update({
       status: status === 'PAID' ? 'paid' : status.toLowerCase(),
       paid_at: paid_at ? new Date(paid_at * 1000).toISOString() : null,
-      callback_data: payload // Menyimpan seluruh data callback itu ide bagus!
-    }).eq('tripay_reference', reference).select('id, subscription_id, user_id') // ambil ID transaksi juga
+      callback_data: payload
+    }).eq('tripay_reference', reference).select('id, subscription_id, user_id')
     .single();
     if (transactionError) {
       // Jika error karena referensi tidak ditemukan, tetap kembalikan status 200
@@ -68,32 +68,44 @@ serve(async (req)=>{
       }
       throw transactionError;
     }
-    // Update VIP subscription
-    const { data: subscription, error: subError } = await supabaseClient.from('pro_subscriptions').select('subscription_type, subscription_end_date')
-      .eq('id', transaction.subscription_id).single();
-    
-    if (subError) throw new Error('Subscription not found for this transaction.');
-    
-    if (subscription) {
-      // Logika untuk perpanjangan: basis tanggal adalah end_date yang ada
-      const startDate = new Date(subscription.subscription_end_date || Date.now());
-      const endDate = new Date(startDate);
-      if (subscription.subscription_type === 'monthly') {
-        endDate.setMonth(endDate.getMonth() + 1);
-      } else if (subscription.subscription_type === 'yearly') {
-        endDate.setFullYear(endDate.getFullYear() + 1);
-      }
-      await supabaseClient.from('pro_subscriptions').update({
-        status: 'active',
-        subscription_end_date: endDate.toISOString()
-      }).eq('id', transaction.subscription_id);
+    // Process payment and create/update pro_user subscription
+    if (status === 'PAID') {
+      // Get user email from pro_subscriptions
+      const { data: subscription, error: subError } = await supabaseClient
+        .from('pro_subscriptions')
+        .select('user_email, subscription_type, amount_paid, currency')
+        .eq('id', transaction.subscription_id)
+        .single();
       
-      // Sync pro status for the user after subscription is activated
-      await supabaseClient.rpc('sync_pro_status_from_subscription', {
-        p_user_id: transaction.user_id
+      if (subError || !subscription) {
+        console.error('Subscription not found for transaction:', transaction.subscription_id);
+        throw new Error('Subscription not found for this transaction.');
+      }
+      
+      // Calculate subscription dates using the database function
+      const startDate = new Date();
+      const { data: endDateResult } = await supabaseClient.rpc('calculate_subscription_end_date', {
+        p_subscription_type: subscription.subscription_type,
+        p_start_date: startDate.toISOString()
       });
       
-      console.log(`Pro subscription ${transaction.subscription_id} extended/activated for user ${transaction.user_id}`);
+      // Insert or update pro_user record
+      await supabaseClient.from('pro_user').upsert({
+        email: subscription.user_email,
+        status: 'active',
+        subscription_type: subscription.subscription_type,
+        start_date: startDate.toISOString(),
+        end_date: endDateResult,
+        amount: subscription.amount_paid,
+        currency: subscription.currency || 'IDR',
+        tripay_reference: reference,
+        payment_method: payload.payment_method || 'Tripay'
+      }, { 
+        onConflict: 'email',
+        ignoreDuplicates: false 
+      });
+      
+      console.log(`Pro user subscription activated for email: ${subscription.user_email}, type: ${subscription.subscription_type}`);
     }
     
     return new Response(JSON.stringify({
