@@ -11,7 +11,8 @@ interface ProBadgeProps {
 export function ProBadge({ className, size = 'md', showLabel = true }: ProBadgeProps) {
   const { proStatus } = usePro();
 
-  if (!proStatus.isPro || proStatus.loading) {
+  // Show badge if user is confirmed Pro, regardless of loading state
+  if (!proStatus.isPro) {
     return null;
   }
 

@@ -38,12 +38,25 @@ export function usePro() {
         return;
       }
 
-      // Call the database function directly
-      const { data, error } = await supabase.rpc('check_pro_status', { p_user_id: user.id });
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout')), 10000)
+      );
+
+      const rpcPromise = supabase.rpc('check_pro_status', { p_user_id: user.id });
+
+      const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
       
       if (error) {
         console.error('Error checking pro status:', error);
-        setProStatus(prev => ({ ...prev, loading: false }));
+        setProStatus({
+          isPro: false,
+          subscriptionType: null,
+          status: null,
+          expiresAt: null,
+          daysRemaining: null,
+          loading: false
+        });
         return;
       }
       
@@ -71,7 +84,15 @@ export function usePro() {
       }
     } catch (error) {
       console.error('Error in checkProStatus:', error);
-      setProStatus(prev => ({ ...prev, loading: false }));
+      // Set loading to false and default to non-pro on any error
+      setProStatus({
+        isPro: false,
+        subscriptionType: null,
+        status: null,
+        expiresAt: null,
+        daysRemaining: null,
+        loading: false
+      });
     }
   };
 
