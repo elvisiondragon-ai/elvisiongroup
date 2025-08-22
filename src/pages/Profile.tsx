@@ -282,7 +282,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </h1>
         
         <div className="flex items-center justify-center gap-2 mb-3">
-          <TierBadge level={profile.level} className="mb-2" />
+          <TierBadge level={profile.level} isPro={proStatus.isPro} className="mb-2" />
           <span className="text-sm text-muted-foreground">
             Bergabung sejak {joinDate}
           </span>

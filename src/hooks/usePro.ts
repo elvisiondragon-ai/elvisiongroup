@@ -24,7 +24,22 @@ export function usePro() {
     try {
       setProStatus(prev => ({ ...prev, loading: true }));
       
-      const { data, error } = await supabase.functions.invoke('pro-status-check');
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setProStatus({
+          isPro: false,
+          subscriptionType: null,
+          status: null,
+          expiresAt: null,
+          daysRemaining: null,
+          loading: false
+        });
+        return;
+      }
+
+      // Call the database function directly
+      const { data, error } = await supabase.rpc('check_pro_status', { p_user_id: user.id });
       
       if (error) {
         console.error('Error checking pro status:', error);
@@ -34,13 +49,14 @@ export function usePro() {
       
       console.log('Pro status response:', data);
       
-      if (data?.success && data?.data) {
+      if (data && data.length > 0) {
+        const statusData = data[0];
         setProStatus({
-          isPro: data.data.is_pro || false,
-          subscriptionType: data.data.subscription_type,
-          status: data.data.status,
-          expiresAt: data.data.expires_at,
-          daysRemaining: data.data.days_remaining,
+          isPro: statusData.is_pro || false,
+          subscriptionType: statusData.subscription_type,
+          status: statusData.status,
+          expiresAt: statusData.expires_at,
+          daysRemaining: statusData.days_remaining,
           loading: false
         });
       } else {
