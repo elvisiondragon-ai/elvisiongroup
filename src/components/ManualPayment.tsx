@@ -109,22 +109,46 @@ export const ManualPayment: React.FC<ManualPaymentProps> = ({ onClose }) => {
         throw error;
       }
 
-      // Send payment created email notification
-      try {
-        await supabase.functions.invoke('send-payment-created-notification', {
-          body: {
-            userId: user.id,
-            subscriptionType: selectedPlan,
-            amount: amount,
-            currency: 'IDR',
-            paymentMethod: 'BCA_MANUAL',
-            reference: merchantRef
-          }
-        });
-      } catch (emailError) {
-        console.error('Failed to send payment notification email:', emailError);
-        // Don't fail the payment creation if email fails
-      }
+      // FIXED EMAIL CODE - CORRECT FUNCTION NAME:
+
+// Send payment created email notification
+try {
+  console.log('📧 Attempting to send payment notification email...');
+  console.log('📧 User email:', user.email);
+  console.log('📧 Payment data:', {
+    userId: user.id,
+    subscriptionType: selectedPlan,
+    amount: amount,
+    currency: 'IDR',
+    paymentMethod: 'BCA_MANUAL',
+    reference: merchantRef
+  });
+
+  const emailResult = await supabase.functions.invoke('send-payment-created-notification', {
+    body: {
+      userId: user.id,
+      subscriptionType: selectedPlan,
+      amount: amount,
+      currency: 'IDR',
+      paymentMethod: 'BCA_MANUAL',
+      reference: merchantRef
+    }
+  });
+
+  console.log('📧 Email function response:', emailResult);
+
+  if (emailResult.error) {
+    console.error('❌ Email notification failed:', emailResult.error);
+  } else {
+    console.log('✅ Email notification sent successfully!');
+    console.log('📧 Email result data:', emailResult.data);
+  }
+  
+} catch (emailError) {
+  console.error('❌ Email notification exception:', emailError);
+  console.error('❌ Error details:', emailError.message);
+  // Don't fail the payment creation if email fails
+}
 
       toast({
         title: 'Berhasil',
