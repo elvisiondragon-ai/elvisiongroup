@@ -989,6 +989,14 @@ export type Database = {
       }
     }
     Functions: {
+      add_pro_user_by_email: {
+        Args: {
+          p_duration_days?: number
+          p_email: string
+          p_subscription_type?: string
+        }
+        Returns: Json
+      }
       admin_system_health_check: {
         Args: Record<PropertyKey, never>
         Returns: Json
