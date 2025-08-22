@@ -109,6 +109,23 @@ export const ManualPayment: React.FC<ManualPaymentProps> = ({ onClose }) => {
         throw error;
       }
 
+      // Send payment created email notification
+      try {
+        await supabase.functions.invoke('send-payment-created-notification', {
+          body: {
+            userId: user.id,
+            subscriptionType: selectedPlan,
+            amount: amount,
+            currency: 'IDR',
+            paymentMethod: 'BCA_MANUAL',
+            reference: merchantRef
+          }
+        });
+      } catch (emailError) {
+        console.error('Failed to send payment notification email:', emailError);
+        // Don't fail the payment creation if email fails
+      }
+
       toast({
         title: 'Berhasil',
         description: 'Instruksi pembayaran telah dibuat. Silakan lakukan transfer sesuai detail di bawah.',

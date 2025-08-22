@@ -147,6 +147,25 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       }
 
       if (data?.success) {
+        // Send payment created email notification
+        try {
+          await supabase.functions.invoke('send-payment-created-notification', {
+            body: {
+              userId: user.id,
+              subscriptionType: plan.id,
+              amount: plan.price,
+              currency: 'IDR',
+              paymentMethod: selectedPaymentMethod,
+              reference: data.reference,
+              virtualAccount: data.payCode,
+              expiresAt: data.expiry_time
+            }
+          });
+        } catch (emailError) {
+          console.error('Failed to send payment notification email:', emailError);
+          // Don't fail the payment creation if email fails
+        }
+
         // Frontend logic: Show payment details in app
         if (data.payCode) {
           // Show VA number in app

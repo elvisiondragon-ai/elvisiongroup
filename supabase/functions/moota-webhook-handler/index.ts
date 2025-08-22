@@ -137,6 +137,32 @@ serve(async (req) => {
     });
 
     console.log(`Pro user subscription activated for email: ${subscription.user_email}, type: ${subscription.subscription_type}`);
+    
+    // Send payment completion email  
+    try {
+      const emailResponse = await supabaseClient.functions.invoke('send-payment-email', {
+        body: {
+          email: subscription.user_email,
+          userName: subscription.user_email.split('@')[0],
+          type: 'payment_completed',
+          paymentData: {
+            amount: subscription.amount_paid || receivedAmount,
+            currency: subscription.currency || 'IDR',
+            reference: reference,
+            subscriptionType: subscription.subscription_type,
+            paymentMethod: 'BCA Manual Transfer'
+          }
+        }
+      });
+      
+      if (emailResponse.error) {
+        console.error('❌ Failed to send completion email:', emailResponse.error);
+      } else {
+        console.log('✅ Payment completion email sent successfully');
+      }
+    } catch (emailError) {
+      console.error('❌ Error sending payment completion email:', emailError);
+    }
 
     console.log('Payment processed successfully:', {
       transactionId: transaction.id,
