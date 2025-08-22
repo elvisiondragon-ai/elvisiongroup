@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Star, Clock, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { usePro } from '@/hooks/usePro';
-import { ManualPayment } from './ManualPayment';
+import { TripaySubscription } from './TripaySubscription';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProUpgradeProps {
   onClose?: () => void;
@@ -14,8 +15,35 @@ interface ProUpgradeProps {
 export function ProUpgrade({ onClose }: ProUpgradeProps) {
   const { proStatus, startTrial } = usePro();
   const [loading, setLoading] = useState(false);
-  const [showManualPayment, setShowManualPayment] = useState(false);
+  const [showTripayPayment, setShowTripayPayment] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (showTripayPayment) {
+      fetchUserData();
+    }
+  }, [showTripayPayment]);
+
+  const fetchUserData = async () => {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (currentUser) {
+        setUser(currentUser);
+        
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+        
+        setUserProfile(profile);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   const handleStartTrial = async () => {
     setLoading(true);
@@ -56,9 +84,9 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
   };
 
 
-  // Show manual payment interface
-  if (showManualPayment) {
-    return <ManualPayment onClose={() => setShowManualPayment(false)} />;
+  // Show Tripay payment interface
+  if (showTripayPayment) {
+    return <TripaySubscription user={user} userProfile={userProfile} onClose={() => setShowTripayPayment(false)} />;
   }
 
   // Show loading state
@@ -112,7 +140,7 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
                 Upgrade to continue Pro access after trial
               </p>
               <Button 
-                onClick={() => setShowManualPayment(true)}
+                onClick={() => setShowTripayPayment(true)}
                 className="w-full"
                 variant="default"
               >
@@ -166,7 +194,7 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
           </Button>
           
           <Button 
-            onClick={() => setShowManualPayment(true)}
+            onClick={() => setShowTripayPayment(true)}
             className="w-full"
           >
             <Crown className="w-4 h-4 mr-2" />
