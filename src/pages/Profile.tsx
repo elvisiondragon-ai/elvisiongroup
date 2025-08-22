@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { TierBadge } from "@/components/TierBadge";
+import { ProBadge } from "@/components/ProBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
 import { NotificationSettings } from "@/components/NotificationSettings";
@@ -282,10 +283,16 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </h1>
         
         <div className="flex items-center justify-center gap-2 mb-3">
-          <TierBadge level={profile.level} isPro={proStatus.isPro} className="mb-2" />
+          <TierBadge level={profile.level} isPro={proStatus.isPro} />
+        </div>
+        
+        <div className="flex items-center justify-center gap-2 mb-3">
           <span className="text-sm text-muted-foreground">
             Bergabung sejak {joinDate}
           </span>
+          {proStatus.isPro && (
+            <ProBadge size="sm" />
+          )}
         </div>
         
         <div className="max-w-xs mx-auto mb-6">
@@ -407,7 +414,14 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           onClick={() => onNavigate("payment")}
         >
           <Crown className="w-4 h-4 mr-2" />
-          {proStatus.isPro ? 'Pro Membership' : 'Upgrade ke Pro'}
+          {proStatus.isPro 
+            ? `Your Pro Plan until ${proStatus.expiresAt ? new Date(proStatus.expiresAt).toLocaleDateString('id-ID', { 
+                year: 'numeric', 
+                month: 'short',
+                day: 'numeric'
+              }) : 'Unknown'}`
+            : 'Upgrade ke Pro'
+          }
         </Button>
 
         <Button 
