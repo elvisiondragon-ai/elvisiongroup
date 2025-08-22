@@ -38,53 +38,56 @@ export function usePro() {
         return;
       }
 
-      // Add timeout to prevent infinite loading
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout')), 10000)
-      );
+      // First check profile achievements (fallback method)
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('achievements')
+        .eq('user_id', user.id)
+        .single();
 
-      const rpcPromise = supabase.rpc('check_pro_status', { p_user_id: user.id });
-
-      const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
-      
-      if (error) {
-        console.error('Error checking pro status:', error);
+      if (profileData?.achievements?.includes('pro')) {
         setProStatus({
-          isPro: false,
-          subscriptionType: null,
-          status: null,
+          isPro: true,
+          subscriptionType: 'achievement',
+          status: 'active',
           expiresAt: null,
           daysRemaining: null,
           loading: false
         });
         return;
       }
-      
-      console.log('Pro status response:', data);
-      
-      if (data && data.length > 0) {
-        const statusData = data[0];
-        setProStatus({
-          isPro: statusData.is_pro || false,
-          subscriptionType: statusData.subscription_type,
-          status: statusData.status,
-          expiresAt: statusData.expires_at,
-          daysRemaining: statusData.days_remaining,
-          loading: false
-        });
-      } else {
-        setProStatus({
-          isPro: false,
-          subscriptionType: null,
-          status: null,
-          expiresAt: null,
-          daysRemaining: null,
-          loading: false
-        });
+
+      // Try the RPC function as backup
+      try {
+        const { data, error } = await supabase.rpc('check_pro_status', { p_user_id: user.id });
+        
+        if (!error && data && data.length > 0) {
+          const statusData = data[0];
+          setProStatus({
+            isPro: statusData.is_pro || false,
+            subscriptionType: statusData.subscription_type,
+            status: statusData.status,
+            expiresAt: statusData.expires_at,
+            daysRemaining: statusData.days_remaining,
+            loading: false
+          });
+          return;
+        }
+      } catch (rpcError) {
+        console.log('RPC function failed, using achievements fallback');
       }
+
+      // Default to not pro
+      setProStatus({
+        isPro: false,
+        subscriptionType: null,
+        status: null,
+        expiresAt: null,
+        daysRemaining: null,
+        loading: false
+      });
     } catch (error) {
       console.error('Error in checkProStatus:', error);
-      // Set loading to false and default to non-pro on any error
       setProStatus({
         isPro: false,
         subscriptionType: null,
