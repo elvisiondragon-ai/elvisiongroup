@@ -284,13 +284,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </h1>
         
         <div className="flex items-center justify-center gap-2 mb-3">
-          <TierBadge level={profile.level} isPro={true} />
-          {true && (
-            <span className="px-2 py-1 text-xs font-medium bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full flex items-center gap-1">
-              <span className="text-xs">⭐</span>
-              PRO
-            </span>
-          )}
+          <TierBadge level={profile.level} isPro={proStatus.isPro} />
         </div>
         
         <div className="flex items-center justify-center gap-2 mb-3">
