@@ -82,6 +82,12 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
           <div className="flex items-center gap-2">
             <span className="font-semibold text-foreground">{user.name}</span>
             <TierBadge level={user.level} isPro={user.isPro} />
+            {user.isPro && (
+              <span className="px-2 py-1 text-xs font-medium bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full flex items-center gap-1">
+                <span className="text-xs">⭐</span>
+                PRO
+              </span>
+            )}
           </div>
           
           {canDelete && (
