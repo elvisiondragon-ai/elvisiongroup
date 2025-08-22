@@ -1016,7 +1016,7 @@ export type Database = {
         Returns: number
       }
       calculate_subscription_end_date: {
-        Args: { p_start_date?: string; p_subscription_type: string }
+        Args: { p_start_date: string; p_subscription_type: string }
         Returns: string
       }
       can_access_payment_transaction: {
