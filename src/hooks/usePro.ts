@@ -131,14 +131,7 @@ export function usePro() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      if (paymentMethod === 'BCA_MANUAL') {
-        // Use Supabase function for Moota (BCA Manual)
-        const { data, error } = await supabase.functions.invoke('moota-create-payment', {
-          body: { subscriptionType, paymentMethod, userEmail, userName, phoneNumber, amount, currency }
-        });
-        
-        if (error) throw error;
-        return data;
+
       } else {
         // Use Supabase function for Tripay
         const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
