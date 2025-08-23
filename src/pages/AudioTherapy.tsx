@@ -153,10 +153,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 5,
       title: "Verse 5 - Vitality Vortex",
       subtitle: "Memperbaiki ulang finansial, fisik dan mental untuk hidup yang sehat",
-      unlocked: false,
+      unlocked: userLevel >= 5 || proStatus.isPro,
       requiredLevel: 5,
       artwork: verse5Artwork,
-      audioUrl: null,
+      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse5%20-%20Virtality%20Vortex.MP3',
       language: 'id'
     },
     {
