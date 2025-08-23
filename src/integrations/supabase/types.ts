@@ -339,10 +339,9 @@ export type Database = {
           callback_data: Json | null
           created_at: string
           currency: string | null
+          customer_phone: string | null
           expires_at: string | null
           id: string
-          moota_mutation_id: string | null
-          moota_webhook_data: Json | null
           paid_at: string | null
           payment_instructions: Json | null
           payment_method: string | null
@@ -351,7 +350,7 @@ export type Database = {
           subscription_id: string
           tripay_merchant_ref: string
           tripay_reference: string
-          unique_code: number | null
+          unique_code: string | null
           updated_at: string
           user_id: string
         }
@@ -361,10 +360,9 @@ export type Database = {
           callback_data?: Json | null
           created_at?: string
           currency?: string | null
+          customer_phone?: string | null
           expires_at?: string | null
           id?: string
-          moota_mutation_id?: string | null
-          moota_webhook_data?: Json | null
           paid_at?: string | null
           payment_instructions?: Json | null
           payment_method?: string | null
@@ -373,7 +371,7 @@ export type Database = {
           subscription_id: string
           tripay_merchant_ref: string
           tripay_reference: string
-          unique_code?: number | null
+          unique_code?: string | null
           updated_at?: string
           user_id: string
         }
@@ -383,10 +381,9 @@ export type Database = {
           callback_data?: Json | null
           created_at?: string
           currency?: string | null
+          customer_phone?: string | null
           expires_at?: string | null
           id?: string
-          moota_mutation_id?: string | null
-          moota_webhook_data?: Json | null
           paid_at?: string | null
           payment_instructions?: Json | null
           payment_method?: string | null
@@ -395,7 +392,7 @@ export type Database = {
           subscription_id?: string
           tripay_merchant_ref?: string
           tripay_reference?: string
-          unique_code?: number | null
+          unique_code?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -416,62 +413,12 @@ export type Database = {
           },
         ]
       }
-      payments: {
-        Row: {
-          amount: number
-          amount_received: number | null
-          created_at: string | null
-          fee_customer: number | null
-          fee_merchant: number | null
-          id: number
-          merchant_ref: string
-          paid_at: string | null
-          payment_method: string | null
-          payment_method_code: string | null
-          reference: string
-          status: string
-          tripay_data: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          amount: number
-          amount_received?: number | null
-          created_at?: string | null
-          fee_customer?: number | null
-          fee_merchant?: number | null
-          id?: number
-          merchant_ref: string
-          paid_at?: string | null
-          payment_method?: string | null
-          payment_method_code?: string | null
-          reference: string
-          status?: string
-          tripay_data?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          amount?: number
-          amount_received?: number | null
-          created_at?: string | null
-          fee_customer?: number | null
-          fee_merchant?: number | null
-          id?: number
-          merchant_ref?: string
-          paid_at?: string | null
-          payment_method?: string | null
-          payment_method_code?: string | null
-          reference?: string
-          status?: string
-          tripay_data?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       pro_subscriptions: {
         Row: {
           amount_paid: number | null
           created_at: string
           currency: string | null
+          customer_phone: string | null
           id: string
           ip_address: string | null
           status: string
@@ -483,12 +430,13 @@ export type Database = {
           tripay_reference: string | null
           updated_at: string
           user_email: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           amount_paid?: number | null
           created_at?: string
           currency?: string | null
+          customer_phone?: string | null
           id?: string
           ip_address?: string | null
           status?: string
@@ -500,12 +448,13 @@ export type Database = {
           tripay_reference?: string | null
           updated_at?: string
           user_email?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           amount_paid?: number | null
           created_at?: string
           currency?: string | null
+          customer_phone?: string | null
           id?: string
           ip_address?: string | null
           status?: string
@@ -517,7 +466,7 @@ export type Database = {
           tripay_reference?: string | null
           updated_at?: string
           user_email?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -526,6 +475,7 @@ export type Database = {
           amount: number | null
           created_at: string
           currency: string | null
+          customer_phone: string | null
           email: string
           end_date: string | null
           id: string
@@ -540,6 +490,7 @@ export type Database = {
           amount?: number | null
           created_at?: string
           currency?: string | null
+          customer_phone?: string | null
           email: string
           end_date?: string | null
           id?: string
@@ -554,6 +505,7 @@ export type Database = {
           amount?: number | null
           created_at?: string
           currency?: string | null
+          customer_phone?: string | null
           email?: string
           end_date?: string | null
           id?: string
@@ -574,8 +526,10 @@ export type Database = {
           display_name: string | null
           experience_points: number
           id: string
+          is_premium: boolean | null
           level: number
           preferred_language: string | null
+          premium_expires_at: string | null
           streak_days: number
           total_sessions: number
           updated_at: string
@@ -588,8 +542,10 @@ export type Database = {
           display_name?: string | null
           experience_points?: number
           id?: string
+          is_premium?: boolean | null
           level?: number
           preferred_language?: string | null
+          premium_expires_at?: string | null
           streak_days?: number
           total_sessions?: number
           updated_at?: string
@@ -602,8 +558,10 @@ export type Database = {
           display_name?: string | null
           experience_points?: number
           id?: string
+          is_premium?: boolean | null
           level?: number
           preferred_language?: string | null
+          premium_expires_at?: string | null
           streak_days?: number
           total_sessions?: number
           updated_at?: string
@@ -989,6 +947,10 @@ export type Database = {
       }
     }
     Functions: {
+      add_achievement: {
+        Args: { achievement: string; user_id: string }
+        Returns: undefined
+      }
       add_pro_user_by_email: {
         Args: {
           p_duration_days?: number
