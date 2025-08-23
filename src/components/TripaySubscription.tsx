@@ -147,14 +147,14 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
         throw error;
       }
 
-      console.log('VPS Response Data:', data);
+      console.log('VPS Response:', data);
       console.log('Condition check - data exists:', !!data);
       console.log('Condition check - data.success:', data?.success);
       console.log('Condition check - data.payCode:', data?.payCode);
       console.log('Condition check - data.qrUrl:', data?.qrUrl);
       console.log('User object:', user);
 
-      console.log('✅ About to send email notification');
+      console.log('EMAIL FUNCTION START');
       // Send payment created email notification
       try {
         await supabase.functions.invoke('send-payment-created-notification', {
@@ -169,8 +169,10 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
             expiresAt: data.expiry_time
           }
         });
+        console.log('EMAIL FUNCTION END');
       } catch (emailError) {
         console.error('Failed to send payment notification email:', emailError);
+        console.log('EMAIL FUNCTION ERROR');
         // Don't fail the payment creation if email fails
       }
 
