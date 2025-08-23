@@ -154,58 +154,50 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       console.log('Condition check - data.qrUrl:', data?.qrUrl);
       console.log('User object:', user);
 
-      if (data && (data.success || data.payCode || data.qrUrl)) {
-        console.log('✅ About to send email notification');
-        // Send payment created email notification
-        try {
-          await supabase.functions.invoke('send-payment-created-notification', {
-            body: {
-              userId: user.id,
-              subscriptionType: plan.id,
-              amount: plan.price,
-              currency: 'IDR',
-              paymentMethod: selectedPaymentMethod,
-              reference: data.reference,
-              virtualAccount: data.payCode,
-              expiresAt: data.expiry_time
-            }
-          });
-        } catch (emailError) {
-          console.error('Failed to send payment notification email:', emailError);
-          // Don't fail the payment creation if email fails
-        }
+      console.log('✅ About to send email notification');
+      // Send payment created email notification
+      try {
+        await supabase.functions.invoke('send-payment-created-notification', {
+          body: {
+            userId: user.id,
+            subscriptionType: plan.id,
+            amount: plan.price,
+            currency: 'IDR',
+            paymentMethod: selectedPaymentMethod,
+            reference: data.reference,
+            virtualAccount: data.payCode,
+            expiresAt: data.expiry_time
+          }
+        });
+      } catch (emailError) {
+        console.error('Failed to send payment notification email:', emailError);
+        // Don't fail the payment creation if email fails
+      }
 
-        // Frontend logic: Show payment details in app
-        if (data.payCode) {
-          // Show VA number in app
-          setPaymentData(data);
-          setShowPaymentInstructions(true);
-          toast({
-            title: "Pembayaran Berhasil Dibuat",
-            description: "Silakan selesaikan pembayaran menggunakan Virtual Account",
-          });
-        } else if (data.qrUrl) {
-          // Show QR code in app  
-          setPaymentData(data);
-          setShowPaymentInstructions(true);
-          toast({
-            title: "Pembayaran Berhasil Dibuat", 
-            description: "Silakan scan QR Code untuk menyelesaikan pembayaran",
-          });
-        } else {
-          // Show general payment instructions
-          setPaymentData(data);
-          setShowPaymentInstructions(true);
-          toast({
-            title: "Pembayaran Berhasil Dibuat",
-            description: "Silakan ikuti instruksi pembayaran",
-          });
-        }
-      } else {
+      // Frontend logic: Show payment details in app
+      if (data.payCode) {
+        // Show VA number in app
+        setPaymentData(data);
+        setShowPaymentInstructions(true);
         toast({
-          title: "Error",
-          description: data?.error || "Gagal membuat pembayaran. Silakan coba lagi.",
-          variant: "destructive",
+          title: "Pembayaran Berhasil Dibuat",
+          description: "Silakan selesaikan pembayaran menggunakan Virtual Account",
+        });
+      } else if (data.qrUrl) {
+        // Show QR code in app  
+        setPaymentData(data);
+        setShowPaymentInstructions(true);
+        toast({
+          title: "Pembayaran Berhasil Dibuat", 
+          description: "Silakan scan QR Code untuk menyelesaikan pembayaran",
+        });
+      } else {
+        // Show general payment instructions
+        setPaymentData(data);
+        setShowPaymentInstructions(true);
+        toast({
+          title: "Pembayaran Berhasil Dibuat",
+          description: "Silakan ikuti instruksi pembayaran",
         });
       }
     } catch (error) {
