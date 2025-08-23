@@ -17,17 +17,9 @@ export function useSignedAudioUrl(filePath: string | null) {
       setError(null);
       
       try {
-        // Extract the file path from the full URL if it's a full URL
-        let cleanPath = filePath;
-        if (filePath.includes('audio-files/')) {
-          cleanPath = filePath.split('audio-files/')[1];
-          // Decode URI components
-          cleanPath = decodeURIComponent(cleanPath);
-        }
-
         const { data, error } = await supabase.storage
           .from('audio-files')
-          .createSignedUrl(cleanPath, 3600); // 1 hour expiry
+          .createSignedUrl(filePath, 4800); // 1 hour 20 minutes expiry
         
         if (error) {
           console.error('Error creating signed URL:', error);
