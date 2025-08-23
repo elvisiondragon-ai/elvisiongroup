@@ -148,8 +148,14 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       }
 
       console.log('VPS Response Data:', data);
+      console.log('Condition check - data exists:', !!data);
+      console.log('Condition check - data.success:', data?.success);
+      console.log('Condition check - data.payCode:', data?.payCode);
+      console.log('Condition check - data.qrUrl:', data?.qrUrl);
+      console.log('User object:', user);
 
       if (data && (data.success || data.payCode || data.qrUrl)) {
+        console.log('✅ About to send email notification');
         // Send payment created email notification
         try {
           await supabase.functions.invoke('send-payment-created-notification', {
