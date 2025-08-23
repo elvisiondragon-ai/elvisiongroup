@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy } from 'lucide-react';
+import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -116,6 +116,51 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
 
     fetchPlans();
   }, []);
+
+  // Realtime subscription to listen for payment status changes
+  useEffect(() => {
+    if (!showPaymentInstructions || !paymentData?.tripay_reference) return;
+
+    console.log('🔔 Setting up realtime subscription for tripay_reference:', paymentData.tripay_reference);
+
+    const channel = supabase
+      .channel('payment-status-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'payment_transactions',
+          filter: `tripay_reference=eq.${paymentData.tripay_reference}`
+        },
+        (payload) => {
+          console.log('💰 Payment status change detected:', payload);
+          
+          if (payload.new?.status === 'paid') {
+            console.log('🎉 Payment confirmed as PAID!');
+            
+            // Show success notification
+            toast({
+              title: "Pembayaran Berhasil!",
+              description: "Pembayaran berhasil silahkan cek email!",
+              variant: "default",
+            });
+
+            // Close the payment modal after a short delay
+            setTimeout(() => {
+              onClose();
+            }, 2000);
+          }
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription when component unmounts or dependencies change
+    return () => {
+      console.log('🔄 Cleaning up payment realtime subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [showPaymentInstructions, paymentData?.tripay_reference, toast, onClose]);
 
   const handleCreatePayment = async () => {
     if (!user || !selectedPlan || !phoneNumber.trim() || !fullName.trim()) {
