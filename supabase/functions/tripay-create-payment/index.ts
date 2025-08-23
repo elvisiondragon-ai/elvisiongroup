@@ -62,6 +62,12 @@ serve(async (req) => {
       result = JSON.parse(responseText)
       console.log('✅ Parsed JSON successfully')
       console.log('📋 Result keys:', Object.keys(result))
+      
+      // Map VPS response reference to tripay_reference for consistency
+      if (result.reference) {
+        result.tripay_reference = result.reference;
+        console.log(`🔄 Mapped reference ${result.reference} to tripay_reference`);
+      }
     } catch (parseError) {
       console.log('⚠️ JSON parse failed:', parseError.message)
       // If not JSON, wrap in object

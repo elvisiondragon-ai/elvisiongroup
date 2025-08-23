@@ -269,7 +269,7 @@ export function Payment({ onNavigate }: PaymentProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-xs text-muted-foreground block">Referensi</span>
-                  <span className="font-mono text-sm font-medium">{paymentData?.reference}</span>
+                  <span className="font-mono text-sm font-medium">{paymentData?.tripay_reference}</span>
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground block">Metode</span>

@@ -26,11 +26,14 @@ serve(async (req) => {
     console.log('💰 VPS payment data:', payload);
     const { reference, status, amount, paid_at } = payload;
     
-    if (!reference) {
+    // Map VPS reference to tripay_reference for consistent naming
+    const tripay_reference = reference;
+    
+    if (!tripay_reference) {
       throw new Error('Missing reference in VPS callback');
     }
     
-    console.log(`📋 Processing payment: ${reference}, Status: ${status}`);
+    console.log(`📋 Processing payment: ${tripay_reference}, Status: ${status}`);
     
     // Update payment transaction
     const { data: transaction, error: transactionError } = await supabaseClient
@@ -40,20 +43,118 @@ serve(async (req) => {
         paid_at: paid_at ? new Date(paid_at * 1000).toISOString() : null,
         callback_data: payload
       })
-      .eq('tripay_reference', reference)
+      .eq('tripay_reference', tripay_reference)
       .select('id, subscription_id, user_id')
       .single();
     
     if (transactionError) {
       if (transactionError.code === 'PGRST116') {
-        console.warn(`⚠️ Transaction with reference ${reference} not found.`);
-        return new Response(JSON.stringify({
-          success: true,
-          message: 'Transaction not found, but acknowledged.'
-        }), {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        });
+        console.warn(`⚠️ Transaction with tripay_reference ${tripay_reference} not found.`);
+        
+        // Try to find subscription by tripay_reference directly
+        console.log(`🔍 Looking for subscription with reference: ${tripay_reference}`);
+        const { data: subscription, error: subLookupError } = await supabaseClient
+          .from('pro_subscriptions')
+          .select('*')
+          .eq('tripay_reference', tripay_reference)
+          .single();
+        
+        if (!subLookupError && subscription) {
+          console.log(`✅ Found subscription by tripay_reference: ${subscription.id}`);
+          console.log(`✅ Using subscription found by: tripay_reference, ID: ${subscription.id}, User: ${subscription.user_email}`);
+          
+          // Process subscription activation directly
+          if (status === 'PAID') {
+            console.log(`💳 Processing PAID status for reference: ${tripay_reference}`);
+            
+            // Update subscription status
+            const { error: updateError } = await supabaseClient
+              .from('pro_subscriptions')
+              .update({
+                status: 'active',
+                subscription_start_date: new Date().toISOString()
+              })
+              .eq('id', subscription.id);
+            
+            if (updateError) {
+              console.error('❌ Error updating subscription status:', updateError);
+              throw updateError;
+            }
+            
+            // Create pro_user record and handle achievements as before
+            const startDate = new Date();
+            const { data: endDateResult } = await supabaseClient.rpc('calculate_subscription_end_date', {
+              p_subscription_type: subscription.subscription_type,
+              p_start_date: startDate.toISOString()
+            });
+            
+            await supabaseClient.from('pro_user').upsert({
+              email: subscription.user_email,
+              status: 'active',
+              subscription_type: subscription.subscription_type,
+              start_date: startDate.toISOString(),
+              end_date: endDateResult,
+              amount: subscription.amount_paid,
+              currency: subscription.currency || 'IDR',
+              tripay_reference: tripay_reference,
+              payment_method: payload.payment_method || 'Tripay'
+            }, { 
+              onConflict: 'email',
+              ignoreDuplicates: false 
+            });
+            
+            // Add 'pro' achievement
+            if (subscription.user_id) {
+              await supabaseClient
+                .from('profiles')
+                .update({
+                  achievements: supabaseClient.raw(`array_append(achievements, 'pro')`),
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', subscription.user_id)
+                .not('achievements', 'cs', '{"pro"}');
+            }
+            
+            // Send payment completion email
+            try {
+              await supabaseClient.functions.invoke('send-payment-email', {
+                body: {
+                  email: subscription.user_email,
+                  userName: subscription.user_email.split('@')[0],
+                  type: 'payment_completed',
+                  paymentData: {
+                    amount: subscription.amount_paid || amount,
+                    currency: subscription.currency || 'IDR',
+                    tripay_reference: tripay_reference,
+                    subscriptionType: subscription.subscription_type,
+                    paymentMethod: payload.payment_method || 'Tripay',
+                    endDate: endDateResult
+                  }
+                }
+              });
+              console.log('✅ Payment completion email sent successfully');
+            } catch (emailError) {
+              console.error('❌ Error sending payment completion email:', emailError);
+            }
+          }
+          
+          return new Response(JSON.stringify({
+            success: true,
+            message: 'Subscription processed successfully'
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        } else {
+          console.log('❌ No subscription found with tripay_reference');
+          return new Response(JSON.stringify({
+            success: true,
+            message: 'Transaction not found, but acknowledged.'
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
       }
       throw transactionError;
     }
@@ -99,7 +200,7 @@ serve(async (req) => {
         end_date: endDateResult,
         amount: subscription.amount_paid,
         currency: subscription.currency || 'IDR',
-        tripay_reference: reference,
+        tripay_reference: tripay_reference,
         payment_method: payload.payment_method || 'Tripay'
       }, { 
         onConflict: 'email',
@@ -130,7 +231,7 @@ serve(async (req) => {
             paymentData: {
               amount: subscription.amount_paid || amount,
               currency: subscription.currency || 'IDR',
-              reference: reference,
+              tripay_reference: tripay_reference,
               subscriptionType: subscription.subscription_type,
               paymentMethod: payload.payment_method || 'Tripay',
               endDate: endDateResult

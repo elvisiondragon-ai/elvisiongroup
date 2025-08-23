@@ -164,7 +164,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
             amount: plan.price,
             currency: 'IDR',
             paymentMethod: selectedPaymentMethod,
-            reference: data.reference,
+            tripayReference: data.tripay_reference,
             virtualAccount: data.payCode,
             expiresAt: data.expiry_time
           }
@@ -273,7 +273,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <span className="text-xs text-muted-foreground block">Referensi</span>
-                        <span className="font-mono text-sm font-medium">{paymentData?.reference}</span>
+                        <span className="font-mono text-sm font-medium">{paymentData?.tripay_reference}</span>
                       </div>
                       <div>
                         <span className="text-xs text-muted-foreground block">Metode</span>
