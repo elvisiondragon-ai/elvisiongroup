@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -131,30 +132,27 @@ export function usePro() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-
-      } else {
-        // Use Supabase function for Tripay
-        const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
-          body: { 
-            subscriptionType, 
-            paymentMethod, 
-            userEmail, 
-            userName, 
-            phoneNumber,
-            amount,
-            currency
-          }
-        });
-        
-        if (error) throw error;
-        
-        // Open checkout URL if available
-        if (data?.success && data?.checkoutUrl) {
-          window.open(data.checkoutUrl, '_blank', 'noopener,noreferrer');
+      // Use Supabase function for Tripay
+      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
+        body: { 
+          subscriptionType, 
+          paymentMethod, 
+          userEmail, 
+          userName, 
+          phoneNumber,
+          amount,
+          currency
         }
-        
-        return data;
+      });
+      
+      if (error) throw error;
+      
+      // Open checkout URL if available
+      if (data?.success && data?.checkoutUrl) {
+        window.open(data.checkoutUrl, '_blank', 'noopener,noreferrer');
       }
+      
+      return data;
     } catch (error) {
       console.error('Payment creation failed:', error);
       throw error;
