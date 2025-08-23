@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -146,6 +147,9 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
         throw error;
       }
 
+      console.log('VPS Response Data:', data);
+
+      if (data && (data.success || data.payCode || data.qrUrl)) {
         // Send payment created email notification
         try {
           await supabase.functions.invoke('send-payment-created-notification', {
@@ -191,7 +195,6 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
             description: "Silakan ikuti instruksi pembayaran",
           });
         }
-        // Don't use data.checkoutUrl for redirect
       } else {
         toast({
           title: "Error",
