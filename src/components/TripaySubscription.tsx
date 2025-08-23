@@ -146,6 +146,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
         throw error;
       }
 
+      
         // Send payment created email notification
         try {
           await supabase.functions.invoke('send-payment-created-notification', {
