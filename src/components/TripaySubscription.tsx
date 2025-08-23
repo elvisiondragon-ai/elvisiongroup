@@ -154,7 +154,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
       console.log('Condition check - data.qrUrl:', data?.qrUrl);
       console.log('User object:', user);
 
-      
+      if (data && (data.success || data.payCode || data.qrUrl)) {
         console.log('✅ About to send email notification');
         // Send payment created email notification
         try {
@@ -173,7 +173,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
         } catch (emailError) {
           console.error('Failed to send payment notification email:', emailError);
           // Don't fail the payment creation if email fails
-        
+        }
 
         // Frontend logic: Show payment details in app
         if (data.payCode) {
