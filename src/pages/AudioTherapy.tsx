@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
+import { VerseAudioCard } from "@/components/VerseAudioCard";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
 import verse2Artwork from "@/assets/verse-2-cosmic.jpg";
 import verse3Artwork from "@/assets/verse-3-cosmic.jpg";
@@ -106,7 +107,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: userLevel >= 2 || proStatus.isPro,
       requiredLevel: 2,
       artwork: verseArtwork,
-      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill%20-%20low%20env.MP3',
+      audioPath: 'Verse1 - The Space Hill - low env.MP3',
       language: 'en'
     },
     {
@@ -116,7 +117,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: userLevel >= 3 || proStatus.isPro,
       requiredLevel: 3,
       artwork: verse2Artwork,
-      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse2%20-%20Lucid%20Beach%20-%20low%20env.MP3',
+      audioPath: 'Verse2 - Lucid Beach - low env.MP3',
       language: 'id'
     },
     {
@@ -126,7 +127,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: userLevel >= 4 || proStatus.isPro,
       requiredLevel: 4,
       artwork: verse3Artwork,
-      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%203%20-%20Syukur.MP3',
+      audioPath: 'Verse 3 - Syukur.MP3',
       language: 'id'
     },
     {
@@ -136,7 +137,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: true,
       requiredLevel: 1,
       artwork: verse4Artwork,
-      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%204%20-%20Prosperity%20Stream%20Vol.%201.MP3',
+      audioPath: 'Verse 4 - Prosperity Stream Vol. 1.MP3',
       language: 'id'
     },
     {
@@ -146,7 +147,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: true,
       requiredLevel: 1,
       artwork: verse4Artwork,
-      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse4-English.MP3',
+      audioPath: 'Verse4-English.MP3',
       language: 'en'
     },
     {
@@ -156,7 +157,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: userLevel >= 5 || proStatus.isPro,
       requiredLevel: 5,
       artwork: verse5Artwork,
-      audioUrl: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse5%20-%20Virtality%20Vortex.MP3',
+      audioPath: 'Verse5 - Virtality Vortex.MP3',
       language: 'id'
     },
     {
@@ -166,7 +167,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: false,
       requiredLevel: 6,
       artwork: verse6Artwork,
-      audioUrl: null,
+      audioPath: null,
       language: 'id'
     },
     {
@@ -176,7 +177,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: false,
       requiredLevel: 7,
       artwork: verse7Artwork,
-      audioUrl: null,
+      audioPath: null,
       language: 'id'
     },
     {
@@ -186,7 +187,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: false,
       requiredLevel: 8,
       artwork: verse8Artwork,
-      audioUrl: null,
+      audioPath: null,
       language: 'id'
     },
     {
@@ -196,7 +197,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: false,
       requiredLevel: 9,
       artwork: verse9Artwork,
-      audioUrl: null,
+      audioPath: null,
       language: 'id'
     },
     {
@@ -206,7 +207,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: false,
       requiredLevel: 10,
       artwork: verse10Artwork,
-      audioUrl: null,
+      audioPath: null,
       language: 'id'
     },
   ];
@@ -281,176 +282,19 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
 
                 {/* Artwork or Lock */}
                 <div className="flex justify-center">
-                  {verse.unlocked && verse.artwork ? (
-                    <div className="relative group cursor-pointer">
-                      {/* Outer glow ring */}
-                      <div className="absolute inset-0 w-40 h-40 rounded-full bg-gradient-to-r from-primary via-accent to-primary opacity-30 blur-xl animate-pulse"></div>
-                      
-                      {/* Main artwork container */}
-                      <div className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-gradient-to-r from-primary/60 to-accent/60 shadow-2xl shadow-primary/40">
-                        <img
-                          src={verse.artwork}
-                          alt={`${verse.title} cosmic artwork`}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-accent/20"></div>
-                      </div>
-                      
-                      {/* Play Button Overlay */}
-                      <div 
-                        className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center transition-all duration-500 cursor-pointer"
-                        onClick={() => {
-                           // Always stop any currently playing audio first
-                           if (currentAudio) {
-                             currentAudio.pause();
-                             currentAudio.currentTime = 0;
-                             setCurrentAudio(null);
-                             setPlayingVerseId(null);
-                           }
-
-                           if (playingVerseId === verse.id) {
-                             // If this verse was playing, just stop it (already handled above)
-                             return;
-                           }
-
-                            // Start new audio
-                            if (verse.audioUrl) {
-                              const audio = new Audio();
-                              
-                              // Set CORS and security attributes before setting src
-                              audio.crossOrigin = 'anonymous';
-                              audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-                              audio.setAttribute('disablePictureInPicture', 'true');
-                              audio.preload = 'metadata';
-                              
-                              // Add security attributes
-                              audio.addEventListener('contextmenu', (e) => e.preventDefault());
-                              
-                              // Set source after configuration
-                              audio.src = verse.audioUrl;
-                              
-                              // Set playing state immediately
-                              setCurrentAudio(audio);
-                              setPlayingVerseId(verse.id);
-                              
-                              // Load and play with better error handling
-                              audio.load();
-                              audio.play().catch(error => {
-                                console.error('Error playing audio:', error);
-                                console.error('Audio URL:', verse.audioUrl);
-                                console.error('Audio readyState:', audio.readyState);
-                                
-                                // Reset state if play fails
-                                setCurrentAudio(null);
-                                setPlayingVerseId(null);
-                                
-                                // Try alternative approach
-                                if (error.name === 'NotSupportedError') {
-                                  // Try opening in new tab as fallback
-                                  window.open(verse.audioUrl, '_blank');
-                                }
-                              });
-                              
-                              // Handle audio end
-                              audio.addEventListener('ended', () => {
-                                setCurrentAudio(null);
-                                setPlayingVerseId(null);
-                                
-                                // Award XP for completing audio
-                                const verseTitle = verse.title;
-                                awardXP('audio_completion', 10, `Completed ${verseTitle}`, {
-                                  verseId: verse.id,
-                                  verseTitle: verseTitle
-                                });
-                              });
-                              
-                              // Prevent seeking beyond current position when paused
-                              audio.addEventListener('pause', () => {
-                                const currentTime = audio.currentTime;
-                                audio.addEventListener('seeked', () => {
-                                  if (audio.paused && audio.currentTime > currentTime + 1) {
-                                    audio.currentTime = currentTime;
-                                  }
-                                });
-                              });
-                            }
-                         }}
-                      >
-                         <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform group-hover:scale-110 transition-transform duration-300">
-                           {playingVerseId === verse.id ? (
-                             // Pause icon (two rectangles)
-                             <div className="flex gap-1 items-center justify-center">
-                               <div className="w-1.5 h-5 bg-white rounded-sm"></div>
-                               <div className="w-1.5 h-5 bg-white rounded-sm"></div>
-                             </div>
-                           ) : (
-                             // Play icon (triangle) - incline pattern
-                             <div className="relative flex items-center justify-center">
-                               <div 
-                                 className="w-0 h-0 ml-1"
-                                 style={{
-                                   borderLeft: '14px solid white',
-                                   borderTop: '10px solid transparent',
-                                   borderBottom: '10px solid transparent',
-                                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-                                 }}
-                               />
-                             </div>
-                           )}
-                         </div>
-                      </div>
-                    </div>
-                   ) : (
-                    <div className="relative">
-                      {/* Locked or No Audio Container */}
-                      <div className={`w-36 h-36 rounded-full flex items-center justify-center border-2 border-dashed transition-all duration-500 ${
-                        !verse.unlocked
-                          ? verse.requiredLevel === 10
-                            ? "bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-400/40 shadow-lg shadow-purple-500/20"
-                            : "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/40 shadow-lg shadow-rose-500/20"
-                          : "bg-gradient-to-br from-muted/20 to-background border-muted-foreground/40"
-                      }`}>
-                        <div className="text-center space-y-3">
-                          {!verse.unlocked ? (
-                            <>
-                              {verse.requiredLevel === 10 ? (
-                                <Zap className="w-12 h-12 text-purple-400 mx-auto animate-pulse" />
-                              ) : (
-                                <Crown className="w-12 h-12 text-rose-400 mx-auto animate-pulse" />
-                              )}
-                              <div className="relative">
-                                <Lock className="w-6 h-6 text-muted-foreground mx-auto" />
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <Music className="w-12 h-12 text-muted-foreground mx-auto" />
-                              <div className="text-xs text-muted-foreground font-medium">
-                                Coming Soon
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {!verse.unlocked && (
-                        <>
-                          <div className={`text-xs font-bold mt-3 ${
-                            verse.requiredLevel === 10 ? "text-purple-400" : "text-rose-400"
-                          }`}>
-                            {t('audioTherapy.locked')}
-                          </div>
-                          
-                          {/* Animated glow ring */}
-                          <div className={`absolute inset-0 rounded-full animate-pulse ${
-                            verse.requiredLevel === 10
-                              ? "bg-gradient-to-r from-purple-500/10 to-violet-500/10"
-                              : "bg-gradient-to-r from-rose-500/10 to-pink-500/10"
-                          } blur-xl`}></div>
-                        </>
-                      )}
-                    </div>
-                  )}
+                  <VerseAudioCard
+                    verse={verse}
+                    isPlaying={playingVerseId === verse.id}
+                    onPlay={() => setPlayingVerseId(verse.id)}
+                    onStop={() => {
+                      setPlayingVerseId(null);
+                      if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio.currentTime = 0;
+                        setCurrentAudio(null);
+                      }
+                    }}
+                  />
                 </div>
 
                 {/* Status/Button */}

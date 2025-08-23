@@ -2,10 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Play, Pause, ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles, Lock } from "lucide-react";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useXPSystem } from "@/hooks/useXPSystem";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useXPSystem } from '@/hooks/useXPSystem';
+import { useSignedAudioUrl } from '@/hooks/useSignedAudioUrl';
 
 interface SpiritualJournalProps {
   onNavigate: (tab: string) => void;
@@ -46,6 +47,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     return userLevel >= journal.levelRequired;
   };
 
+  const { signedUrl, loading: urlLoading } = useSignedAudioUrl('Jurnalsyukur1.MP3');
+
   const handlePlay = (journalId: number) => {
     // Check if journal is locked
     const journal = journals.find(j => j.id === journalId);
@@ -63,7 +66,15 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       return;
     }
 
-    const audioUrl = "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Jurnalsyukur1.MP3";
+    // Wait for signed URL to be ready
+    if (!signedUrl || urlLoading) {
+      toast({
+        title: "Loading",
+        description: "Sedang mempersiapkan audio...",
+        variant: "default"
+      });
+      return;
+    }
     
     // If currently playing this journal, stop it completely and reset
     if (playingJournal === journalId && currentAudio) {
@@ -94,7 +105,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     }
 
     // Create and configure new audio with security features
-    const audio = new Audio(audioUrl);
+    const audio = new Audio(signedUrl);
     audio.preload = 'metadata';
     
     // Prevent download and right-click context menu
@@ -371,13 +382,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                            currentAudio.currentTime = 0;
                          }
                          
-                         // Play audio for Journal Spiritual 1
-                         const audioUrl = journal.id === 1 
-                           ? 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Jurnalsyukur1.MP3'
-                           : null;
-                         
-                         if (audioUrl) {
-                           const audio = new Audio(audioUrl);
+                          // Play audio for Journal Spiritual 1 with signed URL
+                          if (journal.id === 1 && signedUrl) {
+                            const audio = new Audio(signedUrl);
                            
                            // Prevent download and right-click context menu
                            audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
@@ -414,20 +421,28 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                                  audio.currentTime = currentTime;
                                }
                              });
-                           });
-                         }
+                            });
+                          } else if (journal.id !== 1) {
+                            toast({
+                              title: "Coming Soon",
+                              description: "Audio untuk jurnal ini akan segera tersedia",
+                              variant: "default"
+                            });
+                          }
                        }
                      }}
-                     disabled={isLocked}
+                     disabled={isLocked || (journal.id === 1 && (!signedUrl || urlLoading))}
                      className={`w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'scale-110 shadow-lg' : ''} ${isLocked ? 'cursor-not-allowed opacity-50' : ''}`}
                    >
-                    {isLocked ? (
-                      <Lock className="w-6 h-6 text-foreground" />
-                    ) : isCurrentlyPlaying ? (
-                      <Pause className="w-6 h-6 text-foreground animate-pulse" />
-                    ) : (
-                      <Play className="w-6 h-6 text-foreground" />
-                    )}
+                     {isLocked ? (
+                       <Lock className="w-6 h-6 text-foreground" />
+                     ) : (journal.id === 1 && urlLoading) ? (
+                       <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+                     ) : isCurrentlyPlaying ? (
+                       <Pause className="w-6 h-6 text-foreground animate-pulse" />
+                     ) : (
+                       <Play className="w-6 h-6 text-foreground" />
+                     )}
                   </Button>
                 </div>
                 
