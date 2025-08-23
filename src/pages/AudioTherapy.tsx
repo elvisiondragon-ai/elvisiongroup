@@ -107,7 +107,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: userLevel >= 2 || proStatus.isPro,
       requiredLevel: 2,
       artwork: verseArtwork,
-      audioPath: 'Verse1 - The Space Hill.MP3',
+      audioPath: 'Verse1 - The Space Hill - low env.MP3',
       language: 'en'
     },
     {
@@ -117,7 +117,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: userLevel >= 3 || proStatus.isPro,
       requiredLevel: 3,
       artwork: verse2Artwork,
-      audioPath: 'Verse2 - Lucid Beach.MP3',
+      audioPath: 'Verse2 - Lucid Beach - low env.MP3',
       language: 'id'
     },
     {
