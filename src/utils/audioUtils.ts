@@ -12,7 +12,7 @@ export const audioFiles = [
 export const getAudioUrl = async (fileName: string) => {
   const { data, error } = await supabase.storage
     .from('audio-files')
-    .createSignedUrl(fileName, 4800); // 1 hour 20 minutes
+    .createSignedUrl(fileName, 86400); // 24 hours
   
   return error ? null : data.signedUrl;
 };
