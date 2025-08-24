@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useXPSystem } from '@/hooks/useXPSystem';
-import { useSignedAudioUrl } from '@/hooks/useSignedAudioUrl';
+import { getAudioUrl } from '@/utils/audioUtils';
 
 interface SpiritualJournalProps {
   onNavigate: (tab: string) => void;
@@ -47,7 +47,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     return userLevel >= journal.levelRequired;
   };
 
-  const { signedUrl, loading: urlLoading } = useSignedAudioUrl('Jurnalsyukur1.MP3');
+  const publicAudioUrl = getAudioUrl('Jurnalsyukur1.MP3');
 
   const handlePlay = (journalId: number) => {
     // Check if journal is locked
@@ -66,15 +66,6 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       return;
     }
 
-    // Wait for signed URL to be ready
-    if (!signedUrl || urlLoading) {
-      toast({
-        title: "Loading",
-        description: "Sedang mempersiapkan audio...",
-        variant: "default"
-      });
-      return;
-    }
     
     // If currently playing this journal, stop it completely and reset
     if (playingJournal === journalId && currentAudio) {
@@ -105,7 +96,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     }
 
     // Create and configure new audio with security features
-    const audio = new Audio(signedUrl);
+    const audio = new Audio(publicAudioUrl);
     audio.preload = 'metadata';
     
     // Prevent download and right-click context menu
@@ -382,9 +373,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                            currentAudio.currentTime = 0;
                          }
                          
-                          // Play audio for Journal Spiritual 1 with signed URL
-                          if (journal.id === 1 && signedUrl) {
-                            const audio = new Audio(signedUrl);
+                           // Play audio for Journal Spiritual 1 with public URL
+                           if (journal.id === 1) {
+                             const audio = new Audio(publicAudioUrl);
                            
                            // Prevent download and right-click context menu
                            audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
@@ -431,14 +422,12 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                           }
                        }
                      }}
-                     disabled={isLocked || (journal.id === 1 && (!signedUrl || urlLoading))}
-                     className={`w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'scale-110 shadow-lg' : ''} ${isLocked ? 'cursor-not-allowed opacity-50' : ''}`}
-                   >
-                     {isLocked ? (
-                       <Lock className="w-6 h-6 text-foreground" />
-                     ) : (journal.id === 1 && urlLoading) ? (
-                       <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
-                     ) : isCurrentlyPlaying ? (
+                      disabled={isLocked}
+                      className={`w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'scale-110 shadow-lg' : ''} ${isLocked ? 'cursor-not-allowed opacity-50' : ''}`}
+                    >
+                      {isLocked ? (
+                        <Lock className="w-6 h-6 text-foreground" />
+                      ) : isCurrentlyPlaying ? (
                        <Pause className="w-6 h-6 text-foreground animate-pulse" />
                      ) : (
                        <Play className="w-6 h-6 text-foreground" />

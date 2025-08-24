@@ -9,10 +9,10 @@ export const audioFiles = [
   'Verse5 - Virtality Vortex.MP3'
 ];
 
-export const getAudioUrl = async (fileName: string) => {
-  const { data, error } = await supabase.storage
+export const getAudioUrl = (fileName: string) => {
+  const { data } = supabase.storage
     .from('audio-files')
-    .createSignedUrl(fileName, 604800); // 7 days (maximum allowed)
+    .getPublicUrl(fileName);
   
-  return error ? null : data.signedUrl;
+  return data.publicUrl;
 };

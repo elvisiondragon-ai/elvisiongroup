@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Play, Pause, Lock, Music, Crown, Zap, Star } from 'lucide-react';
-import { useSignedAudioUrl } from '@/hooks/useSignedAudioUrl';
+import { getAudioUrl } from '@/utils/audioUtils';
 import { useXPSystem } from '@/hooks/useXPSystem';
 
 interface Verse {
@@ -22,14 +22,14 @@ interface VerseAudioCardProps {
 }
 
 export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioCardProps) {
-  const { signedUrl, loading: urlLoading, error } = useSignedAudioUrl(verse.audioPath);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const { awardXP } = useXPSystem();
 
   // Handle audio creation and playback
   useEffect(() => {
-    if (isPlaying && signedUrl && !audio) {
-      const newAudio = new Audio(signedUrl);
+    if (isPlaying && verse.audioPath && !audio) {
+      const publicUrl = getAudioUrl(verse.audioPath);
+      const newAudio = new Audio(publicUrl);
       newAudio.crossOrigin = 'anonymous';
       newAudio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
       newAudio.setAttribute('disablePictureInPicture', 'true');
@@ -73,7 +73,7 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
         audio.removeEventListener('error', () => {});
       }
     };
-  }, [isPlaying, signedUrl, audio, onStop, awardXP, verse.id, verse.title]);
+  }, [isPlaying, verse.audioPath, audio, onStop, awardXP, verse.id, verse.title]);
 
   const handlePlayClick = () => {
     if (!verse.unlocked) return;
@@ -85,11 +85,7 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
     }
   };
 
-  if (error) {
-    console.error('Signed URL error:', error);
-  }
-
-  const canPlay = verse.unlocked && verse.audioPath && !urlLoading && !error;
+  const canPlay = verse.unlocked && verse.audioPath;
 
   return (
     <div className="relative group cursor-pointer">
@@ -114,9 +110,7 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
             onClick={handlePlayClick}
           >
             <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform group-hover:scale-110 transition-transform duration-300">
-              {urlLoading ? (
-                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : !canPlay ? (
+              {!canPlay ? (
                 <Lock className="w-6 h-6 text-white/60" />
               ) : isPlaying ? (
                 // Pause icon
