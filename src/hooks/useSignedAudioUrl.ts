@@ -19,7 +19,7 @@ export function useSignedAudioUrl(filePath: string | null) {
       try {
         const { data, error } = await supabase.storage
           .from('audio-files')
-          .createSignedUrl(filePath, 86400); // 24 hours expiry
+          .createSignedUrl(filePath, 604800); // 7 days (maximum allowed)
         
         if (error) {
           console.error('Error creating signed URL:', error);
