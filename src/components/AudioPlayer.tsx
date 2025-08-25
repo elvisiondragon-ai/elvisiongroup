@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAudioSession } from "@/hooks/useAudioSession";
 
 interface AudioPlayerProps {
   title: string;
@@ -19,20 +20,54 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
   const [volume, setVolume] = useState(1);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
+  const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !src) return;
+
+    // Initialize audio session
+    initializeSession();
 
     const setAudioData = () => {
       setDuration(audio.duration);
       setCurrentTime(audio.currentTime);
+      
+      // Update media session metadata
+      updateMetadata({
+        title: title,
+        artist: "eL Vision Group",
+        album: description || "Audio Therapy",
+        artwork: [
+          { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+        ]
+      });
     };
 
-    const setAudioTime = () => setCurrentTime(audio.currentTime);
+    const setAudioTime = () => {
+      setCurrentTime(audio.currentTime);
+      updatePlaybackState({
+        duration: audio.duration,
+        playbackRate: audio.playbackRate,
+        position: audio.currentTime
+      });
+    };
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
+
+    // Enhanced audio setup for better compatibility
+    audio.setAttribute('preload', 'metadata');
+    audio.setAttribute('controlsList', 'nodownload noremoteplayback');
+    audio.crossOrigin = 'anonymous';
 
     audio.addEventListener('loadeddata', setAudioData);
     audio.addEventListener('timeupdate', setAudioTime);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
 
     if (autoPlay && src) {
       audio.play().then(() => setIsPlaying(true)).catch(() => {
@@ -47,8 +82,11 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     return () => {
       audio.removeEventListener('loadeddata', setAudioData);
       audio.removeEventListener('timeupdate', setAudioTime);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
     };
-  }, [src, autoPlay, toast]);
+  }, [src, autoPlay, toast, title, description, initializeSession, updateMetadata, updatePlaybackState]);
 
   const togglePlayPause = () => {
     const audio = audioRef.current;
