@@ -10,7 +10,6 @@ import { MeditationSessions } from "./MeditationSessions";
 import { Tutorial } from "./Tutorial";
 import { IgnisQuest } from "./IgnisQuest";
 import { Payment } from "./Payment";
-import { HLSTest } from "./HLSTest";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
@@ -45,8 +44,6 @@ const Index = () => {
         return <IgnisQuest onNavigate={setActiveTab} />;
       case "payment":
         return <Payment onNavigate={setActiveTab} />;
-      case "hls-test":
-        return <HLSTest onNavigate={setActiveTab} />;
       default:
         return <Home onNavigate={setActiveTab} />;
     }

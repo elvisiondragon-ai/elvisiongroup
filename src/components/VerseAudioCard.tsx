@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Play, Pause, Lock, Music, Crown, Zap, Star } from 'lucide-react';
 import { getAudioUrl } from '@/utils/audioUtils';
 import { useXPSystem } from '@/hooks/useXPSystem';
-import { useAudioSession } from '@/hooks/useAudioSession';
-
 
 interface Verse {
   id: number;
@@ -26,7 +24,6 @@ interface VerseAudioCardProps {
 export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioCardProps) {
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const { awardXP } = useXPSystem();
-  const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
 
   // Handle audio creation and playback
   useEffect(() => {
@@ -34,35 +31,11 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
       const publicUrl = getAudioUrl(verse.audioPath);
       const newAudio = new Audio(publicUrl);
       newAudio.crossOrigin = 'anonymous';
-      newAudio.setAttribute('controlsList', 'nodownload noremoteplayback');
-      newAudio.setAttribute('preload', 'metadata');
-      
-      // Enable background audio continuation
-      newAudio.setAttribute('data-background-audio', 'true');
-      
-      // Initialize audio session for background playback
-      initializeSession();
+      newAudio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+      newAudio.setAttribute('disablePictureInPicture', 'true');
+      newAudio.preload = 'metadata';
       
       const handleContextMenu = (e: Event) => e.preventDefault();
-      const handleLoadedData = () => {
-        // Update media session metadata for background playback
-        updateMetadata({
-          title: verse.title,
-          artist: "eL Vision Group",
-          album: verse.subtitle || "Audio Therapy",
-          artwork: [
-            { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-            { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
-          ]
-        });
-      };
-      const handleTimeUpdate = () => {
-        updatePlaybackState({
-          duration: newAudio.duration,
-          playbackRate: newAudio.playbackRate,
-          position: newAudio.currentTime
-        });
-      };
       const handleEnded = () => {
         onStop();
         awardXP('audio_completion', 10, `Completed ${verse.title}`, {
@@ -76,8 +49,6 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
       };
 
       newAudio.addEventListener('contextmenu', handleContextMenu);
-      newAudio.addEventListener('loadeddata', handleLoadedData);
-      newAudio.addEventListener('timeupdate', handleTimeUpdate);
       newAudio.addEventListener('ended', handleEnded);
       newAudio.addEventListener('error', handleError);
 
@@ -100,34 +71,13 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
 
     return () => {
       if (audio) {
-        audio.removeEventListener('contextmenu', () => {});
-        audio.removeEventListener('loadeddata', () => {});
-        audio.removeEventListener('timeupdate', () => {});
-        audio.removeEventListener('ended', () => {});
-        audio.removeEventListener('error', () => {});
         audio.pause();
         audio.currentTime = 0;
         audio.src = '';
         audio.load();
       }
     };
-  }, [isPlaying, verse.audioPath, audio, onStop, awardXP, verse.id, verse.title, initializeSession, updateMetadata, updatePlaybackState]);
-
-  // Separate useEffect for window focus handling - moved out of nested useEffect
-  useEffect(() => {
-    const handleFocus = () => {
-      if (audio && isPlaying) {
-        // Just sync UI with actual audio state, don't change audio
-        const actuallyPlaying = !audio.paused && !audio.ended;
-        if (!actuallyPlaying) {
-          onStop();
-        }
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [audio, isPlaying, onStop]);
+  }, [isPlaying, verse.audioPath, audio, onStop, awardXP, verse.id, verse.title]);
 
   const handlePlayClick = () => {
     if (!verse.unlocked) return;
@@ -138,7 +88,6 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
       onPlay();
     }
   };
-
 
   const canPlay = verse.unlocked && verse.audioPath;
 
@@ -189,7 +138,6 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
               )}
             </div>
           </div>
-          
         </div>
       ) : (
         <div className="relative">
