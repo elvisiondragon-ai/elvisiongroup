@@ -52,7 +52,8 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
 
     const setupAudioUrl = async () => {
       const cachedUrl = await getCachedAudioUrl(src);
-      setCurrentAudioUrl(cachedUrl);
+      // Fallback to original URL if no cached version (for airplane mode)
+      setCurrentAudioUrl(cachedUrl || src);
     };
 
     setupAudioUrl();
@@ -62,15 +63,15 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
   useEffect(() => {
     const handleVisibilityChange = () => {
       const audio = audioRef.current;
-      if (!audio) return;
+      if (!audio || document.hidden) return;
       
-      if (!document.hidden) {
-        // App became visible - sync UI state with actual audio state
-        const actuallyPlaying = !audio.paused && !audio.ended && audio.currentTime > 0 && audio.readyState > 2;
+      // Simple sync - just check if audio is actually playing
+      setTimeout(() => {
+        const actuallyPlaying = !audio.paused && !audio.ended;
         setIsPlaying(actuallyPlaying);
         setCurrentTime(audio.currentTime);
-        setDuration(audio.duration);
-      }
+        if (audio.duration) setDuration(audio.duration);
+      }, 100); // Small delay to ensure audio state is stable
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -151,21 +152,22 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     });
   }, [currentAudioUrl, autoPlay, toast]);
 
-  const togglePlayPause = () => {
+  const togglePlayPause = async () => {
     const audio = audioRef.current;
     if (!audio || !currentAudioUrl) return;
 
     if (isPlaying) {
       audio.pause();
-      setIsPlaying(false);
     } else {
-      audio.play().then(() => setIsPlaying(true)).catch((error) => {
+      try {
+        await audio.play();
+      } catch (error) {
         toast({
           title: "Playback Error",
           description: "Unable to play audio file",
           variant: "destructive",
         });
-      });
+      }
     }
   };
 
