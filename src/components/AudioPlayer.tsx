@@ -6,6 +6,7 @@ import { Play, Pause, SkipBack, SkipForward, Volume2, Upload, Download, Wifi, Wi
 import { useToast } from "@/hooks/use-toast";
 import { useAudioSession } from "@/hooks/useAudioSession";
 import { useOfflineAudio } from "@/hooks/useOfflineAudio";
+import Hls from 'hls.js';
 
 interface AudioPlayerProps {
   title: string;
@@ -22,6 +23,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string>("");
   const audioRef = useRef<HTMLAudioElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
   const { toast } = useToast();
   const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
   const { 
@@ -83,6 +85,55 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
 
     // Initialize audio session
     initializeSession();
+    
+    // Check if this is HLS URL
+    const isHlsUrl = currentAudioUrl.endsWith('.m3u8');
+    console.log('Audio URL:', currentAudioUrl, 'Is HLS:', isHlsUrl);
+    
+    if (isHlsUrl) {
+      // Setup HLS
+      if (Hls.isSupported()) {
+        console.log('Setting up HLS with hls.js');
+        const hls = new Hls({
+          debug: true, // Enable debug for testing
+          enableWorker: false,
+        });
+        
+        hlsRef.current = hls;
+        hls.loadSource(currentAudioUrl);
+        hls.attachMedia(audio);
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log('HLS manifest parsed successfully');
+        });
+        
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.error('HLS Error:', event, data);
+          if (data.fatal) {
+            toast({
+              title: "Streaming Error",
+              description: "Audio streaming failed",
+              variant: "destructive",
+            });
+          }
+        });
+        
+      } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+        console.log('Using native HLS support (Safari)');
+        audio.src = currentAudioUrl;
+      } else {
+        console.error('HLS not supported');
+        toast({
+          title: "Not Supported",
+          description: "HLS streaming not supported in this browser",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Regular audio file
+      console.log('Setting up regular audio');
+      audio.src = currentAudioUrl;
+    }
 
     const setAudioData = () => {
       setDuration(audio.duration);
@@ -128,6 +179,13 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     audio.addEventListener('ended', handleEnded);
 
     return () => {
+      // Cleanup HLS
+      if (hlsRef.current) {
+        console.log('Cleaning up HLS');
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+      
       audio.removeEventListener('loadeddata', setAudioData);
       audio.removeEventListener('timeupdate', setAudioTime);
       audio.removeEventListener('play', handlePlay);

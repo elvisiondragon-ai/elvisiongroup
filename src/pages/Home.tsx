@@ -293,5 +293,26 @@ export function Home({
           </div>
         </Card>
       </div>
+
+      {/* Development Testing - Only show in development */}
+      {window.location.hostname === 'localhost' && (
+        <div className="p-6">
+          <Card className="p-6 bg-gradient-secondary border-yellow-500/20">
+            <h3 className="text-lg font-semibold mb-4 text-yellow-400">🔧 Development Tools</h3>
+            <div className="flex gap-4">
+              <Button 
+                onClick={() => onNavigate("hls-test")} 
+                variant="outline"
+                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10"
+              >
+                HLS vs Regular Audio Test
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Only visible in localhost - test HLS streaming vs direct audio
+            </p>
+          </Card>
+        </div>
+      )}
     </div>;
 }
