@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAudioSession } from "@/hooks/useAudioSession";
 
 interface AudioPlayerProps {
   title: string;
@@ -19,6 +20,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
   const [volume, setVolume] = useState(1);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
+  const { setupMediaSession, setMediaSessionHandlers, updatePlaybackState, updatePositionState } = useAudioSession();
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -27,15 +29,54 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     const setAudioData = () => {
       setDuration(audio.duration);
       setCurrentTime(audio.currentTime);
+      
+      // Update position state for media session
+      if (audio.duration && !isNaN(audio.duration)) {
+        updatePositionState(audio.duration, 1, audio.currentTime);
+      }
     };
 
-    const setAudioTime = () => setCurrentTime(audio.currentTime);
+    const setAudioTime = () => {
+      setCurrentTime(audio.currentTime);
+      // Update position state during playback
+      if (isPlaying && audio.duration && !isNaN(audio.duration)) {
+        updatePositionState(audio.duration, 1, audio.currentTime);
+      }
+    };
 
     audio.addEventListener('loadeddata', setAudioData);
     audio.addEventListener('timeupdate', setAudioTime);
 
+    // Setup media session when audio loads
+    if (src) {
+      setupMediaSession({
+        title: title,
+        artist: 'eL Vision Group',
+        album: 'Spiritual Audio'
+      });
+
+      setMediaSessionHandlers({
+        play: () => togglePlayPause(),
+        pause: () => togglePlayPause(),
+        seekbackward: (details) => {
+          const seekOffset = details.seekOffset || 10;
+          if (audio) audio.currentTime = Math.max(0, audio.currentTime - seekOffset);
+        },
+        seekforward: (details) => {
+          const seekOffset = details.seekOffset || 10;
+          if (audio) audio.currentTime = Math.min(duration, audio.currentTime + seekOffset);
+        },
+        seekto: (details) => {
+          if (audio && details.seekTime !== undefined) audio.currentTime = details.seekTime;
+        }
+      });
+    }
+
     if (autoPlay && src) {
-      audio.play().then(() => setIsPlaying(true)).catch(() => {
+      audio.play().then(() => {
+        setIsPlaying(true);
+        updatePlaybackState('playing');
+      }).catch(() => {
         toast({
           title: "Autoplay blocked",
           description: "Click play to start the audio",
@@ -47,8 +88,9 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     return () => {
       audio.removeEventListener('loadeddata', setAudioData);
       audio.removeEventListener('timeupdate', setAudioTime);
+      updatePlaybackState('none');
     };
-  }, [src, autoPlay, toast]);
+  }, [src, autoPlay, toast, title, setupMediaSession, setMediaSessionHandlers, updatePlaybackState, updatePositionState]);
 
   const togglePlayPause = () => {
     const audio = audioRef.current;
@@ -57,8 +99,12 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
+      updatePlaybackState('paused');
     } else {
-      audio.play().then(() => setIsPlaying(true)).catch((error) => {
+      audio.play().then(() => {
+        setIsPlaying(true);
+        updatePlaybackState('playing');
+      }).catch((error) => {
         toast({
           title: "Playback Error",
           description: "Unable to play audio file",
@@ -100,8 +146,12 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
         <audio
           ref={audioRef}
           src={src}
-          onEnded={() => setIsPlaying(false)}
+          onEnded={() => {
+            setIsPlaying(false);
+            updatePlaybackState('paused');
+          }}
           onError={() => {
+            updatePlaybackState('none');
             toast({
               title: "Audio Error",
               description: "Failed to load audio file",
