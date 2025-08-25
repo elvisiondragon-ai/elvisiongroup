@@ -6,7 +6,6 @@ import { Play, Pause, SkipBack, SkipForward, Volume2, Upload, Download, Wifi, Wi
 import { useToast } from "@/hooks/use-toast";
 import { useAudioSession } from "@/hooks/useAudioSession";
 import { useOfflineAudio } from "@/hooks/useOfflineAudio";
-import { useAudioProtection } from "@/hooks/useAudioProtection";
 
 interface AudioPlayerProps {
   title: string;
@@ -32,15 +31,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     cacheAudio, 
     getCachedAudioUrl 
   } = useOfflineAudio();
-  const { markUserAction, protectAudio } = useAudioProtection({
-    onXPReset: () => {
-      toast({
-        title: "XP Reset",
-        description: "XP untuk audio ini akan diulang kembali",
-        variant: "default",
-      });
-    }
-  });
 
   // Monitor online status
   useEffect(() => {
@@ -75,9 +65,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     // Initialize audio session
     initializeSession();
 
-    // Setup audio protection
-    const cleanupProtection = protectAudio(audio);
-
     const setAudioData = () => {
       setDuration(audio.duration);
       setCurrentTime(audio.currentTime);
@@ -107,10 +94,13 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => setIsPlaying(false);
 
-    // Enhanced audio setup for better compatibility
+    // Enhanced audio setup for better compatibility and background play
     audio.setAttribute('preload', 'metadata');
     audio.setAttribute('controlsList', 'nodownload noremoteplayback');
     audio.crossOrigin = 'anonymous';
+    
+    // Enable background audio continuation
+    audio.setAttribute('data-background-audio', 'true');
 
     audio.addEventListener('loadeddata', setAudioData);
     audio.addEventListener('timeupdate', setAudioTime);
@@ -134,15 +124,12 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
-      cleanupProtection();
     };
-  }, [currentAudioUrl, autoPlay, toast, title, description, initializeSession, updateMetadata, updatePlaybackState, protectAudio]);
+  }, [currentAudioUrl, autoPlay, toast, title, description, initializeSession, updateMetadata, updatePlaybackState]);
 
   const togglePlayPause = () => {
     const audio = audioRef.current;
     if (!audio || !currentAudioUrl) return;
-
-    markUserAction(); // Mark as user-initiated action
 
     if (isPlaying) {
       audio.pause();
@@ -173,7 +160,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     const audio = audioRef.current;
     if (!audio) return;
     
-    markUserAction(); // Mark as user-initiated action
     const newTime = (value[0] / 100) * duration;
     audio.currentTime = newTime;
     setCurrentTime(newTime);
@@ -183,7 +169,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     const audio = audioRef.current;
     if (!audio) return;
     
-    markUserAction(); // Mark as user-initiated action
     const newVolume = value[0] / 100;
     audio.volume = newVolume;
     setVolume(newVolume);
@@ -252,7 +237,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
             variant="ghost"
             size="icon"
             onClick={() => {
-              markUserAction();
               const audio = audioRef.current;
               if (audio) audio.currentTime = Math.max(0, audio.currentTime - 10);
             }}
@@ -277,7 +261,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
             variant="ghost"
             size="icon"
             onClick={() => {
-              markUserAction();
               const audio = audioRef.current;
               if (audio) audio.currentTime = Math.min(duration, audio.currentTime + 10);
             }}
