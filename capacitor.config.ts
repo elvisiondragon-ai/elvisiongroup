@@ -21,12 +21,6 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
     }
-  },
-  ios: {
-    backgroundModes: ["audio"]
-  },
-  android: {
-    allowMixedContent: true
   }
 };
 
