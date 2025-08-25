@@ -17,11 +17,19 @@
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/elvisionlogo.png" />
     
-    <script src="/kill-cache.js"></script>
     <script>
-      // 🚨 SERVICE WORKER REGISTRATION DISABLED FOR SECURITY
-      // DO NOT re-enable - it exposes audio URLs through caching
-      console.log('🚨 SERVICE WORKER REGISTRATION BLOCKED - SECURITY MODE ACTIVE');
+      // Register service worker for background audio support
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
     </script>
   </head>
 

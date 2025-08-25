@@ -5,8 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Upload, Download, Wifi, WifiOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioSession } from "@/hooks/useAudioSession";
-// import { useOfflineAudio } from "@/hooks/useOfflineAudio"; // DISABLED - Security risk
-import Hls from 'hls.js';
+import { useOfflineAudio } from "@/hooks/useOfflineAudio";
 
 interface AudioPlayerProps {
   title: string;
@@ -23,17 +22,15 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string>("");
   const audioRef = useRef<HTMLAudioElement>(null);
-  const hlsRef = useRef<Hls | null>(null);
   const { toast } = useToast();
   const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
-  // REMOVED: All caching functionality disabled for security
-  // const { 
-  //   isDownloading, 
-  //   downloadProgress, 
-  //   isAudioCached, 
-  //   cacheAudio, 
-  //   getCachedAudioUrl 
-  // } = useOfflineAudio();
+  const { 
+    isDownloading, 
+    downloadProgress, 
+    isAudioCached, 
+    cacheAudio, 
+    getCachedAudioUrl 
+  } = useOfflineAudio();
 
   // Monitor online status
   useEffect(() => {
@@ -49,12 +46,18 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     };
   }, []);
 
-  // Setup audio URL (NO CACHING - Direct URLs only)
+  // Setup audio URL (cached or original)
   useEffect(() => {
     if (!src) return;
-    // Direct URL assignment - no caching to prevent security issues
-    setCurrentAudioUrl(src);
-  }, [src]);
+
+    const setupAudioUrl = async () => {
+      const cachedUrl = await getCachedAudioUrl(src);
+      // Fallback to original URL if no cached version (for airplane mode)
+      setCurrentAudioUrl(cachedUrl || src);
+    };
+
+    setupAudioUrl();
+  }, [src, getCachedAudioUrl]);
 
   // Keep audio playing in background - no interference with audio element
   useEffect(() => {
@@ -80,55 +83,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
 
     // Initialize audio session
     initializeSession();
-    
-    // Check if this is HLS URL
-    const isHlsUrl = currentAudioUrl.endsWith('.m3u8');
-    console.log('Audio URL:', currentAudioUrl, 'Is HLS:', isHlsUrl);
-    
-    if (isHlsUrl) {
-      // Setup HLS
-      if (Hls.isSupported()) {
-        console.log('Setting up HLS with hls.js');
-        const hls = new Hls({
-          debug: true, // Enable debug for testing
-          enableWorker: false,
-        });
-        
-        hlsRef.current = hls;
-        hls.loadSource(currentAudioUrl);
-        hls.attachMedia(audio);
-        
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          console.log('HLS manifest parsed successfully');
-        });
-        
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          console.error('HLS Error:', event, data);
-          if (data.fatal) {
-            toast({
-              title: "Streaming Error",
-              description: "Audio streaming failed",
-              variant: "destructive",
-            });
-          }
-        });
-        
-      } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-        console.log('Using native HLS support (Safari)');
-        audio.src = currentAudioUrl;
-      } else {
-        console.error('HLS not supported');
-        toast({
-          title: "Not Supported",
-          description: "HLS streaming not supported in this browser",
-          variant: "destructive",
-        });
-      }
-    } else {
-      // Regular audio file
-      console.log('Setting up regular audio');
-      audio.src = currentAudioUrl;
-    }
 
     const setAudioData = () => {
       setDuration(audio.duration);
@@ -174,13 +128,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     audio.addEventListener('ended', handleEnded);
 
     return () => {
-      // Cleanup HLS
-      if (hlsRef.current) {
-        console.log('Cleaning up HLS');
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
-      
       audio.removeEventListener('loadeddata', setAudioData);
       audio.removeEventListener('timeupdate', setAudioTime);
       audio.removeEventListener('play', handlePlay);
@@ -222,10 +169,16 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     }
   };
 
-  // REMOVED: All download functionality disabled for security
-  // const handleDownload = async () => {
-  //   // NO DOWNLOADS ALLOWED - Security risk
-  // };
+  const handleDownload = async () => {
+    if (!src || !title) return;
+    
+    const success = await cacheAudio(src, title);
+    if (success) {
+      // Update current audio URL to use cached version
+      const cachedUrl = await getCachedAudioUrl(src);
+      setCurrentAudioUrl(cachedUrl);
+    }
+  };
 
   const handleSeek = (value: number[]) => {
     const audio = audioRef.current;
@@ -340,10 +293,29 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
             <SkipForward className="h-4 w-4" />
           </Button>
 
-          {/* REMOVED: Download functionality disabled for security */}
+          {/* Download for offline */}
+          {src && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDownload}
+              disabled={isDownloading}
+              title="Download for offline use"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
-        {/* REMOVED: Download progress UI disabled for security */}
+        {/* Download Progress */}
+        {isDownloading && (
+          <div className="space-y-2">
+            <div className="text-center text-sm text-muted-foreground">
+              Downloading for offline use...
+            </div>
+            <Progress value={downloadProgress} className="h-2" />
+          </div>
+        )}
 
         {/* Volume Control */}
         <div className="flex items-center space-x-2">

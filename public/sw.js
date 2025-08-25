@@ -1,55 +1,27 @@
-// Service Worker for background audio support - CACHING DISABLED
-const CACHE_NAME = 'audio-therapy-v2-SECURITY-DISABLED';
+// Service Worker for background audio support
+const CACHE_NAME = 'audio-therapy-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/manifest.json'
+];
 
-// Install event - Clear ALL caches on install for security
+// Install event
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    // Clear all caches to prevent audio URL exposure
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          console.log('Clearing cache:', cacheName);
-          return caches.delete(cacheName);
-        })
-      );
-    })
-  );
-  // Skip waiting to activate immediately
-  self.skipWaiting();
-});
-
-// Activate event - Force cache clearing
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          console.log('Deleting cache on activate:', cacheName);
-          return caches.delete(cacheName);
-        })
-      );
-    }).then(() => {
-      // Clear localStorage audio cache data
-      console.log('Clearing localStorage audio cache');
-      // Note: localStorage is not available in service worker, 
-      // but this will be handled by the main app
-      return self.clients.claim();
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
   );
 });
 
-// CRITICAL: Bypass ALL caching - direct fetch only
+// Fetch event for caching
 self.addEventListener('fetch', (event) => {
-  // SECURITY: Never cache, never serve from cache, always fetch fresh
   event.respondWith(
-    fetch(event.request.clone(), {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
-    }).catch(() => fetch(event.request))
+    caches.match(event.request)
+      .then((response) => {
+        // Return cached version or fetch from network
+        return response || fetch(event.request);
+      })
   );
 });
 

@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Play, Pause, Lock, Music, Crown, Zap, Star, Download } from 'lucide-react';
+import { Play, Pause, Lock, Music, Crown, Zap, Star } from 'lucide-react';
 import { getAudioUrl } from '@/utils/audioUtils';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useAudioSession } from '@/hooks/useAudioSession';
-// import { useOfflineAudio } from '@/hooks/useOfflineAudio'; // DISABLED - Security risk
 
 interface Verse {
   id: number;
@@ -27,13 +26,6 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const { awardXP } = useXPSystem();
   const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
-  // REMOVED: All caching functionality disabled for security
-  // const { 
-  //   isDownloading, 
-  //   downloadProgress, 
-  //   isAudioCached, 
-  //   cacheAudio 
-  // } = useOfflineAudio();
 
   // Handle audio creation and playback
   useEffect(() => {
@@ -146,11 +138,6 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
     }
   };
 
-  // REMOVED: All download functionality disabled for security
-  // const handleDownload = async () => {
-  //   // NO DOWNLOADS ALLOWED - Security risk
-  // };
-
   const canPlay = verse.unlocked && verse.audioPath;
 
   return (
@@ -200,8 +187,6 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
               )}
             </div>
           </div>
-          
-          {/* REMOVED: Download functionality disabled for security */}
         </div>
       ) : (
         <div className="relative">
