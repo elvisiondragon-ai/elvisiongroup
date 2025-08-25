@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import { Tutorial } from "./pages/Tutorial";
 import NotFound from "./pages/NotFound";
 import type { User } from '@supabase/supabase-js';
+import { AudioProvider } from "@/contexts/AudioContext";
 
 const queryClient = new QueryClient();
 
@@ -74,30 +75,32 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route 
-              path="/" 
-              element={user ? <Index /> : <Auth onLogin={setUser} />} 
-            />
-            <Route 
-              path="/auth" 
-              element={user ? <Index /> : <Auth onLogin={setUser} />} 
-            />
-            <Route 
-              path="/tutorial" 
-              element={user ? <Tutorial /> : <Auth onLogin={setUser} />} 
-            />
-            <Route 
-              path="/reset-password" 
-              element={<ResetPassword />} 
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <AudioProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route 
+                path="/" 
+                element={user ? <Index /> : <Auth onLogin={setUser} />} 
+              />
+              <Route 
+                path="/auth" 
+                element={user ? <Index /> : <Auth onLogin={setUser} />} 
+              />
+              <Route 
+                path="/tutorial" 
+                element={user ? <Tutorial /> : <Auth onLogin={setUser} />} 
+              />
+              <Route 
+                path="/reset-password" 
+                element={<ResetPassword />} 
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AudioProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

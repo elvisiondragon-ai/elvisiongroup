@@ -1,5 +1,5 @@
 import { Lock, Music, Crown, Zap } from 'lucide-react';
-import { useGlobalAudio } from '@/hooks/useGlobalAudio';
+import { useGlobalAudio } from '@/contexts/AudioContext';
 
 interface Verse {
   id: number;

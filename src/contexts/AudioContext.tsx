@@ -1,7 +1,7 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useRef, useCallback, useEffect } from 'react';
 import { getAudioUrl } from '@/utils/audioUtils';
-import { useAudioSession } from './useAudioSession';
-import { useXPSystem } from './useXPSystem';
+import { useAudioSession } from '@/hooks/useAudioSession';
+import { useXPSystem } from '@/hooks/useXPSystem';
 
 interface CurrentTrack {
   id: number;
@@ -11,7 +11,7 @@ interface CurrentTrack {
   audioPath: string;
 }
 
-interface UseGlobalAudioReturn {
+interface AudioContextType {
   currentTrackId: number | null;
   isPlaying: boolean;
   playTrack: (track: CurrentTrack, onWarning?: () => Promise<boolean>) => Promise<void>;
@@ -20,7 +20,9 @@ interface UseGlobalAudioReturn {
   resumeTrack: () => void;
 }
 
-export function useGlobalAudio(): UseGlobalAudioReturn {
+const AudioContext = createContext<AudioContextType | undefined>(undefined);
+
+export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [currentTrackId, setCurrentTrackId] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<CurrentTrack | null>(null);
@@ -190,14 +192,14 @@ export function useGlobalAudio(): UseGlobalAudioReturn {
     }
   }, [isPlaying, setPlaybackState]);
 
-  // Cleanup on unmount
+  // Only cleanup on app unmount (not on navigation)
   useEffect(() => {
     return () => {
       cleanupAudio();
     };
   }, [cleanupAudio]);
 
-  return {
+  const value = {
     currentTrackId,
     isPlaying,
     playTrack,
@@ -205,4 +207,18 @@ export function useGlobalAudio(): UseGlobalAudioReturn {
     pauseTrack,
     resumeTrack
   };
+
+  return (
+    <AudioContext.Provider value={value}>
+      {children}
+    </AudioContext.Provider>
+  );
+}
+
+export function useGlobalAudio() {
+  const context = useContext(AudioContext);
+  if (context === undefined) {
+    throw new Error('useGlobalAudio must be used within an AudioProvider');
+  }
+  return context;
 }
