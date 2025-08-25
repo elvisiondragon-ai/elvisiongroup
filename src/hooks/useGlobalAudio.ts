@@ -117,8 +117,28 @@ export function useGlobalAudio(): UseGlobalAudioReturn {
       setCurrentTrack(track);
       setCurrentTrackId(track.id);
 
-      // Initialize media session
-      initializeSession();
+      // Initialize media session with handlers
+      initializeSession({
+        onPlay: async () => {
+          if (audioRef.current && !isPlaying) {
+            try {
+              await audioRef.current.play();
+              setIsPlaying(true);
+              setPlaybackState('playing');
+            } catch (error) {
+              console.error('Error resuming audio via media session:', error);
+            }
+          }
+        },
+        onPause: () => {
+          if (audioRef.current && isPlaying) {
+            audioRef.current.pause();
+            setIsPlaying(false);
+            setPlaybackState('paused');
+          }
+        }
+      });
+      
       updateMetadata({
         title: track.title,
         artist: "eL Vision Group",

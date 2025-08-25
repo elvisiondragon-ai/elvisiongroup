@@ -17,12 +17,17 @@ interface PlaybackState {
   position: number;
 }
 
+interface MediaSessionHandlers {
+  onPlay?: () => void;
+  onPause?: () => void;
+}
+
 export function useAudioSession() {
-  const initializeSession = useCallback(() => {
+  const initializeSession = useCallback((handlers?: MediaSessionHandlers) => {
     if ('mediaSession' in navigator) {
-      // Set default action handlers to prevent system interference
-      navigator.mediaSession.setActionHandler('play', null);
-      navigator.mediaSession.setActionHandler('pause', null);
+      // Connect action handlers to actual audio controls
+      navigator.mediaSession.setActionHandler('play', handlers?.onPlay || null);
+      navigator.mediaSession.setActionHandler('pause', handlers?.onPause || null);
       navigator.mediaSession.setActionHandler('seekbackward', null);
       navigator.mediaSession.setActionHandler('seekforward', null);
       navigator.mediaSession.setActionHandler('previoustrack', null);
