@@ -59,23 +59,21 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     setupAudioUrl();
   }, [src, getCachedAudioUrl]);
 
-  // Sync audio state when returning to app (fix for audio stopping on app focus)
+  // Keep audio playing in background - no interference with audio element
   useEffect(() => {
-    const handleVisibilityChange = () => {
+    const handleFocus = () => {
+      // Simple check without interfering with audio playback
       const audio = audioRef.current;
-      if (!audio || document.hidden) return;
-      
-      // Simple sync - just check if audio is actually playing
-      setTimeout(() => {
-        const actuallyPlaying = !audio.paused && !audio.ended;
-        setIsPlaying(actuallyPlaying);
+      if (audio) {
+        // Just sync UI with actual audio state, don't change audio
+        setIsPlaying(!audio.paused && !audio.ended);
         setCurrentTime(audio.currentTime);
         if (audio.duration) setDuration(audio.duration);
-      }, 100); // Small delay to ensure audio state is stable
+      }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   // Setup audio element and event listeners (only once per audio URL)
