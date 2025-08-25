@@ -58,6 +58,26 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     setupAudioUrl();
   }, [src, getCachedAudioUrl]);
 
+  // Sync audio state when returning to app (fix for audio stopping on app focus)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      
+      if (!document.hidden) {
+        // App became visible - sync UI state with actual audio state
+        const actuallyPlaying = !audio.paused && !audio.ended && audio.currentTime > 0 && audio.readyState > 2;
+        setIsPlaying(actuallyPlaying);
+        setCurrentTime(audio.currentTime);
+        setDuration(audio.duration);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  // Setup audio element and event listeners (only once per audio URL)
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentAudioUrl) return;
@@ -108,16 +128,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
 
-    if (autoPlay && currentAudioUrl) {
-      audio.play().then(() => setIsPlaying(true)).catch(() => {
-        toast({
-          title: "Autoplay blocked",
-          description: "Click play to start the audio",
-          variant: "default",
-        });
-      });
-    }
-
     return () => {
       audio.removeEventListener('loadeddata', setAudioData);
       audio.removeEventListener('timeupdate', setAudioTime);
@@ -125,7 +135,21 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentAudioUrl, autoPlay, toast, title, description, initializeSession, updateMetadata, updatePlaybackState]);
+  }, [currentAudioUrl, initializeSession, updateMetadata, updatePlaybackState]);
+
+  // Handle autoplay separately to avoid re-initializing audio
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentAudioUrl || !autoPlay) return;
+
+    audio.play().then(() => setIsPlaying(true)).catch(() => {
+      toast({
+        title: "Autoplay blocked",
+        description: "Click play to start the audio",
+        variant: "default",
+      });
+    });
+  }, [currentAudioUrl, autoPlay, toast]);
 
   const togglePlayPause = () => {
     const audio = audioRef.current;
