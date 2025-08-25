@@ -233,6 +233,60 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          ai_response: string | null
+          created_at: string | null
+          from_email: string | null
+          id: number
+          knowledge_base_id: string | null
+          original_content: string | null
+          status: string | null
+          subject: string | null
+        }
+        Insert: {
+          ai_response?: string | null
+          created_at?: string | null
+          from_email?: string | null
+          id?: number
+          knowledge_base_id?: string | null
+          original_content?: string | null
+          status?: string | null
+          subject?: string | null
+        }
+        Update: {
+          ai_response?: string | null
+          created_at?: string | null
+          from_email?: string | null
+          id?: number
+          knowledge_base_id?: string | null
+          original_content?: string | null
+          status?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      knowledge_base: {
+        Row: {
+          answer: string
+          created_at: string | null
+          id: number
+          question: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string | null
+          id?: never
+          question: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string | null
+          id?: never
+          question?: string
+        }
+        Relationships: []
+      }
       notification_settings: {
         Row: {
           chat_notifications_enabled: boolean
