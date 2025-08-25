@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Play, Pause, Lock, Music, Crown, Zap, Star } from 'lucide-react';
 import { getAudioUrl } from '@/utils/audioUtils';
 import { useXPSystem } from '@/hooks/useXPSystem';
+import { useAudioSession } from '@/hooks/useAudioSession';
 
 interface Verse {
   id: number;
@@ -22,62 +23,88 @@ interface VerseAudioCardProps {
 }
 
 export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioCardProps) {
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const { awardXP } = useXPSystem();
+  const { initializeSession, updateMetadata, setPlaybackState } = useAudioSession();
 
-  // Handle audio creation and playback
+  // Stable callback functions to prevent useEffect re-runs
+  const handleEnded = useCallback(() => {
+    onStop();
+    awardXP('audio_completion', 10, `Completed ${verse.title}`, {
+      verseId: verse.id,
+      verseTitle: verse.title
+    });
+  }, [onStop, awardXP, verse.title, verse.id]);
+
+  const handleError = useCallback((e: Event) => {
+    console.error('Audio playback error:', e);
+    onStop();
+  }, [onStop]);
+
+  const handleContextMenu = useCallback((e: Event) => e.preventDefault(), []);
+
+  // Create audio once and keep it stable
   useEffect(() => {
-    if (isPlaying && verse.audioPath && !audio) {
-      const publicUrl = getAudioUrl(verse.audioPath);
-      const newAudio = new Audio(publicUrl);
-      newAudio.crossOrigin = 'anonymous';
-      newAudio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-      newAudio.setAttribute('disablePictureInPicture', 'true');
-      newAudio.preload = 'metadata';
-      
-      const handleContextMenu = (e: Event) => e.preventDefault();
-      const handleEnded = () => {
-        onStop();
-        awardXP('audio_completion', 10, `Completed ${verse.title}`, {
-          verseId: verse.id,
-          verseTitle: verse.title
-        });
-      };
-      const handleError = (e: Event) => {
-        console.error('Audio playback error:', e);
-        onStop();
-      };
+    if (!verse.audioPath) return;
 
-      newAudio.addEventListener('contextmenu', handleContextMenu);
-      newAudio.addEventListener('ended', handleEnded);
-      newAudio.addEventListener('error', handleError);
+    const publicUrl = getAudioUrl(verse.audioPath);
+    const audio = new Audio(publicUrl);
+    
+    // Configure audio for background playback
+    audio.crossOrigin = 'anonymous';
+    audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+    audio.setAttribute('disablePictureInPicture', 'true');
+    audio.preload = 'metadata';
+    
+    // Add event listeners
+    audio.addEventListener('contextmenu', handleContextMenu);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
 
-      setAudio(newAudio);
-      
-      newAudio.play().catch(error => {
+    // Initialize media session
+    initializeSession();
+    updateMetadata({
+      title: verse.title,
+      artist: "eL Vision Group",
+      album: verse.subtitle || "Spiritual Audio",
+      artwork: verse.artwork ? [
+        { src: verse.artwork, sizes: '512x512', type: 'image/jpeg' }
+      ] : [
+        { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+      ]
+    });
+
+    audioRef.current = audio;
+
+    return () => {
+      audio.removeEventListener('contextmenu', handleContextMenu);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+      audio.pause();
+      audio.src = '';
+      audio.load();
+      audioRef.current = null;
+    };
+  }, [verse.audioPath, verse.title, verse.subtitle, verse.artwork, verse.id, handleContextMenu, handleEnded, handleError, initializeSession, updateMetadata]);
+
+  // Handle play/pause state changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.play().then(() => {
+        setPlaybackState('playing');
+      }).catch(error => {
         console.error('Error playing audio:', error);
         onStop();
       });
-    }
-
-    // Cleanup when not playing
-    if (!isPlaying && audio) {
+    } else {
       audio.pause();
-      audio.currentTime = 0;
-      audio.src = '';
-      audio.load();
-      setAudio(null);
+      setPlaybackState('paused');
     }
-
-    return () => {
-      if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.src = '';
-        audio.load();
-      }
-    };
-  }, [isPlaying, verse.audioPath, audio, onStop, awardXP, verse.id, verse.title]);
+  }, [isPlaying, setPlaybackState, onStop]);
 
   const handlePlayClick = () => {
     if (!verse.unlocked) return;
