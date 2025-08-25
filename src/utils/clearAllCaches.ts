@@ -30,12 +30,23 @@ export const clearAllAudioCaches = async (): Promise<void> => {
       }
     });
     
-    // 4. Force service worker update
+    // 4. COMPLETELY UNREGISTER service worker for security
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
       for (const registration of registrations) {
-        console.log('Updating service worker for cache clearing');
-        await registration.update();
+        console.log('🚨 UNREGISTERING SERVICE WORKER FOR SECURITY');
+        await registration.unregister();
+      }
+      
+      // Clear any service worker caches directly
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(name => {
+            console.log('🚨 Force deleting cache:', name);
+            return caches.delete(name);
+          })
+        );
       }
     }
     

@@ -1,5 +1,5 @@
 // Service Worker for background audio support - CACHING DISABLED
-const CACHE_NAME = 'audio-therapy-v1';
+const CACHE_NAME = 'audio-therapy-v2-SECURITY-DISABLED';
 
 // Install event - Clear ALL caches on install for security
 self.addEventListener('install', (event) => {
@@ -38,11 +38,20 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// DISABLED: Fetch caching disabled for audio security
-// self.addEventListener('fetch', (event) => {
-//   // NO CACHING - Security risk for audio protection
-//   event.respondWith(fetch(event.request));
-// });
+// CRITICAL: Bypass ALL caching - direct fetch only
+self.addEventListener('fetch', (event) => {
+  // SECURITY: Never cache, never serve from cache, always fetch fresh
+  event.respondWith(
+    fetch(event.request.clone(), {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    }).catch(() => fetch(event.request))
+  );
+});
 
 // Background sync for audio continuity
 self.addEventListener('message', (event) => {
