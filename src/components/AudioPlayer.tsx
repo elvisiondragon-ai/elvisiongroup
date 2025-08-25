@@ -6,6 +6,7 @@ import { Play, Pause, SkipBack, SkipForward, Volume2, Upload, Download, Wifi, Wi
 import { useToast } from "@/hooks/use-toast";
 import { useAudioSession } from "@/hooks/useAudioSession";
 import { useOfflineAudio } from "@/hooks/useOfflineAudio";
+// import Hls from 'hls.js'; // Temporarily disabled for debugging
 
 interface AudioPlayerProps {
   title: string;
@@ -22,6 +23,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string>("");
   const audioRef = useRef<HTMLAudioElement>(null);
+  // const hlsRef = useRef<Hls | null>(null); // Temporarily disabled
   const { toast } = useToast();
   const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
   const { 
@@ -83,6 +85,9 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
 
     // Initialize audio session
     initializeSession();
+    
+    // Temporarily disable HLS for debugging - use regular audio
+    audio.src = currentAudioUrl;
 
     const setAudioData = () => {
       setDuration(audio.duration);
@@ -128,6 +133,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     audio.addEventListener('ended', handleEnded);
 
     return () => {
+      // Temporarily disabled HLS cleanup
       audio.removeEventListener('loadeddata', setAudioData);
       audio.removeEventListener('timeupdate', setAudioTime);
       audio.removeEventListener('play', handlePlay);
