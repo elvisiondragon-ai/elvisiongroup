@@ -10,19 +10,9 @@ export const audioFiles = [
 ];
 
 export const getAudioUrl = (fileName: string) => {
-  console.log('getAudioUrl called with:', fileName);
-  
-  // HLS Only Mode for Verse 1 - No direct MP3 URLs exposed
-  if (fileName === 'Verse1 - The Space Hill.MP3') {
-    console.log('Returning HLS URL for Verse 1');
-    return '/hls/verse1/playlist.m3u8';
-  }
-  
-  // Regular Supabase URL for other files
   const { data } = supabase.storage
     .from('audio-files')
     .getPublicUrl(fileName);
   
-  console.log('Returning regular URL:', data.publicUrl);
   return data.publicUrl;
 };
