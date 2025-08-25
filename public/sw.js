@@ -1,29 +1,20 @@
-// Service Worker for background audio support
-const CACHE_NAME = 'audio-therapy-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
+// Service Worker ONLY for background audio - ZERO CACHING
+console.log('🎵 Background Audio Service Worker - NO CACHING MODE');
 
-// Install event
+// Install immediately
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
-  );
+  console.log('🎵 Installing background audio service worker');
+  self.skipWaiting();
 });
 
-// Fetch event for caching
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
-  );
+// Activate immediately  
+self.addEventListener('activate', (event) => {
+  console.log('🎵 Activating background audio service worker');
+  event.waitUntil(self.clients.claim());
 });
+
+// NO FETCH INTERCEPTION - Let all requests go through normally
+// This prevents any caching while still enabling background audio
 
 // Background sync for audio continuity
 self.addEventListener('message', (event) => {
