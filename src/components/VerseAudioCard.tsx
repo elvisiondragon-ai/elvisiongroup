@@ -149,6 +149,12 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
     if (!verse.audioPath || !verse.title) return;
     
     const publicUrl = getAudioUrl(verse.audioPath);
+    
+    // Don't allow download of HLS files (they're already protected)
+    if (publicUrl.endsWith('.m3u8')) {
+      return; // Silently skip HLS downloads
+    }
+    
     await cacheAudio(publicUrl, verse.title);
   };
 

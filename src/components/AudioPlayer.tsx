@@ -53,6 +53,12 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     if (!src) return;
 
     const setupAudioUrl = async () => {
+      // Skip caching for HLS files to prevent URL exposure
+      if (src.endsWith('.m3u8')) {
+        setCurrentAudioUrl(src);
+        return;
+      }
+      
       const cachedUrl = await getCachedAudioUrl(src);
       // Fallback to original URL if no cached version (for airplane mode)
       setCurrentAudioUrl(cachedUrl || src);
@@ -229,6 +235,16 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
 
   const handleDownload = async () => {
     if (!src || !title) return;
+    
+    // Don't allow download of HLS files (they're already protected)
+    if (src.endsWith('.m3u8')) {
+      toast({
+        title: "Download Not Available",
+        description: "This audio is already optimized for secure streaming",
+        variant: "default",
+      });
+      return;
+    }
     
     const success = await cacheAudio(src, title);
     if (success) {
