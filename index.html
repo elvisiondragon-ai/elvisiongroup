@@ -18,22 +18,16 @@
     <meta name="twitter:image" content="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/elvisionlogo.png" />
     
     <script>
-      // 🎵 Register BACKGROUND AUDIO ONLY service worker (NO caching)
+      // Register service worker for background audio support
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-          try {
-            // First clear any existing caches
-            if ('caches' in window) {
-              const cacheNames = await caches.keys();
-              await Promise.all(cacheNames.map(name => caches.delete(name)));
-            }
-            
-            // Register background audio service worker
-            const registration = await navigator.serviceWorker.register('/sw.js');
-            console.log('🎵 Background audio SW registered:', registration.scope);
-          } catch (error) {
-            console.log('🎵 Background audio SW registration failed:', error);
-          }
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
         });
       }
     </script>
