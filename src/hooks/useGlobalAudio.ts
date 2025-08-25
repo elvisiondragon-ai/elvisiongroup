@@ -1,0 +1,188 @@
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { getAudioUrl } from '@/utils/audioUtils';
+import { useAudioSession } from './useAudioSession';
+import { useXPSystem } from './useXPSystem';
+
+interface CurrentTrack {
+  id: number;
+  title: string;
+  subtitle?: string;
+  artwork?: string;
+  audioPath: string;
+}
+
+interface UseGlobalAudioReturn {
+  currentTrackId: number | null;
+  isPlaying: boolean;
+  playTrack: (track: CurrentTrack, onWarning?: () => Promise<boolean>) => Promise<void>;
+  stopTrack: () => void;
+  pauseTrack: () => void;
+  resumeTrack: () => void;
+}
+
+export function useGlobalAudio(): UseGlobalAudioReturn {
+  const [currentTrackId, setCurrentTrackId] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState<CurrentTrack | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { awardXP } = useXPSystem();
+  const { initializeSession, updateMetadata, setPlaybackState } = useAudioSession();
+
+  // Cleanup function to stop and remove audio
+  const cleanupAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current.load();
+      audioRef.current = null;
+    }
+    setIsPlaying(false);
+    setPlaybackState('paused');
+  }, [setPlaybackState]);
+
+  // Handle audio completion
+  const handleEnded = useCallback(() => {
+    if (currentTrack) {
+      awardXP('audio_completion', 10, `Completed ${currentTrack.title}`, {
+        verseId: currentTrack.id,
+        verseTitle: currentTrack.title
+      });
+    }
+    setCurrentTrackId(null);
+    setCurrentTrack(null);
+    cleanupAudio();
+  }, [currentTrack, awardXP, cleanupAudio]);
+
+  // Handle audio error
+  const handleError = useCallback((e: Event) => {
+    console.error('Audio playback error:', e);
+    setCurrentTrackId(null);
+    setCurrentTrack(null);
+    cleanupAudio();
+  }, [cleanupAudio]);
+
+  // Prevent context menu (download protection)
+  const handleContextMenu = useCallback((e: Event) => e.preventDefault(), []);
+
+  // Play track function
+  const playTrack = useCallback(async (track: CurrentTrack, onWarning?: () => Promise<boolean>) => {
+    // If there's already a track playing, show warning
+    if (currentTrackId && currentTrackId !== track.id && onWarning) {
+      const shouldContinue = await onWarning();
+      if (!shouldContinue) {
+        return;
+      }
+    }
+
+    // Stop current audio if different track
+    if (currentTrackId !== track.id) {
+      cleanupAudio();
+    }
+
+    // If same track and already playing/paused, just resume/pause
+    if (currentTrackId === track.id && audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+        setPlaybackState('paused');
+      } else {
+        try {
+          await audioRef.current.play();
+          setIsPlaying(true);
+          setPlaybackState('playing');
+        } catch (error) {
+          console.error('Error resuming audio:', error);
+        }
+      }
+      return;
+    }
+
+    // Create new audio for new track
+    try {
+      const publicUrl = getAudioUrl(track.audioPath);
+      const audio = new Audio(publicUrl);
+      
+      // Configure audio for background playback
+      audio.crossOrigin = 'anonymous';
+      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+      audio.setAttribute('disablePictureInPicture', 'true');
+      audio.preload = 'metadata';
+      
+      // Add event listeners
+      audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('error', handleError);
+      audio.addEventListener('contextmenu', handleContextMenu);
+
+      audioRef.current = audio;
+      setCurrentTrack(track);
+      setCurrentTrackId(track.id);
+
+      // Initialize media session
+      initializeSession();
+      updateMetadata({
+        title: track.title,
+        artist: "eL Vision Group",
+        album: track.subtitle || "Spiritual Audio",
+        artwork: track.artwork ? [
+          { src: track.artwork, sizes: '512x512', type: 'image/jpeg' }
+        ] : [
+          { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+        ]
+      });
+
+      // Play audio
+      await audio.play();
+      setIsPlaying(true);
+      setPlaybackState('playing');
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      cleanupAudio();
+    }
+  }, [currentTrackId, isPlaying, cleanupAudio, handleEnded, handleError, handleContextMenu, initializeSession, updateMetadata, setPlaybackState]);
+
+  // Stop track function
+  const stopTrack = useCallback(() => {
+    setCurrentTrackId(null);
+    setCurrentTrack(null);
+    cleanupAudio();
+  }, [cleanupAudio]);
+
+  // Pause track function
+  const pauseTrack = useCallback(() => {
+    if (audioRef.current && isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      setPlaybackState('paused');
+    }
+  }, [isPlaying, setPlaybackState]);
+
+  // Resume track function
+  const resumeTrack = useCallback(async () => {
+    if (audioRef.current && !isPlaying) {
+      try {
+        await audioRef.current.play();
+        setIsPlaying(true);
+        setPlaybackState('playing');
+      } catch (error) {
+        console.error('Error resuming audio:', error);
+      }
+    }
+  }, [isPlaying, setPlaybackState]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cleanupAudio();
+    };
+  }, [cleanupAudio]);
+
+  return {
+    currentTrackId,
+    isPlaying,
+    playTrack,
+    stopTrack,
+    pauseTrack,
+    resumeTrack
+  };
+}

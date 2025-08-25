@@ -10,6 +10,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
 import { VerseAudioCard } from "@/components/VerseAudioCard";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import verseArtwork from "@/assets/verse-1-cosmic.jpg";
 import verse2Artwork from "@/assets/verse-2-cosmic.jpg";
 import verse3Artwork from "@/assets/verse-3-cosmic.jpg";
@@ -29,11 +39,11 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { t, i18n } = useTranslation();
   const [userLevel, setUserLevel] = useState(1);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-  const [playingVerseId, setPlayingVerseId] = useState<number | null>(null);
   const [audioTracks, setAudioTracks] = useState<any[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [warningResolver, setWarningResolver] = useState<((value: boolean) => void) | null>(null);
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
 
@@ -97,6 +107,22 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const handleUploadComplete = () => {
     fetchAudioTracks(); // Refresh the tracks list
     setShowUpload(false);
+  };
+
+  // Warning dialog handler
+  const handleWarning = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setWarningResolver(() => resolve);
+      setShowWarningDialog(true);
+    });
+  };
+
+  const handleWarningResponse = (shouldContinue: boolean) => {
+    if (warningResolver) {
+      warningResolver(shouldContinue);
+      setWarningResolver(null);
+    }
+    setShowWarningDialog(false);
   };
 
   const verses = [
@@ -284,16 +310,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                 <div className="flex justify-center">
                   <VerseAudioCard
                     verse={verse}
-                    isPlaying={playingVerseId === verse.id}
-                    onPlay={() => setPlayingVerseId(verse.id)}
-                    onStop={() => {
-                      setPlayingVerseId(null);
-                      if (currentAudio) {
-                        currentAudio.pause();
-                        currentAudio.currentTime = 0;
-                        setCurrentAudio(null);
-                      }
-                    }}
+                    onWarning={handleWarning}
                   />
                 </div>
 
@@ -423,6 +440,32 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-accent/5 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
       </div>
+
+      {/* Warning Dialog */}
+      <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
+        <AlertDialogContent className="bg-background border border-primary/20">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-primary">Peringatan</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Anda akan mengulang exp dari awal jika menghentikan audio ini, lanjutkan?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => handleWarningResponse(false)}
+              className="border-muted-foreground/20"
+            >
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => handleWarningResponse(true)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              Lanjutkan
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

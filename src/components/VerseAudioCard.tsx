@@ -1,8 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Play, Pause, Lock, Music, Crown, Zap, Star } from 'lucide-react';
-import { getAudioUrl } from '@/utils/audioUtils';
-import { useXPSystem } from '@/hooks/useXPSystem';
-import { useAudioSession } from '@/hooks/useAudioSession';
+import { Lock, Music, Crown, Zap } from 'lucide-react';
+import { useGlobalAudio } from '@/hooks/useGlobalAudio';
 
 interface Verse {
   id: number;
@@ -17,119 +14,34 @@ interface Verse {
 
 interface VerseAudioCardProps {
   verse: Verse;
-  isPlaying: boolean;
-  onPlay: () => void;
-  onStop: () => void;
+  onWarning?: () => Promise<boolean>;
 }
 
-export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioCardProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { awardXP } = useXPSystem();
-  const { initializeSession, updateMetadata, setPlaybackState } = useAudioSession();
+export function VerseAudioCard({ verse, onWarning }: VerseAudioCardProps) {
+  const { currentTrackId, isPlaying, playTrack, stopTrack } = useGlobalAudio();
 
-  // Stable callback functions to prevent useEffect re-runs
-  const handleEnded = useCallback(() => {
-    onStop();
-    awardXP('audio_completion', 10, `Completed ${verse.title}`, {
-      verseId: verse.id,
-      verseTitle: verse.title
-    });
-  }, [onStop, awardXP, verse.title, verse.id]);
-
-  const handleError = useCallback((e: Event) => {
-    console.error('Audio playback error:', e);
-    onStop();
-  }, [onStop]);
-
-  const handleContextMenu = useCallback((e: Event) => e.preventDefault(), []);
-
-  // Create audio object only when audioPath changes
-  useEffect(() => {
-    if (!verse.audioPath) return;
-
-    // Only create new audio if path changed or no audio exists
-    if (!audioRef.current || audioRef.current.src !== getAudioUrl(verse.audioPath)) {
-      // Cleanup previous audio if exists
-      if (audioRef.current) {
-        audioRef.current.removeEventListener('contextmenu', handleContextMenu);
-        audioRef.current.removeEventListener('ended', handleEnded);
-        audioRef.current.removeEventListener('error', handleError);
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current.load();
-      }
-
-      const publicUrl = getAudioUrl(verse.audioPath);
-      const audio = new Audio(publicUrl);
-      
-      // Configure audio for background playback
-      audio.crossOrigin = 'anonymous';
-      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-      audio.setAttribute('disablePictureInPicture', 'true');
-      audio.preload = 'metadata';
-      
-      // Add event listeners
-      audio.addEventListener('contextmenu', handleContextMenu);
-      audio.addEventListener('ended', handleEnded);
-      audio.addEventListener('error', handleError);
-
-      audioRef.current = audio;
-    }
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.removeEventListener('contextmenu', handleContextMenu);
-        audioRef.current.removeEventListener('ended', handleEnded);
-        audioRef.current.removeEventListener('error', handleError);
-        // Don't pause or reset on cleanup - let it continue playing
-        audioRef.current = null;
-      }
-    };
-  }, [verse.audioPath, handleContextMenu, handleEnded, handleError]);
-
-  // Handle media session metadata separately
-  useEffect(() => {
-    initializeSession();
-    updateMetadata({
-      title: verse.title,
-      artist: "eL Vision Group",
-      album: verse.subtitle || "Spiritual Audio",
-      artwork: verse.artwork ? [
-        { src: verse.artwork, sizes: '512x512', type: 'image/jpeg' }
-      ] : [
-        { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-        { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
-      ]
-    });
-  }, [verse.title, verse.subtitle, verse.artwork, initializeSession, updateMetadata]);
-
-  // Handle play/pause state changes
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.play().then(() => {
-        setPlaybackState('playing');
-      }).catch(error => {
-        console.error('Error playing audio:', error);
-        onStop();
-      });
-    } else {
-      audio.pause();
-      setPlaybackState('paused');
-    }
-  }, [isPlaying, setPlaybackState, onStop]);
-
-  const handlePlayClick = () => {
-    if (!verse.unlocked) return;
+  const handlePlayClick = async () => {
+    if (!verse.unlocked || !verse.audioPath) return;
     
-    if (isPlaying) {
-      onStop();
+    const isCurrentTrack = currentTrackId === verse.id;
+    
+    if (isCurrentTrack && isPlaying) {
+      // Stop current track
+      stopTrack();
     } else {
-      onPlay();
+      // Play track (with warning if another track is playing)
+      await playTrack({
+        id: verse.id,
+        title: verse.title,
+        subtitle: verse.subtitle,
+        artwork: verse.artwork,
+        audioPath: verse.audioPath
+      }, onWarning);
     }
   };
+
+  const isCurrentTrack = currentTrackId === verse.id;
+  const isCurrentPlaying = isCurrentTrack && isPlaying;
 
   const canPlay = verse.unlocked && verse.audioPath;
 
@@ -158,7 +70,7 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
             <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform group-hover:scale-110 transition-transform duration-300">
               {!canPlay ? (
                 <Lock className="w-6 h-6 text-white/60" />
-              ) : isPlaying ? (
+              ) : isCurrentPlaying ? (
                 // Pause icon
                 <div className="flex gap-1 items-center justify-center">
                   <div className="w-1.5 h-5 bg-white rounded-sm"></div>
