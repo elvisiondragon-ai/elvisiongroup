@@ -117,6 +117,16 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
       // Type cast the response data safely
       const loginData = data as unknown as DailyLoginResponse;
 
+      // Check if notification already shown today to prevent spam
+      const todayString = new Date().toDateString();
+      const shownKey = `streak_notification_${todayString}`;
+      const alreadyShownToday = localStorage.getItem(shownKey);
+
+      // Don't show notification if already shown today or if already processed
+      if (alreadyShownToday || loginData.message === "Already logged in today") {
+        return;
+      }
+
       // Show streak notification
       if (loginData.streak_bonus_awarded) {
         toast({
@@ -124,16 +134,19 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
           description: `+${loginData.xp_awarded} XP for completing 7 consecutive days!`,
           duration: 5000,
         });
+        localStorage.setItem(shownKey, 'true');
       } else if (loginData.streak_days === 1) {
         toast({
           title: "🌟 Login Streak Started!",
           description: "Keep logging in daily to earn bonus XP every 7 days!",
         });
+        localStorage.setItem(shownKey, 'true');
       } else if (loginData.streak_days > 1) {
         toast({
           title: "🔥 Streak Active!",
           description: `${loginData.streak_days} day streak! ${7 - (loginData.streak_days % 7)} more days until bonus XP!`,
         });
+        localStorage.setItem(shownKey, 'true');
       }
 
       // Refresh profile to get updated data
