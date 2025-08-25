@@ -1,29 +1,48 @@
-// Service Worker for background audio support
+// Service Worker for background audio support - CACHING DISABLED
 const CACHE_NAME = 'audio-therapy-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
 
-// Install event
+// Install event - Clear ALL caches on install for security
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+    // Clear all caches to prevent audio URL exposure
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          console.log('Clearing cache:', cacheName);
+          return caches.delete(cacheName);
+        })
+      );
+    })
+  );
+  // Skip waiting to activate immediately
+  self.skipWaiting();
+});
+
+// Activate event - Force cache clearing
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          console.log('Deleting cache on activate:', cacheName);
+          return caches.delete(cacheName);
+        })
+      );
+    }).then(() => {
+      // Clear localStorage audio cache data
+      console.log('Clearing localStorage audio cache');
+      // Note: localStorage is not available in service worker, 
+      // but this will be handled by the main app
+      return self.clients.claim();
+    })
   );
 });
 
-// Fetch event for caching
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
-  );
-});
+// DISABLED: Fetch caching disabled for audio security
+// self.addEventListener('fetch', (event) => {
+//   // NO CACHING - Security risk for audio protection
+//   event.respondWith(fetch(event.request));
+// });
 
 // Background sync for audio continuity
 self.addEventListener('message', (event) => {

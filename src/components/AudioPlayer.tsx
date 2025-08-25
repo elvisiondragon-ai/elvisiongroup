@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Upload, Download, Wifi, WifiOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioSession } from "@/hooks/useAudioSession";
-import { useOfflineAudio } from "@/hooks/useOfflineAudio";
+// import { useOfflineAudio } from "@/hooks/useOfflineAudio"; // DISABLED - Security risk
 import Hls from 'hls.js';
 
 interface AudioPlayerProps {
@@ -26,13 +26,14 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
   const hlsRef = useRef<Hls | null>(null);
   const { toast } = useToast();
   const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
-  const { 
-    isDownloading, 
-    downloadProgress, 
-    isAudioCached, 
-    cacheAudio, 
-    getCachedAudioUrl 
-  } = useOfflineAudio();
+  // REMOVED: All caching functionality disabled for security
+  // const { 
+  //   isDownloading, 
+  //   downloadProgress, 
+  //   isAudioCached, 
+  //   cacheAudio, 
+  //   getCachedAudioUrl 
+  // } = useOfflineAudio();
 
   // Monitor online status
   useEffect(() => {
@@ -48,24 +49,12 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     };
   }, []);
 
-  // Setup audio URL (cached or original)
+  // Setup audio URL (NO CACHING - Direct URLs only)
   useEffect(() => {
     if (!src) return;
-
-    const setupAudioUrl = async () => {
-      // Skip caching for HLS files to prevent URL exposure
-      if (src.endsWith('.m3u8')) {
-        setCurrentAudioUrl(src);
-        return;
-      }
-      
-      const cachedUrl = await getCachedAudioUrl(src);
-      // Fallback to original URL if no cached version (for airplane mode)
-      setCurrentAudioUrl(cachedUrl || src);
-    };
-
-    setupAudioUrl();
-  }, [src, getCachedAudioUrl]);
+    // Direct URL assignment - no caching to prevent security issues
+    setCurrentAudioUrl(src);
+  }, [src]);
 
   // Keep audio playing in background - no interference with audio element
   useEffect(() => {
@@ -233,26 +222,10 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     }
   };
 
-  const handleDownload = async () => {
-    if (!src || !title) return;
-    
-    // Don't allow download of HLS files (they're already protected)
-    if (src.endsWith('.m3u8')) {
-      toast({
-        title: "Download Not Available",
-        description: "This audio is already optimized for secure streaming",
-        variant: "default",
-      });
-      return;
-    }
-    
-    const success = await cacheAudio(src, title);
-    if (success) {
-      // Update current audio URL to use cached version
-      const cachedUrl = await getCachedAudioUrl(src);
-      setCurrentAudioUrl(cachedUrl);
-    }
-  };
+  // REMOVED: All download functionality disabled for security
+  // const handleDownload = async () => {
+  //   // NO DOWNLOADS ALLOWED - Security risk
+  // };
 
   const handleSeek = (value: number[]) => {
     const audio = audioRef.current;
@@ -367,29 +340,10 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
             <SkipForward className="h-4 w-4" />
           </Button>
 
-          {/* Download for offline */}
-          {src && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDownload}
-              disabled={isDownloading}
-              title="Download for offline use"
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-          )}
+          {/* REMOVED: Download functionality disabled for security */}
         </div>
 
-        {/* Download Progress */}
-        {isDownloading && (
-          <div className="space-y-2">
-            <div className="text-center text-sm text-muted-foreground">
-              Downloading for offline use...
-            </div>
-            <Progress value={downloadProgress} className="h-2" />
-          </div>
-        )}
+        {/* REMOVED: Download progress UI disabled for security */}
 
         {/* Volume Control */}
         <div className="flex items-center space-x-2">

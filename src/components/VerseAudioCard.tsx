@@ -3,7 +3,7 @@ import { Play, Pause, Lock, Music, Crown, Zap, Star, Download } from 'lucide-rea
 import { getAudioUrl } from '@/utils/audioUtils';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useAudioSession } from '@/hooks/useAudioSession';
-import { useOfflineAudio } from '@/hooks/useOfflineAudio';
+// import { useOfflineAudio } from '@/hooks/useOfflineAudio'; // DISABLED - Security risk
 
 interface Verse {
   id: number;
@@ -27,12 +27,13 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const { awardXP } = useXPSystem();
   const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
-  const { 
-    isDownloading, 
-    downloadProgress, 
-    isAudioCached, 
-    cacheAudio 
-  } = useOfflineAudio();
+  // REMOVED: All caching functionality disabled for security
+  // const { 
+  //   isDownloading, 
+  //   downloadProgress, 
+  //   isAudioCached, 
+  //   cacheAudio 
+  // } = useOfflineAudio();
 
   // Handle audio creation and playback
   useEffect(() => {
@@ -145,18 +146,10 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
     }
   };
 
-  const handleDownload = async () => {
-    if (!verse.audioPath || !verse.title) return;
-    
-    const publicUrl = getAudioUrl(verse.audioPath);
-    
-    // Don't allow download of HLS files (they're already protected)
-    if (publicUrl.endsWith('.m3u8')) {
-      return; // Silently skip HLS downloads
-    }
-    
-    await cacheAudio(publicUrl, verse.title);
-  };
+  // REMOVED: All download functionality disabled for security
+  // const handleDownload = async () => {
+  //   // NO DOWNLOADS ALLOWED - Security risk
+  // };
 
   const canPlay = verse.unlocked && verse.audioPath;
 
@@ -208,22 +201,7 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
             </div>
           </div>
           
-          {/* Download Button for Offline */}
-          {verse.audioPath && (
-            <div className="absolute -bottom-2 -right-2 z-10">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDownload();
-                }}
-                disabled={isDownloading}
-                className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-lg hover:scale-110 transition-transform duration-300 disabled:opacity-50"
-                title="Download for offline use"
-              >
-                <Download className="w-4 h-4 text-white" />
-              </button>
-            </div>
-          )}
+          {/* REMOVED: Download functionality disabled for security */}
         </div>
       ) : (
         <div className="relative">
