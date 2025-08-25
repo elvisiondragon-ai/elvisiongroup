@@ -39,7 +39,31 @@ export function usePro() {
         return;
       }
 
-      // First check profile achievements (fallback method)
+      // First check pro_user table directly (highest priority)
+      const { data: proUserData } = await supabase
+        .from('pro_user')
+        .select('*')
+        .eq('email', user.email)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (proUserData && proUserData.length > 0) {
+        const proUser = proUserData[0];
+        const daysRemaining = Math.ceil((new Date(proUser.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        
+        setProStatus({
+          isPro: new Date(proUser.end_date) > new Date(),
+          subscriptionType: proUser.subscription_type,
+          status: proUser.status,
+          expiresAt: proUser.end_date,
+          daysRemaining: daysRemaining > 0 ? daysRemaining : 0,
+          loading: false
+        });
+        return;
+      }
+
+      // Check profile achievements (fallback method)
       const { data: profileData } = await supabase
         .from('profiles')
         .select('achievements')
@@ -58,7 +82,7 @@ export function usePro() {
         return;
       }
 
-      // Try the RPC function as backup
+      // Try the RPC function as backup (pro_subscriptions)
       try {
         const { data, error } = await supabase.rpc('check_pro_status', { p_user_id: user.id });
         
