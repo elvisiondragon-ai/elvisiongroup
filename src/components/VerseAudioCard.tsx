@@ -34,22 +34,23 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
       newAudio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
       newAudio.setAttribute('disablePictureInPicture', 'true');
       newAudio.preload = 'metadata';
-      newAudio.addEventListener('contextmenu', (e) => e.preventDefault());
-
-      // Handle audio end
-      newAudio.addEventListener('ended', () => {
+      
+      const handleContextMenu = (e: Event) => e.preventDefault();
+      const handleEnded = () => {
         onStop();
-        // Award XP for completing audio
         awardXP('audio_completion', 10, `Completed ${verse.title}`, {
           verseId: verse.id,
           verseTitle: verse.title
         });
-      });
-
-      newAudio.addEventListener('error', (e) => {
+      };
+      const handleError = (e: Event) => {
         console.error('Audio playback error:', e);
         onStop();
-      });
+      };
+
+      newAudio.addEventListener('contextmenu', handleContextMenu);
+      newAudio.addEventListener('ended', handleEnded);
+      newAudio.addEventListener('error', handleError);
 
       setAudio(newAudio);
       
@@ -63,14 +64,17 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
     if (!isPlaying && audio) {
       audio.pause();
       audio.currentTime = 0;
+      audio.src = '';
+      audio.load();
       setAudio(null);
     }
 
     return () => {
       if (audio) {
         audio.pause();
-        audio.removeEventListener('ended', () => {});
-        audio.removeEventListener('error', () => {});
+        audio.currentTime = 0;
+        audio.src = '';
+        audio.load();
       }
     };
   }, [isPlaying, verse.audioPath, audio, onStop, awardXP, verse.id, verse.title]);
