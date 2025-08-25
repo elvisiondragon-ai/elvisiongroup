@@ -2,9 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Play, Pause, SkipBack, SkipForward, Volume2, Upload } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Upload, Download, Wifi, WifiOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioSession } from "@/hooks/useAudioSession";
+import { useOfflineAudio } from "@/hooks/useOfflineAudio";
+import { useAudioProtection } from "@/hooks/useAudioProtection";
 
 interface AudioPlayerProps {
   title: string;
@@ -18,16 +20,63 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [currentAudioUrl, setCurrentAudioUrl] = useState<string>("");
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
   const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
+  const { 
+    isDownloading, 
+    downloadProgress, 
+    isAudioCached, 
+    cacheAudio, 
+    getCachedAudioUrl 
+  } = useOfflineAudio();
+  const { markUserAction, protectAudio } = useAudioProtection({
+    onXPReset: () => {
+      toast({
+        title: "XP Reset",
+        description: "XP untuk audio ini akan diulang kembali",
+        variant: "default",
+      });
+    }
+  });
+
+  // Monitor online status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Setup audio URL (cached or original)
+  useEffect(() => {
+    if (!src) return;
+
+    const setupAudioUrl = async () => {
+      const cachedUrl = await getCachedAudioUrl(src);
+      setCurrentAudioUrl(cachedUrl);
+    };
+
+    setupAudioUrl();
+  }, [src, getCachedAudioUrl]);
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !src) return;
+    if (!audio || !currentAudioUrl) return;
 
     // Initialize audio session
     initializeSession();
+
+    // Setup audio protection
+    const cleanupProtection = protectAudio(audio);
 
     const setAudioData = () => {
       setDuration(audio.duration);
@@ -69,7 +118,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
 
-    if (autoPlay && src) {
+    if (autoPlay && currentAudioUrl) {
       audio.play().then(() => setIsPlaying(true)).catch(() => {
         toast({
           title: "Autoplay blocked",
@@ -85,12 +134,15 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
+      cleanupProtection();
     };
-  }, [src, autoPlay, toast, title, description, initializeSession, updateMetadata, updatePlaybackState]);
+  }, [currentAudioUrl, autoPlay, toast, title, description, initializeSession, updateMetadata, updatePlaybackState, protectAudio]);
 
   const togglePlayPause = () => {
     const audio = audioRef.current;
-    if (!audio || !src) return;
+    if (!audio || !currentAudioUrl) return;
+
+    markUserAction(); // Mark as user-initiated action
 
     if (isPlaying) {
       audio.pause();
@@ -106,10 +158,22 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     }
   };
 
+  const handleDownload = async () => {
+    if (!src || !title) return;
+    
+    const success = await cacheAudio(src, title);
+    if (success) {
+      // Update current audio URL to use cached version
+      const cachedUrl = await getCachedAudioUrl(src);
+      setCurrentAudioUrl(cachedUrl);
+    }
+  };
+
   const handleSeek = (value: number[]) => {
     const audio = audioRef.current;
     if (!audio) return;
     
+    markUserAction(); // Mark as user-initiated action
     const newTime = (value[0] / 100) * duration;
     audio.currentTime = newTime;
     setCurrentTime(newTime);
@@ -119,6 +183,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     const audio = audioRef.current;
     if (!audio) return;
     
+    markUserAction(); // Mark as user-initiated action
     const newVolume = value[0] / 100;
     audio.volume = newVolume;
     setVolume(newVolume);
@@ -134,10 +199,10 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
 
   return (
     <Card className="p-6 bg-gradient-secondary border-border">
-      {src && (
+      {currentAudioUrl && (
         <audio
           ref={audioRef}
-          src={src}
+          src={currentAudioUrl}
           onEnded={() => setIsPlaying(false)}
           onError={() => {
             toast({
@@ -150,8 +215,18 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
       )}
       
       <div className="space-y-4">
-        {/* Track Info */}
+        {/* Track Info & Status */}
         <div className="text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            {isOnline ? (
+              <Wifi className="h-4 w-4 text-green-500" />
+            ) : (
+              <WifiOff className="h-4 w-4 text-orange-500" />
+            )}
+            <span className="text-xs text-muted-foreground">
+              {isOnline ? 'Online' : 'Offline Mode'}
+            </span>
+          </div>
           <h3 className="text-lg font-semibold font-orbitron text-foreground">
             {title}
           </h3>
@@ -177,17 +252,18 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
             variant="ghost"
             size="icon"
             onClick={() => {
+              markUserAction();
               const audio = audioRef.current;
               if (audio) audio.currentTime = Math.max(0, audio.currentTime - 10);
             }}
-            disabled={!src}
+            disabled={!currentAudioUrl}
           >
             <SkipBack className="h-4 w-4" />
           </Button>
 
           <Button
             onClick={togglePlayPause}
-            disabled={!src}
+            disabled={!currentAudioUrl}
             className="w-12 h-12 rounded-full bg-gradient-primary hover:opacity-90"
           >
             {isPlaying ? (
@@ -201,14 +277,38 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
             variant="ghost"
             size="icon"
             onClick={() => {
+              markUserAction();
               const audio = audioRef.current;
               if (audio) audio.currentTime = Math.min(duration, audio.currentTime + 10);
             }}
-            disabled={!src}
+            disabled={!currentAudioUrl}
           >
             <SkipForward className="h-4 w-4" />
           </Button>
+
+          {/* Download for offline */}
+          {src && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDownload}
+              disabled={isDownloading}
+              title="Download for offline use"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          )}
         </div>
+
+        {/* Download Progress */}
+        {isDownloading && (
+          <div className="space-y-2">
+            <div className="text-center text-sm text-muted-foreground">
+              Downloading for offline use...
+            </div>
+            <Progress value={downloadProgress} className="h-2" />
+          </div>
+        )}
 
         {/* Volume Control */}
         <div className="flex items-center space-x-2">
@@ -226,7 +326,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
           </div>
         </div>
 
-        {!src && (
+        {!currentAudioUrl && (
           <div className="text-center py-4">
             <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
             <p className="text-sm text-muted-foreground">
