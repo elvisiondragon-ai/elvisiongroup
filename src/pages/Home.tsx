@@ -9,6 +9,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import { Play, Headphones, BookOpen, Zap, Target, Lock } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 
@@ -27,33 +28,18 @@ interface UserProfile {
 export function Home({
   onNavigate
 }: HomeProps) {
-  const {
-    t
-  } = useTranslation();
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const { t } = useTranslation();
+  const { userProfile, user } = useUserProfile();
   const [onlineCount, setOnlineCount] = useState(825); // Base count of 825
-  const {
-    calculateXPProgress
-  } = useXPSystem();
+  const { calculateXPProgress } = useXPSystem();
   const { proStatus } = usePro();
 
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
-      setUser(user);
-      if (user) {
-        await fetchUserProfile(user.id);
-        // Track user presence in online community
-        trackOnlinePresence(user.id);
-      }
-    };
-    getUser();
-  }, []);
+    if (user) {
+      // Track user presence in online community
+      trackOnlinePresence(user.id);
+    }
+  }, [user]);
 
   // Track online users using Supabase presence
   useEffect(() => {
@@ -95,19 +81,6 @@ export function Home({
     });
   };
 
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const {
-        data,
-        error
-      } = await supabase.from('profiles').select('*').eq('user_id', userId).maybeSingle();
-      if (data) {
-        setUserProfile(data);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
 
   const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
 

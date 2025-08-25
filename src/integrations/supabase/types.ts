@@ -233,6 +233,60 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          ai_response: string | null
+          created_at: string | null
+          from_email: string | null
+          id: number
+          knowledge_base_id: string | null
+          original_content: string | null
+          status: string | null
+          subject: string | null
+        }
+        Insert: {
+          ai_response?: string | null
+          created_at?: string | null
+          from_email?: string | null
+          id?: number
+          knowledge_base_id?: string | null
+          original_content?: string | null
+          status?: string | null
+          subject?: string | null
+        }
+        Update: {
+          ai_response?: string | null
+          created_at?: string | null
+          from_email?: string | null
+          id?: number
+          knowledge_base_id?: string | null
+          original_content?: string | null
+          status?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      knowledge_base: {
+        Row: {
+          answer: string
+          created_at: string | null
+          id: number
+          question: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string | null
+          id?: never
+          question: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string | null
+          id?: never
+          question?: string
+        }
+        Relationships: []
+      }
       notification_settings: {
         Row: {
           chat_notifications_enabled: boolean
@@ -527,6 +581,8 @@ export type Database = {
           experience_points: number
           id: string
           is_premium: boolean | null
+          last_login_date: string | null
+          last_streak_bonus_date: string | null
           level: number
           preferred_language: string | null
           premium_expires_at: string | null
@@ -543,6 +599,8 @@ export type Database = {
           experience_points?: number
           id?: string
           is_premium?: boolean | null
+          last_login_date?: string | null
+          last_streak_bonus_date?: string | null
           level?: number
           preferred_language?: string | null
           premium_expires_at?: string | null
@@ -559,6 +617,8 @@ export type Database = {
           experience_points?: number
           id?: string
           is_premium?: boolean | null
+          last_login_date?: string | null
+          last_streak_bonus_date?: string | null
           level?: number
           preferred_language?: string | null
           premium_expires_at?: string | null
@@ -973,6 +1033,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      calculate_correct_level: {
+        Args: { exp_points: number }
+        Returns: number
+      }
       calculate_level_from_xp: {
         Args: { total_xp: number }
         Returns: number
@@ -1075,6 +1139,10 @@ export type Database = {
         Args: { p_transaction_id: string; p_user_id: string }
         Returns: boolean
       }
+      gentle_expire_pro_access: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_masked_payment_transaction: {
         Args: { p_transaction_id: string }
         Returns: {
@@ -1167,6 +1235,10 @@ export type Database = {
       grant_pro_status: {
         Args: { p_user_id: string }
         Returns: undefined
+      }
+      handle_daily_login: {
+        Args: { p_user_id: string }
+        Returns: Json
       }
       has_pro_achievement: {
         Args: { p_user_id: string }

@@ -12,6 +12,7 @@ import { ProUpgrade } from "@/components/ProUpgrade";
 import { usePro } from "@/hooks/usePro";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import { 
   User, 
   Settings, 
@@ -44,55 +45,13 @@ interface UserProfile {
 }
 
 export function Profile({ onLogout, onNavigate }: ProfileProps) {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { userProfile, user, loading } = useUserProfile();
   const [editingProfile, setEditingProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { proStatus } = usePro();
   const { toast } = useToast();
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      if (user) {
-        await fetchUserProfile(user.id);
-      }
-      setLoading(false);
-    };
-
-    getUser();
-  }, []);
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load profile data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (data) {
-        setUserProfile(data);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -234,7 +193,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           userProfile={userProfile}
           onSave={() => {
             setEditingProfile(false);
-            if (user) fetchUserProfile(user.id);
+            // Profile will be updated automatically via context
           }}
           onCancel={() => setEditingProfile(false)}
         />
