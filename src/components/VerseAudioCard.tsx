@@ -43,25 +43,52 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
 
   const handleContextMenu = useCallback((e: Event) => e.preventDefault(), []);
 
-  // Create audio once and keep it stable
+  // Create audio object only when audioPath changes
   useEffect(() => {
     if (!verse.audioPath) return;
 
-    const publicUrl = getAudioUrl(verse.audioPath);
-    const audio = new Audio(publicUrl);
-    
-    // Configure audio for background playback
-    audio.crossOrigin = 'anonymous';
-    audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-    audio.setAttribute('disablePictureInPicture', 'true');
-    audio.preload = 'metadata';
-    
-    // Add event listeners
-    audio.addEventListener('contextmenu', handleContextMenu);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
+    // Only create new audio if path changed or no audio exists
+    if (!audioRef.current || audioRef.current.src !== getAudioUrl(verse.audioPath)) {
+      // Cleanup previous audio if exists
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('contextmenu', handleContextMenu);
+        audioRef.current.removeEventListener('ended', handleEnded);
+        audioRef.current.removeEventListener('error', handleError);
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current.load();
+      }
 
-    // Initialize media session
+      const publicUrl = getAudioUrl(verse.audioPath);
+      const audio = new Audio(publicUrl);
+      
+      // Configure audio for background playback
+      audio.crossOrigin = 'anonymous';
+      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+      audio.setAttribute('disablePictureInPicture', 'true');
+      audio.preload = 'metadata';
+      
+      // Add event listeners
+      audio.addEventListener('contextmenu', handleContextMenu);
+      audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('error', handleError);
+
+      audioRef.current = audio;
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('contextmenu', handleContextMenu);
+        audioRef.current.removeEventListener('ended', handleEnded);
+        audioRef.current.removeEventListener('error', handleError);
+        // Don't pause or reset on cleanup - let it continue playing
+        audioRef.current = null;
+      }
+    };
+  }, [verse.audioPath, handleContextMenu, handleEnded, handleError]);
+
+  // Handle media session metadata separately
+  useEffect(() => {
     initializeSession();
     updateMetadata({
       title: verse.title,
@@ -74,19 +101,7 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
         { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
       ]
     });
-
-    audioRef.current = audio;
-
-    return () => {
-      audio.removeEventListener('contextmenu', handleContextMenu);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
-      audio.pause();
-      audio.src = '';
-      audio.load();
-      audioRef.current = null;
-    };
-  }, [verse.audioPath, verse.title, verse.subtitle, verse.artwork, verse.id, handleContextMenu, handleEnded, handleError, initializeSession, updateMetadata]);
+  }, [verse.title, verse.subtitle, verse.artwork, initializeSession, updateMetadata]);
 
   // Handle play/pause state changes
   useEffect(() => {
