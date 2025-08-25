@@ -251,9 +251,6 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           <span className="text-sm text-muted-foreground">
             Bergabung sejak {joinDate}
           </span>
-          {proStatus.isPro && (
-            <ProBadge size="sm" />
-          )}
         </div>
         
         <div className="max-w-xs mx-auto mb-6">
