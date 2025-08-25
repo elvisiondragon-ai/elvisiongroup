@@ -13,6 +13,7 @@ import { usePro } from "@/hooks/usePro";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import { StreakIndicator } from "@/components/StreakIndicator";
 import { 
   User, 
   Settings, 
@@ -256,17 +257,20 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </div>
         
         <div className="max-w-xs mx-auto mb-6">
-          <div className="flex justify-between text-sm mb-2">
-            <span>Level {profile.level}</span>
+          <div className="flex items-center justify-between text-sm mb-2">
+            <span>Level {profile.level}</span> 
             <span>{profile.experience_points} / {nextLevelXp} XP</span>
           </div>
           <Progress 
             value={Math.min((profile.experience_points / nextLevelXp) * 100, 100)} 
             className="h-2"
           />
-          <p className="text-xs text-muted-foreground mt-1">
-            {Math.max(nextLevelXp - profile.experience_points, 0)} XP untuk level selanjutnya
-          </p>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-xs text-muted-foreground">
+              {Math.max(nextLevelXp - profile.experience_points, 0)} XP untuk level selanjutnya
+            </p>
+            <StreakIndicator streakDays={profile.streak_days} size="sm" />
+          </div>
         </div>
 
         {/* READ TUTORIAL Button */}
