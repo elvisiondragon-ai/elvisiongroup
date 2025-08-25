@@ -95,22 +95,6 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
       });
     }
 
-    // Keep audio playing in background - add focus sync
-    useEffect(() => {
-      const handleFocus = () => {
-        if (audio && isPlaying) {
-          // Just sync UI with actual audio state, don't change audio
-          const actuallyPlaying = !audio.paused && !audio.ended;
-          if (!actuallyPlaying) {
-            onStop();
-          }
-        }
-      };
-
-      window.addEventListener('focus', handleFocus);
-      return () => window.removeEventListener('focus', handleFocus);
-    }, [audio, isPlaying, onStop]);
-
     // Cleanup when not playing
     if (!isPlaying && audio) {
       audio.pause();
@@ -134,6 +118,22 @@ export function VerseAudioCard({ verse, isPlaying, onPlay, onStop }: VerseAudioC
       }
     };
   }, [isPlaying, verse.audioPath, audio, onStop, awardXP, verse.id, verse.title, initializeSession, updateMetadata, updatePlaybackState]);
+
+  // Separate useEffect for window focus handling - moved out of nested useEffect
+  useEffect(() => {
+    const handleFocus = () => {
+      if (audio && isPlaying) {
+        // Just sync UI with actual audio state, don't change audio
+        const actuallyPlaying = !audio.paused && !audio.ended;
+        if (!actuallyPlaying) {
+          onStop();
+        }
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [audio, isPlaying, onStop]);
 
   const handlePlayClick = () => {
     if (!verse.unlocked) return;
