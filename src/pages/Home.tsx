@@ -6,11 +6,14 @@ import { Progress } from "@/components/ui/progress";
 import { TierBadge } from "@/components/TierBadge";
 import { XPRules } from "@/components/XPRules";
 import { StreakIndicator } from "@/components/StreakIndicator";
+import { CacheDebugPanel } from "@/components/CacheDebugPanel";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import { useAudioCache } from "@/hooks/useAudioCache";
+import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { Play, Headphones, BookOpen, Zap, Target, Lock } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 
@@ -34,6 +37,22 @@ export function Home({
   const [onlineCount, setOnlineCount] = useState(825); // Base count of 825
   const { calculateXPProgress } = useXPSystem();
   const { proStatus } = usePro();
+  const { preloadAudioFiles, getCacheStats } = useAudioCache();
+
+  // Preload audio files for better performance
+  useEffect(() => {
+    const audioFiles = [
+      'Verse1 - Calm Clarity.MP3',
+      'Verse2 - Lucid Beach.MP3',
+      'Verse 3 - Syukur.MP3',
+      'Verse 4 - Prosperity Stream Vol. 1.MP3',
+      'Verse4-English.MP3',
+      'Verse5 - Virtality Vortex.MP3'
+    ];
+    
+    // Preload audio files in background for offline access
+    preloadAudioFiles(audioFiles);
+  }, [preloadAudioFiles]);
 
   // Consolidated presence tracking - single channel for both listening and tracking
   useEffect(() => {
@@ -244,5 +263,8 @@ export function Home({
           </div>
         </Card>
       </div>
+      
+      {/* Cache Debug Panel */}
+      <CacheDebugPanel />
     </div>;
 }

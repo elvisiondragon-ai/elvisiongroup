@@ -366,27 +366,6 @@ export type Database = {
         }
         Relationships: []
       }
-      packages: {
-        Row: {
-          duration_days: number | null
-          id: string
-          name: string | null
-          price: number | null
-        }
-        Insert: {
-          duration_days?: number | null
-          id: string
-          name?: string | null
-          price?: number | null
-        }
-        Update: {
-          duration_days?: number | null
-          id?: string
-          name?: string | null
-          price?: number | null
-        }
-        Relationships: []
-      }
       payment_transactions: {
         Row: {
           amount: number
