@@ -1230,6 +1230,10 @@ export type Database = {
         Args: { p_email: string; p_ip_address?: string; p_user_id: string }
         Returns: string
       }
+      sync_all_days_remaining: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       sync_pro_status_from_subscription: {
         Args: { p_user_id: string }
         Returns: boolean

@@ -146,15 +146,23 @@ export function useXPSystem(): XPSystemHook {
         xpForNextLevel = 15000; // Max level
     }
 
-    // XP for current level progress
-    const currentLevelXP = currentXP - totalXPForLevel;
+    // XP for current level progress - FIXED CALCULATION
+    const currentLevelXP = Math.max(0, currentXP - totalXPForLevel);
+    
+    // XP needed for next level from current level start
+    const xpNeededForNextLevel = xpForNextLevel - totalXPForLevel;
     
     // Progress percentage (for max level, show 100%)
-    const progress = level >= 9 ? 100 : Math.min((currentLevelXP / (xpForNextLevel - totalXPForLevel)) * 100, 100);
+    let progress = 0;
+    if (level >= 9) {
+      progress = 100;
+    } else if (xpNeededForNextLevel > 0) {
+      progress = Math.min((currentLevelXP / xpNeededForNextLevel) * 100, 100);
+    }
 
     return {
       currentLevelXP,
-      xpForNextLevel: xpForNextLevel - totalXPForLevel,
+      xpForNextLevel: xpNeededForNextLevel,
       progress
     };
   }, []);
