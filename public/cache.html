@@ -13,18 +13,20 @@
         
         body {
             font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #000000; /* Solid black fallback */
             background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3), transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3), transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.2), transparent 50%),
-                linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 100%);
+                #000000,
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.4), transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.4), transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.3), transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            color: white;
+            color: #ffffff; /* Ensure white text */
             overflow: hidden;
             position: relative;
         }
@@ -44,8 +46,9 @@
         
         .container {
             background: 
-                linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%),
-                linear-gradient(225deg, rgba(120, 119, 198, 0.1) 0%, transparent 50%);
+                rgba(0, 0, 0, 0.7), /* Dark background fallback */
+                linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%),
+                linear-gradient(225deg, rgba(120, 119, 198, 0.15) 0%, transparent 50%);
             backdrop-filter: blur(20px);
             border-radius: 28px;
             padding: 45px 35px;
@@ -53,12 +56,13 @@
             max-width: 480px;
             width: 100%;
             box-shadow: 
-                0 25px 50px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(255, 255, 255, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+                0 25px 50px rgba(0, 0, 0, 0.8),
+                0 0 0 1px rgba(255, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
+            color: #ffffff; /* Ensure text is white */
         }
         
         .container::before {
@@ -129,8 +133,9 @@
         .subtitle {
             opacity: 0.9;
             margin-bottom: 35px;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
+            color: #e5e7eb; /* Light gray for better visibility */
         }
         
         .device-section {
@@ -141,7 +146,8 @@
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 12px;
-            opacity: 0.9;
+            opacity: 0.95;
+            color: #f3f4f6; /* Ensure visibility */
         }
         
         .btn {
@@ -229,12 +235,13 @@
         }
         
         .info {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.4); /* Dark background for contrast */
             border-radius: 16px;
             padding: 20px;
             margin: 25px 0;
             text-align: left;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff; /* White text */
         }
         
         .info h3 {
