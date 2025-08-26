@@ -11,6 +11,13 @@
             box-sizing: border-box;
         }
         
+        html, body {
+            overflow-x: hidden;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 100vw;
+        }
+        
         body {
             font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #000000; /* Solid black fallback */
@@ -369,7 +376,7 @@
                 await clearAllCaches();
                 
                 showStatus(`
-                    ✅ <strong>Cache Android berhasil dibersihkan!</strong><br>
+                    ✅ <strong>Browser Cache Anda Sudah Bersih!</strong><br>
                     📱 Halaman akan reload untuk memuat data terbaru eL Vision...
                 `, 'success');
                 
@@ -393,7 +400,7 @@
                 await clearAllCaches();
                 
                 showStatus(`
-                    ✅ <strong>Cache iPhone/iPad berhasil dibersihkan!</strong><br>
+                    ✅ <strong>Browser Cache Anda Sudah Bersih!</strong><br>
                     📱 Halaman akan reload untuk memuat data terbaru eL Vision...
                 `, 'success');
                 
