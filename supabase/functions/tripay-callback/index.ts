@@ -81,39 +81,21 @@ serve(async (req) => {
               throw updateError;
             }
             
-            // Create pro_user record and handle achievements as before
+            // Calculate subscription end date using unified system
             const startDate = new Date();
             const { data: endDateResult } = await supabaseClient.rpc('calculate_subscription_end_date', {
               p_subscription_type: subscription.subscription_type,
               p_start_date: startDate.toISOString()
             });
             
-            await supabaseClient.from('pro_user').upsert({
-              email: subscription.user_email,
-              status: 'active',
-              subscription_type: subscription.subscription_type,
-              start_date: startDate.toISOString(),
-              end_date: endDateResult,
-              amount: subscription.amount_paid,
-              currency: subscription.currency || 'IDR',
-              tripay_reference: tripay_reference,
-              payment_method: payload.payment_method || 'Tripay'
-            }, { 
-              onConflict: 'email',
-              ignoreDuplicates: false 
-            });
-            
-            // Add 'pro' achievement
-            if (subscription.user_id) {
-              await supabaseClient
-                .from('profiles')
-                .update({
-                  achievements: supabaseClient.raw(`array_append(achievements, 'pro')`),
-                  updated_at: new Date().toISOString()
-                })
-                .eq('user_id', subscription.user_id)
-                .not('achievements', 'cs', '{"pro"}');
-            }
+            // Update pro_subscriptions with calculated end date - SINGLE SOURCE OF TRUTH
+            await supabaseClient
+              .from('pro_subscriptions')
+              .update({
+                subscription_end_date: endDateResult,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', subscription.id);
             
             // Send payment completion email
             try {
@@ -184,40 +166,21 @@ serve(async (req) => {
         })
         .eq('id', transaction.subscription_id);
       
-      // Calculate subscription dates
+      // Calculate subscription end date using unified system
       const startDate = new Date();
       const { data: endDateResult } = await supabaseClient.rpc('calculate_subscription_end_date', {
         p_subscription_type: subscription.subscription_type,
         p_start_date: startDate.toISOString()
       });
       
-      // Create/update pro_user record
-      await supabaseClient.from('pro_user').upsert({
-        email: subscription.user_email,
-        status: 'active',
-        subscription_type: subscription.subscription_type,
-        start_date: startDate.toISOString(),
-        end_date: endDateResult,
-        amount: subscription.amount_paid,
-        currency: subscription.currency || 'IDR',
-        tripay_reference: tripay_reference,
-        payment_method: payload.payment_method || 'Tripay'
-      }, { 
-        onConflict: 'email',
-        ignoreDuplicates: false 
-      });
-      
-      // Add 'pro' achievement to user profile
-      if (subscription.user_id) {
-        await supabaseClient
-          .from('profiles')
-          .update({
-            achievements: supabaseClient.raw(`array_append(achievements, 'pro')`),
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', subscription.user_id)
-          .not('achievements', 'cs', '{"pro"}'); // Only if 'pro' not already in array
-      }
+      // Update pro_subscriptions with calculated end date - SINGLE SOURCE OF TRUTH
+      await supabaseClient
+        .from('pro_subscriptions')
+        .update({
+          subscription_end_date: endDateResult,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', transaction.subscription_id);
       
       console.log(`🎉 Pro subscription activated: ${subscription.user_email}, Type: ${subscription.subscription_type}`);
       

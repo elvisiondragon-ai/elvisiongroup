@@ -114,27 +114,23 @@ serve(async (req) => {
       throw new Error('Subscription not found');
     }
     
-    // Calculate subscription dates using the database function
+    // Calculate subscription end date using unified system
     const startDate = new Date();
     const { data: endDateResult } = await supabaseClient.rpc('calculate_subscription_end_date', {
       p_subscription_type: subscription.subscription_type,
       p_start_date: startDate.toISOString()
     });
     
-    // Insert or update pro_user record
-    await supabaseClient.from('pro_user').upsert({
-      email: subscription.user_email,
-      status: 'active',
-      subscription_type: subscription.subscription_type,
-      start_date: startDate.toISOString(),
-      end_date: endDateResult,
-      amount: subscription.amount_paid,
-      currency: subscription.currency || 'IDR',
-      payment_method: 'BCA Manual Transfer'
-    }, { 
-      onConflict: 'email',
-      ignoreDuplicates: false 
-    });
+    // Update pro_subscriptions with calculated end date - SINGLE SOURCE OF TRUTH
+    await supabaseClient
+      .from('pro_subscriptions')
+      .update({
+        subscription_start_date: startDate.toISOString(),
+        subscription_end_date: endDateResult,
+        status: 'active',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', transaction.subscription_id);
 
     console.log(`Pro user subscription activated for email: ${subscription.user_email}, type: ${subscription.subscription_type}`);
     

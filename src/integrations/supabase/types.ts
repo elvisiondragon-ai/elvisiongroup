@@ -266,27 +266,6 @@ export type Database = {
         }
         Relationships: []
       }
-      knowledge_base: {
-        Row: {
-          answer: string
-          created_at: string | null
-          id: number
-          question: string
-        }
-        Insert: {
-          answer: string
-          created_at?: string | null
-          id?: never
-          question: string
-        }
-        Update: {
-          answer?: string
-          created_at?: string | null
-          id?: never
-          question?: string
-        }
-        Relationships: []
-      }
       notification_settings: {
         Row: {
           chat_notifications_enabled: boolean
@@ -314,54 +293,6 @@ export type Database = {
           quiet_hours_start?: string | null
           updated_at?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      orders: {
-        Row: {
-          amount: number
-          created_at: string | null
-          customer_email: string
-          customer_name: string
-          customer_phone: string | null
-          end_date: string | null
-          id: string
-          merchant_ref: string
-          payment_method: string | null
-          payment_status: string | null
-          start_date: string | null
-          subscription_type: string
-          tripay_reference: string | null
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          customer_email: string
-          customer_name: string
-          customer_phone?: string | null
-          end_date?: string | null
-          id?: string
-          merchant_ref: string
-          payment_method?: string | null
-          payment_status?: string | null
-          start_date?: string | null
-          subscription_type: string
-          tripay_reference?: string | null
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          customer_email?: string
-          customer_name?: string
-          customer_phone?: string | null
-          end_date?: string | null
-          id?: string
-          merchant_ref?: string
-          payment_method?: string | null
-          payment_status?: string | null
-          start_date?: string | null
-          subscription_type?: string
-          tripay_reference?: string | null
         }
         Relationships: []
       }
@@ -773,89 +704,6 @@ export type Database = {
         }
         Relationships: []
       }
-      subscriptions: {
-        Row: {
-          amount: number
-          created_at: string | null
-          customer_email: string
-          id: number
-          merchant_ref: string
-          package_type: string
-          paid_at: number | null
-          status: string | null
-          tripay_reference: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          customer_email: string
-          id?: number
-          merchant_ref: string
-          package_type: string
-          paid_at?: number | null
-          status?: string | null
-          tripay_reference?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          customer_email?: string
-          id?: number
-          merchant_ref?: string
-          package_type?: string
-          paid_at?: number | null
-          status?: string | null
-          tripay_reference?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      transactions: {
-        Row: {
-          amount: number | null
-          created_at: string | null
-          expired_at: string | null
-          id: number
-          merchant_ref: string | null
-          package_id: string | null
-          status: string | null
-          tripay_reference: string | null
-          user_id: string | null
-        }
-        Insert: {
-          amount?: number | null
-          created_at?: string | null
-          expired_at?: string | null
-          id?: number
-          merchant_ref?: string | null
-          package_id?: string | null
-          status?: string | null
-          tripay_reference?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          amount?: number | null
-          created_at?: string | null
-          expired_at?: string | null
-          id?: number
-          merchant_ref?: string | null
-          package_id?: string | null
-          status?: string | null
-          tripay_reference?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "transactions_package_id_fkey"
-            columns: ["package_id"]
-            isOneToOne: false
-            referencedRelation: "packages"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_activities: {
         Row: {
           activity_type: string
@@ -906,24 +754,6 @@ export type Database = {
           email_hash?: string
           id?: string
           updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_memberships: {
-        Row: {
-          created_at: string | null
-          expires_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          expires_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          expires_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1051,7 +881,7 @@ export type Database = {
         Returns: number
       }
       calculate_subscription_end_date: {
-        Args: { p_start_date: string; p_subscription_type: string }
+        Args: { p_start_date?: string; p_subscription_type: string }
         Returns: string
       }
       can_access_payment_transaction: {
@@ -1073,16 +903,6 @@ export type Database = {
       check_daily_journal_limit: {
         Args: { p_user_id: string }
         Returns: boolean
-      }
-      check_pro_status: {
-        Args: { p_user_id: string }
-        Returns: {
-          days_remaining: number
-          expires_at: string
-          is_pro: boolean
-          status: string
-          subscription_type: string
-        }[]
       }
       check_rate_limit: {
         Args: {

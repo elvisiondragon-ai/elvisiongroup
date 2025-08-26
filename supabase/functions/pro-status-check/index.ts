@@ -38,9 +38,9 @@ serve(async (req) => {
 
     console.log('Checking pro status for user:', user.id);
 
-    // Call the database function to check pro status
+    // Call the unified database function to check pro status
     const { data: proStatusData, error: proStatusError } = await supabaseClient
-      .rpc('check_pro_status', {
+      .rpc('check_unified_pro_status', {
         p_user_id: user.id
       });
 
