@@ -9,8 +9,8 @@ const corsHeaders = {
 interface UpdateSubscriptionRequest {
   subscription_id: string;
   status: 'active' | 'pending' | 'expired';
-  subscription_type: 'trial' | 'monthly' | 'weekly' | 'yearly' | 'daily';
-  duration_type?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  subscription_type: 'trial' | '1_month' | '1_week' | '1_year' | '1_day';
+  duration_type?: '1_day' | '1_week' | '1_month' | '1_year';
 }
 
 serve(async (req) => {
@@ -35,7 +35,7 @@ serve(async (req) => {
     }
 
     const requestData: UpdateSubscriptionRequest = await req.json();
-    const { subscription_id, status, subscription_type, duration_type = 'monthly' } = requestData;
+    const { subscription_id, status, subscription_type, duration_type = '1_month' } = requestData;
 
     console.log('Processing manual subscription update:', {
       subscription_id,

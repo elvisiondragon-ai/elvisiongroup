@@ -453,7 +453,7 @@ export type Database = {
           created_at: string
           currency: string | null
           customer_phone: string | null
-          days_remaining: number | null
+          days_remaining: number
           id: string
           ip_address: string | null
           pro_badge: boolean | null
@@ -474,7 +474,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           customer_phone?: string | null
-          days_remaining?: number | null
+          days_remaining?: number
           id?: string
           ip_address?: string | null
           pro_badge?: boolean | null
@@ -495,7 +495,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           customer_phone?: string | null
-          days_remaining?: number | null
+          days_remaining?: number
           id?: string
           ip_address?: string | null
           pro_badge?: boolean | null

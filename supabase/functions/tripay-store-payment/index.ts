@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface StorePaymentRequest {
-  subscriptionType: 'monthly' | 'yearly';
+  subscriptionType: '1_month' | '1_year';
   paymentMethod: string;
   tripayData: any;
   merchantRef: string;
@@ -36,12 +36,12 @@ serve(async (req) => {
 
     const { subscriptionType, paymentMethod, tripayData, merchantRef }: StorePaymentRequest = await req.json();
 
-    // Get or create VIP subscription using UPSERT
+    // Get or create pro subscription using UPSERT
     const { data: subscription, error: subError } = await supabaseClient
-      .from('vip_subscriptions')
+      .from('pro_subscriptions')
       .upsert({
         user_id: user.id,
-        email: user.email,
+        user_email: user.email,
         subscription_type: subscriptionType,
         status: 'pending',
         tripay_reference: tripayData.reference

@@ -38,7 +38,7 @@ serve(async (req) => {
     }
 
     // Calculate amount based on subscription type
-    const amount = subscriptionType === 'yearly' ? 240000 : 25000; // IDR
+    const amount = subscriptionType === '1_year' ? 240000 : 25000; // IDR
     
     // Generate unique transaction reference
     const merchantRef = `MOOTA-${user.id.slice(0, 8)}-${Date.now()}`;

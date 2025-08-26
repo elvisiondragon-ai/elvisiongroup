@@ -39,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
           amount: 150000,
           currency: 'IDR',
           reference: 'TEST-' + Date.now(),
-          subscriptionType: 'monthly',
+          subscriptionType: '1_month',
           paymentMethod: 'Bank Transfer BCA',
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
           virtualAccount: '1234567890123456'
