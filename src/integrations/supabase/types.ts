@@ -1013,6 +1013,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      fix_user_levels: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       gentle_expire_pro_access: {
         Args: Record<PropertyKey, never>
         Returns: undefined
