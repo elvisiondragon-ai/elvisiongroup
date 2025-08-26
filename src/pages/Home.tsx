@@ -35,52 +35,38 @@ export function Home({
   const { calculateXPProgress } = useXPSystem();
   const { proStatus } = usePro();
 
+  // Consolidated presence tracking - single channel for both listening and tracking
   useEffect(() => {
-    if (user) {
-      // Track user presence in online community
-      trackOnlinePresence(user.id);
-    }
-  }, [user]);
+    if (!user) return;
 
-  // Track online users using Supabase presence
-  useEffect(() => {
     const channel = supabase.channel('online_users');
-    channel.on('presence', {
-      event: 'sync'
-    }, () => {
-      const presenceState = channel.presenceState();
-      const onlineUsers = Object.keys(presenceState).length;
-      setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
-    }).on('presence', {
-      event: 'join'
-    }, ({
-      newPresences
-    }) => {
-      console.log('User joined:', newPresences);
-    }).on('presence', {
-      event: 'leave'
-    }, ({
-      leftPresences
-    }) => {
-      console.log('User left:', leftPresences);
-    }).subscribe();
+    
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const presenceState = channel.presenceState();
+        const onlineUsers = Object.keys(presenceState).length;
+        setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
+      })
+      .on('presence', { event: 'join' }, ({ newPresences }) => {
+        console.log('User joined:', newPresences);
+      })
+      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+        console.log('User left:', leftPresences);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          // Track current user's presence
+          await channel.track({
+            user_id: user.id,
+            online_at: new Date().toISOString()
+          });
+        }
+      });
+
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
-
-  const trackOnlinePresence = async (userId: string) => {
-    const channel = supabase.channel('online_users');
-    await channel.subscribe(async status => {
-      if (status === 'SUBSCRIBED') {
-        const presenceTrackStatus = await channel.track({
-          user_id: userId,
-          online_at: new Date().toISOString()
-        });
-        console.log('Presence tracked:', presenceTrackStatus);
-      }
-    });
-  };
+  }, [user]);
 
 
   const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
