@@ -109,8 +109,7 @@ export function Home({
     icon: Target,
     color: "text-orange-500",
     key: "ignis-quest",
-    isNew: true,
-    levelRequired: 5
+    isNew: true
   }];
 
   return <div className="pb-20">
@@ -179,7 +178,7 @@ export function Home({
         
         <div className="grid grid-cols-2 gap-4">
           {features.map((feature, index) => {
-          const isLocked = feature.isLocked || (feature.levelRequired && (userProfile?.level || 1) < feature.levelRequired);
+          const isLocked = feature.isLocked;
           const isIgnisQuest = feature.key === 'ignis-quest';
           return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${isLocked ? 'bg-card/50 cursor-not-allowed' : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'} ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`} onClick={() => {
             if (isLocked) {
@@ -211,10 +210,7 @@ export function Home({
                     <p className="text-xs text-muted-foreground">
                       {feature.description}
                     </p>
-                    {isLocked && feature.levelRequired && <div className="text-xs font-medium text-muted-foreground mt-2">
-                        Level {feature.levelRequired} Required
-                      </div>}
-                    {isLocked && !feature.levelRequired && <div className="text-xs font-medium text-muted-foreground mt-2">
+                    {isLocked && <div className="text-xs font-medium text-muted-foreground mt-2">
                         Locked
                       </div>}
                   </div>

@@ -895,7 +895,7 @@ export type Database = {
           p_user_id: string
           p_xp_amount: number
         }
-        Returns: undefined
+        Returns: Json
       }
       bytea_to_text: {
         Args: { data: string }

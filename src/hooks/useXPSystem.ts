@@ -24,54 +24,8 @@ export function useXPSystem(): XPSystemHook {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Check daily limits
-      if (activityType === 'chat_message') {
-        const { data: canChat } = await supabase.rpc('check_daily_chat_limit', {
-          p_user_id: user.id
-        });
-        
-        if (!canChat) {
-          toast({
-            title: "Daily chat limit reached",
-            description: "You've reached the daily limit of 10 chat messages for XP.",
-            variant: "destructive"
-          });
-          return;
-        }
-      }
-
-      if (activityType === 'journal_entry') {
-        const { data: canJournal } = await supabase.rpc('check_daily_journal_limit', {
-          p_user_id: user.id
-        });
-        
-        if (!canJournal) {
-          toast({
-            title: "Daily journal limit reached",
-            description: "You've reached the daily limit of 5 XP from journal entries.",
-            variant: "destructive"
-          });
-          return;
-        }
-      }
-
-      if (activityType === 'audio_completed') {
-        const { data: canAudio } = await supabase.rpc('check_daily_audio_limit', {
-          p_user_id: user.id
-        });
-        
-        if (!canAudio) {
-          toast({
-            title: "Daily audio limit reached",
-            description: "You've reached the daily limit of 20 XP from audio listening.",
-            variant: "destructive"
-          });
-          return;
-        }
-      }
-
-      // Award XP using the database function
-      const { error } = await supabase.rpc('award_xp', {
+      // Award XP using the enhanced database function
+      const { data, error } = await supabase.rpc('award_xp', {
         p_user_id: user.id,
         p_xp_amount: xpAmount,
         p_activity_type: activityType,
@@ -81,11 +35,19 @@ export function useXPSystem(): XPSystemHook {
 
       if (error) throw error;
 
-      // Show success toast
-      toast({
-        title: `+${xpAmount} XP Earned!`,
-        description: reason || `${activityType} completed`,
-      });
+      // Show success toast with level up information
+      const result = data as any;
+      if (result?.level_up) {
+        toast({
+          title: `🎉 Level Up! Now Level ${result.new_level}!`,
+          description: `+${xpAmount} XP earned! ${result.achievement_earned ? '⚡ New achievement unlocked!' : ''}`,
+        });
+      } else {
+        toast({
+          title: `+${xpAmount} XP Earned!`,
+          description: reason || `${activityType} completed`,
+        });
+      }
 
     } catch (error) {
       console.error('Error awarding XP:', error);
@@ -100,7 +62,7 @@ export function useXPSystem(): XPSystemHook {
   }, [toast]);
 
   const calculateXPProgress = useCallback((currentXP: number, level: number) => {
-    // Extended level requirements to support level 9
+    // Updated level requirements with new thresholds
     let totalXPForLevel = 0;
     let xpForNextLevel = 0;
 
@@ -111,33 +73,37 @@ export function useXPSystem(): XPSystemHook {
         break;
       case 2:
         totalXPForLevel = 150;
-        xpForNextLevel = 1500;
+        xpForNextLevel = 500;
         break;
       case 3:
-        totalXPForLevel = 1500;
-        xpForNextLevel = 3000;
+        totalXPForLevel = 500;
+        xpForNextLevel = 1200;
         break;
       case 4:
-        totalXPForLevel = 3000;
-        xpForNextLevel = 4000;
+        totalXPForLevel = 1200;
+        xpForNextLevel = 2500;
         break;
       case 5:
-        totalXPForLevel = 4000;
-        xpForNextLevel = 5000;
+        totalXPForLevel = 2500;
+        xpForNextLevel = 4500;
         break;
       case 6:
-        totalXPForLevel = 5000;
-        xpForNextLevel = 7500;
+        totalXPForLevel = 4500;
+        xpForNextLevel = 7000;
         break;
       case 7:
-        totalXPForLevel = 7500;
-        xpForNextLevel = 10000;
+        totalXPForLevel = 7000;
+        xpForNextLevel = 9000;
         break;
       case 8:
-        totalXPForLevel = 10000;
-        xpForNextLevel = 15000;
+        totalXPForLevel = 9000;
+        xpForNextLevel = 12000;
         break;
       case 9:
+        totalXPForLevel = 12000;
+        xpForNextLevel = 15000;
+        break;
+      case 10:
         totalXPForLevel = 15000;
         xpForNextLevel = 15000; // Max level
         break;
@@ -154,7 +120,7 @@ export function useXPSystem(): XPSystemHook {
     
     // Progress percentage (for max level, show 100%)
     let progress = 0;
-    if (level >= 9) {
+    if (level >= 10) {
       progress = 100;
     } else if (xpNeededForNextLevel > 0) {
       progress = Math.min((currentLevelXP / xpNeededForNextLevel) * 100, 100);

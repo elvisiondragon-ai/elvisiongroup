@@ -43,13 +43,6 @@ export function XPRules() {
     }
   ];
 
-  const levelRequirements = [
-    { levels: "1", xp: 100 },
-    { levels: "2", xp: 150 },
-    { levels: "3", xp: 1500 },
-    { levels: "4", xp: 3000 }
-  ];
-
   return (
     <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
       <div className="flex items-center gap-2 mb-4">
@@ -57,7 +50,7 @@ export function XPRules() {
         <h3 className="font-semibold text-foreground">How to Earn XP</h3>
       </div>
       
-      <div className="space-y-3 mb-6">
+      <div className="space-y-3">
         {rules.map((rule, index) => {
           const Icon = rule.icon;
           return (
@@ -75,17 +68,6 @@ export function XPRules() {
             </div>
           );
         })}
-      </div>
-
-      <div className="border-t border-border/50 pt-4">
-        <h4 className="text-sm font-medium text-foreground mb-3">Level Requirements</h4>
-        <div className="grid grid-cols-2 gap-2">
-          {levelRequirements.map((req, index) => (
-            <div key={index} className="text-xs text-muted-foreground">
-              <span className="font-medium">Lv {req.levels}:</span> {req.xp} XP/level
-            </div>
-          ))}
-        </div>
       </div>
     </Card>
   );

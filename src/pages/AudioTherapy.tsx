@@ -130,7 +130,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 1,
       title: "Verse 1 - The Space Hill",
       subtitle: "Kedamaian Batin",
-      unlocked: userLevel >= 2 || proStatus.isPro,
+      unlocked: true, // Allow access to all verses - users will discover levels naturally
       requiredLevel: 2,
       artwork: verseArtwork,
       audioPath: 'Verse1 - The Space Hill.MP3',
@@ -140,7 +140,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 2,
       title: "Verse 2 - Lucid Beach",
       subtitle: "Relaksasi seperti berada di pantai, membantu tidur nyenyak dan pikiran jernih",
-      unlocked: userLevel >= 1 || proStatus.isPro,
+      unlocked: true, // Allow access to all verses - users will discover levels naturally
       requiredLevel: 3,
       artwork: verse2Artwork,
       audioPath: 'Verse2 - Lucid Beach.MP3',
@@ -150,7 +150,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 3,
       title: "Verse 3 - Syukur Meditation",
       subtitle: "Menumbuhkan rasa syukur pada titik saraf seluruh tubuh",
-      unlocked: userLevel >= 1 || proStatus.isPro,
+      unlocked: true, // Allow access to all verses - users will discover levels naturally
       requiredLevel: 4,
       artwork: verse3Artwork,
       audioPath: 'Verse 3 - Syukur.MP3',
@@ -180,7 +180,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 5,
       title: "Verse 5 - Vitality Vortex",
       subtitle: "Memperbaiki ulang finansial, fisik dan mental untuk hidup yang sehat",
-      unlocked: userLevel >= 1 || proStatus.isPro,
+      unlocked: true, // Allow access to all verses - users will discover levels naturally
       requiredLevel: 5,
       artwork: verse5Artwork,
       audioPath: 'Verse5 - Virtality Vortex.MP3',
@@ -190,7 +190,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 6,
       title: "Verse 6 - Beautify",
       subtitle: "Memfokuskan Kecantikan fisik yang mempesona setiap orang",
-      unlocked: false,
+      unlocked: true, // Allow access to all verses - users will discover levels naturally
       requiredLevel: 6,
       artwork: verse6Artwork,
       audioPath: null,
@@ -200,7 +200,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 7,
       title: "Verse 7 - Confidence Core",
       subtitle: "Menumbuhkan keyakinan diri agar berani mengambil langkah penting",
-      unlocked: false,
+      unlocked: true, // Allow access to all verses - users will discover levels naturally
       requiredLevel: 7,
       artwork: verse7Artwork,
       audioPath: null,
@@ -210,7 +210,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 8,
       title: "Verse 8 - Love Magnet",
       subtitle: "Menarik cinta dan kasih sayang dari orang-orang di sekitar",
-      unlocked: false,
+      unlocked: true, // Allow access to all verses - users will discover levels naturally
       requiredLevel: 8,
       artwork: verse8Artwork,
       audioPath: null,
@@ -220,7 +220,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 9,
       title: "Verse 9 - Family Harmony",
       subtitle: "Menenangkan emosi dan memperkuat hubungan keluarga",
-      unlocked: false,
+      unlocked: true, // Allow access to all verses - users will discover levels naturally
       requiredLevel: 9,
       artwork: verse9Artwork,
       audioPath: null,
@@ -230,7 +230,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 10,
       title: "Verse 10 - Healing Heart",
       subtitle: "Menyembuhkan luka batin dan memulihkan kedamaian hati",
-      unlocked: false,
+      unlocked: true, // Allow access to all verses - users will discover levels naturally
       requiredLevel: 10,
       artwork: verse10Artwork,
       audioPath: null,
@@ -270,12 +270,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           return (
             <Card
               key={verse.id}
-              className={`relative overflow-hidden border-2 transition-all duration-500 transform hover:scale-[1.02] ${
-                verse.unlocked
-                  ? "bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/40 shadow-2xl shadow-primary/20"
-                  : "bg-gradient-to-br from-muted/20 to-background border-border/40 opacity-70"
-              }`}
-            >
+                  className={`relative overflow-hidden border-2 transition-all duration-500 transform hover:scale-[1.02] bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/40 shadow-2xl shadow-primary/20`}
+                >
               {/* Cosmic Background Pattern */}
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary via-transparent to-accent"></div>
@@ -314,9 +310,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                   />
                 </div>
 
-                {/* Status/Button */}
-                {verse.unlocked ? (
-                  <div className="space-y-4">
+                    <div className="space-y-4">
                     <Button
                       className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-semibold px-10 py-3 rounded-full shadow-lg shadow-primary/40 transform hover:scale-105 transition-all duration-300 border border-white/20"
                       onClick={() => {
@@ -330,75 +324,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     </Button>
                     <div className="text-xs text-primary/80 font-medium">✨ {t('audioTherapy.unlocked')} ✨</div>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* Level requirement badge */}
-                    <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full border shadow-lg ${
-                      verse.requiredLevel === 5 
-                        ? "bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/40 text-amber-300"
-                        : verse.requiredLevel === 10
-                        ? "bg-gradient-to-r from-purple-500/20 to-violet-500/20 border-purple-400/40 text-purple-300"
-                        : verse.requiredLevel === 15
-                        ? "bg-gradient-to-r from-rose-500/20 to-pink-500/20 border-rose-400/40 text-rose-300"
-                        : verse.requiredLevel === 20
-                        ? "bg-gradient-to-r from-emerald-500/20 to-green-500/20 border-emerald-400/40 text-emerald-300"
-                        : verse.requiredLevel === 25
-                        ? "bg-gradient-to-r from-cyan-500/20 to-teal-500/20 border-cyan-400/40 text-cyan-300"
-                        : verse.requiredLevel === 30
-                        ? "bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400/40 text-yellow-300"
-                        : verse.requiredLevel === 35
-                        ? "bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-400/40 text-red-300"
-                        : verse.requiredLevel === 40
-                        ? "bg-gradient-to-r from-indigo-500/20 to-blue-500/20 border-indigo-400/40 text-indigo-300"
-                        : "bg-gradient-to-r from-violet-500/20 to-purple-500/20 border-violet-400/40 text-violet-300"
-                    }`}>
-                      {verse.requiredLevel === 5 ? (
-                        <Star className="w-4 h-4" />
-                      ) : verse.requiredLevel === 10 ? (
-                        <Zap className="w-4 h-4" />
-                      ) : verse.requiredLevel === 15 ? (
-                        <Crown className="w-4 h-4" />
-                      ) : verse.requiredLevel === 20 ? (
-                        <Shield className="w-4 h-4" />
-                      ) : verse.requiredLevel === 25 ? (
-                        <Gem className="w-4 h-4" />
-                      ) : verse.requiredLevel === 30 ? (
-                        <Flame className="w-4 h-4" />
-                      ) : verse.requiredLevel === 35 ? (
-                        <Eye className="w-4 h-4" />
-                      ) : verse.requiredLevel === 40 ? (
-                        <Sparkles className="w-4 h-4" />
-                      ) : (
-                        <Infinity className="w-4 h-4" />
-                      )}
-                       <span className="font-semibold text-sm">
-                         🔒 {t('audioTherapy.levelRequired', { level: verse.requiredLevel })} {verse.id === 2 && "or PRO"}
-                       </span>
-                    </div>
-                    
-                    {/* Progress hint */}
-                    <div className="text-xs text-muted-foreground/80 bg-muted/20 px-4 py-2 rounded-full">
-                      {verse.requiredLevel === 5 
-                        ? "⭐ Continue your journey to unlock"
-                        : verse.requiredLevel === 10
-                        ? "⚡ Advance further to access"
-                        : verse.requiredLevel === 15
-                        ? "👑 Master level required"
-                        : verse.requiredLevel === 20
-                        ? "🛡️ Guardian level needed"
-                        : verse.requiredLevel === 25
-                        ? "💎 Sage wisdom required"
-                        : verse.requiredLevel === 30
-                        ? "🔥 Flame keeper level"
-                        : verse.requiredLevel === 35
-                        ? "👁️ Seer vision required"
-                        : verse.requiredLevel === 40
-                        ? "✨ Cosmic master level"
-                        : "♾️ Infinite wisdom required"
-                      }
-                    </div>
-                  </div>
-                )}
               </div>
             </Card>
           );

@@ -33,18 +33,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
   // Check if user has access to a journal
   const hasAccess = (journal: any) => {
-    if (!userProfile) return false;
-    const userLevel = userProfile.level || 1;
-    const isPro = userProfile.is_vip || false;
-    
-    // Always allow access to level 1 journals
-    if (journal.levelRequired <= 1) return true;
-    
-      // Check Pro requirement
-      if (journal.isProRequired && !isPro) return false;
-    
-    // Check level requirement
-    return userLevel >= journal.levelRequired;
+    // Allow access to all journals - users will discover levels naturally
+    return true;
   };
 
   const publicAudioUrl = getAudioUrl('Jurnalsyukur1.MP3');
@@ -57,10 +47,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     const isLocked = !hasAccess(journal);
     
     if (isLocked) {
-      const proMessage = journal.isProRequired ? " atau beli Pro" : "";
+      // This should never happen now since hasAccess always returns true
       toast({
         title: "Akses Terbatas",
-        description: `Level mu belum cukup (butuh level ${journal.levelRequired})${proMessage}`,
+        description: "Terjadi kesalahan, silakan coba lagi",
         variant: "destructive"
       });
       return;
@@ -435,12 +425,12 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                   </Button>
                 </div>
                 
-                 <p className="text-sm text-muted-foreground">
-                   {isLocked 
-                     ? `Level ${journal.levelRequired} required${journal.isProRequired ? ' • Pro' : ''}`
-                     : `Dengarkan dan renungkan selama ${journal.duration}`
-                   }
-                 </p>
+                  <p className="text-sm text-muted-foreground">
+                    {isLocked 
+                      ? "Akses terbuka untuk semua" // Updated message since all journals are now accessible
+                      : `Dengarkan dan renungkan selama ${journal.duration}`
+                    }
+                  </p>
               </div>
             </Card>
           );

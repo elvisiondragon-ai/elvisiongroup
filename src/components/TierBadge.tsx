@@ -2,6 +2,7 @@ import { Crown, Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProBadge } from "./ProBadge";
 import { usePro } from "@/hooks/usePro";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 
 interface TierBadgeProps {
   level: number;
@@ -12,24 +13,28 @@ interface TierBadgeProps {
 
 export function TierBadge({ level, isPro = false, className, showProBadge = true }: TierBadgeProps) {
   const { proStatus } = usePro();
+  const { userProfile } = useUserProfile();
   
   // Use the unified pro status instead of the isPro prop
   const actualIsPro = proStatus.isPro && proStatus.proBadge;
+  
+  // Check if user has level 3 achievement
+  const hasLevel3Achievement = userProfile?.achievements?.includes('level_3') ?? false;
   
   // Don't show ProBadge if pro badge is disabled or user doesn't have pro access
   const shouldShowProBadge = showProBadge && actualIsPro;
   
   const getTierStyle = () => {
-    if (level >= 9) return "tier-master";
+    if (level >= 10) return "tier-master";
     if (actualIsPro || level >= 6) return "tier-pro";
-    if (level >= 3) return "tier-premium";
+    if (level >= 3 || hasLevel3Achievement) return "tier-premium";
     return "tier-basic";
   };
 
   const getTierIcon = () => {
-    if (level >= 9) return <Crown className="w-3 h-3" />;
+    if (level >= 10) return <Crown className="w-3 h-3" />;
     if (actualIsPro && !showProBadge) return <Star className="w-3 h-3" />;
-    if (level >= 3) return <Zap className="w-3 h-3" />;
+    if (level >= 3 || hasLevel3Achievement) return <Zap className="w-3 h-3 text-purple-400" />;
     return null;
   };
 
