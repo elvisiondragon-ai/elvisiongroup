@@ -475,6 +475,7 @@ export type Database = {
           customer_phone: string | null
           id: string
           ip_address: string | null
+          pro_badge: boolean | null
           status: string
           subscription_end_date: string | null
           subscription_start_date: string | null
@@ -485,6 +486,7 @@ export type Database = {
           updated_at: string
           user_email: string | null
           user_id: string | null
+          verse_access: boolean | null
         }
         Insert: {
           amount_paid?: number | null
@@ -493,6 +495,7 @@ export type Database = {
           customer_phone?: string | null
           id?: string
           ip_address?: string | null
+          pro_badge?: boolean | null
           status?: string
           subscription_end_date?: string | null
           subscription_start_date?: string | null
@@ -503,6 +506,7 @@ export type Database = {
           updated_at?: string
           user_email?: string | null
           user_id?: string | null
+          verse_access?: boolean | null
         }
         Update: {
           amount_paid?: number | null
@@ -511,6 +515,7 @@ export type Database = {
           customer_phone?: string | null
           id?: string
           ip_address?: string | null
+          pro_badge?: boolean | null
           status?: string
           subscription_end_date?: string | null
           subscription_start_date?: string | null
@@ -521,6 +526,7 @@ export type Database = {
           updated_at?: string
           user_email?: string | null
           user_id?: string | null
+          verse_access?: boolean | null
         }
         Relationships: []
       }
@@ -582,6 +588,7 @@ export type Database = {
           id: string
           is_premium: boolean | null
           last_login_date: string | null
+          last_notification_time: string | null
           last_streak_bonus_date: string | null
           level: number
           preferred_language: string | null
@@ -600,6 +607,7 @@ export type Database = {
           id?: string
           is_premium?: boolean | null
           last_login_date?: string | null
+          last_notification_time?: string | null
           last_streak_bonus_date?: string | null
           level?: number
           preferred_language?: string | null
@@ -618,6 +626,7 @@ export type Database = {
           id?: string
           is_premium?: boolean | null
           last_login_date?: string | null
+          last_notification_time?: string | null
           last_streak_bonus_date?: string | null
           level?: number
           preferred_language?: string | null
@@ -1088,6 +1097,18 @@ export type Database = {
         Args: { p_table_name: string; p_user_id: string }
         Returns: boolean
       }
+      check_unified_pro_status: {
+        Args: { p_user_id: string }
+        Returns: {
+          days_remaining: number
+          expires_at: string
+          is_pro: boolean
+          pro_badge: boolean
+          status: string
+          subscription_type: string
+          verse_access: boolean
+        }[]
+      }
       check_vip_status: {
         Args: { p_user_id: string }
         Returns: {
@@ -1138,6 +1159,10 @@ export type Database = {
       enhanced_payment_access_control: {
         Args: { p_transaction_id: string; p_user_id: string }
         Returns: boolean
+      }
+      expire_subscriptions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       gentle_expire_pro_access: {
         Args: Record<PropertyKey, never>

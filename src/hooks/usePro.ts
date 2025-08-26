@@ -8,6 +8,8 @@ export interface ProStatus {
   status: string | null;
   expiresAt: string | null;
   daysRemaining: number | null;
+  verseAccess: boolean;
+  proBadge: boolean;
   loading: boolean;
 }
 
@@ -18,93 +20,89 @@ export function usePro() {
     status: null,
     expiresAt: null,
     daysRemaining: null,
+    verseAccess: false,
+    proBadge: false,
     loading: true
   });
 
+  // Cache for 5 minutes to reduce API calls
+  const CACHE_DURATION = 5 * 60 * 1000;
+  const CACHE_KEY = 'unified_pro_status_cache';
+
+  const setNotPro = () => {
+    setProStatus({
+      isPro: false,
+      subscriptionType: null,
+      status: null,
+      expiresAt: null,
+      daysRemaining: null,
+      verseAccess: false,
+      proBadge: false,
+      loading: false,
+    });
+  };
+
   const checkProStatus = async () => {
     try {
-      setProStatus(prev => ({ ...prev, loading: true }));
-      
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setProStatus({
-          isPro: false,
-          subscriptionType: null,
-          status: null,
-          expiresAt: null,
-          daysRemaining: null,
-          loading: false
-        });
-        return;
-      }
-
-      // First check profile achievements (fallback method)
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('achievements')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profileData?.achievements?.includes('pro')) {
-        setProStatus({
-          isPro: true,
-          subscriptionType: 'achievement',
-          status: 'active',
-          expiresAt: null,
-          daysRemaining: null,
-          loading: false
-        });
-        return;
-      }
-
-      // Try the RPC function as backup
-      try {
-        const { data, error } = await supabase.rpc('check_pro_status', { p_user_id: user.id });
-        
-        if (!error && data && data.length > 0) {
-          const statusData = data[0];
-          setProStatus({
-            isPro: statusData.is_pro || false,
-            subscriptionType: statusData.subscription_type,
-            status: statusData.status,
-            expiresAt: statusData.expires_at,
-            daysRemaining: statusData.days_remaining,
-            loading: false
-          });
+      // Check cache first
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data: cachedData, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_DURATION) {
+          setProStatus({ ...cachedData, loading: false });
           return;
         }
-      } catch (rpcError) {
-        console.log('RPC function failed, using achievements fallback');
       }
 
-      // Default to not pro
-      const finalStatus = {
-        isPro: false,
-        subscriptionType: null,
-        status: null,
-        expiresAt: null,
-        daysRemaining: null,
-        loading: false
-      };
-      
-      setProStatus(finalStatus);
-      
-      // CACHE the result to prevent repeated calls
-      localStorage.setItem('proStatus_cache', JSON.stringify({
-        data: finalStatus,
-        timestamp: Date.now()
-      }));
-    } catch (error) {
-      console.error('Error in checkProStatus:', error);
-      setProStatus({
-        isPro: false,
-        subscriptionType: null,
-        status: null,
-        expiresAt: null,
-        daysRemaining: null,
-        loading: false
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setNotPro();
+        return;
+      }
+
+      // Use unified pro status function - single source of truth
+      const { data, error } = await supabase.rpc('check_unified_pro_status', {
+        p_user_id: user.id
       });
+
+      if (!error && data && data.length > 0) {
+        const statusData = data[0];
+        const proStatusData = {
+          isPro: statusData.is_pro,
+          subscriptionType: statusData.subscription_type,
+          status: statusData.status,
+          expiresAt: statusData.expires_at,
+          daysRemaining: statusData.days_remaining,
+          verseAccess: statusData.verse_access,
+          proBadge: statusData.pro_badge,
+        };
+        
+        setProStatus({ ...proStatusData, loading: false });
+        
+        // Cache the result
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          data: proStatusData,
+          timestamp: Date.now()
+        }));
+      } else {
+        setNotPro();
+        // Cache the "not pro" result as well
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          data: {
+            isPro: false,
+            subscriptionType: null,
+            status: null,
+            expiresAt: null,
+            daysRemaining: null,
+            verseAccess: false,
+            proBadge: false,
+          },
+          timestamp: Date.now()
+        }));
+      }
+    } catch (error) {
+      console.error('Error checking unified pro status:', error);
+      setNotPro();
     }
   };
 
@@ -115,7 +113,9 @@ export function usePro() {
       if (error) throw error;
       
       if (data.success) {
-        await checkProStatus(); // Refresh status
+        // Clear cache and refresh status
+        localStorage.removeItem(CACHE_KEY);
+        await checkProStatus();
         return { success: true, data };
       } else {
         throw new Error(data.error || 'Failed to start trial');
@@ -168,23 +168,6 @@ export function usePro() {
   };
 
   useEffect(() => {
-    // CACHE pro status to prevent excessive API calls
-    const cacheKey = 'proStatus_cache';
-    const cacheDuration = 5 * 60 * 1000; // 5 minutes
-    
-    const cachedData = localStorage.getItem(cacheKey);
-    if (cachedData) {
-      try {
-        const { data, timestamp } = JSON.parse(cachedData);
-        if (Date.now() - timestamp < cacheDuration) {
-          setProStatus(data);
-          return;
-        }
-      } catch (e) {
-        localStorage.removeItem(cacheKey);
-      }
-    }
-    
     checkProStatus();
   }, []);
 

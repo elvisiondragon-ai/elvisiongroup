@@ -7,6 +7,7 @@ import { Send, Users, Languages, Globe, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
+import { usePro } from "@/hooks/usePro";
 import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
@@ -37,6 +38,7 @@ export function Chat() {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
+  const { proStatus } = usePro();
   const { i18n, t } = useTranslation();
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export function Chat() {
             id: session.user.id, // Always use session user ID
             name: profile?.display_name || session.user.email?.split('@')[0] || 'Anonymous',
             level: profile?.level || 1,
-            isPro: profile?.achievements?.includes('pro') || false // Pro based on achievements array
+            isPro: proStatus.isPro // Use unified pro status instead of achievements
           };
           
           console.log('Setting currentUser:', currentUserObj);
@@ -102,7 +104,7 @@ export function Chat() {
     };
 
     getCurrentUser();
-  }, [toast]);
+  }, [toast, proStatus.isPro]); // Add proStatus.isPro as dependency
 
   // Load messages from database
   const loadMessages = useCallback(async (showRefreshState = false) => {
