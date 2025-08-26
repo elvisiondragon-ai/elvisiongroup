@@ -20,13 +20,13 @@
         
         body {
             font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #000000; /* Solid black fallback */
             background: 
-                #000000,
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.4), transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.4), transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.3), transparent 50%),
-                linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 100%);
+                linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%),
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.6), transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.6), transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.5), transparent 50%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -620,6 +620,18 @@
                 }
                 50% {
                     opacity: 0.8;
+                }
+            }
+            
+            @keyframes gradientShift {
+                0% {
+                    background-position: 0% 50%;
+                }
+                50% {
+                    background-position: 100% 50%;
+                }
+                100% {
+                    background-position: 0% 50%;
                 }
             }
         `;
