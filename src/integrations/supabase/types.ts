@@ -461,54 +461,6 @@ export type Database = {
         }
         Relationships: []
       }
-      pro_user: {
-        Row: {
-          amount: number | null
-          created_at: string
-          currency: string | null
-          customer_phone: string | null
-          email: string
-          end_date: string | null
-          id: string
-          payment_method: string | null
-          start_date: string | null
-          status: string
-          subscription_type: string
-          tripay_reference: string | null
-          updated_at: string
-        }
-        Insert: {
-          amount?: number | null
-          created_at?: string
-          currency?: string | null
-          customer_phone?: string | null
-          email: string
-          end_date?: string | null
-          id?: string
-          payment_method?: string | null
-          start_date?: string | null
-          status?: string
-          subscription_type?: string
-          tripay_reference?: string | null
-          updated_at?: string
-        }
-        Update: {
-          amount?: number | null
-          created_at?: string
-          currency?: string | null
-          customer_phone?: string | null
-          email?: string
-          end_date?: string | null
-          id?: string
-          payment_method?: string | null
-          start_date?: string | null
-          status?: string
-          subscription_type?: string
-          tripay_reference?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           achievements: string[] | null
@@ -872,6 +824,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      bytea_to_text: {
+        Args: { data: string }
+        Returns: string
+      }
       calculate_correct_level: {
         Args: { exp_points: number }
         Returns: number
@@ -1089,6 +1045,57 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      http: {
+        Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_delete: {
+        Args:
+          | { content: string; content_type: string; uri: string }
+          | { uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_get: {
+        Args: { data: Json; uri: string } | { uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_head: {
+        Args: { uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_header: {
+        Args: { field: string; value: string }
+        Returns: Database["public"]["CompositeTypes"]["http_header"]
+      }
+      http_list_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          curlopt: string
+          value: string
+        }[]
+      }
+      http_patch: {
+        Args: { content: string; content_type: string; uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_post: {
+        Args:
+          | { content: string; content_type: string; uri: string }
+          | { data: Json; uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_put: {
+        Args: { content: string; content_type: string; uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_reset_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      http_set_curlopt: {
+        Args: { curlopt: string; value: string }
+        Returns: boolean
+      }
       is_super_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1154,6 +1161,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      text_to_bytea: {
+        Args: { data: string }
+        Returns: string
+      }
       update_subscription_status_manually: {
         Args: {
           p_duration_type?: string
@@ -1162,6 +1173,10 @@ export type Database = {
           p_subscription_type: string
         }
         Returns: Json
+      }
+      urlencode: {
+        Args: { data: Json } | { string: string } | { string: string }
+        Returns: string
       }
       validate_admin_role_operation: {
         Args: { p_operation: string; p_role: string; p_target_user_id: string }
@@ -1184,7 +1199,23 @@ export type Database = {
       [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
+      http_header: {
+        field: string | null
+        value: string | null
+      }
+      http_request: {
+        method: unknown | null
+        uri: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content_type: string | null
+        content: string | null
+      }
+      http_response: {
+        status: number | null
+        content_type: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content: string | null
+      }
     }
   }
 }
