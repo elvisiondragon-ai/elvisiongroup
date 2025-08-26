@@ -206,6 +206,76 @@ export type Database = {
         }
         Relationships: []
       }
+      days_remaining: {
+        Row: {
+          created_at: string | null
+          days_remaining: number
+          email: string
+          id: string
+          is_active: boolean | null
+          subscription_end_date: string | null
+          subscription_id: string | null
+          subscription_start_date: string | null
+          subscription_type: string
+          trial_end_date: string | null
+          trial_start_date: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          days_remaining?: number
+          email: string
+          id?: string
+          is_active?: boolean | null
+          subscription_end_date?: string | null
+          subscription_id?: string | null
+          subscription_start_date?: string | null
+          subscription_type: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          days_remaining?: number
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          subscription_end_date?: string | null
+          subscription_id?: string | null
+          subscription_start_date?: string | null
+          subscription_type?: string
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "days_remaining_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "pro_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "days_remaining_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "pro_subscriptions_admin_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "days_remaining_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       device_tokens: {
         Row: {
           created_at: string
@@ -404,6 +474,7 @@ export type Database = {
           created_at: string
           currency: string | null
           customer_phone: string | null
+          days_remaining: number | null
           id: string
           ip_address: string | null
           pro_badge: boolean | null
@@ -424,6 +495,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           customer_phone?: string | null
+          days_remaining?: number | null
           id?: string
           ip_address?: string | null
           pro_badge?: boolean | null
@@ -444,6 +516,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           customer_phone?: string | null
+          days_remaining?: number | null
           id?: string
           ip_address?: string | null
           pro_badge?: boolean | null
