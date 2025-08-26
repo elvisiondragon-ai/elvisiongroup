@@ -79,14 +79,22 @@ export function usePro() {
       }
 
       // Default to not pro
-      setProStatus({
+      const finalStatus = {
         isPro: false,
         subscriptionType: null,
         status: null,
         expiresAt: null,
         daysRemaining: null,
         loading: false
-      });
+      };
+      
+      setProStatus(finalStatus);
+      
+      // CACHE the result to prevent repeated calls
+      localStorage.setItem('proStatus_cache', JSON.stringify({
+        data: finalStatus,
+        timestamp: Date.now()
+      }));
     } catch (error) {
       console.error('Error in checkProStatus:', error);
       setProStatus({
@@ -160,6 +168,23 @@ export function usePro() {
   };
 
   useEffect(() => {
+    // CACHE pro status to prevent excessive API calls
+    const cacheKey = 'proStatus_cache';
+    const cacheDuration = 5 * 60 * 1000; // 5 minutes
+    
+    const cachedData = localStorage.getItem(cacheKey);
+    if (cachedData) {
+      try {
+        const { data, timestamp } = JSON.parse(cachedData);
+        if (Date.now() - timestamp < cacheDuration) {
+          setProStatus(data);
+          return;
+        }
+      } catch (e) {
+        localStorage.removeItem(cacheKey);
+      }
+    }
+    
     checkProStatus();
   }, []);
 

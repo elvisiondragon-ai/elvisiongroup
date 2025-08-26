@@ -165,45 +165,31 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
         const profile = await fetchUserProfile(user.id);
         setUserProfile(profile);
         
-        // Handle daily login after getting profile
-        setTimeout(() => {
-          handleDailyLogin();
-        }, 1000);
+        // Handle daily login after getting profile - single call with session check
+        const sessionKey = `daily_login_${new Date().toDateString()}_${user.id}`;
+        const hasProcessedToday = sessionStorage.getItem(sessionKey);
+        
+        if (!hasProcessedToday && !dailyLoginProcessed) {
+          setTimeout(() => {
+            handleDailyLogin();
+            sessionStorage.setItem(sessionKey, 'true');
+          }, 1000);
+        }
       }
       
       setLoading(false);
     };
 
+    // REMOVE DUPLICATE AUTH LISTENER - App.tsx already handles this
+    // Only get initial user state, no auth state listener here
     getUser();
+  }, []); // FIXED: Empty dependencies to prevent loops
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          setUser(session.user);
-          const profile = await fetchUserProfile(session.user.id);
-          setUserProfile(profile);
-          setDailyLoginProcessed(false); // Reset for new session
-          
-          // Handle daily login for new session
-          setTimeout(() => {
-            handleDailyLogin();
-          }, 1000);
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setUserProfile(null);
-          setDailyLoginProcessed(false);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, [fetchUserProfile, handleDailyLogin]);
-
-  // Listen for XP updates to refresh profile
+  // Listen for XP updates to refresh profile - THROTTLED
   useEffect(() => {
     if (!user) return;
 
+    let throttleTimeout: NodeJS.Timeout;
     const channel = supabase
       .channel('profile_changes')
       .on(
@@ -215,16 +201,20 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
           filter: `user_id=eq.${user.id}`,
         },
         () => {
-          // Refresh profile when it's updated
-          refreshProfile();
+          // THROTTLE refreshProfile calls to prevent spam
+          clearTimeout(throttleTimeout);
+          throttleTimeout = setTimeout(() => {
+            refreshProfile();
+          }, 2000); // 2 second throttle
         }
       )
       .subscribe();
 
     return () => {
+      clearTimeout(throttleTimeout);
       supabase.removeChannel(channel);
     };
-  }, [user, refreshProfile]);
+  }, [user?.id]); // FIXED: Only depend on user.id, not refreshProfile
 
   const value = {
     userProfile,

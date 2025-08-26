@@ -41,29 +41,38 @@ const App = () => {
             window.history.replaceState(null, '', cleanUrl);
           }
           
-          // For Google OAuth, this handles both new signups and existing logins
-          setTimeout(() => {
-            console.log('User authenticated successfully:', session.user.email);
-            // Register for push notifications after successful login
-            registerForNotifications();
-          }, 1000);
+          // THROTTLED notification registration to prevent spam
+          const registerKey = `register_${session.user.id}`;
+          if (!sessionStorage.getItem(registerKey)) {
+            setTimeout(() => {
+              console.log('User authenticated successfully:', session.user.email);
+              registerForNotifications();
+              sessionStorage.setItem(registerKey, 'true');
+            }, 1000);
+          }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setIsLoading(false);
+          // Clear session data on signout
+          sessionStorage.clear();
         } else if (event === 'TOKEN_REFRESHED') {
           setUser(session?.user ?? null);
         }
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
+    // THEN check for existing session - ONLY ONCE
+    let hasCheckedSession = false;
+    if (!hasCheckedSession) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+        hasCheckedSession = true;
+      });
+    }
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [registerForNotifications]); // FIXED: Add dependency
 
   if (isLoading) {
     return (
