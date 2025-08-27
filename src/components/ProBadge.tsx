@@ -6,13 +6,20 @@ interface ProBadgeProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
+  targetUserIsPro?: boolean;
+  targetUserSubscriptionType?: string;
 }
 
-export function ProBadge({ className, size = 'md', showLabel = true }: ProBadgeProps) {
+export function ProBadge({ className, size = 'md', showLabel = true, targetUserIsPro, targetUserSubscriptionType }: ProBadgeProps) {
   const { proStatus } = usePro();
 
-  // Show badge if user is confirmed Pro with badge access
-  if (!proStatus.isPro || !proStatus.proBadge) {
+  // If target user props are provided, use them (for showing other users' badges)
+  // Otherwise use current user's status (for showing own badge)
+  const isTargetUserPro = targetUserIsPro !== undefined ? targetUserIsPro : proStatus.isPro;
+  const subscriptionType = targetUserSubscriptionType !== undefined ? targetUserSubscriptionType : proStatus.subscriptionType;
+
+  // Show badge if target user is pro
+  if (!isTargetUserPro) {
     return null;
   }
 
@@ -28,7 +35,7 @@ export function ProBadge({ className, size = 'md', showLabel = true }: ProBadgeP
     lg: 'w-5 h-5'
   };
 
-  const isYearlyPro = proStatus.subscriptionType === 'yearly';
+  const isYearlyPro = subscriptionType === '1_year';
   const icon = isYearlyPro ? <Crown className={iconSizes[size]} /> : <Star className={iconSizes[size]} />;
 
   return (

@@ -9,23 +9,18 @@ interface TierBadgeProps {
   className?: string;
   showProBadge?: boolean;
   achievements?: string[];
+  subscriptionType?: string;
 }
 
-export function TierBadge({ level, isPro = false, className, showProBadge = true, achievements = [] }: TierBadgeProps) {
+export function TierBadge({ level, isPro = false, className, showProBadge = true, achievements = [], subscriptionType }: TierBadgeProps) {
   const { proStatus } = usePro();
-  
-  // Use the isPro prop passed from parent (individual user's status)
-  const actualIsPro = isPro; // Target user's pro status
   
   // Check if user has level 3 achievement from passed achievements
   const hasLevel3Achievement = achievements?.includes('level_3') ?? false;
   
-  // Non-pro viewers see pro badges so they get inspired to upgrade
-  const isViewerNonPro = !proStatus.proBadge;
-  const showProBadgeToNonPro = isViewerNonPro && actualIsPro; // Non-pro viewers see pro badges
-  
-  // Show ProBadge for any user who has pro status, regardless of viewer's status
-  const shouldShowProBadge = showProBadge && (actualIsPro || showProBadgeToNonPro);
+  // Show ProBadge if the target user has pro status
+  // Non-pro viewers should see pro badges from other users to encourage upgrades
+  const shouldShowProBadge = showProBadge && isPro;
   
   const getTierStyle = () => {
     if (level >= 10) return "tier-master";
@@ -53,7 +48,7 @@ export function TierBadge({ level, isPro = false, className, showProBadge = true
           {getTierIcon()}
         </div>
       </div>
-      {shouldShowProBadge && <ProBadge size="sm" />}
+      {shouldShowProBadge && <ProBadge size="sm" targetUserIsPro={isPro} targetUserSubscriptionType={subscriptionType} />}
     </div>
   );
 }
