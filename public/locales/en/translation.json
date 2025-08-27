@@ -18,7 +18,7 @@
     "subtitle": "Unlock spiritual verses as you progress",
     "locked": "Locked",
     "unlocked": "Unlocked",
-    "levelRequired": "Level {{level}} required",
+    "levelRequired": "Unlocked lv {{level}} or Upgrade to Pro to Unlock",
     "readTutorial": "READ TUTORIAL",
     "availableTracks": "Available Tracks",
     "loading": "Loading audio therapy..."
