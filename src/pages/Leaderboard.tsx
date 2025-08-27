@@ -3,18 +3,16 @@ import { LeaderboardCard } from "@/components/LeaderboardCard";
 import { Trophy, Star, Crown } from "lucide-react";
 
 const mockLeaderboard = [
-  { id: "1", name: "Andin", level: 9, xp: 12500, rank: 1, avatar: "" },
-  { id: "2", name: "Master Yoga", level: 8, xp: 11200, rank: 2, avatar: "" },
-  { id: "3", name: "Jason", level: 7, xp: 8900, rank: 3, isPro: true, avatar: "" },
-  { id: "4", name: "Spiritual Seeker", level: 7, xp: 7800, rank: 4, avatar: "" },
-  { id: "coach-senz", name: "Senz", level: 6, xp: 4500, rank: 5, avatar: "" },
-  { id: "5", name: "Andrew", level: 6, xp: 6500, rank: 6, avatar: "" },
-  { id: "6", name: "Meditation Pro", level: 5, xp: 5200, rank: 7, avatar: "" },
-  { id: "7", name: "Zen Master", level: 4, xp: 4100, rank: 8, avatar: "" },
-  { id: "8", name: "Cosmic Soul", level: 4, xp: 3800, rank: 9, avatar: "" },
-  { id: "9", name: "Sam_165", level: 3, xp: 3200, rank: 10, avatar: "" },
-  { id: "10", name: "Light Worker", level: 3, xp: 2900, rank: 11, avatar: "" },
-  { id: "11", name: "Inner Peace", level: 2, xp: 1800, rank: 12, avatar: "" },
+  { id: "1", name: "Andin", level: 10, xp: 15200, rank: 1, isPro: true, avatar: "" },           // 15200 XP = Level 10 (15,000+)
+  { id: "coach-senz", name: "Abdul Hakikat", level: 9, xp: 12200, rank: 2, isPro: true, avatar: "" }, // 12200 XP = Level 9 (12,000-15,000)
+  { id: "3", name: "Jason", level: 8, xp: 9900, rank: 3, isPro: true, avatar: "" },            // 9900 XP = Level 8 (9,000-12,000)
+  { id: "4", name: "Spiritual Seeker", level: 8, xp: 9380, rank: 4, isPro: true, avatar: "" }, // 9380 XP = Level 8 (9,000-12,000)
+  { id: "2", name: "Master Yoga", level: 7, xp: 8300, rank: 5, isPro: true, avatar: "" },      // 8300 XP = Level 7 (7,000-9,000)
+  { id: "5", name: "Andrew", level: 7, xp: 7940, rank: 6, isPro: true, avatar: "" },           // 7940 XP = Level 7 (7,000-9,000)
+  { id: "7", name: "Zen Master", level: 7, xp: 7340, rank: 7, isPro: true, avatar: "" },       // 7340 XP = Level 7 (7,000-9,000)
+  { id: "8", name: "Cosmic Soul", level: 7, xp: 7100, rank: 8, isPro: true, avatar: "" },      // 7100 XP = Level 7 (7,000-9,000)
+  { id: "9", name: "Sam_Rindu", level: 6, xp: 6900, rank: 9, isPro: true, avatar: "" },        // 6900 XP = Level 6 (4,500-7,000)
+  { id: "10", name: "Nanawati", level: 6, xp: 6760, rank: 10, isPro: true, avatar: "" },       // 6760 XP = Level 6 (4,500-7,000)
 ];
 
 export function Leaderboard() {
@@ -38,7 +36,7 @@ export function Leaderboard() {
         <div className="grid grid-cols-3 gap-4">
           <Card className="p-4 text-center bg-gradient-secondary border-border">
             <Crown className="w-6 h-6 mx-auto mb-2 text-gold" />
-            <div className="text-lg font-bold font-orbitron text-gold">12</div>
+            <div className="text-lg font-bold font-orbitron text-gold">120</div>
             <div className="text-xs text-muted-foreground">Masters</div>
           </Card>
           
@@ -75,7 +73,7 @@ export function Leaderboard() {
               Peringkat Anda
             </h3>
             <div className="text-2xl font-bold font-orbitron text-background mb-1">
-              #23
+              #Tidak ditemukan
             </div>
             <p className="text-sm text-background/80">
               Tetap konsisten untuk naik peringkat!
