@@ -210,7 +210,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 8,
       title: "Verse 8 - Love Magnet",
       subtitle: "Menarik cinta dan kasih sayang dari orang-orang di sekitar",
-      unlocked: userLevel >= 9 
+      unlocked: userLevel >= 9,
       requiredLevel: 9,
       artwork: verse8Artwork,
       audioPath: null,
