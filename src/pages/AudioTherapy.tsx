@@ -130,7 +130,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 1,
       title: "Verse 1 - The Space Hill",
       subtitle: "Kedamaian Batin",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
+      unlocked: userLevel >= 2 || proStatus.isPro, 
       requiredLevel: 2,
       artwork: verseArtwork,
       audioPath: 'Verse1 - The Space Hill.MP3',
@@ -140,7 +140,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 2,
       title: "Verse 2 - Lucid Beach",
       subtitle: "Relaksasi seperti berada di pantai, membantu tidur nyenyak dan pikiran jernih",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
+      unlocked: userLevel >= 3 || proStatus.isPro,
       requiredLevel: 3,
       artwork: verse2Artwork,
       audioPath: 'Verse2 - Lucid Beach.MP3',
@@ -150,7 +150,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 3,
       title: "Verse 3 - Syukur Meditation",
       subtitle: "Menumbuhkan rasa syukur pada titik saraf seluruh tubuh",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
+      unlocked: userLevel >= 4 || proStatus.isPro,
       requiredLevel: 4,
       artwork: verse3Artwork,
       audioPath: 'Verse 3 - Syukur.MP3',
@@ -180,7 +180,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 5,
       title: "Verse 5 - Vitality Vortex",
       subtitle: "Memperbaiki ulang finansial, fisik dan mental untuk hidup yang sehat",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
+      unlocked: userLevel >= 5 || proStatus.isPro,
       requiredLevel: 5,
       artwork: verse5Artwork,
       audioPath: 'Verse5 - Virtality Vortex.MP3',
@@ -190,7 +190,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 6,
       title: "Verse 6 - Beautify",
       subtitle: "Memfokuskan Kecantikan fisik yang mempesona setiap orang",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
+      unlocked: userLevel >= 2 || proStatus.isPro,
       requiredLevel: 6,
       artwork: verse6Artwork,
       audioPath: null,
@@ -200,7 +200,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 7,
       title: "Verse 7 - Confidence Core",
       subtitle: "Menumbuhkan keyakinan diri agar berani mengambil langkah penting",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
+      unlocked: userLevel >= 2 || proStatus.isPro,
       requiredLevel: 7,
       artwork: verse7Artwork,
       audioPath: null,
@@ -210,8 +210,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 8,
       title: "Verse 8 - Love Magnet",
       subtitle: "Menarik cinta dan kasih sayang dari orang-orang di sekitar",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
-      requiredLevel: 8,
+      unlocked: userLevel >= 9 
+      requiredLevel: 9,
       artwork: verse8Artwork,
       audioPath: null,
       language: 'id'
