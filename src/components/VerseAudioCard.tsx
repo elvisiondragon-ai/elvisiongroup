@@ -111,9 +111,11 @@ export function VerseAudioCard({ verse, onWarning }: VerseAudioCardProps) {
                   ) : (
                     <Crown className="w-12 h-12 text-rose-400 mx-auto animate-pulse" />
                   )}
-                  <div className="relative">
-                    <Lock className="w-6 h-6 text-muted-foreground mx-auto" />
-                  </div>
+                  {(
+                    <div className="relative">
+                      <Lock className="w-6 h-6 text-muted-foreground mx-auto" />
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -128,10 +130,40 @@ export function VerseAudioCard({ verse, onWarning }: VerseAudioCardProps) {
           
           {!verse.unlocked && (
             <>
-              <div className={`text-xs font-bold mt-3 ${
-                verse.requiredLevel === 10 ? "text-purple-400" : "text-rose-400"
-              }`}>
-                Locked
+              <div className="text-sm font-bold mt-3 text-center text-red-400 flex items-center justify-center gap-1">
+                {verse.requiredLevel === 2 ? (
+                  <>
+                    Lv 2 or Upgrade Pro
+                  </>
+                ) : verse.requiredLevel === 3 ? (
+                  <>
+                    Lv 3 or Upgrade Pro
+                  </>
+                ) : verse.requiredLevel === 6 ? (
+                  <div className="font-[Luxurious_Script] text-sm">
+                    Lv 5 or Upgrade Pro
+                  </div>
+                ) : verse.requiredLevel === 7 ? (
+                  <>
+                    Lv 6 & Pro
+                  </>
+                ) : verse.requiredLevel === 8 ? (
+                  <>
+                    Lv 7 & Pro
+                  </>
+                ) : verse.requiredLevel === 9 ? (
+                  <>
+                    Lv 8 & Pro
+                  </>
+                ) : verse.requiredLevel === 10 ? (
+                  <>
+                    Lv 9 & Pro
+                  </>
+                ) : verse.requiredLevel === 11 ? (
+                  <>
+                    Lv 10 & Pro
+                  </>
+                ) : "Locked"}
               </div>
               
               {/* Animated glow ring */}

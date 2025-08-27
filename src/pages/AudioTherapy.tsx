@@ -140,8 +140,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 2,
       title: "Verse 2 - Lucid Beach",
       subtitle: "Relaksasi seperti berada di pantai, membantu tidur nyenyak dan pikiran jernih",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
-      requiredLevel: 3,
+      unlocked: proStatus.isPro, // Lock for non-pro users
+      requiredLevel: 2,
       artwork: verse2Artwork,
       audioPath: 'Verse2 - Lucid Beach.MP3',
       language: 'id'
@@ -150,8 +150,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 3,
       title: "Verse 3 - Syukur Meditation",
       subtitle: "Menumbuhkan rasa syukur pada titik saraf seluruh tubuh",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
-      requiredLevel: 4,
+      unlocked: proStatus.isPro, // Lock for non-pro users
+      requiredLevel: 3,
       artwork: verse3Artwork,
       audioPath: 'Verse 3 - Syukur.MP3',
       language: 'id'
@@ -180,8 +180,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 5,
       title: "Verse 5 - Vitality Vortex",
       subtitle: "Memperbaiki ulang finansial, fisik dan mental untuk hidup yang sehat",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
-      requiredLevel: 5,
+      unlocked: proStatus.isPro, // Lock for non-pro users
+      requiredLevel: 6,
       artwork: verse5Artwork,
       audioPath: 'Verse5 - Virtality Vortex.MP3',
       language: 'id'
@@ -190,8 +190,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 6,
       title: "Verse 6 - Beautify",
       subtitle: "Memfokuskan Kecantikan fisik yang mempesona setiap orang",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
-      requiredLevel: 6,
+      unlocked: false, // Lock for all users
+      requiredLevel: 7,
       artwork: verse6Artwork,
       audioPath: null,
       language: 'id'
@@ -200,8 +200,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 7,
       title: "Verse 7 - Confidence Core",
       subtitle: "Menumbuhkan keyakinan diri agar berani mengambil langkah penting",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
-      requiredLevel: 7,
+      unlocked: false, // Lock for all users
+      requiredLevel: 8,
       artwork: verse7Artwork,
       audioPath: null,
       language: 'id'
@@ -210,8 +210,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 8,
       title: "Verse 8 - Love Magnet",
       subtitle: "Menarik cinta dan kasih sayang dari orang-orang di sekitar",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
-      requiredLevel: 8,
+      unlocked: false, // Lock for all users
+      requiredLevel: 9,
       artwork: verse8Artwork,
       audioPath: null,
       language: 'id'
@@ -220,8 +220,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 9,
       title: "Verse 9 - Family Harmony",
       subtitle: "Menenangkan emosi dan memperkuat hubungan keluarga",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
-      requiredLevel: 9,
+      unlocked: false, // Lock for all users
+      requiredLevel: 10,
       artwork: verse9Artwork,
       audioPath: null,
       language: 'id'
@@ -230,8 +230,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 10,
       title: "Verse 10 - Healing Heart",
       subtitle: "Menyembuhkan luka batin dan memulihkan kedamaian hati",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
-      requiredLevel: 10,
+      unlocked: false, // Lock for all users
+      requiredLevel: 11,
       artwork: verse10Artwork,
       audioPath: null,
       language: 'id'
@@ -322,7 +322,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                         {t('audioTherapy.readTutorial')}
                       </span>
                     </Button>
-                    <div className="text-xs text-primary/80 font-medium">✨ {t('audioTherapy.unlocked')} ✨</div>
                   </div>
               </div>
             </Card>
