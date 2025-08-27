@@ -21,8 +21,8 @@ export function TierBadge({ level, isPro = false, className, showProBadge = true
   const hasLevel3Achievement = achievements?.includes('level_3') ?? false;
   
   // Non-pro viewers see pro badges so they get inspired to upgrade
-  const isViewerNonPro = !proStatus.proBadge;
-  const showProBadgeToNonPro = isViewerNonPro && actualproBadge; // Non-pro viewers see pro badges
+  const isViewerNonPro = !actualProBadge;
+  const showProBadgeToNonPro = isViewerNonPro && actualIsPro; // Non-pro viewers see pro badges
   
   // Show ProBadge for any user who has pro status, regardless of viewer's status
   const shouldShowProBadge = showProBadge && (actualIsPro || showProBadgeToNonPro);
