@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { LeaderboardCard } from "@/components/LeaderboardCard";
-import { Trophy, Zap, Crown } from "lucide-react";
+import { Trophy, Star, Crown } from "lucide-react";
 
 const mockLeaderboard = [
   { id: "1", name: "Andin", level: 9, xp: 12500, rank: 1, avatar: "" },
@@ -43,8 +43,8 @@ export function Leaderboard() {
           </Card>
           
           <Card className="p-4 text-center bg-gradient-secondary border-border">
-            <Zap className="w-6 h-6 mx-auto mb-2 text-primary" />
-            <div className="text-lg font-bold font-orbitron text-primary">10.927</div>
+            <Star className="w-6 h-6 mx-auto mb-2 text-gold" />
+            <div className="text-lg font-bold font-orbitron text-gold">10.927</div>
             <div className="text-xs text-muted-foreground">Pro Members</div>
           </Card>
           
