@@ -15,14 +15,14 @@ export function TierBadge({ level, isPro = false, className, showProBadge = true
   const { proStatus } = usePro();
   const { userProfile } = useUserProfile();
   
-  // Use the individual user's pro status from props
-  const actualIsPro = isPro;
+  // Use the unified pro status instead of the isPro prop
+  const actualIsPro = proStatus.isPro && proStatus.proBadge;
   
   // Check if user has level 3 achievement
   const hasLevel3Achievement = userProfile?.achievements?.includes('level_3') ?? false;
   
   // Don't show ProBadge if pro badge is disabled or user doesn't have pro access
-  const shouldShowProBadge = showProBadge && proStatus.proBadge && actualIsPro;
+  const shouldShowProBadge = showProBadge && actualIsPro;
   
   const getTierStyle = () => {
     if (level >= 10) return "tier-master";
