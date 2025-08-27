@@ -180,8 +180,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 5,
       title: "Verse 5 - Vitality Vortex",
       subtitle: "Memperbaiki ulang finansial, fisik dan mental untuk hidup yang sehat",
-      unlocked: false,
-      requiredLevel: 6,
+      unlocked: true, // Allow access to all verses - users will discover levels naturally
+      requiredLevel: 5,
       artwork: verse5Artwork,
       audioPath: 'Verse5 - Virtality Vortex.MP3',
       language: 'id'

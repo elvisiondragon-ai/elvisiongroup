@@ -165,9 +165,9 @@ export function Home({
         <Card className="p-4 bg-gradient-secondary border-border">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="mb-2">
-                <TierBadge level={userProfile?.level || 1} isPro={proStatus.isPro} achievements={userProfile?.achievements || []} />
-                <h3 className="font-semibold text-foreground mt-1">{displayName}</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-semibold text-foreground">{displayName}</h3>
+                <TierBadge level={userProfile?.level || 1} isPro={proStatus.isPro} />
               </div>
               <StreakIndicator streakDays={userProfile?.streak_days || 0} size="sm" />
             </div>

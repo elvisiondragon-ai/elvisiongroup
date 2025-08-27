@@ -1,6 +1,5 @@
 import { Lock, Music, Crown, Zap } from 'lucide-react';
 import { useGlobalAudio } from '@/contexts/AudioContext';
-import { useTranslation } from 'react-i18next';
 
 interface Verse {
   id: number;
@@ -20,7 +19,6 @@ interface VerseAudioCardProps {
 
 export function VerseAudioCard({ verse, onWarning }: VerseAudioCardProps) {
   const { currentTrackId, isPlaying, playTrack, stopTrack } = useGlobalAudio();
-  const { t } = useTranslation();
 
   const handlePlayClick = async () => {
     if (!verse.unlocked || !verse.audioPath) return;
@@ -133,7 +131,7 @@ export function VerseAudioCard({ verse, onWarning }: VerseAudioCardProps) {
               <div className={`text-xs font-bold mt-3 ${
                 verse.requiredLevel === 10 ? "text-purple-400" : "text-rose-400"
               }`}>
-                {t('audioTherapy.levelRequired', { level: verse.requiredLevel })}
+                Locked
               </div>
               
               {/* Animated glow ring */}
