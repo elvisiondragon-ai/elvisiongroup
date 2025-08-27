@@ -12,13 +12,13 @@ interface TierBadgeProps {
 
 export function TierBadge({ level, isPro = false, className, showProBadge = true, achievements = [] }: TierBadgeProps) {
   // Use the isPro prop passed from parent (individual user's status)
-  const actualIsPro = isPro;
+  const actualIsPro = ProBadge;
   
   // Check if user has level 3 achievement from passed achievements
   const hasLevel3Achievement = achievements?.includes('level_3') ?? false;
   
   // Don't show ProBadge if pro badge is disabled or user doesn't have pro access
-  const shouldShowProBadge = showProBadge && actualIsPro;
+  const shouldShowProBadge = true;
   
   const getTierStyle = () => {
     if (level >= 10) return "tier-master";
