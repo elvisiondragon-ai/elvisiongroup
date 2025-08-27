@@ -119,7 +119,10 @@ export function ProUpgrade({ onClose }: ProUpgradeProps) {
             ) : (
               <Badge variant="default" className="gap-1 bg-pro">
                 <Crown className="w-3 h-3" />
-                {proStatus.subscriptionType === 'monthly' ? 'Monthly' : 'Yearly'} Subscription
+                {proStatus.subscriptionType === '1_month' ? '1 Month' : 
+                 proStatus.subscriptionType === '1_year' ? '1 Year' :
+                 proStatus.subscriptionType === '1_week' ? '1 Week' :
+                 proStatus.subscriptionType === '1_day' ? '1 Day' : 'Subscription'}
               </Badge>
             )}
           </CardDescription>
