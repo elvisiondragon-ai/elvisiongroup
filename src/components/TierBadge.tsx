@@ -8,9 +8,19 @@ interface TierBadgeProps {
   className?: string;
   showProBadge?: boolean;
   achievements?: string[];
+  subscriptionType?: string | null;
+  proBadge?: boolean;
 }
 
-export function TierBadge({ level, isPro = false, className, showProBadge = true, achievements = [] }: TierBadgeProps) {
+export function TierBadge({ 
+  level, 
+  isPro = false, 
+  className, 
+  showProBadge = true, 
+  achievements = [],
+  subscriptionType = null,
+  proBadge = false
+}: TierBadgeProps) {
   // Use the isPro prop passed from parent (individual user's status)
   const actualIsPro = isPro;
   
@@ -46,7 +56,14 @@ export function TierBadge({ level, isPro = false, className, showProBadge = true
           {getTierIcon()}
         </div>
       </div>
-      {shouldShowProBadge && <ProBadge size="sm" />}
+      {shouldShowProBadge && (
+        <ProBadge 
+          size="sm" 
+          isPro={actualIsPro}
+          subscriptionType={subscriptionType}
+          proBadge={proBadge}
+        />
+      )}
     </div>
   );
 }

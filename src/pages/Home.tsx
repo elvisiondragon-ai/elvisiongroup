@@ -166,7 +166,13 @@ export function Home({
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="mb-2">
-                <TierBadge level={userProfile?.level || 1} isPro={proStatus.isPro} achievements={userProfile?.achievements || []} />
+                <TierBadge 
+                  level={userProfile?.level || 1} 
+                  isPro={proStatus.isPro} 
+                  achievements={userProfile?.achievements || []}
+                  subscriptionType={proStatus.subscriptionType}
+                  proBadge={proStatus.proBadge}
+                />
                 <h3 className="font-semibold text-foreground mt-1">{displayName}</h3>
               </div>
               <StreakIndicator streakDays={userProfile?.streak_days || 0} size="sm" />
