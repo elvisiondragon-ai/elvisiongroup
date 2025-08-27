@@ -1,25 +1,18 @@
 import { Crown, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePro } from "@/hooks/usePro";
 
 interface ProBadgeProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
-  isPro?: boolean;
-  subscriptionType?: string | null;
-  proBadge?: boolean;
 }
 
-export function ProBadge({ 
-  className, 
-  size = 'md', 
-  showLabel = true,
-  isPro = false,
-  subscriptionType = null,
-  proBadge = false
-}: ProBadgeProps) {
+export function ProBadge({ className, size = 'md', showLabel = true }: ProBadgeProps) {
+  const { proStatus } = usePro();
+
   // Show badge if user is confirmed Pro with badge access
-  if (!isPro || !proBadge) {
+  if (!proStatus.isPro || !proStatus.proBadge) {
     return null;
   }
 
@@ -35,7 +28,7 @@ export function ProBadge({
     lg: 'w-5 h-5'
   };
 
-  const isYearlyPro = subscriptionType === 'yearly';
+  const isYearlyPro = proStatus.subscriptionType === 'yearly';
   const icon = isYearlyPro ? <Crown className={iconSizes[size]} /> : <Star className={iconSizes[size]} />;
 
   return (

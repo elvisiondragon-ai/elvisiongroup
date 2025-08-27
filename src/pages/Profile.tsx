@@ -244,13 +244,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </h1>
         
         <div className="flex items-center justify-center gap-2 mb-3">
-          <TierBadge 
-            level={profile.level} 
-            isPro={proStatus.isPro} 
-            achievements={profile.achievements || []}
-            subscriptionType={proStatus.subscriptionType}
-            proBadge={proStatus.proBadge}
-          />
+          <TierBadge level={profile.level} isPro={proStatus.isPro} achievements={profile.achievements || []} />
         </div>
         
         <div className="flex items-center justify-center gap-2 mb-3">
