@@ -206,9 +206,10 @@ export function DaysRemainingDashboard() {
     switch (type) {
       case 'trial':
         return 'secondary';
-      case 'monthly':
-        return 'default';
-      case 'yearly':
+      case '1_day':
+      case '1_week':
+      case '1_month':
+      case '1_year':
         return 'default';
       default:
         return 'outline';
@@ -268,8 +269,10 @@ export function DaysRemainingDashboard() {
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="trial">Trial</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="yearly">Yearly</SelectItem>
+                <SelectItem value="1_day">1 Day</SelectItem>
+                <SelectItem value="1_week">1 Week</SelectItem>
+                <SelectItem value="1_month">1 Month</SelectItem>
+                <SelectItem value="1_year">1 Year</SelectItem>
               </SelectContent>
             </Select>
 
