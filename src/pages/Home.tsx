@@ -167,7 +167,7 @@ export function Home({
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-semibold text-foreground">{displayName}</h3>
-                <TierBadge level={userProfile?.level || 1} isPro={proStatus.isPro} isCurrentUser={true} />
+                <TierBadge level={userProfile?.level || 1} isPro={proStatus.isPro} />
               </div>
               <StreakIndicator streakDays={userProfile?.streak_days || 0} size="sm" />
             </div>
