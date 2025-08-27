@@ -244,7 +244,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </h1>
         
         <div className="flex items-center justify-center gap-2 mb-3">
-          <TierBadge level={profile.level} isPro={proStatus.isPro} />
+          <TierBadge level={profile.level} isPro={proStatus.isPro} isCurrentUser={true} />
         </div>
         
         <div className="flex items-center justify-center gap-2 mb-3">

@@ -9,20 +9,21 @@ interface TierBadgeProps {
   isPro?: boolean;
   className?: string;
   showProBadge?: boolean;
+  isCurrentUser?: boolean;
 }
 
-export function TierBadge({ level, isPro = false, className, showProBadge = true }: TierBadgeProps) {
+export function TierBadge({ level, isPro = false, className, showProBadge = true, isCurrentUser = false }: TierBadgeProps) {
   const { proStatus } = usePro();
   const { userProfile } = useUserProfile();
   
-  // Use the unified pro status instead of the isPro prop
-  const actualIsPro = proStatus.isPro && proStatus.proBadge;
+  // Only use current user's pro status and achievements if this is for the current user
+  const actualIsPro = isCurrentUser ? (proStatus.isPro && proStatus.proBadge) : false;
   
-  // Check if user has level 3 achievement
-  const hasLevel3Achievement = userProfile?.achievements?.includes('level_3') ?? false;
+  // Check if user has level 3 achievement (only for current user)
+  const hasLevel3Achievement = isCurrentUser ? (userProfile?.achievements?.includes('level_3') ?? false) : false;
   
-  // Don't show ProBadge if pro badge is disabled or user doesn't have pro access
-  const shouldShowProBadge = showProBadge && actualIsPro;
+  // Don't show ProBadge for other users, only for current user
+  const shouldShowProBadge = showProBadge && actualIsPro && isCurrentUser;
   
   const getTierStyle = () => {
     if (level >= 10) return "tier-master";
