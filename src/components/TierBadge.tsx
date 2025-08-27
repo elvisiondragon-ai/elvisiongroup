@@ -22,7 +22,7 @@ export function TierBadge({ level, isPro = false, className, showProBadge = true
   
   // Non-pro viewers see pro badges so they get inspired to upgrade
   const isViewerNonPro = !proStatus.proBadge;
-  const showProBadgeToNonPro = isViewerNonPro && actualIsPro; // Non-pro viewers see pro badges
+  const showProBadgeToNonPro = isViewerNonPro && actualproBadge; // Non-pro viewers see pro badges
   
   // Show ProBadge for any user who has pro status, regardless of viewer's status
   const shouldShowProBadge = showProBadge && (actualIsPro || showProBadgeToNonPro);
