@@ -17,7 +17,7 @@ export function TierBadge({ level, isPro = false, className, showProBadge = true
   // Check if user has level 3 achievement from passed achievements
   const hasLevel3Achievement = achievements?.includes('level_3') ?? false;
   
-  // Show ProBadge based on individual user's pro status and showProBadge prop
+  // Show ProBadge for any user who has pro status, regardless of viewer's status
   const shouldShowProBadge = showProBadge && actualIsPro;
   
   const getTierStyle = () => {
