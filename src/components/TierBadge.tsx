@@ -15,8 +15,8 @@ export function TierBadge({ level, isPro = false, className, showProBadge = true
   const { proStatus } = usePro();
   const { userProfile } = useUserProfile();
   
-  // Use the isPro prop for individual users, fallback to current user status for profile contexts
-  const actualIsPro = isPro;
+  // Use the unified pro status instead of the isPro prop
+  const actualIsPro = proStatus.isPro && proStatus.proBadge;
   
   // Check if user has level 3 achievement
   const hasLevel3Achievement = userProfile?.achievements?.includes('level_3') ?? false;
