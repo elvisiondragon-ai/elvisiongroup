@@ -1,6 +1,7 @@
 import { Crown, Star, Zap, Leaf, Droplets, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProBadge } from "./ProBadge";
+import { usePro } from "@/hooks/usePro";
 
 interface TierBadgeProps {
   level: number;
@@ -11,14 +12,20 @@ interface TierBadgeProps {
 }
 
 export function TierBadge({ level, isPro = false, className, showProBadge = true, achievements = [] }: TierBadgeProps) {
+  const { proStatus } = usePro();
+  
   // Use the isPro prop passed from parent (individual user's status)
-  const actualIsPro = isPro;
+  const actualIsPro = isPro; // Target user's pro status
   
   // Check if user has level 3 achievement from passed achievements
   const hasLevel3Achievement = achievements?.includes('level_3') ?? false;
   
+  // Non-pro viewers see pro badges so they get inspired to upgrade
+  const isViewerNonPro = !proStatus.isPro;
+  const showProBadgeToNonPro = isViewerNonPro && actualIsPro; // Non-pro viewers see pro badges
+  
   // Show ProBadge for any user who has pro status, regardless of viewer's status
-  const shouldShowProBadge = showProBadge && actualIsPro;
+  const shouldShowProBadge = showProBadge && (actualIsPro || showProBadgeToNonPro);
   
   const getTierStyle = () => {
     if (level >= 10) return "tier-master";
