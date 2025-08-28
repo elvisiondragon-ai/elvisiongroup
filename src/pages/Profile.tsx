@@ -168,13 +168,13 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     {
       icon: Calendar,
       label: "Total Verses",
-      value: (profile.total_verses || 0) + 30, // +30 compensation for existing users
+      value: (profile.total_verses || 0) + 50, // +50 compensation for existing users
       color: "text-primary"
     },
     {
       icon: Target,
       label: "Total Journal",
-      value: `${profile.total_sessions + 20}`, // +20 compensation for existing users
+      value: `${profile.total_sessions + 50}`, // +50 compensation for existing users
       color: "text-neon-green"
     },
     {
