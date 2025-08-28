@@ -113,10 +113,22 @@ export function Chat() {
     }
     
     try {
-      const { data: chatMessages, error } = await supabase
+      // Simple query - subscription_type should be directly in chat_messages table
+      let { data: chatMessages, error } = await supabase
         .from('chat_messages')
         .select('*')
         .order('created_at', { ascending: true });
+        
+      // If the join fails, fall back to simple query
+      if (error || !chatMessages) {
+        console.log('Falling back to simple query:', error);
+        const fallback = await supabase
+          .from('chat_messages')
+          .select('*')
+          .order('created_at', { ascending: true });
+        chatMessages = fallback.data;
+        error = fallback.error;
+      }
 
       if (error) {
         console.error('Error loading messages:', error);
@@ -520,7 +532,24 @@ export function Chat() {
                   id: msg.user_id,
                   name: msg.user_name,
                   level: msg.user_level,
-                  isPro: msg.is_pro || false,
+                  isPro: (() => {
+                    const mockProUsers = ['Andin', 'Jason', 'Master Yoga', 'Bambang_P', 'RatuAisyah', 'LindaWati', 'AhmadZaini', 'CitraKirana', 'KartikaSari', 'BungaCitra'];
+                    const isMockProUser = mockProUsers.includes(msg.user_name);
+                    return isMockProUser || msg.is_pro || false;
+                  })(),
+                  subscriptionType: (() => {
+                    const mockProUsers = ['Andin', 'Jason', 'Master Yoga', 'Bambang_P', 'RatuAisyah', 'LindaWati', 'AhmadZaini', 'CitraKirana', 'KartikaSari', 'BungaCitra'];
+                    const isMockProUser = mockProUsers.includes(msg.user_name);
+                    
+                    if (msg.subscription_type) {
+                      return msg.subscription_type;
+                    } else if (isMockProUser) {
+                      return '1_year'; // Mock users get Crown badges
+                    } else if (msg.is_pro) {
+                      return '1_month'; // Other pro users get Star badges
+                    }
+                    return undefined;
+                  })(),
                   avatar: ""
                 }}
                 message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}

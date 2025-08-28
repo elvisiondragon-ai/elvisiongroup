@@ -10,6 +10,7 @@ interface LeaderboardUser {
   xp: number;
   isPro?: boolean;
   rank: number;
+  subscriptionType?: string;
 }
 
 interface LeaderboardCardProps {
@@ -50,7 +51,7 @@ export function LeaderboardCard({ user }: LeaderboardCardProps) {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-semibold text-foreground">{user.name}</span>
-            <TierBadge level={user.level} isPro={user.isPro} achievements={[]} />
+            <TierBadge level={user.level} isPro={user.isPro} achievements={[]} subscriptionType={user.subscriptionType} />
           </div>
           
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

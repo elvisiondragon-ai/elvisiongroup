@@ -3,16 +3,16 @@ import { LeaderboardCard } from "@/components/LeaderboardCard";
 import { Trophy, Star, Crown } from "lucide-react";
 
 const mockLeaderboard = [
-  { id: "1", name: "Andin", level: 10, xp: 15200, rank: 1, isPro: true, avatar: "" },           // 15200 XP = Level 10 (15,000+)
-  { id: "coach-senz", name: "Abdul Hakikat", level: 9, xp: 12200, rank: 2, isPro: true, avatar: "" }, // 12200 XP = Level 9 (12,000-15,000)
-  { id: "3", name: "Jason", level: 8, xp: 9900, rank: 3, isPro: true, avatar: "" },            // 9900 XP = Level 8 (9,000-12,000)
-  { id: "4", name: "Spiritual Seeker", level: 8, xp: 9380, rank: 4, isPro: true, avatar: "" }, // 9380 XP = Level 8 (9,000-12,000)
-  { id: "2", name: "Master Yoga", level: 7, xp: 8300, rank: 5, isPro: true, avatar: "" },      // 8300 XP = Level 7 (7,000-9,000)
-  { id: "5", name: "Andrew", level: 7, xp: 7940, rank: 6, isPro: true, avatar: "" },           // 7940 XP = Level 7 (7,000-9,000)
-  { id: "7", name: "Zen Master", level: 7, xp: 7340, rank: 7, isPro: true, avatar: "" },       // 7340 XP = Level 7 (7,000-9,000)
-  { id: "8", name: "Cosmic Soul", level: 7, xp: 7100, rank: 8, isPro: true, avatar: "" },      // 7100 XP = Level 7 (7,000-9,000)
-  { id: "9", name: "Sam_Rindu", level: 6, xp: 6900, rank: 9, isPro: true, avatar: "" },        // 6900 XP = Level 6 (4,500-7,000)
-  { id: "10", name: "Nanawati", level: 6, xp: 6760, rank: 10, isPro: true, avatar: "" },       // 6760 XP = Level 6 (4,500-7,000)
+  { id: "1", name: "Andin", level: 10, xp: 15200, rank: 1, isPro: true, avatar: "", subscriptionType: "1_year" },
+  { id: "coach-senz", name: "Abdul Hakikat", level: 9, xp: 12200, rank: 2, isPro: true, avatar: "", subscriptionType: "1_year" },
+  { id: "3", name: "Jason", level: 8, xp: 9900, rank: 3, isPro: true, avatar: "", subscriptionType: "1_year" },
+  { id: "4", name: "Spiritual Seeker", level: 8, xp: 9380, rank: 4, isPro: true, avatar: "", subscriptionType: "1_year" },
+  { id: "2", name: "Master Yoga", level: 7, xp: 8300, rank: 5, isPro: true, avatar: "", subscriptionType: "1_year" },
+  { id: "5", name: "Andrew", level: 7, xp: 7940, rank: 6, isPro: true, avatar: "", subscriptionType: "1_year" },
+  { id: "7", name: "Zen Master", level: 7, xp: 7340, rank: 7, isPro: true, avatar: "", subscriptionType: "1_year" },
+  { id: "8", name: "Cosmic Soul", level: 7, xp: 7100, rank: 8, isPro: true, avatar: "", subscriptionType: "1_year" },
+  { id: "9", name: "Sam_Rindu", level: 6, xp: 6900, rank: 9, isPro: true, avatar: "", subscriptionType: "1_year" },
+  { id: "10", name: "Nanawati", level: 6, xp: 6760, rank: 10, isPro: true, avatar: "", subscriptionType: "1_year" },
 ];
 
 export function Leaderboard() {

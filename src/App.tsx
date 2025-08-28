@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useToast } from "@/hooks/use-toast";
 import { Auth } from "./pages/Auth";
 import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
@@ -20,6 +21,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
   
   // Initialize push notifications for authenticated users
   const { registerForNotifications } = usePushNotifications();
@@ -49,6 +51,19 @@ const App = () => {
               registerForNotifications();
               sessionStorage.setItem(registerKey, 'true');
             }, 1000);
+          }
+          
+          // Show one-time update notification
+          const updateNotificationKey = `update_notification_2025_08_28`;
+          if (!localStorage.getItem(updateNotificationKey)) {
+            setTimeout(() => {
+              toast({
+                title: "🚀 Update Telah Tiba!",
+                description: "Silahkan bersihkan Cookie dan Cache untuk kenyamanan User yang lebih baik",
+                duration: 8000,
+              });
+              localStorage.setItem(updateNotificationKey, 'true');
+            }, 2000);
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);

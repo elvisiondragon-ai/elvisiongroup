@@ -38,18 +38,37 @@ export function ProBadge({ className, size = 'md', showLabel = true, targetUserI
   const isYearlyPro = subscriptionType === '1_year';
   const icon = isYearlyPro ? <Crown className={iconSizes[size]} /> : <Star className={iconSizes[size]} />;
 
+  const badgeStyles = isYearlyPro
+    ? {
+        gradient: "bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600",
+        hover: "hover:from-purple-700 hover:via-pink-700 hover:to-blue-700",
+        border: "border-2 border-white/30",
+        shadow: "shadow-2xl shadow-purple-500/25"
+      }
+    : {
+        gradient: "bg-gradient-to-r from-amber-400 to-orange-500",
+        hover: "hover:from-amber-500 hover:to-orange-600", 
+        border: "border-2 border-white/20",
+        shadow: "shadow-lg"
+      };
+
   return (
     <div className={cn(
       "inline-flex items-center rounded-full font-semibold transition-all",
-      "bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg",
-      "hover:from-amber-500 hover:to-orange-600 hover:shadow-xl",
-      "border-2 border-white/20",
+      "text-white relative overflow-hidden",
+      badgeStyles.gradient,
+      badgeStyles.hover,
+      badgeStyles.border,
+      badgeStyles.shadow,
       sizeClasses[size],
       className
     )}>
+      {isYearlyPro && (
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+      )}
       {icon}
       {showLabel && (
-        <span className="font-bold">
+        <span className="font-bold relative z-10">
           {isYearlyPro ? 'PRO+' : 'PRO'}
         </span>
       )}
