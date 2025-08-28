@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { getAudioUrl } from '@/utils/audioUtils';
+import { useGlobalAudio } from '@/contexts/AudioContext';
 
 interface SpiritualJournalProps {
   onNavigate: (tab: string) => void;
@@ -21,13 +22,12 @@ interface Reflection {
 
 export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
-  const [playingJournal, setPlayingJournal] = useState<number | null>(null);
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
+  const { currentTrackId, isPlaying, playTrack, stopTrack } = useGlobalAudio();
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
@@ -37,9 +37,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     return true;
   };
 
-  const publicAudioUrl = getAudioUrl('Jurnalsyukur1.MP3');
+  // Audio URL handled by global AudioContext now
 
-  const handlePlay = (journalId: number) => {
+  const handlePlay = async (journalId: number) => {
     // Check if journal is locked
     const journal = journals.find(j => j.id === journalId);
     if (!journal || !userProfile) return;
@@ -56,85 +56,27 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       return;
     }
 
-    
-    // If currently playing this journal, stop it completely and reset
-    if (playingJournal === journalId && currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-      // Clean up all event listeners properly
-      currentAudio.oncanplay = null;
-      currentAudio.onended = null;
-      currentAudio.onerror = null;
-      currentAudio.onloadstart = null;
-      currentAudio.onloadeddata = null;
-      setCurrentAudio(null);
-      setPlayingJournal(null);
-      return;
-    }
+    // Use global audio system - this prevents multiple audio playing
+    const track = {
+      id: journalId,
+      title: journal.title,
+      subtitle: journal.subtitle,
+      audioPath: 'Jurnalsyukur1.MP3' // All journals use the same audio for now
+    };
 
-    // Stop and cleanup any existing audio completely
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-      currentAudio.oncanplay = null;
-      currentAudio.onended = null;
-      currentAudio.onerror = null;
-      currentAudio.onloadstart = null;
-      currentAudio.onloadeddata = null;
-      setCurrentAudio(null);
-      setPlayingJournal(null);
+    try {
+      await playTrack(track);
+      
+      // Award XP for journal completion when audio ends
+      // The global AudioContext will handle this automatically
+    } catch (error) {
+      console.error('Error playing journal audio:', error);
+      toast({
+        title: "Error",
+        description: "Gagal memutar audio",
+        variant: "destructive"
+      });
     }
-
-    // Create and configure new audio with security features
-    const audio = new Audio(publicAudioUrl);
-    audio.preload = 'metadata';
-    
-    // Prevent download and right-click context menu
-    audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-    audio.setAttribute('disablePictureInPicture', 'true');
-    audio.addEventListener('contextmenu', (e) => e.preventDefault());
-    
-    // Set playing state and current audio reference first
-    setPlayingJournal(journalId);
-    setCurrentAudio(audio);
-    
-    // Setup event handlers using direct property assignment (easier cleanup)
-    audio.oncanplay = () => {
-      // Double check this is still the current audio to prevent race conditions
-      if (audio === currentAudio) {
-        audio.play().catch(error => {
-          console.error('Error playing audio:', error);
-          toast({
-            title: "Error",
-            description: "Gagal memutar audio",
-            variant: "destructive"
-          });
-          if (audio === currentAudio) {
-            setPlayingJournal(null);
-            setCurrentAudio(null);
-          }
-        });
-      }
-    };
-    
-    audio.onended = () => {
-      if (audio === currentAudio) {
-        setPlayingJournal(null);
-        setCurrentAudio(null);
-      }
-    };
-    
-    audio.onerror = () => {
-      if (audio === currentAudio) {
-        toast({
-          title: "Error",
-          description: "Gagal memuat audio",
-          variant: "destructive"
-        });
-        setPlayingJournal(null);
-        setCurrentAudio(null);
-      }
-    };
   };
 
   const journals = [
@@ -213,14 +155,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
     getCurrentUser();
 
-    // Cleanup audio on unmount
-    return () => {
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-      }
-    };
-  }, [currentAudio]);
+    // No need for local audio cleanup - global AudioContext handles this
+  }, []);
 
   const loadUserProfile = async (userId: string) => {
     try {
@@ -322,7 +258,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         {/* Journal Audio Sections */}
         {journals.map((journal) => {
           const Icon = journal.icon;
-          const isCurrentlyPlaying = playingJournal === journal.id;
+          const isCurrentlyPlaying = currentTrackId === journal.id && isPlaying;
           const isLocked = !hasAccess(journal);
           
           return (
@@ -349,69 +285,21 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                 
                  <div className="flex justify-center py-4">
                    <Button
-                     onClick={async () => {
-                       if (playingJournal === journal.id && currentAudio) {
+                     onClick={() => {
+                       if (isCurrentlyPlaying) {
                          // Stop current audio if this journal is playing
-                         currentAudio.pause();
-                         currentAudio.currentTime = 0;
-                         setCurrentAudio(null);
-                         setPlayingJournal(null);
+                         stopTrack();
                        } else {
-                         // Stop any currently playing audio first
-                         if (currentAudio) {
-                           currentAudio.pause();
-                           currentAudio.currentTime = 0;
-                         }
-                         
-                           // Play audio for Journal Spiritual 1 with enhanced protection
-                           if (journal.id === 1) {
-                             const audio = new Audio(publicAudioUrl);
-                           
-                           // Enhanced protection: Prevent download and right-click context menu
-                           audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-                           audio.setAttribute('disablePictureInPicture', 'true');
-                           audio.setAttribute('oncontextmenu', 'return false');
-                           audio.preload = 'metadata';
-                           audio.style.pointerEvents = 'none';
-                           
-                           // Add enhanced security attributes
-                           audio.addEventListener('contextmenu', (e) => e.preventDefault());
-                           
-                           audio.play().then(() => {
-                             setCurrentAudio(audio);
-                             setPlayingJournal(journal.id);
-                           }).catch(error => {
-                             console.error('Error playing audio:', error);
+                         // Play this journal audio using global system
+                         if (journal.id === 1) {
+                           handlePlay(journal.id);
+                         } else {
+                           toast({
+                             title: "Coming Soon",
+                             description: "Audio untuk jurnal ini akan segera tersedia",
+                             variant: "default"
                            });
-                           
-                            // Handle audio end
-                            audio.addEventListener('ended', () => {
-                              setCurrentAudio(null);
-                              setPlayingJournal(null);
-                              
-                              // Award XP for completing spiritual journal audio
-                              awardXP('audio_completion', 10, `Completed ${journal.title}`, {
-                                journalId: journal.id,
-                                journalTitle: journal.title
-                              });
-                            });
-                           
-                           // Prevent seeking beyond current position when paused
-                           audio.addEventListener('pause', () => {
-                             const currentTime = audio.currentTime;
-                             audio.addEventListener('seeked', () => {
-                               if (audio.paused && audio.currentTime > currentTime + 1) {
-                                 audio.currentTime = currentTime;
-                               }
-                             });
-                            });
-                          } else if (journal.id !== 1) {
-                            toast({
-                              title: "Coming Soon",
-                              description: "Audio untuk jurnal ini akan segera tersedia",
-                              variant: "default"
-                            });
-                          }
+                         }
                        }
                      }}
                       disabled={isLocked}

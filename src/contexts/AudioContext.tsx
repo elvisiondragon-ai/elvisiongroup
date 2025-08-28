@@ -45,10 +45,22 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   // Handle audio completion
   const handleEnded = useCallback(() => {
     if (currentTrack) {
-      awardXP('audio_completion', 10, `Completed ${currentTrack.title}`, {
-        verseId: currentTrack.id,
-        verseTitle: currentTrack.title
-      });
+      // Determine if it's a journal or verse based on audio file
+      const isJournal = currentTrack.audioPath === 'Jurnalsyukur1.MP3';
+      
+      if (isJournal) {
+        // Award XP for journal completion
+        awardXP('audio_completion', 10, `Completed ${currentTrack.title}`, {
+          journalId: currentTrack.id,
+          journalTitle: currentTrack.title
+        });
+      } else {
+        // Award XP for verse completion
+        awardXP('audio_completion', 10, `Completed ${currentTrack.title}`, {
+          verseId: currentTrack.id,
+          verseTitle: currentTrack.title
+        });
+      }
     }
     setCurrentTrackId(null);
     setCurrentTrack(null);
