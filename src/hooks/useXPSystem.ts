@@ -38,11 +38,19 @@ export function useXPSystem(): XPSystemHook {
       // Show appropriate toast based on XP result
       const result = data as any;
       
-      // Check if daily limit was reached
+      // Check if daily limit was reached - show positive encouragement
       if (result?.daily_limit_reached) {
+        console.log('🚫 XP Daily Limit Reached:', {
+          activityType,
+          requestedXP: xpAmount,
+          actualXP: result.xp_gained || 0,
+          limitMessage: result.message,
+          timestamp: new Date().toISOString()
+        });
+        
         toast({
-          title: "⏰ Daily Limit Reached",
-          description: result.message || "You've reached your daily XP limit for this activity",
+          title: "🎉 EXP Harian Anda Sudah Maximal!",
+          description: "Kamu sudah menyelesaikan target harian dengan sempurna! Kembali lagi besok untuk melanjutkan perjalanan spiritual ✨",
           variant: "default",
         });
       } else if (result?.level_up) {

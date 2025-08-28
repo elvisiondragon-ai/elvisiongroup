@@ -1,4 +1,4 @@
--- Fix XP limits to include journal text completion in addition to audio completion
+-- FINAL XP LIMITS: 20 XP/day for ALL audio combined, 5 XP/day for journal text
 
 CREATE OR REPLACE FUNCTION public.award_xp(p_user_id uuid, p_xp_amount integer, p_activity_type text, p_reason text DEFAULT NULL, p_metadata jsonb DEFAULT '{}')
 RETURNS jsonb
@@ -16,8 +16,8 @@ DECLARE
   result jsonb;
   daily_xp_earned INTEGER := 0;
   xp_to_award INTEGER := 0;
-  verse_xp_today INTEGER := 0;
-  journal_xp_today INTEGER := 0;
+  audio_xp_today INTEGER := 0;
+  journal_text_xp_today INTEGER := 0;
 BEGIN
   -- Get current profile data
   SELECT level, experience_points INTO old_level, old_xp
@@ -36,14 +36,14 @@ BEGIN
   -- Check daily XP limits for audio completion and journal completion activities
   IF p_activity_type = 'audio_completion' OR p_activity_type = 'journal_completion' THEN
     -- Get today's XP earned for ALL AUDIO activities (verses + journal audio combined)
-    SELECT COALESCE(SUM(xp_amount), 0) INTO verse_xp_today
+    SELECT COALESCE(SUM(xp_amount), 0) INTO audio_xp_today
     FROM public.xp_transactions
     WHERE user_id = p_user_id
       AND activity_type = 'audio_completion'
       AND DATE(created_at) = CURRENT_DATE;
     
     -- Get today's XP earned for journal TEXT activities (journal_completion only)
-    SELECT COALESCE(SUM(xp_amount), 0) INTO journal_xp_today
+    SELECT COALESCE(SUM(xp_amount), 0) INTO journal_text_xp_today
     FROM public.xp_transactions
     WHERE user_id = p_user_id
       AND DATE(created_at) = CURRENT_DATE
@@ -52,19 +52,19 @@ BEGIN
     -- Apply daily limits based on activity type
     IF p_activity_type = 'audio_completion' THEN
       -- ALL AUDIO (verses + journal audio): Max 20 XP per day combined
-      IF verse_xp_today >= 20 THEN
+      IF audio_xp_today >= 20 THEN
         xp_to_award := 0; -- Daily limit reached
-      ELSIF verse_xp_today + p_xp_amount > 20 THEN
-        xp_to_award := 20 - verse_xp_today; -- Award partial XP to reach limit
+      ELSIF audio_xp_today + p_xp_amount > 20 THEN
+        xp_to_award := 20 - audio_xp_today; -- Award partial XP to reach limit
       ELSE
         xp_to_award := p_xp_amount; -- Award full XP
       END IF;
     ELSIF p_activity_type = 'journal_completion' THEN
       -- Journal TEXT completion: Max 5 XP per day
-      IF journal_xp_today >= 5 THEN
+      IF journal_text_xp_today >= 5 THEN
         xp_to_award := 0; -- Daily limit reached
-      ELSIF journal_xp_today + p_xp_amount > 5 THEN
-        xp_to_award := 5 - journal_xp_today; -- Award partial XP to reach limit
+      ELSIF journal_text_xp_today + p_xp_amount > 5 THEN
+        xp_to_award := 5 - journal_text_xp_today; -- Award partial XP to reach limit
       ELSE
         xp_to_award := p_xp_amount; -- Award full XP
       END IF;
@@ -73,12 +73,32 @@ BEGIN
       xp_to_award := p_xp_amount;
     END IF;
   ELSE
-    -- Non-audio completion activities (apply other limits as needed)
+    -- Non-audio/journal completion activities (no specific limits)
     xp_to_award := p_xp_amount;
   END IF;
   
-  -- If no XP to award due to limits, return early
+  -- If no XP to award due to limits, log and return early
   IF xp_to_award <= 0 THEN
+    -- Log the limit reached event for monitoring
+    INSERT INTO public.xp_transactions (
+      user_id, 
+      xp_amount, 
+      activity_type, 
+      reason, 
+      metadata
+    ) VALUES (
+      p_user_id, 
+      0,  -- No XP awarded due to limit
+      p_activity_type || '_limit_reached', 
+      'Daily XP limit reached', 
+      jsonb_build_object(
+        'requested_xp', p_xp_amount,
+        'daily_audio_xp', audio_xp_today,
+        'daily_journal_text_xp', journal_text_xp_today,
+        'limit_type', p_activity_type
+      )
+    );
+    
     result := jsonb_build_object(
       'success', true,
       'old_xp', old_xp,
