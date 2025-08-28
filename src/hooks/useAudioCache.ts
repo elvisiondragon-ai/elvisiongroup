@@ -29,7 +29,7 @@ export function useAudioCache() {
 
     // Generate new URL and cache it
     const { data } = supabase.storage
-      .from('audio-tracks')
+      .from('audio-files')
       .getPublicUrl(fileName);
     
     const publicUrl = data.publicUrl;

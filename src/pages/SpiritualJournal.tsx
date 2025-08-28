@@ -349,7 +349,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                 
                  <div className="flex justify-center py-4">
                    <Button
-                     onClick={() => {
+                     onClick={async () => {
                        if (playingJournal === journal.id && currentAudio) {
                          // Stop current audio if this journal is playing
                          currentAudio.pause();
@@ -363,16 +363,18 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                            currentAudio.currentTime = 0;
                          }
                          
-                           // Play audio for Journal Spiritual 1 with public URL
+                           // Play audio for Journal Spiritual 1 with enhanced protection
                            if (journal.id === 1) {
                              const audio = new Audio(publicAudioUrl);
                            
-                           // Prevent download and right-click context menu
+                           // Enhanced protection: Prevent download and right-click context menu
                            audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
                            audio.setAttribute('disablePictureInPicture', 'true');
+                           audio.setAttribute('oncontextmenu', 'return false');
                            audio.preload = 'metadata';
+                           audio.style.pointerEvents = 'none';
                            
-                           // Add security attributes
+                           // Add enhanced security attributes
                            audio.addEventListener('contextmenu', (e) => e.preventDefault());
                            
                            audio.play().then(() => {

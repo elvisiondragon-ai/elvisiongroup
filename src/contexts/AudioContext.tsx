@@ -104,11 +104,15 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       const publicUrl = getAudioUrl(track.audioPath);
       const audio = new Audio(publicUrl);
       
-      // Configure audio for background playback
+      // Configure audio for background playback with enhanced protection
       audio.crossOrigin = 'anonymous';
       audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
       audio.setAttribute('disablePictureInPicture', 'true');
+      audio.setAttribute('oncontextmenu', 'return false');
       audio.preload = 'metadata';
+      
+      // Add CSS style for pointer-events protection
+      audio.style.pointerEvents = 'none';
       
       // Add event listeners
       audio.addEventListener('ended', handleEnded);

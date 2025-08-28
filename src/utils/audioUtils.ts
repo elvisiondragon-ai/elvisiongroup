@@ -6,7 +6,7 @@ export const audioFiles = [
   'Verse1 - The Space Hill.MP3',
   'Verse2 - Lucid Beach.MP3',
   'Verse4-English.MP3',
-  'Verse5 - Virtality Vortex.MP3'
+  'Verse5 - Virtality Vortexx.MP3'
 ];
 
 export const getAudioUrl = (fileName: string) => {
