@@ -208,7 +208,12 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
           }, 2000); // 2 second throttle
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          console.error('❌ Profile realtime subscription error');
+          // Continue without realtime updates
+        }
+      });
 
     return () => {
       clearTimeout(throttleTimeout);

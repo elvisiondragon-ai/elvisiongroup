@@ -157,7 +157,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
             });
           }}
           controlsList="nodownload noremoteplayback nofullscreen"
-          disablePictureInPicture
           style={{ pointerEvents: 'none' }}
         />
       )}

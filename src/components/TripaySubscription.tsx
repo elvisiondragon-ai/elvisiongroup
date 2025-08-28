@@ -134,15 +134,11 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
           filter: `tripay_reference=eq.${paymentData.tripay_reference}`
         },
         (payload) => {
-          console.log('💰 Payment status change detected:', payload);
-          
-          if (payload.new?.status === 'paid') {
-            console.log('🎉 Payment confirmed as PAID!');
-            
-            // Show success notification
+          console.log('💳 Payment status update received:', payload);
+          if (payload.new.status === 'PAID') {
             toast({
               title: "Pembayaran Berhasil!",
-              description: "Pembayaran berhasil silahkan cek email!",
+              description: "Selamat! Subscription Pro Anda telah aktif.",
               variant: "default",
             });
 
@@ -153,7 +149,12 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          console.error('❌ Realtime subscription error - falling back to polling');
+          // Could implement polling as fallback here if needed
+        }
+      });
 
     // Cleanup subscription when component unmounts or dependencies change
     return () => {

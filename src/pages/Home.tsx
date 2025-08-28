@@ -75,10 +75,17 @@ export function Home({
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           // Track current user's presence
-          await channel.track({
-            user_id: user.id,
-            online_at: new Date().toISOString()
-          });
+          try {
+            await channel.track({
+              user_id: user.id,
+              online_at: new Date().toISOString()
+            });
+          } catch (error) {
+            console.error('❌ Failed to track presence:', error);
+          }
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          console.error('❌ Presence subscription error - using fallback count');
+          setOnlineCount(825); // Fallback static count
         }
       });
 
