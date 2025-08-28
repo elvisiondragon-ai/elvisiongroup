@@ -19,4 +19,9 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
       eventsPerSecond: 2,
     },
   },
+  global: {
+    headers: {
+      'X-Client-Info': 'lovable-app',
+    },
+  },
 });

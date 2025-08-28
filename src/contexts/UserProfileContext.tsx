@@ -189,35 +189,56 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (!user) return;
 
+    // Check if we're in a secure context for WebSocket connections
+    const isSecureContext = window.isSecureContext && 'WebSocket' in window;
+    
+    if (!isSecureContext) {
+      console.warn('⚠️ WebSocket not available in this context, skipping profile realtime subscription');
+      return;
+    }
+
     let throttleTimeout: NodeJS.Timeout;
-    const channel = supabase
-      .channel('profile_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          // THROTTLE refreshProfile calls to prevent spam
-          clearTimeout(throttleTimeout);
-          throttleTimeout = setTimeout(() => {
-            refreshProfile();
-          }, 2000); // 2 second throttle
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-          console.error('❌ Profile realtime subscription error');
-          // Continue without realtime updates
-        }
-      });
+    let channel: any;
+    
+    try {
+      channel = supabase
+        .channel('profile_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            // THROTTLE refreshProfile calls to prevent spam
+            clearTimeout(throttleTimeout);
+            throttleTimeout = setTimeout(() => {
+              refreshProfile();
+            }, 2000); // 2 second throttle
+          }
+        )
+        .subscribe((status) => {
+          console.log('Profile subscription status:', status);
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            console.error('❌ Profile realtime subscription error');
+            // Continue without realtime updates
+          }
+        });
+    } catch (error) {
+      console.error('❌ Failed to create profile realtime subscription:', error);
+    }
 
     return () => {
       clearTimeout(throttleTimeout);
-      supabase.removeChannel(channel);
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.error('Error cleaning up profile channel:', error);
+        }
+      }
     };
   }, [user?.id]); // FIXED: Only depend on user.id, not refreshProfile
 

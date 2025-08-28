@@ -58,41 +58,65 @@ export function Home({
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase.channel('online_users');
+    // Check if we're in a secure context for WebSocket connections
+    const isSecureContext = window.isSecureContext && 'WebSocket' in window;
     
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const presenceState = channel.presenceState();
-        const onlineUsers = Object.keys(presenceState).length;
-        setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
-      })
-      .on('presence', { event: 'join' }, ({ newPresences }) => {
-        console.log('User joined:', newPresences);
-      })
-      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-        console.log('User left:', leftPresences);
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          // Track current user's presence
-          try {
-            await channel.track({
-              user_id: user.id,
-              online_at: new Date().toISOString()
-            });
-          } catch (error) {
-            console.error('❌ Failed to track presence:', error);
+    if (!isSecureContext) {
+      console.warn('⚠️ WebSocket not available in this context, using fallback online count');
+      setOnlineCount(825); // Static fallback count
+      return;
+    }
+
+    let channel: any;
+    
+    try {
+      channel = supabase.channel('online_users');
+      
+      channel
+        .on('presence', { event: 'sync' }, () => {
+          const presenceState = channel.presenceState();
+          const onlineUsers = Object.keys(presenceState).length;
+          setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
+        })
+        .on('presence', { event: 'join' }, ({ newPresences }) => {
+          console.log('User joined:', newPresences);
+        })
+        .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+          console.log('User left:', leftPresences);
+        })
+        .subscribe(async (status) => {
+          console.log('Presence subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            // Track current user's presence
+            try {
+              await channel.track({
+                user_id: user.id,
+                online_at: new Date().toISOString()
+              });
+            } catch (error) {
+              console.error('❌ Failed to track presence:', error);
+            }
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            console.error('❌ Presence subscription error - using fallback count');
+            setOnlineCount(825); // Fallback static count
           }
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-          console.error('❌ Presence subscription error - using fallback count');
-          setOnlineCount(825); // Fallback static count
-        }
-      });
+        });
+    } catch (error) {
+      console.error('❌ Failed to create presence subscription:', error);
+      setOnlineCount(825); // Fallback static count
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.error('Error cleaning up presence channel:', error);
+        }
+      }
     };
   }, [user]);
+
 
 
   const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
