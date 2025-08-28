@@ -1,9 +1,9 @@
-/* Import futuristic fonts */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Import futuristic fonts */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600;700&display=swap');
 
 /* Futuristic Meditation App Design System */
 @layer base {
@@ -305,55 +305,5 @@
   
   .level-progress-fill {
     @apply h-full bg-gradient-primary transition-all duration-500;
-  }
-
-  /* Enhanced Audio Protection */
-  audio {
-    pointer-events: none !important;
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    -khtml-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-    user-select: none !important;
-  }
-  
-  audio::-webkit-media-controls-panel {
-    pointer-events: none !important;
-  }
-  
-  audio::-webkit-media-controls-play-button {
-    pointer-events: none !important;
-  }
-  
-  audio::-webkit-media-controls-timeline {
-    pointer-events: none !important;
-  }
-  
-  audio::-webkit-media-controls-volume-slider {
-    pointer-events: none !important;
-  }
-  
-  audio::-webkit-media-controls-mute-button {
-    pointer-events: none !important;
-  }
-  
-  audio::-webkit-media-controls-current-time-display {
-    pointer-events: none !important;
-  }
-  
-  audio::-webkit-media-controls-time-remaining-display {
-    pointer-events: none !important;
-  }
-
-  /* Prevent text selection on audio elements */
-  .audio-protection {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    pointer-events: none;
   }
 }
