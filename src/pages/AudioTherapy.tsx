@@ -183,7 +183,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: proStatus.isPro, // Lock for non-pro users
       requiredLevel: 6,
       artwork: verse5Artwork,
-      audioPath: 'Verse5 - Virtality Vortex.MP3',
+      audioPath: 'Verse5 - Virtality Vortexx.MP3',
       language: 'id'
     },
     {
