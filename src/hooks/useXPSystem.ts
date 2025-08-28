@@ -35,16 +35,24 @@ export function useXPSystem(): XPSystemHook {
 
       if (error) throw error;
 
-      // Show success toast with level up information
+      // Show appropriate toast based on XP result
       const result = data as any;
-      if (result?.level_up) {
+      
+      // Check if daily limit was reached
+      if (result?.daily_limit_reached) {
+        toast({
+          title: "⏰ Daily Limit Reached",
+          description: result.message || "You've reached your daily XP limit for this activity",
+          variant: "default",
+        });
+      } else if (result?.level_up) {
         toast({
           title: `🎉 Level Up! Now Level ${result.new_level}!`,
-          description: `+${xpAmount} XP earned! ${result.achievement_earned ? '⚡ New achievement unlocked!' : ''}`,
+          description: `+${result.xp_gained || xpAmount} XP earned! ${result.achievement_earned ? '⚡ New achievement unlocked!' : ''}`,
         });
-      } else {
+      } else if (result?.xp_gained > 0) {
         toast({
-          title: `+${xpAmount} XP Earned!`,
+          title: `+${result.xp_gained} XP Earned!`,
           description: reason || `${activityType} completed`,
         });
       }

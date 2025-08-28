@@ -1,6 +1,5 @@
--- Fix XP leak by implementing daily limits for audio completion activities
+-- Fix XP limits to include journal text completion in addition to audio completion
 
--- Update award_xp function to enforce daily limits
 CREATE OR REPLACE FUNCTION public.award_xp(p_user_id uuid, p_xp_amount integer, p_activity_type text, p_reason text DEFAULT NULL, p_metadata jsonb DEFAULT '{}')
 RETURNS jsonb
 LANGUAGE plpgsql
