@@ -183,7 +183,11 @@
 
   /* Tier Badge Styles */
   .tier-badge {
-    @apply px-2 py-1 rounded-full text-xs font-semibold font-orbitron;
+    @apply px-2 py-1 rounded-full text-xs font-semibold font-orbitron whitespace-nowrap;
+    min-width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
   }
   
   .tier-basic {
