@@ -26,8 +26,7 @@ import {
   LogOut,
   Bell,
   ArrowLeft,
-  Trash2,
-  MessageCircle
+  Trash2
 } from "lucide-react";
 
 interface ProfileProps {
@@ -41,7 +40,6 @@ interface UserProfile {
   experience_points: number;
   streak_days: number;
   total_sessions: number;
-  total_verses?: number;
   achievements: string[];
   created_at: string;
   avatar_url?: string;
@@ -146,7 +144,6 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     experience_points: 0,
     streak_days: 0,
     total_sessions: 0,
-    total_verses: 0,
     achievements: [],
     created_at: new Date().toISOString()
   };
@@ -163,22 +160,21 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const achievements = [
     { name: "First Step", description: "Joined eL Vision Group", unlocked: true },
     { name: "Week Warrior", description: "7 days streak", unlocked: profile.streak_days >= 7 },
-    { name: "Verse Master", description: "Complete 50 verses", unlocked: (profile.total_verses || 0) >= 50 }, // Real verse count
-    { name: "Journal Sage", description: "Complete 100 journals", unlocked: profile.total_sessions >= 100 }, // Real sessions, not display count
+    { name: "Zen Master", description: "Complete 100 sessions", unlocked: profile.total_sessions >= 100 },
     { name: "Soul Leader", description: "Reach level 5", unlocked: profile.level >= 5 },
   ];
 
   const stats = [
     {
       icon: Calendar,
-      label: "Total Verses",
-      value: (profile.total_verses || 0) + 30, // +30 compensation for existing users
+      label: "Total Meditations",
+      value: profile.total_sessions,
       color: "text-primary"
     },
     {
       icon: Target,
-      label: "Total Journal",
-      value: `${profile.total_sessions + 20}`, // +20 compensation for existing users
+      label: "Total Sessions",
+      value: `${profile.total_sessions}`,
       color: "text-neon-green"
     },
     {
@@ -363,23 +359,13 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           Edit Profil
         </Button>
         
-        {/* Notification button hidden for now */}
-        {/* <Button 
+        <Button 
           variant="outline" 
           className="w-full"
           onClick={() => setShowNotifications(true)}
         >
           <Bell className="w-4 h-4 mr-2" />
           Notifikasi
-        </Button> */}
-
-        <Button 
-          variant="outline" 
-          className="w-full bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
-          onClick={() => window.open('https://wa.me/62895325633487?text=Kak%20Renata%20saya%20bertanya%20ekosystem%20el%20vision', '_blank')}
-        >
-          <MessageCircle className="w-4 h-4 mr-2" />
-          Customer Service
         </Button>
 
 
