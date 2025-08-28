@@ -130,8 +130,9 @@ export function Auth({ onLogin }: AuthProps) {
 
       if (data.user) {
         toast({
-          title: "Account Created!",
-          description: "Please check your email to confirm your account.",
+          title: "🎉 Akun Berhasil Dibuat!",
+          description: "Trial anda dimulai! Selamat menikmati fitur Pro selama 3 hari.",
+          duration: 6000,
         });
         
         // Clear form
