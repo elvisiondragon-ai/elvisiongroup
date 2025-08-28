@@ -58,9 +58,11 @@ export function useXPSystem(): XPSystemHook {
           title: `🎉 Level Up! Now Level ${result.new_level}!`,
           description: `+${result.xp_gained || xpAmount} XP earned! ${result.achievement_earned ? '⚡ New achievement unlocked!' : ''}`,
         });
-      } else if (result?.xp_gained > 0) {
+      } else {
+        // Always show XP notification for successful requests (even if 0 due to limits)
+        const xpEarned = result?.xp_gained || 0;
         toast({
-          title: `+${result.xp_gained} XP Earned!`,
+          title: xpEarned > 0 ? `+${xpEarned} XP Earned!` : `+${xpAmount} XP Earned!`,
           description: reason || `${activityType} completed`,
         });
       }
