@@ -347,9 +347,10 @@ export function Auth({ onLogin }: AuthProps) {
         window.location.href = '/';
       }
     } catch (error: any) {
+      console.error('Signup error:', error);
       toast({
         title: "Pendaftaran Gagal",
-        description: "Coba gunakan email dan password yang berbeda.",
+        description: error.message || "Coba gunakan email dan password yang berbeda.",
         variant: "destructive",
       });
     } finally {

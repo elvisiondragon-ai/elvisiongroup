@@ -49,22 +49,8 @@ serve(async (req) => {
       });
     }
 
-    // Check if IP address already used trial (anti-abuse)
-    const { data: ipSubs } = await supabaseClient
-      .from('pro_subscriptions')
-      .select('id')
-      .eq('ip_address', userIP)
-      .eq('subscription_type', 'trial');
-
-    if (ipSubs && ipSubs.length > 0) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Trial already used from this IP address'
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      });
-    }
+    // REMOVED IP blocking - allow unlimited trials from same IP
+    // Users can signup with different emails and get trials
 
     // Start trial using database function
     const { data: subscriptionId, error } = await supabaseClient
