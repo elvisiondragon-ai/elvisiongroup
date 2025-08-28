@@ -58,10 +58,19 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => setIsPlaying(false);
 
-    // Enhanced audio setup for better compatibility
+    // Enhanced audio setup for better compatibility and protection
     audio.setAttribute('preload', 'metadata');
-    audio.setAttribute('controlsList', 'nodownload noremoteplayback');
+    audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+    audio.setAttribute('disablePictureInPicture', 'true');
+    audio.setAttribute('oncontextmenu', 'return false');
     audio.crossOrigin = 'anonymous';
+    
+    // Add CSS style for pointer-events protection
+    audio.style.pointerEvents = 'none';
+    
+    // Prevent right-click context menu
+    const handleContextMenu = (e: Event) => e.preventDefault();
+    audio.addEventListener('contextmenu', handleContextMenu);
 
     audio.addEventListener('loadeddata', setAudioData);
     audio.addEventListener('timeupdate', setAudioTime);
@@ -138,6 +147,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
         <audio
           ref={audioRef}
           src={src}
+          onContextMenu={(e) => e.preventDefault()}
           onEnded={() => setIsPlaying(false)}
           onError={() => {
             toast({
@@ -146,6 +156,8 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
               variant: "destructive",
             });
           }}
+          controlsList="nodownload noremoteplayback nofullscreen"
+          style={{ pointerEvents: 'none' }}
         />
       )}
       

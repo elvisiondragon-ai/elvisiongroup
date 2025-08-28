@@ -45,10 +45,22 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   // Handle audio completion
   const handleEnded = useCallback(() => {
     if (currentTrack) {
-      awardXP('audio_completion', 10, `Completed ${currentTrack.title}`, {
-        verseId: currentTrack.id,
-        verseTitle: currentTrack.title
-      });
+      // Determine if it's a journal or verse based on audio file
+      const isJournal = currentTrack.audioPath === 'Jurnalsyukur1.MP3';
+      
+      if (isJournal) {
+        // Award XP for journal completion
+        awardXP('audio_completion', 10, `Completed ${currentTrack.title}`, {
+          journalId: currentTrack.id,
+          journalTitle: currentTrack.title
+        });
+      } else {
+        // Award XP for verse completion
+        awardXP('audio_completion', 10, `Completed ${currentTrack.title}`, {
+          verseId: currentTrack.id,
+          verseTitle: currentTrack.title
+        });
+      }
     }
     setCurrentTrackId(null);
     setCurrentTrack(null);
@@ -104,11 +116,15 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       const publicUrl = getAudioUrl(track.audioPath);
       const audio = new Audio(publicUrl);
       
-      // Configure audio for background playback
+      // Configure audio for background playback with enhanced protection
       audio.crossOrigin = 'anonymous';
       audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
       audio.setAttribute('disablePictureInPicture', 'true');
+      audio.setAttribute('oncontextmenu', 'return false');
       audio.preload = 'metadata';
+      
+      // Add CSS style for pointer-events protection
+      audio.style.pointerEvents = 'none';
       
       // Add event listeners
       audio.addEventListener('ended', handleEnded);

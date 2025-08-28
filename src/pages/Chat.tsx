@@ -25,6 +25,7 @@ interface ChatMessageData {
   message: string;
   created_at: string;
   translatedMessage?: string;
+  subscription_type?: string;
 }
 
 export function Chat() {

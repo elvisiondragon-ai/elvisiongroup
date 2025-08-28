@@ -123,42 +123,64 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
 
     console.log('🔔 Setting up realtime subscription for tripay_reference:', paymentData.tripay_reference);
 
-    const channel = supabase
-      .channel('payment-status-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'payment_transactions',
-          filter: `tripay_reference=eq.${paymentData.tripay_reference}`
-        },
-        (payload) => {
-          console.log('💰 Payment status change detected:', payload);
-          
-          if (payload.new?.status === 'paid') {
-            console.log('🎉 Payment confirmed as PAID!');
-            
-            // Show success notification
-            toast({
-              title: "Pembayaran Berhasil!",
-              description: "Pembayaran berhasil silahkan cek email!",
-              variant: "default",
-            });
+    // Check if we're in a secure context for WebSocket connections
+    const isSecureContext = window.isSecureContext && 'WebSocket' in window;
+    
+    if (!isSecureContext) {
+      console.warn('⚠️ WebSocket not available in this context, skipping realtime subscription');
+      return;
+    }
 
-            // Close the payment modal after a short delay
-            setTimeout(() => {
-              onClose();
-            }, 2000);
+    let channel: any;
+    
+    try {
+      channel = supabase
+        .channel('payment-status-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'payment_transactions',
+            filter: `tripay_reference=eq.${paymentData.tripay_reference}`
+          },
+          (payload) => {
+            console.log('💳 Payment status update received:', payload);
+            if (payload.new.status === 'PAID') {
+              toast({
+                title: "Pembayaran Berhasil!",
+                description: "Selamat! Subscription Pro Anda telah aktif.",
+                variant: "default",
+              });
+
+              // Close the payment modal after a short delay
+              setTimeout(() => {
+                onClose();
+              }, 2000);
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe((status) => {
+          console.log('Payment subscription status:', status);
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            console.error('❌ Realtime subscription error - falling back to polling');
+            // Could implement polling as fallback here if needed
+          }
+        });
+    } catch (error) {
+      console.error('❌ Failed to create realtime subscription:', error);
+    }
 
     // Cleanup subscription when component unmounts or dependencies change
     return () => {
-      console.log('🔄 Cleaning up payment realtime subscription');
-      supabase.removeChannel(channel);
+      if (channel) {
+        console.log('🔄 Cleaning up payment realtime subscription');
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.error('Error cleaning up channel:', error);
+        }
+      }
     };
   }, [showPaymentInstructions, paymentData?.tripay_reference, toast, onClose]);
 

@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
 import { useUserProfile } from "@/contexts/UserProfileContext";
-import { useAudioCache } from "@/hooks/useAudioCache";
+// import { useAudioCache } from "@/hooks/useAudioCache"; // Disabled to prevent memory leaks
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { Play, Headphones, BookOpen, Zap, Target, Lock } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
@@ -37,55 +37,86 @@ export function Home({
   const [onlineCount, setOnlineCount] = useState(825); // Base count of 825
   const { calculateXPProgress } = useXPSystem();
   const { proStatus } = usePro();
-  const { preloadAudioFiles, getCacheStats } = useAudioCache();
+  // const { preloadAudioFiles, getCacheStats } = useAudioCache(); // Disabled to prevent memory leaks
 
-  // Preload audio files for better performance
-  useEffect(() => {
-    const audioFiles = [
-      'Verse1 - Calm Clarity.MP3',
-      'Verse2 - Lucid Beach.MP3',
-      'Verse 3 - Syukur.MP3',
-      'Verse 4 - Prosperity Stream Vol. 1.MP3',
-      'Verse4-English.MP3',
-      'Verse5 - Virtality Vortex.MP3'
-    ];
-    
-    // Preload audio files in background for offline access
-    preloadAudioFiles(audioFiles);
-  }, [preloadAudioFiles]);
+  // Disabled audio preloading to prevent memory leaks and 10000+ active tabs
+  // useEffect(() => {
+  //   const audioFiles = [
+  //     'Verse1 - Calm Clarity.MP3',
+  //     'Verse2 - Lucid Beach.MP3',
+  //     'Verse 3 - Syukur.MP3',
+  //     'Verse 4 - Prosperity Stream Vol. 1.MP3',
+  //     'Verse4-English.MP3',
+  //     'Verse5 - Virtality Vortex.MP3'
+  //   ];
+  //   
+  //   // Preload audio files in background for offline access
+  //   preloadAudioFiles(audioFiles);
+  // }, [preloadAudioFiles]);
 
   // Consolidated presence tracking - single channel for both listening and tracking
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase.channel('online_users');
+    // Check if we're in a secure context for WebSocket connections
+    const isSecureContext = window.isSecureContext && 'WebSocket' in window;
     
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const presenceState = channel.presenceState();
-        const onlineUsers = Object.keys(presenceState).length;
-        setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
-      })
-      .on('presence', { event: 'join' }, ({ newPresences }) => {
-        console.log('User joined:', newPresences);
-      })
-      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-        console.log('User left:', leftPresences);
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          // Track current user's presence
-          await channel.track({
-            user_id: user.id,
-            online_at: new Date().toISOString()
-          });
-        }
-      });
+    if (!isSecureContext) {
+      console.warn('⚠️ WebSocket not available in this context, using fallback online count');
+      setOnlineCount(825); // Static fallback count
+      return;
+    }
+
+    let channel: any;
+    
+    try {
+      channel = supabase.channel('online_users');
+      
+      channel
+        .on('presence', { event: 'sync' }, () => {
+          const presenceState = channel.presenceState();
+          const onlineUsers = Object.keys(presenceState).length;
+          setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
+        })
+        .on('presence', { event: 'join' }, ({ newPresences }) => {
+          console.log('User joined:', newPresences);
+        })
+        .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+          console.log('User left:', leftPresences);
+        })
+        .subscribe(async (status) => {
+          console.log('Presence subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            // Track current user's presence
+            try {
+              await channel.track({
+                user_id: user.id,
+                online_at: new Date().toISOString()
+              });
+            } catch (error) {
+              console.error('❌ Failed to track presence:', error);
+            }
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            console.error('❌ Presence subscription error - using fallback count');
+            setOnlineCount(825); // Fallback static count
+          }
+        });
+    } catch (error) {
+      console.error('❌ Failed to create presence subscription:', error);
+      setOnlineCount(825); // Fallback static count
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.error('Error cleaning up presence channel:', error);
+        }
+      }
     };
   }, [user]);
+
 
 
   const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
