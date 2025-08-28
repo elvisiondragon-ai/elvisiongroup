@@ -34,8 +34,8 @@ BEGIN
     old_xp := 0;
   END IF;
   
-  -- Check daily XP limits for audio completion and journal completion activities
-  IF p_activity_type = 'audio_completion' OR p_activity_type = 'journal_completion' THEN
+  -- Check daily XP limits for audio completion activities
+  IF p_activity_type = 'audio_completion' THEN
     -- Get today's XP earned for verse activities (verseId exists)
     SELECT COALESCE(SUM(xp_amount), 0) INTO verse_xp_today
     FROM public.xp_transactions
@@ -44,15 +44,13 @@ BEGIN
       AND DATE(created_at) = CURRENT_DATE
       AND metadata->>'verseId' IS NOT NULL;
     
-    -- Get today's XP earned for journal activities (journalId exists OR journal_completion activity)
+    -- Get today's XP earned for journal activities (journalId exists)
     SELECT COALESCE(SUM(xp_amount), 0) INTO journal_xp_today
     FROM public.xp_transactions
     WHERE user_id = p_user_id
+      AND activity_type = 'audio_completion'
       AND DATE(created_at) = CURRENT_DATE
-      AND (
-        (activity_type = 'audio_completion' AND metadata->>'journalId' IS NOT NULL)
-        OR activity_type = 'journal_completion'
-      );
+      AND metadata->>'journalId' IS NOT NULL;
     
     -- Apply daily limits based on activity type
     IF p_metadata->>'verseId' IS NOT NULL THEN
@@ -64,8 +62,8 @@ BEGIN
       ELSE
         xp_to_award := p_xp_amount; -- Award full XP
       END IF;
-    ELSIF p_metadata->>'journalId' IS NOT NULL OR p_activity_type = 'journal_completion' THEN
-      -- Journal completion (audio OR text): Max 5 XP per day
+    ELSIF p_metadata->>'journalId' IS NOT NULL THEN
+      -- Journal completion: Max 5 XP per day
       IF journal_xp_today >= 5 THEN
         xp_to_award := 0; -- Daily limit reached
       ELSIF journal_xp_today + p_xp_amount > 5 THEN
@@ -96,7 +94,7 @@ BEGIN
       'daily_limit_reached', true,
       'message', CASE 
         WHEN p_metadata->>'verseId' IS NOT NULL THEN 'Daily verse XP limit reached (20 XP/day)'
-        WHEN p_metadata->>'journalId' IS NOT NULL OR p_activity_type = 'journal_completion' THEN 'Daily journal XP limit reached (5 XP/day)'
+        WHEN p_metadata->>'journalId' IS NOT NULL THEN 'Daily journal XP limit reached (5 XP/day)'
         ELSE 'Daily limit reached'
       END
     );

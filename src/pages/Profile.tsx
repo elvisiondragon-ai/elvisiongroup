@@ -167,14 +167,14 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const stats = [
     {
       icon: Calendar,
-      label: "Total Verses",
-      value: (profile.total_verses || 0) + 50, // +50 compensation for existing users
+      label: "Total Meditations",
+      value: profile.total_sessions,
       color: "text-primary"
     },
     {
       icon: Target,
-      label: "Total Journal",
-      value: `${profile.total_sessions + 50}`, // +50 compensation for existing users
+      label: "Total Sessions",
+      value: `${profile.total_sessions}`,
       color: "text-neon-green"
     },
     {

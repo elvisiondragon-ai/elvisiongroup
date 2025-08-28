@@ -35,34 +35,16 @@ export function useXPSystem(): XPSystemHook {
 
       if (error) throw error;
 
-      // Show appropriate toast based on XP result
+      // Show success toast with level up information
       const result = data as any;
-      
-      // Check if daily limit was reached - show positive encouragement
-      if (result?.daily_limit_reached) {
-        console.log('🚫 XP Daily Limit Reached:', {
-          activityType,
-          requestedXP: xpAmount,
-          actualXP: result.xp_gained || 0,
-          limitMessage: result.message,
-          timestamp: new Date().toISOString()
-        });
-        
-        toast({
-          title: "🎉 EXP Harian Anda Sudah Maximal!",
-          description: "Kamu sudah menyelesaikan target harian dengan sempurna! Kembali lagi besok untuk melanjutkan perjalanan spiritual ✨",
-          variant: "default",
-        });
-      } else if (result?.level_up) {
+      if (result?.level_up) {
         toast({
           title: `🎉 Level Up! Now Level ${result.new_level}!`,
-          description: `+${result.xp_gained || xpAmount} XP earned! ${result.achievement_earned ? '⚡ New achievement unlocked!' : ''}`,
+          description: `+${xpAmount} XP earned! ${result.achievement_earned ? '⚡ New achievement unlocked!' : ''}`,
         });
       } else {
-        // Always show XP notification for successful requests (even if 0 due to limits)
-        const xpEarned = result?.xp_gained || 0;
         toast({
-          title: xpEarned > 0 ? `+${xpEarned} XP Earned!` : `+${xpAmount} XP Earned!`,
+          title: `+${xpAmount} XP Earned!`,
           description: reason || `${activityType} completed`,
         });
       }
