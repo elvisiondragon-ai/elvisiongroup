@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { ProBadge } from '@/components/ProBadge';
 
 interface PaymentProps {
   onNavigate: (tab: string) => void;
@@ -495,8 +496,26 @@ export function Payment({ onNavigate }: PaymentProps) {
                   <Card className="p-3 hover:bg-muted/50 transition-colors">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-medium text-sm">{plan.name}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium text-sm">{plan.name}</h3>
+                          {plan.id === '1_month' && (
+                            <ProBadge 
+                              size="md" 
+                              targetUserIsPro={true} 
+                              targetUserSubscriptionType="1_month" 
+                              showLabel={true}
+                            />
+                          )}
+                          {plan.id === '1_year' && (
+                            <ProBadge 
+                              size="md" 
+                              targetUserIsPro={true} 
+                              targetUserSubscriptionType="1_year" 
+                              showLabel={true}
+                            />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{plan.description}</p>
                       </div>
                       <div className="text-right ml-3">
                         <div className="font-bold text-base">{formatCurrency(plan.price)}</div>

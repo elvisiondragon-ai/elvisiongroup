@@ -4,7 +4,7 @@ import { Card } from "./ui/card";
 export function XPRules() {
   const rules = [
     {
-      action: "Listen to audio until finished",
+      action: "Listen to Verses until Finished",
       xp: 10,
       icon: Music,
       color: "text-purple-400",
