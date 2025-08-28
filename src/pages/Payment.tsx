@@ -500,7 +500,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                           <h3 className="font-medium text-sm">{plan.name}</h3>
                           {plan.id === '1_month' && (
                             <ProBadge 
-                              size="md" 
+                              size="sm" 
                               targetUserIsPro={true} 
                               targetUserSubscriptionType="1_month" 
                               showLabel={true}
@@ -508,7 +508,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                           )}
                           {plan.id === '1_year' && (
                             <ProBadge 
-                              size="md" 
+                              size="sm" 
                               targetUserIsPro={true} 
                               targetUserSubscriptionType="1_year" 
                               showLabel={true}
