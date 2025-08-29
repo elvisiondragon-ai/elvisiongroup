@@ -108,7 +108,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         setPlayingJournal(null);
         setCurrentAudio(null);
         // Award XP for completion
-        awardXP('audio_completion', 10, `Completed ${journal.title}`);
+        awardXP('audio_completion', 1, `Completed ${journal.title}`);
       });
 
       audio.addEventListener('error', (error) => {
@@ -280,7 +280,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       });
     } else {
       // Award XP for completing spiritual journal reflection
-      awardXP('journal_completion', 5, 'Completed spiritual journal reflection');
+      awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
       
       toast({
         title: "Tersimpan",
