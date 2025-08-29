@@ -167,10 +167,18 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
 
   const displayName = profile.display_name || user?.email?.split('@')[0] || "User";
   
-  // Simple XP calculation  
+  // Correct XP calculation using proper thresholds
   const currentXP = profile.experience_points || 0;
   const currentLevel = profile.level || 1;
-  const nextLevelXp = currentLevel * 100; // Simple calculation
+  
+  // Level thresholds (MUST match SQL function)
+  const levelThresholds = [0, 150, 500, 1200, 2500, 4500, 7000, 9000, 12000, 15000];
+  
+  // XP needed for next level
+  const nextLevelXp = currentLevel >= 10 ? 15000 : levelThresholds[currentLevel] || 15000;
+  const currentLevelStartXp = levelThresholds[currentLevel - 1] || 0;
+  const progressXp = Math.max(0, currentXP - currentLevelStartXp);
+  const neededXp = nextLevelXp - currentLevelStartXp;
   const joinDate = new Date(profile.created_at).toLocaleDateString('id-ID', { 
     year: 'numeric', 
     month: 'short' 
@@ -274,16 +282,16 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         
         <div className="max-w-xs mx-auto mb-6">
           <div className="flex items-center justify-between text-sm mb-2">
-            <span>Level {profile.level}</span> 
-            <span>{profile.experience_points} / {nextLevelXp} XP</span>
+            <span>Level {currentLevel}</span> 
+            <span>{currentXP} / {nextLevelXp} XP</span>
           </div>
           <Progress 
-            value={Math.min((profile.experience_points / nextLevelXp) * 100, 100)} 
+            value={currentLevel >= 10 ? 100 : Math.min((progressXp / neededXp) * 100, 100)} 
             className="h-2"
           />
           <div className="flex items-center justify-between mt-2">
             <p className="text-xs text-muted-foreground">
-              {Math.max(nextLevelXp - profile.experience_points, 0)} XP untuk level selanjutnya
+              {currentLevel >= 10 ? 'MAX LEVEL REACHED' : `${Math.max(nextLevelXp - currentXP, 0)} XP untuk level selanjutnya`}
             </p>
             <StreakIndicator streakDays={profile.streak_days} size="sm" />
           </div>
