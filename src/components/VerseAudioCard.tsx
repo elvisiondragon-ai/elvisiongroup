@@ -1,5 +1,6 @@
 import { Lock, Music, Crown, Zap } from 'lucide-react';
 import { useProtectedAudio } from '@/contexts/AudioContext';
+import { useXPSystem } from '@/hooks/useXPSystem';
 import { useState } from 'react';
 
 interface Verse {
@@ -31,6 +32,7 @@ export function VerseAudioCard({
   setCurrentVerseAudio 
 }: VerseAudioCardProps) {
   const { createProtectedAudio } = useProtectedAudio();
+  const { awardXP } = useXPSystem();
   
   // Check if this verse is currently playing
   const isPlaying = currentPlayingVerse === verse.id;
@@ -68,6 +70,8 @@ export function VerseAudioCard({
       audio.addEventListener('ended', () => {
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
+        // Award XP for verse completion
+        awardXP('verse_completion', 10, `Completed ${verse.title}`);
       });
 
       audio.addEventListener('error', (error) => {
