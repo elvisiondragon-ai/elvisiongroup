@@ -335,15 +335,18 @@ export function Payment({ onNavigate }: PaymentProps) {
             <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 shadow-lg">
               <CardHeader className="text-center pb-4">
                 <CardTitle className="flex items-center justify-center gap-2 text-green-700">
-                  📱 QR Code Payment
+                  📱 QR Code QRIS
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-4">
                 <div className="bg-white p-6 rounded-xl border-2 border-dashed border-green-300 inline-block">
-                  <img src={paymentData.qrUrl} alt="QR Code" className="w-40 h-40 mx-auto" />
+                  <img src={paymentData.qrUrl} alt="QR Code QRIS" className="w-48 h-48 mx-auto" />
                 </div>
                 <p className="text-sm text-green-600 font-medium">
-                  Scan QR Code dengan aplikasi e-wallet Anda
+                  Scan QR Code QRIS dengan aplikasi e-wallet atau mobile banking
+                </p>
+                <p className="text-xs text-green-500">
+                  Mendukung: ShopeePay, GoPay, OVO, DANA, LinkAja, dll
                 </p>
               </CardContent>
             </Card>
