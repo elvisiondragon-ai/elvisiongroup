@@ -174,12 +174,12 @@ export function Payment({ onNavigate }: PaymentProps) {
         setPaymentData(data);
         setShowPaymentInstructions(true);
         
-        if (data.payCode) {
+        if (data.pay_code) {
           toast({
             title: "Pembayaran Berhasil Dibuat",
             description: "Silakan selesaikan pembayaran menggunakan Virtual Account",
           });
-        } else if (data.qrUrl) {
+        } else if (data.qr_url) {
           toast({
             title: "Pembayaran Berhasil Dibuat", 
             description: "Silakan scan QR Code untuk menyelesaikan pembayaran",
@@ -283,8 +283,8 @@ export function Payment({ onNavigate }: PaymentProps) {
                           dateStyle: 'medium',
                           timeStyle: 'short'
                         })
-                      : paymentData?.expiredTime 
-                        ? new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
+                      : paymentData?.expired_time 
+                        ? new Date(paymentData.expired_time * 1000).toLocaleString('id-ID', {
                             dateStyle: 'medium',
                             timeStyle: 'short'
                           })
@@ -297,7 +297,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           </Card>
 
           {/* Virtual Account Number */}
-          {paymentData?.payCode && (
+          {paymentData?.pay_code && (
             <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-lg">
               <CardHeader className="text-center pb-4">
                 <CardTitle className="flex items-center justify-center gap-2 text-blue-700">
@@ -308,7 +308,7 @@ export function Payment({ onNavigate }: PaymentProps) {
               <CardContent className="text-center space-y-4">
                 <div className="bg-white border-2 border-dashed border-blue-300 p-6 rounded-xl">
                   <p className="font-mono text-4xl font-bold text-blue-800 tracking-wider mb-2">
-                    {paymentData.payCode}
+                    {paymentData.pay_code}
                   </p>
                   <p className="text-xs text-blue-600 font-medium">
                     Nomor Virtual Account
@@ -320,7 +320,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => copyToClipboard(paymentData.payCode)}
+                  onClick={() => copyToClipboard(paymentData.pay_code)}
                   className="border-blue-300 text-blue-700 hover:bg-blue-50"
                 >
                   <Copy className="w-4 h-4 mr-1" />
@@ -331,7 +331,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           )}
 
           {/* QR Code */}
-          {paymentData?.qrUrl && (
+          {paymentData?.qr_url && (
             <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 shadow-lg">
               <CardHeader className="text-center pb-4">
                 <CardTitle className="flex items-center justify-center gap-2 text-green-700">
@@ -341,11 +341,11 @@ export function Payment({ onNavigate }: PaymentProps) {
               <CardContent className="text-center space-y-4">
                 <div className="bg-white p-6 rounded-xl border-2 border-dashed border-green-300 inline-block">
                   <img 
-                    src={paymentData.qrUrl || paymentData.qr_url} 
+                    src={paymentData.qr_url} 
                     alt="QR Code QRIS" 
                     className="w-48 h-48 mx-auto" 
                     onError={(e) => {
-                      console.error('QR Image failed to load:', paymentData.qrUrl || paymentData.qr_url);
+                      console.error('QR Image failed to load:', paymentData.qr_url);
                     }}
                   />
                 </div>
