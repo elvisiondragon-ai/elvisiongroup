@@ -20,35 +20,42 @@ export function useXPSystem(): XPSystemHook {
   ) => {
     try {
       setIsLoading(true);
+      
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new Error('User not authenticated');
 
-      let result;
-      if (activityType === 'audio_completion') {
-        const isJournal = metadata.journalId || metadata.journalTitle;
-        const minutes = metadata.listeningMinutes || 0;
-        
-        const { data } = await supabase.rpc('award_audio_xp', {
-          user_uuid: user.id,
-          is_journal: !!isJournal,
-          minutes_listened: minutes
-        });
-        result = data;
-      } else if (activityType === 'journal_completion') {
-        const { data } = await supabase.rpc('award_journal_xp', {
-          user_uuid: user.id
-        });
-        result = data;
-      }
+      // Award XP using the enhanced database function
+      const { data, error } = await supabase.rpc('award_xp', {
+        p_user_id: user.id,
+        p_xp_amount: xpAmount,
+        p_activity_type: activityType,
+        p_reason: reason,
+        p_metadata: metadata
+      });
 
-      if (result > 0) {
+      if (error) throw error;
+
+      // Show success toast with level up information
+      const result = data as any;
+      if (result?.level_up) {
         toast({
-          title: `+${result} XP Earned!`,
-          description: reason || activityType
+          title: `🎉 Level Up! Now Level ${result.new_level}!`,
+          description: `+${xpAmount} XP earned! ${result.achievement_earned ? '⚡ New achievement unlocked!' : ''}`,
+        });
+      } else {
+        toast({
+          title: `+${xpAmount} XP Earned!`,
+          description: reason || `${activityType} completed`,
         });
       }
+
     } catch (error) {
-      console.error('XP error:', error);
+      console.error('Error awarding XP:', error);
+      toast({
+        title: "Error awarding XP",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

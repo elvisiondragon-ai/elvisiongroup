@@ -27,24 +27,12 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<CurrentTrack | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-  const totalPlayTimeRef = useRef<number>(0);
   const { awardXP } = useXPSystem();
   const { initializeSession, updateMetadata, setPlaybackState } = useAudioSession();
 
   // Cleanup function to stop and remove audio
   const cleanupAudio = useCallback(() => {
-    // Update total play time if currently playing
-    if (startTimeRef.current && isPlaying) {
-      totalPlayTimeRef.current += Date.now() - startTimeRef.current;
-    }
-    startTimeRef.current = null;
-
     if (audioRef.current) {
-      // Call custom cleanup to remove orphan listeners
-      if (audioRef.current.cleanup) {
-        audioRef.current.cleanup();
-      }
       audioRef.current.pause();
       audioRef.current.src = '';
       audioRef.current.load();
@@ -52,69 +40,16 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
     setIsPlaying(false);
     setPlaybackState('paused');
-  }, [setPlaybackState, isPlaying]);
+  }, [setPlaybackState]);
 
   // Handle audio completion
   const handleEnded = useCallback(() => {
-    console.log('🎵 Audio ended - handleEnded triggered!', { currentTrack });
-    
-    // Ensure we have valid references to prevent orphan audio
-    if (!currentTrack || !audioRef.current) {
-      console.warn('⚠️ Orphan audio detected - missing references');
-      return;
-    }
-    
-    // Update total play time
-    if (startTimeRef.current) {
-      totalPlayTimeRef.current += Date.now() - startTimeRef.current;
-    }
-    
     if (currentTrack) {
-      // Determine if it's a journal or verse based on audio file
-      const isJournal = currentTrack.audioPath === 'Jurnalsyukur1.MP3';
-      const totalMinutes = totalPlayTimeRef.current / (1000 * 60);
-      
-      console.log('🎯 Audio completion check', {
-        isJournal,
-        trackId: currentTrack.id,
-        trackTitle: currentTrack.title,
-        audioPath: currentTrack.audioPath,
-        totalMinutes
+      awardXP('audio_completion', 10, `Completed ${currentTrack.title}`, {
+        verseId: currentTrack.id,
+        verseTitle: currentTrack.title
       });
-      
-      if (isJournal) {
-        // Check minimum 1-hour listening time for journal
-        if (totalMinutes >= 60) {
-          // Award XP for journal completion (minimum 1 hour)
-          awardXP('audio_completion', 10, `Completed ${currentTrack.title} (${Math.floor(totalMinutes)} minutes)`, {
-            journalId: currentTrack.id,
-            journalTitle: currentTrack.title,
-            listeningMinutes: Math.floor(totalMinutes)
-          }).then(() => {
-            console.log('✅ Journal XP awarded successfully');
-          }).catch(error => {
-            console.error('❌ Error awarding journal XP:', error);
-          });
-        } else {
-          console.log('⚠️ Journal listening time insufficient:', totalMinutes, 'minutes (minimum 60 required)');
-        }
-      } else {
-        // Award XP for verse completion
-        awardXP('audio_completion', 10, `Completed ${currentTrack.title}`, {
-          verseId: currentTrack.id,
-          verseTitle: currentTrack.title
-        }).then(() => {
-          console.log('✅ Verse XP awarded successfully');
-        }).catch(error => {
-          console.error('❌ Error awarding verse XP:', error);
-        });
-      }
     }
-    
-    // Reset play time tracking
-    totalPlayTimeRef.current = 0;
-    startTimeRef.current = null;
-    
     setCurrentTrackId(null);
     setCurrentTrack(null);
     cleanupAudio();
@@ -149,18 +84,12 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     // If same track and already playing/paused, just resume/pause
     if (currentTrackId === track.id && audioRef.current) {
       if (isPlaying) {
-        // Update total play time when pausing
-        if (startTimeRef.current) {
-          totalPlayTimeRef.current += Date.now() - startTimeRef.current;
-          startTimeRef.current = null;
-        }
         audioRef.current.pause();
         setIsPlaying(false);
         setPlaybackState('paused');
       } else {
         try {
           await audioRef.current.play();
-          startTimeRef.current = Date.now(); // Start timing when resuming
           setIsPlaying(true);
           setPlaybackState('playing');
         } catch (error) {
@@ -178,36 +107,17 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       // Configure audio for background playback
       audio.crossOrigin = 'anonymous';
       audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-      audio.setAttribute('oncontextmenu', 'return false');
+      audio.setAttribute('disablePictureInPicture', 'true');
       audio.preload = 'metadata';
       
-      // Add CSS style for pointer-events protection
-      audio.style.pointerEvents = 'none';
-      
-      // Add event listeners with orphan audio prevention
-      const onEnded = () => {
-        console.log('🎵 Native audio ended event');
-        handleEnded();
-      };
-      
-      audio.addEventListener('ended', onEnded);
+      // Add event listeners
+      audio.addEventListener('ended', handleEnded);
       audio.addEventListener('error', handleError);
       audio.addEventListener('contextmenu', handleContextMenu);
-      
-      // Store cleanup function for this specific audio instance
-      audio.cleanup = () => {
-        audio.removeEventListener('ended', onEnded);
-        audio.removeEventListener('error', handleError);  
-        audio.removeEventListener('contextmenu', handleContextMenu);
-      };
 
       audioRef.current = audio;
       setCurrentTrack(track);
       setCurrentTrackId(track.id);
-      
-      // Reset and start timing for new track
-      totalPlayTimeRef.current = 0;
-      startTimeRef.current = Date.now();
 
       // Initialize media session with handlers
       initializeSession({
@@ -215,7 +125,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
           if (audioRef.current && !isPlaying) {
             try {
               await audioRef.current.play();
-              startTimeRef.current = Date.now(); // Start timing
               setIsPlaying(true);
               setPlaybackState('playing');
             } catch (error) {
@@ -225,11 +134,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         },
         onPause: () => {
           if (audioRef.current && isPlaying) {
-            // Update total play time when pausing via media session
-            if (startTimeRef.current) {
-              totalPlayTimeRef.current += Date.now() - startTimeRef.current;
-              startTimeRef.current = null;
-            }
             audioRef.current.pause();
             setIsPlaying(false);
             setPlaybackState('paused');
@@ -269,11 +173,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   // Pause track function
   const pauseTrack = useCallback(() => {
     if (audioRef.current && isPlaying) {
-      // Update total play time when pausing
-      if (startTimeRef.current) {
-        totalPlayTimeRef.current += Date.now() - startTimeRef.current;
-        startTimeRef.current = null;
-      }
       audioRef.current.pause();
       setIsPlaying(false);
       setPlaybackState('paused');
@@ -285,7 +184,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (audioRef.current && !isPlaying) {
       try {
         await audioRef.current.play();
-        startTimeRef.current = Date.now(); // Start timing when resuming
         setIsPlaying(true);
         setPlaybackState('playing');
       } catch (error) {
@@ -294,37 +192,12 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isPlaying, setPlaybackState]);
 
-  // Handle tab switching notification for orphan audio
+  // Only cleanup on app unmount (not on navigation)
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && currentTrackId && isPlaying) {
-        // Show notification to keep focus on audio
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('Audio masih berjalan! 🎵', {
-            body: 'Kembali ke aplikasi untuk melanjutkan mendengarkan',
-            icon: '/icon-192x192.png'
-          });
-        }
-      }
-    };
-
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (currentTrackId && isPlaying) {
-        e.preventDefault();
-        e.returnValue = 'Audio masih berjalan. Yakin ingin keluar?';
-        return 'Audio masih berjalan. Yakin ingin keluar?';
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
       cleanupAudio();
     };
-  }, [cleanupAudio, currentTrackId, isPlaying]);
+  }, [cleanupAudio]);
 
   const value = {
     currentTrackId,

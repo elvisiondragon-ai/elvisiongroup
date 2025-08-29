@@ -25,11 +25,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [lastSaveTime, setLastSaveTime] = useState<number>(0);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
-  const { currentTrackId, isPlaying, playTrack, stopTrack } = useGlobalAudio();
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
@@ -273,50 +271,31 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       return;
     }
 
+    const { error } = await supabase
+      .from('reflections')
+      .insert({
+        user_id: currentUser.id,
+        question: currentQuestion,
+        reflection: reflection.trim()
+      });
 
-    // Minimum content length validation
-    if (reflection.trim().length < 10) {
+    if (error) {
+      console.error('Error saving reflection:', error);
       toast({
-        title: "Renungan Terlalu Pendek",
-        description: "Silakan tulis renungan yang lebih bermakna (minimal 10 karakter)",
+        title: "Error",
+        description: "Gagal menyimpan renungan",
         variant: "destructive"
       });
-      return;
-    }
-
-    if (isSaving) return;
-
-    try {
-      setIsSaving(true);
+    } else {
+      // Award XP for completing spiritual journal reflection
+      awardXP('journal_completion', 5, 'Completed spiritual journal reflection');
       
-      const { error } = await supabase
-        .from('reflections')
-        .insert({
-          user_id: currentUser.id,
-          question: currentQuestion,
-          reflection: reflection.trim()
-        });
-
-      if (error) {
-        console.error('Error saving reflection:', error);
-        toast({
-          title: "Error",
-          description: "Gagal menyimpan renungan",
-          variant: "destructive"
-        });
-      } else {
-        // Award XP for completing spiritual journal reflection
-        awardXP('journal_completion', 5, 'Completed spiritual journal reflection');
-        
-        toast({
-          title: "Tersimpan",
-          description: "Renungan Anda telah disimpan",
-        });
-        setReflection("");
-        loadReflections(currentUser.id);
-      }
-    } finally {
-      setIsSaving(false);
+      toast({
+        title: "Tersimpan",
+        description: "Renungan Anda telah disimpan",
+      });
+      setReflection("");
+      loadReflections(currentUser.id);
     }
   };
 
@@ -498,11 +477,11 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
               
               <Button
                 onClick={handleSaveReflection}
-                disabled={!reflection.trim() || isSaving}
+                disabled={!reflection.trim()}
                 className="w-full bg-gradient-accent hover:opacity-90 text-background font-medium glow-accent"
               >
                 <Save className="w-4 h-4 mr-2" />
-                {isSaving ? 'Menyimpan...' : 'Simpan Renungan'}
+                Simpan Renungan
               </Button>
             </div>
           </div>
