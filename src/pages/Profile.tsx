@@ -153,9 +153,9 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     );
   }
 
-  // Create default profile data if not found
-  const defaultProfile: UserProfile = {
-    display_name: user?.email?.split('@')[0] || "Alex",
+  // Simple profile handling
+  const profile = userProfile || {
+    display_name: user?.email?.split('@')[0] || "User",
     level: 1,
     experience_points: 0,
     streak_days: 0,
@@ -165,41 +165,12 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     created_at: new Date().toISOString()
   };
 
-  // Safely merge userProfile with defaults to handle missing database columns
-  let profile = defaultProfile;
-  
-  try {
-    if (userProfile && typeof userProfile === 'object') {
-      profile = {
-        ...defaultProfile,
-        ...userProfile,
-        // Handle new columns that exist in database
-        total_verses: userProfile?.total_verses ?? 0,
-        total_journal: userProfile?.total_journal ?? 0,
-        achievements: Array.isArray(userProfile?.achievements) ? userProfile.achievements : [],
-        // Ensure all required fields exist with safe defaults
-        experience_points: Number(userProfile?.experience_points) || 0,
-        level: Number(userProfile?.level) || 1,
-        streak_days: Number(userProfile?.streak_days) || 0,
-        display_name: userProfile?.display_name || user?.email?.split('@')[0] || "User",
-        created_at: userProfile?.created_at || new Date().toISOString()
-      };
-    }
-  } catch (profileError) {
-    console.error('Profile data processing error:', profileError);
-    profile = defaultProfile;
-  }
-
   const displayName = profile.display_name || user?.email?.split('@')[0] || "User";
-  const getXPThresholds = () => {
-    const thresholds = [0, 150, 500, 1200, 2500, 4500, 7000, 9000, 12000, 15000];
-    return thresholds;
-  };
-
-  const thresholds = getXPThresholds();
-  const currentLevelXP = thresholds[profile.level - 1] || 0;
-  const nextLevelXP = profile.level >= 10 ? 15000 : thresholds[profile.level] || 0;
-  const xpForNextLevel = nextLevelXP - profile.experience_points;
+  
+  // Simple XP calculation  
+  const currentXP = profile.experience_points || 0;
+  const currentLevel = profile.level || 1;
+  const nextLevelXp = currentLevel * 100; // Simple calculation
   const joinDate = new Date(profile.created_at).toLocaleDateString('id-ID', { 
     year: 'numeric', 
     month: 'short' 
