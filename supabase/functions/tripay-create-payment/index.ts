@@ -45,6 +45,10 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+    
+    console.log('🔍 Raw auth header:', authHeader)
+    const token = authHeader.replace('Bearer ', '')
+    console.log('🔍 Extracted token (first 20 chars):', token.substring(0, 20) + '...')
 
     // Create client with anon key to verify user
     const supabaseClient = createClient(
@@ -52,24 +56,35 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY')!
     )
 
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''))
-    if (authError || !user) {
-      console.log('❌ Authentication failed:', authError?.message)
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
+    if (authError || !user || !user.id) {
+      console.log('❌ Authentication failed or user.id is null:', authError?.message)
+      console.log('❌ User object:', JSON.stringify(user))
       return new Response(
-        JSON.stringify({ error: 'Authentication failed' }),
+        JSON.stringify({ error: 'Authentication failed - user ID is null' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     console.log('✅ Found user from auth token:', user.id)
+    console.log('🔍 User object:', JSON.stringify(user))
 
     // Parse request body
     console.log('📥 Parsing request body...')
     const body = await req.json()
     console.log('✅ Received body:', JSON.stringify(body))
+    console.log('🔍 Body userEmail:', body.userEmail)
+    console.log('🔍 User email from auth:', user.email)
 
     // VPS URL
     const vpsUrl = "https://payment.elvisiongroup.com/create-payment"
+    
+    // Conflict fix: VPS expects 'id' field, not 'user_id'
+    const vpsPayload = {
+      ...body,
+      id: user.id,      // Add id field for VPS
+      userId: user.id   // Add userId field for VPS
+    }
     
     // Forward to VPS directly
     console.log('🌐 Sending to VPS...')
@@ -78,7 +93,7 @@ serve(async (req) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(vpsPayload)
     })
 
     console.log('📡 VPS Response status:', vpsResponse.status)
@@ -142,10 +157,15 @@ serve(async (req) => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
+      
+      console.log('🔍 DEBUG VALUES:')
+      console.log('  - user.id:', user.id)
+      console.log('  - body.userEmail:', body.userEmail)
+      console.log('  - user.email:', user.email)
 
       const { data: subscription, error: subError } = await supabase
         .from('pro_subscriptions')
-        .upsert({
+        .insert({
           user_id: user.id,
           user_email: body.userEmail,
           subscription_type: body.subscriptionType,
@@ -156,8 +176,6 @@ serve(async (req) => {
           ip_address: req.headers.get('x-forwarded-for') || 'unknown',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'tripay_reference'
         })
         .select()
         .single()
@@ -193,6 +211,7 @@ serve(async (req) => {
         .insert({
           subscription_id: subscription.id,
           user_id: user.id,
+          user_email: body.userEmail,
           tripay_reference: vpsResult.reference,
           tripay_merchant_ref: vpsResult.merchant_ref || `EVG_${Date.now()}_${body.subscriptionType}`,
           payment_method: body.paymentMethod,
@@ -217,14 +236,22 @@ serve(async (req) => {
 
       console.log('✅ Payment creation complete')
       
-      // Return successful response with checkout URL
+      // Return successful response with all payment data
       return new Response(JSON.stringify({
         success: true,
-        checkoutUrl: vpsResult.checkout_url,
         tripay_reference: vpsResult.reference,
+        reference: vpsResult.reference,
+        merchant_ref: vpsResult.merchant_ref,
+        status: vpsResult.status,
+        paymentMethod: body.paymentMethod,
         amount: body.amount || vpsResult.amount,
-        payment_method: body.paymentMethod,
-        expires_at: vpsResult.expired_time
+        paid_at: vpsResult.paid_at,
+        checkoutUrl: vpsResult.checkout_url,
+        payCode: vpsResult.pay_code,
+        qrUrl: vpsResult.qr_url,
+        expiredTime: vpsResult.expired_time,
+        expires_at: new Date(vpsResult.expired_time * 1000).toISOString(),
+        instructions: vpsResult.instructions
       }), {
         headers: {
           ...corsHeaders,
@@ -240,8 +267,19 @@ serve(async (req) => {
       // Return VPS response even if database fails
       return new Response(JSON.stringify({
         success: true,
-        checkoutUrl: vpsResult.checkout_url,
         tripay_reference: vpsResult.reference,
+        reference: vpsResult.reference,
+        merchant_ref: vpsResult.merchant_ref,
+        status: vpsResult.status,
+        paymentMethod: body.paymentMethod,
+        amount: body.amount || vpsResult.amount,
+        paid_at: vpsResult.paid_at,
+        checkoutUrl: vpsResult.checkout_url,
+        payCode: vpsResult.pay_code,
+        qrUrl: vpsResult.qr_url,
+        expiredTime: vpsResult.expired_time,
+        expires_at: new Date(vpsResult.expired_time * 1000).toISOString(),
+        instructions: vpsResult.instructions,
         warning: 'Database storage failed but payment created'
       }), {
         headers: {

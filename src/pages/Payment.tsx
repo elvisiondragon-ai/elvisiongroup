@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy } from 'lucide-react';
+import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -63,7 +63,7 @@ export function Payment({ onNavigate }: PaymentProps) {
     },
     {
       id: '1_year',
-      name: 'Berlangganan 1 Tahun',
+      name: 'Berlangganan 1 Tahun (30% Lebih Hemat)',
       description: 'Berlangganan tahunan dengan akses penuh',
       price: 800000,
       currency: 'IDR',
@@ -278,10 +278,18 @@ export function Payment({ onNavigate }: PaymentProps) {
                 <div className="col-span-2">
                   <span className="text-xs text-muted-foreground block">Berlaku Hingga</span>
                   <span className="text-sm font-medium text-orange-600">
-                    {new Date(paymentData?.expiredTime * 1000).toLocaleString('id-ID', {
-                      dateStyle: 'medium',
-                      timeStyle: 'short'
-                    })}
+                    {paymentData?.expires_at 
+                      ? new Date(paymentData.expires_at).toLocaleString('id-ID', {
+                          dateStyle: 'medium',
+                          timeStyle: 'short'
+                        })
+                      : paymentData?.expiredTime 
+                        ? new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short'
+                          })
+                        : 'N/A'
+                    }
                   </span>
                 </div>
               </div>
@@ -298,9 +306,12 @@ export function Payment({ onNavigate }: PaymentProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-4">
-                <div className="bg-white border-2 border-dashed border-blue-300 p-4 rounded-xl">
-                  <p className="font-mono text-2xl font-bold text-blue-800 tracking-wider">
+                <div className="bg-white border-2 border-dashed border-blue-300 p-6 rounded-xl">
+                  <p className="font-mono text-4xl font-bold text-blue-800 tracking-wider mb-2">
                     {paymentData.payCode}
+                  </p>
+                  <p className="text-xs text-blue-600 font-medium">
+                    Nomor Virtual Account
                   </p>
                 </div>
                 <p className="text-sm text-blue-600 font-medium">
@@ -495,7 +506,13 @@ export function Payment({ onNavigate }: PaymentProps) {
                   <Card className="p-3 hover:bg-muted/50 transition-colors">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-medium text-sm">{plan.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-sm">{plan.name}</h3>
+                          {/* Crown logo for 1 year subscription */}
+                          {(plan.durationDays === 365 || plan.name.includes('Tahun') || plan.name.includes('Year')) && (
+                            <Crown className="w-4 h-4 text-yellow-500" />
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
                       </div>
                       <div className="text-right ml-3">
