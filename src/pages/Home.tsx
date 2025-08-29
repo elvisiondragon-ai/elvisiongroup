@@ -239,8 +239,45 @@ export function Home({
         })}
         </div>
         
-        {/* XP Rules */}
-        <XPRules />
+        {/* XP Motivation & Weekly Challenge */}
+        <Card className="p-6 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-cyan-500/10 border border-primary/20">
+          <div className="text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="p-3 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 animate-pulse">
+                <Zap className="w-8 h-8 text-white" />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent font-orbitron">
+                ⚡ Dapatkan EXP Sebanyak Mungkin! ⚡
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Beraktivitas di Ecosystem eL Vision, Perbaiki Frekuensimu. 
+                <br />
+                <span className="text-primary font-medium">EXP mu disini akan menjadi alat ukur mempermudah keberhasilan dunia nyata mu</span>
+              </p>
+            </div>
+
+            {/* Weekly Challenge */}
+            <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-400/30">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Target className="w-5 h-5 text-orange-400" />
+                <span className="font-semibold text-orange-300">WEEKLY CHALLENGE</span>
+                <Target className="w-5 h-5 text-orange-400" />
+              </div>
+              <p className="text-sm font-medium text-orange-200 mb-2">
+                🔥 BONUS RAJIN AKTIF EXP MINGGUAN 🔥
+              </p>
+              <div className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                +50 EXP 🏆
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Tetap aktif setiap hari untuk bonus mingguan!
+              </p>
+            </div>
+          </div>
+        </Card>
       </div>
 
       {/* Community Preview */}

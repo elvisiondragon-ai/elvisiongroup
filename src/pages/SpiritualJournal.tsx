@@ -377,17 +377,34 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         })}
 
         {/* Tutorial Section */}
-        <Card className="p-6 bg-gradient-to-r from-primary/10 to-accent/10 border-2 border-primary/20">
-          <div className="space-y-4 text-center">
-            <h3 className="text-lg font-semibold font-orbitron text-foreground">
+        <Card className="p-8 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-orange-500/10 border-2 border-amber-400/30 shadow-2xl">
+          <div className="space-y-6 text-center">
+            <h3 className="text-2xl font-bold text-amber-300 tracking-wider" style={{
+              fontFamily: 'serif',
+              fontWeight: 'bold',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+              letterSpacing: '0.1em'
+            }}>
               Tutorial
             </h3>
-            <div className="space-y-3">
-            <p className="text-foreground font-medium leading-relaxed">
-              Keinginan yang kamu lepaskan, terwujud ke hidupmu..<br></br> Emosi negatif yang kamu lepaskan, akan Menjadi Energi Ignis Memory mu..
-            </p>
-              <p className="text-muted-foreground text-sm">
-                Riwayat Jurnal eL Vision Ini alat ukurmu setiap bulan
+            <div className="space-y-4">
+              <p className="text-foreground font-serif text-lg leading-relaxed tracking-wide" style={{
+                fontFamily: 'Times New Roman, serif',
+                fontWeight: '500',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+                letterSpacing: '0.02em'
+              }}>
+                Keinginan yang kamu lepaskan, terwujud ke hidupmu..<br/>
+                Emosi negatif yang kamu lepaskan, akan Menjadi Energi Ignis Memory mu..
+              </p>
+              <p className="text-amber-200 text-xl font-serif font-bold leading-relaxed tracking-wide px-4" style={{
+                fontFamily: 'Times New Roman, serif',
+                fontWeight: 'bold',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.4)',
+                letterSpacing: '0.05em',
+                fontSize: '1.25rem'
+              }}>
+                "Riwayat Jurnal eL Vision Ini alat ukurmu setiap bulan, semakin dilepaskan keinginan semakin mudah terjadi"
               </p>
             </div>
           </div>
