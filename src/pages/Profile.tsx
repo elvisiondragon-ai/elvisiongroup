@@ -26,7 +26,8 @@ import {
   LogOut,
   Bell,
   ArrowLeft,
-  Trash2
+  Trash2,
+  MessageCircle
 } from "lucide-react";
 
 interface ProfileProps {
@@ -389,19 +390,25 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         <Button 
           variant="outline" 
           className="w-full"
-          onClick={() => setShowNotifications(true)}
+          onClick={() => {
+            const message = encodeURIComponent("Kak renata saya dari ecosystem mau bertanya");
+            window.open(`https://wa.me/62895325633487?text=${message}`, '_blank');
+          }}
         >
-          <Bell className="w-4 h-4 mr-2" />
-          Notifikasi
+          <MessageCircle className="w-4 h-4 mr-2" />
+          Hubungi Customer Support
         </Button>
 
 
         <Button 
           variant="outline" 
-          className={`w-full ${proStatus.isPro ? 'border-pro text-pro' : 'tier-pro'}`}
+          className={`w-full ${proStatus.isPro 
+            ? 'border-pro text-pro' 
+            : 'bg-gradient-to-r from-black via-gray-900 to-yellow-600 hover:from-gray-900 hover:via-black hover:to-yellow-500 text-white border-none shadow-lg hover:shadow-xl transition-all duration-300'
+          }`}
           onClick={() => onNavigate("payment")}
         >
-          <Crown className="w-4 h-4 mr-2" />
+          <Crown className={`w-4 h-4 mr-2 ${proStatus.isPro ? '' : 'text-yellow-400'}`} />
           {proStatus.isPro 
             ? `Your Pro Plan until ${proStatus.expiresAt ? new Date(proStatus.expiresAt).toLocaleDateString('id-ID', { 
                 year: 'numeric', 

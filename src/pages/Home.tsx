@@ -14,7 +14,7 @@ import { usePro } from "@/hooks/usePro";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useAudioCache } from "@/hooks/useAudioCache";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
-import { Play, Headphones, BookOpen, Zap, Target, Lock } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 
 interface HomeProps {
@@ -108,8 +108,8 @@ export function Home({
   }, {
     title: t('Verse of eL Vision'),
     description: "Spiritual frequency healing",
-    icon: Headphones,
-    color: "text-accent",
+    icon: Sparkles,
+    color: "text-yellow-500",
     key: "audio-therapy"
   }, {
     title: t('home.spiritualJournal'),
@@ -126,7 +126,7 @@ export function Home({
   }, {
     title: "Ignis Quest",
     description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
-    icon: Target,
+    icon: Flame,
     color: "text-orange-500",
     key: "ignis-quest",
     isNew: true
@@ -200,8 +200,14 @@ export function Home({
           {features.map((feature, index) => {
           const isLocked = feature.isLocked;
           const isIgnisQuest = feature.key === 'ignis-quest';
-          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${isLocked ? 'bg-card/50 cursor-not-allowed' : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'} ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`} onClick={() => {
-            if (isLocked) {
+          const isIgnisLocked = isIgnisQuest && !proStatus.isPro;
+          const actuallyLocked = isLocked || isIgnisLocked;
+          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${actuallyLocked ? 'bg-card/50 cursor-not-allowed' : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'} ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`} onClick={() => {
+            if (actuallyLocked) {
+              if (isIgnisLocked) {
+                onNavigate("payment"); // Navigate to payment/upgrade page
+                return;
+              }
               return; // Do nothing if locked
             }
             console.log("Feature clicked:", feature.key);
@@ -210,17 +216,23 @@ export function Home({
                 {feature.isNew}
                 
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className={`p-3 rounded-full bg-muted ${feature.color} relative`}>
-                    {feature.key === 'ignis-quest' ? <img src={`${supabase.storage.from('admin-image').getPublicUrl('ignis-logo.gif').data.publicUrl}`} alt="Ignis Quest Logo" className="w-6 h-6 object-contain" onError={e => {
-                  // Fallback to Target icon if image fails to load
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.removeAttribute('style');
-                }} /> : <feature.icon className="w-6 h-6" />}
-                    {feature.key === 'ignis-quest' && <feature.icon className="w-6 h-6" style={{
-                  display: 'none'
-                }} />}
+                  <div className={`p-3 rounded-full relative ${
+                    feature.key === 'audio-therapy' 
+                      ? 'bg-gradient-to-r from-yellow-600 via-amber-500 to-yellow-400 shadow-lg shadow-yellow-500/30' 
+                    : feature.key === 'ignis-quest'
+                      ? 'bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 shadow-lg shadow-orange-500/50'
+                      : 'bg-muted'
+                  } ${feature.color}`}>
+                    <feature.icon className={`w-6 h-6 ${
+                      feature.key === 'audio-therapy' ? 'text-white animate-pulse' 
+                      : feature.key === 'ignis-quest' ? 'text-white animate-pulse'
+                      : ''
+                    }`} />
                     {isLocked && <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
                         <Lock className="w-4 h-4 text-muted-foreground" />
+                      </div>}
+                    {isIgnisLocked && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
+                        <Lock className="w-4 h-4 text-yellow-400" />
                       </div>}
                   </div>
                   <div>

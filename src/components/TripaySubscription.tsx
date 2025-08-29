@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, CheckCircle, Star, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -64,7 +64,7 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
     },
     {
       id: '1_year',
-      name: 'Berlangganan 1 Tahun',
+      name: 'Berlangganan 1 Tahun (30% Lebih Hemat)',
       description: 'Berlangganan tahunan dengan akses penuh',
       price: 800000,
       currency: 'IDR',
@@ -535,8 +535,21 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
                           <Card className="p-3 hover:bg-muted/50 transition-colors">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
-                                <h3 className="font-medium text-sm">{plan.name}</h3>
-                                <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="font-medium text-sm">{plan.name}</h3>
+                                  {/* Crown logo for 1 year subscription */}
+                                  {(plan.durationDays === 365 || plan.name.includes('Tahun') || plan.name.includes('Year')) && (
+                                    <Crown className="w-4 h-4 text-yellow-500" />
+                                  )}
+                                  {/* DEBUG: Show plan ID */}
+                                  <span className="text-xs bg-red-500 text-white px-1 rounded">{plan.id}</span>
+                                  {/* Always show a test badge for debugging */}
+                                  <div className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-500 text-white rounded-full font-bold">
+                                    <Star className="w-3 h-3" />
+                                    <span>TEST</span>
+                                  </div>
+                                </div>
+                                <p className="text-xs text-muted-foreground">{plan.description}</p>
                               </div>
                               <div className="text-right ml-3">
                                 <div className="font-bold text-base">{formatCurrency(plan.price)}</div>
