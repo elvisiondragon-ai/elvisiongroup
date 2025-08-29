@@ -283,7 +283,12 @@ export function Payment({ onNavigate }: PaymentProps) {
                           dateStyle: 'medium',
                           timeStyle: 'short'
                         })
-                      : 'N/A'
+                      : paymentData?.expiredTime 
+                        ? new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short'
+                          })
+                        : 'N/A'
                     }
                   </span>
                 </div>
