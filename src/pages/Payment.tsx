@@ -285,7 +285,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                 <div className="col-span-2">
                   <span className="text-xs text-muted-foreground block">Berlaku Hingga</span>
                   <span className="text-sm font-medium text-orange-600">
-                    {paymentData?.expiredTime 
+                    {paymentData?.expiredTime && !isNaN(paymentData.expiredTime)
                       ? new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
                           year: 'numeric',
                           month: 'long', 
@@ -293,7 +293,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                           hour: '2-digit',
                           minute: '2-digit'
                         })
-                      : 'N/A'
+                      : 'Tidak ada batas waktu'
                     }
                   </span>
                 </div>

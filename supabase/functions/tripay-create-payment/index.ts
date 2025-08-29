@@ -226,7 +226,7 @@ serve(async (req) => {
           status: 'pending',
           payment_url: vpsResult.checkoutUrl,
           payment_instructions: JSON.stringify(vpsResult.instructions || []),
-          expires_at: vpsResult.expiredTime ? new Date(vpsResult.expiredTime * 1000).toISOString() : null,
+          expires_at: vpsResult.expiredTime,
           bank_account: vpsResult.payCode,
           unique_code: vpsResult.qrString || vpsResult.payCode,
           created_at: new Date().toISOString(),
