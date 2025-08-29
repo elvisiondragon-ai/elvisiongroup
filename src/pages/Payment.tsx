@@ -279,7 +279,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                   <span className="text-xs text-muted-foreground block">Berlaku Hingga</span>
                   <span className="text-sm font-medium text-orange-600">
                     {paymentData?.expires_at 
-                      ? new Date(paymentData.expires_at).toLocaleString('id-ID', {
+                      ? new Date(paymentData.expires_at * 1000).toLocaleString('id-ID', {
                           dateStyle: 'medium',
                           timeStyle: 'short'
                         })
