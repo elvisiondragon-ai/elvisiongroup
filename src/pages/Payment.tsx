@@ -256,7 +256,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           </div>
         </div>
 
-        <div className="px-6 space-y-6">
+        <div className="px-6 space-y-6 pb-32">
           {/* Status Badge */}
           <div className="flex justify-center">
             <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium">
@@ -302,7 +302,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           </Card>
 
           {/* Virtual Account Number */}
-          {(paymentData?.payCode || paymentData?.paymentType === 'DIRECT') && (
+          {(paymentData?.payCode || paymentData?.paymentType === 'DIRECT') && paymentData?.paymentMethod !== 'QRIS' && (
             <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-lg">
               <CardHeader className="text-center pb-4">
                 <CardTitle className="flex items-center justify-center gap-2 text-blue-700">
@@ -378,7 +378,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                   📋 Cara Pembayaran
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="max-h-96 overflow-y-auto space-y-4">
                 {paymentData.instructions.map((instructionGroup: any, groupIndex: number) => (
                   <div key={groupIndex} className="space-y-3">
                     <h4 className="font-semibold text-purple-600">{instructionGroup.title}</h4>
