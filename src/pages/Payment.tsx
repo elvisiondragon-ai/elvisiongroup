@@ -85,6 +85,48 @@ export function Payment({ onNavigate }: PaymentProps) {
     }
   ]);
 
+  // Real-time payment status listener
+  useEffect(() => {
+    if (!showPaymentInstructions || !paymentData?.tripay_reference) return;
+
+    console.log('🔔 Setting up realtime subscription for tripay_reference:', paymentData.tripay_reference);
+
+    const channel = supabase
+      .channel('payment-status-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'payment_transactions',
+          filter: `tripay_reference=eq.${paymentData.tripay_reference}`
+        },
+        (payload) => {
+          console.log('💰 Payment status change detected:', payload);
+          
+          if (payload.new?.status === 'paid') {
+            console.log('🎉 Payment completed! Showing success notification...');
+            
+            // Show success notification
+            toast({
+              title: "🎉 Pembayaran Berhasil!",
+              description: "Pesanan telah dibayar. Akun PRO Anda telah diaktifkan!",
+              duration: 5000,
+            });
+            
+            // Redirect to profile after 2 seconds
+            setTimeout(() => {
+              setShowPaymentInstructions(false);
+              onNavigate("profile");
+            }, 2000);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [showPaymentInstructions, paymentData?.tripay_reference, toast, onNavigate]);
+
   useEffect(() => {
     const initializeData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
