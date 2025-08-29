@@ -6,7 +6,17 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useXPSystem } from '@/hooks/useXPSystem';
-import { getAudioUrl } from '@/utils/audioUtils';
+import { useProtectedAudio } from '@/contexts/AudioContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SpiritualJournalProps {
   onNavigate: (tab: string) => void;
@@ -21,13 +31,18 @@ interface Reflection {
 
 export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
-  const [playingJournal, setPlayingJournal] = useState<number | null>(null);
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [warningResolver, setWarningResolver] = useState<((value: boolean) => void) | null>(null);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
+  const { createProtectedAudio } = useProtectedAudio();
+  
+  // Local audio state - your primitive approach that works better
+  const [playingJournal, setPlayingJournal] = useState<number | null>(null);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
@@ -37,9 +52,23 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     return true;
   };
 
-  const publicAudioUrl = getAudioUrl('Jurnalsyukur1.MP3');
+  // Warning dialog handler - keeps users focused
+  const handleWarning = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setWarningResolver(() => resolve);
+      setShowWarningDialog(true);
+    });
+  };
 
-  const handlePlay = (journalId: number) => {
+  const handleWarningResponse = (shouldContinue: boolean) => {
+    if (warningResolver) {
+      warningResolver(shouldContinue);
+      setWarningResolver(null);
+    }
+    setShowWarningDialog(false);
+  };
+
+  const handlePlay = async (journalId: number) => {
     // Check if journal is locked
     const journal = journals.find(j => j.id === journalId);
     if (!journal || !userProfile) return;
@@ -56,85 +85,56 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       return;
     }
 
-    
-    // If currently playing this journal, stop it completely and reset
+    // If currently playing this journal, stop it
     if (playingJournal === journalId && currentAudio) {
       currentAudio.pause();
-      currentAudio.currentTime = 0;
-      // Clean up all event listeners properly
-      currentAudio.oncanplay = null;
-      currentAudio.onended = null;
-      currentAudio.onerror = null;
-      currentAudio.onloadstart = null;
-      currentAudio.onloadeddata = null;
-      setCurrentAudio(null);
       setPlayingJournal(null);
+      setCurrentAudio(null);
       return;
     }
 
-    // Stop and cleanup any existing audio completely
+    // Stop any currently playing audio
     if (currentAudio) {
       currentAudio.pause();
-      currentAudio.currentTime = 0;
-      currentAudio.oncanplay = null;
-      currentAudio.onended = null;
-      currentAudio.onerror = null;
-      currentAudio.onloadstart = null;
-      currentAudio.onloadeddata = null;
       setCurrentAudio(null);
-      setPlayingJournal(null);
     }
 
-    // Create and configure new audio with security features
-    const audio = new Audio(publicAudioUrl);
-    audio.preload = 'metadata';
-    
-    // Prevent download and right-click context menu
-    audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-    audio.setAttribute('disablePictureInPicture', 'true');
-    audio.addEventListener('contextmenu', (e) => e.preventDefault());
-    
-    // Set playing state and current audio reference first
-    setPlayingJournal(journalId);
-    setCurrentAudio(audio);
-    
-    // Setup event handlers using direct property assignment (easier cleanup)
-    audio.oncanplay = () => {
-      // Double check this is still the current audio to prevent race conditions
-      if (audio === currentAudio) {
-        audio.play().catch(error => {
-          console.error('Error playing audio:', error);
-          toast({
-            title: "Error",
-            description: "Gagal memutar audio",
-            variant: "destructive"
-          });
-          if (audio === currentAudio) {
-            setPlayingJournal(null);
-            setCurrentAudio(null);
-          }
-        });
-      }
-    };
-    
-    audio.onended = () => {
-      if (audio === currentAudio) {
+    // Create new protected audio with your primitive approach
+    try {
+      const audio = createProtectedAudio('Jurnalsyukur1.MP3');
+      
+      // Add event listeners
+      audio.addEventListener('ended', () => {
         setPlayingJournal(null);
         setCurrentAudio(null);
-      }
-    };
-    
-    audio.onerror = () => {
-      if (audio === currentAudio) {
+        // Award XP for completion
+        awardXP('audio_completion', 10, `Completed ${journal.title}`);
+      });
+
+      audio.addEventListener('error', (error) => {
+        console.error('Error playing audio:', error);
+        setPlayingJournal(null);
+        setCurrentAudio(null);
         toast({
           title: "Error",
-          description: "Gagal memuat audio",
+          description: "Gagal memutar audio",
           variant: "destructive"
         });
-        setPlayingJournal(null);
-        setCurrentAudio(null);
-      }
-    };
+      });
+
+      // Play audio
+      await audio.play();
+      setPlayingJournal(journalId);
+      setCurrentAudio(audio);
+      
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      toast({
+        title: "Error",
+        description: "Gagal memutar audio",
+        variant: "destructive"
+      });
+    }
   };
 
   const journals = [
@@ -212,15 +212,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     };
 
     getCurrentUser();
-
-    // Cleanup audio on unmount
-    return () => {
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-      }
-    };
-  }, [currentAudio]);
+  }, []);
 
   const loadUserProfile = async (userId: string) => {
     try {
@@ -350,66 +342,14 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                  <div className="flex justify-center py-4">
                    <Button
                      onClick={() => {
-                       if (playingJournal === journal.id && currentAudio) {
-                         // Stop current audio if this journal is playing
-                         currentAudio.pause();
-                         currentAudio.currentTime = 0;
-                         setCurrentAudio(null);
-                         setPlayingJournal(null);
+                       if (journal.id === 1) {
+                         handlePlay(journal.id);
                        } else {
-                         // Stop any currently playing audio first
-                         if (currentAudio) {
-                           currentAudio.pause();
-                           currentAudio.currentTime = 0;
-                         }
-                         
-                           // Play audio for Journal Spiritual 1 with public URL
-                           if (journal.id === 1) {
-                             const audio = new Audio(publicAudioUrl);
-                           
-                           // Prevent download and right-click context menu
-                           audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-                           audio.setAttribute('disablePictureInPicture', 'true');
-                           audio.preload = 'metadata';
-                           
-                           // Add security attributes
-                           audio.addEventListener('contextmenu', (e) => e.preventDefault());
-                           
-                           audio.play().then(() => {
-                             setCurrentAudio(audio);
-                             setPlayingJournal(journal.id);
-                           }).catch(error => {
-                             console.error('Error playing audio:', error);
-                           });
-                           
-                            // Handle audio end
-                            audio.addEventListener('ended', () => {
-                              setCurrentAudio(null);
-                              setPlayingJournal(null);
-                              
-                              // Award XP for completing spiritual journal audio
-                              awardXP('audio_completion', 10, `Completed ${journal.title}`, {
-                                journalId: journal.id,
-                                journalTitle: journal.title
-                              });
-                            });
-                           
-                           // Prevent seeking beyond current position when paused
-                           audio.addEventListener('pause', () => {
-                             const currentTime = audio.currentTime;
-                             audio.addEventListener('seeked', () => {
-                               if (audio.paused && audio.currentTime > currentTime + 1) {
-                                 audio.currentTime = currentTime;
-                               }
-                             });
-                            });
-                          } else if (journal.id !== 1) {
-                            toast({
-                              title: "Coming Soon",
-                              description: "Audio untuk jurnal ini akan segera tersedia",
-                              variant: "default"
-                            });
-                          }
+                         toast({
+                           title: "Coming Soon",
+                           description: "Audio untuk jurnal ini akan segera tersedia",
+                           variant: "default"
+                         });
                        }
                      }}
                       disabled={isLocked}
@@ -558,6 +498,32 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           <div className="absolute top-0 right-1/3 w-0.5 h-full bg-gradient-to-b from-transparent via-accent/15 to-transparent animate-pulse" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
         </div>
       </div>
+
+      {/* Focus Warning Dialog */}
+      <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
+        <AlertDialogContent className="bg-background border border-primary/20">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-primary">Peringatan</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Anda akan mengulang exp dari awal jika menghentikan audio ini, lanjutkan?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => handleWarningResponse(false)}
+              className="border-muted-foreground/20"
+            >
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => handleWarningResponse(true)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              Lanjutkan
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

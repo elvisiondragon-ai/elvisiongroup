@@ -4,42 +4,25 @@ import { Card } from "./ui/card";
 export function XPRules() {
   const rules = [
     {
-      action: "Listen to audio until finished",
+      action: "Mendengar audio sampai selesai",
       xp: 10,
       icon: Music,
       color: "text-purple-400",
-      bgColor: "bg-purple-500/10",
-      limit: "Max 20 XP/day"
+      bgColor: "bg-purple-500/10"
     },
     {
-      action: "Complete spiritual journal entry",
+      action: "Menulis journal spiritual",
       xp: 5,
       icon: BookOpen,
       color: "text-blue-400",
-      bgColor: "bg-blue-500/10",
-      limit: "Max 5 XP/day"
+      bgColor: "bg-blue-500/10"
     },
     {
-      action: "Send message in community chat",
+      action: "Menekan tombol chat",
       xp: 1,
       icon: MessageCircle,
       color: "text-green-400",
-      bgColor: "bg-green-500/10",
-      limit: "Max 10/day"
-    },
-    {
-      action: "Daily login streak bonus",
-      xp: 5,
-      icon: Calendar,
-      color: "text-orange-400",
-      bgColor: "bg-orange-500/10"
-    },
-    {
-      action: "Weekly challenge bonus",
-      xp: 50,
-      icon: Star,
-      color: "text-yellow-400",
-      bgColor: "bg-yellow-500/10"
+      bgColor: "bg-green-500/10"
     }
   ];
 
@@ -47,10 +30,12 @@ export function XPRules() {
     <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="w-5 h-5 text-primary" />
-        <h3 className="font-semibold text-foreground">How to Earn XP</h3>
+        <h3 className="font-semibold text-foreground">How to Earn EXP</h3>
       </div>
       
-      <div className="space-y-3">
+      {/* Daily Activities */}
+      <div className="space-y-3 mb-6">
+        <h4 className="text-sm font-medium text-muted-foreground">Setiap aktivitas anda:</h4>
         {rules.map((rule, index) => {
           const Icon = rule.icon;
           return (
@@ -60,14 +45,34 @@ export function XPRules() {
               </div>
               <div className="flex-1">
                 <span className="text-sm text-foreground">{rule.action}</span>
-                {rule.limit && (
-                  <span className="text-xs text-muted-foreground ml-2">({rule.limit})</span>
-                )}
               </div>
-              <span className="text-sm font-semibold text-primary">+{rule.xp} XP</span>
+              <span className="text-sm font-semibold text-primary">+{rule.xp} EXP</span>
             </div>
           );
         })}
+      </div>
+
+      {/* Daily Limit */}
+      <div className="p-4 rounded-lg bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Calendar className="w-4 h-4 text-orange-400" />
+          <span className="text-sm font-medium text-foreground">MAX 35 EXP / DAY</span>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Maksimal 35 EXP per hari dari semua aktivitas
+        </p>
+      </div>
+
+      {/* Weekly Challenge */}
+      <div className="p-4 rounded-lg bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-500/20">
+        <div className="flex items-center gap-2 mb-2">
+          <Star className="w-4 h-4 text-yellow-400" />
+          <span className="text-sm font-medium text-foreground">WEEKLY CHALLENGE BONUS</span>
+        </div>
+        <p className="text-xs text-muted-foreground mb-1">
+          Jika hit 35 EXP setiap hari selama 7 hari akan dapat bonus:
+        </p>
+        <span className="text-lg font-bold text-yellow-400">+50 EXP</span>
       </div>
     </Card>
   );

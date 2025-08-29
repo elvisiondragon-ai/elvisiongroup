@@ -39,7 +39,8 @@ interface UserProfile {
   level: number;
   experience_points: number;
   streak_days: number;
-  total_sessions: number;
+  total_verses: number;
+  total_journal: number;
   achievements: string[];
   created_at: string;
   avatar_url?: string;
@@ -48,6 +49,10 @@ interface UserProfile {
 export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const { userProfile, user, loading } = useUserProfile();
   const [editingProfile, setEditingProfile] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+
+  // Wrap in try-catch to handle any profile data errors
+  try {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -137,21 +142,67 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     );
   }
 
+  // Error handling - if no user, show error state
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center pb-20">
+        <div className="text-center">
+          <p className="text-destructive">Error loading profile</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   // Create default profile data if not found
   const defaultProfile: UserProfile = {
     display_name: user?.email?.split('@')[0] || "Alex",
     level: 1,
     experience_points: 0,
     streak_days: 0,
-    total_sessions: 0,
+    total_verses: 0,
+    total_journal: 0,
     achievements: [],
     created_at: new Date().toISOString()
   };
 
-  const profile = userProfile || defaultProfile;
+  // Safely merge userProfile with defaults to handle missing database columns
+  let profile = defaultProfile;
+  
+  try {
+    if (userProfile && typeof userProfile === 'object') {
+      profile = {
+        ...defaultProfile,
+        ...userProfile,
+        // Handle new columns that exist in database
+        total_verses: userProfile?.total_verses ?? 0,
+        total_journal: userProfile?.total_journal ?? 0,
+        achievements: Array.isArray(userProfile?.achievements) ? userProfile.achievements : [],
+        // Ensure all required fields exist with safe defaults
+        experience_points: Number(userProfile?.experience_points) || 0,
+        level: Number(userProfile?.level) || 1,
+        streak_days: Number(userProfile?.streak_days) || 0,
+        display_name: userProfile?.display_name || user?.email?.split('@')[0] || "User",
+        created_at: userProfile?.created_at || new Date().toISOString()
+      };
+    }
+  } catch (profileError) {
+    console.error('Profile data processing error:', profileError);
+    profile = defaultProfile;
+  }
 
   const displayName = profile.display_name || user?.email?.split('@')[0] || "User";
-  const nextLevelXp = profile.level * 100;
+  const getXPThresholds = () => {
+    const thresholds = [0, 150, 500, 1200, 2500, 4500, 7000, 9000, 12000, 15000];
+    return thresholds;
+  };
+
+  const thresholds = getXPThresholds();
+  const currentLevelXP = thresholds[profile.level - 1] || 0;
+  const nextLevelXP = profile.level >= 10 ? 15000 : thresholds[profile.level] || 0;
+  const xpForNextLevel = nextLevelXP - profile.experience_points;
   const joinDate = new Date(profile.created_at).toLocaleDateString('id-ID', { 
     year: 'numeric', 
     month: 'short' 
@@ -160,21 +211,21 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const achievements = [
     { name: "First Step", description: "Joined eL Vision Group", unlocked: true },
     { name: "Week Warrior", description: "7 days streak", unlocked: profile.streak_days >= 7 },
-    { name: "Zen Master", description: "Complete 100 sessions", unlocked: profile.total_sessions >= 100 },
+    { name: "Zen Master", description: "Complete 100 journal entries", unlocked: profile.total_journal >= 100 },
     { name: "Soul Leader", description: "Reach level 5", unlocked: profile.level >= 5 },
   ];
 
   const stats = [
     {
       icon: Calendar,
-      label: "Total Meditations",
-      value: profile.total_sessions,
+      label: "Total Verses",
+      value: `${profile.total_verses || 0}`,
       color: "text-primary"
     },
     {
       icon: Target,
-      label: "Total Sessions",
-      value: `${profile.total_sessions}`,
+      label: "Total Journal",
+      value: `${profile.total_journal || 0}`,
       color: "text-neon-green"
     },
     {
@@ -437,4 +488,21 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
       </div>
     </div>
   );
+
+  } catch (error) {
+    console.error('Profile render error:', error);
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center pb-20">
+        <div className="text-center space-y-4">
+          <p className="text-destructive">Error loading profile data</p>
+          <p className="text-sm text-muted-foreground">
+            This might be due to recent database updates. Please try refreshing.
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Refresh Page
+          </Button>
+        </div>
+      </div>
+    );
+  }
 }

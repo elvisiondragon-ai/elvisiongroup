@@ -1,5 +1,6 @@
 import { Lock, Music, Crown, Zap } from 'lucide-react';
-import { useGlobalAudio } from '@/contexts/AudioContext';
+import { useProtectedAudio } from '@/contexts/AudioContext';
+import { useState } from 'react';
 
 interface Verse {
   id: number;
@@ -15,33 +16,77 @@ interface Verse {
 interface VerseAudioCardProps {
   verse: Verse;
   onWarning?: () => Promise<boolean>;
+  currentPlayingVerse: number | null;
+  setCurrentPlayingVerse: (id: number | null) => void;
+  currentVerseAudio: HTMLAudioElement | null;
+  setCurrentVerseAudio: (audio: HTMLAudioElement | null) => void;
 }
 
-export function VerseAudioCard({ verse, onWarning }: VerseAudioCardProps) {
-  const { currentTrackId, isPlaying, playTrack, stopTrack } = useGlobalAudio();
+export function VerseAudioCard({ 
+  verse, 
+  onWarning, 
+  currentPlayingVerse, 
+  setCurrentPlayingVerse,
+  currentVerseAudio,
+  setCurrentVerseAudio 
+}: VerseAudioCardProps) {
+  const { createProtectedAudio } = useProtectedAudio();
+  
+  // Check if this verse is currently playing
+  const isPlaying = currentPlayingVerse === verse.id;
 
   const handlePlayClick = async () => {
     if (!verse.unlocked || !verse.audioPath) return;
     
-    const isCurrentTrack = currentTrackId === verse.id;
-    
-    if (isCurrentTrack && isPlaying) {
-      // Stop current track
-      stopTrack();
-    } else {
-      // Play track (with warning if another track is playing)
-      await playTrack({
-        id: verse.id,
-        title: verse.title,
-        subtitle: verse.subtitle,
-        artwork: verse.artwork,
-        audioPath: verse.audioPath
-      }, onWarning);
+    // If this verse is currently playing, stop it
+    if (isPlaying && currentVerseAudio) {
+      currentVerseAudio.pause();
+      setCurrentPlayingVerse(null);
+      setCurrentVerseAudio(null);
+      return;
+    }
+
+    // If another verse is playing, show focus warning
+    if (currentPlayingVerse && currentPlayingVerse !== verse.id && onWarning) {
+      const shouldContinue = await onWarning();
+      if (!shouldContinue) {
+        return; // User chose to stay with current verse
+      }
+    }
+
+    // Stop any currently playing verse
+    if (currentVerseAudio) {
+      currentVerseAudio.pause();
+      setCurrentVerseAudio(null);
+    }
+
+    // Create new protected audio with your primitive approach
+    try {
+      const audio = createProtectedAudio(verse.audioPath);
+      
+      // Add event listeners
+      audio.addEventListener('ended', () => {
+        setCurrentPlayingVerse(null);
+        setCurrentVerseAudio(null);
+      });
+
+      audio.addEventListener('error', (error) => {
+        console.error('Error playing audio:', error);
+        setCurrentPlayingVerse(null);
+        setCurrentVerseAudio(null);
+      });
+
+      // Play audio
+      await audio.play();
+      setCurrentPlayingVerse(verse.id);
+      setCurrentVerseAudio(audio);
+      
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      setCurrentPlayingVerse(null);
+      setCurrentVerseAudio(null);
     }
   };
-
-  const isCurrentTrack = currentTrackId === verse.id;
-  const isCurrentPlaying = isCurrentTrack && isPlaying;
 
   const canPlay = verse.unlocked && verse.audioPath;
 
@@ -70,7 +115,7 @@ export function VerseAudioCard({ verse, onWarning }: VerseAudioCardProps) {
             <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform group-hover:scale-110 transition-transform duration-300">
               {!canPlay ? (
                 <Lock className="w-6 h-6 text-white/60" />
-              ) : isCurrentPlaying ? (
+              ) : isPlaying ? (
                 // Pause icon
                 <div className="flex gap-1 items-center justify-center">
                   <div className="w-1.5 h-5 bg-white rounded-sm"></div>

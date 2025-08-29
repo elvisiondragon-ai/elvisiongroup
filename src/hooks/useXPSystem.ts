@@ -24,7 +24,7 @@ export function useXPSystem(): XPSystemHook {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Award XP using the enhanced database function
+      // Award XP using the basic system (daily limits not implemented yet)
       const { data, error } = await supabase.rpc('award_xp', {
         p_user_id: user.id,
         p_xp_amount: xpAmount,
@@ -37,12 +37,15 @@ export function useXPSystem(): XPSystemHook {
 
       // Show success toast with level up information
       const result = data as any;
+      
+      // Check for level up
       if (result?.level_up) {
         toast({
-          title: `🎉 Level Up! Now Level ${result.new_level}!`,
-          description: `+${xpAmount} XP earned! ${result.achievement_earned ? '⚡ New achievement unlocked!' : ''}`,
+          title: `🎉 SELAMAT ANDA MASUK KE LEVEL SELANJUTNYA!`,
+          description: `Sekarang Level ${result.new_level}! +${xpAmount} XP earned! ${result.achievement_earned ? '⚡ Achievement baru terbuka!' : ''}`,
         });
       } else {
+        // Simple success message
         toast({
           title: `+${xpAmount} XP Earned!`,
           description: reason || `${activityType} completed`,

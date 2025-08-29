@@ -47,6 +47,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
 
+  // Shared state to track which verse is currently playing (verses only)
+  const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
+  const [currentVerseAudio, setCurrentVerseAudio] = useState<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     const initializeData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -307,6 +311,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                   <VerseAudioCard
                     verse={verse}
                     onWarning={handleWarning}
+                    currentPlayingVerse={currentPlayingVerse}
+                    setCurrentPlayingVerse={setCurrentPlayingVerse}
+                    currentVerseAudio={currentVerseAudio}
+                    setCurrentVerseAudio={setCurrentVerseAudio}
                   />
                 </div>
 

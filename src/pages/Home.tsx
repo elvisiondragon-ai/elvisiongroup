@@ -26,7 +26,8 @@ interface UserProfile {
   level: number;
   experience_points: number;
   streak_days: number;
-  total_sessions: number;
+  total_verses: number;
+  total_journal: number;
 }
 
 export function Home({
