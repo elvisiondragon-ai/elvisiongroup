@@ -226,6 +226,13 @@ export function Payment({ onNavigate }: PaymentProps) {
     });
   };
 
+  // Debug payment data
+  console.log('🔍 Payment Data Debug:', paymentData);
+  console.log('🔍 payCode:', paymentData?.payCode);
+  console.log('🔍 qrUrl:', paymentData?.qrUrl);
+  console.log('🔍 expiredTime:', paymentData?.expiredTime);
+  console.log('🔍 paymentType:', paymentData?.paymentType);
+
   if (showPaymentInstructions) {
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -280,8 +287,11 @@ export function Payment({ onNavigate }: PaymentProps) {
                   <span className="text-sm font-medium text-orange-600">
                     {paymentData?.expiredTime 
                       ? new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
-                          dateStyle: 'medium',
-                          timeStyle: 'short'
+                          year: 'numeric',
+                          month: 'long', 
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
                         })
                       : 'N/A'
                     }
@@ -292,7 +302,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           </Card>
 
           {/* Virtual Account Number */}
-          {paymentData?.payCode && (
+          {(paymentData?.payCode || paymentData?.paymentType === 'DIRECT') && (
             <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-lg">
               <CardHeader className="text-center pb-4">
                 <CardTitle className="flex items-center justify-center gap-2 text-blue-700">
@@ -303,7 +313,7 @@ export function Payment({ onNavigate }: PaymentProps) {
               <CardContent className="text-center space-y-4">
                 <div className="bg-white border-2 border-dashed border-blue-300 p-6 rounded-xl">
                   <p className="font-mono text-4xl font-bold text-blue-800 tracking-wider mb-2">
-                    {paymentData.payCode}
+                    {paymentData.payCode || 'Loading...'}
                   </p>
                   <p className="text-xs text-blue-600 font-medium">
                     Nomor Virtual Account
@@ -326,7 +336,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           )}
 
           {/* QR Code */}
-          {paymentData?.qrUrl && (
+          {(paymentData?.qrUrl || paymentData?.paymentMethod === 'QRIS') && (
             <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 shadow-lg">
               <CardHeader className="text-center pb-4">
                 <CardTitle className="flex items-center justify-center gap-2 text-green-700">
@@ -335,14 +345,20 @@ export function Payment({ onNavigate }: PaymentProps) {
               </CardHeader>
               <CardContent className="text-center space-y-4">
                 <div className="bg-white p-6 rounded-xl border-2 border-dashed border-green-300 inline-block">
-                  <img 
-                    src={paymentData.qrUrl} 
-                    alt="QR Code QRIS" 
-                    className="w-48 h-48 mx-auto" 
-                    onError={(e) => {
-                      console.error('QR Image failed to load:', paymentData.qrUrl);
-                    }}
-                  />
+                  {paymentData?.qrUrl ? (
+                    <img 
+                      src={paymentData.qrUrl} 
+                      alt="QR Code QRIS" 
+                      className="w-48 h-48 mx-auto" 
+                      onError={(e) => {
+                        console.error('QR Image failed to load:', paymentData.qrUrl);
+                      }}
+                    />
+                  ) : (
+                    <div className="w-48 h-48 mx-auto bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center rounded-lg">
+                      <p className="text-gray-500 text-sm">QR Code Loading...</p>
+                    </div>
+                  )}
                 </div>
                 <p className="text-sm text-green-600 font-medium">
                   Scan QR Code QRIS dengan aplikasi e-wallet atau mobile banking
