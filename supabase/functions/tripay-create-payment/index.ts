@@ -79,11 +79,13 @@ serve(async (req) => {
     // VPS URL
     const vpsUrl = "https://payment.elvisiongroup.com/create-payment"
     
-    // Conflict fix: VPS expects 'id' field, not 'user_id'
+    // Map to VPS expected format (serverjs.txt line 104)
     const vpsPayload = {
-      ...body,
-      id: user.id,      // Add id field for VPS
-      userId: user.id   // Add userId field for VPS
+      subscriptionType: body.subscriptionType,
+      paymentMethod: body.paymentMethod,
+      userName: body.userName || body.fullName || user.email?.split('@')[0] || 'Anonymous',
+      userEmail: body.userEmail || user.email,
+      phoneNumber: body.phoneNumber || '08123456789'
     }
     
     // Forward to VPS directly
@@ -110,6 +112,9 @@ serve(async (req) => {
       vpsResult = JSON.parse(responseText)
       console.log('✅ Parsed JSON successfully')
       console.log('📋 Result keys:', Object.keys(vpsResult))
+      console.log('🕒 expiredTime value:', vpsResult.expiredTime, 'type:', typeof vpsResult.expiredTime)
+      console.log('💳 payCode value:', vpsResult.payCode)
+      console.log('📱 qrUrl value:', vpsResult.qrUrl)
     } catch (parseError) {
       console.log('⚠️ JSON parse failed:', parseError.message)
       return new Response(
@@ -142,6 +147,7 @@ serve(async (req) => {
 
     // Database operations - Create subscription and payment records
     console.log('💾 ===== DATABASE OPERATIONS START =====')
+    console.log('🔍 vpsResult.expired_time value:', vpsResult.expired_time, 'type:', typeof vpsResult.expired_time);
     
     try {
       // Create subscription record
@@ -212,17 +218,17 @@ serve(async (req) => {
           subscription_id: subscription.id,
           user_id: user.id,
           user_email: body.userEmail,
-          tripay_reference: vpsResult.reference,
-          tripay_merchant_ref: vpsResult.merchant_ref || `EVG_${Date.now()}_${body.subscriptionType}`,
+          tripay_reference: vpsResult.tripay_reference || vpsResult.reference,
+          tripay_merchant_ref: vpsResult.merchantRef,
           payment_method: body.paymentMethod,
           amount: body.amount || vpsResult.amount,
           currency: body.currency || 'IDR',
           status: 'pending',
-          payment_url: vpsResult.checkout_url,
+          payment_url: vpsResult.checkoutUrl,
           payment_instructions: JSON.stringify(vpsResult.instructions || []),
-          expires_at: vpsResult.expired_time,
-          bank_account: vpsResult.pay_code,
-          unique_code: vpsResult.qr_string || vpsResult.pay_code,
+          expires_at: vpsResult.expiredTime ? new Date(vpsResult.expiredTime * 1000).toISOString() : null,
+          bank_account: vpsResult.payCode,
+          unique_code: vpsResult.qrString || vpsResult.payCode,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -236,22 +242,22 @@ serve(async (req) => {
 
       console.log('✅ Payment creation complete')
       
-      // Return successful response with all payment data
+      // Return successful response mapping VPS fields correctly (serverjs.txt lines 199-214)
       return new Response(JSON.stringify({
-        success: true,
-        tripay_reference: vpsResult.reference,
+        success: vpsResult.success,
+        paymentType: vpsResult.paymentType,
+        checkoutUrl: vpsResult.checkoutUrl,
+        payCode: vpsResult.payCode,
+        tripay_reference: vpsResult.tripay_reference,
         reference: vpsResult.reference,
-        merchant_ref: vpsResult.merchant_ref,
-        status: vpsResult.status,
-        paymentMethod: body.paymentMethod,
-        amount: body.amount || vpsResult.amount,
-        paid_at: vpsResult.paid_at,
-        checkoutUrl: vpsResult.checkout_url,
-        payCode: vpsResult.pay_code,
-        qrUrl: vpsResult.qr_url,
-        expiredTime: vpsResult.expired_time,
-        expires_at: new Date(vpsResult.expired_time * 1000).toISOString(),
-        instructions: vpsResult.instructions
+        merchantRef: vpsResult.merchantRef,
+        amount: vpsResult.amount,
+        expiredTime: vpsResult.expiredTime,
+        paymentMethod: vpsResult.paymentMethod,
+        instructions: vpsResult.instructions,
+        qrString: vpsResult.qrString,
+        qrUrl: vpsResult.qrUrl,
+        status: vpsResult.status
       }), {
         headers: {
           ...corsHeaders,
@@ -266,20 +272,20 @@ serve(async (req) => {
       
       // Return VPS response even if database fails
       return new Response(JSON.stringify({
-        success: true,
-        tripay_reference: vpsResult.reference,
+        success: vpsResult.success,
+        paymentType: vpsResult.paymentType,
+        checkoutUrl: vpsResult.checkoutUrl,
+        payCode: vpsResult.payCode,
+        tripay_reference: vpsResult.tripay_reference,
         reference: vpsResult.reference,
-        merchant_ref: vpsResult.merchant_ref,
-        status: vpsResult.status,
-        paymentMethod: body.paymentMethod,
-        amount: body.amount || vpsResult.amount,
-        paid_at: vpsResult.paid_at,
-        checkoutUrl: vpsResult.checkout_url,
-        payCode: vpsResult.pay_code,
-        qrUrl: vpsResult.qr_url,
-        expiredTime: vpsResult.expired_time,
-        expires_at: new Date(vpsResult.expired_time * 1000).toISOString(),
+        merchantRef: vpsResult.merchantRef,
+        amount: vpsResult.amount,
+        expiredTime: vpsResult.expiredTime,
+        paymentMethod: vpsResult.paymentMethod,
         instructions: vpsResult.instructions,
+        qrString: vpsResult.qrString,
+        qrUrl: vpsResult.qrUrl,
+        status: vpsResult.status,
         warning: 'Database storage failed but payment created'
       }), {
         headers: {
