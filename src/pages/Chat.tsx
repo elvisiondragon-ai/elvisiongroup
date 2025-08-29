@@ -134,22 +134,22 @@ export function Chat() {
         console.error('Error loading messages:', error);
         // If no messages in database, use mock data as fallback
         const mockMessages: ChatMessageData[] = [
-          { id: '1', user_id: '1', user_name: 'Budiyas32', user_level: 3, is_pro: true, message: 'asik banget apknya', created_at: new Date('2024-01-20T09:15:00').toISOString() },
-          { id: '2', user_id: '2', user_name: 'dudungsubang', user_level: 2, is_pro: true, message: 'bener lebih mudah denger audionya ada historynya lagi', created_at: new Date('2024-01-20T09:16:00').toISOString() },
-          { id: '3', user_id: '3', user_name: 'andiniwati', user_level: 2, is_pro: true, message: 'iya jadi betah diam di aplikasi', created_at: new Date('2024-01-20T09:16:30').toISOString() },
-          { id: '4', user_id: '4', user_name: 'Jason', user_level: 3, is_pro: true, message: 'wah iya nih ada sistem game juga', created_at: new Date('2024-01-20T09:18:00').toISOString() },
-          { id: '5', user_id: '5', user_name: 'Andin', user_level: 9, is_pro: true, message: 'bener mas anto, seru ngejar poinnya hehe', created_at: new Date('2024-01-20T09:18:30').toISOString() },
-          { id: '6', user_id: '6', user_name: 'Master Yoga', user_level: 8, is_pro: true, message: 'Peringkatku naik terus nih, jadi semangat', created_at: new Date('2024-01-20T09:19:00').toISOString() },
-          { id: '7', user_id: '7', user_name: 'SitiAisyah', user_level: 2, is_pro: true, message: 'fitur history itu yg paling ngebantu aku sih', created_at: new Date('2024-01-20T09:22:00').toISOString() },
-          { id: '8', user_id: '8', user_name: 'EkoPrasetyo', user_level: 2, is_pro: true, message: 'setuju, ga perlu cari ulang audio yg kemarin didengerin', created_at: new Date('2024-01-20T09:22:30').toISOString() },
-          { id: '9', user_id: '9', user_name: 'IwanSetiawan', user_level: 2, is_pro: true, message: 'Tampilannya juga bersih, ga ribet, enak diliat', created_at: new Date('2024-01-20T09:25:00').toISOString() },
-          { id: '10', user_id: '10', user_name: 'DewiLestari90', user_level: 1, is_pro: true, message: 'baru download kemarin, langsung sukaa', created_at: new Date('2024-01-20T09:30:00').toISOString() },
+          { id: '1', user_id: '1', user_name: 'Budiyas32', user_level: 3, is_pro: true, subscription_type: '1_year', message: 'asik banget apknya', created_at: new Date('2024-01-20T09:15:00').toISOString() },
+          { id: '2', user_id: '2', user_name: 'dudungsubang', user_level: 2, is_pro: true, subscription_type: '1_year', message: 'bener lebih mudah denger audionya ada historynya lagi', created_at: new Date('2024-01-20T09:16:00').toISOString() },
+          { id: '3', user_id: '3', user_name: 'andiniwati', user_level: 2, is_pro: true, subscription_type: '1_month', message: 'iya jadi betah diam di aplikasi', created_at: new Date('2024-01-20T09:16:30').toISOString() },
+          { id: '4', user_id: '4', user_name: 'Jason', user_level: 3, is_pro: true, subscription_type: '1_year', message: 'wah iya nih ada sistem game juga', created_at: new Date('2024-01-20T09:18:00').toISOString() },
+          { id: '5', user_id: '5', user_name: 'Andin', user_level: 9, is_pro: true, subscription_type: '1_year', message: 'bener mas anto, seru ngejar poinnya hehe', created_at: new Date('2024-01-20T09:18:30').toISOString() },
+          { id: '6', user_id: '6', user_name: 'Master Yoga', user_level: 8, is_pro: true, subscription_type: '1_year', message: 'Peringkatku naik terus nih, jadi semangat', created_at: new Date('2024-01-20T09:19:00').toISOString() },
+          { id: '7', user_id: '7', user_name: 'SitiAisyah', user_level: 2, is_pro: true, subscription_type: '1_month', message: 'fitur history itu yg paling ngebantu aku sih', created_at: new Date('2024-01-20T09:22:00').toISOString() },
+          { id: '8', user_id: '8', user_name: 'EkoPrasetyo', user_level: 2, is_pro: true, subscription_type: '1_month', message: 'setuju, ga perlu cari ulang audio yg kemarin didengerin', created_at: new Date('2024-01-20T09:22:30').toISOString() },
+          { id: '9', user_id: '9', user_name: 'IwanSetiawan', user_level: 2, is_pro: true, subscription_type: '1_month', message: 'Tampilannya juga bersih, ga ribet, enak diliat', created_at: new Date('2024-01-20T09:25:00').toISOString() },
+          { id: '10', user_id: '10', user_name: 'DewiLestari90', user_level: 1, is_pro: true, subscription_type: '1_year', message: 'baru download kemarin, langsung sukaa', created_at: new Date('2024-01-20T09:30:00').toISOString() },
           { id: '11', user_id: '11', user_name: 'Bambang_P', user_level: 3, is_pro: false, message: 'selamat datang mba dewi, dijamin nagih wkwk', created_at: new Date('2024-01-20T10:15:00').toISOString() },
           { id: '12', user_id: '12', user_name: 'PutriAyu', user_level: 2, is_pro: false, message: 'notifikasinya juga ga ganggu, pas banget timingnya', created_at: new Date('2024-01-20T10:17:00').toISOString() },
           { id: '13', user_id: '13', user_name: 'JokoWibowo88', user_level: 2, is_pro: false, message: 'Betul, ngingetin pas ada konten baru aja', created_at: new Date('2024-01-20T10:17:30').toISOString() },
-          { id: '14', user_id: '14', user_name: 'HendraGunawan', user_level: 4, is_pro: true, message: 'eh ada yg udah dapet badge \'Master\' belum?', created_at: new Date('2024-01-20T10:20:00').toISOString() },
+          { id: '14', user_id: '14', user_name: 'HendraGunawan', user_level: 4, is_pro: true, subscription_type: '1_year', message: 'eh ada yg udah dapet badge \'Master\' belum?', created_at: new Date('2024-01-20T10:20:00').toISOString() },
           { id: '15', user_id: '15', user_name: 'RatuAisyah', user_level: 3, is_pro: false, message: 'aku baru dapet yg \'Expert\', susah bgt yg master', created_at: new Date('2024-01-20T10:21:00').toISOString() },
-          { id: '16', user_id: '16', user_name: 'SuryaAdi', user_level: 4, is_pro: true, message: 'Master harus selesain 100 audio tanpa skip kalo gasalah', created_at: new Date('2024-01-20T10:21:30').toISOString() },
+          { id: '16', user_id: '16', user_name: 'SuryaAdi', user_level: 4, is_pro: true, subscription_type: '1_month', message: 'Master harus selesain 100 audio tanpa skip kalo gasalah', created_at: new Date('2024-01-20T10:21:30').toISOString() },
           { id: '17', user_id: '17', user_name: 'HeruSantoso', user_level: 2, is_pro: false, message: 'wih mantap, kejar ah', created_at: new Date('2024-01-20T10:22:00').toISOString() },
           { id: '18', user_id: '18', user_name: 'LindaWati', user_level: 3, is_pro: false, message: 'Suka bgt sama playlistnya, bisa bikin sendiri', created_at: new Date('2024-01-20T11:40:00').toISOString() },
           { id: '19', user_id: '19', user_name: 'AhmadZaini', user_level: 3, is_pro: false, message: 'iyaa, aku kelompokin per topik jadi gampang belajarnya', created_at: new Date('2024-01-20T11:41:00').toISOString() },
@@ -162,7 +162,7 @@ export function Chat() {
           { id: '26', user_id: '26', user_name: 'DianPermata', user_level: 2, is_pro: false, message: 'Gamenya itu loh, simpel tapi bikin penasaran', created_at: new Date('2024-01-20T11:54:00').toISOString() },
           { id: '27', user_id: '27', user_name: 'FajarNugroho', user_level: 2, is_pro: false, message: 'bener, ga sadar udah main setengah jam sendiri', created_at: new Date('2024-01-20T11:55:00').toISOString() },
           { id: '28', user_id: '28', user_name: 'IndahPermatasari', user_level: 1, is_pro: false, message: 'Poinnya bisa dituker ga sih?', created_at: new Date('2024-01-20T11:58:00').toISOString() },
-          { id: '29', user_id: 'dragon@yahoo.com', user_name: 'Admin_Renata', user_level: 10, is_pro: true, message: 'Belum bisa kak Indah, tapi ditunggu aja updatenya ya :)', created_at: new Date('2024-01-20T12:05:00').toISOString() },
+          { id: '29', user_id: 'dragon@yahoo.com', user_name: 'Admin_Renata', user_level: 10, is_pro: true, subscription_type: '1_year', message: 'Belum bisa kak Indah, tapi ditunggu aja updatenya ya :)', created_at: new Date('2024-01-20T12:05:00').toISOString() },
           { id: '30', user_id: '30', user_name: 'AndiMalaka', user_level: 1, is_pro: false, message: 'wih adminnya muncul', created_at: new Date('2024-01-20T13:30:00').toISOString() },
           { id: '31', user_id: '31', user_name: 'BayuPradana', user_level: 2, is_pro: false, message: 'siap min, ditunggu fitur barunya', created_at: new Date('2024-01-20T13:31:00').toISOString() },
           { id: '32', user_id: '32', user_name: 'KartikaSari', user_level: 3, is_pro: false, message: 'Semoga ada fitur dark mode ya min kedepannya', created_at: new Date('2024-01-20T13:35:00').toISOString() },
@@ -174,9 +174,9 @@ export function Chat() {
           { id: '38', user_id: '38', user_name: 'ZainalAbidin', user_level: 2, is_pro: false, message: 'Komunitasnya juga asik, jadi nambah temen', created_at: new Date('2024-01-20T15:08:00').toISOString() },
           { id: '39', user_id: '39', user_name: 'AsepSunandar', user_level: 1, is_pro: false, message: 'bener kang, pada ramah semua disini', created_at: new Date('2024-01-20T15:09:00').toISOString() },
           { id: '40', user_id: '40', user_name: 'BungaCitra', user_level: 3, is_pro: false, message: 'pokoknya aplot konten baru terus ya min, jangan kasih kendor', created_at: new Date('2024-01-20T15:12:00').toISOString() },
-          { id: '41', user_id: '41', user_name: 'CandraWijaya', user_level: 4, is_pro: true, message: 'setiap hari pasti buka aplikasi ini, udah jadi kebiasaan', created_at: new Date('2024-01-20T15:20:00').toISOString() },
-          { id: '42', user_id: '42', user_name: 'DoniSaputra', user_level: 4, is_pro: true, message: 'sama, pagi2 dengerin audio disini bikin semangat kerja', created_at: new Date('2024-01-20T15:21:00').toISOString() },
-          { id: '43', user_id: '38625adb-dcfb-4bac-b473-2e6ee37af72e', user_name: 'Senz', user_level: 6, is_pro: true, message: 'mantap komunitas ini makin rame ya, semangat terus semua!', created_at: new Date('2024-01-20T15:25:00').toISOString() },
+          { id: '41', user_id: '41', user_name: 'CandraWijaya', user_level: 4, is_pro: true, subscription_type: '1_year', message: 'setiap hari pasti buka aplikasi ini, udah jadi kebiasaan', created_at: new Date('2024-01-20T15:20:00').toISOString() },
+          { id: '42', user_id: '42', user_name: 'DoniSaputra', user_level: 4, is_pro: true, subscription_type: '1_year', message: 'sama, pagi2 dengerin audio disini bikin semangat kerja', created_at: new Date('2024-01-20T15:21:00').toISOString() },
+          { id: '43', user_id: '38625adb-dcfb-4bac-b473-2e6ee37af72e', user_name: 'Senz', user_level: 6, is_pro: true, subscription_type: '1_year', message: 'mantap komunitas ini makin rame ya, semangat terus semua!', created_at: new Date('2024-01-20T15:25:00').toISOString() },
           { id: '44', user_id: 'sam-165-user-id', user_name: 'Sam_165', user_level: 3, is_pro: false, message: 'Halo semua! Baru aja naik level 3 nih, seneng banget!', created_at: new Date('2024-01-20T15:30:00').toISOString() }
         ];
         setMessages(mockMessages);
@@ -532,24 +532,8 @@ export function Chat() {
                   id: msg.user_id,
                   name: msg.user_name,
                   level: msg.user_level,
-                  isPro: (() => {
-                    const mockProUsers = ['Andin', 'Jason', 'Master Yoga', 'Bambang_P', 'RatuAisyah', 'LindaWati', 'AhmadZaini', 'CitraKirana', 'KartikaSari', 'BungaCitra'];
-                    const isMockProUser = mockProUsers.includes(msg.user_name);
-                    return isMockProUser || msg.is_pro || false;
-                  })(),
-                  subscriptionType: (() => {
-                    const mockProUsers = ['Andin', 'Jason', 'Master Yoga', 'Bambang_P', 'RatuAisyah', 'LindaWati', 'AhmadZaini', 'CitraKirana', 'KartikaSari', 'BungaCitra'];
-                    const isMockProUser = mockProUsers.includes(msg.user_name);
-                    
-                    if (msg.subscription_type) {
-                      return msg.subscription_type;
-                    } else if (isMockProUser) {
-                      return '1_year'; // Mock users get Crown badges
-                    } else if (msg.is_pro) {
-                      return '1_month'; // Other pro users get Star badges
-                    }
-                    return undefined;
-                  })(),
+                  isPro: msg.is_pro,
+                  subscriptionType: msg.subscription_type,
                   avatar: ""
                 }}
                 message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
