@@ -327,10 +327,18 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
                       <div className="col-span-2">
                         <span className="text-xs text-muted-foreground block">Berlaku Hingga</span>
                         <span className="text-sm font-medium text-orange-600">
-                          {new Date(paymentData?.expiredTime * 1000).toLocaleString('id-ID', {
-                            dateStyle: 'medium',
-                            timeStyle: 'short'
-                          })}
+                          {paymentData?.expires_at 
+                            ? new Date(paymentData.expires_at).toLocaleString('id-ID', {
+                                dateStyle: 'medium',
+                                timeStyle: 'short'
+                              })
+                            : paymentData?.expiredTime 
+                              ? new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
+                                  dateStyle: 'medium',
+                                  timeStyle: 'short'
+                                })
+                              : 'N/A'
+                          }
                         </span>
                       </div>
                     </div>
@@ -347,9 +355,12 @@ export function TripaySubscription({ user, userProfile, onClose }: TripaySubscri
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="text-center space-y-4">
-                      <div className="bg-white border-2 border-dashed border-blue-300 p-4 rounded-xl">
-                        <p className="font-mono text-2xl font-bold text-blue-800 tracking-wider">
+                      <div className="bg-white border-2 border-dashed border-blue-300 p-6 rounded-xl">
+                        <p className="font-mono text-4xl font-bold text-blue-800 tracking-wider mb-2">
                           {paymentData.payCode}
+                        </p>
+                        <p className="text-xs text-blue-600 font-medium">
+                          Nomor Virtual Account
                         </p>
                       </div>
                       <p className="text-sm text-blue-600 font-medium">
