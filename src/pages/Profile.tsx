@@ -50,9 +50,6 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const { userProfile, user, loading } = useUserProfile();
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
-
-  // Wrap in try-catch to handle any profile data errors
-  try {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -488,21 +485,4 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
       </div>
     </div>
   );
-
-  } catch (error) {
-    console.error('Profile render error:', error);
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center pb-20">
-        <div className="text-center space-y-4">
-          <p className="text-destructive">Error loading profile data</p>
-          <p className="text-sm text-muted-foreground">
-            This might be due to recent database updates. Please try refreshing.
-          </p>
-          <Button onClick={() => window.location.reload()}>
-            Refresh Page
-          </Button>
-        </div>
-      </div>
-    );
-  }
 }
