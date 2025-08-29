@@ -532,7 +532,7 @@ export function Chat() {
                   id: msg.user_id,
                   name: msg.user_name,
                   level: msg.user_level,
-                  isPro: msg.is_pro,
+                  isPro: msg.is_pro || !!msg.subscription_type,
                   subscriptionType: msg.subscription_type,
                   avatar: ""
                 }}
