@@ -106,6 +106,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           
           if (payload.new?.status === 'paid') {
             console.log('🎉 Payment completed! Showing success notification...');
+            console.log('🎉 Payment data:', payload.new);
             
             // Show success notification
             toast({
@@ -114,18 +115,26 @@ export function Payment({ onNavigate }: PaymentProps) {
               duration: 5000,
             });
             
-            // Redirect to profile after 2 seconds
+            // Also show alert as backup
+            alert("🎉 PEMBAYARAN BERHASIL! Akun PRO Anda telah diaktifkan!");
+            
+            // Redirect to profile after 3 seconds  
             setTimeout(() => {
               setShowPaymentInstructions(false);
               onNavigate("profile");
-            }, 2000);
+            }, 3000);
+          } else {
+            console.log('📝 Payment status update:', payload.new?.status);
           }
         }
       )
       .subscribe();
 
-    return () => supabase.removeChannel(channel);
-  }, [showPaymentInstructions, paymentData?.tripay_reference, toast, onNavigate]);
+    return () => {
+      console.log('🧹 Cleaning up realtime subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [showPaymentInstructions, paymentData?.tripay_reference]);
 
   useEffect(() => {
     const initializeData = async () => {
