@@ -283,12 +283,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                           dateStyle: 'medium',
                           timeStyle: 'short'
                         })
-                      : paymentData?.expiredTime 
-                        ? new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
-                            dateStyle: 'medium',
-                            timeStyle: 'short'
-                          })
-                        : 'N/A'
+                      : 'N/A'
                     }
                   </span>
                 </div>
@@ -340,7 +335,14 @@ export function Payment({ onNavigate }: PaymentProps) {
               </CardHeader>
               <CardContent className="text-center space-y-4">
                 <div className="bg-white p-6 rounded-xl border-2 border-dashed border-green-300 inline-block">
-                  <img src={paymentData.qrUrl} alt="QR Code QRIS" className="w-48 h-48 mx-auto" />
+                  <img 
+                    src={paymentData.qrUrl || paymentData.qr_url} 
+                    alt="QR Code QRIS" 
+                    className="w-48 h-48 mx-auto" 
+                    onError={(e) => {
+                      console.error('QR Image failed to load:', paymentData.qrUrl || paymentData.qr_url);
+                    }}
+                  />
                 </div>
                 <p className="text-sm text-green-600 font-medium">
                   Scan QR Code QRIS dengan aplikasi e-wallet atau mobile banking
