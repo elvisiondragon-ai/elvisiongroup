@@ -250,7 +250,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
             </Button>
             <h1 className="text-xl font-semibold">Pro Membership</h1>
           </div>
-          <ProUpgrade onClose={() => setShowProUpgrade(false)} />
+          <ProUpgrade onClose={() => setShowProUpgrade(false)} onNavigate={onNavigate} />
         </div>
       </div>
     );
