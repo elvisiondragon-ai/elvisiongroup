@@ -136,7 +136,7 @@ export function Home({
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="h-64 bg-cover bg-center bg-no-repeat" style={{
-        backgroundImage: `url(${supabase.storage.from('admin-image').getPublicUrl('elheadphone.jpeg').data.publicUrl})`
+        backgroundImage: `url(https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/bg-website.png)`
       }}>
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
           <div className="absolute top-4 right-4">
