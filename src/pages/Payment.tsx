@@ -111,18 +111,37 @@ export function Payment({ onNavigate }: PaymentProps) {
             // Show success notification
             toast({
               title: "🎉 Pembayaran Berhasil!",
-              description: "Pesanan telah dibayar. Akun PRO Anda telah diaktifkan!",
-              duration: 5000,
+              description: "Pembayaran berhasil silahkan Check Email !",
+              duration: 30000,
+              className: "text-lg p-6",
             });
             
-            // Also show alert as backup
-            alert("🎉 PEMBAYARAN BERHASIL! Akun PRO Anda telah diaktifkan!");
+            // Show full-screen success modal
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+              <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                <div style="background: white; padding: 40px; border-radius: 15px; text-align: center; max-width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                  <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+                  <h2 style="font-size: 2rem; color: #00c851; margin-bottom: 15px;">Pembayaran Berhasil!</h2>
+                  <p style="font-size: 1.2rem; color: #666; margin-bottom: 20px;">Pembayaran berhasil silahkan Check Email !</p>
+                  <p style="color: #999;">Jendela ini akan tertutup dalam <span id="countdown">30</span> detik</p>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(modal);
             
-            // Redirect to profile after 3 seconds  
-            setTimeout(() => {
-              setShowPaymentInstructions(false);
-              onNavigate("profile");
-            }, 3000);
+            let countdown = 30;
+            const countdownEl = document.getElementById('countdown');
+            const timer = setInterval(() => {
+              countdown--;
+              if (countdownEl) countdownEl.textContent = countdown.toString();
+              if (countdown <= 0) {
+                clearInterval(timer);
+                document.body.removeChild(modal);
+                setShowPaymentInstructions(false);
+                onNavigate("profile");
+              }
+            }, 1000);
           } else {
             console.log('📝 Payment status update:', payload.new?.status);
           }
@@ -327,7 +346,7 @@ export function Payment({ onNavigate }: PaymentProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-xs text-muted-foreground block">Referensi</span>
-                  <span className="font-mono text-sm font-medium">{paymentData?.tripay_reference}</span>
+                  <span className="font-mono text-xs font-medium break-all">{paymentData?.tripay_reference}</span>
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground block">Metode</span>
@@ -363,7 +382,7 @@ export function Payment({ onNavigate }: PaymentProps) {
               </CardHeader>
               <CardContent className="text-center space-y-4">
                 <div className="bg-white border-2 border-dashed border-blue-300 p-6 rounded-xl">
-                  <p className="font-mono text-4xl font-bold text-blue-800 tracking-wider mb-2">
+                  <p className="font-mono text-lg sm:text-2xl font-bold text-blue-800 tracking-wider mb-2 break-all">
                     {paymentData.payCode || 'Loading...'}
                   </p>
                   <p className="text-xs text-blue-600 font-medium">
