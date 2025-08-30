@@ -18,8 +18,9 @@ export function TierBadge({ level, isPro = false, className, showProBadge = true
   // Check if user has level 3 achievement from passed achievements
   const hasLevel3Achievement = achievements?.includes('level_3') ?? false;
   
-  // Don't show ProBadge if pro badge is disabled or user doesn't have pro access
-  const shouldShowProBadge = true;
+  // FIXED: Only show ProBadge if user actually has subscription (prevents mirror bug)
+  // Don't show ProBadge if disabled OR if this specific user has no subscription
+  const shouldShowProBadge = showProBadge && (subscriptionType || isPro);
   
   const getTierStyle = () => {
     if (level >= 10) return "tier-master";

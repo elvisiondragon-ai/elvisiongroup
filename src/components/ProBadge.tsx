@@ -13,12 +13,20 @@ interface ProBadgeProps {
 export function ProBadge({ className, size = 'md', showLabel = true, targetUserIsPro, targetUserSubscriptionType }: ProBadgeProps) {
   const { proStatus } = usePro();
 
-  // If target user props are provided, use them (for showing other users' badges)
-  // Otherwise use current user's status (for showing own badge)
-  const subscriptionType = targetUserSubscriptionType !== undefined ? targetUserSubscriptionType : proStatus.subscriptionType;
+  // FIXED: For other users, ONLY show their actual subscription type
+  // For current user (when no target specified), use current user's status
+  const subscriptionType = targetUserSubscriptionType !== undefined 
+    ? targetUserSubscriptionType 
+    : proStatus.subscriptionType;
 
-  // Show badge ONLY if user has a subscription type (not just isPro)
-  if (!subscriptionType) {
+  // CRITICAL FIX: If this is for another user (targetUserSubscriptionType was passed)
+  // and they don't have a subscription, don't show badge at all - NO FALLBACK TO VIEWER
+  if (targetUserSubscriptionType !== undefined && !targetUserSubscriptionType) {
+    return null;
+  }
+  
+  // For current user, show badge only if they have subscription
+  if (targetUserSubscriptionType === undefined && !subscriptionType) {
     return null;
   }
 
