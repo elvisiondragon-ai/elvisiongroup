@@ -160,6 +160,10 @@ export function usePro() {
         window.open(data.checkoutUrl, '_blank', 'noopener,noreferrer');
       }
       
+      // FIXED: Clear cache and refresh status after payment creation
+      localStorage.removeItem(CACHE_KEY);
+      await checkProStatus();
+      
       return data;
     } catch (error) {
       console.error('Payment creation failed:', error);
@@ -169,6 +173,63 @@ export function usePro() {
 
   useEffect(() => {
     checkProStatus();
+  }, []);
+
+  // REAL-TIME LISTENER: Listen for payment success
+  useEffect(() => {
+    let subscription: any = null;
+    
+    const setupRealtimeListener = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Listen for NEW pro_subscriptions records (payment success)
+      subscription = supabase
+        .channel('payment_success_listener')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'pro_subscriptions',
+          filter: `user_id=eq.${user.id}`
+        }, async (payload) => {
+          console.log('🎉 Payment success detected:', payload);
+          
+          // Clear cache and refresh pro status
+          localStorage.removeItem(CACHE_KEY);
+          await checkProStatus();
+          
+          // Show success notification with email check message
+          const subscriptionData = payload.new;
+          const subscriptionType = subscriptionData.subscription_type;
+          const duration = subscriptionType === '1_year' ? '1 Tahun' : 
+                          subscriptionType === '1_month' ? '1 Bulan' : 
+                          subscriptionType === '1_week' ? '1 Minggu' : 
+                          subscriptionType === '1_day' ? '1 Hari' : 'PRO';
+          
+          // You can use your toast system here
+          if (window.showToast) {
+            window.showToast({
+              title: "🎉 Pembayaran Berhasil!",
+              description: `Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.`,
+              type: "success",
+              duration: 7000
+            });
+          } else {
+            // Fallback browser notification
+            alert(`🎉 Pembayaran Berhasil! Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.`);
+          }
+        })
+        .subscribe();
+    };
+
+    setupRealtimeListener();
+
+    // Cleanup listener on unmount
+    return () => {
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
+    };
   }, []);
 
   return {

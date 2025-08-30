@@ -15,11 +15,10 @@ export function ProBadge({ className, size = 'md', showLabel = true, targetUserI
 
   // If target user props are provided, use them (for showing other users' badges)
   // Otherwise use current user's status (for showing own badge)
-  const isTargetUserPro = targetUserIsPro !== undefined ? targetUserIsPro : proStatus.isPro;
   const subscriptionType = targetUserSubscriptionType !== undefined ? targetUserSubscriptionType : proStatus.subscriptionType;
 
-  // Show badge if target user is pro
-  if (!isTargetUserPro) {
+  // Show badge ONLY if user has a subscription type (not just isPro)
+  if (!subscriptionType) {
     return null;
   }
 
