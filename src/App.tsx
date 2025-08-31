@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
 import { useToast } from "@/hooks/use-toast";
+import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Auth } from "./pages/Auth";
 import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
@@ -30,6 +31,41 @@ const App = () => {
   
   // Initialize real-time notifications
   useRealTimeNotifications(user);
+
+  // PWA Update Logic
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(r) {
+      console.log('SW Registered: ' + r)
+    },
+    onRegisterError(error) {
+      console.log('SW registration error', error)
+    },
+  })
+
+  // Show update notification when available
+  useEffect(() => {
+    if (needRefresh) {
+      toast({
+        title: "🎯 Ada Update Terbaru!",
+        description: "Klik untuk update ke versi terbaru aplikasi",
+        action: (
+          <button 
+            onClick={() => {
+              updateServiceWorker(true)
+              setNeedRefresh(false)
+            }}
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            Update Sekarang
+          </button>
+        ),
+        duration: 0, // Don't auto-dismiss
+      });
+    }
+  }, [needRefresh, toast, updateServiceWorker, setNeedRefresh]);
 
   useEffect(() => {
     // Set up auth state listener FIRST
