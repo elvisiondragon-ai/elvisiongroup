@@ -146,7 +146,7 @@ export function Home({
   }];
 
   const tutorialFeature = {
-    title: "Cara Menggunakan Aplikasi",
+    title: "Cara Menggunakan Aplikasi - REVERT CLEAN",
     description: "Tutorial lengkap cara menggunakan semua fitur aplikasi eL Vision Group",
     icon: Play,
     color: "text-blue-500",

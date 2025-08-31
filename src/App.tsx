@@ -43,27 +43,41 @@ const App = () => {
     onRegisterError(error) {
       console.log('SW registration error', error)
     },
+    onNeedRefresh() {
+      console.log('🔄 Update available, saving to localStorage')
+      localStorage.setItem('app-needs-update', 'true')
+    }
   })
 
   // Show update notification when available
   useEffect(() => {
-    if (needRefresh) {
+    const showUpdateToast = () => {
       toast({
         title: "🎯 Ada Update Terbaru!",
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
           <button 
             onClick={() => {
+              console.log('🔄 User clicked update, clearing localStorage')
+              localStorage.removeItem('app-needs-update')
               updateServiceWorker(true)
               setNeedRefresh(false)
             }}
             className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
           >
-            Update Sekarang
+            Tekan disini untuk update otomatis
           </button>
         ),
         duration: 0, // Don't auto-dismiss
       });
+    }
+
+    // Check if update is available from SW or localStorage
+    const hasUpdate = needRefresh || localStorage.getItem('app-needs-update') === 'true'
+    
+    if (hasUpdate) {
+      console.log('📢 Showing update notification')
+      showUpdateToast()
     }
   }, [needRefresh, toast, updateServiceWorker, setNeedRefresh]);
 
