@@ -188,7 +188,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const achievements = [
     { name: "First Step", description: "Joined eL Vision Group", unlocked: true },
     { name: "Week Warrior", description: "7 days streak", unlocked: profile.streak_days >= 7 },
-    { name: "Zen Master", description: "Complete 100 journal entries", unlocked: profile.total_journal >= 100 },
+    { name: "Zen Master", description: "Complete 100 journal entries", unlocked: (profile as any).total_journal >= 100 },
     { name: "Soul Leader", description: "Reach level 5", unlocked: profile.level >= 5 },
   ];
 
@@ -196,13 +196,13 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     {
       icon: Calendar,
       label: "Total Verses",
-      value: `${profile.total_verses || 0}`,
+      value: `${(profile as any).total_verses || 0}`,
       color: "text-primary"
     },
     {
       icon: Target,
       label: "Total Journal",
-      value: `${profile.total_journal || 0}`,
+      value: `${(profile as any).total_journal || 0}`,
       color: "text-neon-green"
     },
     {
@@ -261,7 +261,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
       {/* Profile Header */}
       <div className="p-6 text-center">
         <Avatar className="w-24 h-24 mx-auto mb-4 border-2 border-primary glow-primary">
-          <AvatarImage src={profile.avatar_url} />
+          <AvatarImage src={(profile as any).avatar_url} />
           <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xl font-orbitron">
             {displayName.charAt(0).toUpperCase()}
           </AvatarFallback>
