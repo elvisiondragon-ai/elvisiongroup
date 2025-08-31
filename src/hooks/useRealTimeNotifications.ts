@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { User } from '@supabase/supabase-js';
@@ -16,13 +16,27 @@ interface RealtimeNotification {
 export const useRealTimeNotifications = (user: User | null) => {
   const { toast } = useToast();
 
+  const handleNotification = useCallback((payload: any) => {
+    console.log('🔔 New real-time notification received:', payload);
+    
+    const notification = payload.new as RealtimeNotification;
+    
+    // Show toast notification immediately
+    toast({
+      title: notification.title,
+      description: notification.message,
+      variant: getToastVariant(notification.type),
+      duration: notification.type === 'error' ? 8000 : 5000,
+    });
+  }, [toast]);
+
   useEffect(() => {
     if (!user) return;
 
     console.log('🔔 Setting up real-time notifications for user:', user.id);
 
     const channel = supabase
-      .channel('real-time-notifications')
+      .channel(`notifications-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -31,19 +45,7 @@ export const useRealTimeNotifications = (user: User | null) => {
           table: 'notifications',
           filter: `user_id=eq.${user.id}`,
         },
-        (payload) => {
-          console.log('🔔 New real-time notification received:', payload);
-          
-          const notification = payload.new as RealtimeNotification;
-          
-          // Show toast notification immediately
-          toast({
-            title: notification.title,
-            description: notification.message,
-            variant: getToastVariant(notification.type),
-            duration: notification.type === 'error' ? 8000 : 5000,
-          });
-        }
+        handleNotification
       )
       .subscribe((status) => {
         console.log('🔔 Real-time subscription status:', status);
@@ -54,7 +56,7 @@ export const useRealTimeNotifications = (user: User | null) => {
       console.log('🔔 Cleaning up real-time notifications subscription');
       supabase.removeChannel(channel);
     };
-  }, [user, toast]);
+  }, [user?.id, handleNotification]);
 };
 
 // Helper function to map notification type to toast variant

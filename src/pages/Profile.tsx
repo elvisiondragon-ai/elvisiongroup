@@ -430,7 +430,8 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           Logout
         </Button>
 
-        {/* Delete Account Section */}
+        {/* Delete Account Section - HIDDEN */}
+        {false && (
         <div className="border-t border-border pt-4 mt-6">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
             Zona Bahaya
@@ -469,6 +470,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );

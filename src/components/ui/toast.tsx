@@ -27,9 +27,9 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-background text-foreground",
+        default: "border-gradient bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-amber-100 shadow-2xl ring-1 ring-white/10",
         destructive:
-          "destructive group border-destructive bg-destructive text-destructive-foreground",
+          "destructive group border-red-600 bg-gradient-to-br from-red-900 via-red-800 to-red-900 text-amber-100 shadow-2xl ring-1 ring-white/10",
       },
     },
     defaultVariants: {
@@ -75,7 +75,7 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      "absolute right-2 top-2 rounded-md p-1 text-amber-100/70 opacity-0 transition-opacity hover:text-amber-100 focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-amber-100/70 group-[.destructive]:hover:text-amber-100 group-[.destructive]:focus:ring-amber-100 group-[.destructive]:focus:ring-offset-red-900",
       className
     )}
     toast-close=""
@@ -92,7 +92,7 @@ const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn("text-sm font-semibold", className)}
+    className={cn("text-lg font-bold text-amber-100 tracking-wide", className)}
     {...props}
   />
 ))
@@ -104,7 +104,7 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn("text-sm opacity-90", className)}
+    className={cn("text-lg text-amber-100/90 font-medium tracking-wide leading-relaxed", className)}
     {...props}
   />
 ))
