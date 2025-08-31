@@ -273,7 +273,10 @@ export function Home({
         {/* Tutorial Button */}
         <Card 
           className="p-6 border-border transition-all duration-300 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 hover:from-indigo-500/20 hover:via-purple-500/10 hover:to-pink-500/20 border-indigo-500/20 hover:border-indigo-400/40 cursor-pointer col-span-2 relative overflow-hidden group"
-          onClick={() => setShowTutorialModal(true)}
+          onClick={(e) => {
+            e.preventDefault();
+            if (!showTutorialModal) setShowTutorialModal(true);
+          }}
         >
           {/* Background glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -392,8 +395,13 @@ export function Home({
                 <video 
                   className="w-full rounded-lg"
                   controls={!showPlayButton}
-                  preload="metadata"
+                  preload="none"
+                  crossOrigin="anonymous"
                   onPlay={() => setShowPlayButton(false)}
+                  onError={(e) => {
+                    console.error('Video error:', e);
+                    setShowPlayButton(true);
+                  }}
                   style={{ aspectRatio: '9/16', maxHeight: '70vh' }}
                 >
                   <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/reactmove.mp4" type="video/mp4" />
