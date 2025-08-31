@@ -13,8 +13,31 @@ interface ProUpgradeProps {
 }
 
 export function ProUpgrade({ onClose, onNavigate }: ProUpgradeProps) {
-  const { proStatus } = usePro();
+  const { proStatus, startTrial } = usePro();
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+
+
+  const handleStartTrial = async () => {
+    setLoading(true);
+    try {
+      await startTrial();
+      toast({
+        title: "Pro Trial Started!",
+        description: "You now have 3 days of Pro access. Enjoy premium features!",
+      });
+      onClose?.();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start trial. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   const formatCurrency = (amount: number) => {
@@ -129,14 +152,19 @@ export function ProUpgrade({ onClose, onNavigate }: ProUpgradeProps) {
             </div>
           </div>
           
-          <div className="text-center p-4 bg-muted/50 rounded-lg">
-            <p className="text-sm text-muted-foreground mb-2">
-              <strong>Free Access:</strong> Verse 4 + Spiritual Journal
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Upgrade to Pro for all verses and premium features
-            </p>
-          </div>
+          <Button 
+            onClick={handleStartTrial}
+            disabled={loading}
+            className="w-full"
+            variant="outline"
+          >
+            {loading ? (
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+            ) : (
+              <Clock className="w-4 h-4 mr-2" />
+            )}
+            {loading ? 'Starting...' : 'Start 3-Day Free Trial'}
+          </Button>
           
           <Button 
             onClick={() => onNavigate?.("payment")}
