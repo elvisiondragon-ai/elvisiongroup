@@ -539,8 +539,8 @@ export function Chat() {
                     const mockProUsers = ['Andin', 'Jason', 'Master Yoga', 'Bambang_P', 'RatuAisyah', 'LindaWati', 'AhmadZaini', 'CitraKirana', 'KartikaSari', 'BungaCitra'];
                     const isMockProUser = mockProUsers.includes(msg.user_name);
                     
-                    if ((msg as any).subscription_type) {
-                      return (msg as any).subscription_type;
+                    if (msg.subscription_type) {
+                      return msg.subscription_type;
                     } else if (isMockProUser) {
                       return '1_year'; // Mock users get Crown badges
                     } else if (msg.is_pro) {

@@ -206,8 +206,18 @@ export function usePro() {
                           subscriptionType === '1_week' ? '1 Minggu' : 
                           subscriptionType === '1_day' ? '1 Hari' : 'PRO';
           
-          // Show success notification
-          console.log(`🎉 Pembayaran Berhasil! Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.`);
+          // You can use your toast system here
+          if (window.showToast) {
+            window.showToast({
+              title: "🎉 Pembayaran Berhasil!",
+              description: `Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.`,
+              type: "success",
+              duration: 7000
+            });
+          } else {
+            // Fallback browser notification
+            alert(`🎉 Pembayaran Berhasil! Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.`);
+          }
         })
         .subscribe();
     };
