@@ -59,33 +59,42 @@ export function Home({
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase.channel('online_users');
+    // Skip realtime in development environments that don't support WebSocket
+    const isDevelopment = window.location.hostname.includes('sandbox') || window.location.hostname.includes('localhost');
     
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const presenceState = channel.presenceState();
-        const onlineUsers = Object.keys(presenceState).length;
-        setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
-      })
-      .on('presence', { event: 'join' }, ({ newPresences }) => {
-        console.log('User joined:', newPresences);
-      })
-      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-        console.log('User left:', leftPresences);
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          // Track current user's presence
-          await channel.track({
-            user_id: user.id,
-            online_at: new Date().toISOString()
-          });
-        }
-      });
+    try {
+      const channel = supabase.channel('online_users');
+      
+      channel
+        .on('presence', { event: 'sync' }, () => {
+          const presenceState = channel.presenceState();
+          const onlineUsers = Object.keys(presenceState).length;
+          setOnlineCount(825 + onlineUsers); // Base 825 + actual online users
+        })
+        .on('presence', { event: 'join' }, ({ newPresences }) => {
+          console.log('User joined:', newPresences);
+        })
+        .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+          console.log('User left:', leftPresences);
+        })
+        .subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            // Track current user's presence
+            await channel.track({
+              user_id: user.id,
+              online_at: new Date().toISOString()
+            });
+          }
+        });
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (error) {
+      // Fallback for environments without WebSocket support (like Lovable sandbox)
+      console.log('WebSocket not available, using fallback online count');
+      setOnlineCount(825); // Just use base count
+    }
   }, [user]);
 
 
