@@ -59,12 +59,12 @@ const App = () => {
           }
           
           // Show one-time update notification
-          const updateNotificationKey = `update_notification_2025_08_28`;
+          const updateNotificationKey = `update_notification_2025_08_31`;
           if (!localStorage.getItem(updateNotificationKey)) {
             setTimeout(() => {
               toast({
-                title: "🚀 Update Telah Tiba!",
-                description: "Silahkan bersihkan Cookie dan Cache untuk kenyamanan User yang lebih baik",
+                title: "🎉 Sukses Update!",
+                description: "Anda sudah di Versi Terbaru, Selamat menikmati 🚀",
                 duration: 8000,
               });
               localStorage.setItem(updateNotificationKey, 'true');
