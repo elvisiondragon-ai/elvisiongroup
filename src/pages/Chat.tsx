@@ -476,7 +476,6 @@ export function Chat() {
               className="gap-2"
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
             
             {/* Translate Button with Language Options */}

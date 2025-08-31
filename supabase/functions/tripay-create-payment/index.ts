@@ -242,6 +242,24 @@ serve(async (req) => {
 
       console.log('✅ Payment creation complete')
       
+      // Send pending payment email
+      try {
+        await supabase.functions.invoke('send-payment-email', {
+          body: {
+            userEmail: body.userEmail || user.email,
+            amount: body.amount || vpsResult.amount,
+            currency: body.currency || 'IDR',
+            reference: vpsResult.reference,
+            subscriptionType: body.subscriptionType,
+            paymentMethod: body.paymentMethod,
+            status: 'payment_created'
+          }
+        })
+        console.log('📧 Pending payment email sent to:', body.userEmail || user.email)
+      } catch (emailError) {
+        console.log('📧 Email notification failed (non-critical):', emailError)
+      }
+      
       // Return successful response mapping VPS fields correctly (serverjs.txt lines 199-214)
       return new Response(JSON.stringify({
         success: vpsResult.success,

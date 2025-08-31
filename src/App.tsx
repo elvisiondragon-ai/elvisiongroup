@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
 import { useToast } from "@/hooks/use-toast";
 import { Auth } from "./pages/Auth";
 import { ResetPassword } from "./pages/ResetPassword";
@@ -15,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import type { User } from '@supabase/supabase-js';
 import { AudioProvider } from "@/contexts/AudioContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,9 @@ const App = () => {
   
   // Initialize push notifications for authenticated users
   const { registerForNotifications } = usePushNotifications();
+  
+  // Initialize real-time notifications
+  useRealTimeNotifications(user);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -100,8 +105,9 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AudioProvider>
-          <UserProfileProvider>
+        <AuthProvider>
+          <AudioProvider>
+            <UserProfileProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -126,8 +132,9 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-          </UserProfileProvider>
-        </AudioProvider>
+            </UserProfileProvider>
+          </AudioProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

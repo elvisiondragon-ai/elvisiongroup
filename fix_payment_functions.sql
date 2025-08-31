@@ -56,7 +56,7 @@ BEGIN
     SET 
       subscription_id = new_subscription_id,
       waiting_payment_id = NULL,
-      status = 'completed',
+      status = 'paid',
       completed_at = now(),
       updated_at = now()
     WHERE waiting_payment_id = waiting_record.id
