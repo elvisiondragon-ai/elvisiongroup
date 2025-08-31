@@ -40,9 +40,7 @@ export function Home({
   const { proStatus } = usePro();
   const { preloadAudioFiles, getCacheStats } = useAudioCache();
   const [showTutorialModal, setShowTutorialModal] = useState(false);
-  const [showCacheModal, setShowCacheModal] = useState(false);
   const [showPlayButton, setShowPlayButton] = useState(true);
-  const [showCachePlayButton, setShowCachePlayButton] = useState(true);
 
   // Preload audio files for better performance
   useEffect(() => {
@@ -146,7 +144,7 @@ export function Home({
   }];
 
   const tutorialFeature = {
-    title: "Cara Menggunakan Aplikasi - ULTIMATE TEST v7",
+    title: "Cara Menggunakan Aplikasi",
     description: "Tutorial lengkap cara menggunakan semua fitur aplikasi eL Vision Group",
     icon: Play,
     color: "text-blue-500",
@@ -309,44 +307,6 @@ export function Home({
           <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
         </Card>
 
-        {/* Cache Clearing Tutorial */}
-        <Card 
-          className="p-6 border-border transition-all duration-300 bg-gradient-to-br from-red-500/10 via-orange-500/5 to-yellow-500/10 hover:from-red-500/20 hover:via-orange-500/10 hover:to-yellow-500/20 border-red-500/20 hover:border-red-400/40 cursor-pointer col-span-2 relative overflow-hidden group"
-          onClick={() => setShowCacheModal(true)}
-        >
-          {/* Background glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 via-orange-600/5 to-yellow-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          
-          <div className="relative z-10 flex flex-col items-center text-center space-y-4">
-            {/* Icon container with glow */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300 animate-pulse"></div>
-              <div className="relative p-4 rounded-full bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 shadow-2xl shadow-red-500/30 group-hover:shadow-red-500/50 group-hover:scale-110 transition-all duration-300">
-                <Play className="w-8 h-8 text-white animate-pulse" />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="font-bold text-lg text-foreground group-hover:text-red-300 transition-colors duration-300">
-                Cara Bersihkan Error
-              </h3>
-              <p className="text-sm text-muted-foreground group-hover:text-red-200/80 transition-colors duration-300 leading-relaxed">
-                Tutorial lengkap cara membersihkan cache dan error pada aplikasi eL Vision Group
-              </p>
-              
-              {/* Call to action indicator */}
-              <div className="flex items-center justify-center gap-2 mt-4 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="w-2 h-2 bg-red-400 rounded-full animate-bounce"></div>
-                <span className="text-xs font-medium text-red-300 uppercase tracking-wide">Tap to Watch</span>
-                <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Corner accent */}
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-red-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
-        </Card>
-        
         {/* XP Motivation & Weekly Challenge */}
         <Card className="p-6 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-cyan-500/10 border border-primary/20">
           <div className="text-center space-y-4">
@@ -461,56 +421,6 @@ export function Home({
         </div>
       )}
 
-      {/* Cache Clearing Video Modal */}
-      {showCacheModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-xl font-semibold font-orbitron">Cara Bersihkan Error Cache</h2>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => {
-                  setShowCacheModal(false);
-                  setShowCachePlayButton(true);
-                }}
-              >
-                ✕
-              </Button>
-            </div>
-            <div className="p-6">
-              <div className="relative">
-                <video 
-                  className="w-full rounded-lg"
-                  controls={!showCachePlayButton}
-                  preload="metadata"
-                  onPlay={() => setShowCachePlayButton(false)}
-                  style={{ aspectRatio: '9/16', maxHeight: '70vh' }}
-                >
-                  <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/caches.mp4" type="video/mp4" />
-                  Browser Anda tidak mendukung video HTML5.
-                </video>
-                
-                {/* Overlay Play Button */}
-                {showCachePlayButton && (
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer group"
-                    onClick={(e) => {
-                      const video = e.currentTarget.previousElementSibling as HTMLVideoElement;
-                      video.play();
-                      setShowCachePlayButton(false);
-                    }}
-                  >
-                    <div className="bg-black/50 backdrop-blur-sm rounded-full p-6 group-hover:bg-black/70 transition-all duration-300">
-                      <Play className="w-16 h-16 text-white group-hover:scale-110 transition-transform duration-300" fill="currentColor" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       
       {/* Cache Debug Panel */}
       <CacheDebugPanel />
