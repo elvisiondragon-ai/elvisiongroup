@@ -39,6 +39,8 @@ export function Home({
   const { calculateXPProgress } = useXPSystem();
   const { proStatus } = usePro();
   const { preloadAudioFiles, getCacheStats } = useAudioCache();
+  const [showTutorialModal, setShowTutorialModal] = useState(false);
+  const [showPlayButton, setShowPlayButton] = useState(true);
 
   // Preload audio files for better performance
   useEffect(() => {
@@ -141,6 +143,14 @@ export function Home({
     isNew: true
   }];
 
+  const tutorialFeature = {
+    title: "Cara Menggunakan Aplikasi",
+    description: "Tutorial lengkap cara menggunakan semua fitur aplikasi eL Vision Group",
+    icon: Play,
+    color: "text-blue-500",
+    key: "tutorial"
+  };
+
   return <div className="pb-20">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
@@ -155,8 +165,8 @@ export function Home({
             <div className="flex items-center gap-4">
               <img src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" alt="eL Vision Group Logo" className="w-16 h-16 object-contain" />
               <div>
-                <h1 className="text-3xl font-bold font-orbitron text-foreground mb-2">
-                  {t('Welcome to Ecosystem')}
+                <h1 className="text-3xl font-bold font-serif text-foreground mb-2">
+                  Ecosystem
                   <span className="block bg-gradient-primary bg-clip-text text-transparent">
                     eL Vision Group
                   </span>
@@ -259,6 +269,43 @@ export function Home({
               </Card>;
         })}
         </div>
+
+        {/* Tutorial Button */}
+        <Card 
+          className="p-6 border-border transition-all duration-300 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 hover:from-indigo-500/20 hover:via-purple-500/10 hover:to-pink-500/20 border-indigo-500/20 hover:border-indigo-400/40 cursor-pointer col-span-2 relative overflow-hidden group"
+          onClick={() => setShowTutorialModal(true)}
+        >
+          {/* Background glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          
+          <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300 animate-pulse"></div>
+              <div className="relative p-4 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-2xl shadow-indigo-500/30 group-hover:shadow-indigo-500/50 group-hover:scale-110 transition-all duration-300">
+                <tutorialFeature.icon className="w-8 h-8 text-white animate-pulse" />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="font-bold text-lg text-foreground group-hover:text-indigo-300 transition-colors duration-300">
+                {tutorialFeature.title}
+              </h3>
+              <p className="text-sm text-muted-foreground group-hover:text-indigo-200/80 transition-colors duration-300 leading-relaxed">
+                {tutorialFeature.description}
+              </p>
+              
+              {/* Call to action indicator */}
+              <div className="flex items-center justify-center gap-2 mt-4 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></div>
+                <span className="text-xs font-medium text-indigo-300 uppercase tracking-wide">Tap to Watch</span>
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Corner accent */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
+        </Card>
         
         {/* XP Motivation & Weekly Challenge */}
         <Card className="p-6 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-cyan-500/10 border border-primary/20">
@@ -322,6 +369,57 @@ export function Home({
           </div>
         </Card>
       </div>
+      
+      {/* Tutorial Video Modal */}
+      {showTutorialModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-xl font-semibold font-orbitron">Cara Menggunakan Aplikasi</h2>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  setShowTutorialModal(false);
+                  setShowPlayButton(true);
+                }}
+              >
+                ✕
+              </Button>
+            </div>
+            <div className="p-6">
+              <div className="relative">
+                <video 
+                  className="w-full rounded-lg"
+                  controls={!showPlayButton}
+                  preload="metadata"
+                  onPlay={() => setShowPlayButton(false)}
+                  style={{ aspectRatio: '9/16', maxHeight: '70vh' }}
+                >
+                  <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/reactmove.mp4" type="video/mp4" />
+                  Browser Anda tidak mendukung video HTML5.
+                </video>
+                
+                {/* Overlay Play Button */}
+                {showPlayButton && (
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer group"
+                    onClick={(e) => {
+                      const video = e.currentTarget.previousElementSibling as HTMLVideoElement;
+                      video.play();
+                      setShowPlayButton(false);
+                    }}
+                  >
+                    <div className="bg-black/50 backdrop-blur-sm rounded-full p-6 group-hover:bg-black/70 transition-all duration-300">
+                      <Play className="w-16 h-16 text-white group-hover:scale-110 transition-transform duration-300" fill="currentColor" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Cache Debug Panel */}
       <CacheDebugPanel />
