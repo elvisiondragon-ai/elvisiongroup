@@ -161,7 +161,7 @@ export function usePro() {
     checkProStatus();
   }, []);
 
-  // REAL-TIME LISTENER: Listen for payment success
+  // REAL-TIME LISTENER: Listen for payment success AND admin changes
   useEffect(() => {
     let subscription: any = null;
     
@@ -169,20 +169,34 @@ export function usePro() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Listen for NEW pro_subscriptions records (payment success)
+      // Listen for ALL pro_subscriptions changes (payment success + admin grants/cancels)
       subscription = supabase
-        .channel('payment_success_listener')
+        .channel('pro_status_changes')
         .on('postgres_changes', {
-          event: 'INSERT',
+          event: '*', // INSERT, UPDATE, DELETE
           schema: 'public',
           table: 'pro_subscriptions',
           filter: `user_id=eq.${user.id}`
         }, async (payload) => {
-          console.log('🎉 Payment success detected:', payload);
+          console.log('🔄 Pro status change detected:', payload);
           
           // Clear cache and refresh pro status
           localStorage.removeItem(CACHE_KEY);
           await checkProStatus();
+          
+          if (payload.eventType === 'DELETE' || payload.new?.status === 'expired') {
+            // Pro CANCELLED - Set persistent notification
+            localStorage.setItem('pro-status-change', JSON.stringify({
+              type: 'cancelled',
+              timestamp: Date.now()
+            }));
+          } else if (payload.eventType === 'INSERT' && payload.new?.status === 'active') {
+            // Set persistent notification for Pro granted
+            localStorage.setItem('pro-status-change', JSON.stringify({
+              type: 'granted', 
+              timestamp: Date.now()
+            }));
+            console.log('🎉 Payment success detected:', payload);
           
           // Show success notification with email check message
           const subscriptionData = payload.new;
