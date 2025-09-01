@@ -21,7 +21,6 @@ interface VerseAudioCardProps {
   setCurrentPlayingVerse: (id: number | null) => void;
   currentVerseAudio: HTMLAudioElement | null;
   setCurrentVerseAudio: (audio: HTMLAudioElement | null) => void;
-  onMeditativeState?: (verse: Verse, audio: HTMLAudioElement) => void;
 }
 
 export function VerseAudioCard({ 
@@ -30,8 +29,7 @@ export function VerseAudioCard({
   currentPlayingVerse, 
   setCurrentPlayingVerse,
   currentVerseAudio,
-  setCurrentVerseAudio,
-  onMeditativeState
+  setCurrentVerseAudio
 }: VerseAudioCardProps) {
   const { createProtectedAudio } = useProtectedAudio();
   const { awardXP } = useXPSystem();
@@ -86,11 +84,6 @@ export function VerseAudioCard({
       await audio.play();
       setCurrentPlayingVerse(verse.id);
       setCurrentVerseAudio(audio);
-      
-      // Trigger meditative state for Verse 1
-      if (verse.id === 1 && onMeditativeState) {
-        onMeditativeState(verse, audio);
-      }
       
     } catch (error) {
       console.error('Error playing audio:', error);

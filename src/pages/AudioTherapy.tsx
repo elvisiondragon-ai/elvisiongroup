@@ -360,7 +360,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     setCurrentPlayingVerse={setCurrentPlayingVerse}
                     currentVerseAudio={currentVerseAudio}
                     setCurrentVerseAudio={setCurrentVerseAudio}
-                    onMeditativeState={handleMeditativeState}
                   />
                 </div>
 
