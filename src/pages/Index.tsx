@@ -11,13 +11,36 @@ import { Tutorial } from "./Tutorial";
 import { IgnisQuest } from "./IgnisQuest";
 import { Payment } from "./Payment";
 import { supabase } from "@/integrations/supabase/client";
+import { useMeditative } from "@/contexts/MeditativeContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
+  const [showTabWarning, setShowTabWarning] = useState(false);
+  const [pendingTab, setPendingTab] = useState<string | null>(null);
+  const { isMeditativeActive } = useMeditative();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.href = '/auth';
+  };
+
+  const handleTabChange = (newTab: string) => {
+    if (isMeditativeActive && newTab !== activeTab) {
+      setPendingTab(newTab);
+      setShowTabWarning(true);
+      return;
+    }
+    setActiveTab(newTab);
   };
 
   const renderContent = () => {
@@ -54,7 +77,45 @@ const Index = () => {
       <main className="relative">
         {renderContent()}
       </main>
-      <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomNavigation activeTab={activeTab} onTabChange={handleTabChange} />
+      
+      {/* Tab Warning Dialog */}
+      <AlertDialog open={showTabWarning} onOpenChange={setShowTabWarning}>
+        <AlertDialogContent className="bg-background border border-primary/20">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-primary">Peringatan</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              EXP sesi ini akan di reset jika keluar tab. Fokuslah sejenak.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-2">
+            <AlertDialogAction 
+              onClick={() => {
+                setShowTabWarning(false);
+                setPendingTab(null);
+                if (pendingTab) {
+                  setActiveTab(pendingTab);
+                } else {
+                  setActiveTab("audio-therapy");
+                }
+                // Reset logic here if needed
+              }}
+              className="bg-destructive hover:bg-destructive/90 w-full"
+            >
+              Reset EXP dan Keluar
+            </AlertDialogAction>
+            <AlertDialogCancel 
+              onClick={() => {
+                setShowTabWarning(false);
+                setPendingTab(null);
+              }}
+              className="border-primary/20 w-full"
+            >
+              Jangan Reset EXP
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

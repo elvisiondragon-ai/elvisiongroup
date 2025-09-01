@@ -107,24 +107,9 @@ export function usePro() {
     }
   };
 
+  // TRIAL REMOVED FOR SECURITY - NO FREE PRO ACCESS
   const startTrial = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('pro-trial-start');
-      
-      if (error) throw error;
-      
-      if (data.success) {
-        // Clear cache and refresh status
-        localStorage.removeItem(CACHE_KEY);
-        await checkProStatus();
-        return { success: true, data };
-      } else {
-        throw new Error(data.error || 'Failed to start trial');
-      }
-    } catch (error) {
-      console.error('Trial start failed:', error);
-      throw error;
-    }
+    throw new Error('Trial functionality has been disabled for security. Please purchase a subscription.');
   };
 
   const createPayment = async (
@@ -213,11 +198,28 @@ export function usePro() {
               title: "🎉 Pembayaran Berhasil!",
               description: `Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.`,
               type: "success",
-              duration: 7000
+              duration: 7000,
+              className: "text-xl p-8 bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 border-purple-500/30 shadow-2xl shadow-purple-500/25 ring-2 ring-purple-400/20"
             });
           } else {
-            // Fallback browser notification
-            alert(`🎉 Pembayaran Berhasil! Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.`);
+            // Enhanced fallback notification with purple styling
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+              <div style="position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 400px;">
+                <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding: 25px; border-radius: 15px; box-shadow: 0 20px 60px rgba(139, 92, 246, 0.4); border: 2px solid rgba(139, 92, 246, 0.3); animation: slideInRight 0.5s ease-out;">
+                  <div style="color: #8b5cf6; font-size: 1.5rem; font-weight: bold; margin-bottom: 8px;">🎉 Pembayaran Berhasil!</div>
+                  <div style="color: #c4b5fd; font-size: 1rem; line-height: 1.5;">Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.</div>
+                </div>
+              </div>
+              <style>
+                @keyframes slideInRight {
+                  from { transform: translateX(100%); opacity: 0; }
+                  to { transform: translateX(0); opacity: 1; }
+                }
+              </style>
+            `;
+            document.body.appendChild(modal);
+            setTimeout(() => document.body.removeChild(modal), 7000);
           }
         })
         .subscribe();

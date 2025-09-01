@@ -9,7 +9,9 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
+import { useMeditative } from "@/contexts/MeditativeContext";
 import { VerseAudioCard } from "@/components/VerseAudioCard";
+import { MeditativeState } from "@/components/MeditativeState";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,8 +46,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [loading, setLoading] = useState(true);
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [warningResolver, setWarningResolver] = useState<((value: boolean) => void) | null>(null);
+  const [meditativeState, setMeditativeState] = useState<{verse: any, audio: HTMLAudioElement} | null>(null);
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
+  const { setMeditativeActive } = useMeditative();
 
   // Shared state to track which verse is currently playing (verses only)
   const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
@@ -127,6 +131,35 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       setWarningResolver(null);
     }
     setShowWarningDialog(false);
+  };
+
+  // Handle meditative state activation
+  const handleMeditativeState = (verse: any, audio: HTMLAudioElement) => {
+    setMeditativeState({ verse, audio });
+    setMeditativeActive(true);
+  };
+
+  // Handle meditative state exit
+  const handleMeditativeExit = () => {
+    if (meditativeState?.audio) {
+      meditativeState.audio.pause();
+    }
+    setMeditativeState(null);
+    setCurrentPlayingVerse(null);
+    setCurrentVerseAudio(null);
+    setMeditativeActive(false);
+  };
+
+  // Handle meditative state exit with reset
+  const handleMeditativeResetExit = () => {
+    if (meditativeState?.audio) {
+      meditativeState.audio.pause();
+    }
+    // Reset EXP here if needed
+    setMeditativeState(null);
+    setCurrentPlayingVerse(null);
+    setCurrentVerseAudio(null);
+    setMeditativeActive(false);
   };
 
   const verses = [
@@ -242,6 +275,18 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     },
   ];
 
+  // Show meditative state if active
+  if (meditativeState) {
+    return (
+      <MeditativeState
+        verse={meditativeState.verse}
+        audio={meditativeState.audio}
+        onExit={handleMeditativeExit}
+        onResetExit={handleMeditativeResetExit}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -315,6 +360,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     setCurrentPlayingVerse={setCurrentPlayingVerse}
                     currentVerseAudio={currentVerseAudio}
                     setCurrentVerseAudio={setCurrentVerseAudio}
+                    onMeditativeState={handleMeditativeState}
                   />
                 </div>
 

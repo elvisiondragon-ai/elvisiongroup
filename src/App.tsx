@@ -18,6 +18,7 @@ import type { User } from '@supabase/supabase-js';
 import { AudioProvider } from "@/contexts/AudioContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { MeditativeProvider } from "@/contexts/MeditativeContext";
 
 const queryClient = new QueryClient();
 
@@ -157,10 +158,11 @@ const App = () => {
       <TooltipProvider>
         <AuthProvider>
           <AudioProvider>
-            <UserProfileProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+            <MeditativeProvider>
+              <UserProfileProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
             <Routes>
               <Route 
                 path="/" 
@@ -182,7 +184,8 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-            </UserProfileProvider>
+              </UserProfileProvider>
+            </MeditativeProvider>
           </AudioProvider>
         </AuthProvider>
       </TooltipProvider>

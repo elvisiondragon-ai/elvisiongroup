@@ -113,20 +113,31 @@ export function Payment({ onNavigate }: PaymentProps) {
               title: "🎉 Pembayaran Berhasil!",
               description: "Pembayaran berhasil silahkan Check Email !",
               duration: 30000,
-              className: "text-lg p-6",
+              className: "text-xl p-8 bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 border-purple-500/30 shadow-2xl shadow-purple-500/25 ring-2 ring-purple-400/20",
             });
             
-            // Show full-screen success modal
+            // Show full-screen success modal with purple design
             const modal = document.createElement('div');
             modal.innerHTML = `
-              <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999;">
-                <div style="background: white; padding: 40px; border-radius: 15px; text-align: center; max-width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-                  <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
-                  <h2 style="font-size: 2rem; color: #00c851; margin-bottom: 15px;">Pembayaran Berhasil!</h2>
-                  <p style="font-size: 1.2rem; color: #666; margin-bottom: 20px;">Pembayaran berhasil silahkan Check Email !</p>
-                  <p style="color: #999;">Jendela ini akan tertutup dalam <span id="countdown">30</span> detik</p>
+              <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px);">
+                <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding: 50px; border-radius: 25px; text-align: center; max-width: 90%; box-shadow: 0 25px 80px rgba(139, 92, 246, 0.3); border: 2px solid rgba(139, 92, 246, 0.3); position: relative; overflow: hidden;">
+                  <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%); animation: pulse 2s ease-in-out infinite;"></div>
+                  <div style="position: relative; z-index: 10;">
+                    <div style="font-size: 5rem; margin-bottom: 25px; filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));">🎉</div>
+                    <h2 style="font-size: 2.5rem; background: linear-gradient(45deg, #8b5cf6, #a855f7, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; font-weight: bold;">Pembayaran Berhasil!</h2>
+                    <p style="font-size: 1.4rem; color: #c4b5fd; margin-bottom: 25px; line-height: 1.6;">Pembayaran berhasil silahkan Check Email !</p>
+                    <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 15px; margin-top: 20px;">
+                      <p style="color: #a78bfa; font-size: 1rem;">Jendela ini akan tertutup dalam <span id="countdown" style="color: #8b5cf6; font-weight: bold; font-size: 1.2rem;">30</span> detik</p>
+                    </div>
+                  </div>
                 </div>
               </div>
+              <style>
+                @keyframes pulse {
+                  0%, 100% { opacity: 0.5; transform: scale(1); }
+                  50% { opacity: 0.8; transform: scale(1.05); }
+                }
+              </style>
             `;
             document.body.appendChild(modal);
             
@@ -211,10 +222,20 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, []);
 
   const handleCreatePayment = async () => {
-    if (!user || !selectedPlan || !phoneNumber.trim() || !fullName.trim()) {
+    if (!user || !selectedPlan || !phoneNumber.trim() || !fullName.trim() || !email.trim()) {
       toast({
-        title: "Data Tidak Lengkap",
-        description: "Mohon lengkapi nama lengkap dan nomor telepon",
+        title: "Data Tidak Lengkap", 
+        description: "Mohon lengkapi nama lengkap, nomor telepon, dan email",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate phone number format
+    if (!/^08[0-9]{8,11}$/.test(phoneNumber)) {
+      toast({
+        title: "Nomor Telepon Tidak Valid",
+        description: "Format: 08xxxxxxxxxx (8-13 digit)",
         variant: "destructive",
       });
       return;
@@ -231,8 +252,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           paymentMethod: selectedPaymentMethod,
           userName: fullName,
           userEmail: email,
-          phoneNumber: phoneNumber,
-          paymentFlow: 'direct'
+          phoneNumber: phoneNumber
         }
       });
 

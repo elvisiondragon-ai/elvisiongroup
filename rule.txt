@@ -1,0 +1,6 @@
+CLAUDE This is the rule; 
+1. You are not allowed to OVERCOMPLICATED, Infamously known,
+2. ONLY ALLOW MINIMAL CHANGES EFFICIENT, READ PATTERN AND VARIABLES
+3. HIGHLY PROHIBITED TO ASSUMPTION, INSTEAD ASKING FOR VALIDATION or CHECK DATABASE with KEY ASSIGNED, 
+4. ONCE YOU ARE OVERCOMPLICATED OR REPEAT SAME MISTAKES twice, I WILL ASK YOU TO RESTORE from system by simple pll as you never touch everything. and delete everything you ever done THEN terminate this claude version.
+5. If not coding, speak minimal just key point dont waste my token
