@@ -3,10 +3,14 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const usePushNotifications = () => {
   const [isRegistered, setIsRegistered] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<'prompt' | 'granted' | 'denied' | 'prompt-with-rationale'>('prompt');
+  
+  // OPTIMIZATION: Use cached user from AuthContext instead of making auth calls
+  const { user } = useAuth();
 
   const registerForNotifications = async () => {
     try {
@@ -36,8 +40,11 @@ export const usePushNotifications = () => {
 
   const saveDeviceToken = async (token: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      // OPTIMIZATION: Use cached user from AuthContext instead of auth.getUser() call
+      if (!user) {
+        console.log('No authenticated user found in context');
+        return;
+      }
 
       const platform = Capacitor.getPlatform();
       

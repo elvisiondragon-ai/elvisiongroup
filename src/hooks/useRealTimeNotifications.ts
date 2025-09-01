@@ -21,6 +21,12 @@ export const useRealTimeNotifications = (user: User | null) => {
     
     const notification = payload.new as RealtimeNotification;
     
+    // OPTIMIZATION: Client-side filtering - only show notifications for current user
+    if (!user || notification.user_id !== user.id) {
+      console.log('🔔 Notification filtered out - not for current user');
+      return;
+    }
+    
     // Show toast notification immediately
     toast({
       title: notification.title,
@@ -28,32 +34,34 @@ export const useRealTimeNotifications = (user: User | null) => {
       variant: getToastVariant(notification.type),
       duration: notification.type === 'error' ? 8000 : 5000,
     });
-  }, [toast]);
+  }, [toast, user?.id]);
 
   useEffect(() => {
     if (!user) return;
 
-    console.log('🔔 Setting up real-time notifications for user:', user.id);
+    console.log('🔔 Setting up GLOBAL real-time notifications channel');
 
+    // OPTIMIZATION: Use single global channel instead of per-user channels
+    // This reduces from 128 individual channels to 1 shared channel
     const channel = supabase
-      .channel(`notifications-${user.id}`)
+      .channel('global-notifications')
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`,
+          table: 'notifications'
+          // REMOVED: filter: `user_id=eq.${user.id}` - now handled client-side
         },
         handleNotification
       )
       .subscribe((status) => {
-        console.log('🔔 Real-time subscription status:', status);
+        console.log('🔔 Global real-time subscription status:', status);
       });
 
     // Cleanup subscription on unmount
     return () => {
-      console.log('🔔 Cleaning up real-time notifications subscription');
+      console.log('🔔 Cleaning up global real-time notifications subscription');
       supabase.removeChannel(channel);
     };
   }, [user?.id, handleNotification]);

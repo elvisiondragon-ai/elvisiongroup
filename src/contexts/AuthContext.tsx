@@ -26,6 +26,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [proStatus, setProStatus] = useState<any>(null);
+  
+  // OPTIMIZATION: Add caching to prevent excessive RPC calls
+  const [proStatusCache, setProStatusCache] = useState<{data: any, timestamp: number} | null>(null);
+  const [lastProCheck, setLastProCheck] = useState<number>(0);
 
   useEffect(() => {
     // Get initial session
@@ -45,7 +49,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await checkProStatus(session.user.id);
+          // OPTIMIZATION: Add rate limiting check before making RPC calls
+          try {
+            const rateLimitResponse = await fetch(
+              'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/auth-rate-limit',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${session.access_token}`
+                }
+              }
+            );
+            
+            if (rateLimitResponse.ok) {
+              await checkProStatus(session.user.id, event === 'SIGNED_IN');
+            } else {
+              console.log('🚫 Rate limited - using cached status or default');
+              if (proStatusCache) {
+                setProStatus(proStatusCache.data);
+              }
+              setLoading(false);
+            }
+          } catch (rateLimitError) {
+            console.warn('Rate limit check failed, proceeding with pro status check:', rateLimitError);
+            await checkProStatus(session.user.id, event === 'SIGNED_IN');
+          }
         } else {
           setProStatus(null);
           setLoading(false);
@@ -56,8 +85,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkProStatus = async (userId: string) => {
+  const checkProStatus = async (userId: string, force: boolean = false) => {
+    const now = Date.now();
+    const cacheAge = proStatusCache ? now - proStatusCache.timestamp : Infinity;
+    const timeSinceLastCheck = now - lastProCheck;
+    
+    // OPTIMIZATION: Use cache if less than 5 minutes old and not forced, and minimum 30 seconds between checks
+    if (!force && cacheAge < 300000 && timeSinceLastCheck < 30000 && proStatusCache) {
+      console.log('✅ AuthContext using cached pro status (age: ' + Math.floor(cacheAge/1000) + 's)');
+      setProStatus(proStatusCache.data);
+      setLoading(false);
+      return;
+    }
+    
+    // Prevent rapid successive calls
+    if (timeSinceLastCheck < 30000 && !force) {
+      console.log('⏱️ AuthContext pro check throttled (last check: ' + Math.floor(timeSinceLastCheck/1000) + 's ago)');
+      setLoading(false);
+      return;
+    }
+    
+    setLastProCheck(now);
+    
     try {
+      console.log('🔄 AuthContext making RPC call for pro status...');
       const { data, error } = await supabase.rpc('check_unified_pro_status', {
         p_user_id: userId
       });
@@ -72,17 +123,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         daysRemaining: data?.[0]?.days_remaining,
       };
 
+      // Cache the result
+      setProStatusCache({ data: status, timestamp: now });
       setProStatus(status);
-      console.log('✅ AuthContext pro status:', status);
+      console.log('✅ AuthContext pro status updated and cached:', status);
     } catch (error) {
       console.error('❌ AuthContext pro check failed:', error);
-      setProStatus({
+      const fallbackStatus = {
         isPro: false,
         subscriptionType: null,
         status: null,
         expiresAt: null,
         daysRemaining: null,
-      });
+      };
+      setProStatus(fallbackStatus);
+      // Don't cache errors, but still update timestamp to prevent spam
     } finally {
       setLoading(false);
     }
