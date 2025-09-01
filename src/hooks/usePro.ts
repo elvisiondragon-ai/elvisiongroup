@@ -197,43 +197,44 @@ export function usePro() {
               timestamp: Date.now()
             }));
             console.log('🎉 Payment success detected:', payload);
-          
-          // Show success notification with email check message
-          const subscriptionData = payload.new;
-          const subscriptionType = subscriptionData.subscription_type;
-          const duration = subscriptionType === '1_year' ? '1 Tahun' : 
-                          subscriptionType === '1_month' ? '1 Bulan' : 
-                          subscriptionType === '1_week' ? '1 Minggu' : 
-                          subscriptionType === '1_day' ? '1 Hari' : 'PRO';
-          
-          // You can use your toast system here
-          if (window.showToast) {
-            window.showToast({
-              title: "🎉 Pembayaran Berhasil!",
-              description: `Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.`,
-              type: "success",
-              duration: 7000,
-              className: "text-xl p-8 bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 border-purple-500/30 shadow-2xl shadow-purple-500/25 ring-2 ring-purple-400/20"
-            });
-          } else {
-            // Enhanced fallback notification with purple styling
-            const modal = document.createElement('div');
-            modal.innerHTML = `
-              <div style="position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 400px;">
-                <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding: 25px; border-radius: 15px; box-shadow: 0 20px 60px rgba(139, 92, 246, 0.4); border: 2px solid rgba(139, 92, 246, 0.3); animation: slideInRight 0.5s ease-out;">
-                  <div style="color: #8b5cf6; font-size: 1.5rem; font-weight: bold; margin-bottom: 8px;">🎉 Pembayaran Berhasil!</div>
-                  <div style="color: #c4b5fd; font-size: 1rem; line-height: 1.5;">Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.</div>
+            
+            // Show success notification with email check message
+            const subscriptionData = payload.new;
+            const subscriptionType = subscriptionData.subscription_type;
+            const duration = subscriptionType === '1_year' ? '1 Tahun' : 
+                            subscriptionType === '1_month' ? '1 Bulan' : 
+                            subscriptionType === '1_week' ? '1 Minggu' : 
+                            subscriptionType === '1_day' ? '1 Hari' : 'PRO';
+            
+            // You can use your toast system here
+            if (window.showToast) {
+              window.showToast({
+                title: "🎉 Pembayaran Berhasil!",
+                description: `Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.`,
+                type: "success",
+                duration: 7000,
+                className: "text-xl p-8 bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 border-purple-500/30 shadow-2xl shadow-purple-500/25 ring-2 ring-purple-400/20"
+              });
+            } else {
+              // Enhanced fallback notification with purple styling
+              const modal = document.createElement('div');
+              modal.innerHTML = `
+                <div style="position: fixed: top: 20px; right: 20px; z-index: 10000; max-width: 400px;">
+                  <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding: 25px; border-radius: 15px; box-shadow: 0 20px 60px rgba(139, 92, 246, 0.4); border: 2px solid rgba(139, 92, 246, 0.3); animation: slideInRight 0.5s ease-out;">
+                    <div style="color: #8b5cf6; font-size: 1.5rem; font-weight: bold; margin-bottom: 8px;">🎉 Pembayaran Berhasil!</div>
+                    <div style="color: #c4b5fd; font-size: 1rem; line-height: 1.5;">Status PRO ${duration} Anda telah aktif. Silahkan cek email Anda untuk konfirmasi.</div>
+                  </div>
                 </div>
-              </div>
-              <style>
-                @keyframes slideInRight {
-                  from { transform: translateX(100%); opacity: 0; }
-                  to { transform: translateX(0); opacity: 1; }
-                }
-              </style>
-            `;
-            document.body.appendChild(modal);
-            setTimeout(() => document.body.removeChild(modal), 7000);
+                <style>
+                  @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                  }
+                </style>
+              `;
+              document.body.appendChild(modal);
+              setTimeout(() => document.body.removeChild(modal), 7000);
+            }
           }
         })
         .subscribe();
