@@ -79,10 +79,12 @@ export function VerseAudioCard({
       
       // Add event listeners
       audio.addEventListener('ended', () => {
+        console.log('🎵 Audio ended for verse:', verse.title, 'ID:', verse.id);
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
         // Award XP based on verse type - Short verses get +1 XP, main verses get +10 XP
         const xpAmount = verse.id === 100 ? 1 : 10; // ID 100 is our reflection verse
+        console.log('🏆 Awarding XP:', xpAmount, 'for verse:', verse.title);
         awardXP('verse_completion', xpAmount, `Completed ${verse.title}`);
       });
 

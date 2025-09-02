@@ -18,6 +18,7 @@ export function useXPSystem(): XPSystemHook {
     reason?: string,
     metadata: any = {}
   ) => {
+    console.log('🎯 awardXP called:', { activityType, xpAmount, reason, metadata });
     try {
       setIsLoading(true);
       

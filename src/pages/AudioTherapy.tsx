@@ -330,7 +330,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     unlocked: true,
                     requiredLevel: 1,
                     artwork: verseArtwork, // Will be replaced by custom background
-                    audioPath: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Jurnalsyukur1.MP3',
+                    audioPath: 'Jurnalsyukur1.MP3',
                     language: 'id'
                   }}
                   onWarning={handleWarning}
