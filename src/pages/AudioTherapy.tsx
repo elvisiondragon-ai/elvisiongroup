@@ -273,7 +273,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 10 - Healing Heart",
       subtitle: "Menyembuhkan luka batin dan memulihkan kedamaian hati",
       unlocked: false, // Lock for all users
-      requiredLevel: 11,
+      requiredLevel: 1,
       artwork: verse10Artwork,
       audioPath: null,
       language: 'id'
@@ -283,7 +283,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 11 - Inner Light",
       subtitle: "Membangkitkan cahaya batin untuk pencerahan spiritual",
       unlocked: false, // Lock for all users
-      requiredLevel: 12,
+      requiredLevel: 1,
       artwork: verse11Artwork,
       audioPath: null,
       language: 'id'
@@ -293,7 +293,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 12 - Divine Harmony",
       subtitle: "Menyelaraskan jiwa dengan harmoni ilahi alam semesta",
       unlocked: false, // Lock for all users
-      requiredLevel: 13,
+      requiredLevel: 1,
       artwork: verse12Artwork,
       audioPath: null,
       language: 'id'
@@ -313,7 +313,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 14 - Celestial Calm",
       subtitle: "Mencapai ketenangan surgawi yang abadi",
       unlocked: false, // Lock for all users
-      requiredLevel: 15,
+      requiredLevel: 1,
       artwork: verse14Artwork,
       audioPath: null,
       language: 'id'
@@ -323,7 +323,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       title: "Verse 15 - Enlightened Serenity",
       subtitle: "Ketenangan yang tercerahkan dalam kesadaran murni",
       unlocked: false, // Lock for all users
-      requiredLevel: 16,
+      requiredLevel: 1,
       artwork: verse15Artwork,
       audioPath: null,
       language: 'id'
