@@ -1,22 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Play, Pause, ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles, Lock } from "lucide-react";
+import { ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles, Lock } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useXPSystem } from '@/hooks/useXPSystem';
-import { useProtectedAudio } from '@/contexts/AudioContext';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface SpiritualJournalProps {
   onNavigate: (tab: string) => void;
@@ -34,15 +23,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const [warningResolver, setWarningResolver] = useState<((value: boolean) => void) | null>(null);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
-  const { createProtectedAudio } = useProtectedAudio();
-  
-  // Local audio state - your primitive approach that works better
-  const [playingJournal, setPlayingJournal] = useState<number | null>(null);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
@@ -52,90 +34,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     return true;
   };
 
-  // Warning dialog handler - keeps users focused
-  const handleWarning = (): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setWarningResolver(() => resolve);
-      setShowWarningDialog(true);
-    });
-  };
 
-  const handleWarningResponse = (shouldContinue: boolean) => {
-    if (warningResolver) {
-      warningResolver(shouldContinue);
-      setWarningResolver(null);
-    }
-    setShowWarningDialog(false);
-  };
-
-  const handlePlay = async (journalId: number) => {
-    // Check if journal is locked
-    const journal = journals.find(j => j.id === journalId);
-    if (!journal || !userProfile) return;
-    
-    const isLocked = !hasAccess(journal);
-    
-    if (isLocked) {
-      // This should never happen now since hasAccess always returns true
-      toast({
-        title: "Akses Terbatas",
-        description: "Terjadi kesalahan, silakan coba lagi",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // If currently playing this journal, stop it
-    if (playingJournal === journalId && currentAudio) {
-      currentAudio.pause();
-      setPlayingJournal(null);
-      setCurrentAudio(null);
-      return;
-    }
-
-    // Stop any currently playing audio
-    if (currentAudio) {
-      currentAudio.pause();
-      setCurrentAudio(null);
-    }
-
-    // Create new protected audio with your primitive approach
-    try {
-      const audio = createProtectedAudio('Jurnalsyukur1.MP3');
-      
-      // Add event listeners
-      audio.addEventListener('ended', () => {
-        setPlayingJournal(null);
-        setCurrentAudio(null);
-        // Award XP for completion
-        awardXP('audio_completion', 1, `Completed ${journal.title}`);
-      });
-
-      audio.addEventListener('error', (error) => {
-        console.error('Error playing audio:', error);
-        setPlayingJournal(null);
-        setCurrentAudio(null);
-        toast({
-          title: "Error",
-          description: "Gagal memutar audio",
-          variant: "destructive"
-        });
-      });
-
-      // Play audio
-      await audio.play();
-      setPlayingJournal(journalId);
-      setCurrentAudio(audio);
-      
-    } catch (error) {
-      console.error('Error playing audio:', error);
-      toast({
-        title: "Error",
-        description: "Gagal memutar audio",
-        variant: "destructive"
-      });
-    }
-  };
 
   const journals = [
     {
@@ -311,66 +210,32 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       </div>
 
       <div className="px-6 space-y-6">
-        {/* Journal Audio Sections */}
+        {/* Journal Sections - Audio Removed */}
         {journals.map((journal) => {
           const Icon = journal.icon;
-          const isCurrentlyPlaying = playingJournal === journal.id;
-          const isLocked = !hasAccess(journal);
           
           return (
-            <Card key={journal.id} className={`relative p-6 ${journal.gradient} border-2 ${journal.borderColor} ${journal.glowClass} overflow-hidden transition-all duration-300 ${isLocked ? 'opacity-75' : ''}`}>
-              {/* Animated background ripple */}
-              <div className="absolute inset-0 opacity-20">
-                <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-white/20 ${isCurrentlyPlaying ? 'animate-ping' : ''}`}></div>
-                <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-white/10 ${isCurrentlyPlaying ? 'animate-pulse' : ''}`}></div>
-              </div>
-              
+            <Card key={journal.id} className={`relative p-6 ${journal.gradient} border-2 ${journal.borderColor} ${journal.glowClass} overflow-hidden transition-all duration-300`}>
               <div className="relative z-10 text-center space-y-4">
                 <div className="flex items-center justify-center gap-3 mb-2">
                   <Icon className="w-6 h-6 text-foreground" />
                   <h2 className="text-xl font-semibold font-orbitron text-foreground">
                     {journal.title}
                   </h2>
-                  {isLocked && (
-                    <Lock className="w-5 h-5 text-muted-foreground ml-2" />
-                  )}
                 </div>
                 <p className="text-muted-foreground">
-                  {journal.subtitle}
+                  Audio telah dihapus - Fokus pada jurnal tertulis
                 </p>
                 
-                 <div className="flex justify-center py-4">
-                   <Button
-                     onClick={() => {
-                       if (journal.id === 1) {
-                         handlePlay(journal.id);
-                       } else {
-                         toast({
-                           title: "Coming Soon",
-                           description: "Audio untuk jurnal ini akan segera tersedia",
-                           variant: "default"
-                         });
-                       }
-                     }}
-                      disabled={isLocked}
-                      className={`w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30 hover:border-white/50 backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'scale-110 shadow-lg' : ''} ${isLocked ? 'cursor-not-allowed opacity-50' : ''}`}
-                    >
-                      {isLocked ? (
-                        <Lock className="w-6 h-6 text-foreground" />
-                      ) : isCurrentlyPlaying ? (
-                       <Pause className="w-6 h-6 text-foreground animate-pulse" />
-                     ) : (
-                       <Play className="w-6 h-6 text-foreground" />
-                     )}
-                  </Button>
+                <div className="py-4">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center">
+                    <Icon className="w-8 h-8 text-foreground/60" />
+                  </div>
                 </div>
                 
-                  <p className="text-sm text-muted-foreground">
-                    {isLocked 
-                      ? "Akses terbuka untuk semua" // Updated message since all journals are now accessible
-                      : `Dengarkan dan renungkan selama ${journal.duration}`
-                    }
-                  </p>
+                <p className="text-sm text-muted-foreground">
+                  Gunakan bagian jurnal di bawah untuk refleksi
+                </p>
               </div>
             </Card>
           );
@@ -516,31 +381,6 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         </div>
       </div>
 
-      {/* Focus Warning Dialog */}
-      <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
-        <AlertDialogContent className="bg-background border border-primary/20">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-primary">Peringatan</AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">
-              Anda akan mengulang exp dari awal jika menghentikan audio ini, lanjutkan?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel 
-              onClick={() => handleWarningResponse(false)}
-              className="border-muted-foreground/20"
-            >
-              Batal
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => handleWarningResponse(true)}
-              className="bg-primary hover:bg-primary/90"
-            >
-              Lanjutkan
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
