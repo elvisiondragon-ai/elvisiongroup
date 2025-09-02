@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Supabase Edge Functions - DO NOT COMMIT
+supabase/functions/

@@ -11,7 +11,7 @@ import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
 import { useMeditative } from "@/contexts/MeditativeContext";
 import { VerseAudioCard } from "@/components/VerseAudioCard";
-import { MeditativeState } from "@/components/MeditativeState";
+import { useProtectedAudio } from "@/contexts/AudioContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,14 +51,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [loading, setLoading] = useState(true);
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [warningResolver, setWarningResolver] = useState<((value: boolean) => void) | null>(null);
-  const [meditativeState, setMeditativeState] = useState<{verse: any, audio: HTMLAudioElement} | null>(null);
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
-
-  // Shared state to track which verse is currently playing (verses only)
-  const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
-  const [currentVerseAudio, setCurrentVerseAudio] = useState<HTMLAudioElement | null>(null);
+  const { currentPlayingVerse, currentVerseAudio, setCurrentPlayingVerse, setCurrentVerseAudio } = useProtectedAudio();
 
   useEffect(() => {
     const initializeData = async () => {
@@ -138,34 +134,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     setShowWarningDialog(false);
   };
 
-  // Handle meditative state activation
-  const handleMeditativeState = (verse: any, audio: HTMLAudioElement) => {
-    setMeditativeState({ verse, audio });
-    setMeditativeActive(true);
-  };
-
-  // Handle meditative state exit
-  const handleMeditativeExit = () => {
-    if (meditativeState?.audio) {
-      meditativeState.audio.pause();
-    }
-    setMeditativeState(null);
-    setCurrentPlayingVerse(null);
-    setCurrentVerseAudio(null);
-    setMeditativeActive(false);
-  };
-
-  // Handle meditative state exit with reset
-  const handleMeditativeResetExit = () => {
-    if (meditativeState?.audio) {
-      meditativeState.audio.pause();
-    }
-    // Reset EXP here if needed
-    setMeditativeState(null);
-    setCurrentPlayingVerse(null);
-    setCurrentVerseAudio(null);
-    setMeditativeActive(false);
-  };
 
   const verses = [
     {
@@ -330,17 +298,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     },
   ];
 
-  // Show meditative state if active
-  if (meditativeState) {
-    return (
-      <MeditativeState
-        verse={meditativeState.verse}
-        audio={meditativeState.audio}
-        onExit={handleMeditativeExit}
-        onResetExit={handleMeditativeResetExit}
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -357,7 +314,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
-              {t('audioTherapy.title')}
+              Verses of eL Vision
             </h1>
           </div>
           <LanguageSwitcher />
@@ -365,10 +322,93 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         <p className="text-muted-foreground text-center">
           {t('Dengarkan Pakai Headphone')}
         </p>
+        
+        {/* Single Tutorial Button for All Songs */}
+        <div className="flex justify-center mt-6">
+          <Button
+            className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-semibold px-8 py-3 rounded-full shadow-lg shadow-primary/40 transform hover:scale-105 transition-all duration-300 border border-white/20"
+            onClick={() => {
+              onNavigate('tutorial');
+            }}
+          >
+            <span className="flex items-center gap-2">
+              <Music className="w-4 h-4" />
+              {t('audioTherapy.readTutorial')}
+            </span>
+          </Button>
+        </div>
       </div>
 
-      {/* Verses */}
+      {/* Short Verses - Reflection */}
+      <div className="px-6 space-y-4">
+        <div className="text-center space-y-1">
+          <h2 className="text-lg font-semibold font-orbitron bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+            Short Verses - Reflection
+          </h2>
+          <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent mx-auto"></div>
+        </div>
+
+        <Card className="relative overflow-hidden border transition-all duration-300 hover:scale-[1.01] bg-gradient-to-br from-orange-500/5 via-background to-yellow-500/5 border-orange-400/30 shadow-lg shadow-orange-400/10">
+          {/* Minimal Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-orange-500 via-transparent to-yellow-500"></div>
+            <div className="absolute top-2 right-2 w-8 h-8 border border-orange-400/20 rounded-full"></div>
+            <div className="absolute bottom-2 left-2 w-4 h-4 border border-yellow-400/20 rounded-full"></div>
+          </div>
+          
+          <div className="relative z-10 text-center space-y-4 p-4">
+            {/* Compact Title */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-center gap-2">
+                <h3 className="text-lg font-semibold font-orbitron bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+                  Guided to Inner Silence
+                </h3>
+                <span className="px-1.5 py-0.5 text-xs font-medium rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                  SHORT
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground/80 font-medium">
+                Refleksi mendalam menuju ketenangan batin
+              </p>
+              <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent mx-auto"></div>
+            </div>
+
+            {/* Smaller Audio Player */}
+            <div className="flex justify-center">
+              <div className="transform scale-75">
+                {/* @ts-ignore - Lovable deployment compatibility */}
+                <VerseAudioCard
+                  verse={{
+                    id: 100,
+                    title: "Guided to Inner Silence",
+                    subtitle: "Refleksi mendalam menuju ketenangan batin",
+                    unlocked: true,
+                    requiredLevel: 1,
+                    artwork: verseArtwork, // Will be replaced by custom background
+                    audioPath: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Jurnalsyukur1.MP3',
+                    language: 'id'
+                  }}
+                  onWarning={handleWarning}
+                  currentPlayingVerse={currentPlayingVerse}
+                  setCurrentPlayingVerse={setCurrentPlayingVerse}
+                  currentVerseAudio={currentVerseAudio}
+                  setCurrentVerseAudio={setCurrentVerseAudio}
+                />
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Main Verses */}
       <div className="px-6 space-y-8">
+        <div className="text-center space-y-2 pt-8">
+          <h2 className="text-xl font-bold font-orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Main Verses
+          </h2>
+          <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto"></div>
+        </div>
+        
         {verses.map((verse) => {
 
           return (
@@ -408,6 +448,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
 
                 {/* Artwork or Lock */}
                 <div className="flex justify-center">
+                  {/* @ts-ignore - Lovable deployment compatibility */}
                   <VerseAudioCard
                     verse={verse}
                     onWarning={handleWarning}
@@ -418,19 +459,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                   />
                 </div>
 
-                    <div className="space-y-4">
-                    <Button
-                      className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-semibold px-10 py-3 rounded-full shadow-lg shadow-primary/40 transform hover:scale-105 transition-all duration-300 border border-white/20"
-                      onClick={() => {
-                        onNavigate('tutorial');
-                      }}
-                    >
-                      <span className="flex items-center gap-2">
-                        <Music className="w-4 h-4" />
-                        {t('audioTherapy.readTutorial')}
-                      </span>
-                    </Button>
-                  </div>
               </div>
             </Card>
           );

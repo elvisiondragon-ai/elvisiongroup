@@ -1,7 +1,7 @@
 import { Lock, Music, Crown, Zap } from 'lucide-react';
 import { useProtectedAudio } from '@/contexts/AudioContext';
 import { useXPSystem } from '@/hooks/useXPSystem';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Verse {
   id: number;
@@ -37,6 +37,17 @@ export function VerseAudioCard({
   // Check if this verse is currently playing
   const isPlaying = currentPlayingVerse === verse.id;
 
+  // Check if audio is actually playing when component mounts/updates
+  useEffect(() => {
+    if (isPlaying && currentVerseAudio) {
+      if (currentVerseAudio.paused || currentVerseAudio.ended) {
+        // Audio stopped but state says it's playing - sync the state
+        setCurrentPlayingVerse(null);
+        setCurrentVerseAudio(null);
+      }
+    }
+  }, [isPlaying, currentVerseAudio, setCurrentPlayingVerse, setCurrentVerseAudio]);
+
   const handlePlayClick = async () => {
     if (!verse.unlocked || !verse.audioPath) return;
     
@@ -70,8 +81,9 @@ export function VerseAudioCard({
       audio.addEventListener('ended', () => {
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
-        // Award XP for verse completion
-        awardXP('verse_completion', 10, `Completed ${verse.title}`);
+        // Award XP based on verse type - Short verses get +1 XP, main verses get +10 XP
+        const xpAmount = verse.id === 100 ? 1 : 10; // ID 100 is our reflection verse
+        awardXP('verse_completion', xpAmount, `Completed ${verse.title}`);
       });
 
       audio.addEventListener('error', (error) => {
