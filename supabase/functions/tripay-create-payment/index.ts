@@ -169,11 +169,12 @@ serve(async (req) => {
       console.log('  - body.userEmail:', body.userEmail)
       console.log('  - user.email:', user.email)
 
-      const { data: subscription, error: subError } = await supabase
-        .from('pro_subscriptions')
+      const { data: waitingPayment, error: waitingError } = await supabase
+        .from('waiting_payment')
         .insert({
           user_id: user.id,
           user_email: body.userEmail,
+          customer_phone: body.phoneNumber,
           subscription_type: body.subscriptionType,
           amount_paid: body.amount || vpsResult.amount,
           currency: body.currency || 'IDR',
@@ -186,16 +187,16 @@ serve(async (req) => {
         .select()
         .single()
 
-      if (subError) {
-        console.log('❌ Subscription creation error:', subError)
-        throw new Error(`Subscription creation failed: ${subError.message}`)
+      if (waitingError) {
+        console.log('❌ Waiting payment creation error:', waitingError)
+        throw new Error(`Waiting payment creation failed: ${waitingError.message}`)
       }
 
-      console.log('✅ Created/updated subscription ID:', subscription.id)
+      console.log('✅ Created waiting payment ID:', waitingPayment.id)
 
       // Create payment transaction record
       console.log('💾 Creating payment record:', {
-        subscription_id: subscription.id,
+        subscription_id: waitingPayment.id,
         user_id: user.id,
         tripay_reference: vpsResult.reference,
         tripay_merchant_ref: vpsResult.merchant_ref || `EVG_${Date.now()}_${body.subscriptionType}`,
@@ -212,35 +213,7 @@ serve(async (req) => {
         updated_at: new Date().toISOString()
       })
 
-      const { data: payment, error: payError } = await supabase
-        .from('payment_transactions')
-        .insert({
-          subscription_id: subscription.id,
-          user_id: user.id,
-          user_email: body.userEmail,
-          tripay_reference: vpsResult.tripay_reference || vpsResult.reference,
-          tripay_merchant_ref: vpsResult.merchantRef,
-          payment_method: body.paymentMethod,
-          amount: body.amount || vpsResult.amount,
-          currency: body.currency || 'IDR',
-          status: 'pending',
-          payment_url: vpsResult.checkoutUrl,
-          payment_instructions: JSON.stringify(vpsResult.instructions || []),
-          expires_at: vpsResult.expiredTime,
-          bank_account: vpsResult.payCode,
-          unique_code: vpsResult.qrString || vpsResult.payCode,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .select()
-        .single()
-
-      if (payError) {
-        console.log('❌ Payment record creation error:', payError)
-        throw new Error(`Payment record creation failed: ${payError.message}`)
-      }
-
-      console.log('✅ Payment creation complete')
+      console.log('✅ Waiting payment creation complete')
       
       // Send pending payment email
       try {

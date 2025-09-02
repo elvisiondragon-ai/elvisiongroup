@@ -8,11 +8,15 @@ const corsHeaders = {
 
 interface TripayCallbackPayload {
   reference: string
+  tripay_reference?: string
   status: string
   payment_method: string
-  amount: number
-  currency: string
+  payment_method_code?: string
+  amount?: number
+  total_amount?: string
+  currency?: string
   merchant_ref?: string
+  paid_at?: string
   payment_name?: string
   payment_email?: string
   customer_name?: string
@@ -25,20 +29,28 @@ interface TripayCallbackPayload {
 }
 
 export default async function handler(req: Request): Promise<Response> {
+  console.log('🚀 Tripay callback function started')
+  console.log('📝 Method:', req.method)
+  console.log('📝 URL:', req.url)
+  
   // Handle CORS
   if (req.method === 'OPTIONS') {
+    console.log('✅ CORS preflight handled')
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
+    console.log('📥 Parsing request body...')
     const payload: TripayCallbackPayload = await req.json()
-    console.log('📥 Tripay callback received:', payload)
+    console.log('📥 Tripay callback received:', JSON.stringify(payload, null, 2))
 
+    console.log('🔧 Initializing Supabase client...')
     // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
+    console.log('✅ Supabase client initialized')
 
     // Verify callback signature if needed (add your verification logic here)
     // const isValidSignature = verifyTripaySignature(payload)
@@ -50,16 +62,27 @@ export default async function handler(req: Request): Promise<Response> {
     // }
 
     // UPDATED: Use the new callback processing function
+    console.log('🔄 Calling process_tripay_payment_callback with params:', {
+      p_tripay_reference: payload.reference,
+      p_payment_status: payload.status, 
+      p_payment_method: payload.payment_method || 'Unknown'
+    })
+    
     const { data: result, error } = await supabase.rpc('process_tripay_payment_callback', {
       p_tripay_reference: payload.reference,
       p_payment_status: payload.status, 
       p_payment_method: payload.payment_method || 'Unknown'
     })
 
+    console.log('🔄 RPC call completed')
+    console.log('📊 Result:', result)
+    console.log('❓ Error:', error)
+
     if (error) {
       console.error('❌ Callback processing error:', error)
+      console.error('❌ Error details:', JSON.stringify(error, null, 2))
       return new Response(
-        JSON.stringify({ success: false, error: error.message }),
+        JSON.stringify({ success: false, error: error.message, details: error }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -67,7 +90,7 @@ export default async function handler(req: Request): Promise<Response> {
       )
     }
 
-    console.log('✅ Callback processed successfully:', result)
+    console.log('✅ Callback processed successfully:', JSON.stringify(result, null, 2))
 
     // If payment was successful, send notification email
     if (result.success && result.action === 'subscription_activated') {
@@ -109,11 +132,15 @@ export default async function handler(req: Request): Promise<Response> {
 
   } catch (error) {
     console.error('💥 Callback handler error:', error)
+    console.error('💥 Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    console.error('💥 Error details:', JSON.stringify(error, null, 2))
+    
     return new Response(
       JSON.stringify({ 
         success: false, 
         error: 'Callback processing failed',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : null
       }),
       { 
         status: 500, 

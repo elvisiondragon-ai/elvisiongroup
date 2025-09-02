@@ -96,24 +96,37 @@ export function Payment({ onNavigate }: PaymentProps) {
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: 'INSERT',
           schema: 'public',
-          table: 'payment_transactions',
+          table: 'pro_subscriptions',
           filter: `tripay_reference=eq.${paymentData.tripay_reference}`
         },
         (payload) => {
-          console.log('💰 Payment status change detected:', payload);
+          console.log('💰 Pro subscription activated:', payload);
           
-          if (payload.new?.status === 'paid') {
+          if (payload.new?.status === 'active') {
             console.log('🎉 Payment completed! Showing success notification...');
             console.log('🎉 Payment data:', payload.new);
             
-            // Show success notification
+            // Show success notification with refresh button
             toast({
               title: "🎉 Pembayaran Berhasil!",
-              description: "Pembayaran berhasil silahkan Check Email !",
-              duration: 30000,
-              className: "text-xl p-8 bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 border-purple-500/30 shadow-2xl shadow-purple-500/25 ring-2 ring-purple-400/20",
+              description: "Status Pro telah aktif, Klik disini untuk Refresh dan Akses Pro",
+              action: (
+                <button 
+                  onClick={() => {
+                    console.log('🔄 User clicked refresh after payment success')
+                    // Clear all pro status caches before refresh
+                    localStorage.removeItem('unified_pro_status_cache')
+                    localStorage.removeItem('pro-status-change')
+                    window.location.reload()
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  🔄 Refresh dan Akses Pro!
+                </button>
+              ),
+              duration: 0, // Don't auto-dismiss
             });
             
             // Show full-screen success modal with purple design
@@ -126,6 +139,9 @@ export function Payment({ onNavigate }: PaymentProps) {
                     <div style="font-size: 5rem; margin-bottom: 25px; filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));">🎉</div>
                     <h2 style="font-size: 2.5rem; background: linear-gradient(45deg, #8b5cf6, #a855f7, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; font-weight: bold;">Pembayaran Berhasil!</h2>
                     <p style="font-size: 1.4rem; color: #c4b5fd; margin-bottom: 25px; line-height: 1.6;">Pembayaran berhasil silahkan Check Email !</p>
+                    <button id="refreshBtn" style="background: linear-gradient(45deg, #10b981, #059669); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); transition: all 0.3s ease;">
+                      🔄 Refresh dan Akses Pro Sekarang!
+                    </button>
                     <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 15px; margin-top: 20px;">
                       <p style="color: #a78bfa; font-size: 1rem;">Jendela ini akan tertutup dalam <span id="countdown" style="color: #8b5cf6; font-weight: bold; font-size: 1.2rem;">30</span> detik</p>
                     </div>
@@ -140,6 +156,20 @@ export function Payment({ onNavigate }: PaymentProps) {
               </style>
             `;
             document.body.appendChild(modal);
+            
+            // Add refresh button click handler
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+              refreshBtn.addEventListener('click', () => {
+                console.log('🔄 User clicked refresh from payment success modal');
+                // Clear all pro status caches before refresh
+                localStorage.removeItem('unified_pro_status_cache');
+                localStorage.removeItem('pro-status-change');
+                clearInterval(timer);
+                document.body.removeChild(modal);
+                window.location.reload();
+              });
+            }
             
             let countdown = 30;
             const countdownEl = document.getElementById('countdown');
@@ -252,7 +282,8 @@ export function Payment({ onNavigate }: PaymentProps) {
           paymentMethod: selectedPaymentMethod,
           userName: fullName,
           userEmail: email,
-          phoneNumber: phoneNumber
+          phoneNumber: phoneNumber,
+          amount: plan.price
         }
       });
 
