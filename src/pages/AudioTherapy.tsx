@@ -32,6 +32,11 @@ import verse7Artwork from "@/assets/verse-7-cosmic.jpg";
 import verse8Artwork from "@/assets/verse-8-cosmic.jpg";
 import verse9Artwork from "@/assets/verse-9-cosmic.jpg";
 import verse10Artwork from "@/assets/verse-10-cosmic.jpg";
+import verse11Artwork from "@/assets/verse-11-cosmic.jpg";
+import verse12Artwork from "@/assets/verse-12-cosmic.jpg";
+import verse13Artwork from "@/assets/verse-13-cosmic.jpg";
+import verse14Artwork from "@/assets/verse-14-cosmic.jpg";
+import verse15Artwork from "@/assets/verse-15-cosmic.jpg";
 
 interface AudioTherapyProps {
   onNavigate: (tab: string) => void;
@@ -270,6 +275,56 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: false, // Lock for all users
       requiredLevel: 11,
       artwork: verse10Artwork,
+      audioPath: null,
+      language: 'id'
+    },
+    {
+      id: 11,
+      title: "Verse 11 - Inner Light",
+      subtitle: "Membangkitkan cahaya batin untuk pencerahan spiritual",
+      unlocked: false, // Lock for all users
+      requiredLevel: 12,
+      artwork: verse11Artwork,
+      audioPath: null,
+      language: 'id'
+    },
+    {
+      id: 12,
+      title: "Verse 12 - Divine Harmony",
+      subtitle: "Menyelaraskan jiwa dengan harmoni ilahi alam semesta",
+      unlocked: false, // Lock for all users
+      requiredLevel: 13,
+      artwork: verse12Artwork,
+      audioPath: null,
+      language: 'id'
+    },
+    {
+      id: 13,
+      title: "Verse 13 - Radiant Peace",
+      subtitle: "Memancarkan kedamaian yang bercahaya dari dalam hati",
+      unlocked: false, // Lock for all users
+      requiredLevel: 14,
+      artwork: verse13Artwork,
+      audioPath: null,
+      language: 'id'
+    },
+    {
+      id: 14,
+      title: "Verse 14 - Celestial Calm",
+      subtitle: "Mencapai ketenangan surgawi yang abadi",
+      unlocked: false, // Lock for all users
+      requiredLevel: 15,
+      artwork: verse14Artwork,
+      audioPath: null,
+      language: 'id'
+    },
+    {
+      id: 15,
+      title: "Verse 15 - Enlightened Serenity",
+      subtitle: "Ketenangan yang tercerahkan dalam kesadaran murni",
+      unlocked: false, // Lock for all users
+      requiredLevel: 16,
+      artwork: verse15Artwork,
       audioPath: null,
       language: 'id'
     },
