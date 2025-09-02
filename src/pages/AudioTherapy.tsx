@@ -49,7 +49,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
-  const { currentPlayingVerse, currentVerseAudio, setCurrentPlayingVerse, setCurrentVerseAudio } = useProtectedAudio();
+
+  // Local audio state (not global)
+  const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
+  const [currentVerseAudio, setCurrentVerseAudio] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const initializeData = async () => {
