@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Heart, Wind, DollarSign, Sparkles, Lock } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -22,82 +22,14 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
-  // Check if user has access to a journal
-  const hasAccess = (journal: any) => {
-    // Allow access to all journals - users will discover levels naturally
-    return true;
-  };
 
 
 
-  const journals = [
-    {
-      id: 1,
-      title: "Guide to Inner Silence",
-      subtitle: "Audio Pembuka Renungan",
-      duration: "2 menit",
-      icon: Sparkles,
-      gradient: "bg-gradient-primary",
-      borderColor: "border-primary/30",
-      glowClass: "glow-primary",
-      levelRequired: 1,
-      isProRequired: false
-    },
-    {
-      id: 2,
-      title: "Nafasmu lebih berharga dari masalahmu",
-      subtitle: "Audio Pembuka Renungan",
-      duration: "5 menit",
-      icon: Wind,
-      gradient: "bg-gradient-to-br from-blue-500/20 via-cyan-500/10 to-teal-500/20",
-      borderColor: "border-cyan-400/30",
-      glowClass: "glow-accent",
-      levelRequired: 5,
-      isProRequired: true
-    },
-    {
-      id: 3,
-      title: "Cinta Pasanganmu adalah Cerminan Frekuensi mu",
-      subtitle: "Audio Pembuka Renungan",
-      duration: "8 menit",
-      icon: Heart,
-      gradient: "bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-red-500/20",
-      borderColor: "border-pink-400/30",
-      glowClass: "hover:shadow-pink-500/20",
-      levelRequired: 7,
-      isProRequired: true
-    },
-    {
-      id: 4,
-      title: "Cinta Adalah Kesehatan",
-      subtitle: "Audio Pembuka Renungan",
-      duration: "10 menit",
-      icon: Heart,
-      gradient: "bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-red-500/20",
-      borderColor: "border-pink-400/30",
-      glowClass: "hover:shadow-pink-500/20",
-      levelRequired: 8,
-      isProRequired: true
-    },
-    {
-      id: 5,
-      title: "Uang adalah Frekuensi Energi",
-      subtitle: "Audio Pembuka Renungan",
-      duration: "7 menit",
-      icon: DollarSign,
-      gradient: "bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-orange-500/20",
-      borderColor: "border-amber-400/30",
-      glowClass: "hover:shadow-amber-500/20",
-      levelRequired: 9,
-      isProRequired: true
-    }
-  ];
 
   useEffect(() => {
     // Get current user and load reflections
@@ -106,37 +38,11 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       if (session?.user) {
         setCurrentUser(session.user);
         loadReflections(session.user.id);
-        loadUserProfile(session.user.id);
       }
     };
 
     getCurrentUser();
   }, []);
-
-  const loadUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
-      }
-
-      if (data) {
-        setUserProfile(data);
-      } else {
-        // Default profile if not found
-        setUserProfile({ level: 1, is_vip: false });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setUserProfile({ level: 1, is_vip: false });
-    }
-  };
 
   const loadReflections = async (userId: string) => {
     const { data, error } = await supabase
@@ -210,36 +116,6 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       </div>
 
       <div className="px-6 space-y-6">
-        {/* Journal Sections - Audio Removed */}
-        {journals.map((journal) => {
-          const Icon = journal.icon;
-          
-          return (
-            <Card key={journal.id} className={`relative p-6 ${journal.gradient} border-2 ${journal.borderColor} ${journal.glowClass} overflow-hidden transition-all duration-300`}>
-              <div className="relative z-10 text-center space-y-4">
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <Icon className="w-6 h-6 text-foreground" />
-                  <h2 className="text-xl font-semibold font-orbitron text-foreground">
-                    {journal.title}
-                  </h2>
-                </div>
-                <p className="text-muted-foreground">
-                  Audio telah dihapus - Fokus pada jurnal tertulis
-                </p>
-                
-                <div className="py-4">
-                  <div className="w-16 h-16 mx-auto rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center">
-                    <Icon className="w-8 h-8 text-foreground/60" />
-                  </div>
-                </div>
-                
-                <p className="text-sm text-muted-foreground">
-                  Gunakan bagian jurnal di bawah untuk refleksi
-                </p>
-              </div>
-            </Card>
-          );
-        })}
 
         {/* Tutorial Section */}
         <Card className="p-8 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-orange-500/10 border-2 border-amber-400/30 shadow-2xl">

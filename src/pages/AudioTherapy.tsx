@@ -50,7 +50,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
 
-  // Local audio state (not global)
+  // Local audio state (better for XP tracking)
   const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
   const [currentVerseAudio, setCurrentVerseAudio] = useState<HTMLAudioElement | null>(null);
 
