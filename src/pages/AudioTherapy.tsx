@@ -12,6 +12,7 @@ import { usePro } from "@/hooks/usePro";
 import { useMeditative } from "@/contexts/MeditativeContext";
 import { VerseAudioCard } from "@/components/VerseAudioCard";
 import { useProtectedAudio } from "@/contexts/AudioContext";
+import { SacredFocusNotification } from "@/components/SacredFocusNotification";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +33,7 @@ import verse7Artwork from "@/assets/verse-7-cosmic.jpg";
 import verse8Artwork from "@/assets/verse-8-cosmic.jpg";
 import verse9Artwork from "@/assets/verse-9-cosmic.jpg";
 import verse10Artwork from "@/assets/verse-10-cosmic.jpg";
+import shortVerse1Artwork from "@/assets/shortverse1.png";
 
 interface AudioTherapyProps {
   onNavigate: (tab: string) => void;
@@ -46,6 +48,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [loading, setLoading] = useState(true);
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [warningResolver, setWarningResolver] = useState<((value: boolean) => void) | null>(null);
+  const [showSacredNotification, setShowSacredNotification] = useState(false);
+  const [currentVerseName, setCurrentVerseName] = useState<string>("");
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
@@ -332,7 +336,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     subtitle: "Refleksi mendalam menuju ketenangan batin",
                     unlocked: true,
                     requiredLevel: 1,
-                    artwork: verseArtwork, // Will be replaced by custom background
+                    artwork: shortVerse1Artwork, // Using dedicated short verse artwork
                     audioPath: 'Jurnalsyukur1.MP3',
                     language: 'id'
                   }}
@@ -341,6 +345,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                   setCurrentPlayingVerse={setCurrentPlayingVerse}
                   currentVerseAudio={currentVerseAudio}
                   setCurrentVerseAudio={setCurrentVerseAudio}
+                  onShowSacredNotification={(verseName) => {
+                    setCurrentVerseName(verseName);
+                    setShowSacredNotification(true);
+                  }}
                 />
               </div>
             </div>
@@ -404,6 +412,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     setCurrentPlayingVerse={setCurrentPlayingVerse}
                     currentVerseAudio={currentVerseAudio}
                     setCurrentVerseAudio={setCurrentVerseAudio}
+                    onShowSacredNotification={(verseName) => {
+                      setCurrentVerseName(verseName);
+                      setShowSacredNotification(true);
+                    }}
                   />
                 </div>
 
@@ -474,6 +486,13 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Sacred Focus Notification */}
+      <SacredFocusNotification
+        isVisible={showSacredNotification}
+        onClose={() => setShowSacredNotification(false)}
+        verseName={currentVerseName}
+      />
     </div>
   );
 }

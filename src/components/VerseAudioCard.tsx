@@ -21,6 +21,7 @@ interface VerseAudioCardProps {
   setCurrentPlayingVerse: (id: number | null) => void;
   currentVerseAudio: HTMLAudioElement | null;
   setCurrentVerseAudio: (audio: HTMLAudioElement | null) => void;
+  onShowSacredNotification?: (verseName: string) => void;
 }
 
 export function VerseAudioCard({ 
@@ -29,7 +30,8 @@ export function VerseAudioCard({
   currentPlayingVerse, 
   setCurrentPlayingVerse,
   currentVerseAudio,
-  setCurrentVerseAudio
+  setCurrentVerseAudio,
+  onShowSacredNotification
 }: VerseAudioCardProps) {
   const { createProtectedAudio } = useProtectedAudio();
   const { awardXP } = useXPSystem();
@@ -93,6 +95,13 @@ export function VerseAudioCard({
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
       });
+
+      // Show sacred notification before playing
+      if (onShowSacredNotification) {
+        onShowSacredNotification(verse.title);
+        // Wait a moment for notification to appear
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
 
       // Play audio
       await audio.play();
