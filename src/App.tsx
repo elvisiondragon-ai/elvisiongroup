@@ -132,6 +132,48 @@ const App = () => {
     }
   }, [toast]);
 
+  // Global navigation protection for audio playback
+  useEffect(() => {
+    // Prevent navigation during audio playback
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Check if any audio is currently playing
+      const audioElements = document.querySelectorAll('audio');
+      const isPlaying = Array.from(audioElements).some(audio => !audio.paused);
+      
+      if (isPlaying) {
+        e.preventDefault();
+        e.returnValue = 'Audio is currently playing. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    // Prevent accidental navigation
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Block F5 (refresh), Ctrl+R, Ctrl+W (close), Alt+Left (back)
+      if (
+        e.key === 'F5' || 
+        (e.ctrlKey && (e.key === 'r' || e.key === 'w')) ||
+        (e.altKey && e.key === 'ArrowLeft')
+      ) {
+        const audioElements = document.querySelectorAll('audio');
+        const isPlaying = Array.from(audioElements).some(audio => !audio.paused);
+        
+        if (isPlaying) {
+          e.preventDefault();
+          console.log('Navigation blocked - audio is playing');
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

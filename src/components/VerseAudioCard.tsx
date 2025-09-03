@@ -75,9 +75,9 @@ export function VerseAudioCard({
       setCurrentVerseAudio(null);
     }
 
-    // Create new protected audio with blob URL protection
+    // Create new protected audio with basic protection
     try {
-      const audio = await createProtectedAudio(verse.audioPath);
+      const audio = createProtectedAudio(verse.audioPath);
       
       // Add event listeners
       audio.addEventListener('ended', () => {

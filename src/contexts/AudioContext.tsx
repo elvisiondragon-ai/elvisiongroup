@@ -2,26 +2,20 @@ import React, { createContext, useContext } from 'react';
 import { getAudioUrl } from '@/utils/audioUtils';
 
 interface AudioContextType {
-  createProtectedAudio: (audioPath: string) => Promise<HTMLAudioElement>;
+  createProtectedAudio: (audioPath: string) => HTMLAudioElement;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
-  // Create protected audio - fast playback with private bucket for short verses
-  const createProtectedAudio = async (audioPath: string): Promise<HTMLAudioElement> => {
-    const audio = new Audio();
-    
+  // Basic protection with crossOrigin + caching
+  const createProtectedAudio = (audioPath: string): HTMLAudioElement => {
     // Check if it's already a full URL (starts with http/https)
-    if (audioPath.startsWith('http')) {
-      audio.src = audioPath;
-    } else {
-      // Use private bucket signed URL for short verses (ID 100), public for others
-      const audioUrl = await getAudioUrl(audioPath);
-      audio.src = audioUrl;
-    }
+    const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
     
-    // Core protections that work
+    const audio = new Audio(audioUrl);
+    
+    // Basic protections that work
     audio.setAttribute('preload', 'metadata');
     audio.setAttribute('controlsList', 'nodownload noremoteplayback');
     audio.crossOrigin = 'anonymous'; // THE MAGIC KEY - prevents IDM downloads
