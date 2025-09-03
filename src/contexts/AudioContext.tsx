@@ -2,25 +2,55 @@ import React, { createContext, useContext } from 'react';
 import { getAudioUrl } from '@/utils/audioUtils';
 
 interface AudioContextType {
-  createProtectedAudio: (audioPath: string) => HTMLAudioElement;
+  createProtectedAudio: (audioPath: string) => Promise<HTMLAudioElement>;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
-  // Create protected audio with HLS streaming approach
-  const createProtectedAudio = (audioPath: string): HTMLAudioElement => {
+  // Create protected audio with blob URL streaming to hide real URLs
+  const createProtectedAudio = async (audioPath: string): Promise<HTMLAudioElement> => {
     // Check if it's already a full URL (starts with http/https)  
-    const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
+    const audioUrl = audioPath.startsWith('http') ? audioPath : await getAudioUrl(audioPath);
     
     const audio = new Audio();
     
-    // HLS streaming for better protection + service worker caching
-    if ('MediaSource' in window && audioUrl.endsWith('.MP3')) {
-      // Convert MP3 to HLS-like streaming URL for protection
-      const hlsUrl = `${audioUrl}#.m3u8`; // Trick browsers into HLS mode
-      audio.src = hlsUrl;
-    } else {
+    try {
+      // Fetch audio as blob to hide real URL from network inspection
+      console.log('Fetching audio as blob to hide URL...');
+      const response = await fetch(audioUrl, {
+        headers: {
+          'Accept': 'audio/*',
+          'Cache-Control': 'no-cache', // Force fresh download to blob
+        },
+        credentials: 'omit', // Don't send credentials
+        referrerPolicy: 'no-referrer', // Hide referrer
+        mode: 'cors', // Ensure CORS handling
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch audio: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      // Use blob URL instead of direct Supabase URL
+      audio.src = blobUrl;
+      
+      // Clean up blob URL when audio is done
+      audio.addEventListener('ended', () => {
+        URL.revokeObjectURL(blobUrl);
+      });
+      
+      // Clean up on error
+      audio.addEventListener('error', () => {
+        URL.revokeObjectURL(blobUrl);
+      });
+      
+    } catch (error) {
+      console.warn('Blob URL failed, fallback to direct URL:', error);
+      // Fallback to direct URL with protection
       audio.src = audioUrl;
     }
     

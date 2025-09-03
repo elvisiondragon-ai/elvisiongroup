@@ -9,10 +9,29 @@ export const audioFiles = [
   'Verse5 - Virtality Vortex.MP3'
 ];
 
-export const getAudioUrl = (fileName: string) => {
-  const { data } = supabase.storage
-    .from('audio-files')
-    .getPublicUrl(fileName);
-  
-  return data.publicUrl;
+export const getAudioUrl = async (fileName: string) => {
+  try {
+    // Use signed URL with 30 minute expiration for better security
+    const { data, error } = await supabase.storage
+      .from('audio-files')
+      .createSignedUrl(fileName, 1800); // 30 minutes
+      
+    if (error) {
+      console.warn('Signed URL failed, fallback to public URL:', error);
+      // Fallback to public URL if signed URL fails
+      const { data: publicData } = supabase.storage
+        .from('audio-files')
+        .getPublicUrl(fileName);
+      return publicData.publicUrl;
+    }
+    
+    return data.signedUrl;
+  } catch (error) {
+    console.error('Error getting audio URL:', error);
+    // Final fallback to public URL
+    const { data } = supabase.storage
+      .from('audio-files')
+      .getPublicUrl(fileName);
+    return data.publicUrl;
+  }
 };
