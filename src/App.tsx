@@ -198,7 +198,7 @@ const App = () => {
                     title: notification.title,
                     description: notification.message,
                     variant: notification.type === 'error' ? 'destructive' : 'default',
-                    duration: notification.type === 'error' ? 8000 : 5000,
+                    duration: 15000,
                   });
                   
                   // Mark personal notifications as read (broadcasts don't need marking)

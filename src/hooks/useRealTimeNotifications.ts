@@ -32,7 +32,7 @@ export const useRealTimeNotifications = (user: User | null) => {
       title: notification.title,
       description: notification.message,
       variant: getToastVariant(notification.type),
-      duration: notification.type === 'error' ? 8000 : 5000,
+      duration: 15000,
     });
   }, [toast, user?.id]);
 
