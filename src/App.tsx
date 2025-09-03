@@ -9,7 +9,6 @@ import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
 import { useToast } from "@/hooks/use-toast";
 import { useRegisterSW } from 'virtual:pwa-register/react';
-import { useXPSystem } from "@/hooks/useXPSystem";
 import { Auth } from "./pages/Auth";
 import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
@@ -27,7 +26,6 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const { awardXP } = useXPSystem();
   
   // Initialize push notifications for authenticated users
   const { registerForNotifications } = usePushNotifications();
@@ -60,15 +58,11 @@ const App = () => {
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
           <button 
-            onClick={async () => {
+            onClick={() => {
               console.log('🔄 User clicked update, clearing localStorage')
               localStorage.removeItem('app-needs-update')
               updateServiceWorker(true)
               setNeedRefresh(false)
-              // Award XP for updating app
-              if (user) {
-                await awardXP('bonus_exp', 10, 'Update aplikasi ke versi terbaru');
-              }
             }}
             className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
           >
