@@ -10,28 +10,16 @@ export const audioFiles = [
 ];
 
 export const getAudioUrl = async (fileName: string) => {
-  try {
-    // Use signed URL with 30 minute expiration for better security
-    const { data, error } = await supabase.storage
-      .from('audio-files')
-      .createSignedUrl(fileName, 1800); // 30 minutes
-      
-    if (error) {
-      console.warn('Signed URL failed, fallback to public URL:', error);
-      // Fallback to public URL if signed URL fails
-      const { data: publicData } = supabase.storage
-        .from('audio-files')
-        .getPublicUrl(fileName);
-      return publicData.publicUrl;
-    }
-    
-    return data.signedUrl;
-  } catch (error) {
-    console.error('Error getting audio URL:', error);
-    // Final fallback to public URL
-    const { data } = supabase.storage
-      .from('audio-files')
-      .getPublicUrl(fileName);
-    return data.publicUrl;
+  // Use private bucket signed URL ONLY for short verse (Jurnalsyukur1.MP3)
+  if (fileName === 'Jurnalsyukur1.MP3') {
+    // Your private bucket signed URL for testing
+    return 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/sign/testaudio/Jurnalsyukur1.MP3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9mNzk0Yjg1MC04NjZhLTQwMWItYjVlYi0wZjdiZjdlMzcxMGYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJ0ZXN0YXVkaW8vSnVybmFsc3l1a3VyMS5NUDMiLCJpYXQiOjE3NTY5MDU0NTUsImV4cCI6MTc4ODQ0MTQ1NX0.xUVMTBMJwCl7ogHnO38S2xXuvTjbipeFUk7-S4g2FcQ';
   }
+  
+  // All other verses use regular public bucket (fast loading)
+  const { data } = supabase.storage
+    .from('audio-files')
+    .getPublicUrl(fileName);
+  
+  return data.publicUrl;
 };
