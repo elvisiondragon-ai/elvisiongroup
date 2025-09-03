@@ -54,7 +54,7 @@ const App = () => {
   useEffect(() => {
     const showUpdateToast = () => {
       toast({
-        title: "🎯 Ada Update Terbaru!",
+        title: "🎯 Ada Update Terbaru! - Auto Deploy Notification",
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
           <button 
@@ -159,69 +159,74 @@ const App = () => {
             }, 1000);
           }
           
-          // Check for broadcast notifications and unread personal notifications on login
-          setTimeout(async () => {
-            try {
-              // Check broadcast notifications (global announcements)
-              const { data: broadcasts, error: broadcastError } = await supabase
-                .from('broadcast_notifications')
-                .select('*')
-                .gt('expires_at', new Date().toISOString())
-                .order('created_at', { ascending: false });
+          // Check for broadcast notifications and unread personal notifications on login (one-time ever)
+          if (!localStorage.getItem(`notifications_checked_${session.user.id}`)) {
+            setTimeout(async () => {
+              try {
+                // Check broadcast notifications (global announcements)
+                const { data: broadcasts, error: broadcastError } = await supabase
+                  .from('broadcast_notifications')
+                  .select('*')
+                  .gt('expires_at', new Date().toISOString())
+                  .order('created_at', { ascending: false });
 
-              // Check personal notifications
-              const { data: notifications, error: notificationError } = await supabase
-                .from('notifications')
-                .select('*')
-                .eq('user_id', session.user.id)
-                .eq('read', false)
-                .order('created_at', { ascending: false });
+                // Check personal notifications
+                const { data: notifications, error: notificationError } = await supabase
+                  .from('notifications')
+                  .select('*')
+                  .eq('user_id', session.user.id)
+                  .eq('read', false)
+                  .order('created_at', { ascending: false });
 
-              if (broadcastError) {
-                console.error('Error fetching broadcast notifications:', broadcastError);
+                if (broadcastError) {
+                  console.error('Error fetching broadcast notifications:', broadcastError);
+                }
+
+                if (notificationError) {
+                  console.error('Error fetching notifications:', notificationError);
+                }
+
+                // Combine broadcasts and personal notifications
+                const allNotifications = [
+                  ...(broadcasts || []).map(n => ({ ...n, isBroadcast: true })),
+                  ...(notifications || []).map(n => ({ ...n, isBroadcast: false }))
+                ];
+
+                // Show each notification only if not shown before
+                allNotifications.forEach((notification, index) => {
+                  setTimeout(() => {
+                    toast({
+                      title: notification.title,
+                      description: notification.message,
+                      variant: notification.type === 'error' ? 'destructive' : 'default',
+                      duration: 15000,
+                    });
+                    
+                    // Mark personal notifications as read (broadcasts don't need marking)
+                    if (!notification.isBroadcast) {
+                      supabase
+                        .from('notifications')
+                        .update({ read: true })
+                        .eq('id', notification.id)
+                        .then(() => console.log('Notification marked as read:', notification.id));
+                    }
+                  }, index * 1000); // Stagger notifications by 1 second each
+                });
+
+                // Mark notifications as checked forever
+                localStorage.setItem(`notifications_checked_${session.user.id}`, 'true');
+              } catch (error) {
+                console.error('Error checking notifications:', error);
               }
-
-              if (notificationError) {
-                console.error('Error fetching notifications:', notificationError);
-              }
-
-              // Combine broadcasts and personal notifications
-              const allNotifications = [
-                ...(broadcasts || []).map(n => ({ ...n, isBroadcast: true })),
-                ...(notifications || []).map(n => ({ ...n, isBroadcast: false }))
-              ];
-
-              // Show each notification
-              allNotifications.forEach((notification, index) => {
-                setTimeout(() => {
-                  toast({
-                    title: notification.title,
-                    description: notification.message,
-                    variant: notification.type === 'error' ? 'destructive' : 'default',
-                    duration: 15000,
-                  });
-                  
-                  // Mark personal notifications as read (broadcasts don't need marking)
-                  if (!notification.isBroadcast) {
-                    supabase
-                      .from('notifications')
-                      .update({ read: true })
-                      .eq('id', notification.id)
-                      .then(() => console.log('Notification marked as read:', notification.id));
-                  }
-                }, index * 1000); // Stagger notifications by 1 second each
-              });
-            } catch (error) {
-              console.error('Error checking notifications:', error);
-            }
-          }, 1500);
+            }, 1500);
+          }
           
           // Show one-time update notification
           const updateNotificationKey = `update_notification_2025_08_31`;
           if (!localStorage.getItem(updateNotificationKey)) {
             setTimeout(() => {
               toast({
-                title: "🎉 Sukses Update!",
+                title: "🎉 Sukses Update! - Auto Deploy Notification",
                 description: "Anda sudah di Versi Terbaru, Selamat menikmati 🚀",
                 duration: 8000,
               });
