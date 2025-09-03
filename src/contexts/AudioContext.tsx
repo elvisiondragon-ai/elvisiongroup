@@ -8,40 +8,34 @@ interface AudioContextType {
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
-  // Create protected audio element with your primitive approach
+  // Create protected audio with minimal Web Audio API approach
   const createProtectedAudio = (audioPath: string): HTMLAudioElement => {
     // Check if it's already a full URL (starts with http/https)
     const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
     
-    // Block empty URLs (download manager detected)
-    if (!audioUrl) {
-      throw new Error('Audio access denied');
+    // Create audio element with minimal Web Audio API protection
+    const audio = new Audio();
+    
+    // MINIMAL Web Audio API for protection without breaking playback
+    if (window.AudioContext || window.webkitAudioContext) {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaElementSource(audio);
+        source.connect(audioContext.destination);
+      } catch (e) {
+        // Fallback to regular audio if Web Audio API fails
+        console.log('Web Audio API failed, using regular audio');
+      }
     }
     
-    const audio = new Audio(audioUrl);
+    // Set source AFTER Web Audio API setup
+    audio.src = audioUrl;
     
-    // Add protection - no download, no right-click + crossOrigin fix
+    // ONLY the working protections
     audio.setAttribute('preload', 'metadata');
     audio.setAttribute('controlsList', 'nodownload noremoteplayback');
     audio.crossOrigin = 'anonymous'; // THE MAGIC KEY - prevents IDM downloads
-    audio.referrerPolicy = 'no-referrer'; // Hide referrer information
-    
-    // Block right-click and inspect element
     audio.addEventListener('contextmenu', (e) => e.preventDefault());
-    
-    // Block keyboard shortcuts for saving
-    audio.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    });
-    
-    // Override src property to prevent direct access
-    Object.defineProperty(audio, 'currentSrc', {
-      get: () => '[PROTECTED]',
-      configurable: false
-    });
     
     return audio;
   };

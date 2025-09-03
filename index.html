@@ -17,48 +17,7 @@
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/elvisionlogo.png" />
     
-    <!-- Security headers to block download managers -->
-    <meta http-equiv="Referrer-Policy" content="no-referrer" />
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options" content="DENY" />
-    <meta http-equiv="Content-Security-Policy" content="media-src 'self' *.supabase.co; script-src 'self' 'unsafe-inline'; object-src 'none';" />
-    
     <script>
-      // Anti-download manager protection
-      (function() {
-        // Block download manager user agents
-        const ua = navigator.userAgent.toLowerCase();
-        const blockedAgents = ['idm', 'internetdownloadmanager', 'neatdownloadmanager', 'fdm', 'eagleget'];
-        if (blockedAgents.some(agent => ua.includes(agent))) {
-          document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial;">Access denied for automated tools</div>';
-          return;
-        }
-
-        // Disable right-click globally
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
-        
-        // Block Ctrl+S and F12
-        document.addEventListener('keydown', (e) => {
-          if ((e.ctrlKey && e.key === 's') || e.key === 'F12') {
-            e.preventDefault();
-            return false;
-          }
-        });
-
-        // Override console to hide URLs
-        if (window.console) {
-          ['log', 'warn', 'error'].forEach(method => {
-            const original = console[method];
-            console[method] = function(...args) {
-              const filtered = args.map(arg => 
-                typeof arg === 'string' && arg.includes('supabase.co') ? '[PROTECTED_URL]' : arg
-              );
-              original.apply(console, filtered);
-            };
-          });
-        }
-      })();
-
       // Register service worker for background audio support
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
