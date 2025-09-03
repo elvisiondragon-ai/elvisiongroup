@@ -165,6 +165,63 @@ const App = () => {
             }, 1000);
           }
           
+          // Check for broadcast notifications and unread personal notifications on login
+          setTimeout(async () => {
+            try {
+              // Check broadcast notifications (global announcements)
+              const { data: broadcasts, error: broadcastError } = await supabase
+                .from('broadcast_notifications')
+                .select('*')
+                .gt('expires_at', new Date().toISOString())
+                .order('created_at', { ascending: false });
+
+              // Check personal notifications
+              const { data: notifications, error: notificationError } = await supabase
+                .from('notifications')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .eq('read', false)
+                .order('created_at', { ascending: false });
+
+              if (broadcastError) {
+                console.error('Error fetching broadcast notifications:', broadcastError);
+              }
+
+              if (notificationError) {
+                console.error('Error fetching notifications:', notificationError);
+              }
+
+              // Combine broadcasts and personal notifications
+              const allNotifications = [
+                ...(broadcasts || []).map(n => ({ ...n, isBroadcast: true })),
+                ...(notifications || []).map(n => ({ ...n, isBroadcast: false }))
+              ];
+
+              // Show each notification
+              allNotifications.forEach((notification, index) => {
+                setTimeout(() => {
+                  toast({
+                    title: notification.title,
+                    description: notification.message,
+                    variant: notification.type === 'error' ? 'destructive' : 'default',
+                    duration: notification.type === 'error' ? 8000 : 5000,
+                  });
+                  
+                  // Mark personal notifications as read (broadcasts don't need marking)
+                  if (!notification.isBroadcast) {
+                    supabase
+                      .from('notifications')
+                      .update({ read: true })
+                      .eq('id', notification.id)
+                      .then(() => console.log('Notification marked as read:', notification.id));
+                  }
+                }, index * 1000); // Stagger notifications by 1 second each
+              });
+            } catch (error) {
+              console.error('Error checking notifications:', error);
+            }
+          }, 1500);
+          
           // Show one-time update notification
           const updateNotificationKey = `update_notification_2025_08_31`;
           if (!localStorage.getItem(updateNotificationKey)) {
