@@ -9,10 +9,35 @@ export const audioFiles = [
   'Verse5 - Virtality Vortex.MP3'
 ];
 
+// URL obfuscation to hide real URLs from download managers
+const obfuscateUrl = (url: string): string => {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(7);
+  return `${url}?t=${timestamp}&r=${random}&_=${btoa(window.location.href).slice(0, 8)}`;
+};
+
+// Detect download managers by user agent
+const isDownloadManager = (): boolean => {
+  const ua = navigator.userAgent.toLowerCase();
+  const downloadManagers = [
+    'idm', 'internetdownloadmanager', 'neatdownloadmanager', 
+    'fdm', 'freedownloadmanager', 'downloadaccelerator',
+    'eagleget', 'jdownloader', 'ant download manager'
+  ];
+  return downloadManagers.some(dm => ua.includes(dm));
+};
+
 export const getAudioUrl = (fileName: string) => {
+  // Block download managers completely
+  if (isDownloadManager()) {
+    console.warn('Download manager detected - access denied');
+    return '';
+  }
+
   const { data } = supabase.storage
     .from('audio-files')
     .getPublicUrl(fileName);
   
-  return data.publicUrl;
+  // Return obfuscated URL to hide real path
+  return obfuscateUrl(data.publicUrl);
 };
