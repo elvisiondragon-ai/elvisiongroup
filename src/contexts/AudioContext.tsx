@@ -14,8 +14,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
     const audio = new Audio(audioUrl);
     
-    // Add protection - no download, no right-click
-    audio.setAttribute('controlsList', 'nodownload');
+    // Add protection - no download, no right-click + crossOrigin fix
+    audio.setAttribute('preload', 'metadata');
+    audio.setAttribute('controlsList', 'nodownload noremoteplayback');
+    audio.crossOrigin = 'anonymous'; // THE MAGIC KEY - prevents IDM downloads
     audio.addEventListener('contextmenu', (e) => e.preventDefault());
     
     return audio;
