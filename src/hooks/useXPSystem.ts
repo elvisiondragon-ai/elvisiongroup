@@ -38,16 +38,29 @@ export function useXPSystem(): XPSystemHook {
       // Show success toast with level up information
       const result = data as any;
       
+      // Check if daily limit was reached
+      if (!result.success && result.reason === 'daily_limit_reached') {
+        // Don't show notification for daily limit - just silently return
+        return;
+      }
+      
       // Check for level up
       if (result?.level_up) {
         toast({
           title: `🎉 SELAMAT ANDA MASUK KE LEVEL SELANJUTNYA!`,
-          description: `Sekarang Level ${result.new_level}! +${xpAmount} XP earned! ${result.achievement_earned ? '⚡ Achievement baru terbuka!' : ''}`,
+          description: `Sekarang Level ${result.new_level}! +${result.xp_awarded} XP earned! ${result.achievement_earned ? '⚡ Achievement baru terbuka!' : ''}`,
         });
-      } else {
-        // Simple success message
+      } else if (result.show_notification && result.limit_reached) {
+        // Only show daily limit notification when limit is hit for the first time
         toast({
-          title: `+${xpAmount} XP Earned!`,
+          title: `+${result.xp_awarded} XP Earned! 🎯 Daily Limit Reached`,
+          description: `You've earned 30/30 XP today! Come back tomorrow for more XP.`,
+          variant: "default",
+        });
+      } else if (result.success) {
+        // Regular success message
+        toast({
+          title: `+${result.xp_awarded} XP Earned!`,
           description: reason || `${activityType} completed`,
         });
       }

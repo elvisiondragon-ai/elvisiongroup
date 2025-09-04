@@ -84,13 +84,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         variant: "destructive"
       });
     } else {
-      // Award XP for completing spiritual journal reflection
+      // Award XP for completing spiritual journal reflection (this will show XP notification)
       awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
       
-      toast({
-        title: "Tersimpan",
-        description: "Renungan Anda telah disimpan",
-      });
+      // Remove the duplicate "Tersimpan" notification - only show XP notification
       setReflection("");
       loadReflections(currentUser.id);
     }
