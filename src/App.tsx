@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
+import { useAppUpdates } from "@/hooks/useAppUpdates";
 import { useToast } from "@/hooks/use-toast";
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Auth } from "./pages/Auth";
@@ -32,6 +33,9 @@ const App = () => {
   
   // Initialize real-time notifications
   useRealTimeNotifications(user);
+  
+  // Initialize app updates check
+  useAppUpdates(user);
 
   // PWA Update Logic
   const {
@@ -61,8 +65,11 @@ const App = () => {
             onClick={() => {
               console.log('🔄 User clicked update, clearing localStorage')
               localStorage.removeItem('app-needs-update')
-              updateServiceWorker(true)
-              setNeedRefresh(false)
+              alert("🚀 Update Berhasil");
+              setTimeout(() => {
+                updateServiceWorker(true)
+                setNeedRefresh(false)
+              }, 1000);
             }}
             className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
           >
