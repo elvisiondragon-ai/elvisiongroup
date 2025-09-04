@@ -160,9 +160,23 @@ const App = () => {
           }
           
           // Check for broadcast notifications and unread personal notifications on login (one-time ever)
-          if (!localStorage.getItem(`notifications_checked_${session.user.id}`)) {
-            setTimeout(async () => {
-              try {
+          // Check database instead of localStorage to survive cache/cookie clear
+          setTimeout(async () => {
+            try {
+              // Check if user has already been shown broadcast notifications
+              const { data: hasSeenBroadcasts, error: checkError } = await supabase
+                .rpc('check_user_notification_shown', {
+                  p_user_id: session.user.id,
+                  p_notification_type: 'broadcasts_checked'
+                });
+
+              if (checkError) {
+                console.error('Error checking notification status:', checkError);
+                return;
+              }
+
+              // Only show notifications if user hasn't seen them before
+              if (!hasSeenBroadcasts) {
                 // Check broadcast notifications (global announcements)
                 const { data: broadcasts, error: broadcastError } = await supabase
                   .from('broadcast_notifications')
@@ -213,13 +227,16 @@ const App = () => {
                   }, index * 1000); // Stagger notifications by 1 second each
                 });
 
-                // Mark notifications as checked forever
-                localStorage.setItem(`notifications_checked_${session.user.id}`, 'true');
-              } catch (error) {
-                console.error('Error checking notifications:', error);
+                // Mark notifications as checked forever in database
+                await supabase.rpc('mark_notification_type_shown', {
+                  p_user_id: session.user.id,
+                  p_notification_type: 'broadcasts_checked'
+                });
               }
-            }, 1500);
-          }
+            } catch (error) {
+              console.error('Error checking notifications:', error);
+            }
+          }, 1500);
           
           // Show one-time update notification
           const updateNotificationKey = `update_notification_2025_08_31`;

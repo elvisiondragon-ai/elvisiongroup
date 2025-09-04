@@ -28,7 +28,10 @@ import {
   Bell,
   ArrowLeft,
   Trash2,
-  MessageCircle
+  MessageCircle,
+  Send,
+  Flame,
+  Droplets
 } from "lucide-react";
 
 interface ProfileProps {
@@ -195,22 +198,25 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
 
   const stats = [
     {
-      icon: Calendar,
+      icon: Flame,
       label: "Total Verses",
       value: `${profile.total_verses || 0}`,
-      color: "text-primary"
+      color: "text-orange-500",
+      iconStyle: { filter: "drop-shadow(0 0 8px rgba(251, 146, 60, 0.8)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))" }
     },
     {
-      icon: Target,
+      icon: Droplets,
       label: "Total Journal",
       value: `${profile.total_journal || 0}`,
-      color: "text-neon-green"
+      color: "text-blue-400",
+      iconStyle: { filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.8)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))" }
     },
     {
       icon: BookOpen,
       label: "Points Earned",
       value: `${profile.experience_points}`,
-      color: "text-accent"
+      color: "text-purple-400",
+      iconStyle: { filter: "drop-shadow(0 0 8px rgba(196, 181, 253, 0.8)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))" }
     }
   ];
 
@@ -317,7 +323,10 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           {stats.map((stat, index) => (
             <Card key={index} className="p-4 bg-gradient-secondary border-border text-center">
               <div className={`${stat.color} mb-2 flex justify-center`}>
-                <stat.icon className="w-6 h-6" />
+                <stat.icon 
+                  className="w-8 h-8" 
+                  style={stat.iconStyle}
+                />
               </div>
               <div className="font-bold font-orbitron text-foreground text-lg">
                 {stat.value}
@@ -404,16 +413,32 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           variant="outline" 
           className="w-full relative overflow-hidden group bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 hover:from-slate-800 hover:via-blue-800 hover:to-indigo-800 text-white border-none shadow-2xl hover:shadow-blue-900/25 transition-all duration-500 transform hover:scale-[1.02]"
           onClick={() => {
-            window.open('https://elvisiongroup.com/ecosystem', '_blank');
+            window.open('https://ecosystem.elvisiongroup.com', '_blank');
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-slate-800/30 via-blue-800/30 to-indigo-800/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative flex items-center justify-center">
-            <Target className="w-4 h-4 mr-2 text-slate-200 group-hover:text-white transition-colors duration-300" />
+            <Target className="w-4 h-4 mr-2 text-white group-hover:text-white transition-colors duration-300" />
             <span className="font-semibold tracking-wide">Tujuan Kami</span>
           </div>
           <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
           <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        </Button>
+
+        <Button 
+          variant="outline" 
+          className="w-full relative overflow-hidden group bg-gradient-to-r from-blue-600/20 via-sky-500/20 to-cyan-400/20 hover:from-blue-600/30 hover:via-sky-500/30 hover:to-cyan-400/30 text-white hover:text-white border border-blue-400/30 hover:border-cyan-400/50 shadow-lg hover:shadow-cyan-400/25 transition-all duration-500 transform hover:scale-[1.02]"
+          onClick={() => {
+            window.open('https://t.me/elvision1', '_blank');
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-sky-500/10 to-cyan-400/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative flex items-center justify-center">
+            <Send className="w-4 h-4 mr-2 text-white group-hover:text-white transition-colors duration-300" />
+            <span className="font-semibold tracking-wide">Telegram Community</span>
+          </div>
+          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400/30 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"></div>
         </Button>
 
         <Button 

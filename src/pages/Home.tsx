@@ -14,6 +14,7 @@ import { usePro } from "@/hooks/usePro";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useAudioCache } from "@/hooks/useAudioCache";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
+import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
 import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 
@@ -44,6 +45,7 @@ export function Home({
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<{url: string, type: 'video' | 'image', title: string} | null>(null);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [cachedMediaUrls, setCachedMediaUrls] = useState<Map<string, string>>(new Map());
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   // Preload audio files for better performance
@@ -451,7 +453,8 @@ export function Home({
         <Card 
           className="p-6 border-border transition-all duration-300 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 hover:from-emerald-500/20 hover:via-teal-500/10 hover:to-cyan-500/20 border-emerald-500/20 hover:border-emerald-400/40 cursor-pointer col-span-2 relative overflow-hidden group"
           onClick={() => {
-            setShowMediaModal(true);
+            setCurrentMediaIndex(0);
+            setSelectedMedia(mediaFiles[0]);
           }}
         >
           {/* Background glow effect */}
@@ -714,19 +717,42 @@ export function Home({
                         ref={(el) => {
                           videoRefs.current[index] = el;
                         }}
-                        src={media.url}
+                        src={cachedMediaUrls.get(media.url) || media.url}
                         controls
                         className="max-w-full rounded-lg"
                         style={{ maxHeight: '60vh' }}
                         preload="metadata"
+                        crossOrigin="anonymous"
+                        onLoadStart={async () => {
+                          // Preload and cache video for future views
+                          if (!cachedMediaUrls.has(media.url)) {
+                            try {
+                              const cachedUrl = await preloadAndCacheMedia(media.url);
+                              setCachedMediaUrls(prev => new Map(prev).set(media.url, cachedUrl));
+                            } catch (error) {
+                              console.warn('Failed to cache video:', error);
+                            }
+                          }
+                        }}
                       >
                         Browser Anda tidak mendukung video HTML5.
                       </video>
                     ) : (
                       <img
-                        src={media.url}
+                        src={cachedMediaUrls.get(media.url) || media.url}
                         alt={media.title}
                         className="max-w-full max-h-[60vh] object-contain rounded-lg"
+                        onLoad={async () => {
+                          // Preload and cache image for future views
+                          if (!cachedMediaUrls.has(media.url)) {
+                            try {
+                              const cachedUrl = await preloadAndCacheMedia(media.url);
+                              setCachedMediaUrls(prev => new Map(prev).set(media.url, cachedUrl));
+                            } catch (error) {
+                              console.warn('Failed to cache image:', error);
+                            }
+                          }
+                        }}
                       />
                     )}
                   </div>
