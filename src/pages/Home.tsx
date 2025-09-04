@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import { usePro } from "@/hooks/usePro";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useAudioCache } from "@/hooks/useAudioCache";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
-import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 
 interface HomeProps {
@@ -41,6 +41,10 @@ export function Home({
   const { preloadAudioFiles, getCacheStats } = useAudioCache();
   const [showTutorialModal, setShowTutorialModal] = useState(false);
   const [showPlayButton, setShowPlayButton] = useState(true);
+  const [showMediaModal, setShowMediaModal] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState<{url: string, type: 'video' | 'image', title: string} | null>(null);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   // Preload audio files for better performance
   useEffect(() => {
@@ -56,6 +60,39 @@ export function Home({
     // Preload audio files in background for offline access
     preloadAudioFiles(audioFiles);
   }, [preloadAudioFiles]);
+
+  // Video control system - only one video can play at a time
+  useEffect(() => {
+    const handleVideoPlay = (playingIndex: number) => {
+      // Pause all other videos when one starts playing
+      videoRefs.current.forEach((video, index) => {
+        if (video && index !== playingIndex && !video.paused) {
+          video.pause();
+        }
+      });
+    };
+
+    // Add play event listeners to all video elements
+    videoRefs.current.forEach((video, index) => {
+      if (video) {
+        const playHandler = () => handleVideoPlay(index);
+        video.addEventListener('play', playHandler);
+        
+        // Store the handler for cleanup
+        (video as any)._playHandler = playHandler;
+      }
+    });
+
+    // Cleanup function
+    return () => {
+      videoRefs.current.forEach((video) => {
+        if (video && (video as any)._playHandler) {
+          video.removeEventListener('play', (video as any)._playHandler);
+          delete (video as any)._playHandler;
+        }
+      });
+    };
+  }, [selectedMedia]); // Re-run when media modal opens/closes
 
   // Consolidated presence tracking - single channel for both listening and tracking
   useEffect(() => {
@@ -150,6 +187,116 @@ export function Home({
     color: "text-blue-500",
     key: "tutorial"
   };
+
+  const mediaFiles = [
+    // All Videos First
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/kikireact.mp4",
+      type: "video" as const,
+      title: "Pengalaman Kiki"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/senoreact.mp4",
+      type: "video" as const,
+      title: "Pengalaman Seno"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/DRVIDEO_WA.mp4",
+      type: "video" as const,
+      title: "Pengalaman Dr"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/FELVIDEO_WA.mp4",
+      type: "video" as const,
+      title: "Pengalaman Fel"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/HABIBVIDEO_WA.mp4",
+      type: "video" as const,
+      title: "Pengalaman Habib"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/INTELVIDEO_WA.mp4",
+      type: "video" as const,
+      title: "Pengalaman Intel"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/LENA_WA.mp4",
+      type: "video" as const,
+      title: "Pengalaman Lena"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/VIOVIDEO_WA.mp4",
+      type: "video" as const,
+      title: "Pengalaman Vio"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/UMIVIDEO_WA.mp4",
+      type: "video" as const,
+      title: "Pengalaman Umi"
+    },
+    // All Images After Videos
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_28juli.png",
+      type: "image" as const,
+      title: "Testimoni 28 Juli"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi%20santri.jpeg",
+      type: "image" as const,
+      title: "Testimoni Santri"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_15taun.png",
+      type: "image" as const,
+      title: "Testimoni 15 Tahun"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_3minggu.jpeg",
+      type: "image" as const,
+      title: "Testimoni 3 Minggu"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_depres.jpeg",
+      type: "image" as const,
+      title: "Testimoni Depresi"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_eldi3.jpeg",
+      type: "image" as const,
+      title: "Testimoni Eldi"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_JOE.jpeg",
+      type: "image" as const,
+      title: "Testimoni Joe"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_muklas.jpeg",
+      type: "image" as const,
+      title: "Testimoni Muklas"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_pelakor.jpeg",
+      type: "image" as const,
+      title: "Testimoni Pelakor"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_pesantren.png",
+      type: "image" as const,
+      title: "Testimoni Pesantren"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_proyek.jpg",
+      type: "image" as const,
+      title: "Testimoni Proyek"
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi05.jpeg",
+      type: "image" as const,
+      title: "Testimoni 05"
+    }
+  ];
 
   return <div className="pb-20">
       {/* Hero Section */}
@@ -293,22 +440,42 @@ export function Home({
               <h3 className="font-bold text-lg text-foreground group-hover:text-indigo-300 transition-colors duration-300">
                 {tutorialFeature.title}
               </h3>
-              <p className="text-sm text-muted-foreground group-hover:text-indigo-200/80 transition-colors duration-300 leading-relaxed">
-                {tutorialFeature.description}
-              </p>
-              
-              {/* Call to action indicator */}
-              <div className="flex items-center justify-center gap-2 mt-4 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></div>
-                <span className="text-xs font-medium text-indigo-300 uppercase tracking-wide">Tap to Watch</span>
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              </div>
             </div>
           </div>
 
           {/* Corner accent */}
           <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
         </Card>
+
+        {/* Pengalaman Anggota Section Card */}
+        <Card 
+          className="p-6 border-border transition-all duration-300 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 hover:from-emerald-500/20 hover:via-teal-500/10 hover:to-cyan-500/20 border-emerald-500/20 hover:border-emerald-400/40 cursor-pointer col-span-2 relative overflow-hidden group"
+          onClick={() => {
+            setShowMediaModal(true);
+          }}
+        >
+          {/* Background glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/5 via-teal-600/5 to-cyan-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          
+          <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300 animate-pulse"></div>
+              <div className="relative p-4 rounded-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 shadow-2xl shadow-emerald-500/30 group-hover:shadow-emerald-500/50 group-hover:scale-110 transition-all duration-300">
+                <Video className="w-8 h-8 text-white animate-pulse" />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="font-bold text-lg text-foreground group-hover:text-emerald-300 transition-colors duration-300">
+                Pengalaman Anggota
+              </h3>
+            </div>
+          </div>
+
+          {/* Corner accent */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-emerald-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
+        </Card>
+
 
         {/* XP Motivation & Weekly Challenge */}
         <Card className="p-6 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-cyan-500/10 border border-primary/20">
@@ -429,6 +596,159 @@ export function Home({
         </div>
       )}
 
+      {/* Pengalaman Anggota Modal */}
+      {showMediaModal && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-xl font-semibold font-orbitron">Pengalaman Anggota</h2>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowMediaModal(false)}
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
+              {/* Description */}
+              <div className="mb-6">
+                <Card className="p-4 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-emerald-500/20">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Lihat pengalaman dan testimoni dari anggota eL Vision Group
+                  </p>
+                </Card>
+              </div>
+
+              {/* Media Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {mediaFiles.map((media, index) => (
+                  <Card
+                    key={index}
+                    className="relative overflow-hidden cursor-pointer group hover:scale-[1.02] transition-transform duration-300 shadow-lg hover:shadow-xl"
+                    onClick={() => {
+                      setCurrentMediaIndex(index);
+                      setSelectedMedia(media);
+                      setShowMediaModal(false);
+                    }}
+                  >
+                    <div className="relative aspect-video bg-muted">
+                      {media.type === 'video' ? (
+                        <>
+                          <video
+                            src={media.url}
+                            className="w-full h-full object-cover"
+                            preload="metadata"
+                            muted
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors duration-300">
+                            <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
+                              <Play className="w-8 h-8 text-white" fill="currentColor" />
+                            </div>
+                          </div>
+                          <div className="absolute top-2 right-2 bg-black/60 rounded-full p-1.5">
+                            <Video className="w-4 h-4 text-white" />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <img
+                            src={media.url}
+                            alt={media.title}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                          <div className="absolute top-2 right-2 bg-black/60 rounded-full p-1.5">
+                            <ImageIcon className="w-4 h-4 text-white" />
+                          </div>
+                        </>
+                      )}
+                      
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      
+                      {/* Title overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                        <p className="text-white text-sm font-medium">
+                          {media.title}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Vertical Scrollable Media Player Modal */}
+      {selectedMedia && !showMediaModal && (
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-black/80 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <h2 className="text-xl font-semibold text-white">Pengalaman Anggota</h2>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setSelectedMedia(null)}
+                className="text-white hover:bg-white/10"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            
+            {/* Scrollable Media Content */}
+            <div className="overflow-y-auto max-h-[80vh] p-4 space-y-6">
+              {mediaFiles.map((media, index) => (
+                <div key={index} className="space-y-2">
+                  {/* Media Title */}
+                  <h3 className="text-white font-medium text-lg text-center">
+                    {media.title}
+                  </h3>
+                  
+                  {/* Media Content */}
+                  <div className="flex justify-center">
+                    {media.type === 'video' ? (
+                      <video
+                        ref={(el) => {
+                          videoRefs.current[index] = el;
+                        }}
+                        src={media.url}
+                        controls
+                        className="max-w-full rounded-lg"
+                        style={{ maxHeight: '60vh' }}
+                        preload="metadata"
+                      >
+                        Browser Anda tidak mendukung video HTML5.
+                      </video>
+                    ) : (
+                      <img
+                        src={media.url}
+                        alt={media.title}
+                        className="max-w-full max-h-[60vh] object-contain rounded-lg"
+                      />
+                    )}
+                  </div>
+                  
+                  {/* Separator */}
+                  {index < mediaFiles.length - 1 && (
+                    <div className="border-t border-white/10 pt-6 mt-6" />
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            {/* Footer */}
+            <div className="p-4 border-t border-white/10 text-center text-white/80 text-sm">
+              <p>Pengalaman dari Anggota eL Vision Group</p>
+              <p className="text-white/60 text-xs mt-1">
+                Scroll ke bawah untuk melihat semua media
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Cache Debug Panel */}
       <CacheDebugPanel />

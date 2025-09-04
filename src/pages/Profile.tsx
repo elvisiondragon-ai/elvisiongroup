@@ -400,6 +400,21 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           Hubungi Customer Support
         </Button>
 
+        <Button 
+          variant="outline" 
+          className="w-full relative overflow-hidden group bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 hover:from-slate-800 hover:via-blue-800 hover:to-indigo-800 text-white border-none shadow-2xl hover:shadow-blue-900/25 transition-all duration-500 transform hover:scale-[1.02]"
+          onClick={() => {
+            window.open('https://elvisiongroup.com/ecosystem', '_blank');
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-800/30 via-blue-800/30 to-indigo-800/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative flex items-center justify-center">
+            <Target className="w-4 h-4 mr-2 text-slate-200 group-hover:text-white transition-colors duration-300" />
+            <span className="font-semibold tracking-wide">Tujuan Kami</span>
+          </div>
+          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        </Button>
 
         <Button 
           variant="outline" 
