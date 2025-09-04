@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { ProUpgrade } from "@/components/ProUpgrade";
+import { LoadingOverlay } from "@/components/LoadingOverlay";
 
 import { usePro } from "@/hooks/usePro";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,6 +59,8 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const { proStatus } = usePro();
   const { toast } = useToast();
 
@@ -264,7 +267,9 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   }
 
   return (
-    <div className="pb-20">
+    <>
+      <LoadingOverlay isVisible={showLoadingOverlay} message={loadingMessage} />
+      <div className="pb-20">
       {/* Profile Header */}
       <div className="p-6 text-center">
         <Avatar className="w-24 h-24 mx-auto mb-4 border-2 border-primary glow-primary">
@@ -413,7 +418,13 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           variant="outline" 
           className="w-full relative overflow-hidden group bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 hover:from-slate-800 hover:via-blue-800 hover:to-indigo-800 text-white border-none shadow-2xl hover:shadow-blue-900/25 transition-all duration-500 transform hover:scale-[1.02]"
           onClick={() => {
-            window.open('https://ecosystem.elvisiongroup.com', '_blank');
+            setLoadingMessage('Loading Tujuan Kami...');
+            setShowLoadingOverlay(true);
+            // Show loading for 1 second before opening
+            setTimeout(() => {
+              window.open('https://ecosystem.elvisiongroup.com', '_blank');
+              setShowLoadingOverlay(false);
+            }, 1000);
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-slate-800/30 via-blue-800/30 to-indigo-800/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -429,7 +440,13 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           variant="outline" 
           className="w-full relative overflow-hidden group bg-gradient-to-r from-blue-600/20 via-sky-500/20 to-cyan-400/20 hover:from-blue-600/30 hover:via-sky-500/30 hover:to-cyan-400/30 text-white hover:text-white border border-blue-400/30 hover:border-cyan-400/50 shadow-lg hover:shadow-cyan-400/25 transition-all duration-500 transform hover:scale-[1.02]"
           onClick={() => {
-            window.open('https://t.me/elvision1', '_blank');
+            setLoadingMessage('Connecting to Telegram...');
+            setShowLoadingOverlay(true);
+            // Show loading for 1 second before opening
+            setTimeout(() => {
+              window.open('https://t.me/elvision1', '_blank');
+              setShowLoadingOverlay(false);
+            }, 1000);
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-sky-500/10 to-cyan-400/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -513,5 +530,6 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         )}
       </div>
     </div>
+    </>
   );
 }
