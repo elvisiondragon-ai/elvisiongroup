@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Play, Pause, Volume2, Upload } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioSession } from "@/hooks/useAudioSession";
 
@@ -58,37 +58,10 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => setIsPlaying(false);
 
-    // ANTI-SCRUB PROTECTION - Multiple methods like Spotify
-    const preventSeeking = (e: Event) => {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    };
-
-    const preventSeekingImmediate = (e: Event) => {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      // Reset to current position if someone tries to seek
-      const currentPos = audio.currentTime;
-      setTimeout(() => {
-        if (audio.currentTime !== currentPos) {
-          audio.currentTime = currentPos;
-        }
-      }, 0);
-      return false;
-    };
-
     // Enhanced audio setup for better compatibility
     audio.setAttribute('preload', 'metadata');
-    audio.setAttribute('controlsList', 'nodownload noremoteplayback noseek');
+    audio.setAttribute('controlsList', 'nodownload noremoteplayback');
     audio.crossOrigin = 'anonymous';
-
-    // Add all the anti-seek event listeners
-    audio.addEventListener('seeking', preventSeekingImmediate);
-    audio.addEventListener('seeked', preventSeekingImmediate);
-    audio.addEventListener('loadstart', preventSeeking);
-    audio.addEventListener('progress', preventSeeking);
-    audio.addEventListener('ratechange', preventSeeking);
 
     audio.addEventListener('loadeddata', setAudioData);
     audio.addEventListener('timeupdate', setAudioTime);
@@ -107,13 +80,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     }
 
     return () => {
-      // Remove anti-seek listeners
-      audio.removeEventListener('seeking', preventSeekingImmediate);
-      audio.removeEventListener('seeked', preventSeekingImmediate);
-      audio.removeEventListener('loadstart', preventSeeking);
-      audio.removeEventListener('progress', preventSeeking);
-      audio.removeEventListener('ratechange', preventSeeking);
-
       audio.removeEventListener('loadeddata', setAudioData);
       audio.removeEventListener('timeupdate', setAudioTime);
       audio.removeEventListener('play', handlePlay);
@@ -140,6 +106,14 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     }
   };
 
+  const handleSeek = (value: number[]) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    const newTime = (value[0] / 100) * duration;
+    audio.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
 
   const handleVolumeChange = (value: number[]) => {
     const audio = audioRef.current;
@@ -160,26 +134,20 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
 
   return (
     <Card className="p-6 bg-gradient-secondary border-border">
-      {/* COMPLETELY HIDDEN AUDIO - NO CONTROLS POSSIBLE */}
-      <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', visibility: 'hidden', opacity: 0, width: 0, height: 0, overflow: 'hidden' }}>
-        {src && (
-          <audio
-            ref={audioRef}
-            src={src}
-            onEnded={() => setIsPlaying(false)}
-            onError={() => {
-              toast({
-                title: "Audio Error",
-                description: "Failed to load audio file",
-                variant: "destructive",
-              });
-            }}
-            preload="none"
-            controls={false}
-            style={{ display: 'none !important', visibility: 'hidden !important', position: 'absolute', left: '-99999px', top: '-99999px', width: '1px', height: '1px', opacity: 0 }}
-          />
-        )}
-      </div>
+      {src && (
+        <audio
+          ref={audioRef}
+          src={src}
+          onEnded={() => setIsPlaying(false)}
+          onError={() => {
+            toast({
+              title: "Audio Error",
+              description: "Failed to load audio file",
+              variant: "destructive",
+            });
+          }}
+        />
+      )}
       
       <div className="space-y-4">
         {/* Track Info */}
@@ -194,69 +162,51 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
           )}
         </div>
 
-        {/* FAKE LOCKED PROGRESS BAR - COMPLETELY NON-INTERACTIVE */}
+        {/* Progress Bar */}
         <div className="space-y-2">
-          <div 
-            className="w-full bg-muted/20 rounded-full h-2 relative cursor-not-allowed"
-            style={{ 
-              pointerEvents: 'none', 
-              userSelect: 'none', 
-              WebkitUserSelect: 'none',
-              MozUserSelect: 'none',
-              msUserSelect: 'none'
-            }}
-            onMouseDown={(e) => e.preventDefault()}
-            onTouchStart={(e) => e.preventDefault()}
-            onClick={(e) => e.preventDefault()}
-          >
-            <div 
-              className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
-              style={{ 
-                width: `${progress}%`,
-                pointerEvents: 'none',
-                userSelect: 'none',
-                WebkitUserSelect: 'none',
-                MozUserSelect: 'none',
-                msUserSelect: 'none'
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-              onTouchStart={(e) => e.preventDefault()}
-              onClick={(e) => e.preventDefault()}
-            />
-            {/* Invisible overlay to block all interactions */}
-            <div 
-              className="absolute inset-0 cursor-not-allowed"
-              style={{ 
-                background: 'transparent',
-                pointerEvents: 'auto',
-                zIndex: 10
-              }}
-              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); return false; }}
-              onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); return false; }}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); return false; }}
-              onTouchMove={(e) => { e.preventDefault(); e.stopPropagation(); return false; }}
-              onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); return false; }}
-              onDragStart={(e) => { e.preventDefault(); return false; }}
-            />
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground select-none">
+          <Progress value={progress} className="h-2" />
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
         </div>
 
-        {/* Controls - Play/Pause Only */}
-        <div className="flex items-center justify-center">
+        {/* Controls */}
+        <div className="flex items-center justify-center space-x-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const audio = audioRef.current;
+              if (audio) audio.currentTime = Math.max(0, audio.currentTime - 10);
+            }}
+            disabled={!src}
+          >
+            <SkipBack className="h-4 w-4" />
+          </Button>
+
           <Button
             onClick={togglePlayPause}
             disabled={!src}
-            className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90 shadow-lg"
+            className="w-12 h-12 rounded-full bg-gradient-primary hover:opacity-90"
           >
             {isPlaying ? (
-              <Pause className="h-8 w-8" />
+              <Pause className="h-6 w-6" />
             ) : (
-              <Play className="h-8 w-8 ml-1" />
+              <Play className="h-6 w-6 ml-1" />
             )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const audio = audioRef.current;
+              if (audio) audio.currentTime = Math.min(duration, audio.currentTime + 10);
+            }}
+            disabled={!src}
+          >
+            <SkipForward className="h-4 w-4" />
           </Button>
         </div>
 

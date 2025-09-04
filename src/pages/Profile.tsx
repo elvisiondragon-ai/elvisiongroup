@@ -404,7 +404,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           variant="outline" 
           className="w-full relative overflow-hidden group bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 hover:from-slate-800 hover:via-blue-800 hover:to-indigo-800 text-white border-none shadow-2xl hover:shadow-blue-900/25 transition-all duration-500 transform hover:scale-[1.02]"
           onClick={() => {
-            window.open('https://ecosystem.elvisiongroup.com', '_blank');
+            window.open('https://elvisiongroup.com/ecosystem', '_blank');
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-slate-800/30 via-blue-800/30 to-indigo-800/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
