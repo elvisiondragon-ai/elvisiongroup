@@ -339,6 +339,19 @@ export function Auth({ onLogin }: AuthProps) {
       }
 
       if (data.user) {
+        // Send welcome email and add to subscriber list
+        try {
+          await supabase.functions.invoke('send-signup-email', {
+            body: {
+              userEmail: signupData.email,
+              userName: signupData.email.split('@')[0]
+            }
+          });
+        } catch (emailError) {
+          console.error('Failed to send welcome email:', emailError);
+          // Continue even if email fails
+        }
+
         toast({
           title: "Akun Berhasil Dibuat!",
           description: "Anda berhasil mendaftar dan masuk.",
