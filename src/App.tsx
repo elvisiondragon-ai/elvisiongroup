@@ -26,6 +26,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
   
   // Initialize push notifications for authenticated users
@@ -65,7 +66,10 @@ const App = () => {
             onClick={() => {
               console.log('🔄 User clicked update, clearing localStorage')
               localStorage.removeItem('app-needs-update')
-              alert("🚀 Update Berhasil");
+              toast({
+                title: "🚀 Update Berhasil!",
+                description: "Aplikasi berhasil diperbarui"
+              });
               setTimeout(() => {
                 updateServiceWorker(true)
                 setNeedRefresh(false)
