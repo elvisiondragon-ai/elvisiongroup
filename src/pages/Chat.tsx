@@ -203,6 +203,7 @@ export function Chat() {
     loadMessages();
   }, [loadMessages]);
 
+
   useEffect(() => {
     // Set up 60-minute polling interval
     const interval = setInterval(() => {
@@ -515,14 +516,14 @@ export function Chat() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
         {isLoading ? (
           <div className="flex items-center justify-center p-8">
             <p className="text-muted-foreground">Loading chat history...</p>
           </div>
         ) : (
-          <div className="divide-y divide-border">
-            {messages.map((msg) => (
+          <div className="divide-y divide-border" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
+            {messages.slice().reverse().map((msg) => (
               <ChatMessage
                 key={msg.id}
                 id={msg.id}
