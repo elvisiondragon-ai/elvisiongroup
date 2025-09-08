@@ -130,11 +130,11 @@ export function VerseAudioCard({
       setCurrentPlayingVerse(verse.id);
       setCurrentVerseAudio(audio);
       
-      // Show sacred notification after 5 seconds delay
+      // Show sacred notification after 3 seconds delay
       if (onShowSacredNotification) {
         setTimeout(() => {
           onShowSacredNotification(verse.title);
-        }, 5000);
+        }, 3000);
       }
       
     } catch (error) {
