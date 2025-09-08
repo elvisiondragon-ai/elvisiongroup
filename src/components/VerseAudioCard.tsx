@@ -1,7 +1,8 @@
-import { Lock, Music, Crown, Zap } from 'lucide-react';
+import { Lock, Music, Crown, Zap, SkipBack, SkipForward } from 'lucide-react';
 import { useProtectedAudio } from '@/contexts/AudioContext';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useState, useEffect } from 'react';
+import { Progress } from '@/components/ui/progress';
 
 interface Verse {
   id: number;
@@ -35,6 +36,10 @@ export function VerseAudioCard({
 }: VerseAudioCardProps) {
   const { createProtectedAudio } = useProtectedAudio();
   const { awardXP } = useXPSystem();
+  
+  // Audio state
+  const [audioDuration, setAudioDuration] = useState<number | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
   
   // Check if this verse is currently playing
   const isPlaying = currentPlayingVerse === verse.id;
@@ -79,11 +84,20 @@ export function VerseAudioCard({
     try {
       const audio = await createProtectedAudio(verse.audioPath);
       
-      // Add event listeners
+      // Add event listeners  
+      audio.addEventListener('loadedmetadata', () => {
+        setAudioDuration(audio.duration);
+      });
+      
+      audio.addEventListener('timeupdate', () => {
+        setCurrentTime(audio.currentTime);
+      });
       audio.addEventListener('ended', () => {
         console.log('🎵 Audio ended for verse:', verse.title, 'ID:', verse.id);
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
+        setAudioDuration(null);
+        setCurrentTime(0);
         // Award XP based on verse type - Short verses get +1 XP, main verses get +10 XP
         const xpAmount = verse.id === 100 ? 1 : 10; // ID 100 is our reflection verse
         console.log('🏆 Awarding XP:', xpAmount, 'for verse:', verse.title);
@@ -94,6 +108,8 @@ export function VerseAudioCard({
         console.error('Error playing audio:', error);
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
+        setAudioDuration(null);
+        setCurrentTime(0);
       });
 
       // Show sacred notification before playing
@@ -116,6 +132,22 @@ export function VerseAudioCard({
   };
 
   const canPlay = verse.unlocked && verse.audioPath;
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleSeek = (value: number[]) => {
+    if (currentVerseAudio && audioDuration) {
+      const newTime = (value[0] / 100) * audioDuration;
+      currentVerseAudio.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+
+  const progress = audioDuration ? (currentTime / audioDuration) * 100 : 0;
 
   return (
     <div className="relative group cursor-pointer">
@@ -164,6 +196,26 @@ export function VerseAudioCard({
               )}
             </div>
           </div>
+          
+          {/* Audio Controls - Show when playing */}
+          {isPlaying && audioDuration && (
+            <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-48 bg-black/80 backdrop-blur-lg rounded-lg p-2 border border-primary/20">
+              <Progress 
+                value={progress} 
+                className="h-1 cursor-pointer bg-white/10" 
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const percent = ((e.clientX - rect.left) / rect.width) * 100;
+                  handleSeek([Math.max(0, Math.min(100, percent))]);
+                }}
+              />
+              <div className="flex justify-between text-xs text-white/60 mt-1">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(audioDuration)}</span>
+              </div>
+            </div>
+          )}
+
         </div>
       ) : (
         <div className="relative">
