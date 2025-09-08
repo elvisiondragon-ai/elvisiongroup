@@ -8,6 +8,13 @@ import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown } from 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+// Meta Pixel declaration
+declare global {
+  interface Window {
+    fbq?: any;
+  }
+}
+
 interface PaymentProps {
   onNavigate: (tab: string) => void;
 }
@@ -24,6 +31,34 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const { toast } = useToast();
+
+  // Meta Pixel initialization
+  useEffect(() => {
+    // Initialize Meta Pixel if not already loaded
+    if (typeof window !== 'undefined' && !window.fbq) {
+      (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
+        if (f.fbq) return;
+        n = f.fbq = function(...args: any[]) {
+          n.callMethod ?
+            n.callMethod.apply(n, args) : n.queue.push(args)
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s)
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+      // Initialize with your Pixel ID
+      window.fbq('init', '3319324491540889');
+      window.fbq('track', 'PageView');
+    }
+  }, []);
 
   const paymentMethods = [
     {
@@ -107,6 +142,53 @@ export function Payment({ onNavigate }: PaymentProps) {
           if (payload.new?.status === 'active') {
             console.log('🎉 Payment completed! Showing success notification...');
             console.log('🎉 Payment data:', payload.new);
+            
+            // Track Meta Pixel Purchase - Only when truly PAID
+            const plan = subscriptionPlans.find(p => p.id === selectedPlan);
+            if (window.fbq && paymentData) {
+              console.log('📊 Tracking Meta Pixel Purchase:', {
+                value: paymentData.amount,
+                currency: 'IDR',
+                content_name: plan?.name || 'Pro Subscription',
+                transaction_id: paymentData.tripay_reference
+              });
+              
+              window.fbq('track', 'Purchase', {
+                value: paymentData.amount || 0,
+                currency: 'IDR',
+                content_name: plan?.name || 'Pro Subscription',
+                content_ids: [selectedPlan],
+                content_type: 'subscription',
+                transaction_id: paymentData.tripay_reference
+              });
+            }
+            
+            // Send to Meta CAPI as backup for better tracking reliability
+            if (paymentData && plan) {
+              fetch('/api/meta-capi-purchase', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  pixel_id: '3319324491540889',
+                  access_token: 'EAAGuZBVYmBugBPHXEpB2VcmWW1UoTE46sgMQaVZC4jtP4kmG223z324ZB7gpe5bI0UzeQgcehTZAUnbZCL0kTSxVu84fNlj8sxjtcZArwgA3FlGMxsXndZBZAGHoeW8oZAc8ZBCbfeRdGoxGmWasm18sH4lSnsf3hrWX2Ymn6Qzq80C1dnXeeQrlVZChzW53V0UnXJ6hwZDZD',
+                  event_name: 'Purchase',
+                  user_data: {
+                    email: email,
+                    phone: phoneNumber,
+                  },
+                  custom_data: {
+                    value: paymentData.amount,
+                    currency: 'IDR',
+                    content_name: plan.name,
+                    transaction_id: paymentData.tripay_reference
+                  }
+                })
+              }).catch(error => {
+                console.log('📡 Meta CAPI backup failed (not critical):', error);
+              });
+            }
             
             // Show success notification with refresh button
             toast({
