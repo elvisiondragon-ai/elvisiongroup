@@ -40,6 +40,7 @@ export function VerseAudioCard({
   // Audio state
   const [audioDuration, setAudioDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
+  const [showDownloadNotif, setShowDownloadNotif] = useState(false);
   
   // Check if this verse is currently playing
   const isPlaying = currentPlayingVerse === verse.id;
@@ -80,9 +81,21 @@ export function VerseAudioCard({
       setCurrentVerseAudio(null);
     }
 
+    // Check if first time download
+    const cacheKey = `verse_${verse.id}_cached`;
+    const isCached = localStorage.getItem(cacheKey);
+    
+    if (!isCached) {
+      setShowDownloadNotif(true);
+    }
+
     // Create new protected audio with caching
     try {
       const audio = await createProtectedAudio(verse.audioPath);
+      
+      // Mark as cached and hide notification
+      localStorage.setItem(cacheKey, 'true');
+      setShowDownloadNotif(false);
       
       // Add event listeners  
       audio.addEventListener('loadedmetadata', () => {
@@ -112,17 +125,17 @@ export function VerseAudioCard({
         setCurrentTime(0);
       });
 
-      // Show sacred notification before playing
-      if (onShowSacredNotification) {
-        onShowSacredNotification(verse.title);
-        // Wait a moment for notification to appear
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
-
-      // Play audio
+      // Play audio first
       await audio.play();
       setCurrentPlayingVerse(verse.id);
       setCurrentVerseAudio(audio);
+      
+      // Show sacred notification after 5 seconds delay
+      if (onShowSacredNotification) {
+        setTimeout(() => {
+          onShowSacredNotification(verse.title);
+        }, 5000);
+      }
       
     } catch (error) {
       console.error('Error playing audio:', error);
@@ -298,6 +311,13 @@ export function VerseAudioCard({
               } blur-xl`}></div>
             </>
           )}
+        </div>
+      )}
+      
+      {/* Simple Download Notification */}
+      {showDownloadNotif && (
+        <div className="fixed bottom-4 left-4 right-4 z-50 bg-primary/90 text-white p-3 rounded-lg shadow-lg animate-pulse">
+          <p className="text-sm text-center">Audio sedang di download agar anda lebih mudah mendengarkan nanti, tunggu sebentar...</p>
         </div>
       )}
     </div>
