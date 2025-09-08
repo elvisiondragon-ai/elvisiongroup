@@ -152,8 +152,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 2,
       title: "Verse 2 - Lucid Beach",
       subtitle: "Relaksasi seperti berada di pantai, membantu tidur nyenyak dan pikiran jernih",
-      unlocked: proStatus.isPro, // Lock for non-pro users
-      requiredLevel: 2,
+      unlocked: true,
+      requiredLevel: 1,
       artwork: verse2Artwork,
       audioPath: 'Verse2 - Lucid Beach.MP3',
       language: 'id'
@@ -171,22 +171,12 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     {
       id: 4,
       title: "Verse 4 - Prosperity Stream",
-      subtitle: "Frekuensi Kaya Raya",
-      unlocked: true,
-      requiredLevel: 1,
+      subtitle: "Frekuensi afirmasi menarik kekayaan dengan rasa yang dimiliki orang orang sukses",
+      unlocked: proStatus.isPro || userLevel >= 5,
+      requiredLevel: 5,
       artwork: verse4Artwork,
       audioPath: 'Verse 4 - Prosperity Stream Vol. 1.MP3',
       language: 'id'
-    },
-    {
-      id: 41,
-      title: "Verse 4 - Prosperity Stream (English)",
-      subtitle: "Prosperity Stream",
-      unlocked: true,
-      requiredLevel: 1,
-      artwork: verse4Artwork,
-      audioPath: 'Verse4-English.MP3',
-      language: 'en'
     },
     {
       id: 5,
