@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Play, Pause, SkipBack, SkipForward, Volume2, Upload } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioSession } from "@/hooks/useAudioSession";
+import { useProtectedAudio } from "@/contexts/AudioContext";
 
 interface AudioPlayerProps {
   title: string;
@@ -18,9 +19,11 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
   const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
+  const { createProtectedAudio, isCached } = useProtectedAudio();
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -88,14 +91,41 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     };
   }, [src, autoPlay, toast, title, description, initializeSession, updateMetadata, updatePlaybackState]);
 
-  const togglePlayPause = () => {
+  const togglePlayPause = async () => {
+    if (!src) return;
+    
     const audio = audioRef.current;
-    if (!audio || !src) return;
+    if (!audio) return;
 
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
     } else {
+      // Check if audio needs to be re-cached (iOS cache cleared)
+      const needsRecaching = !(await isCached(src)) && audio.src && !audio.src.startsWith('blob:');
+      
+      if (needsRecaching) {
+        try {
+          // Re-create audio with loading feedback
+          const newAudio = await createProtectedAudio(src, setIsLoadingAudio);
+          
+          // Replace the audio element source
+          if (audioRef.current) {
+            audioRef.current.src = newAudio.src;
+            audioRef.current.load();
+          }
+          
+          // Show notification for re-download
+          toast({
+            title: "Re-downloading audio",
+            description: "Cache was cleared, downloading again...",
+            variant: "default",
+          });
+        } catch (error) {
+          console.error('Failed to re-cache audio:', error);
+        }
+      }
+      
       audio.play().then(() => setIsPlaying(true)).catch((error) => {
         toast({
           title: "Playback Error",
@@ -187,10 +217,12 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
 
           <Button
             onClick={togglePlayPause}
-            disabled={!src}
+            disabled={!src || isLoadingAudio}
             className="w-12 h-12 rounded-full bg-gradient-primary hover:opacity-90"
           >
-            {isPlaying ? (
+            {isLoadingAudio ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : isPlaying ? (
               <Pause className="h-6 w-6" />
             ) : (
               <Play className="h-6 w-6 ml-1" />
