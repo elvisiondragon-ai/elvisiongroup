@@ -17,6 +17,7 @@ import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
 import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
+import faviconImage from "@/assets/favicon.png";
 
 interface HomeProps {
   onNavigate: (tab: string) => void;
@@ -312,7 +313,7 @@ export function Home({
           </div>
           <div className="relative h-full flex items-end p-6">
             <div className="flex items-center gap-4">
-              <img src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" alt="eL Vision Group Logo" className="w-16 h-16 object-contain" />
+              <img src={faviconImage} alt="eL Vision Group Logo" className="w-16 h-16 object-contain" />
               <div>
                 <h1 className="text-3xl font-bold font-serif text-foreground mb-2">
                   Ecosystem
