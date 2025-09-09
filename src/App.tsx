@@ -66,14 +66,19 @@ const App = () => {
             onClick={() => {
               console.log('🔄 User clicked update, clearing localStorage')
               localStorage.removeItem('app-needs-update')
+              
+              // Set flag for success message after reload
+              localStorage.setItem('update-success-pending', 'true');
+              
               toast({
-                title: "🚀 Update Berhasil!",
-                description: "Aplikasi berhasil diperbarui"
+                title: "🚀 Sedang Update...",
+                description: "Tunggu sebentar, aplikasi akan restart otomatis"
               });
+              
               setTimeout(() => {
                 updateServiceWorker(true)
                 setNeedRefresh(false)
-              }, 1000);
+              }, 1500);
             }}
             className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
           >
@@ -260,6 +265,19 @@ const App = () => {
               });
               localStorage.setItem(updateNotificationKey, 'true');
             }, 2000);
+          }
+          
+          // Show update success notification after manual update (iOS fix)
+          const updateSuccessPending = localStorage.getItem('update-success-pending');
+          if (updateSuccessPending) {
+            setTimeout(() => {
+              toast({
+                title: "🚀 Update Berhasil!",
+                description: "Aplikasi berhasil diperbarui ke versi terbaru ✅",
+                duration: 6000,
+              });
+              localStorage.removeItem('update-success-pending');
+            }, 1000);
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
