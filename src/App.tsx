@@ -27,6 +27,7 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [updateClicked, setUpdateClicked] = useState(false);
   const { toast } = useToast();
   
   // Initialize push notifications for authenticated users
@@ -63,24 +64,30 @@ const App = () => {
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
           <button 
-            onClick={() => {
+            onClick={(e) => {
+              // Prevent double clicks on iOS
+              if (updateClicked) return;
+              
+              e.preventDefault();
+              e.stopPropagation();
+              setUpdateClicked(true);
+              
               console.log('🔄 User clicked update, clearing localStorage')
               localStorage.removeItem('app-needs-update')
               
               // Set flag for success message after reload
               localStorage.setItem('update-success-pending', 'true');
               
-              toast({
-                title: "🚀 Sedang Update...",
-                description: "Tunggu sebentar, aplikasi akan restart otomatis"
-              });
-              
-              setTimeout(() => {
-                updateServiceWorker(true)
-                setNeedRefresh(false)
-              }, 1500);
+              // Update immediately without intermediate message
+              updateServiceWorker(true)
+              setNeedRefresh(false)
             }}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+            disabled={updateClicked}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              updateClicked 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+            }`}
           >
             Tekan disini untuk update otomatis
           </button>
