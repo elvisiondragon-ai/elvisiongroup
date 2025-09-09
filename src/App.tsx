@@ -28,7 +28,11 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateClicked, setUpdateClicked] = useState(false);
+  const [toastId, setToastId] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // iOS detection
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   
   // Initialize push notifications for authenticated users
   const { registerForNotifications } = usePushNotifications();
@@ -59,7 +63,10 @@ const App = () => {
   // Show update notification when available
   useEffect(() => {
     const showUpdateToast = () => {
-      toast({
+      // Prevent multiple toasts
+      if (toastId) return;
+      
+      const newToastId = toast({
         title: "🎯 Ada Update Terbaru! - Auto Deploy Notification",
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
@@ -68,6 +75,7 @@ const App = () => {
               // Prevent double clicks on iOS
               if (updateClicked) return;
               
+              // iOS-specific event handling
               e.preventDefault();
               e.stopPropagation();
               setUpdateClicked(true);
@@ -78,15 +86,30 @@ const App = () => {
               // Set flag for success message after reload
               localStorage.setItem('update-success-pending', 'true');
               
-              // Update immediately without intermediate message
-              updateServiceWorker(true)
-              setNeedRefresh(false)
+              // iOS-specific timing adjustments
+              const updateDelay = isIOS ? 200 : 50;
+              const resetDelay = isIOS ? 3000 : 2000;
+              
+              setTimeout(() => {
+                updateServiceWorker(true)
+                setNeedRefresh(false)
+                setToastId(null); // Clear toast reference
+                
+                // Reset state after update completes
+                setTimeout(() => {
+                  setUpdateClicked(false);
+                }, resetDelay);
+              }, updateDelay);
+            }}
+            onTouchStart={(e) => {
+              // iOS-specific: Handle touch events properly
+              e.preventDefault();
             }}
             disabled={updateClicked}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               updateClicked 
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80'
             }`}
           >
             Tekan disini untuk update otomatis
@@ -94,16 +117,25 @@ const App = () => {
         ),
         duration: 0, // Don't auto-dismiss
       });
+      
+      setToastId(newToastId);
     }
 
     // Check if update is available from SW or localStorage
     const hasUpdate = needRefresh || localStorage.getItem('app-needs-update') === 'true'
     
-    if (hasUpdate) {
+    if (hasUpdate && !toastId) {
       console.log('📢 Showing update notification')
       showUpdateToast()
     }
-  }, [needRefresh, toast, updateServiceWorker, setNeedRefresh]);
+    
+    // Cleanup toast ID when update completes
+    return () => {
+      if (!hasUpdate) {
+        setToastId(null);
+      }
+    };
+  }, [needRefresh, toast, updateServiceWorker, setNeedRefresh, toastId]);
 
   // Pro status change notification (persistent like deploy notification)
   useEffect(() => {
