@@ -111,7 +111,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       audioCache.set(audioPath, blobUrl);
       
       // Store in IndexedDB for persistence (especially important for iOS)
-      const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
       await indexedDBCache.store(cacheKey, blob, audioUrl);
       
       // Create audio element with cached blob
