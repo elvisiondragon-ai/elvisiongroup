@@ -344,6 +344,61 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
             </div>
           </div>
         </Card>
+
+        <Card className="relative overflow-hidden border transition-all duration-300 hover:scale-[1.01] bg-gradient-to-br from-orange-500/5 via-background to-yellow-500/5 border-orange-400/30 shadow-lg shadow-orange-400/10">
+          {/* Minimal Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-orange-500 via-transparent to-yellow-500"></div>
+            <div className="absolute top-2 right-2 w-8 h-8 border border-orange-400/20 rounded-full"></div>
+            <div className="absolute bottom-2 left-2 w-4 h-4 border border-yellow-400/20 rounded-full"></div>
+          </div>
+          
+          <div className="relative z-10 text-center space-y-4 p-4">
+            {/* Compact Title */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-center gap-2">
+                <h3 className="text-base font-semibold font-orbitron bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+                  eL Vision Delta Breathing
+                </h3>
+                <span className="px-1.5 py-0.5 text-xs font-medium rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                  SHORT
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground/80 font-medium">
+                Tehnik Pernafasan Delta untuk Mengantuk cepat
+              </p>
+              <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent mx-auto"></div>
+            </div>
+
+            {/* Smaller Audio Player */}
+            <div className="flex justify-center">
+              <div className="transform scale-75">
+                {/* @ts-ignore - Lovable deployment compatibility */}
+                <VerseAudioCard
+                  verse={{
+                    id: 101,
+                    title: "eL Vision Delta Breathing",
+                    subtitle: "Tehnik Pernafasan Delta untuk Mengantuk cepat",
+                    unlocked: true,
+                    requiredLevel: 1,
+                    artwork: verse7Artwork,
+                    audioPath: 'Short Verse - eL Vision Delta Breathing.MP3',
+                    language: 'id'
+                  }}
+                  onWarning={handleWarning}
+                  currentPlayingVerse={currentPlayingVerse}
+                  setCurrentPlayingVerse={setCurrentPlayingVerse}
+                  currentVerseAudio={currentVerseAudio}
+                  setCurrentVerseAudio={setCurrentVerseAudio}
+                  onShowSacredNotification={(verseName) => {
+                    setCurrentVerseName(verseName);
+                    setShowSacredNotification(true);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
 
       {/* Main Verses */}
