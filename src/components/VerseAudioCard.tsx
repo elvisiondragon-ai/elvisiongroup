@@ -276,6 +276,10 @@ export function VerseAudioCard({
                   <>
                     Lv 3 or Upgrade Pro
                   </>
+                ) : verse.requiredLevel === 4 ? (
+                  <>
+                    Lv 4 or Upgrade Pro
+                  </>
                 ) : verse.requiredLevel === 6 ? (
                   <div className="font-[Luxurious_Script] text-sm">
                     Lv 5 or Upgrade Pro
