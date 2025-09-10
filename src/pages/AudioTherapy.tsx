@@ -379,8 +379,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     id: 101,
                     title: "eL Vision Delta Breathing",
                     subtitle: "Tehnik Pernafasan Delta untuk Mengantuk cepat",
-                    unlocked: true,
-                    requiredLevel: 1,
+                    unlocked: proStatus.isPro || userLevel >= 4,
+                    requiredLevel: 4,
                     artwork: verse7Artwork,
                     audioPath: 'Short Verse - eL Vision Delta Breathing.MP3',
                     language: 'id'
