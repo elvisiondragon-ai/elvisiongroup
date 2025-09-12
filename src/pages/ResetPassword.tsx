@@ -98,7 +98,7 @@ export function ResetPassword() {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
               <img 
-                src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" 
+                src="/assets/favicon.png" 
                 alt="eL Vision Group Logo" 
                 className="w-24 h-24 object-contain"
               />
@@ -144,7 +144,7 @@ export function ResetPassword() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <img 
-              src="/lovable-uploads/fbd7b86c-d8ea-447e-87ad-d67254074e61.png" 
+              src="/assets/favicon.png" 
               alt="eL Vision Group Logo" 
               className="w-24 h-24 object-contain"
             />
