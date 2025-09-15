@@ -15,7 +15,7 @@ import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useAudioCache } from "@/hooks/useAudioCache";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
-import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 import faviconImage from "@/assets/favicon.png";
 
@@ -151,11 +151,12 @@ export function Home({
 
   const features = [{
     title: t('home.meditationSessions'),
-    description: "Guided meditation sessions",
-    icon: Play,
-    color: "text-primary",
+    description: "Weekly live meditation sessions",
+    icon: Radio,
+    color: "text-red-500",
     key: "meditation-sessions",
-    isLocked: true
+    isLocked: false,
+    isLive: true
   }, {
     title: t('Verse of eL Vision'),
     description: "Spiritual frequency healing",
@@ -164,16 +165,18 @@ export function Home({
     key: "audio-therapy"
   }, {
     title: t('home.spiritualJournal'),
-    description: "Track your transformation journey",
-    icon: BookOpen,
-    color: "text-gold",
-    key: "spiritual-journal"
+    description: "Sacred transformation chronicles",
+    icon: Scroll,
+    color: "text-amber-400",
+    key: "spiritual-journal",
+    isMystical: true
   }, {
     title: "Community",
-    description: "Join the soul tribe",
-    icon: Zap,
-    color: "text-neon-green",
-    key: "chat"
+    description: "Divine soul collective",
+    icon: Users,
+    color: "text-cyan-400",
+    key: "chat",
+    isCommunity: true
   }, {
     title: "Ignis Quest",
     description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
@@ -386,17 +389,34 @@ export function Home({
                 
                 <div className="flex flex-col items-center text-center space-y-3">
                   <div className={`p-3 rounded-full relative ${
-                    feature.key === 'audio-therapy' 
-                      ? 'bg-gradient-to-r from-yellow-600 via-amber-500 to-yellow-400 shadow-lg shadow-yellow-500/30' 
+                    feature.key === 'meditation-sessions'
+                      ? 'bg-gradient-to-r from-red-600 via-red-500 to-orange-500 shadow-lg shadow-red-500/40 animate-pulse'
+                    : feature.key === 'audio-therapy'
+                      ? 'bg-gradient-to-r from-yellow-600 via-amber-500 to-yellow-400 shadow-lg shadow-yellow-500/30'
+                    : feature.key === 'spiritual-journal'
+                      ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-400 shadow-xl shadow-amber-500/50 border-2 border-amber-300/30'
+                    : feature.key === 'chat'
+                      ? 'bg-gradient-to-r from-cyan-600 via-blue-500 to-purple-600 shadow-xl shadow-cyan-500/50 border-2 border-cyan-300/30'
                     : feature.key === 'ignis-quest'
                       ? 'bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 shadow-lg shadow-orange-500/50'
                       : 'bg-muted'
                   } ${feature.color}`}>
                     <feature.icon className={`w-6 h-6 ${
-                      feature.key === 'audio-therapy' ? 'text-white animate-pulse' 
+                      feature.key === 'meditation-sessions' ? 'text-white animate-pulse'
+                      : feature.key === 'audio-therapy' ? 'text-white animate-pulse'
+                      : feature.key === 'spiritual-journal' ? 'text-white drop-shadow-lg'
+                      : feature.key === 'chat' ? 'text-white drop-shadow-lg'
                       : feature.key === 'ignis-quest' ? 'text-white animate-pulse'
                       : ''
                     }`} />
+                    {/* Live indicator for meditation sessions */}
+                    {feature.key === 'meditation-sessions' && (
+                      <div className="absolute -top-1 -right-1 flex items-center">
+                        <div className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg">
+                          LIVE
+                        </div>
+                      </div>
+                    )}
                     {isLocked && <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
                         <Lock className="w-4 h-4 text-muted-foreground" />
                       </div>}
