@@ -429,7 +429,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                 <div className="mt-4 p-3 bg-primary/10 border border-primary/30 rounded-lg text-center">
                   <p className="text-primary text-sm flex items-center justify-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Caching audio for better performance...
+                    🚀Download Live on Progress
                   </p>
                 </div>
               )}

@@ -320,7 +320,7 @@ export function VerseAudioCard({
       
       {/* Simple Download Notification */}
       {showDownloadNotif && (
-        <div className="fixed bottom-4 left-4 right-4 z-50 bg-primary/90 text-white p-3 rounded-lg shadow-lg animate-pulse">
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-primary/90 text-white p-3 rounded-lg shadow-lg animate-pulse min-w-[280px] max-w-[90vw]">
           <p className="text-sm text-center">Audio sedang di download agar anda lebih mudah mendengarkan nanti, tunggu sebentar...</p>
         </div>
       )}
