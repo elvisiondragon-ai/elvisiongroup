@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { getAudioUrl } from '@/utils/audioUtils';
 import { indexedDBCache } from '@/utils/indexedDBCache';
+import { AudioProtection } from '@/utils/audioProtection';
 
 interface AudioContextType {
   createProtectedAudio: (audioPath: string, onLoadingChange?: (loading: boolean) => void) => Promise<HTMLAudioElement>;
@@ -14,6 +15,18 @@ const AudioContext = createContext<AudioContextType | undefined>(undefined);
 export function AudioProvider({ children }: { children: React.ReactNode }) {
   // In-memory cache for audio blobs
   const [audioCache] = useState(new Map<string, string>());
+
+  // Initialize audio protection on mount
+  React.useEffect(() => {
+    AudioProtection.monitorDownloadAttempts();
+    // Track blob URLs without auto-clearing
+    const clearTrackedUrls = AudioProtection.trackBlobUrls();
+
+    // Return cleanup function to clear tracked URLs on unmount if needed
+    return () => {
+      // clearTrackedUrls(); // Commented out to keep URLs persistent
+    };
+  }, []);
   
   const clearCache = useCallback(async () => {
     // Clean up blob URLs to prevent memory leaks
@@ -53,13 +66,30 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (cachedUrl) {
       console.log('🎵 Using memory cached audio:', audioPath);
       const audio = new Audio(cachedUrl);
-      
-      // Apply protections
-      audio.setAttribute('preload', 'metadata');
-      audio.setAttribute('controlsList', 'nodownload noremoteplayback');
+
+      // Apply comprehensive protections
+      audio.setAttribute('preload', 'none');
+      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+      audio.setAttribute('disablepictureinpicture', 'true');
       audio.crossOrigin = 'anonymous';
       audio.addEventListener('contextmenu', (e) => e.preventDefault());
-      
+      audio.addEventListener('dragstart', (e) => e.preventDefault());
+      audio.addEventListener('drag', (e) => e.preventDefault());
+
+      // Override src property
+      Object.defineProperty(audio, 'src', {
+        value: cachedUrl,
+        writable: false,
+        enumerable: false,
+        configurable: false
+      });
+
+      Object.defineProperty(audio, 'currentSrc', {
+        get: () => 'protected://audio-stream',
+        enumerable: false,
+        configurable: false
+      });
+
       return audio;
     }
 
@@ -72,15 +102,32 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       
       // Store in memory cache for faster subsequent access
       audioCache.set(audioPath, blobUrl);
-      
+
       const audio = new Audio(blobUrl);
-      
-      // Apply protections
-      audio.setAttribute('preload', 'metadata');
-      audio.setAttribute('controlsList', 'nodownload noremoteplayback');
+
+      // Apply comprehensive protections
+      audio.setAttribute('preload', 'none');
+      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+      audio.setAttribute('disablepictureinpicture', 'true');
       audio.crossOrigin = 'anonymous';
       audio.addEventListener('contextmenu', (e) => e.preventDefault());
-      
+      audio.addEventListener('dragstart', (e) => e.preventDefault());
+      audio.addEventListener('drag', (e) => e.preventDefault());
+
+      // Override src property
+      Object.defineProperty(audio, 'src', {
+        value: blobUrl,
+        writable: false,
+        enumerable: false,
+        configurable: false
+      });
+
+      Object.defineProperty(audio, 'currentSrc', {
+        get: () => 'protected://audio-stream',
+        enumerable: false,
+        configurable: false
+      });
+
       return audio;
     }
 
@@ -115,13 +162,42 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       
       // Create audio element with cached blob
       const audio = new Audio(blobUrl);
-      
-      // Apply protections
-      audio.setAttribute('preload', 'metadata');
-      audio.setAttribute('controlsList', 'nodownload noremoteplayback');
+
+      // Apply comprehensive protections
+      audio.setAttribute('preload', 'none');
+      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+      audio.setAttribute('disablepictureinpicture', 'true');
       audio.crossOrigin = 'anonymous';
+
+      // Prevent right-click context menu
       audio.addEventListener('contextmenu', (e) => e.preventDefault());
-      
+
+      // Prevent drag and drop
+      audio.addEventListener('dragstart', (e) => e.preventDefault());
+      audio.addEventListener('drag', (e) => e.preventDefault());
+
+      // Prevent keyboard shortcuts (Ctrl+S, etc.)
+      audio.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+        }
+      });
+
+      // Override src property to make it non-enumerable and non-configurable
+      Object.defineProperty(audio, 'src', {
+        value: blobUrl,
+        writable: false,
+        enumerable: false,
+        configurable: false
+      });
+
+      // Add protection against direct blob access
+      Object.defineProperty(audio, 'currentSrc', {
+        get: () => 'protected://audio-stream',
+        enumerable: false,
+        configurable: false
+      });
+
       console.log('🎵 Audio cached successfully:', audioPath);
       onLoadingChange?.(false);
       return audio;
@@ -132,12 +208,30 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       // Fallback to direct URL if caching fails
       const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
       const audio = new Audio(audioUrl);
-      
-      audio.setAttribute('preload', 'metadata');
-      audio.setAttribute('controlsList', 'nodownload noremoteplayback');
+
+      // Apply comprehensive protections even for fallback
+      audio.setAttribute('preload', 'none');
+      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+      audio.setAttribute('disablepictureinpicture', 'true');
       audio.crossOrigin = 'anonymous';
       audio.addEventListener('contextmenu', (e) => e.preventDefault());
-      
+      audio.addEventListener('dragstart', (e) => e.preventDefault());
+      audio.addEventListener('drag', (e) => e.preventDefault());
+
+      // Override src property even for direct URLs
+      Object.defineProperty(audio, 'src', {
+        value: audioUrl,
+        writable: false,
+        enumerable: false,
+        configurable: false
+      });
+
+      Object.defineProperty(audio, 'currentSrc', {
+        get: () => 'protected://audio-stream',
+        enumerable: false,
+        configurable: false
+      });
+
       onLoadingChange?.(false);
       return audio;
     }

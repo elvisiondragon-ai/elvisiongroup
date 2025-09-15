@@ -3,8 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { ArrowLeft, Play, Pause, Volume2, Users, Radio, Heart, Star, Sparkles, Headphones, Clock, Crown, Eye } from "lucide-react";
+import { ArrowLeft, Play, Pause, Volume2, Users, Radio, Heart, Star, Sparkles, Headphones, Clock, Crown, Eye, Loader2 } from "lucide-react";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import { useProtectedAudio } from "@/contexts/AudioContext";
+import { supabase } from "@/integrations/supabase/client";
 import faviconImage from "@/assets/favicon.png";
 
 interface MeditationSessionsProps {
@@ -14,11 +16,15 @@ interface MeditationSessionsProps {
 export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   const { t } = useTranslation();
   const { userProfile } = useUserProfile();
+  const { createProtectedAudio } = useProtectedAudio();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.7);
   const [liveCount, setLiveCount] = useState(3876);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [sessionData, setSessionData] = useState<any>(null);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Simulate live audience count updates
@@ -49,16 +55,134 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
     };
   }, []);
 
-  const togglePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
+  // Fetch meditation session data from database
+  const fetchSessionData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('audio_tracks')
+        .select('*')
+        .eq('category', 'meditation_session')
+        .eq('is_public', true)
+        .single();
 
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
+      if (error) {
+        console.error('Error fetching session data:', error);
+        // Fallback to hardcoded data if database fetch fails
+        setSessionData({
+          title: 'Monday Live Session 736',
+          description: 'Join our weekly guided meditation session with thousands of practitioners worldwide.',
+          file_url: 'live01.MP3'
+        });
+        return;
+      }
+
+      setSessionData(data);
+    } catch (error) {
+      console.error('Error:', error);
+      setAudioError('Failed to load session data');
     }
-    setIsPlaying(!isPlaying);
+  };
+
+  // Fetch session data on mount
+  useEffect(() => {
+    fetchSessionData();
+  }, []);
+
+  // Additional anti-download protection
+  useEffect(() => {
+    // Disable developer tools shortcuts
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+      if (e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+          (e.ctrlKey && e.key === 'u')) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    // Prevent right-click context menu
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    // Prevent text selection on audio elements
+    const handleSelectStart = (e: Event) => {
+      const target = e.target as Element;
+      if (target.tagName === 'AUDIO') {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('selectstart', handleSelectStart);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('selectstart', handleSelectStart);
+    };
+  }, []);
+
+  const togglePlayPause = async () => {
+    if (!sessionData?.file_url) {
+      setAudioError('Session data not available');
+      return;
+    }
+
+    const currentAudio = audioRef.current;
+
+    if (isPlaying && currentAudio) {
+      currentAudio.pause();
+      setIsPlaying(false);
+      return;
+    }
+
+    try {
+      setIsLoadingAudio(true);
+      setAudioError(null);
+
+      // Create protected audio using the same system as VerseAudioCard
+      const protectedAudio = await createProtectedAudio(sessionData.file_url, setIsLoadingAudio);
+
+      // Set up event listeners
+      protectedAudio.addEventListener('loadedmetadata', () => {
+        setDuration(protectedAudio.duration);
+      });
+
+      protectedAudio.addEventListener('timeupdate', () => {
+        setCurrentTime(protectedAudio.currentTime);
+      });
+
+      protectedAudio.addEventListener('ended', () => {
+        setIsPlaying(false);
+      });
+
+      protectedAudio.addEventListener('error', () => {
+        setAudioError('Failed to play audio');
+        setIsLoadingAudio(false);
+      });
+
+      // Set volume
+      protectedAudio.volume = volume;
+
+      // Play the protected audio
+      await protectedAudio.play();
+
+      // Update refs and state
+      audioRef.current = protectedAudio;
+      setIsPlaying(true);
+      setIsLoadingAudio(false);
+
+    } catch (error) {
+      console.error('Error playing protected audio:', error);
+      setAudioError('Failed to load or play audio');
+      setIsLoadingAudio(false);
+      setIsPlaying(false);
+    }
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,7 +259,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
               </div>
 
               <h2 className="text-3xl font-bold font-orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">
-                Monday Live Session 736
+                {sessionData?.title || 'Monday Live Session 736'}
               </h2>
 
               <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground mb-4">
@@ -150,18 +274,13 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
               </div>
 
               <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
-                Join our weekly guided meditation session with thousands of practitioners worldwide.
-                Experience collective healing energy and spiritual alignment through the power of group consciousness.
+                {sessionData?.description || 'Join our weekly guided meditation session with thousands of practitioners worldwide. Experience collective healing energy and spiritual alignment through the power of group consciousness.'}
               </p>
             </div>
 
             {/* Audio Player */}
             <div className="max-w-md mx-auto">
-              <audio
-                ref={audioRef}
-                src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/live01.MP3"
-                preload="metadata"
-              />
+              {/* Audio element is created programmatically via protected audio system */}
 
               {/* Album Art */}
               <div className="relative mb-8">
@@ -196,7 +315,9 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                       onClick={togglePlayPause}
                       className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-2 border-white/50 shadow-2xl shadow-black/50 transition-all duration-300 hover:scale-110"
                     >
-                      {isPlaying ? (
+                      {isLoadingAudio ? (
+                        <Loader2 className="w-10 h-10 text-white animate-spin" />
+                      ) : isPlaying ? (
                         <Pause className="w-10 h-10 text-white" />
                       ) : (
                         <Play className="w-10 h-10 text-white ml-1" />
@@ -254,7 +375,9 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                   onClick={togglePlayPause}
                   className="w-20 h-20 rounded-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-2xl shadow-primary/40 transform hover:scale-105 transition-all duration-300 border-2 border-white/10"
                 >
-                  {isPlaying ? (
+                  {isLoadingAudio ? (
+                    <Loader2 className="w-10 h-10 animate-spin" />
+                  ) : isPlaying ? (
                     <Pause className="w-10 h-10" />
                   ) : (
                     <Play className="w-10 h-10 ml-1" />
@@ -293,6 +416,23 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                 </div>
                 <span className="text-sm text-muted-foreground font-mono w-10">{Math.round(volume * 100)}%</span>
               </div>
+
+              {/* Error Display */}
+              {audioError && (
+                <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-center">
+                  <p className="text-red-400 text-sm">{audioError}</p>
+                </div>
+              )}
+
+              {/* Loading Display */}
+              {isLoadingAudio && (
+                <div className="mt-4 p-3 bg-primary/10 border border-primary/30 rounded-lg text-center">
+                  <p className="text-primary text-sm flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Caching audio for better performance...
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Session Benefits */}
@@ -326,7 +466,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                   <div className="absolute inset-0 w-3 h-3 rounded-full bg-primary animate-ping"></div>
                 </div>
                 <div>
-                  <div className="font-semibold text-primary">Monday Live Session 736</div>
+                  <div className="font-semibold text-primary">{sessionData?.title || 'Monday Live Session 736'}</div>
                   <div className="text-sm text-muted-foreground">21.45 WIB • Live Now</div>
                 </div>
               </div>

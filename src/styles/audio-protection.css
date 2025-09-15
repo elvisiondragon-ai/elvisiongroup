@@ -1,0 +1,49 @@
+/* Audio Download Protection Styles */
+
+/* Hide download button in audio controls */
+audio::-webkit-media-controls-download-button {
+  display: none !important;
+}
+
+audio::-webkit-media-controls-enclosure {
+  overflow: hidden;
+}
+
+/* Firefox download button hiding */
+audio::-moz-media-controls {
+  display: none !important;
+}
+
+/* Prevent right-click menu on audio */
+audio {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -khtml-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  pointer-events: none !important;
+}
+
+/* Allow play controls but prevent other interactions */
+audio:focus {
+  outline: none !important;
+}
+
+/* Hide in DevTools */
+audio[src^="blob:"] {
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}
+
+/* Prevent drag and drop */
+audio {
+  -webkit-user-drag: none !important;
+  -moz-user-drag: none !important;
+  user-drag: none !important;
+  draggable: false !important;
+}

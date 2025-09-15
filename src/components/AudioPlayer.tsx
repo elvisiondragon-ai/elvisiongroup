@@ -62,7 +62,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
     const handleEnded = () => setIsPlaying(false);
 
     // Enhanced audio setup for better compatibility
-    audio.setAttribute('preload', 'metadata');
+    audio.setAttribute('preload', 'none');
     audio.setAttribute('controlsList', 'nodownload noremoteplayback');
     audio.crossOrigin = 'anonymous';
 
