@@ -212,15 +212,43 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                 </div>
               </div>
 
-              {/* Live Session Title */}
+              {/* Progress Bar */}
               <div className="mb-8">
-                <div className="text-center">
+                <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+                  <span className="font-mono">{formatTime(currentTime)}</span>
                   <span className="text-primary font-semibold">Monday Live Session</span>
+                  <span className="font-mono">{formatTime(duration)}</span>
+                </div>
+                <div className="relative">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={progressPercentage}
+                    onChange={handleSeek}
+                    className="w-full h-3 bg-muted/50 rounded-lg appearance-none cursor-pointer slider backdrop-blur-sm"
+                    style={{
+                      background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${progressPercentage}%, hsl(var(--muted)) ${progressPercentage}%, hsl(var(--muted)) 100%)`
+                    }}
+                  />
                 </div>
               </div>
 
               {/* Control Buttons */}
-              <div className="flex items-center justify-center mb-8">
+              <div className="flex items-center justify-center gap-8 mb-8">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="w-14 h-14 rounded-full hover:bg-primary/10 border border-primary/20 transition-all duration-300"
+                  onClick={() => {
+                    if (audioRef.current) {
+                      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 15);
+                    }
+                  }}
+                >
+                  <span className="text-sm font-semibold text-primary">-15s</span>
+                </Button>
+
                 <Button
                   size="icon"
                   onClick={togglePlayPause}
@@ -231,6 +259,19 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                   ) : (
                     <Play className="w-10 h-10 ml-1" />
                   )}
+                </Button>
+
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="w-14 h-14 rounded-full hover:bg-primary/10 border border-primary/20 transition-all duration-300"
+                  onClick={() => {
+                    if (audioRef.current) {
+                      audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 15);
+                    }
+                  }}
+                >
+                  <span className="text-sm font-semibold text-primary">+15s</span>
                 </Button>
               </div>
 
