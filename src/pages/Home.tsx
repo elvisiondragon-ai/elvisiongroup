@@ -15,7 +15,7 @@ import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useAudioCache } from "@/hooks/useAudioCache";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
-import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3 } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 import faviconImage from "@/assets/favicon.png";
 
@@ -177,6 +177,13 @@ export function Home({
     color: "text-cyan-400",
     key: "chat",
     isCommunity: true
+  }, {
+    title: "Personal Analytics",
+    description: "AI-powered spiritual journey insights from RENATA",
+    icon: BarChart3,
+    color: "text-purple-500",
+    key: "personal-analytics",
+    isAnalytics: true
   }, {
     title: "Ignis Quest",
     description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
@@ -399,6 +406,8 @@ export function Home({
                       ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-400 shadow-xl shadow-amber-500/50 border-2 border-amber-300/30'
                     : feature.key === 'chat'
                       ? 'bg-gradient-to-r from-cyan-600 via-blue-500 to-purple-600 shadow-xl shadow-cyan-500/50 border-2 border-cyan-300/30'
+                    : feature.key === 'personal-analytics'
+                      ? 'bg-gradient-to-r from-purple-600 via-indigo-500 to-purple-400 shadow-xl shadow-purple-500/50 border-2 border-purple-300/30'
                     : feature.key === 'ignis-quest'
                       ? 'bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 shadow-lg shadow-orange-500/50'
                       : 'bg-muted'
@@ -408,6 +417,7 @@ export function Home({
                       : feature.key === 'audio-therapy' ? 'text-white animate-pulse'
                       : feature.key === 'spiritual-journal' ? 'text-white drop-shadow-lg'
                       : feature.key === 'chat' ? 'text-white drop-shadow-lg'
+                      : feature.key === 'personal-analytics' ? 'text-white drop-shadow-lg animate-pulse'
                       : feature.key === 'ignis-quest' ? 'text-white animate-pulse'
                       : ''
                     }`} />

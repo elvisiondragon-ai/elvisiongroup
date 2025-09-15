@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { AudioUpload } from "@/components/AudioUpload";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown, Shield, Gem, Flame, Eye, Sparkles, Globe, Infinity } from "lucide-react";
+import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown, Shield, Gem, Flame, Eye, Sparkles, Globe, Infinity, Users, TrendingUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { useMeditative } from "@/contexts/MeditativeContext";
 import { VerseAudioCard } from "@/components/VerseAudioCard";
 import { useProtectedAudio } from "@/contexts/AudioContext";
 import { SacredFocusNotification } from "@/components/SacredFocusNotification";
+import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +40,28 @@ interface AudioTherapyProps {
   onNavigate: (tab: string) => void;
 }
 
+// Meditation Counter Component
+function MeditationCounter() {
+  const [currentlyMeditating, setCurrentlyMeditating] = useState(() => {
+    // Generate dynamic number based on current date for consistency
+    const today = new Date();
+    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+    const seed = (dayOfYear * 137) % 1000;
+    return 1400 + (seed % 4201); // 1400-5600 range
+  });
+
+  useEffect(() => {
+    // Simulate live updates with realistic bounds
+    const interval = setInterval(() => {
+      setCurrentlyMeditating(prev => Math.max(1400, Math.min(5600, prev + Math.floor(Math.random() * 15) - 7)));
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return <span>{currentlyMeditating.toLocaleString()}</span>;
+}
+
 export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { t, i18n } = useTranslation();
   const [userLevel, setUserLevel] = useState(1);
@@ -50,6 +73,9 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [warningResolver, setWarningResolver] = useState<((value: boolean) => void) | null>(null);
   const [showSacredNotification, setShowSacredNotification] = useState(false);
   const [currentVerseName, setCurrentVerseName] = useState<string>("");
+  const [showProUpgrade, setShowProUpgrade] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState<string>("unlock");
+  const [userStats, setUserStats] = useState<any>(null);
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
@@ -83,12 +109,17 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('level')
+        .select('level, total_verses_completed, current_streak, total_meditations')
         .eq('user_id', userId)
         .maybeSingle();
 
       if (data) {
         setUserLevel(data.level);
+        setUserStats({
+          totalMeditations: data.total_meditations || 0,
+          daysActive: Math.floor((new Date().getTime() - new Date(userId).getTime()) / (1000 * 60 * 60 * 24)),
+          currentStreak: data.current_streak || 0
+        });
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -136,37 +167,51 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     setShowWarningDialog(false);
   };
 
+  const handleProUpgrade = (reason: string) => {
+    setUpgradeReason(reason);
+    setShowProUpgrade(true);
+  };
+
+  const navigateToPayment = () => {
+    setShowProUpgrade(false);
+    onNavigate("payment");
+  };
+
 
   const verses = [
     {
       id: 1,
       title: "Verse 1 - The Space Hill",
       subtitle: "Kedamaian Batin",
-      unlocked: true, // Allow access to all verses - users will discover levels naturally
+      unlocked: true, // Free access
       requiredLevel: 2,
       artwork: verseArtwork,
       audioPath: 'Verse1 - The Space Hill.MP3',
-      language: 'en'
+      language: 'en',
+      isFree: true
     },
     {
       id: 2,
       title: "Verse 2 - Lucid Beach",
       subtitle: "Relaksasi seperti berada di pantai, membantu tidur nyenyak dan pikiran jernih",
-      unlocked: true,
+      unlocked: true, // Free access
       requiredLevel: 1,
       artwork: verse2Artwork,
       audioPath: 'Verse2 - Lucid Beach.MP3',
-      language: 'id'
+      language: 'id',
+      isFree: true
     },
     {
       id: 3,
       title: "Verse 3 - Syukur Meditation",
       subtitle: "Menumbuhkan rasa syukur pada titik saraf seluruh tubuh",
-      unlocked: proStatus.isPro, // Lock for non-pro users
+      unlocked: proStatus.isPro, // Pro only
       requiredLevel: 3,
       artwork: verse3Artwork,
       audioPath: 'Verse 3 - Syukur.MP3',
-      language: 'id'
+      language: 'id',
+      isFree: false,
+      proOnly: true
     },
     {
       id: 4,
@@ -176,17 +221,21 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       requiredLevel: 5,
       artwork: verse4Artwork,
       audioPath: 'Verse 4 - Prosperity Stream Vol. 1.MP3',
-      language: 'id'
+      language: 'id',
+      isFree: false,
+      proOnly: true
     },
     {
       id: 5,
       title: "Verse 5 - Vitality Vortex",
       subtitle: "Memperbaiki ulang finansial, fisik dan mental untuk hidup yang sehat",
-      unlocked: proStatus.isPro, // Lock for non-pro users
+      unlocked: proStatus.isPro, // Pro only
       requiredLevel: 6,
       artwork: verse5Artwork,
       audioPath: 'Verse5 - Virtality Vortex.MP3',
-      language: 'id'
+      language: 'id',
+      isFree: false,
+      proOnly: true
     },
     {
       id: 6,
@@ -280,6 +329,59 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           </Button>
         </div>
       </div>
+
+      {/* Live Meditation Counter */}
+      <div className="px-6 mb-6">
+        <div className="flex justify-center">
+          <div className="flex items-center gap-2 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-full px-4 py-2 shadow-lg">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-green-400 text-sm font-medium">
+              <MeditationCounter /> sedang bermeditasi
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Personalized Stats for Conversion */}
+      {!proStatus.isPro && userStats && (
+        <div className="px-6 mb-6">
+          <Card className="p-4 bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border border-indigo-500/30">
+            <div className="text-center space-y-3">
+              <div className="flex items-center justify-center gap-2">
+                <TrendingUp className="w-5 h-5 text-indigo-400" />
+                <h3 className="text-lg font-semibold text-indigo-300">Progress Anda</h3>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center p-3 bg-indigo-800/30 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-400">{userStats.totalMeditations || 0}</div>
+                  <div className="text-xs text-indigo-300">Meditasi</div>
+                </div>
+                <div className="text-center p-3 bg-indigo-800/30 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-400">{userStats.daysActive || 0}</div>
+                  <div className="text-xs text-indigo-300">Hari Aktif</div>
+                </div>
+                <div className="text-center p-3 bg-indigo-800/30 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-400">{userStats.currentStreak || 0}</div>
+                  <div className="text-xs text-indigo-300">Streak</div>
+                </div>
+              </div>
+
+              <p className="text-indigo-200 text-sm">
+                <strong>Anggota Pro rata-rata:</strong> 45x lebih banyak insight & kemajuan spiritual!
+              </p>
+
+              <Button
+                onClick={() => handleProUpgrade("stats")}
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Lihat Apa yang Anggota Pro Dapatkan
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Short Verses - Reflection */}
       <div className="px-6 space-y-4">
@@ -383,7 +485,9 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     requiredLevel: 4,
                     artwork: verse7Artwork,
                     audioPath: 'Short Verse - eL Vision Delta Breathing.MP3',
-                    language: 'id'
+                    language: 'id',
+                    isFree: false,
+                    proOnly: true
                   }}
                   onWarning={handleWarning}
                   currentPlayingVerse={currentPlayingVerse}
@@ -537,6 +641,15 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         isVisible={showSacredNotification}
         onClose={() => setShowSacredNotification(false)}
         verseName={currentVerseName}
+      />
+
+      {/* Pro Upgrade Modal */}
+      <ProUpgradeModal
+        isVisible={showProUpgrade}
+        onClose={() => setShowProUpgrade(false)}
+        onNavigateToPayment={navigateToPayment}
+        reason={upgradeReason}
+        userStats={userStats}
       />
     </div>
   );

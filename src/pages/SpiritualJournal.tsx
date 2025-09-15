@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Save, BarChart3, BookOpen } from "lucide-react";
+import { JournalAnalytics } from "@/components/JournalAnalytics";
+import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +25,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [showProUpgrade, setShowProUpgrade] = useState(false);
+  const [activeTab, setActiveTab] = useState("journal");
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
 
@@ -45,15 +50,20 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   }, []);
 
   const loadReflections = async (userId: string) => {
+    console.log('🔍 Loading reflections for user:', userId);
+
     const { data, error } = await supabase
       .from('reflections')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
+    console.log('📊 Reflections query result:', { data, error });
+
     if (error) {
-      console.error('Error loading reflections:', error);
+      console.error('❌ Error loading reflections:', error);
     } else {
+      console.log('✅ Successfully loaded reflections:', data?.length || 0, 'entries');
       setReflections(data || []);
     }
   };
@@ -68,29 +78,51 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       return;
     }
 
-    const { error } = await supabase
+    console.log('💾 Attempting to save reflection for user:', currentUser.id);
+    console.log('📝 Reflection content:', reflection.trim());
+
+    const { data, error } = await supabase
       .from('reflections')
       .insert({
         user_id: currentUser.id,
+        user_email: currentUser.email,
         question: currentQuestion,
-        reflection: reflection.trim()
-      });
+        reflection: reflection.trim(),
+        content: reflection.trim() // Populate both fields for RENATA compatibility
+      })
+      .select(); // Return the inserted data to verify
 
     if (error) {
-      console.error('Error saving reflection:', error);
+      console.error('❌ Error saving reflection:', error);
       toast({
         title: "Error",
-        description: "Gagal menyimpan renungan",
+        description: `Gagal menyimpan renungan: ${error.message}`,
         variant: "destructive"
       });
     } else {
+      console.log('✅ Reflection saved successfully:', data);
+
       // Award XP for completing spiritual journal reflection (this will show XP notification)
       awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
-      
-      // Remove the duplicate "Tersimpan" notification - only show XP notification
+
+      toast({
+        title: "✅ Tersimpan",
+        description: "Renungan berhasil disimpan ke database",
+        variant: "default"
+      });
+
       setReflection("");
       loadReflections(currentUser.id);
     }
+  };
+
+  const handleProUpgradeClick = () => {
+    setShowProUpgrade(true);
+  };
+
+  const navigateToPayment = () => {
+    setShowProUpgrade(false);
+    onNavigate("payment");
   };
 
   return (
@@ -113,6 +145,20 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       </div>
 
       <div className="px-6 space-y-6">
+        {/* Tabs for Journal and Analytics */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="journal" className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Jurnal
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="journal" className="space-y-6 mt-6">
 
         {/* Tutorial Section */}
         <Card className="p-8 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-orange-500/10 border-2 border-amber-400/30 shadow-2xl">
@@ -189,7 +235,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
               <h3 className="text-lg font-semibold font-orbitron text-foreground">
                 Riwayat Renungan
               </h3>
-              
+
               <div className="space-y-4 max-h-64 overflow-y-auto">
                 {reflections.map((refl) => (
                   <div key={refl.id} className="p-4 rounded-lg bg-card/30 border border-border space-y-2">
@@ -214,6 +260,13 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
             </div>
           </Card>
         )}
+
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6 mt-6">
+            <JournalAnalytics onUpgradeClick={handleProUpgradeClick} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Done Button */}
@@ -253,6 +306,19 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           <div className="absolute top-0 right-1/3 w-0.5 h-full bg-gradient-to-b from-transparent via-accent/15 to-transparent animate-pulse" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
         </div>
       </div>
+
+      {/* Pro Upgrade Modal */}
+      <ProUpgradeModal
+        isVisible={showProUpgrade}
+        onClose={() => setShowProUpgrade(false)}
+        onNavigateToPayment={navigateToPayment}
+        reason="analytics"
+        userStats={{
+          totalMeditations: reflections.length * 2, // Estimate based on journal entries
+          daysActive: reflections.length,
+          currentStreak: Math.min(7, reflections.length)
+        }}
+      />
 
     </div>
   );

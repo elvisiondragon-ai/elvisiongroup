@@ -18,6 +18,8 @@ interface UserProfile {
   experience_points: number;
   streak_days: number;
   total_sessions: number;
+  total_verses: number;
+  total_journal: number;
   achievements: string[];
   created_at: string;
   avatar_url?: string;

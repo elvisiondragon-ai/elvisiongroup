@@ -10,6 +10,7 @@ import { MeditationSessions } from "./MeditationSessions";
 import { Tutorial } from "./Tutorial";
 import { IgnisQuest } from "./IgnisQuest";
 import { Payment } from "./Payment";
+import { JournalAnalytics } from "@/components/JournalAnalytics";
 import { supabase } from "@/integrations/supabase/client";
 import { useMeditative } from "@/contexts/MeditativeContext";
 import {
@@ -59,6 +60,18 @@ const Index = () => {
       case "spiritual-journal":
         console.log("Rendering SpiritualJournal component");
         return <SpiritualJournal onNavigate={setActiveTab} />;
+      case "personal-analytics":
+        console.log("Rendering Personal Analytics component");
+        return (
+          <div className="min-h-screen bg-background pb-20">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+                Personal Analytics
+              </h1>
+              <JournalAnalytics onUpgradeClick={() => setActiveTab("payment")} />
+            </div>
+          </div>
+        );
       case "meditation-sessions":
         return <MeditationSessions onNavigate={setActiveTab} />;
       case "tutorial":
