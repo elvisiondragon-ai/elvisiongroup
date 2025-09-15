@@ -155,7 +155,7 @@ export function Home({
     icon: Radio,
     color: "text-red-500",
     key: "meditation-sessions",
-    isLocked: false,
+    isLocked: !proStatus.isPro,
     isLive: true
   }, {
     title: t('Verse of eL Vision'),
@@ -371,12 +371,14 @@ export function Home({
         <div className="grid grid-cols-2 gap-4">
           {features.map((feature, index) => {
           const isLocked = feature.isLocked;
+          const isMeditationSession = feature.key === 'meditation-sessions';
+          const isMeditationLocked = isMeditationSession && !proStatus.isPro;
           const isIgnisQuest = feature.key === 'ignis-quest';
           const isIgnisLocked = isIgnisQuest && !proStatus.isPro;
-          const actuallyLocked = isLocked || isIgnisLocked;
-          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${actuallyLocked ? 'bg-card/50 cursor-not-allowed' : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'} ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`} onClick={() => {
+          const actuallyLocked = isLocked || isIgnisLocked || isMeditationLocked;
+          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${actuallyLocked ? 'bg-card/50 cursor-pointer' : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'} ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`} onClick={() => {
             if (actuallyLocked) {
-              if (isIgnisLocked) {
+              if (isIgnisLocked || isMeditationLocked) {
                 onNavigate("payment"); // Navigate to payment/upgrade page
                 return;
               }
@@ -417,7 +419,10 @@ export function Home({
                         </div>
                       </div>
                     )}
-                    {isLocked && <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
+                    {isMeditationLocked && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
+                        <Lock className="w-4 h-4 text-red-400" />
+                      </div>}
+                    {isLocked && !isMeditationLocked && <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
                         <Lock className="w-4 h-4 text-muted-foreground" />
                       </div>}
                     {isIgnisLocked && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
@@ -431,7 +436,10 @@ export function Home({
                     <p className="text-xs text-muted-foreground">
                       {feature.description}
                     </p>
-                    {isLocked && <div className="text-xs font-medium text-muted-foreground mt-2">
+                    {isMeditationLocked && <div className="text-xs font-medium text-red-400 mt-2">
+                        Upgrade to Pro
+                      </div>}
+                    {isLocked && !isMeditationLocked && <div className="text-xs font-medium text-muted-foreground mt-2">
                         Locked
                       </div>}
                   </div>
