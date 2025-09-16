@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, BarChart3, BookOpen } from "lucide-react";
+import { ArrowLeft, Save, BarChart3, BookOpen, X } from "lucide-react";
 import { JournalAnalytics } from "@/components/JournalAnalytics";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import { useState, useEffect } from 'react';
@@ -125,6 +125,43 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     onNavigate("payment");
   };
 
+  const handleDeleteReflection = async (reflectionId: string) => {
+    if (!currentUser) return;
+
+    try {
+      const { error } = await supabase
+        .from('reflections')
+        .delete()
+        .eq('id', reflectionId)
+        .eq('user_id', currentUser.id);
+
+      if (error) {
+        toast({
+          title: "❌ Gagal menghapus",
+          description: "Terjadi kesalahan saat menghapus renungan",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "✅ Berhasil dihapus",
+        description: "Renungan berhasil dihapus",
+        variant: "default"
+      });
+
+      // Reload reflections
+      loadReflections(currentUser.id);
+    } catch (error) {
+      console.error("Error deleting reflection:", error);
+      toast({
+        title: "❌ Gagal menghapus",
+        description: "Terjadi kesalahan sistem",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -238,8 +275,17 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
               <div className="space-y-4 max-h-64 overflow-y-auto">
                 {reflections.map((refl) => (
-                  <div key={refl.id} className="p-4 rounded-lg bg-card/30 border border-border space-y-2">
-                    <div className="text-sm text-muted-foreground">
+                  <div key={refl.id} className="relative p-4 rounded-lg bg-card/30 border border-border space-y-2">
+                    {/* Delete Button */}
+                    <Button
+                      onClick={() => handleDeleteReflection(refl.id)}
+                      className="absolute top-2 right-2 w-6 h-6 p-0 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-full shadow-lg hover:shadow-purple-500/50 transition-all duration-200"
+                      size="sm"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+
+                    <div className="text-sm text-muted-foreground pr-8">
                       {new Date(refl.created_at).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "long",
