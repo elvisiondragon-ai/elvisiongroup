@@ -437,7 +437,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                 {/* @ts-ignore - Lovable deployment compatibility */}
                 <VerseAudioCard
                   verse={{
-                    id: 100,
+                    id: 11,
                     title: "Guided to Inner Silence",
                     subtitle: "Refleksi mendalam menuju ketenangan batin",
                     unlocked: true,
@@ -492,7 +492,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                 {/* @ts-ignore - Lovable deployment compatibility */}
                 <VerseAudioCard
                   verse={{
-                    id: 101,
+                    id: 12,
                     title: "eL Vision Delta Breathing",
                     subtitle: "Tehnik Pernafasan Delta untuk Mengantuk cepat",
                     unlocked: proStatus.isPro || userLevel >= 4,
