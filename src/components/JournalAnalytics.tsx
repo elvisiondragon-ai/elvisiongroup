@@ -20,7 +20,7 @@ interface AnalyticsData {
     percentage: number;
   }>;
   insights: string[];
-  recommendation: string;
+  recommendation: string[];
   spiritualGrowthScore: number;
 }
 
@@ -80,10 +80,10 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
               : `🎯 Anda telah menyelesaikan ${userTotalVerses} Verses. Kombinasikan dengan menulis jurnal untuk hasil manifestasi yang optimal.`
           ],
           recommendation: userTotalJournal === 0
-            ? "Mulai dengan menulis 1 jurnal hari ini tentang apa yang paling ingin Anda lepaskan. Lalu dengarkan Verse 1 atau 2 untuk menenangkan pikiran."
+            ? ["✍️ Mulai dengan menulis 1 jurnal hari ini tentang apa yang paling ingin Anda lepaskan", "🎵 Dengarkan Verse 1 atau 2 untuk menenangkan pikiran"]
             : userTotalJournal < 3
-            ? `Tulis ${3 - userTotalJournal} jurnal lagi untuk mendapat analisis mendalam dari RENATA. Fokus pada hal spesifik yang ingin Anda manifestasikan.`
-            : "Dengarkan minimal 3 Verses dan tulis 2 jurnal lagi untuk mendapat analisis spiritual yang komprehensif.",
+            ? [`📝 Tulis ${3 - userTotalJournal} jurnal lagi untuk mendapat analisis mendalam dari RENATA`, "🎯 Fokus pada hal spesifik yang ingin Anda manifestasikan"]
+            : ["🎵 Dengarkan minimal 3 Verses untuk analisis yang komprehensif", "📖 Tulis 2 jurnal lagi dengan tema yang konsisten"],
           spiritualGrowthScore: Math.max(10, userTotalJournal * 15 + userTotalVerses * 10)
         };
 
@@ -123,8 +123,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
           `🎵 Kombinasi jurnal + Verses menciptakan frekuensi manifestasi yang powerful. Teruskan pola ini untuk hasil yang menakjubkan.`
         ],
         recommendation: userTotalVerses < 5
-          ? `Target next: Dengarkan ${5 - userTotalVerses} Verses lagi dan tulis ${Math.max(7, userTotalJournal + 3)} jurnal tentang "${topManifestationWord}" untuk memperkuat manifestasi.`
-          : `Anda sudah di jalur yang tepat! Tulis ${Math.max(10, userTotalJournal * 2)} jurnal spesifik tentang "${topManifestationWord}" sambil rutin dengarkan Verse 4-5 untuk manifestasi keuangan yang powerful.`,
+          ? [`🎵 Target next: Dengarkan ${5 - userTotalVerses} Verses lagi untuk analisis yang lebih akurat`, `📝 Tulis ${Math.max(7, userTotalJournal + 3)} jurnal tentang "${topManifestationWord}" untuk memperkuat manifestasi`]
+          : [`✅ Anda sudah di jalur yang tepat! Teruskan konsistensi ini`, `📖 Tulis ${Math.max(10, userTotalJournal * 2)} jurnal spesifik tentang "${topManifestationWord}"`, `🎵 Dengarkan Verse 4-5 rutin untuk manifestasi keuangan yang powerful`],
         spiritualGrowthScore: Math.min(90, 25 + (userTotalJournal * 8) + (userTotalVerses * 12))
       };
 
@@ -211,8 +211,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
           "Setiap kata yang Anda tulis adalah investasi untuk ketenangan batin dan manifestasi impian."
         ],
         recommendation: userTotalJournal > 0
-          ? `Berdasarkan ${userTotalJournal} jurnal yang telah Anda tulis, lanjutkan dengan menulis lebih fokus pada hal-hal spesifik yang ingin Anda manifestasikan. Kombinasikan dengan meditasi rutin untuk hasil optimal.`
-          : "Mulai dengan menulis 1 jurnal per hari selama 7 hari berturut-turut. Fokus pada apa yang ingin Anda lepaskan hari ini.",
+          ? [`📈 Berdasarkan ${userTotalJournal} jurnal yang telah Anda tulis, Anda menunjukkan dedikasi yang luar biasa`, `🎯 Lanjutkan dengan menulis lebih fokus pada hal-hal spesifik yang ingin Anda manifestasikan`, `🧘 Kombinasikan dengan meditasi rutin untuk hasil optimal`]
+          : ["📝 Mulai dengan menulis 1 jurnal per hari selama 7 hari berturut-turut", "🎯 Fokus pada apa yang ingin Anda lepaskan hari ini"],
         spiritualGrowthScore: Math.min(75, 25 + (userTotalJournal * 8))
       };
 
@@ -448,9 +448,13 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <p className="text-green-100 leading-relaxed text-lg">
-                  {analytics.recommendation}
-                </p>
+                <div className="space-y-3">
+                  {analytics.recommendation.map((rec, index) => (
+                    <div key={index} className="p-4 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg">
+                      <p className="text-green-100 leading-relaxed">{rec}</p>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           )}
