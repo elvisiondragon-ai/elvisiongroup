@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, BarChart3, BookOpen, X } from "lucide-react";
+import { ArrowLeft, Save, BarChart3, BookOpen, Trash2 } from "lucide-react";
 import { JournalAnalytics } from "@/components/JournalAnalytics";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import { useState, useEffect } from 'react';
@@ -279,10 +279,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                     {/* Delete Button */}
                     <Button
                       onClick={() => handleDeleteReflection(refl.id)}
-                      className="absolute top-2 right-2 w-6 h-6 p-0 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-full shadow-lg hover:shadow-purple-500/50 transition-all duration-200"
+                      className="absolute top-2 right-2 w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-200 hover:scale-110"
                       size="sm"
                     >
-                      <X className="w-3 h-3" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </Button>
 
                     <div className="text-sm text-muted-foreground pr-8">
