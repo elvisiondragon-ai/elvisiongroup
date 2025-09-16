@@ -1,0 +1,171 @@
+import { useEffect, useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { usePro } from '@/hooks/usePro';
+
+interface NotificationTracker {
+  pengalamanAnggota: string | null;
+  personalAnalysis: string | null;
+  sesiMeditasi: string | null;
+}
+
+const PENGALAMAN_VIDEOS = [
+  'OM-MANI-PADME-HUM',
+  'RUQYAH-MANDARIN',
+  'THETA-HEALING-SABAH-GOOD-MORNING-SABAH',
+  'SILENT-MIND-MEDITATION',
+  'CLEARING-SPACE-HEALING'
+];
+
+// Using the app's tab-based navigation system
+const setActiveTab = (tab: string) => {
+  // This will trigger the app's tab change logic
+  const event = new CustomEvent('changeActiveTab', { detail: tab });
+  window.dispatchEvent(event);
+};
+
+export const useFreeUserNotifications = () => {
+  const { toast } = useToast();
+  const { proStatus } = usePro();
+  const navigate = useNavigate();
+  const [hasShownToday, setHasShownToday] = useState(false);
+
+  const getStoredTracker = (): NotificationTracker => {
+    const stored = localStorage.getItem('freeUserNotifications');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return { pengalamanAnggota: null, personalAnalysis: null, sesiMeditasi: null };
+      }
+    }
+    return { pengalamanAnggota: null, personalAnalysis: null, sesiMeditasi: null };
+  };
+
+  const updateTracker = (type: keyof NotificationTracker) => {
+    const tracker = getStoredTracker();
+    tracker[type] = new Date().toDateString();
+    localStorage.setItem('freeUserNotifications', JSON.stringify(tracker));
+  };
+
+  const shouldShowNotification = (type: keyof NotificationTracker, intervalDays: number): boolean => {
+    if (proStatus.isPro) return false; // No notifications for Pro users
+
+    const tracker = getStoredTracker();
+    const lastShown = tracker[type];
+
+    if (!lastShown) return true; // Never shown before
+
+    const daysSinceLastShown = Math.floor(
+      (new Date().getTime() - new Date(lastShown).getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    return daysSinceLastShown >= intervalDays;
+  };
+
+  const getRandomVideo = () => {
+    const randomIndex = Math.floor(Math.random() * PENGALAMAN_VIDEOS.length);
+    return PENGALAMAN_VIDEOS[randomIndex];
+  };
+
+  const showPengalamanAnggotaNotification = () => {
+    if (!shouldShowNotification('pengalamanAnggota', 1)) return;
+
+    const randomVideo = getRandomVideo();
+
+    toast({
+      title: "🎵 Pengalaman Anggota Menunggu!",
+      description: "Dengarkan testimoni spiritual dari member lainnya",
+      action: (
+        <button
+          onClick={() => {
+            updateTracker('pengalamanAnggota');
+            // Navigate to audio therapy section with specific video
+            setActiveTab('audio-therapy');
+            // Store the selected video for the audio therapy component to pick up
+            localStorage.setItem('selectedPengalamanVideo', randomVideo);
+          }}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+        >
+          Dengar Sekarang
+        </button>
+      ),
+      duration: 10000,
+    });
+
+    updateTracker('pengalamanAnggota');
+  };
+
+  const showPersonalAnalysisNotification = () => {
+    if (!shouldShowNotification('personalAnalysis', 1)) return;
+
+    toast({
+      title: "🧠 Personal Analysis Tersedia!",
+      description: "Dapatkan insight mendalam tentang perjalanan spiritual Anda",
+      action: (
+        <button
+          onClick={() => {
+            updateTracker('personalAnalysis');
+            setActiveTab('personal-analytics');
+          }}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+        >
+          Analisis Sekarang
+        </button>
+      ),
+      duration: 10000,
+    });
+
+    updateTracker('personalAnalysis');
+  };
+
+  const showSesiMeditasiNotification = () => {
+    if (!shouldShowNotification('sesiMeditasi', 3)) return;
+
+    toast({
+      title: "🧘‍♀️ Waktunya Sesi Meditasi!",
+      description: "Bergabung dengan sesi meditasi untuk ketenangan batin",
+      action: (
+        <button
+          onClick={() => {
+            updateTracker('sesiMeditasi');
+            setActiveTab('meditation-sessions');
+          }}
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+        >
+          Join Sekarang
+        </button>
+      ),
+      duration: 10000,
+    });
+
+    updateTracker('sesiMeditasi');
+  };
+
+  // Main notification scheduler
+  useEffect(() => {
+    if (proStatus.isPro || hasShownToday) return;
+
+    // Wait a bit for the app to fully load
+    const timer = setTimeout(() => {
+      // Check which notification to show based on priority and intervals
+      if (shouldShowNotification('sesiMeditasi', 3)) {
+        showSesiMeditasiNotification();
+        setHasShownToday(true);
+      } else if (shouldShowNotification('personalAnalysis', 1)) {
+        showPersonalAnalysisNotification();
+        setHasShownToday(true);
+      } else if (shouldShowNotification('pengalamanAnggota', 1)) {
+        showPengalamanAnggotaNotification();
+        setHasShownToday(true);
+      }
+    }, 5000); // Show notification 5 seconds after app loads
+
+    return () => clearTimeout(timer);
+  }, [proStatus.isPro, hasShownToday]);
+
+  return {
+    showPengalamanAnggotaNotification,
+    showPersonalAnalysisNotification,
+    showSesiMeditasiNotification,
+  };
+};

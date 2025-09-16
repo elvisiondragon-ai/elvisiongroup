@@ -36,11 +36,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
   const canUseFreeReport = () => {
     if (proStatus.isPro) return true;
 
-    const today = new Date().toDateString();
-    if (lastReportDate !== today) {
-      return freeReportsUsed < 1; // 1 free report per day for non-Pro users
-    }
-    return false;
+    return freeReportsUsed < 1; // 1 free report forever for non-Pro users
   };
 
   const generateAIReport = async () => {
@@ -170,10 +166,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
 
         // Track free report usage
         if (!proStatus.isPro) {
-          const today = new Date().toDateString();
           setFreeReportsUsed(prev => prev + 1);
-          setLastReportDate(today);
-          localStorage.setItem('freeReportsUsed', JSON.stringify({ date: today, count: freeReportsUsed + 1 }));
+          localStorage.setItem('freeReportsUsed', JSON.stringify({ count: freeReportsUsed + 1 }));
         }
 
       } catch (apiError) {
@@ -184,10 +178,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
 
         // Still track usage even with fallback
         if (!proStatus.isPro) {
-          const today = new Date().toDateString();
           setFreeReportsUsed(prev => prev + 1);
-          setLastReportDate(today);
-          localStorage.setItem('freeReportsUsed', JSON.stringify({ date: today, count: freeReportsUsed + 1 }));
+          localStorage.setItem('freeReportsUsed', JSON.stringify({ count: freeReportsUsed + 1 }));
         }
       }
 
@@ -231,12 +223,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
     const saved = localStorage.getItem('freeReportsUsed');
     if (saved) {
       try {
-        const { date, count } = JSON.parse(saved);
-        const today = new Date().toDateString();
-        if (date === today) {
-          setFreeReportsUsed(count);
-          setLastReportDate(date);
-        }
+        const { count } = JSON.parse(saved);
+        setFreeReportsUsed(count);
       } catch {
         // Ignore parsing errors
       }
@@ -267,7 +255,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
             <div className="flex items-center justify-center gap-2 mb-4">
               <Badge variant="outline" className="border-amber-500 text-amber-400">
                 <span className="mr-1">🆓</span>
-                {freeReportsUsed}/1 Laporan Gratis Hari Ini
+{freeReportsUsed}/1
               </Badge>
             </div>
           )}
@@ -290,34 +278,6 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
               </>
             )}
           </Button>
-
-          {/* Visual Understanding Section */}
-          <div className="mt-4 p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Sparkles className="w-5 h-5 text-blue-400" />
-              <h3 className="text-lg font-semibold text-blue-300">
-                Bagaimana RENATA Bekerja
-              </h3>
-            </div>
-
-            <div className="space-y-3 text-sm text-blue-200 leading-relaxed">
-              <p className="text-center">
-                <strong className="text-blue-300">Total Verses</strong> + <strong className="text-purple-300">Spiritual Journal</strong> + <strong className="text-emerald-300">Elite Habit</strong>
-              </p>
-
-              <div className="text-center text-blue-400 font-medium">
-                ⬇️ Menjadi Tolak Ukur Keberhasilan Goal Anda ⬇️
-              </div>
-
-              <p className="text-center">
-                RENATA akan memberi Anda <strong className="text-yellow-300">insight</strong> apa yang perlu dimaksimalkan karena manusia seringkali lupa.
-              </p>
-
-              <div className="text-center text-xs text-blue-300 mt-3 border-t border-blue-500/20 pt-3">
-                🌟 Sesuai arahan eL Vision Group 🌟
-              </div>
-            </div>
-          </div>
 
           {!canUseFreeReport() && !proStatus.isPro && (
             <div className="p-4 bg-gradient-to-r from-amber-900/20 to-orange-900/20 border border-amber-500/30 rounded-lg">

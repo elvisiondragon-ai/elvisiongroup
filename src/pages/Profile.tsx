@@ -16,12 +16,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { StreakIndicator } from "@/components/StreakIndicator";
-import { 
-  User, 
-  Settings, 
-  Crown, 
-  Zap, 
-  Calendar, 
+import {
+  User,
+  Settings,
+  Crown,
+  Zap,
+  Calendar,
   Target,
   BookOpen,
   Award,
@@ -32,7 +32,8 @@ import {
   MessageCircle,
   Send,
   Flame,
-  Droplets
+  Droplets,
+  Activity
 } from "lucide-react";
 
 interface ProfileProps {
@@ -47,6 +48,7 @@ interface UserProfile {
   streak_days: number;
   total_verses: number;
   total_journal: number;
+  total_elite_habit: number;
   achievements: string[];
   created_at: string;
   avatar_url?: string;
@@ -169,6 +171,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
     streak_days: 0,
     total_verses: 0,
     total_journal: 0,
+    total_elite_habit: 0,
     achievements: [],
     created_at: new Date().toISOString()
   };
@@ -215,12 +218,12 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
       iconStyle: { filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.8)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))" }
     },
     {
-      icon: BookOpen,
-      label: "Points Earned",
-      value: `${profile.experience_points}`,
-      color: "text-purple-400",
-      iconStyle: { filter: "drop-shadow(0 0 8px rgba(196, 181, 253, 0.8)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))" }
-    }
+      icon: Activity,
+      label: "Total Elite Habit",
+      value: `${profile.total_elite_habit || 0}`,
+      color: "text-emerald-400",
+      iconStyle: { filter: "drop-shadow(0 0 8px rgba(16, 185, 129, 0.8)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))" }
+    },
   ];
 
   // Show edit component if editing

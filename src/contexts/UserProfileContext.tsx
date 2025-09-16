@@ -20,6 +20,7 @@ interface UserProfile {
   total_sessions: number;
   total_verses: number;
   total_journal: number;
+  total_elite_habit: number;
   achievements: string[];
   created_at: string;
   avatar_url?: string;

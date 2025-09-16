@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Home } from "./Home";
 import { Chat } from "./Chat";
@@ -11,7 +11,6 @@ import { Tutorial } from "./Tutorial";
 import { IgnisQuest } from "./IgnisQuest";
 import { Payment } from "./Payment";
 import { JournalAnalytics } from "@/components/JournalAnalytics";
-import { EliteHabit } from "@/components/EliteHabit";
 import { supabase } from "@/integrations/supabase/client";
 import { useMeditative } from "@/contexts/MeditativeContext";
 import {
@@ -45,6 +44,19 @@ const Index = () => {
     setActiveTab(newTab);
   };
 
+  // Listen for custom tab change events from notifications
+  useEffect(() => {
+    const handleCustomTabChange = (event: CustomEvent) => {
+      handleTabChange(event.detail);
+    };
+
+    window.addEventListener('changeActiveTab', handleCustomTabChange as EventListener);
+
+    return () => {
+      window.removeEventListener('changeActiveTab', handleCustomTabChange as EventListener);
+    };
+  }, [isMeditativeActive, activeTab]);
+
   const renderContent = () => {
     console.log("Current activeTab:", activeTab);
     switch (activeTab) {
@@ -70,18 +82,6 @@ const Index = () => {
                 Personal Analytics
               </h1>
               <JournalAnalytics onUpgradeClick={() => setActiveTab("payment")} />
-            </div>
-          </div>
-        );
-      case "elite-habit":
-        console.log("Rendering Elite Habit component");
-        return (
-          <div className="min-h-screen bg-background pb-20">
-            <div className="p-6">
-              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
-                Elite Habit
-              </h1>
-              <EliteHabit />
             </div>
           </div>
         );

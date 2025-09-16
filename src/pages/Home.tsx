@@ -15,7 +15,7 @@ import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useAudioCache } from "@/hooks/useAudioCache";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
-import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3 } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity } from "lucide-react";
 import heroImage from "@/assets/hero-meditation.jpg";
 import faviconImage from "@/assets/favicon.png";
 
@@ -150,7 +150,7 @@ export function Home({
   };
 
   const features = [{
-    title: t('home.meditationSessions'),
+    title: "Sesi Meditasi",
     description: "Weekly live meditation sessions",
     icon: Radio,
     color: "text-red-500",
@@ -164,7 +164,7 @@ export function Home({
     color: "text-yellow-500",
     key: "audio-therapy"
   }, {
-    title: t('home.spiritualJournal'),
+    title: "Jurnal Spiritual",
     description: "Sacred transformation chronicles",
     icon: Scroll,
     color: "text-amber-400",
@@ -184,6 +184,13 @@ export function Home({
     color: "text-purple-500",
     key: "personal-analytics",
     isAnalytics: true
+  }, {
+    title: "Elite Habit",
+    description: "Olahraga terkonsentrasi dengan mindfulness untuk ketenangan",
+    icon: Activity,
+    color: "text-emerald-500",
+    key: "elite-habit",
+    isNew: true
   }, {
     title: "Ignis Quest",
     description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
@@ -408,6 +415,8 @@ export function Home({
                       ? 'bg-gradient-to-r from-cyan-600 via-blue-500 to-purple-600 shadow-xl shadow-cyan-500/50 border-2 border-cyan-300/30'
                     : feature.key === 'personal-analytics'
                       ? 'bg-gradient-to-r from-purple-600 via-indigo-500 to-purple-400 shadow-xl shadow-purple-500/50 border-2 border-purple-300/30'
+                    : feature.key === 'elite-habit'
+                      ? 'bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-400 shadow-xl shadow-emerald-500/50 border-2 border-emerald-300/30'
                     : feature.key === 'ignis-quest'
                       ? 'bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 shadow-lg shadow-orange-500/50'
                       : 'bg-muted'
@@ -418,6 +427,7 @@ export function Home({
                       : feature.key === 'spiritual-journal' ? 'text-white drop-shadow-lg'
                       : feature.key === 'chat' ? 'text-white drop-shadow-lg'
                       : feature.key === 'personal-analytics' ? 'text-white drop-shadow-lg animate-pulse'
+                      : feature.key === 'elite-habit' ? 'text-white drop-shadow-lg animate-pulse'
                       : feature.key === 'ignis-quest' ? 'text-white animate-pulse'
                       : ''
                     }`} />

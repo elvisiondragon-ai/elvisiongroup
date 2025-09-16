@@ -3,4 +3,6 @@ OVER COMPLICATED CLAUDE
   1. DO NOT jumped to solutions without fully understanding your system
   2. DO NOT added unnecessary complexity when your system worked fine
   3. Ask clarifying questions about what you actually needed
-  4. DO NOT assumed problems existed where there weren't any
+  4. DO NOT assumed problems existed where there weren't any 
+  5. IF You make a code for debugging or assist me put inside folder assist_code.
+  6. IF GIVE ME SQL or CURL DO NOT WRITE HERE, instead make files sh,js, or whatever I can open on visual code editor.
