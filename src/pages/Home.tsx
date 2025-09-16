@@ -178,7 +178,7 @@ export function Home({
     key: "chat",
     isCommunity: true
   }, {
-    title: "Personal Analytics Algoritm",
+    title: "Personal Analytics",
     description: "AI-powered spiritual journey insights from RENATA",
     icon: BarChart3,
     color: "text-purple-500",

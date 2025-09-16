@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Minus, Check, Activity, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserProfile } from '@/contexts/UserProfileContext';
+import { useXPSystem } from '@/hooks/useXPSystem';
 
 interface EliteHabitEntry {
   id?: string;
@@ -31,6 +32,7 @@ const EXERCISE_OPTIONS = [
 
 export function EliteHabit() {
   const { userProfile, user, refreshProfile } = useUserProfile();
+  const { awardXP } = useXPSystem();
   const [selectedExercise, setSelectedExercise] = useState('');
   const [duration, setDuration] = useState(5);
   const [todayEntries, setTodayEntries] = useState<EliteHabitEntry[]>([]);
@@ -132,6 +134,7 @@ export function EliteHabit() {
         .from('elite_habits')
         .insert({
           user_id: user.id,
+          user_email: user.email,
           exercise_type: selectedExercise,
           duration_minutes: duration,
           date: today
@@ -139,7 +142,10 @@ export function EliteHabit() {
 
       if (insertError) throw insertError;
 
-      // Reset form (total_elite_habit will be updated automatically by database trigger)
+      // Award XP for elite habit completion (this will show XP notification)
+      awardXP('elite_habit_completion', 10, 'Completed elite habit exercise');
+
+      // Reset form
       setSelectedExercise('');
       setDuration(5);
 
@@ -151,7 +157,7 @@ export function EliteHabit() {
       setShowReports(true);
 
     } catch (error) {
-      console.error('Error submitting habit:', error);
+      console.error('Elite habit error:', error);
     } finally {
       setLoading(false);
     }
@@ -272,7 +278,10 @@ export function EliteHabit() {
 
         {/* Submit Button */}
         <Button
-          onClick={submitHabit}
+          onClick={() => {
+            console.log('BUTTON CLICKED!');
+            submitHabit();
+          }}
           disabled={!selectedExercise || loading}
           className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
           size="lg"

@@ -33,18 +33,140 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
   const [lastReportDate, setLastReportDate] = useState<string | null>(null);
   const [usingFallback, setUsingFallback] = useState(false);
 
-  const canUseFreeReport = () => {
-    if (proStatus.isPro) return true;
+  // Safe database tracking for monthly analytics
+  const checkMonthlyAnalyticsUsage = async () => {
+    if (!user || proStatus.isPro) return { canUse: true, used: 0 };
 
+    try {
+      console.log('🔍 Checking analytics usage for user:', user.id);
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('analytics_used, last_analytics_date')
+        .eq('user_id', user.id)
+        .single();
+
+      console.log('📊 Database response:', { profile, error });
+
+      if (error) {
+        console.error('❌ Error checking analytics usage:', error);
+        // Fallback to localStorage logic
+        return checkLocalStorageUsage();
+      }
+
+      const currentMonth = new Date().toISOString().slice(0, 7); // "2025-01"
+      const lastUsedMonth = profile?.last_analytics_date?.slice(0, 7);
+
+      console.log('📅 Month comparison:', { currentMonth, lastUsedMonth, analyticsUsed: profile?.analytics_used });
+
+      if (lastUsedMonth !== currentMonth) {
+        // New month - reset counter in database
+        console.log('🔄 New month detected, resetting counter');
+        try {
+          await supabase
+            .from('profiles')
+            .update({
+              analytics_used: 0,
+              last_analytics_date: new Date().toISOString().split('T')[0]
+            })
+            .eq('user_id', user.id);
+          console.log('✅ Counter reset for new month');
+        } catch (resetError) {
+          console.error('❌ Failed to reset counter:', resetError);
+        }
+        return { canUse: true, used: 0 };
+      }
+
+      const used = profile?.analytics_used || 0;
+      const canUse = used < 1;
+
+      console.log('✅ Final result:', { canUse, used });
+
+      return { canUse, used };
+    } catch (error) {
+      console.error('💥 Database error, falling back to localStorage:', error);
+      return checkLocalStorageUsage();
+    }
+  };
+
+  // Fallback to localStorage if database fails
+  const checkLocalStorageUsage = () => {
     const today = new Date().toDateString();
     if (lastReportDate !== today) {
-      return freeReportsUsed < 1; // 1 free report per day for non-Pro users
+      return { canUse: freeReportsUsed < 1, used: freeReportsUsed };
     }
-    return false;
+    return { canUse: false, used: freeReportsUsed };
+  };
+
+  // Update analytics usage in database
+  const updateAnalyticsUsage = async () => {
+    if (!user || proStatus.isPro) return;
+
+    try {
+      const today = new Date().toISOString().split('T')[0]; // "2025-01-17"
+      const currentMonth = new Date().toISOString().slice(0, 7); // "2025-01"
+
+      console.log('💾 Updating analytics usage:', { userId: user.id, today });
+
+      // First get current usage
+      const { data: profile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('analytics_used, last_analytics_date')
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError) {
+        console.error('❌ Error fetching current usage:', fetchError);
+        throw fetchError;
+      }
+
+      const lastUsedMonth = profile?.last_analytics_date?.slice(0, 7);
+      const currentUsage = (lastUsedMonth === currentMonth) ? (profile?.analytics_used || 0) : 0;
+      const newUsage = currentUsage + 1;
+
+      console.log('📊 Usage calculation:', { currentUsage, newUsage, lastUsedMonth, currentMonth });
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          analytics_used: newUsage,
+          last_analytics_date: today
+        })
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('❌ Error updating analytics usage:', error);
+        // Fallback to localStorage tracking
+        const todayString = new Date().toDateString();
+        setFreeReportsUsed(newUsage);
+        setLastReportDate(todayString);
+        localStorage.setItem('freeReportsUsed', JSON.stringify({ date: todayString, count: newUsage }));
+      } else {
+        console.log('✅ Successfully updated analytics usage in database');
+        setFreeReportsUsed(newUsage);
+      }
+    } catch (error) {
+      console.error('💥 Database error, using localStorage fallback:', error);
+      // Fallback to localStorage - increment current usage
+      const todayString = new Date().toDateString();
+      const currentCount = freeReportsUsed + 1;
+      setFreeReportsUsed(currentCount);
+      setLastReportDate(todayString);
+      localStorage.setItem('freeReportsUsed', JSON.stringify({ date: todayString, count: currentCount }));
+    }
+  };
+
+  const canUseFreeReport = async () => {
+    if (proStatus.isPro) return true;
+
+    const usage = await checkMonthlyAnalyticsUsage();
+    setFreeReportsUsed(usage.used);
+    return usage.canUse;
   };
 
   const generateAIReport = async () => {
-    if (!canUseFreeReport() && !proStatus.isPro) {
+    const canUse = await canUseFreeReport();
+    if (!canUse && !proStatus.isPro) {
       onUpgradeClick();
       return;
     }
@@ -88,6 +210,12 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
         };
 
         setAnalytics(encouragementAnalysis);
+
+        // Track usage for successful analysis (even if it's encouragement)
+        if (!proStatus.isPro) {
+          await updateAnalyticsUsage();
+        }
+
         setLoading(false);
         return;
       }
@@ -159,6 +287,11 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
           // Use real AI analysis
           setAnalytics(data.analysis);
           setUsingFallback(false);
+
+          // Track usage for successful AI analysis
+          if (!proStatus.isPro) {
+            await updateAnalyticsUsage();
+          }
         } else if (data.error === 'insufficient_data') {
           // Handle insufficient data case - already handled above
           console.log('Insufficient data for analysis');
@@ -168,26 +301,15 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
           throw new Error('AI analysis failed');
         }
 
-        // Track free report usage
-        if (!proStatus.isPro) {
-          const today = new Date().toDateString();
-          setFreeReportsUsed(prev => prev + 1);
-          setLastReportDate(today);
-          localStorage.setItem('freeReportsUsed', JSON.stringify({ date: today, count: freeReportsUsed + 1 }));
-        }
-
       } catch (apiError) {
         console.error('RENATA analysis failed, using simulated analysis:', apiError);
         // Use simulated analysis as fallback
         setAnalytics(simulatedAnalysis);
         setUsingFallback(true);
 
-        // Still track usage even with fallback
+        // Track usage for fallback analysis
         if (!proStatus.isPro) {
-          const today = new Date().toDateString();
-          setFreeReportsUsed(prev => prev + 1);
-          setLastReportDate(today);
-          localStorage.setItem('freeReportsUsed', JSON.stringify({ date: today, count: freeReportsUsed + 1 }));
+          await updateAnalyticsUsage();
         }
       }
 
@@ -227,21 +349,46 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
   };
 
   useEffect(() => {
-    // Load free report usage from localStorage
-    const saved = localStorage.getItem('freeReportsUsed');
-    if (saved) {
-      try {
-        const { date, count } = JSON.parse(saved);
-        const today = new Date().toDateString();
-        if (date === today) {
-          setFreeReportsUsed(count);
-          setLastReportDate(date);
-        }
-      } catch {
-        // Ignore parsing errors
+    // Load analytics usage state when component mounts or user/profile changes
+    const loadAnalyticsState = async () => {
+      if (!user || proStatus.isPro) {
+        setFreeReportsUsed(0);
+        return;
       }
+
+      try {
+        console.log('🔄 Loading analytics state...');
+        const usage = await checkMonthlyAnalyticsUsage();
+        console.log('📊 Setting usage to:', usage.used);
+        setFreeReportsUsed(usage.used);
+      } catch (error) {
+        console.error('Error loading analytics state:', error);
+        // Fallback to localStorage
+        const saved = localStorage.getItem('freeReportsUsed');
+        if (saved) {
+          try {
+            const { date, count } = JSON.parse(saved);
+            const today = new Date().toDateString();
+            if (date === today) {
+              setFreeReportsUsed(count);
+              setLastReportDate(date);
+            } else {
+              setFreeReportsUsed(0);
+            }
+          } catch {
+            setFreeReportsUsed(0);
+          }
+        } else {
+          setFreeReportsUsed(0);
+        }
+      }
+    };
+
+    // Load when we have user and userProfile is available
+    if (user && userProfile) {
+      loadAnalyticsState();
     }
-  }, []);
+  }, [user, userProfile, proStatus.isPro]);
 
   return (
     <div className="space-y-6">
@@ -267,14 +414,14 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
             <div className="flex items-center justify-center gap-2 mb-4">
               <Badge variant="outline" className="border-amber-500 text-amber-400">
                 <span className="mr-1">🆓</span>
-                {freeReportsUsed}/1 Laporan Gratis Hari Ini
+                {freeReportsUsed}/1 Laporan Gratis Bulan Ini
               </Badge>
             </div>
           )}
 
           <Button
             onClick={generateAIReport}
-            disabled={loading || (!canUseFreeReport() && !proStatus.isPro)}
+            disabled={loading || (freeReportsUsed >= 1 && !proStatus.isPro)}
             className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
             size="lg"
           >
@@ -321,12 +468,12 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
             </div>
           )}
 
-          {!canUseFreeReport() && !proStatus.isPro && (
+          {freeReportsUsed >= 1 && !proStatus.isPro && (
             <div className="p-4 bg-gradient-to-r from-amber-900/20 to-orange-900/20 border border-amber-500/30 rounded-lg">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Lock className="w-5 h-5 text-amber-400" />
                 <span className="text-amber-300 font-semibold">
-                  Laporan Gratis Habis
+                  Laporan Gratis Bulan Ini Habis
                 </span>
               </div>
               <p className="text-amber-200 text-sm text-center mb-3">

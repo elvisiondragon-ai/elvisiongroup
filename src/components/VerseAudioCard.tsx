@@ -111,8 +111,8 @@ export function VerseAudioCard({
         setCurrentVerseAudio(null);
         setAudioDuration(null);
         setCurrentTime(0);
-        // Award XP based on verse type - Short verses get +1 XP, main verses get +10 XP
-        const xpAmount = verse.id === 100 ? 1 : 10; // ID 100 is our reflection verse
+        // Award XP - All verses get +10 XP
+        const xpAmount = 10; // All verses now give +10 XP
         console.log('🏆 Awarding XP:', xpAmount, 'for verse:', verse.title);
         awardXP('verse_completion', xpAmount, `Completed ${verse.title}`);
       });
