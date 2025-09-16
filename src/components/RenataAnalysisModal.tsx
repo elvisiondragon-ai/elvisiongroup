@@ -181,7 +181,7 @@ export function RenataAnalysisModal({ isOpen }: RenataAnalysisModalProps) {
               {/* Status Text */}
               <div className="text-center">
                 <p className="text-gray-400 text-sm">
-                  RENATA sedang menggunakan ChatGPT-4o-mini Creative Mode
+                  Renata eL Vision Group Technology is Cooking..
                 </p>
                 <p className="text-gray-500 text-xs mt-2">
                   Proses ini dapat memakan waktu 10-30 detik untuk hasil terbaik
