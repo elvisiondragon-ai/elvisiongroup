@@ -256,7 +256,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
               <Button
                 onClick={handleSaveReflection}
                 disabled={!reflection.trim()}
-                className="w-full bg-gradient-accent hover:opacity-90 text-background font-medium glow-accent"
+                className="w-full bg-gradient-accent hover:opacity-90 text-background font-medium glow-accent transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0"
               >
                 <Save className="w-4 h-4 mr-2" />
                 Simpan Renungan
@@ -279,7 +279,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                     {/* Delete Button */}
                     <Button
                       onClick={() => handleDeleteReflection(refl.id)}
-                      className="absolute top-2 right-2 w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-200 hover:scale-110"
+                      className="absolute top-2 right-2 w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
                       size="sm"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

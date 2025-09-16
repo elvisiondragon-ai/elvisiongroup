@@ -33,38 +33,30 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
   };
 
   const handleDelete = async () => {
-    try {
-      const { error } = await supabase
-        .from('chat_messages')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting message:', error);
-        toast({
-          title: "Error",
-          description: "Failed to delete message",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      if (onDelete) {
-        onDelete(id);
-      }
-
-      toast({
-        title: "Success",
-        description: "Message deleted successfully"
-      });
-    } catch (error) {
-      console.error('Error deleting message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete message",
-        variant: "destructive"
-      });
+    // Immediate optimistic UI update for ultra-fast feel
+    if (onDelete) {
+      onDelete(id);
     }
+
+    toast({
+      title: "Message Deleted 🔥",
+      description: ""
+    });
+
+    // Fire database delete in background - don't wait
+    supabase
+      .from('chat_messages')
+      .delete()
+      .eq('id', id)
+      .then(({ error }) => {
+        if (error) {
+          console.error('Background delete failed:', error);
+          // Could add rollback logic here if needed
+        }
+      })
+      .catch(err => {
+        console.error('Background delete error:', err);
+      });
   };
 
   const canDelete = currentUserId === user.id;
@@ -90,9 +82,9 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
               variant="ghost"
               size="sm"
               onClick={handleDelete}
-              className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="h-7 w-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>

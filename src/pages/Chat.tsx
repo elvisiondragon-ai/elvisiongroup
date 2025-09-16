@@ -36,6 +36,7 @@ export function Chat() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
@@ -392,17 +393,13 @@ export function Chat() {
       return;
     }
 
-    console.log('Attempting to send message with user:', currentUser);
-    console.log('Message data:', {
-      user_id: currentUser.id,
-      user_name: currentUser.name,
-      user_level: currentUser.level,
-      is_pro: currentUser.isPro,
-      message: message.trim()
-    });
+    setIsSending(true);
 
     try {
-      const { error } = await supabase
+      console.log('🚀 Starting message insert at:', new Date().toISOString());
+
+      // Add timeout to prevent hanging
+      const insertPromise = supabase
         .from('chat_messages')
         .insert({
           user_id: currentUser.id,
@@ -411,6 +408,13 @@ export function Chat() {
           is_pro: currentUser.isPro,
           message: message.trim()
         });
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Database timeout after 3 seconds')), 3000)
+      );
+
+      const { error } = await Promise.race([insertPromise, timeoutPromise]);
+      console.log('✅ Message insert completed at:', new Date().toISOString());
 
       if (error) {
         console.error('Error sending message:', error);
@@ -421,9 +425,26 @@ export function Chat() {
         });
       } else {
         console.log('Message sent successfully');
-        // Award XP for chat message
-        awardXP('chat_message', 1, 'Sent a chat message');
+
+        // Optimistically add the message to UI immediately
+        const newMessage: ChatMessageData = {
+          id: `temp-${Date.now()}`, // Temporary ID
+          user_id: currentUser.id,
+          user_name: currentUser.name,
+          user_level: currentUser.level,
+          is_pro: currentUser.isPro,
+          message: message.trim(),
+          created_at: new Date().toISOString()
+        };
+
+        setMessages(current => [...current, newMessage]);
         setMessage("");
+
+        toast({
+          title: "Message Sent 🚀",
+          description: "",
+          variant: "default"
+        });
       }
     } catch (err) {
       console.error('Unexpected error sending message:', err);
@@ -432,6 +453,8 @@ export function Chat() {
         description: "An unexpected error occurred",
         variant: "destructive"
       });
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -574,10 +597,14 @@ export function Chat() {
           />
           <Button
             onClick={handleSendMessage}
-            disabled={!message.trim()}
-            className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-4"
+            disabled={!message.trim() || isSending}
+            className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-4 transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0"
           >
-            <Send className="w-4 h-4" />
+            {isSending ? (
+              <div className="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
           </Button>
         </div>
       </div>

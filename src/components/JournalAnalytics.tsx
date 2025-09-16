@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { usePro } from '@/hooks/usePro';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { RenataAnalysisModal } from '@/components/RenataAnalysisModal';
+import { useToast } from '@/hooks/use-toast';
 
 interface JournalAnalyticsProps {
   onUpgradeClick: () => void;
@@ -28,6 +29,7 @@ interface AnalyticsData {
 export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
   const { proStatus } = usePro();
   const { userProfile, user } = useUserProfile();
+  const { toast } = useToast();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [freeReportsUsed, setFreeReportsUsed] = useState(0);
@@ -192,6 +194,19 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
 
       // Check if user needs more engagement first
       if (!reflections || userTotalJournal < 3 || userTotalVerses < 2) {
+        // Show red warning for unfulfilled conditions
+        setLoading(false);
+        setShowAnalysisModal(false);
+
+        const missingJournals = Math.max(0, 3 - userTotalJournal);
+        const missingVerses = Math.max(0, 2 - userTotalVerses);
+
+        toast({
+          title: "❌ Kondisi Belum Terpenuhi",
+          description: `Untuk analisis sukses: ${missingJournals > 0 ? `Tulis ${missingJournals} jurnal lagi` : '✅ Jurnal cukup'}${missingJournals > 0 && missingVerses > 0 ? ' & ' : ''}${missingVerses > 0 ? `Selesaikan ${missingVerses} verse lagi` : missingJournals === 0 ? '✅ Verse cukup' : ''}`,
+          variant: "destructive"
+        });
+
         const encouragementAnalysis = {
           totalEntries: userTotalJournal,
           totalVerses: userTotalVerses,
@@ -214,11 +229,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
 
         setAnalytics(encouragementAnalysis);
 
-        // Track usage for successful analysis (even if it's encouragement)
-        if (!proStatus.isPro) {
-          await updateAnalyticsUsage();
-        }
-
+        // DON'T track usage for encouragement - user needs more data first
         setLoading(false);
         return;
       }
@@ -310,8 +321,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
         setAnalytics(simulatedAnalysis);
         setUsingFallback(true);
 
-        // Track usage for fallback analysis
-        if (!proStatus.isPro) {
+        // Track usage for fallback analysis ONLY if user has sufficient data
+        if (!proStatus.isPro && reflections && reflections.length >= 3 && userTotalVerses >= 2) {
           await updateAnalyticsUsage();
         }
       }
@@ -343,6 +354,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
 
       setAnalytics(meaningfulFallback);
       setUsingFallback(true);
+
+      // DON'T track usage for error fallback - this isn't a proper analysis
     } finally {
       // Ensure loading is always set to false and modal is hidden
       setTimeout(() => {
