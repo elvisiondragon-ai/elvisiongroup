@@ -43,17 +43,31 @@ interface AudioTherapyProps {
 // Meditation Counter Component
 function MeditationCounter() {
   const [currentlyMeditating, setCurrentlyMeditating] = useState(() => {
-    // Generate dynamic number based on current date for consistency
+    // Start from base 3472 with small daily variation
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
-    const seed = (dayOfYear * 137) % 1000;
-    return 1400 + (seed % 4201); // 1400-5600 range
+    const seed = (dayOfYear * 137) % 200;
+    return 3472 + seed; // 3472-3672 base range
   });
 
   useEffect(() => {
-    // Simulate live updates with realistic bounds
+    // Simulate realistic daily meditation patterns
     const interval = setInterval(() => {
-      setCurrentlyMeditating(prev => Math.max(1400, Math.min(5600, prev + Math.floor(Math.random() * 15) - 7)));
+      setCurrentlyMeditating(prev => {
+        const hour = new Date().getHours();
+        let targetRange;
+
+        // Peak meditation times - night is most active
+        if (hour >= 19 && hour <= 23) targetRange = [4000, 5600]; // Night peak (7PM-11PM)
+        else if (hour >= 6 && hour <= 9) targetRange = [3200, 4200]; // Morning meditation
+        else if (hour >= 0 && hour <= 5) targetRange = [2800, 3800]; // Late night/early morning
+        else targetRange = [2500, 3500]; // Daytime
+
+        const target = targetRange[0] + Math.random() * (targetRange[1] - targetRange[0]);
+        const drift = prev < target ? 1 : -1; // Gentle drift toward target
+        const change = Math.floor(Math.random() * 10) - 4 + drift; // -3 to +6 range
+        return Math.max(2500, Math.min(5600, prev + change));
+      });
     }, 8000);
 
     return () => clearInterval(interval);
@@ -336,7 +350,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           <div className="flex items-center gap-2 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-full px-4 py-2 shadow-lg">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-green-400 text-sm font-medium">
-              <MeditationCounter /> sedang bermeditasi
+              <MeditationCounter /> Anggota Sedang meditasi
             </span>
           </div>
         </div>
