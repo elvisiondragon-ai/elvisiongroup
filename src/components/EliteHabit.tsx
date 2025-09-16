@@ -8,9 +8,12 @@ import { useUserProfile } from '@/contexts/UserProfileContext';
 
 interface EliteHabitEntry {
   id?: string;
+  user_id?: string;
+  user_email?: string;
   exercise_type: string;
   duration_minutes: number;
   date: string;
+  created_at?: string;
 }
 
 const EXERCISE_OPTIONS = [

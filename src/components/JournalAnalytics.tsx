@@ -251,7 +251,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
           <div className="flex items-center justify-center gap-2 mb-2">
             <Brain className="w-6 h-6 text-purple-400" />
             <CardTitle className="text-xl text-purple-100">
-              Personal Analytics by RENATA
+              Personal Analytics Algoritm by RENATA
             </CardTitle>
           </div>
           <CardDescription className="text-purple-300">
@@ -291,33 +291,35 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
             )}
           </Button>
 
-          {/* Visual Understanding Section */}
-          <div className="mt-4 p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Sparkles className="w-5 h-5 text-blue-400" />
-              <h3 className="text-lg font-semibold text-blue-300">
-                Bagaimana RENATA Bekerja
-              </h3>
-            </div>
-
-            <div className="space-y-3 text-sm text-blue-200 leading-relaxed">
-              <p className="text-center">
-                <strong className="text-blue-300">Total Verses</strong> + <strong className="text-purple-300">Spiritual Journal</strong> + <strong className="text-emerald-300">Elite Habit</strong>
-              </p>
-
-              <div className="text-center text-blue-400 font-medium">
-                ⬇️ Menjadi Tolak Ukur Keberhasilan Goal Anda ⬇️
+          {/* Visual Understanding Section - Only show when no analytics results */}
+          {!analytics && (
+            <div className="mt-4 p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Sparkles className="w-5 h-5 text-blue-400" />
+                <h3 className="text-lg font-semibold text-blue-300">
+                  Bagaimana RENATA Bekerja
+                </h3>
               </div>
 
-              <p className="text-center">
-                RENATA akan memberi Anda <strong className="text-yellow-300">insight</strong> apa yang perlu dimaksimalkan karena manusia seringkali lupa.
-              </p>
+              <div className="space-y-3 text-sm text-blue-200 leading-relaxed">
+                <p className="text-center">
+                  <strong className="text-blue-300">Total Verses</strong> + <strong className="text-purple-300">Spiritual Journal</strong> + <strong className="text-emerald-300">Elite Habit</strong>
+                </p>
 
-              <div className="text-center text-xs text-blue-300 mt-3 border-t border-blue-500/20 pt-3">
-                🌟 Sesuai arahan eL Vision Group 🌟
+                <div className="text-center text-blue-400 font-medium">
+                  ⬇️ Menjadi Tolak Ukur Keberhasilan Goal Anda ⬇️
+                </div>
+
+                <p className="text-center">
+                  RENATA akan memberi Anda <strong className="text-yellow-300">insight</strong> apa yang perlu dimaksimalkan karena manusia seringkali lupa.
+                </p>
+
+                <div className="text-center text-xs text-blue-300 mt-3 border-t border-blue-500/20 pt-3">
+                  🌟 Sesuai arahan eL Vision Group 🌟
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {!canUseFreeReport() && !proStatus.isPro && (
             <div className="p-4 bg-gradient-to-r from-amber-900/20 to-orange-900/20 border border-amber-500/30 rounded-lg">
@@ -405,7 +407,9 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
                     <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                       <span className="font-medium">{goal.goal}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">{goal.count}x</span>
+                        <span className="text-sm text-muted-foreground">
+                          {typeof goal.count === 'number' ? `${goal.count}x` : goal.count}
+                        </span>
                         <Badge variant="secondary">{goal.percentage}%</Badge>
                       </div>
                     </div>

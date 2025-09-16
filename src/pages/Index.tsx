@@ -67,7 +67,7 @@ const Index = () => {
           <div className="min-h-screen bg-background pb-20">
             <div className="p-6">
               <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
-                Personal Analytics
+                Personal Analytics Algoritm
               </h1>
               <JournalAnalytics onUpgradeClick={() => setActiveTab("payment")} />
             </div>
