@@ -6,6 +6,7 @@ import { TrendingUp, BookOpen, Target, Sparkles, Brain, Crown, Lock, Loader2 } f
 import { supabase } from '@/integrations/supabase/client';
 import { usePro } from '@/hooks/usePro';
 import { useUserProfile } from '@/contexts/UserProfileContext';
+import { RenataAnalysisModal } from '@/components/RenataAnalysisModal';
 
 interface JournalAnalyticsProps {
   onUpgradeClick: () => void;
@@ -32,6 +33,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
   const [freeReportsUsed, setFreeReportsUsed] = useState(0);
   const [lastReportDate, setLastReportDate] = useState<string | null>(null);
   const [usingFallback, setUsingFallback] = useState(false);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
 
   // Safe database tracking for monthly analytics
   const checkMonthlyAnalyticsUsage = async () => {
@@ -172,6 +174,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
     }
 
     setLoading(true);
+    setShowAnalysisModal(true);
     try {
       if (!user || !userProfile) return;
 
@@ -341,9 +344,10 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
       setAnalytics(meaningfulFallback);
       setUsingFallback(true);
     } finally {
-      // Ensure loading is always set to false
+      // Ensure loading is always set to false and modal is hidden
       setTimeout(() => {
         setLoading(false);
+        setShowAnalysisModal(false);
       }, 100);
     }
   };
@@ -391,6 +395,10 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
   }, [user, userProfile, proStatus.isPro]);
 
   return (
+    <>
+      {/* High-Tech Analysis Modal */}
+      <RenataAnalysisModal isOpen={showAnalysisModal} />
+
     <div className="space-y-6">
       {/* Header */}
       <Card className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 border border-purple-500/30">
@@ -608,5 +616,6 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
         </div>
       )}
     </div>
+    </>
   );
 }
