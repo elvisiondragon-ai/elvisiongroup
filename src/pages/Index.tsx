@@ -102,7 +102,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <ProUpgradeNotification onUpgradeClick={() => setActiveTab("payment")} />
-      <main className="relative pt-14">
+      <main className="relative">
         {renderContent()}
       </main>
       <BottomNavigation activeTab={activeTab} onTabChange={handleTabChange} />
