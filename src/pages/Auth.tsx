@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff, Sparkles, Zap } from "lucide-react";
+import { Turnstile } from '@marsidev/react-turnstile';
 import type { User } from '@supabase/supabase-js';
 
 interface AuthProps {
@@ -36,6 +37,9 @@ export function Auth({ onLogin }: AuthProps) {
   const [forgotPasswordData, setForgotPasswordData] = useState({
     email: ''
   });
+
+  // Captcha token state
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   // Track current view
   const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent'>('auth');
@@ -275,12 +279,21 @@ export function Auth({ onLogin }: AuthProps) {
 
   const enhancedHandleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Allow any password without strict validation
     if (signupData.password !== signupData.confirmPassword) {
       toast({
         title: "Password Tidak Cocok",
         description: "Password dan konfirmasi password harus sama.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!captchaToken) {
+      toast({
+        title: "Captcha Required",
+        description: "Please complete the captcha verification.",
         variant: "destructive",
       });
       return;
@@ -309,6 +322,7 @@ export function Auth({ onLogin }: AuthProps) {
         password: signupData.password,
         options: {
           emailRedirectTo: redirectUrl,
+          captchaToken,
           // Skip email confirmation for easier registration
           data: {
             email_confirm: true
@@ -416,7 +430,7 @@ export function Auth({ onLogin }: AuthProps) {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
+                className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
                 disabled={isLoading}
               >
                 {isLoading ? "Mengirim..." : "Kirim Reset Email"}
@@ -563,7 +577,7 @@ export function Auth({ onLogin }: AuthProps) {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
+                  className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
                   disabled={isLoading}
                 >
                   {isLoading ? "Masuk..." : "Masuk"}
@@ -575,7 +589,7 @@ export function Auth({ onLogin }: AuthProps) {
                 <Button
                   onClick={() => setCurrentView('forgot-password')}
                   variant="ghost"
-                  className="text-muted-foreground hover:text-foreground text-sm"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-all duration-200 transform hover:scale-105 active:scale-95"
                 >
                   Lupa Password?
                 </Button>
@@ -593,7 +607,7 @@ export function Auth({ onLogin }: AuthProps) {
               <Button
                 onClick={handleGoogleAuth}
                 variant="outline"
-                className="w-full h-11 border-border hover:bg-muted"
+                className="w-full h-11 border-border hover:bg-muted transition-all duration-200 transform hover:scale-105 active:scale-95"
                 disabled={isLoading}
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -688,10 +702,26 @@ export function Auth({ onLogin }: AuthProps) {
                   </div>
                 </div>
 
+                {/* Turnstile CAPTCHA */}
+                <div className="flex justify-center">
+                  <Turnstile
+                    siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
+                    onSuccess={(token) => {
+                      setCaptchaToken(token);
+                    }}
+                    onError={() => {
+                      setCaptchaToken(null);
+                    }}
+                    onExpire={() => {
+                      setCaptchaToken(null);
+                    }}
+                  />
+                </div>
+
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
-                  disabled={isLoading}
+                  className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                  disabled={isLoading || !captchaToken}
                 >
                   {isLoading ? "Membuat Akun..." : "Buat Akun"}
                 </Button>
@@ -709,7 +739,7 @@ export function Auth({ onLogin }: AuthProps) {
               <Button
                 onClick={handleGoogleAuth}
                 variant="outline"
-                className="w-full h-11 border-border hover:bg-muted"
+                className="w-full h-11 border-border hover:bg-muted transition-all duration-200 transform hover:scale-105 active:scale-95"
                 disabled={isLoading}
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">

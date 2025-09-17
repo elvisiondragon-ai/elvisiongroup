@@ -211,16 +211,16 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="flex-1 bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary"
+          className="flex-1 bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary transition-all duration-200 transform hover:scale-105 active:scale-95"
         >
           <Save className="w-4 h-4 mr-2" />
           {saving ? 'Saving...' : 'Save Changes'}
         </Button>
-        
+
         <Button
           variant="outline"
           onClick={onCancel}
-          className="flex-1 border-border hover:border-primary"
+          className="flex-1 border-border hover:border-primary transition-all duration-200 transform hover:scale-105 active:scale-95"
         >
           Cancel
         </Button>

@@ -314,9 +314,9 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </div>
 
         {/* READ TUTORIAL Button */}
-        <Button 
+        <Button
           variant="outline"
-          className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium px-8 py-2 rounded-full glow-primary border-primary hover:border-primary"
+          className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium px-8 py-2 rounded-full glow-primary border-primary hover:border-primary transition-all duration-200 transform hover:scale-105 active:scale-95"
           onClick={() => {
             onNavigate('tutorial');
           }}
@@ -396,18 +396,18 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           Pengaturan
         </h2>
         
-        <Button 
-          variant="outline" 
-          className="w-full"
+        <Button
+          variant="outline"
+          className="w-full transition-all duration-200 hover:scale-105 active:scale-95 transform"
           onClick={() => setEditingProfile(true)}
         >
           <User className="w-4 h-4 mr-2" />
           Edit Profil
         </Button>
         
-        <Button 
-          variant="outline" 
-          className="w-full"
+        <Button
+          variant="outline"
+          className="w-full transition-all duration-200 hover:scale-105 active:scale-95 transform"
           onClick={() => {
             const message = encodeURIComponent("Kak renata saya dari ecosystem mau bertanya");
             window.open(`https://wa.me/62895325633487?text=${message}`, '_blank');
@@ -417,9 +417,9 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           Hubungi Customer Support
         </Button>
 
-        <Button 
-          variant="outline" 
-          className="w-full relative overflow-hidden group bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 hover:from-slate-800 hover:via-blue-800 hover:to-indigo-800 text-white border-none shadow-2xl hover:shadow-blue-900/25 transition-all duration-500 transform hover:scale-[1.02]"
+        <Button
+          variant="outline"
+          className="w-full relative overflow-hidden group bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 hover:from-slate-800 hover:via-blue-800 hover:to-indigo-800 text-white border-none shadow-2xl hover:shadow-blue-900/25 transition-all duration-200 transform hover:scale-105 active:scale-95"
           onClick={() => {
             setLoadingMessage('Loading Tujuan Kami...');
             setShowLoadingOverlay(true);
@@ -439,9 +439,9 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
         </Button>
 
-        <Button 
-          variant="outline" 
-          className="w-full relative overflow-hidden group bg-gradient-to-r from-blue-600/20 via-sky-500/20 to-cyan-400/20 hover:from-blue-600/30 hover:via-sky-500/30 hover:to-cyan-400/30 text-white hover:text-white border border-blue-400/30 hover:border-cyan-400/50 shadow-lg hover:shadow-cyan-400/25 transition-all duration-500 transform hover:scale-[1.02]"
+        <Button
+          variant="outline"
+          className="w-full relative overflow-hidden group bg-gradient-to-r from-blue-600/20 via-sky-500/20 to-cyan-400/20 hover:from-blue-600/30 hover:via-sky-500/30 hover:to-cyan-400/30 text-white hover:text-white border border-blue-400/30 hover:border-cyan-400/50 shadow-lg hover:shadow-cyan-400/25 transition-all duration-200 transform hover:scale-105 active:scale-95"
           onClick={() => {
             setLoadingMessage('Connecting to Telegram...');
             setShowLoadingOverlay(true);
@@ -461,11 +461,11 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"></div>
         </Button>
 
-        <Button 
-          variant="outline" 
-          className={`w-full ${proStatus.isPro 
-            ? 'border-pro text-pro' 
-            : 'bg-gradient-to-r from-black via-gray-900 to-yellow-600 hover:from-gray-900 hover:via-black hover:to-yellow-500 text-white border-none shadow-lg hover:shadow-xl transition-all duration-300'
+        <Button
+          variant="outline"
+          className={`w-full transition-all duration-200 transform hover:scale-105 active:scale-95 ${proStatus.isPro
+            ? 'border-pro text-pro'
+            : 'bg-gradient-to-r from-black via-gray-900 to-yellow-600 hover:from-gray-900 hover:via-black hover:to-yellow-500 text-white border-none shadow-lg hover:shadow-xl'
           }`}
           onClick={() => onNavigate("payment")}
         >
@@ -484,7 +484,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         <Button
           variant="destructive"
           onClick={handleLogout}
-          className="w-full"
+          className="w-full transition-all duration-200 transform hover:scale-105 active:scale-95"
         >
           <LogOut className="w-4 h-4 mr-2" />
           Logout
