@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { ProUpgradeNotification } from "@/components/ProUpgradeNotification";
 import { Home } from "./Home";
 import { Chat } from "./Chat";
 import { Leaderboard } from "./Leaderboard";
@@ -100,7 +101,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="relative">
+      <ProUpgradeNotification onUpgradeClick={() => setActiveTab("payment")} />
+      <main className="relative pt-14">
         {renderContent()}
       </main>
       <BottomNavigation activeTab={activeTab} onTabChange={handleTabChange} />

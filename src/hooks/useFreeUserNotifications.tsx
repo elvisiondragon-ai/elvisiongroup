@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePro } from '@/hooks/usePro';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NotificationTracker {
   lastShownDate: string | null;
@@ -74,6 +75,7 @@ const triggerNavigation = (action: string) => {
 
 export const useFreeUserNotifications = () => {
   const { proStatus } = usePro();
+  const { user } = useAuth();
   const [currentNotificationIndex, setCurrentNotificationIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [currentReason, setCurrentReason] = useState('');
@@ -99,6 +101,7 @@ export const useFreeUserNotifications = () => {
   };
 
   const shouldStartNotifications = (): boolean => {
+    if (!user) return false; // No notifications for unauthenticated users
     if (proStatus.isPro) return false; // No notifications for Pro users
 
     const tracker = getStoredTracker();
@@ -166,10 +169,11 @@ export const useFreeUserNotifications = () => {
 
   // Main notification scheduler
   useEffect(() => {
+    if (!user) return; // No notifications for unauthenticated users
     if (proStatus.isPro) return;
 
     if (shouldStartNotifications()) {
-      console.log('🔔 Starting daily notification sequence for free user');
+      console.log('🔔 Starting daily notification sequence for authenticated free user');
 
       // Start notification sequence 5 seconds after app loads
       const initialDelay = setTimeout(() => {
@@ -189,9 +193,9 @@ export const useFreeUserNotifications = () => {
 
       return () => clearTimeout(initialDelay);
     } else {
-      console.log('🚫 Daily notifications already shown today or user is Pro');
+      console.log('🚫 Daily notifications already shown today, user is Pro, or user is not authenticated');
     }
-  }, [proStatus.isPro]);
+  }, [user, proStatus.isPro]);
 
   // Manual trigger functions for testing/debugging
   const triggerSpecificNotification = (index: number) => {

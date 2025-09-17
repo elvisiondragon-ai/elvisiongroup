@@ -648,7 +648,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           
           <div className="space-y-3">
             <div>
-              <Label htmlFor="fullName" className="text-xs text-muted-foreground">Nama Lengkap</Label>
+              <Label htmlFor="fullName" className="text-xs text-muted-foreground">Nama</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -657,8 +657,9 @@ export function Payment({ onNavigate }: PaymentProps) {
                   placeholder="Masukkan nama lengkap"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-muted/50 cursor-not-allowed"
                   required
+                  disabled
                 />
               </div>
             </div>
@@ -673,8 +674,9 @@ export function Payment({ onNavigate }: PaymentProps) {
                   placeholder="email@contoh.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-muted/50 cursor-not-allowed"
                   required
+                  disabled
                 />
               </div>
             </div>
