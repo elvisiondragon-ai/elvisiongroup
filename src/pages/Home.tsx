@@ -376,7 +376,7 @@ export function Home({
                   </span>
                 </h1>
                 <p className="text-muted-foreground">
-                  {t('Self-Transformation Through Spiritual Technology')}
+                  Ecosystem eL Vision Group - Secret of Effortless Wealthy Life
                 </p>
               </div>
             </div>
