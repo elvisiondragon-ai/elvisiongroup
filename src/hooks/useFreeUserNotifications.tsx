@@ -18,11 +18,11 @@ const PENGALAMAN_VIDEOS = [
 const NOTIFICATIONS = [
   {
     id: 1,
-    title: "🎵 Pengalaman Anggota Menunggu!",
+    title: "🎵 Testimonials Menunggu rasakan sendiri",
     description: "Dengarkan testimoni spiritual dari member lainnya",
     buttonText: "Dengar Sekarang",
     buttonClass: "bg-purple-600 hover:bg-purple-700",
-    action: 'pengalaman-anggota'
+    action: 'vio-testimonial'
   },
   {
     id: 2,
@@ -115,6 +115,12 @@ export const useFreeUserNotifications = () => {
 
   const handleNotificationAction = (action: string) => {
     switch (action) {
+      case 'vio-testimonial':
+        // Open Vio's video modal directly - for authenticated users only
+        triggerNavigation('home');
+        const event = new CustomEvent('openVioVideo');
+        window.dispatchEvent(event);
+        break;
       case 'pengalaman-anggota':
         // Navigate to home and scroll to testimonials section
         triggerNavigation('home');

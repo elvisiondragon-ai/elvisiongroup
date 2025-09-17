@@ -159,6 +159,23 @@ export function Home({
     }
   }, []);
 
+  // Listen for Vio video open event from notification
+  useEffect(() => {
+    const handleOpenVioVideo = () => {
+      setIndividualVideo({
+        url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/VIOVIDEO_WA.mp4",
+        title: "Pengalaman Vio"
+      });
+      setShowIndividualVideoModal(true);
+    };
+
+    window.addEventListener('openVioVideo', handleOpenVioVideo);
+
+    return () => {
+      window.removeEventListener('openVioVideo', handleOpenVioVideo);
+    };
+  }, []);
+
   const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
 
   // Calculate XP progress using the XP system
@@ -551,7 +568,7 @@ export function Home({
         </div>
 
 
-        {/* 1000+ Testimonials Section Card */}
+        {/* User Testimonials Section Card */}
         <Card
           className="p-6 border-border transition-all duration-300 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 hover:from-emerald-500/20 hover:via-teal-500/10 hover:to-cyan-500/20 border-emerald-500/20 hover:border-emerald-400/40 cursor-pointer col-span-2 relative overflow-hidden group"
           onClick={() => {
@@ -571,7 +588,7 @@ export function Home({
 
             <div className="space-y-2">
               <h3 className="font-bold text-lg text-foreground group-hover:text-emerald-300 transition-colors duration-300">
-                1000+ Testimonials
+                User Testimonials
               </h3>
               <p className="text-sm text-muted-foreground">
                 Testimoni tertulis dari ribuan anggota eL Vision Group
@@ -931,7 +948,7 @@ export function Home({
         <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-black/80 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <h2 className="text-xl font-semibold text-white">1000+ Testimonials</h2>
+              <h2 className="text-xl font-semibold text-white">User Testimonials</h2>
               <Button
                 variant="ghost"
                 size="sm"
@@ -948,11 +965,6 @@ export function Home({
                 .filter(media => media.type === 'image')
                 .map((media, index) => (
                   <div key={index} className="space-y-2">
-                    {/* Image Title */}
-                    <h3 className="text-white font-medium text-lg text-center">
-                      {media.title}
-                    </h3>
-
                     {/* Image Content */}
                     <div className="flex justify-center">
                       <img

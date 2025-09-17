@@ -3,6 +3,12 @@ import { Quote, Star } from "lucide-react";
 
 const testimonials = [
   {
+    name: "Hadi - Pro User",
+    text: "eL Vision Group bukan sekadar aplikasi - ini adalah teknologi spiritual yang mengubah kebiasaan digital menjadi kehidupan yang tercerahkan. Benar-benar mengubah cara manusia berhubungan dengan teknologi dan pertumbuhan batin.",
+    rating: 5,
+    type: "text"
+  },
+  {
     name: "Kiki",
     text: "Pengalaman luar biasa dengan eL Vision Group. Transformasi spiritual yang nyata dan profound.",
     rating: 5,
@@ -32,7 +38,7 @@ const testimonials = [
   },
   {
     name: "Lena",
-    text: "Community yang supportif dan tools yang powerful. Recommended untuk spiritual journey.",
+    text: "Mantap Pol cukup ikutin yang mudah rezeki malah datang sendiri guys",
     rating: 5,
     type: "video",
     videoIndex: 6 // LENA_WA.mp4 (index 6 in mediaFiles array)
@@ -53,13 +59,20 @@ const testimonials = [
   },
   {
     name: "Vio",
-    text: "Frequency healing dan meditasi di eL Vision benar-benar mengubah energi dan mindset saya.",
+    text: "Sebelumnya sering overthinking untuk sesuatu yang gak perlu, sangat merugikan secara finansial dan mental, ikut eL Vision Group semua jadi lebih ringan dan relax menghadapi hidup",
     rating: 5,
     type: "video",
     videoIndex: 7 // VIOVIDEO_WA.mp4
   },
   {
-    name: "Member Premium",
+    name: "Habib",
+    text: "Alhamdulillah begini cara bersyukur saat tubuh lebih segar menerima hidup, rezeki jadi berdatangan, coba sendiri wahai umat",
+    rating: 5,
+    type: "video",
+    videoIndex: 4 // HABIBVIDEO_WA.mp4 (index 4 in mediaFiles array)
+  },
+  {
+    name: "Putri - Tier Ignis 🔥",
     text: "15 tahun mencari, akhirnya menemukan solusi di eL Vision Group. Gratitude!",
     rating: 5,
     type: "text"
@@ -103,6 +116,10 @@ const videoMap: Record<string, { url: string; title: string }> = {
   "Vio": {
     url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/VIOVIDEO_WA.mp4",
     title: "Pengalaman Vio"
+  },
+  "Habib": {
+    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/HABIBVIDEO_WA.mp4",
+    title: "Pengalaman Habib"
   }
 };
 
