@@ -237,6 +237,16 @@ export function Auth({ onLogin }: AuthProps) {
 
   const enhancedHandleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!captchaToken) {
+      toast({
+        title: "Captcha Required",
+        description: "Please complete the captcha verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -253,6 +263,8 @@ export function Auth({ onLogin }: AuthProps) {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
+      }, {
+        captchaToken: captchaToken
       });
 
       if (error) throw error;
@@ -322,7 +334,8 @@ export function Auth({ onLogin }: AuthProps) {
         password: signupData.password,
         options: {
           emailRedirectTo: redirectUrl,
-          captchaToken,
+          // Temporarily disable captcha
+          // captchaToken,
           // Skip email confirmation for easier registration
           data: {
             email_confirm: true
@@ -575,10 +588,26 @@ export function Auth({ onLogin }: AuthProps) {
                   </div>
                 </div>
 
+                {/* Turnstile CAPTCHA */}
+                <div className="flex justify-center">
+                  <Turnstile
+                    siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
+                    onSuccess={(token) => {
+                      setCaptchaToken(token);
+                    }}
+                    onError={() => {
+                      setCaptchaToken(null);
+                    }}
+                    onExpire={() => {
+                      setCaptchaToken(null);
+                    }}
+                  />
+                </div>
+
                 <Button
                   type="submit"
                   className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
-                  disabled={isLoading}
+                  disabled={isLoading || !captchaToken}
                 >
                   {isLoading ? "Masuk..." : "Masuk"}
                 </Button>
