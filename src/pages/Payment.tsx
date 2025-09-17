@@ -285,17 +285,28 @@ export function Payment({ onNavigate }: PaymentProps) {
       
       if (user) {
         setEmail(user.email || '');
-        
+
         // Fetch user profile
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('user_id', user.id)
           .maybeSingle();
-        
+
         setUserProfile(profile);
+
+        // Auto-fetch fullName from profile or fallback to email username
+        let autoFullName = '';
         if (profile?.display_name) {
-          setFullName(profile.display_name);
+          autoFullName = profile.display_name;
+        } else if (user.email) {
+          // Fallback to email username if profile display_name is empty
+          autoFullName = user.email.split('@')[0];
+        }
+
+        // Only update fullName if it's currently empty to avoid overwriting user input
+        if (!fullName.trim() && autoFullName) {
+          setFullName(autoFullName);
         }
       }
 
