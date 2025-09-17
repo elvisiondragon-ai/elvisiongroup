@@ -481,14 +481,16 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         </Button>
 
 
-        <Button
-          variant="destructive"
-          onClick={handleLogout}
-          className="w-full transition-all duration-200 transform hover:scale-105 active:scale-95"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Logout
-        </Button>
+        <div className="p-6">
+          <Button
+            variant="destructive"
+            onClick={handleLogout}
+            className="w-full transition-all duration-200 transform hover:scale-105 active:scale-95"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
+        </div>
 
         {/* Delete Account Section - HIDDEN */}
         {false && (

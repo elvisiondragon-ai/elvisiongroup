@@ -11,10 +11,20 @@ console.log('🔗 Supabase connecting to:', SUPABASE_URL.includes('localhost') ?
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Determine redirect URL based on environment
+const getRedirectURL = () => {
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname, port } = window.location;
+    return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+  }
+  return SUPABASE_URL.includes('localhost') ? 'http://localhost:8080' : 'https://yourdomain.com';
+};
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    redirectTo: getRedirectURL(),
   }
 });
