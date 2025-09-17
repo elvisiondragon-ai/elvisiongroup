@@ -25,8 +25,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [activeTab, setActiveTab] = useState("journal");
+  const [showProUpgrade, setShowProUpgrade] = useState(false);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
 
@@ -102,12 +102,12 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     } else {
       console.log('✅ Reflection saved successfully:', data);
 
-      // Award XP for completing spiritual journal reflection (this will show XP notification)
-      awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
+      // Award XP for completing spiritual journal reflection (without showing separate XP notification)
+      awardXP('journal_completion', 1, 'Completed spiritual journal reflection', {}, false);
 
       toast({
-        title: "✅ Tersimpan",
-        description: "Renungan berhasil disimpan ke database",
+        title: "Reflection Stored 🚀",
+        description: "+1 EXP",
         variant: "default"
       });
 
@@ -118,11 +118,6 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
   const handleProUpgradeClick = () => {
     setShowProUpgrade(true);
-  };
-
-  const navigateToPayment = () => {
-    setShowProUpgrade(false);
-    onNavigate("payment");
   };
 
   const handleDeleteReflection = async (reflectionId: string) => {
@@ -145,8 +140,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       }
 
       toast({
-        title: "✅ Berhasil dihapus",
-        description: "Renungan berhasil dihapus",
+        title: "Reflection Deleted 🔥",
         variant: "default"
       });
 
@@ -357,10 +351,13 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       <ProUpgradeModal
         isVisible={showProUpgrade}
         onClose={() => setShowProUpgrade(false)}
-        onNavigateToPayment={navigateToPayment}
+        onNavigateToPayment={() => {
+          setShowProUpgrade(false);
+          onNavigate("payment");
+        }}
         reason="analytics"
         userStats={{
-          totalMeditations: reflections.length * 2, // Estimate based on journal entries
+          totalMeditations: reflections.length * 2,
           daysActive: reflections.length,
           currentStreak: Math.min(7, reflections.length)
         }}

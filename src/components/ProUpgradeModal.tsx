@@ -67,7 +67,7 @@ export function ProUpgradeModal({
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className={`w-full max-w-md mx-auto bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 border-2 border-purple-500/50 shadow-2xl shadow-purple-500/25 ${showAnimation ? 'animate-in zoom-in-95 duration-300' : ''}`}>
+      <Card className={`w-full max-w-sm max-h-[75vh] overflow-y-auto mx-auto bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 border-2 border-purple-500/50 shadow-2xl shadow-purple-500/25 ${showAnimation ? 'animate-in zoom-in-95 duration-300' : ''}`}>
         <CardHeader className="text-center relative">
           <Button
             variant="ghost"
@@ -128,7 +128,7 @@ export function ProUpgradeModal({
             <div className="space-y-2">
               <div className="flex items-center gap-3 text-purple-100">
                 <Star className="w-4 h-4 text-yellow-400" />
-                <span className="text-sm">Akses semua 10 Verses Premium</span>
+                <span className="text-sm">Akses ke Verse Pro dan powerful</span>
               </div>
               <div className="flex items-center gap-3 text-purple-100">
                 <Zap className="w-4 h-4 text-yellow-400" />
@@ -152,7 +152,7 @@ export function ProUpgradeModal({
               <span className="font-semibold text-sm">Penawaran Terbatas!</span>
             </div>
             <p className="text-orange-200 text-sm">
-              Dapatkan <strong>30% diskon</strong> untuk berlangganan bulan pertama
+              Dapatkan <strong>30% diskon</strong> untuk berlangganan Tahunan
             </p>
           </div>
 
@@ -166,13 +166,6 @@ export function ProUpgradeModal({
               Upgrade ke Pro Sekarang
             </Button>
 
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="w-full border-purple-500/50 text-purple-300 hover:bg-purple-800/30"
-            >
-              Nanti Saja
-            </Button>
           </div>
         </CardContent>
       </Card>

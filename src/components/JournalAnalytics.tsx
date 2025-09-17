@@ -507,6 +507,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
                 <Crown className="w-4 h-4 mr-2" />
                 Upgrade untuk Analytics Unlimited
               </Button>
+
             </div>
           )}
         </div>
@@ -629,6 +630,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
         </div>
       )}
     </div>
+
     </>
   );
 }

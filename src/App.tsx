@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
 import { useAppUpdates } from "@/hooks/useAppUpdates";
+import { useFreeUserNotifications } from "@/hooks/useFreeUserNotifications";
+import { FreeUserNotificationModal } from "@/components/FreeUserNotificationModal";
 import { useToast } from "@/hooks/use-toast";
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Auth } from "./pages/Auth";
@@ -39,9 +41,17 @@ const App = () => {
   
   // Initialize real-time notifications
   useRealTimeNotifications(user);
-  
+
   // Initialize app updates check
   useAppUpdates(user);
+
+  // Initialize free user daily notifications
+  const {
+    showModal,
+    currentReason,
+    handleModalNavigate,
+    handleModalClose
+  } = useFreeUserNotifications();
 
   // PWA Update Logic
   const {
@@ -385,6 +395,14 @@ const App = () => {
             </MeditativeProvider>
           </AudioProvider>
         </AuthProvider>
+
+        {/* Free User Notification Modal */}
+        <FreeUserNotificationModal
+          isVisible={showModal}
+          onClose={handleModalClose}
+          onNavigate={handleModalNavigate}
+          reason={currentReason}
+        />
       </TooltipProvider>
     </QueryClientProvider>
   );

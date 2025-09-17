@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface XPSystemHook {
-  awardXP: (activityType: string, xpAmount: number, reason?: string, metadata?: any) => Promise<void>;
+  awardXP: (activityType: string, xpAmount: number, reason?: string, metadata?: any, showNotification?: boolean) => Promise<void>;
   calculateXPProgress: (currentXP: number, level: number) => { currentLevelXP: number; xpForNextLevel: number; progress: number };
   isLoading: boolean;
 }
@@ -16,7 +16,8 @@ export function useXPSystem(): XPSystemHook {
     activityType: string,
     xpAmount: number,
     reason?: string,
-    metadata: any = {}
+    metadata: any = {},
+    showNotification: boolean = true
   ) => {
     try {
       setIsLoading(true);
@@ -44,25 +45,28 @@ export function useXPSystem(): XPSystemHook {
         return;
       }
       
-      // Check for level up
-      if (result?.level_up) {
-        toast({
-          title: `🎉 SELAMAT ANDA MASUK KE LEVEL SELANJUTNYA!`,
-          description: `Sekarang Level ${result.new_level}! +${result.xp_awarded} XP earned! ${result.achievement_earned ? '⚡ Achievement baru terbuka!' : ''}`,
-        });
-      } else if (result.show_notification && result.limit_reached) {
-        // Only show daily limit notification when limit is hit for the first time
-        toast({
-          title: `+${result.xp_awarded} XP Earned! 🎯 Daily Limit Reached`,
-          description: `You've earned 30/30 XP today! Come back tomorrow for more XP.`,
-          variant: "default",
-        });
-      } else if (result.success) {
-        // Regular success message
-        toast({
-          title: `+${result.xp_awarded} XP Earned!`,
-          description: reason || `${activityType} completed`,
-        });
+      // Only show notifications if showNotification is true
+      if (showNotification) {
+        // Check for level up
+        if (result?.level_up) {
+          toast({
+            title: `🎉 SELAMAT ANDA MASUK KE LEVEL SELANJUTNYA!`,
+            description: `Sekarang Level ${result.new_level}! +${result.xp_awarded} XP earned! ${result.achievement_earned ? '⚡ Achievement baru terbuka!' : ''}`,
+          });
+        } else if (result.show_notification && result.limit_reached) {
+          // Only show daily limit notification when limit is hit for the first time
+          toast({
+            title: `+${result.xp_awarded} XP Earned! 🎯 Daily Limit Reached`,
+            description: `You've earned 30/30 XP today! Come back tomorrow for more XP.`,
+            variant: "default",
+          });
+        } else if (result.success) {
+          // Regular success message
+          toast({
+            title: `+${result.xp_awarded} XP Earned!`,
+            description: reason || `${activityType} completed`,
+          });
+        }
       }
 
     } catch (error) {
