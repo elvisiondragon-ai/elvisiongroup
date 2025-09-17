@@ -205,6 +205,16 @@ export function Auth({ onLogin }: AuthProps) {
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!captchaToken) {
+      toast({
+        title: "Captcha Required",
+        description: "Please complete the captcha verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -213,6 +223,7 @@ export function Auth({ onLogin }: AuthProps) {
         forgotPasswordData.email,
         {
           redirectTo: `${window.location.origin}/reset-password`,
+          captchaToken: captchaToken
         }
       );
 
@@ -443,10 +454,26 @@ export function Auth({ onLogin }: AuthProps) {
                 </div>
               </div>
 
+              {/* Turnstile CAPTCHA */}
+              <div className="flex justify-center">
+                <Turnstile
+                  siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
+                  onSuccess={(token) => {
+                    setCaptchaToken(token);
+                  }}
+                  onError={() => {
+                    setCaptchaToken(null);
+                  }}
+                  onExpire={() => {
+                    setCaptchaToken(null);
+                  }}
+                />
+              </div>
+
               <Button
                 type="submit"
                 className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
-                disabled={isLoading}
+                disabled={isLoading || !captchaToken}
               >
                 {isLoading ? "Mengirim..." : "Kirim Reset Email"}
               </Button>
