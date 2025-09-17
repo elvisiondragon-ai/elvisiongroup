@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff, Sparkles, Zap } from "lucide-react";
-import { Turnstile } from '@marsidev/react-turnstile';
+// Removed React Turnstile library - using manual implementation
 import type { User } from '@supabase/supabase-js';
 
 interface AuthProps {
@@ -43,6 +43,54 @@ export function Auth({ onLogin }: AuthProps) {
 
   // Track current view
   const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent'>('auth');
+
+  // Load Turnstile script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup script when component unmounts
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  // Get fresh Turnstile token
+  const getTurnstileToken = async (): Promise<string> => {
+    // Wait for Turnstile to load
+    if (!(window as any).turnstile) {
+      await new Promise<void>((resolve) => {
+        const check = () => {
+          if ((window as any).turnstile) resolve();
+          else setTimeout(check, 50);
+        };
+        check();
+      });
+    }
+
+    const turnstile = (window as any).turnstile;
+    const container = document.getElementById('cf-turnstile');
+    if (!container) throw new Error('Missing #cf-turnstile element');
+
+    // Clear any previous widget
+    container.innerHTML = '';
+
+    const token = await new Promise<string>((resolve) => {
+      const widgetId = turnstile.render('#cf-turnstile', {
+        sitekey: '0x4AAAAAAB1zRiolDtnT61Ah',
+        size: 'invisible',
+        callback: (t: string) => resolve(t),
+      });
+      // Execute after render
+      turnstile.execute(widgetId);
+    });
+
+    if (!token) throw new Error('Turnstile failed to produce a token');
+    return token;
+  };
 
   // Check if user is already logged in
   useEffect(() => {
@@ -237,22 +285,15 @@ export function Auth({ onLogin }: AuthProps) {
 
   const enhancedHandleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!captchaToken) {
-      toast({
-        title: "Captcha Required",
-        description: "Please complete the captcha verification.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
+      // Get fresh Turnstile token
+      const captchaToken = await getTurnstileToken();
+
       // Clean up any existing auth state
       cleanupAuthState();
-      
+
       // Attempt global sign out first
       try {
         await supabase.auth.signOut({ scope: 'global' });
@@ -264,7 +305,7 @@ export function Auth({ onLogin }: AuthProps) {
         email: loginData.email,
         password: loginData.password,
       }, {
-        captchaToken: captchaToken
+        captchaToken
       });
 
       if (error) throw error;
@@ -302,14 +343,7 @@ export function Auth({ onLogin }: AuthProps) {
       return;
     }
 
-    if (!captchaToken) {
-      toast({
-        title: "Captcha Required",
-        description: "Please complete the captcha verification.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Remove this validation - we'll get token fresh
 
     // Very lenient password validation - minimum 1 character
     if (signupData.password.length < 1) {
@@ -324,18 +358,20 @@ export function Auth({ onLogin }: AuthProps) {
     setIsLoading(true);
 
     try {
+      // Get fresh Turnstile token
+      const captchaToken = await getTurnstileToken();
+
       // Clean up existing state first
       cleanupAuthState();
-      
+
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { data, error } = await supabase.auth.signUp({
         email: signupData.email,
         password: signupData.password,
         options: {
           emailRedirectTo: redirectUrl,
-          // Temporarily disable captcha
-          // captchaToken,
+          captchaToken,
           // Skip email confirmation for easier registration
           data: {
             email_confirm: true
@@ -514,6 +550,9 @@ export function Auth({ onLogin }: AuthProps) {
   // Main Auth View
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {/* Invisible Turnstile container */}
+      <div id="cf-turnstile" style={{ display: 'none' }}></div>
+
       <div className="w-full max-w-md">
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
@@ -588,26 +627,10 @@ export function Auth({ onLogin }: AuthProps) {
                   </div>
                 </div>
 
-                {/* Turnstile CAPTCHA */}
-                <div className="flex justify-center">
-                  <Turnstile
-                    siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
-                    onSuccess={(token) => {
-                      setCaptchaToken(token);
-                    }}
-                    onError={() => {
-                      setCaptchaToken(null);
-                    }}
-                    onExpire={() => {
-                      setCaptchaToken(null);
-                    }}
-                  />
-                </div>
-
                 <Button
                   type="submit"
                   className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
-                  disabled={isLoading || !captchaToken}
+                  disabled={isLoading}
                 >
                   {isLoading ? "Masuk..." : "Masuk"}
                 </Button>
@@ -731,26 +754,10 @@ export function Auth({ onLogin }: AuthProps) {
                   </div>
                 </div>
 
-                {/* Turnstile CAPTCHA */}
-                <div className="flex justify-center">
-                  <Turnstile
-                    siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
-                    onSuccess={(token) => {
-                      setCaptchaToken(token);
-                    }}
-                    onError={() => {
-                      setCaptchaToken(null);
-                    }}
-                    onExpire={() => {
-                      setCaptchaToken(null);
-                    }}
-                  />
-                </div>
-
                 <Button
                   type="submit"
                   className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
-                  disabled={isLoading || !captchaToken}
+                  disabled={isLoading}
                 >
                   {isLoading ? "Membuat Akun..." : "Buat Akun"}
                 </Button>
