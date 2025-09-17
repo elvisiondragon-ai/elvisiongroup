@@ -116,14 +116,13 @@ export const useFreeUserNotifications = () => {
   const handleNotificationAction = (action: string) => {
     switch (action) {
       case 'pengalaman-anggota':
-        const randomVideo = getRandomVideo();
-        triggerNavigation('audio-therapy');
-        localStorage.setItem('selectedPengalamanVideo', randomVideo);
+        // Navigate to home and scroll to testimonials section
+        triggerNavigation('home');
+        localStorage.setItem('scrollToTestimonials', 'true');
         break;
       case 'tujuan-kami':
-        triggerNavigation('profile');
-        // Additional navigation to tujuan kami section can be handled by Profile component
-        localStorage.setItem('scrollToTujuanKami', 'true');
+        // Navigate to external ecosystem website
+        window.open('https://ecosystem.elvisiongroup.com', '_blank');
         break;
       case 'personal-analytics':
         triggerNavigation('personal-analytics');

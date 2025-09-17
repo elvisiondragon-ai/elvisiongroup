@@ -8,6 +8,7 @@ import { XPRules } from "@/components/XPRules";
 import { StreakIndicator } from "@/components/StreakIndicator";
 import { CacheDebugPanel } from "@/components/CacheDebugPanel";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { Testimonials } from "@/components/testimonials";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
@@ -46,8 +47,12 @@ export function Home({
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<{url: string, type: 'video' | 'image', title: string} | null>(null);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [showIndividualVideoModal, setShowIndividualVideoModal] = useState(false);
+  const [individualVideo, setIndividualVideo] = useState<{url: string, title: string} | null>(null);
+  const [showImageGalleryModal, setShowImageGalleryModal] = useState(false);
   const [cachedMediaUrls, setCachedMediaUrls] = useState<Map<string, string>>(new Map());
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const testimonialsRef = useRef<HTMLDivElement>(null);
 
   // Preload audio files for better performance
   useEffect(() => {
@@ -139,6 +144,20 @@ export function Home({
     }
   }, [user]);
 
+  // Check for scroll to testimonials flag from notification
+  useEffect(() => {
+    const shouldScrollToTestimonials = localStorage.getItem('scrollToTestimonials');
+    if (shouldScrollToTestimonials === 'true' && testimonialsRef.current) {
+      // Small delay to ensure the component is fully rendered
+      setTimeout(() => {
+        testimonialsRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+        localStorage.removeItem('scrollToTestimonials'); // Clear the flag
+      }, 500);
+    }
+  }, []);
 
   const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
 
@@ -207,6 +226,7 @@ export function Home({
     color: "text-blue-500",
     key: "tutorial"
   };
+
 
   const mediaFiles = [
     // All Videos First
@@ -390,7 +410,39 @@ export function Home({
           const isIgnisQuest = feature.key === 'ignis-quest';
           const isIgnisLocked = isIgnisQuest && !proStatus.isPro;
           const actuallyLocked = isLocked || isIgnisLocked || isMeditationLocked;
-          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${actuallyLocked ? 'bg-card/50 cursor-pointer' : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'} ${feature.isNew ? 'relative' : ''} ${isIgnisQuest ? 'col-span-2' : ''}`} onClick={() => {
+          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${
+            feature.key === 'personal-analytics'
+              ? actuallyLocked
+                ? 'bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-fuchsia-500/10 border-violet-500/20 cursor-pointer opacity-90'
+                : 'bg-gradient-to-br from-violet-500/15 via-purple-500/10 to-fuchsia-500/15 hover:from-violet-500/25 hover:via-purple-500/15 hover:to-fuchsia-500/25 border-violet-500/30 hover:border-violet-400/50 cursor-pointer'
+              : feature.key === 'ignis-quest'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-red-500/10 via-orange-500/5 to-yellow-500/10 border-orange-500/20 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-red-500/15 via-orange-500/10 to-yellow-500/15 hover:from-red-500/25 hover:via-orange-500/15 hover:to-yellow-500/25 border-orange-500/30 hover:border-red-400/50 cursor-pointer'
+              : feature.key === 'audio-therapy'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-yellow-300/15 via-amber-400/12 to-orange-500/15 border-yellow-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-yellow-300/20 via-amber-400/18 to-orange-500/20 hover:from-yellow-300/35 hover:via-amber-400/30 hover:to-orange-500/35 border-yellow-500/40 hover:border-amber-400/70 cursor-pointer'
+              : feature.key === 'spiritual-journal'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-amber-300/15 via-yellow-500/12 to-orange-400/15 border-amber-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-amber-300/20 via-yellow-500/18 to-orange-400/20 hover:from-amber-300/35 hover:via-yellow-500/30 hover:to-orange-400/35 border-amber-500/40 hover:border-yellow-400/70 cursor-pointer'
+              : feature.key === 'meditation-sessions'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-orange-400/15 via-red-500/12 to-pink-600/15 border-orange-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-orange-400/20 via-red-500/18 to-pink-600/20 hover:from-orange-400/35 hover:via-red-500/30 hover:to-pink-600/35 border-orange-500/40 hover:border-red-500/70 cursor-pointer'
+              : feature.key === 'chat'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-blue-400/15 via-cyan-500/12 to-indigo-600/15 border-blue-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-blue-400/20 via-cyan-500/18 to-indigo-600/20 hover:from-blue-400/35 hover:via-cyan-500/30 hover:to-indigo-600/35 border-blue-500/40 hover:border-cyan-500/70 cursor-pointer'
+              : feature.key === 'elite-habit'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-emerald-400/15 via-green-500/12 to-teal-600/15 border-emerald-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-emerald-400/20 via-green-500/18 to-teal-600/20 hover:from-emerald-400/35 hover:via-green-500/30 hover:to-teal-600/35 border-emerald-500/40 hover:border-green-500/70 cursor-pointer'
+                : actuallyLocked
+                  ? 'bg-card/50 cursor-pointer'
+                  : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'
+          } ${feature.isNew ? 'relative' : ''}`} onClick={() => {
             if (actuallyLocked) {
               if (isIgnisLocked || isMeditationLocked) {
                 onNavigate("payment"); // Navigate to payment/upgrade page
@@ -414,7 +466,7 @@ export function Home({
                     : feature.key === 'chat'
                       ? 'bg-gradient-to-r from-cyan-600 via-blue-500 to-purple-600 shadow-xl shadow-cyan-500/50 border-2 border-cyan-300/30'
                     : feature.key === 'personal-analytics'
-                      ? 'bg-gradient-to-r from-purple-600 via-indigo-500 to-purple-400 shadow-xl shadow-purple-500/50 border-2 border-purple-300/30'
+                      ? 'bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 shadow-2xl shadow-violet-500/60 border-2 border-violet-400/40 animate-pulse'
                     : feature.key === 'elite-habit'
                       ? 'bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-400 shadow-xl shadow-emerald-500/50 border-2 border-emerald-300/30'
                     : feature.key === 'ignis-quest'
@@ -426,7 +478,7 @@ export function Home({
                       : feature.key === 'audio-therapy' ? 'text-white animate-pulse'
                       : feature.key === 'spiritual-journal' ? 'text-white drop-shadow-lg'
                       : feature.key === 'chat' ? 'text-white drop-shadow-lg'
-                      : feature.key === 'personal-analytics' ? 'text-white drop-shadow-lg animate-pulse'
+                      : feature.key === 'personal-analytics' ? 'text-white drop-shadow-2xl animate-pulse'
                       : feature.key === 'elite-habit' ? 'text-white drop-shadow-lg animate-pulse'
                       : feature.key === 'ignis-quest' ? 'text-white animate-pulse'
                       : ''
@@ -466,61 +518,64 @@ export function Home({
                 </div>
               </Card>;
         })}
-        </div>
 
-        {/* Tutorial Button */}
-        <Card 
-          className="p-6 border-border transition-all duration-300 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 hover:from-indigo-500/20 hover:via-purple-500/10 hover:to-pink-500/20 border-indigo-500/20 hover:border-indigo-400/40 cursor-pointer col-span-2 relative overflow-hidden group"
-          onClick={(e) => {
-            e.preventDefault();
-            if (!showTutorialModal) setShowTutorialModal(true);
-          }}
-        >
-          {/* Background glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          
-          <div className="relative z-10 flex flex-col items-center text-center space-y-4">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300 animate-pulse"></div>
-              <div className="relative p-4 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-2xl shadow-indigo-500/30 group-hover:shadow-indigo-500/50 group-hover:scale-110 transition-all duration-300">
-                <tutorialFeature.icon className="w-8 h-8 text-white animate-pulse" />
+          {/* Tutorial Button */}
+          <Card
+            className="p-4 border-border transition-all duration-300 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 hover:from-indigo-500/20 hover:via-purple-500/10 hover:to-pink-500/20 border-indigo-500/20 hover:border-indigo-400/40 cursor-pointer relative overflow-hidden group"
+            onClick={(e) => {
+              e.preventDefault();
+              if (!showTutorialModal) setShowTutorialModal(true);
+            }}
+          >
+            {/* Background glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="relative p-3 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 group-hover:scale-110 transition-all duration-300">
+                <tutorialFeature.icon className="w-6 h-6 text-white animate-pulse" />
+              </div>
+
+              <div>
+                <h3 className="font-medium text-foreground mb-1">
+                  {tutorialFeature.title}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {tutorialFeature.description}
+                </p>
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <h3 className="font-bold text-lg text-foreground group-hover:text-indigo-300 transition-colors duration-300">
-                {tutorialFeature.title}
-              </h3>
-            </div>
-          </div>
 
-          {/* Corner accent */}
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
-        </Card>
+            {/* Corner accent */}
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
+          </Card>
+        </div>
 
-        {/* Pengalaman Anggota Section Card */}
-        <Card 
+
+        {/* 1000+ Testimonials Section Card */}
+        <Card
           className="p-6 border-border transition-all duration-300 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 hover:from-emerald-500/20 hover:via-teal-500/10 hover:to-cyan-500/20 border-emerald-500/20 hover:border-emerald-400/40 cursor-pointer col-span-2 relative overflow-hidden group"
           onClick={() => {
-            setCurrentMediaIndex(0);
-            setSelectedMedia(mediaFiles[0]);
+            setShowImageGalleryModal(true);
           }}
         >
           {/* Background glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/5 via-teal-600/5 to-cyan-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          
+
           <div className="relative z-10 flex flex-col items-center text-center space-y-4">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300 animate-pulse"></div>
               <div className="relative p-4 rounded-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 shadow-2xl shadow-emerald-500/30 group-hover:shadow-emerald-500/50 group-hover:scale-110 transition-all duration-300">
-                <Video className="w-8 h-8 text-white animate-pulse" />
+                <ImageIcon className="w-8 h-8 text-white animate-pulse" />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <h3 className="font-bold text-lg text-foreground group-hover:text-emerald-300 transition-colors duration-300">
-                Pengalaman Anggota
+                1000+ Testimonials
               </h3>
+              <p className="text-sm text-muted-foreground">
+                Testimoni tertulis dari ribuan anggota eL Vision Group
+              </p>
             </div>
           </div>
 
@@ -528,6 +583,15 @@ export function Home({
           <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-emerald-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
         </Card>
 
+        {/* Testimonials Section */}
+        <div ref={testimonialsRef}>
+          <Testimonials
+            onVideoClick={(videoIndex, videoUrl, videoTitle) => {
+              setIndividualVideo({ url: videoUrl, title: videoTitle });
+              setShowIndividualVideoModal(true);
+            }}
+          />
+        </div>
 
         {/* XP Motivation & Weekly Challenge */}
         <Card className="p-6 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-cyan-500/10 border border-primary/20">
@@ -824,7 +888,110 @@ export function Home({
           </div>
         </div>
       )}
-      
+
+      {/* Individual Video Testimonial Modal */}
+      {showIndividualVideoModal && individualVideo && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-xl font-semibold font-orbitron">{individualVideo.title}</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowIndividualVideoModal(false);
+                  setIndividualVideo(null);
+                }}
+                className="text-foreground hover:bg-muted"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="p-6">
+              <div className="relative flex justify-center">
+                <video
+                  src={individualVideo.url}
+                  controls
+                  autoPlay
+                  className="max-w-full rounded-lg"
+                  style={{ maxHeight: '70vh' }}
+                  preload="metadata"
+                  crossOrigin="anonymous"
+                >
+                  Browser Anda tidak mendukung video HTML5.
+                </video>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Gallery Modal - Only Images */}
+      {showImageGalleryModal && (
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-black/80 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <h2 className="text-xl font-semibold text-white">1000+ Testimonials</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowImageGalleryModal(false)}
+                className="text-white hover:bg-white/10"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* Scrollable Image Content Only */}
+            <div className="overflow-y-auto max-h-[80vh] p-4 space-y-6">
+              {mediaFiles
+                .filter(media => media.type === 'image')
+                .map((media, index) => (
+                  <div key={index} className="space-y-2">
+                    {/* Image Title */}
+                    <h3 className="text-white font-medium text-lg text-center">
+                      {media.title}
+                    </h3>
+
+                    {/* Image Content */}
+                    <div className="flex justify-center">
+                      <img
+                        src={cachedMediaUrls.get(media.url) || media.url}
+                        alt={media.title}
+                        className="max-w-full max-h-[60vh] object-contain rounded-lg"
+                        onLoad={async () => {
+                          // Preload and cache image for future views
+                          if (!cachedMediaUrls.has(media.url)) {
+                            try {
+                              const cachedUrl = await preloadAndCacheMedia(media.url);
+                              setCachedMediaUrls(prev => new Map(prev).set(media.url, cachedUrl));
+                            } catch (error) {
+                              console.warn('Failed to cache image:', error);
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+
+                    {/* Separator */}
+                    {index < mediaFiles.filter(m => m.type === 'image').length - 1 && (
+                      <div className="border-t border-white/10 pt-6 mt-6" />
+                    )}
+                  </div>
+                ))}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-white/10 text-center text-white/80 text-sm">
+              <p>Testimoni Tertulis dari Anggota eL Vision Group</p>
+              <p className="text-white/60 text-xs mt-1">
+                Scroll ke bawah untuk melihat semua testimoni
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Cache Debug Panel */}
       <CacheDebugPanel />
     </div>;

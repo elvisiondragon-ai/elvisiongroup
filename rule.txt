@@ -1,5 +1,6 @@
 OVER COMPLICATED CLAUDE
 
+Claude have disgusting legacy BEHAVIOR - OVERCOMPLICATED, and become OVERLY STUPID by it -
   1. DO NOT jumped to solutions without fully understanding your system
   2. DO NOT added unnecessary complexity when your system worked fine
   3. Ask clarifying questions about what you actually needed
