@@ -58,10 +58,10 @@ export function PrivacyPolicy() {
                 provide community features, and deliver premium content for Pro users.
               </p>
 
-              <h3 className="text-xl font-semibold mb-3">3. Third-Party Services</h3>
+              <h3 className="text-xl font-semibold mb-3">3. Data Storage Technology</h3>
               <p className="mb-4">
-                We use Supabase for secure authentication and data storage. Your data
-                is protected according to industry-standard security practices.
+                We use eL Vision Technology for secure authentication and data storage. Your data
+                is protected according to industry-standard security practices with our proprietary systems.
               </p>
 
               <h3 className="text-xl font-semibold mb-3">4. Data Security</h3>
@@ -79,7 +79,7 @@ export function PrivacyPolicy() {
               <h3 className="text-xl font-semibold mb-3">6. Cookies and Analytics</h3>
               <p className="mb-4">
                 The app uses minimal cookies for authentication and user experience
-                optimization. No personal data is shared with third parties without consent.
+                optimization. All data processing is handled by eL Vision Technology systems.
               </p>
 
               <div className="mt-8 p-4 bg-muted rounded-lg">
