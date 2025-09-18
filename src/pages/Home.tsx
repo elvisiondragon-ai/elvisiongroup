@@ -816,14 +816,14 @@ export function Home({
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-xl font-semibold font-orbitron">Cara Menggunakan Aplikasi</h2>
               <Button 
-                variant="ghost" 
-                size="sm" 
                 onClick={() => {
                   setShowTutorialModal(false);
                   setShowPlayButton(true);
                 }}
+                className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
+                size="sm"
               >
-                ✕
+                <X className="w-3.5 h-3.5" />
               </Button>
             </div>
             <div className="p-6">
@@ -872,11 +872,11 @@ export function Home({
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-xl font-semibold font-orbitron">Pengalaman Anggota</h2>
               <Button 
-                variant="ghost" 
-                size="sm" 
                 onClick={() => setShowMediaModal(false)}
+                className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
+                size="sm"
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </Button>
             </div>
             <div className="p-6 max-h-[80vh] overflow-y-auto">
@@ -958,12 +958,11 @@ export function Home({
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <h2 className="text-xl font-semibold text-white">Pengalaman Anggota</h2>
               <Button 
-                variant="ghost" 
-                size="sm" 
                 onClick={() => setSelectedMedia(null)}
-                className="text-white hover:bg-white/10"
+                className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
+                size="sm"
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </Button>
             </div>
             
@@ -1049,15 +1048,14 @@ export function Home({
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-xl font-semibold font-orbitron">{individualVideo.title}</h2>
               <Button
-                variant="ghost"
-                size="sm"
                 onClick={() => {
                   setShowIndividualVideoModal(false);
                   setIndividualVideo(null);
                 }}
-                className="text-foreground hover:bg-muted"
+                className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
+                size="sm"
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </Button>
             </div>
             <div className="p-6">
@@ -1086,12 +1084,11 @@ export function Home({
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <h2 className="text-xl font-semibold text-white">User Testimonials</h2>
               <Button
-                variant="ghost"
-                size="sm"
                 onClick={() => setShowImageGalleryModal(false)}
-                className="text-white hover:bg-white/10"
+                className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
+                size="sm"
               >
-                <X className="w-5 h-5" />
+                <X className="w-3.5 h-3.5" />
               </Button>
             </div>
 
