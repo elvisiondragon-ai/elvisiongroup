@@ -15,14 +15,14 @@ export function ProUpgradeNotification({ onUpgradeClick }: ProUpgradeNotificatio
   // Debug logging
   console.log('🔍 ProUpgradeNotification - user:', !!user, 'isPro:', proStatus?.isPro);
 
-  // Set 3-minute delay before showing notification for non-Pro users
+  // Set 30-second delay before showing notification for non-Pro users
   useEffect(() => {
     if (user && !proStatus?.isPro) {
-      console.log('⏰ Starting 3-minute delay for Pro notification');
+      console.log('⏰ Starting 30-second delay for Pro notification');
       const timer = setTimeout(() => {
-        console.log('✅ 3 minutes passed, showing Pro notification');
+        console.log('✅ 30 seconds passed, showing Pro notification');
         setShowAfterDelay(true);
-      }, 3 * 60 * 1000); // 3 minutes
+      }, 30 * 1000); // 30 seconds
 
       return () => clearTimeout(timer);
     }
