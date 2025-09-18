@@ -14,11 +14,8 @@ export function ProUpgradeNotification({ onUpgradeClick }: ProUpgradeNotificatio
   // Debug logging
   console.log('🔍 ProUpgradeNotification - user:', !!user, 'isPro:', proStatus?.isPro);
 
-  // For testing in localhost - always show if user exists, comment out in production
-  // if (!user || proStatus?.isPro) return null;
-
-  // Temporary for localhost testing - show for any authenticated user
-  if (!user) return null;
+  // Hide notification if user is not logged in OR if user is already Pro
+  if (!user || proStatus?.isPro) return null;
 
   // If completely hidden, don't render anything
   if (isHidden) return null;
