@@ -10,12 +10,26 @@ export function ProUpgradeNotification({ onUpgradeClick }: ProUpgradeNotificatio
   const { user, proStatus } = useAuth();
   const [isMinimized, setIsMinimized] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
+  const [showAfterDelay, setShowAfterDelay] = useState(false);
 
   // Debug logging
   console.log('🔍 ProUpgradeNotification - user:', !!user, 'isPro:', proStatus?.isPro);
 
-  // Hide notification if user is not logged in OR if user is already Pro
-  if (!user || proStatus?.isPro) return null;
+  // Set 3-minute delay before showing notification for non-Pro users
+  useEffect(() => {
+    if (user && !proStatus?.isPro) {
+      console.log('⏰ Starting 3-minute delay for Pro notification');
+      const timer = setTimeout(() => {
+        console.log('✅ 3 minutes passed, showing Pro notification');
+        setShowAfterDelay(true);
+      }, 3 * 60 * 1000); // 3 minutes
+
+      return () => clearTimeout(timer);
+    }
+  }, [user, proStatus?.isPro]);
+
+  // Hide notification if user is not logged in OR if user is already Pro OR if delay hasn't passed
+  if (!user || proStatus?.isPro || !showAfterDelay) return null;
 
   // If completely hidden, don't render anything
   if (isHidden) return null;
