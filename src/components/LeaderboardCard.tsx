@@ -28,7 +28,7 @@ export function LeaderboardCard({ user }: LeaderboardCardProps) {
   };
 
   const getRankStyle = () => {
-    if (user.rank === 1) return "text-gold glow-gold";
+    if (user.rank === 1) return "text-gold";
     if (user.rank === 2) return "text-silver";
     if (user.rank === 3) return "text-accent";
     return "text-muted-foreground";
