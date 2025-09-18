@@ -261,7 +261,6 @@ export function KecantikanFisik({ onNavigate }: KecantikanFisikProps) {
             className="w-full rounded-lg"
             controls={!showPlayButton}
             preload="metadata"
-            muted
             crossOrigin="anonymous"
             onPlay={() => setShowPlayButton(false)}
             onCanPlay={(e) => {

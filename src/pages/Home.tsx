@@ -320,64 +320,120 @@ export function Home({
     },
     // All Images After Videos
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_28juli.png",
-      type: "image" as const,
-      title: "Testimoni 28 Juli"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testI_jahitan.jpeg",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi%20santri.jpeg",
-      type: "image" as const,
-      title: "Testimoni Santri"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi01.jpeg",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_15taun.png",
-      type: "image" as const,
-      title: "Testimoni 15 Tahun"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi03.jpeg",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_3minggu.jpeg",
-      type: "image" as const,
-      title: "Testimoni 3 Minggu"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi05.jpeg",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_depres.jpeg",
-      type: "image" as const,
-      title: "Testimoni Depresi"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi09.png",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_eldi3.jpeg",
-      type: "image" as const,
-      title: "Testimoni Eldi"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_15taun.png",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_JOE.jpeg",
-      type: "image" as const,
-      title: "Testimoni Joe"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_17juli.png",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_muklas.jpeg",
-      type: "image" as const,
-      title: "Testimoni Muklas"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_28juli.png",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_pelakor.jpeg",
-      type: "image" as const,
-      title: "Testimoni Pelakor"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_2jt.jpeg",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_pesantren.png",
-      type: "image" as const,
-      title: "Testimoni Pesantren"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_3minggu.jpeg",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi_proyek.jpg",
-      type: "image" as const,
-      title: "Testimoni Proyek"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_JOE.jpeg",
+      type: "image" as const
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/testi05.jpeg",
-      type: "image" as const,
-      title: "Testimoni 05"
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_agustinus.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_audio1.png",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_audio2.png",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_damai.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_depres.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_eldi3.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_jahit.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_jauh.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_karimah.png",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_kelas1.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_marah.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_muklas.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_pelakor.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_pesantren.png",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_pesantreren01.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_proyek.jpg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_santet.jpeg",
+      type: "image" as const
+    },
+    {
+      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/testi_santri.jpeg",
+      type: "image" as const
     }
   ];
 
@@ -1040,7 +1096,7 @@ export function Home({
             </div>
 
             {/* Scrollable Image Content Only */}
-            <div className="overflow-y-auto max-h-[80vh] p-4 space-y-6">
+            <div className="overflow-y-auto max-h-[80vh] p-4 pb-8 space-y-6">
               {mediaFiles
                 .filter(media => media.type === 'image')
                 .map((media, index) => (
