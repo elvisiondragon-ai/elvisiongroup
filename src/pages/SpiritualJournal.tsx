@@ -16,7 +16,6 @@ interface SpiritualJournalProps {
 
 interface Reflection {
   id: string;
-  question: string;
   reflection: string;
   created_at: string;
 }
@@ -86,9 +85,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       .insert({
         user_id: currentUser.id,
         user_email: currentUser.email,
-        question: currentQuestion,
-        reflection: reflection.trim(),
-        content: reflection.trim() // Populate both fields for RENATA compatibility
+        reflection: reflection.trim()
       })
       .select(); // Return the inserted data to verify
 
@@ -289,7 +286,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                       })}
                     </div>
                     <div className="text-xs text-muted-foreground italic mb-2">
-                      "{refl.question}"
+                      "{currentQuestion}"
                     </div>
                     <div className="text-foreground leading-relaxed">
                       {refl.reflection}
