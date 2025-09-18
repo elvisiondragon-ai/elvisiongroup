@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { TierBadge } from "@/components/TierBadge";
 import { ProBadge } from "@/components/ProBadge";
+import { AdminBadge } from "@/components/AdminBadge";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
 import { NotificationSettings } from "@/components/NotificationSettings";
@@ -177,6 +179,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   };
 
   const displayName = profile.display_name || user?.email?.split('@')[0] || "User";
+  const isAdmin = user?.id === '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
   
   // Correct XP calculation using proper thresholds
   const currentXP = profile.experience_points || 0;
@@ -282,13 +285,23 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
           </AvatarFallback>
         </Avatar>
         
-        <h1 className="text-2xl font-bold font-orbitron text-foreground mb-2">
-          {displayName}
-        </h1>
-        
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <TierBadge level={profile.level} isPro={proStatus.isPro} achievements={profile.achievements || []} />
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <h1 className={cn(
+            "text-2xl font-bold font-orbitron transition-all duration-300",
+            isAdmin 
+              ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-4 py-2 rounded-lg shadow-2xl shadow-red-500/25"
+              : "text-foreground"
+          )}>
+            {displayName}
+          </h1>
+          {isAdmin && <AdminBadge size="md" />}
         </div>
+        
+        {!isAdmin && (
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <TierBadge level={profile.level} isPro={proStatus.isPro} achievements={profile.achievements || []} />
+          </div>
+        )}
         
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="text-sm text-muted-foreground">
@@ -321,7 +334,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
             onNavigate('tutorial');
           }}
         >
-          READ TUTORIAL
+          Tutorial - Ecosystem
         </Button>
       </div>
 

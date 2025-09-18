@@ -1,26 +1,28 @@
 import { Crown, Star, Zap, Leaf, Droplets, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProBadge } from "./ProBadge";
+import { AdminBadge } from "./AdminBadge";
 import { usePro } from "@/hooks/usePro";
 
 interface TierBadgeProps {
   level: number;
   isPro?: boolean;
+  isAdmin?: boolean;
   className?: string;
   showProBadge?: boolean;
   achievements?: string[];
   subscriptionType?: string;
 }
 
-export function TierBadge({ level, isPro = false, className, showProBadge = true, achievements = [], subscriptionType }: TierBadgeProps) {
+export function TierBadge({ level, isPro = false, isAdmin = false, className, showProBadge = true, achievements = [], subscriptionType }: TierBadgeProps) {
   const { proStatus } = usePro();
   
   // Check if user has level 3 achievement from passed achievements
   const hasLevel3Achievement = achievements?.includes('level_3') ?? false;
   
   // FIXED: Only show ProBadge if user actually has subscription (prevents mirror bug)
-  // Don't show ProBadge if disabled OR if this specific user has no subscription
-  const shouldShowProBadge = showProBadge && (subscriptionType || isPro);
+  // Don't show ProBadge if disabled OR if this specific user has no subscription OR if user is admin
+  const shouldShowProBadge = showProBadge && (subscriptionType || isPro) && !isAdmin;
   
   const getTierStyle = () => {
     if (level >= 10) return "tier-master";
@@ -42,12 +44,16 @@ export function TierBadge({ level, isPro = false, className, showProBadge = true
 
   return (
     <div className="flex items-center gap-2">
-      <div className={cn("tier-badge", getTierStyle(), className)}>
-        <div className="flex items-center gap-1">
-          <span>Lv {level}</span>
-          {getTierIcon()}
+      {/* Hide level badge for admin users */}
+      {!isAdmin && (
+        <div className={cn("tier-badge", getTierStyle(), className)}>
+          <div className="flex items-center gap-1">
+            <span>Lv {level}</span>
+            {getTierIcon()}
+          </div>
         </div>
-      </div>
+      )}
+      {isAdmin && <AdminBadge size="sm" />}
       {shouldShowProBadge && <ProBadge size="sm" targetUserIsPro={isPro} targetUserSubscriptionType={subscriptionType} />}
     </div>
   );

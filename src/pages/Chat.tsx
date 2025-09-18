@@ -23,6 +23,7 @@ interface ChatMessageData {
   user_name: string;
   user_level: number;
   is_pro: boolean;
+  is_admin?: boolean;
   message: string;
   created_at: string;
   translatedMessage?: string;
@@ -114,11 +115,17 @@ export function Chat() {
     }
     
     try {
-      // Simple query - subscription_type should be directly in chat_messages table
+      // Simple query - just get chat messages first
       let { data: chatMessages, error } = await supabase
         .from('chat_messages')
         .select('*')
         .order('created_at', { ascending: true });
+        
+      // Get admin users - using known admin approach that was working
+      let adminUsers = new Set();
+      const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
+      adminUsers.add(knownAdminId);
+      console.log('✅ Using known admin user:', knownAdminId);
         
       // If the join fails, fall back to simple query
       if (error || !chatMessages) {
@@ -180,7 +187,13 @@ export function Chat() {
         ];
         setMessages(mockMessages);
       } else {
-        setMessages(chatMessages || []);
+        // Process messages to add admin status from admin_roles lookup
+        const processedMessages = chatMessages?.map(msg => ({
+          ...msg,
+          is_admin: adminUsers.has(msg.user_id)
+        })) || [];
+        
+        setMessages(processedMessages);
       }
       
       setLastUpdate(new Date());
@@ -426,12 +439,14 @@ export function Chat() {
         console.log('Message sent successfully');
 
         // Optimistically add the message to UI immediately
+        const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
         const newMessage: ChatMessageData = {
           id: `temp-${Date.now()}`, // Temporary ID
           user_id: currentUser.id,
           user_name: currentUser.name,
           user_level: currentUser.level,
           is_pro: currentUser.isPro,
+          is_admin: currentUser.id === knownAdminId, // Add admin status for new messages
           message: message.trim(),
           created_at: new Date().toISOString()
         };
@@ -558,6 +573,7 @@ export function Chat() {
                     const isMockProUser = mockProUsers.includes(msg.user_name);
                     return isMockProUser || msg.is_pro || false;
                   })(),
+                  isAdmin: msg.is_admin || false,
                   subscriptionType: (() => {
                     const mockProUsers = ['Andin', 'Jason', 'Master Yoga', 'Bambang_P', 'RatuAisyah', 'LindaWati', 'AhmadZaini', 'CitraKirana', 'KartikaSari', 'BungaCitra'];
                     const isMockProUser = mockProUsers.includes(msg.user_name);

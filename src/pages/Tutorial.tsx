@@ -31,10 +31,10 @@ export function Tutorial() {
       <div className="sticky top-0 z-10 bg-blue-900/20 backdrop-blur-md border-b border-blue-500/30 p-4">
         <div className="text-center">
           <h1 className="font-semibold text-2xl text-white" style={{ fontFamily: 'serif' }}>
-            Tutorial Read Profil
+            Tutorial - Ecosystem
           </h1>
           <p className="text-sm text-white/80" style={{ fontFamily: 'serif' }}>
-            Panduan Memahami Profil Spiritual
+            Panduan Transformasi Kehidupan Nyata
           </p>
         </div>
       </div>
@@ -47,108 +47,88 @@ export function Tutorial() {
               <BookOpen className="w-10 h-10 text-white animate-pulse" />
             </div>
             <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'serif' }}>
-              Tutorial Read Profil
+              Tutorial - Ecosystem
             </h2>
             <p className="text-lg font-semibold text-white" style={{ fontFamily: 'serif' }}>
-              Profil ini akan menjadi tolak ukur anda dengan kehidupan
+              Ini akan menjadi tolak ukur anda dengan kehidupan
             </p>
           </div>
         </Card>
 
-        {/* Metrics Explanation */}
-        <div className="space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-blue-900/20 backdrop-blur-md rounded-lg border border-blue-500/30">
-            <Flame className="w-8 h-8 text-orange-400 mt-1 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="font-bold text-white mb-2 text-lg" style={{ fontFamily: 'serif' }}>Total Verses - Api:</p>
-              <p className="text-white/80" style={{ fontFamily: 'serif' }}>
-                melambangkan tekad dan ambisi anda dalam mencapai tujuan
+        {/* New Ecosystem Tutorial Content */}
+        <Card className="p-6 bg-blue-900/20 backdrop-blur-md border border-blue-500/30">
+          <div className="space-y-6">
+            <div className="text-center">
+              <p className="text-white text-lg leading-relaxed" style={{ fontFamily: 'serif' }}>
+                Sebagai kita sekarang memiliki <span className="font-bold text-orange-400">Elite Habit</span> dan <span className="font-bold text-blue-400">Personal Analysis</span>, kita harus memasukkannya ke dalam tutorial ini.
               </p>
             </div>
-            <div className="w-20 h-20 rounded-lg overflow-hidden border-2 border-orange-400/30 flex-shrink-0">
-              <img
-                src={position1}
-                alt="Duduk Bersila"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-start gap-3 p-4 bg-blue-900/20 backdrop-blur-md rounded-lg border border-blue-500/30">
-            <Droplets className="w-8 h-8 text-blue-400 mt-1 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="font-bold text-white mb-2 text-lg" style={{ fontFamily: 'serif' }}>Total Journal - Air:</p>
-              <p className="text-white/80" style={{ fontFamily: 'serif' }}>
-                melambangkan totalitas anda melepaskan semua emosi negatif berserta ambisi negatif atas keinginan anda
-              </p>
-            </div>
-            <div className="w-20 h-20 rounded-lg overflow-hidden border-2 border-blue-400/30 flex-shrink-0">
-              <img
-                src={position3}
-                alt="Bersandar di Kursi"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
 
-        {/* Combination Card */}
-        <Card className="p-6 bg-blue-900/20 backdrop-blur-md border border-blue-500/30">
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center gap-3">
-              <Flame className="w-8 h-8 text-orange-400" />
-              <span className="text-2xl font-bold text-white" style={{ fontFamily: 'serif' }}>+</span>
-              <Droplets className="w-8 h-8 text-blue-400" />
-            </div>
-            <h3 className="text-xl font-bold text-white" style={{ fontFamily: 'serif' }}>
-              Dengan Menggabungkan Tekad yang serius dan Melepaskan Emosi Negatif
-            </h3>
-            <p className="text-white/80" style={{ fontFamily: 'serif' }}>
-              Anda akan mudah mengukur pencapaian di kehidupan nyata setiap bulan.
-            </p>
-          </div>
-        </Card>
-
-
-        {/* Guidance Section */}
-        <Card className="p-6 bg-blue-900/20 backdrop-blur-md border border-blue-500/30">
-          <div className="space-y-4">
-            <p className="text-white font-semibold text-lg" style={{ fontFamily: 'serif' }}>
-              Jika Tujuan belum Tercapai:
-            </p>
-            
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
-                <p className="text-white/80 text-sm" style={{ fontFamily: 'serif' }}>
-                  <span className="font-medium text-white">Cek Apakah anda sudah sering melepaskan Emosi negatif dan keinginan di Journal Spiritual?</span>
-                </p>
+            {/* Step-by-step Instructions */}
+            <div className="space-y-4">
+              <div className="bg-white/10 rounded-lg p-4 border border-white/20">
+                <h3 className="text-xl font-bold text-white mb-3" style={{ fontFamily: 'serif' }}>
+                  Langkah Transformasi 7 Hari:
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center text-white font-bold text-sm">1</div>
+                    <p className="text-white/90" style={{ fontFamily: 'serif' }}>
+                      <span className="font-semibold">Lakukan Elite Habit</span> agar lebih mudah konsentrasi dengan nyaman
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center text-white font-bold text-sm">2</div>
+                    <p className="text-white/90" style={{ fontFamily: 'serif' }}>
+                      <span className="font-semibold">Dengar Verse of eL Vision</span>
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-purple-400 flex items-center justify-center text-white font-bold text-sm">3</div>
+                    <p className="text-white/90" style={{ fontFamily: 'serif' }}>
+                      <span className="font-semibold">Tulis Journal Spiritual</span>
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center text-white font-bold text-sm">4</div>
+                    <p className="text-white/90" style={{ fontFamily: 'serif' }}>
+                      <span className="font-semibold">Lakukan 7 hari</span> lalu <span className="font-semibold">Klik Personal Analysis</span>
+                    </p>
+                  </div>
+                </div>
               </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
-                <p className="text-white/80 text-sm" style={{ fontFamily: 'serif' }}>
-                  <span className="font-medium text-white">Cek apakah anda sudah sering mendengarkan total verse agar pikiran menjadi fokus dengan jernih mencapai Tujuan anda?</span>
+            </div>
+
+            {/* Promise Section */}
+            <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-lg p-6 border border-yellow-500/30">
+              <div className="text-center space-y-4">
+                <h3 className="text-2xl font-bold text-yellow-300" style={{ fontFamily: 'serif' }}>
+                  Janji Transformasi
+                </h3>
+                <p className="text-white text-lg leading-relaxed" style={{ fontFamily: 'serif' }}>
+                  Anda akan mendapat jawaban yang <span className="font-bold text-yellow-300">mencengangkan</span>, dan kehidupan anda di dunia nyata pun akan mengalami <span className="font-bold text-yellow-300">perubahan nyata</span>.
                 </p>
               </div>
             </div>
-          </div>
-        </Card>
 
-        {/* Conclusion Section */}
-        <Card className="p-6 bg-blue-900/20 backdrop-blur-md border border-blue-500/30">
-          <div className="text-center space-y-4">
-            <p className="text-white/80 text-sm" style={{ fontFamily: 'serif' }}>
-              Sering kali kita tidak bisa mengukur sudah sejauh mana usaha kita mencapai Tujuan Kita <span className="font-semibold text-white">-Harta, Tahta, Cinta-</span>
-            </p>
-            
-            <p className="font-semibold text-white text-lg" style={{ fontFamily: 'serif' }}>
-              Dengan Ekosistem ini anda akan memiliki visual nyata mengukur setiap langkah pencapaian anda di dunia nyata
-            </p>
-            
-            <div className="pt-4">
-              <p className="text-xl font-bold text-white mb-2" style={{ fontFamily: 'serif' }}>
-                Teruslah hidup dalam rasa syukur
+            {/* Reality Section */}
+            <div className="bg-gradient-to-br from-red-500/20 to-pink-500/20 rounded-lg p-6 border border-red-500/30">
+              <div className="text-center space-y-4">
+                <p className="text-white text-lg font-semibold" style={{ fontFamily: 'serif' }}>
+                  Ini bukan sekedar game digital, <br />
+                  <span className="text-red-300 font-bold text-xl">Ecosystem eL Vision adalah Simulasi dari dunia nyata</span>.
+                </p>
+              </div>
+            </div>
+
+            {/* Closing Message */}
+            <div className="text-center py-6">
+              <p className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'serif' }}>
+                Selamat Berbahagia! ✨
               </p>
               <p className="text-lg text-white/80" style={{ fontFamily: 'serif' }}>
                 eL Vision Group

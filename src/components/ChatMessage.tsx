@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface ChatMessageProps {
   id: string;
@@ -13,6 +14,7 @@ interface ChatMessageProps {
     avatar?: string;
     level: number;
     isPro?: boolean;
+    isAdmin?: boolean;
     subscriptionType?: string;
   };
   message: string;
@@ -73,8 +75,15 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-foreground">{user.name}</span>
-            <TierBadge level={user.level} isPro={user.isPro} achievements={[]} subscriptionType={user.subscriptionType} />
+            <span className={cn(
+              "font-semibold transition-all duration-300",
+              user.isAdmin 
+                ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 rounded-lg shadow-2xl shadow-red-500/25 hover:from-red-700 hover:via-red-800 hover:to-red-900"
+                : "text-foreground"
+            )}>
+              {user.name}
+            </span>
+            <TierBadge level={user.level} isPro={user.isPro} isAdmin={user.isAdmin} achievements={[]} subscriptionType={user.subscriptionType} />
           </div>
           
           {canDelete && (

@@ -17,6 +17,8 @@ import { useAudioCache } from "@/hooks/useAudioCache";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
 import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity } from "lucide-react";
+import { AdminBadge } from "@/components/AdminBadge";
+import { cn } from "@/lib/utils";
 import heroImage from "@/assets/hero-meditation.jpg";
 import faviconImage from "@/assets/favicon.png";
 
@@ -177,6 +179,7 @@ export function Home({
   }, []);
 
   const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
+  const isAdmin = user?.id === '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
 
   // Calculate XP progress using the XP system
   const xpProgress = userProfile ? calculateXPProgress(userProfile.experience_points, userProfile.level) : {
@@ -390,8 +393,18 @@ export function Home({
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="mb-2">
-                <TierBadge level={userProfile?.level || 1} isPro={proStatus.isPro} achievements={userProfile?.achievements || []} />
-                <h3 className="font-semibold text-foreground mt-1">{displayName}</h3>
+                {!isAdmin && <TierBadge level={userProfile?.level || 1} isPro={proStatus.isPro} achievements={userProfile?.achievements || []} />}
+                <div className="flex items-center gap-2 mt-1">
+                  <h3 className={cn(
+                    "font-semibold transition-all duration-300",
+                    isAdmin 
+                      ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 rounded-lg shadow-2xl shadow-red-500/25"
+                      : "text-foreground"
+                  )}>
+                    {displayName}
+                  </h3>
+                  {isAdmin && <AdminBadge size="sm" />}
+                </div>
               </div>
               <StreakIndicator streakDays={userProfile?.streak_days || 0} size="sm" />
             </div>
