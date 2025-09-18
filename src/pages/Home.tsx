@@ -14,9 +14,10 @@ import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useAudioCache } from "@/hooks/useAudioCache";
+import { useToast } from "@/hooks/use-toast";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
-import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity, Heart, Smile, Apple, Gem, HelpCircle } from "lucide-react";
 import { AdminBadge } from "@/components/AdminBadge";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/hero-meditation.jpg";
@@ -44,6 +45,7 @@ export function Home({
   const { calculateXPProgress } = useXPSystem();
   const { proStatus } = usePro();
   const { preloadAudioFiles, getCacheStats } = useAudioCache();
+  const { toast } = useToast();
   const [showTutorialModal, setShowTutorialModal] = useState(false);
   const [showPlayButton, setShowPlayButton] = useState(true);
   const [showMediaModal, setShowMediaModal] = useState(false);
@@ -224,24 +226,45 @@ export function Home({
     key: "personal-analytics",
     isAnalytics: true
   }, {
-    title: "Community",
-    description: "Divine soul collective",
-    icon: Users,
-    color: "text-cyan-400",
-    key: "chat",
-    isCommunity: true
-  }, {
     title: "Ignis Quest",
     description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
     icon: Flame,
     color: "text-orange-500",
     key: "ignis-quest",
     isNew: true
+  }, {
+    title: "Peredaran Darah",
+    description: "Optimasi aliran darah untuk mencapai keadaan meditatif yang ideal melalui yoga, olahraga, puasa, dan gaya hidup sehat",
+    icon: Heart,
+    color: "text-red-400",
+    key: "blood-circulation",
+    isBloodFlow: true
+  }, {
+    title: "Kecantikan Fisik",
+    description: "Rahasia kecantikan sejati dari dalam - bagaimana kesehatan mental dan spiritual mempengaruhi penampilan fisik",
+    icon: Smile,
+    color: "text-rose-400",
+    key: "physical-beauty",
+    isBeauty: true
+  }, {
+    title: "True Diet",
+    description: "Diet sejati bukan obat melainkan cara pandang kita terhadap makanan - revolusi mindset untuk kesehatan optimal",
+    icon: Apple,
+    color: "text-green-400",
+    key: "true-diet",
+    isTrueDiet: true
+  }, {
+    title: "Lifestyle",
+    description: "Harmoni sempurna antara inner calm, jewelry, dan fragrance untuk meningkatkan karisma dan daya tarik alami",
+    icon: Gem,
+    color: "text-purple-400",
+    key: "lifestyle",
+    isLifestyle: true
   }];
 
   const tutorialFeature = {
-    title: "Cara Menggunakan Aplikasi",
-    description: "Tutorial lengkap cara menggunakan semua fitur aplikasi eL Vision Group",
+    title: "Tutorial Video",
+    description: "",
     icon: Play,
     color: "text-blue-500",
     key: "tutorial"
@@ -438,9 +461,9 @@ export function Home({
           const isMeditationSession = feature.key === 'meditation-sessions';
           const isMeditationLocked = isMeditationSession && !proStatus.isPro;
           const isIgnisQuest = feature.key === 'ignis-quest';
-          const isIgnisLocked = isIgnisQuest && !proStatus.isPro;
+          const isIgnisLocked = isIgnisQuest && (userProfile?.level || 1) < 8;
           const actuallyLocked = isLocked || isIgnisLocked || isMeditationLocked;
-          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${
+          return <Card key={index} className={`${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'p-2 rounded-full aspect-square max-w-24 max-h-24 mx-auto' : 'p-4'} border-border transition-all duration-300 relative ${
             feature.key === 'personal-analytics'
               ? actuallyLocked
                 ? 'bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-fuchsia-500/10 border-violet-500/20 cursor-pointer opacity-90'
@@ -469,13 +492,38 @@ export function Home({
                 ? actuallyLocked
                   ? 'bg-gradient-to-br from-emerald-400/15 via-green-500/12 to-teal-600/15 border-emerald-500/30 cursor-pointer opacity-90'
                   : 'bg-gradient-to-br from-emerald-400/20 via-green-500/18 to-teal-600/20 hover:from-emerald-400/35 hover:via-green-500/30 hover:to-teal-600/35 border-emerald-500/40 hover:border-green-500/70 cursor-pointer'
+              : feature.key === 'blood-circulation'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-red-600/80 via-pink-500/80 to-rose-500/80 border-red-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-red-600 via-pink-500 to-rose-500 hover:from-red-700 hover:via-pink-600 hover:to-rose-600 border-red-500/40 hover:border-pink-500/70 cursor-pointer'
+              : feature.key === 'physical-beauty'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-rose-600/80 via-amber-500/80 to-yellow-500/80 border-rose-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-rose-600 via-amber-500 to-yellow-500 hover:from-rose-700 hover:via-amber-600 hover:to-yellow-600 border-rose-500/40 hover:border-amber-500/70 cursor-pointer'
+              : feature.key === 'true-diet'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-green-600/80 via-lime-500/80 to-emerald-500/80 border-green-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-green-600 via-lime-500 to-emerald-500 hover:from-green-700 hover:via-lime-600 hover:to-emerald-600 border-green-500/40 hover:border-lime-500/70 cursor-pointer'
+              : feature.key === 'lifestyle'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-purple-600/80 via-violet-500/80 to-indigo-500/80 border-purple-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-purple-600 via-violet-500 to-indigo-500 hover:from-purple-700 hover:via-violet-600 hover:to-indigo-600 border-purple-500/40 hover:border-violet-500/70 cursor-pointer'
                 : actuallyLocked
                   ? 'bg-card/50 cursor-pointer'
                   : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'
           } ${feature.isNew ? 'relative' : ''}`} onClick={() => {
             if (actuallyLocked) {
-              if (isIgnisLocked || isMeditationLocked) {
-                onNavigate("payment"); // Navigate to payment/upgrade page
+              if (isMeditationLocked) {
+                onNavigate("payment"); // Navigate to payment/upgrade page for Pro features
+                return;
+              }
+              if (isIgnisLocked) {
+                // Show fire notification for Ignis Quest level requirement
+                toast({
+                  title: "🔥 Ignis Quest",
+                  description: "🔥 Ignis For lv 8 User ++, Jalani Proses anda terlebih dahulu",
+                  duration: 4000
+                });
                 return;
               }
               return; // Do nothing if locked
@@ -485,8 +533,8 @@ export function Home({
           }}>
                 {feature.isNew}
                 
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className={`p-3 rounded-full relative ${
+                <div className={`flex flex-col items-center text-center ${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'space-y-1 justify-center h-full' : 'space-y-3'}`}>
+                  <div className={`${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'w-20 h-20 flex items-center justify-center' : 'p-3'} rounded-full relative ${
                     feature.key === 'meditation-sessions'
                       ? 'bg-gradient-to-r from-red-600 via-red-500 to-orange-500 shadow-lg shadow-red-500/40 animate-pulse'
                     : feature.key === 'audio-therapy'
@@ -501,9 +549,17 @@ export function Home({
                       ? 'bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-400 shadow-xl shadow-emerald-500/50 border-2 border-emerald-300/30'
                     : feature.key === 'ignis-quest'
                       ? 'bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 shadow-lg shadow-orange-500/50'
+                    : feature.key === 'blood-circulation'
+                      ? 'bg-transparent'
+                    : feature.key === 'physical-beauty'
+                      ? 'bg-transparent'
+                    : feature.key === 'true-diet'
+                      ? 'bg-gradient-to-r from-green-600 via-lime-500 to-emerald-500'
+                    : feature.key === 'lifestyle'
+                      ? 'bg-gradient-to-r from-purple-600 via-violet-500 to-indigo-500'
                       : 'bg-muted'
                   } ${feature.color}`}>
-                    <feature.icon className={`w-6 h-6 ${
+                    <feature.icon className={`${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'w-8 h-8' : 'w-6 h-6'} ${
                       feature.key === 'meditation-sessions' ? 'text-white animate-pulse'
                       : feature.key === 'audio-therapy' ? 'text-white animate-pulse'
                       : feature.key === 'spiritual-journal' ? 'text-white drop-shadow-lg'
@@ -511,6 +567,10 @@ export function Home({
                       : feature.key === 'personal-analytics' ? 'text-white drop-shadow-2xl animate-pulse'
                       : feature.key === 'elite-habit' ? 'text-white drop-shadow-lg animate-pulse'
                       : feature.key === 'ignis-quest' ? 'text-white animate-pulse'
+                      : feature.key === 'blood-circulation' ? 'text-white drop-shadow-2xl'
+                      : feature.key === 'physical-beauty' ? 'text-white drop-shadow-2xl'
+                      : feature.key === 'true-diet' ? 'text-white drop-shadow-2xl'
+                      : feature.key === 'lifestyle' ? 'text-white drop-shadow-2xl'
                       : ''
                     }`} />
                     {/* Live indicator for meditation sessions */}
@@ -527,21 +587,26 @@ export function Home({
                     {isLocked && !isMeditationLocked && <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
                         <Lock className="w-4 h-4 text-muted-foreground" />
                       </div>}
-                    {isIgnisLocked && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
-                        <Lock className="w-4 h-4 text-yellow-400" />
+                    {isIgnisLocked && <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 rounded-full flex items-center justify-center opacity-80">
+                        <Flame className="w-6 h-6 text-white animate-pulse" />
                       </div>}
                   </div>
                   <div>
-                    <h3 className="font-medium text-foreground mb-1">
+                    <h3 className={`font-medium text-foreground mb-1 ${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'text-sm font-bold' : ''}`}>
                       {feature.title}
                     </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {feature.description}
-                    </p>
+                    {!(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') && (
+                      <p className="text-xs text-muted-foreground">
+                        {feature.description}
+                      </p>
+                    )}
                     {isMeditationLocked && <div className="text-xs font-medium text-red-400 mt-2">
                         Upgrade to Pro
                       </div>}
-                    {isLocked && !isMeditationLocked && <div className="text-xs font-medium text-muted-foreground mt-2">
+                    {isIgnisLocked && <div className="text-xs font-medium text-orange-400 mt-2">
+                        Requires Level 8
+                      </div>}
+                    {isLocked && !isMeditationLocked && !isIgnisLocked && <div className="text-xs font-medium text-muted-foreground mt-2">
                         Locked
                       </div>}
                   </div>
@@ -569,9 +634,11 @@ export function Home({
                 <h3 className="font-medium text-foreground mb-1">
                   {tutorialFeature.title}
                 </h3>
-                <p className="text-xs text-muted-foreground">
-                  {tutorialFeature.description}
-                </p>
+                {tutorialFeature.description && (
+                  <p className="text-xs text-muted-foreground">
+                    {tutorialFeature.description}
+                  </p>
+                )}
               </div>
             </div>
 

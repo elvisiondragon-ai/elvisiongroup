@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { AudioUpload } from "@/components/AudioUpload";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown, Shield, Gem, Flame, Eye, Sparkles, Globe, Infinity, Users, TrendingUp } from "lucide-react";
+import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown, Shield, Gem, Flame, Eye, Sparkles, Globe, Infinity, Users, TrendingUp, Headphones } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -324,9 +324,21 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           </div>
           <LanguageSwitcher />
         </div>
-        <p className="text-muted-foreground text-center">
-          {t('Dengarkan Pakai Headphone')}
-        </p>
+        <div className="bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-red-500/20 border border-yellow-500/30 rounded-xl p-4 mb-4">
+          <div className="flex items-center justify-center gap-3">
+            <div className="animate-pulse">
+              <Headphones className="w-8 h-8 text-yellow-400" />
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-yellow-400 animate-pulse">
+                Wajib Pakai Headphone Untuk hasil maximal
+              </p>
+              <p className="text-sm text-yellow-300/80 mt-1">
+                Gunakan headphone berkualitas untuk pengalaman terbaik
+              </p>
+            </div>
+          </div>
+        </div>
         
         {/* Single Tutorial Button for All Songs */}
         <div className="flex justify-center mt-6">

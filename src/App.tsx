@@ -15,7 +15,7 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Auth } from "./pages/Auth";
 import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
-import { Tutorial } from "./pages/Tutorial";
+import { TutorialVideo } from "./pages/TutorialVideo";
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
@@ -399,7 +399,7 @@ const App = () => {
               />
               <Route 
                 path="/tutorial" 
-                element={user ? <Tutorial /> : <Auth onLogin={setUser} />} 
+                element={user ? <TutorialVideo /> : <Auth onLogin={setUser} />} 
               />
               <Route
                 path="/reset-password"

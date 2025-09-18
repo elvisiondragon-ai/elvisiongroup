@@ -5,7 +5,7 @@ Your
 Pattern: 
 -> Read the ENTIRE REQUESTED component first 
 -> Traced the execution flow -> give user SQL in assist_code folder to check schema/function or what you need  
--> Found the gap -> SQL to FIX + SQL to verify the fix if it's working
+-> Found the gap -> SQL to FIX + SQL to verify the fix if it's working (both in 1 file)
 -> Save Report on migration
 
 Claude Job = Front end
@@ -18,7 +18,7 @@ Highly NOTE: Claude have disgusting legacy BEHAVIOR - OVERCOMPLICATED, and becom
   4. DO NOT assumed problems existed where there weren't any 
   5. IF You make a code for debugging or assist me put inside folder assist_code.
   6. HIGHLY FORBIDDEN : DO NOT made unauthorized changes
-  7. For Database or supabase, check Scheme first ask user to check required SQL, until clarity then you give fixing code, AFTER giving code SQL must with verify code if it working.
+  7. For Database or supabase, check Scheme first ask user to check required SQL, until clarity then you give fixing code, AFTER giving code SQL must with verify code if it working (both fix and verify in 1 file).
 
 
 

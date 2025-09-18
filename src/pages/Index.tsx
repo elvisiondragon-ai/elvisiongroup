@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { ProUpgradeNotification } from "@/components/ProUpgradeNotification";
 import { Home } from "./Home";
@@ -8,11 +8,15 @@ import { Profile } from "./Profile";
 import { AudioTherapy } from "./AudioTherapy";
 import { SpiritualJournal } from "./SpiritualJournal";
 import { MeditationSessions } from "./MeditationSessions";
-import { Tutorial } from "./Tutorial";
+import { TutorialVideo } from "./TutorialVideo";
 import { IgnisQuest } from "./IgnisQuest";
 import { Payment } from "./Payment";
 import { JournalAnalytics } from "@/components/JournalAnalytics";
 import { EliteHabit } from "@/components/EliteHabit";
+import { BloodCirculation } from "@/components/BloodCirculation";
+import { KecantikanFisik } from "@/components/KecantikanFisik";
+import { TrueDiet } from "@/components/TrueDiet";
+import { Lifestyle } from "@/components/Lifestyle";
 import { supabase } from "@/integrations/supabase/client";
 import { useMeditative } from "@/contexts/MeditativeContext";
 import {
@@ -45,6 +49,11 @@ const Index = () => {
     }
     setActiveTab(newTab);
   };
+
+  // Global scroll-to-top functionality for all section navigation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
 
   const renderContent = () => {
     console.log("Current activeTab:", activeTab);
@@ -89,11 +98,50 @@ const Index = () => {
       case "meditation-sessions":
         return <MeditationSessions onNavigate={setActiveTab} />;
       case "tutorial":
-        return <Tutorial />;
+        return <TutorialVideo />;
       case "ignis-quest":
         return <IgnisQuest onNavigate={setActiveTab} />;
       case "payment":
         return <Payment onNavigate={setActiveTab} />;
+      case "blood-circulation":
+        console.log("Rendering Blood Circulation component");
+        return (
+          <div className="min-h-screen bg-background pb-20">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+                Peredaran Darah Optimal
+              </h1>
+              <BloodCirculation onNavigate={setActiveTab} />
+            </div>
+          </div>
+        );
+      case "physical-beauty":
+        console.log("Rendering Physical Beauty component");
+        return (
+          <div className="min-h-screen bg-background pb-20">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+                Kecantikan Fisik Sejati
+              </h1>
+              <KecantikanFisik onNavigate={setActiveTab} />
+            </div>
+          </div>
+        );
+      case "true-diet":
+        console.log("Rendering True Diet component");
+        return (
+          <div className="min-h-screen bg-background pb-20">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+                True Diet: Diet Sejati
+              </h1>
+              <TrueDiet onNavigate={setActiveTab} />
+            </div>
+          </div>
+        );
+      case "lifestyle":
+        console.log("Rendering Lifestyle component");
+        return <Lifestyle onNavigate={setActiveTab} />;
       default:
         return <Home onNavigate={setActiveTab} />;
     }

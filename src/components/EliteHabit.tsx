@@ -14,6 +14,7 @@ interface EliteHabitEntry {
   exercise_type: string;
   duration_minutes: number;
   date: string;
+  notes?: string;
   created_at?: string;
 }
 
@@ -35,6 +36,7 @@ export function EliteHabit() {
   const { awardXP } = useXPSystem();
   const [selectedExercise, setSelectedExercise] = useState('');
   const [duration, setDuration] = useState(5);
+  const [notes, setNotes] = useState('');
   const [todayEntries, setTodayEntries] = useState<EliteHabitEntry[]>([]);
   const [totalEliteHabits, setTotalEliteHabits] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -125,7 +127,7 @@ export function EliteHabit() {
   };
 
   const submitHabit = async () => {
-    if (!selectedExercise || !user) return;
+    if (!selectedExercise || !user || !notes.trim()) return;
 
     setLoading(true);
     try {
@@ -137,7 +139,8 @@ export function EliteHabit() {
           user_email: user.email,
           exercise_type: selectedExercise,
           duration_minutes: duration,
-          date: today
+          date: today,
+          notes: notes.trim()
         });
 
       if (insertError) throw insertError;
@@ -148,6 +151,7 @@ export function EliteHabit() {
       // Reset form
       setSelectedExercise('');
       setDuration(5);
+      setNotes('');
 
       // Reload data and refresh profile context
       loadHabitData();
@@ -198,14 +202,21 @@ export function EliteHabit() {
           <h3 className="font-semibold mb-3 text-emerald-400">Hari Ini:</h3>
           <div className="space-y-2">
             {todayEntries.map((entry, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-emerald-900/20 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-400" />
-                  <span className="font-medium">{entry.exercise_type}</span>
+              <div key={index} className="p-3 bg-emerald-900/20 rounded-lg space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span className="font-medium">{entry.exercise_type}</span>
+                  </div>
+                  <Badge variant="outline" className="border-emerald-500 text-emerald-400">
+                    {entry.duration_minutes} menit
+                  </Badge>
                 </div>
-                <Badge variant="outline" className="border-emerald-500 text-emerald-400">
-                  {entry.duration_minutes} menit
-                </Badge>
+                {entry.notes && (
+                  <div className="text-xs text-emerald-300 bg-emerald-800/20 p-2 rounded border-l-2 border-emerald-500">
+                    <strong>Catatan:</strong> {entry.notes}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -276,18 +287,44 @@ export function EliteHabit() {
           </div>
         </div>
 
+        {/* Notes Field - Required */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-2">
+            Catatan (wajib): <span className="text-red-400">*</span>
+          </label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Bagaimana perasaan Anda setelah aktivitas ini? Efek pada peredaran darah, konsentrasi, dan ketenangan..."
+            className={`w-full p-3 rounded-lg bg-background border text-sm resize-none ${
+              notes.trim() === '' 
+                ? 'border-red-500/50 focus:border-red-500' 
+                : 'border-emerald-500/30 focus:border-emerald-500'
+            }`}
+            rows={3}
+            required
+          />
+          <p className="text-xs text-emerald-300/80 mt-1">
+            <span className="text-red-400">*Wajib diisi:</span> Catat bagaimana aktivitas ini mempengaruhi peredaran darah dan kemudahan bermeditasi Anda
+          </p>
+        </div>
+
         {/* Submit Button */}
         <Button
           onClick={() => {
             console.log('BUTTON CLICKED!');
             submitHabit();
           }}
-          disabled={!selectedExercise || loading}
-          className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+          disabled={!selectedExercise || !notes.trim() || loading}
+          className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-gray-500 disabled:to-gray-600"
           size="lg"
         >
           {loading ? (
             <>Menyimpan...</>
+          ) : !selectedExercise ? (
+            <>Pilih olahraga terlebih dahulu</>
+          ) : !notes.trim() ? (
+            <>Tulis catatan wajib terlebih dahulu</>
           ) : (
             <>
               <Check className="w-5 h-5 mr-2" />
@@ -359,26 +396,33 @@ export function EliteHabit() {
               {currentEntries.map((entry, index) => (
                 <div
                   key={entry.id || index}
-                  className="flex items-center justify-between p-4 bg-emerald-800/20 rounded-lg border border-emerald-500/20"
+                  className="p-4 bg-emerald-800/20 rounded-lg border border-emerald-500/20 space-y-2"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-600/20 flex items-center justify-center">
-                      <Activity className="w-4 h-4 text-emerald-400" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-600/20 flex items-center justify-center">
+                        <Activity className="w-4 h-4 text-emerald-400" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-emerald-100">
+                          {entry.exercise_type}
+                        </div>
+                        <div className="text-xs text-emerald-300">
+                          {formatDate(entry.created_at)}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-medium text-emerald-100">
-                        {entry.exercise_type}
-                      </div>
-                      <div className="text-xs text-emerald-300">
-                        {formatDate(entry.created_at)}
-                      </div>
+                    <div className="text-right">
+                      <Badge variant="outline" className="border-emerald-500 text-emerald-400">
+                        {entry.duration_minutes} min
+                      </Badge>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <Badge variant="outline" className="border-emerald-500 text-emerald-400">
-                      {entry.duration_minutes} min
-                    </Badge>
-                  </div>
+                  {entry.notes && (
+                    <div className="text-xs text-emerald-300 bg-emerald-700/20 p-2 rounded border-l-2 border-emerald-500">
+                      <strong>Catatan:</strong> {entry.notes}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
