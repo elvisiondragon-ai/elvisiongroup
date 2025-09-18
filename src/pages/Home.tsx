@@ -210,12 +210,12 @@ export function Home({
     key: "spiritual-journal",
     isMystical: true
   }, {
-    title: "Community",
-    description: "Divine soul collective",
-    icon: Users,
-    color: "text-cyan-400",
-    key: "chat",
-    isCommunity: true
+    title: "Elite Habit",
+    description: "Olahraga terkonsentrasi dengan mindfulness untuk ketenangan",
+    icon: Activity,
+    color: "text-emerald-500",
+    key: "elite-habit",
+    isNew: true
   }, {
     title: "Personal Analytics",
     description: "AI-powered spiritual journey insights from RENATA",
@@ -224,12 +224,12 @@ export function Home({
     key: "personal-analytics",
     isAnalytics: true
   }, {
-    title: "Elite Habit",
-    description: "Olahraga terkonsentrasi dengan mindfulness untuk ketenangan",
-    icon: Activity,
-    color: "text-emerald-500",
-    key: "elite-habit",
-    isNew: true
+    title: "Community",
+    description: "Divine soul collective",
+    icon: Users,
+    color: "text-cyan-400",
+    key: "chat",
+    isCommunity: true
   }, {
     title: "Ignis Quest",
     description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
