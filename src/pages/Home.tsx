@@ -1004,22 +1004,6 @@ export function Home({
         </div>
       )}
 
-      {/* Privacy Policy and Terms Links */}
-      <div className="p-6 text-center space-x-4">
-        <a
-          href="/privacy-policy"
-          className="text-muted-foreground hover:text-foreground text-sm transition-all duration-200 underline"
-        >
-          Privacy Policy
-        </a>
-        <span className="text-muted-foreground">•</span>
-        <a
-          href="/terms"
-          className="text-muted-foreground hover:text-foreground text-sm transition-all duration-200 underline"
-        >
-          Terms of Service
-        </a>
-      </div>
 
       {/* Cache Debug Panel */}
       <CacheDebugPanel />

@@ -84,6 +84,7 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
         user_id: user?.id,
         display_name: displayName,
         avatar_url: avatarUrl,
+        user_email: email,
         updated_at: new Date().toISOString()
       };
 
