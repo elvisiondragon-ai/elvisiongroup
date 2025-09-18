@@ -73,6 +73,7 @@ export type Database = {
           id: string
           is_active: boolean
           role: string
+          user_email: string | null
           user_id: string
         }
         Insert: {
@@ -82,6 +83,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           role: string
+          user_email?: string | null
           user_id: string
         }
         Update: {
@@ -91,7 +93,59 @@ export type Database = {
           id?: string
           is_active?: boolean
           role?: string
+          user_email?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      app_config: {
+        Row: {
+          created_at: string | null
+          current_version: number
+          force_refresh: boolean | null
+          id: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_version?: number
+          force_refresh?: boolean | null
+          id?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_version?: number
+          force_refresh?: boolean | null
+          id?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      app_updates: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          requires_refresh: boolean | null
+          title: string
+          version: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          requires_refresh?: boolean | null
+          title: string
+          version: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          requires_refresh?: boolean | null
+          title?: string
+          version?: string
         }
         Relationships: []
       }
@@ -140,6 +194,36 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_request_logs: {
+        Row: {
+          component_name: string | null
+          created_at: string | null
+          id: number
+          ip_address: unknown | null
+          request_type: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          component_name?: string | null
+          created_at?: string | null
+          id?: number
+          ip_address?: unknown | null
+          request_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          component_name?: string | null
+          created_at?: string | null
+          id?: number
+          ip_address?: unknown | null
+          request_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           allowed_users: string[] | null
@@ -149,6 +233,7 @@ export type Database = {
           is_private: boolean | null
           is_pro: boolean | null
           message: string
+          subscription_type: string | null
           user_id: string
           user_level: number
           user_name: string
@@ -161,6 +246,7 @@ export type Database = {
           is_private?: boolean | null
           is_pro?: boolean | null
           message: string
+          subscription_type?: string | null
           user_id: string
           user_level?: number
           user_name: string
@@ -173,6 +259,7 @@ export type Database = {
           is_private?: boolean | null
           is_pro?: boolean | null
           message?: string
+          subscription_type?: string | null
           user_id?: string
           user_level?: number
           user_name?: string
@@ -217,8 +304,6 @@ export type Database = {
           subscription_id: string | null
           subscription_start_date: string | null
           subscription_type: string
-          trial_end_date: string | null
-          trial_start_date: string | null
           updated_at: string | null
           user_id: string
         }
@@ -232,8 +317,6 @@ export type Database = {
           subscription_id?: string | null
           subscription_start_date?: string | null
           subscription_type: string
-          trial_end_date?: string | null
-          trial_start_date?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -247,8 +330,6 @@ export type Database = {
           subscription_id?: string | null
           subscription_start_date?: string | null
           subscription_type?: string
-          trial_end_date?: string | null
-          trial_start_date?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -261,13 +342,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "days_remaining_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "pro_subscriptions_admin_view"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "days_remaining_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
@@ -275,6 +349,36 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      debug_logs: {
+        Row: {
+          created_at: string | null
+          error_code: string | null
+          error_message: string | null
+          function_name: string | null
+          id: string
+          parameters: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          function_name?: string | null
+          id?: string
+          parameters?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          function_name?: string | null
+          id?: string
+          parameters?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       device_tokens: {
         Row: {
@@ -299,6 +403,39 @@ export type Database = {
           platform?: string
           token?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      elite_habits: {
+        Row: {
+          created_at: string
+          date: string
+          duration_minutes: number
+          exercise_type: string
+          id: string
+          updated_at: string
+          user_email: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          duration_minutes: number
+          exercise_type: string
+          id?: string
+          updated_at?: string
+          user_email?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          duration_minutes?: number
+          exercise_type?: string
+          id?: string
+          updated_at?: string
+          user_email?: string | null
           user_id?: string
         }
         Relationships: []
@@ -366,86 +503,38 @@ export type Database = {
         }
         Relationships: []
       }
-      payment_transactions: {
+      notifications: {
         Row: {
-          amount: number
-          bank_account: string | null
-          callback_data: Json | null
-          created_at: string
-          currency: string | null
-          customer_phone: string | null
-          expires_at: string | null
+          created_at: string | null
           id: string
-          paid_at: string | null
-          payment_instructions: Json | null
-          payment_method: string | null
-          payment_url: string | null
-          status: string
-          subscription_id: string
-          tripay_merchant_ref: string
-          tripay_reference: string
-          unique_code: string | null
-          updated_at: string
-          user_id: string
+          message: string
+          notification_type: string | null
+          read: boolean | null
+          title: string
+          type: string | null
+          user_id: string | null
         }
         Insert: {
-          amount: number
-          bank_account?: string | null
-          callback_data?: Json | null
-          created_at?: string
-          currency?: string | null
-          customer_phone?: string | null
-          expires_at?: string | null
+          created_at?: string | null
           id?: string
-          paid_at?: string | null
-          payment_instructions?: Json | null
-          payment_method?: string | null
-          payment_url?: string | null
-          status?: string
-          subscription_id: string
-          tripay_merchant_ref: string
-          tripay_reference: string
-          unique_code?: string | null
-          updated_at?: string
-          user_id: string
+          message: string
+          notification_type?: string | null
+          read?: boolean | null
+          title: string
+          type?: string | null
+          user_id?: string | null
         }
         Update: {
-          amount?: number
-          bank_account?: string | null
-          callback_data?: Json | null
-          created_at?: string
-          currency?: string | null
-          customer_phone?: string | null
-          expires_at?: string | null
+          created_at?: string | null
           id?: string
-          paid_at?: string | null
-          payment_instructions?: Json | null
-          payment_method?: string | null
-          payment_url?: string | null
-          status?: string
-          subscription_id?: string
-          tripay_merchant_ref?: string
-          tripay_reference?: string
-          unique_code?: string | null
-          updated_at?: string
-          user_id?: string
+          message?: string
+          notification_type?: string | null
+          read?: boolean | null
+          title?: string
+          type?: string | null
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "payment_transactions_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "pro_subscriptions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payment_transactions_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "pro_subscriptions_admin_view"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       pro_subscriptions: {
         Row: {
@@ -461,8 +550,6 @@ export type Database = {
           subscription_end_date: string | null
           subscription_start_date: string | null
           subscription_type: string
-          trial_end_date: string | null
-          trial_start_date: string | null
           tripay_reference: string | null
           updated_at: string
           user_email: string | null
@@ -482,8 +569,6 @@ export type Database = {
           subscription_end_date?: string | null
           subscription_start_date?: string | null
           subscription_type?: string
-          trial_end_date?: string | null
-          trial_start_date?: string | null
           tripay_reference?: string | null
           updated_at?: string
           user_email?: string | null
@@ -503,8 +588,6 @@ export type Database = {
           subscription_end_date?: string | null
           subscription_start_date?: string | null
           subscription_type?: string
-          trial_end_date?: string | null
-          trial_start_date?: string | null
           tripay_reference?: string | null
           updated_at?: string
           user_email?: string | null
@@ -516,59 +599,71 @@ export type Database = {
       profiles: {
         Row: {
           achievements: string[] | null
+          analytics_used: number | null
+          app_version: number | null
           avatar_url: string | null
           created_at: string
+          daily_xp_earned: number | null
           display_name: string | null
           experience_points: number
           id: string
-          is_premium: boolean | null
+          last_analytics_date: string | null
           last_login_date: string | null
-          last_notification_time: string | null
           last_streak_bonus_date: string | null
           level: number
           preferred_language: string | null
-          premium_expires_at: string | null
           streak_days: number
-          total_sessions: number
+          total_elite_habit: number | null
+          total_journal: number | null
+          total_verses: number | null
           updated_at: string
+          user_email: string
           user_id: string
         }
         Insert: {
           achievements?: string[] | null
+          analytics_used?: number | null
+          app_version?: number | null
           avatar_url?: string | null
           created_at?: string
+          daily_xp_earned?: number | null
           display_name?: string | null
           experience_points?: number
           id?: string
-          is_premium?: boolean | null
+          last_analytics_date?: string | null
           last_login_date?: string | null
-          last_notification_time?: string | null
           last_streak_bonus_date?: string | null
           level?: number
           preferred_language?: string | null
-          premium_expires_at?: string | null
           streak_days?: number
-          total_sessions?: number
+          total_elite_habit?: number | null
+          total_journal?: number | null
+          total_verses?: number | null
           updated_at?: string
+          user_email: string
           user_id: string
         }
         Update: {
           achievements?: string[] | null
+          analytics_used?: number | null
+          app_version?: number | null
           avatar_url?: string | null
           created_at?: string
+          daily_xp_earned?: number | null
           display_name?: string | null
           experience_points?: number
           id?: string
-          is_premium?: boolean | null
+          last_analytics_date?: string | null
           last_login_date?: string | null
-          last_notification_time?: string | null
           last_streak_bonus_date?: string | null
           level?: number
           preferred_language?: string | null
-          premium_expires_at?: string | null
           streak_days?: number
-          total_sessions?: number
+          total_elite_habit?: number | null
+          total_journal?: number | null
+          total_verses?: number | null
           updated_at?: string
+          user_email?: string
           user_id?: string
         }
         Relationships: []
@@ -605,27 +700,33 @@ export type Database = {
       }
       reflections: {
         Row: {
-          created_at: string
+          content: string | null
+          created_at: string | null
           id: string
           question: string
           reflection: string
-          updated_at: string
+          updated_at: string | null
+          user_email: string | null
           user_id: string
         }
         Insert: {
-          created_at?: string
+          content?: string | null
+          created_at?: string | null
           id?: string
           question: string
           reflection: string
-          updated_at?: string
+          updated_at?: string | null
+          user_email?: string | null
           user_id: string
         }
         Update: {
-          created_at?: string
+          content?: string | null
+          created_at?: string | null
           id?: string
           question?: string
           reflection?: string
-          updated_at?: string
+          updated_at?: string | null
+          user_email?: string | null
           user_id?: string
         }
         Relationships: []
@@ -762,6 +863,51 @@ export type Database = {
         }
         Relationships: []
       }
+      waiting_payment: {
+        Row: {
+          amount_paid: number | null
+          created_at: string | null
+          currency: string | null
+          customer_phone: string | null
+          id: string
+          ip_address: string | null
+          status: string | null
+          subscription_type: string | null
+          tripay_reference: string | null
+          updated_at: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string | null
+          currency?: string | null
+          customer_phone?: string | null
+          id?: string
+          ip_address?: string | null
+          status?: string | null
+          subscription_type?: string | null
+          tripay_reference?: string | null
+          updated_at?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string | null
+          currency?: string | null
+          customer_phone?: string | null
+          id?: string
+          ip_address?: string | null
+          status?: string | null
+          subscription_type?: string | null
+          tripay_reference?: string | null
+          updated_at?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       xp_transactions: {
         Row: {
           activity_id: string | null
@@ -794,62 +940,13 @@ export type Database = {
       }
     }
     Views: {
-      pro_subscriptions_admin_view: {
-        Row: {
-          amount_paid: number | null
-          created_at: string | null
-          currency: string | null
-          display_name: string | null
-          id: string | null
-          readable_status: string | null
-          status: string | null
-          subscription_end_date: string | null
-          subscription_start_date: string | null
-          subscription_type: string | null
-          trial_end_date: string | null
-          trial_start_date: string | null
-          updated_at: string | null
-          user_email: string | null
-          user_id: string | null
-        }
-        Insert: {
-          amount_paid?: number | null
-          created_at?: string | null
-          currency?: string | null
-          display_name?: never
-          id?: string | null
-          readable_status?: never
-          status?: string | null
-          subscription_end_date?: string | null
-          subscription_start_date?: string | null
-          subscription_type?: string | null
-          trial_end_date?: string | null
-          trial_start_date?: string | null
-          updated_at?: string | null
-          user_email?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          amount_paid?: number | null
-          created_at?: string | null
-          currency?: string | null
-          display_name?: never
-          id?: string | null
-          readable_status?: never
-          status?: string | null
-          subscription_end_date?: string | null
-          subscription_start_date?: string | null
-          subscription_type?: string | null
-          trial_end_date?: string | null
-          trial_start_date?: string | null
-          updated_at?: string | null
-          user_email?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      activate_pro_subscription: {
+        Args: { p_payment_method?: string; p_tripay_reference: string }
+        Returns: string
+      }
       add_achievement: {
         Args: { achievement: string; user_id: string }
         Returns: undefined
@@ -866,7 +963,33 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      auto_expire_pro_users: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      award_audio_xp: {
+        Args: {
+          is_journal?: boolean
+          minutes_listened?: number
+          user_uuid: string
+        }
+        Returns: number
+      }
+      award_journal_xp: {
+        Args: { user_uuid: string }
+        Returns: number
+      }
       award_xp: {
+        Args: {
+          p_activity_type: string
+          p_metadata?: Json
+          p_reason?: string
+          p_user_id: string
+          p_xp_amount: number
+        }
+        Returns: Json
+      }
+      award_xp_with_daily_limit: {
         Args: {
           p_activity_type: string
           p_metadata?: Json
@@ -889,7 +1012,7 @@ export type Database = {
         Returns: number
       }
       calculate_subscription_end_date: {
-        Args: { p_start_date?: string; p_subscription_type: string }
+        Args: { p_start_date: string; p_subscription_type: string }
         Returns: string
       }
       can_access_payment_transaction: {
@@ -899,6 +1022,10 @@ export type Database = {
       can_access_verse: {
         Args: { p_user_id: string; p_verse_number: number }
         Returns: boolean
+      }
+      check_and_award_achievements: {
+        Args: { user_id_param: string }
+        Returns: undefined
       }
       check_daily_audio_limit: {
         Args: { p_user_id: string }
@@ -911,6 +1038,10 @@ export type Database = {
       check_daily_journal_limit: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      check_journal_spam_limits: {
+        Args: { journal_text: string; p_user_id: string }
+        Returns: Json
       }
       check_rate_limit: {
         Args: {
@@ -937,15 +1068,13 @@ export type Database = {
           verse_access: boolean
         }[]
       }
-      check_vip_status: {
+      check_user_notification_shown: {
+        Args: { p_notification_type: string; p_user_id: string }
+        Returns: boolean
+      }
+      check_weekly_challenge_bonus: {
         Args: { p_user_id: string }
-        Returns: {
-          days_remaining: number
-          expires_at: string
-          is_vip: boolean
-          status: string
-          subscription_type: string
-        }[]
+        Returns: boolean
       }
       cleanup_chat_message_user_names: {
         Args: Record<PropertyKey, never>
@@ -955,9 +1084,21 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      cleanup_expired_pro_subscriptions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      cleanup_expired_waiting_payments: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       cleanup_user_display_names: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      confirm_payment_make_pro: {
+        Args: { p_subscription_type: string; p_tripay_reference: string }
+        Returns: boolean
       }
       create_chat_message: {
         Args: {
@@ -967,6 +1108,31 @@ export type Database = {
           p_message: string
         }
         Returns: string
+      }
+      create_payment_with_validation: {
+        Args: {
+          p_payment_method: string
+          p_subscription_type: string
+          p_tripay_reference: string
+          p_user_email: string
+          p_user_full_name: string
+          p_user_id: string
+          p_user_phone: string
+        }
+        Returns: Json
+      }
+      create_pending_payment: {
+        Args: {
+          p_amount: number
+          p_email: string
+          p_tripay_reference: string
+          p_user_id: string
+        }
+        Returns: string
+      }
+      daily_sync_days_remaining: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       decrypt_email: {
         Args: { p_encrypted_email: string }
@@ -996,9 +1162,26 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
-      gentle_expire_pro_access: {
+      force_global_cache_refresh: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_auth_request_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          component_name: string
+          last_request: string
+          request_count: number
+          unique_users: number
+        }[]
+      }
+      get_daily_xp_status: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      get_level_from_xp: {
+        Args: { xp_amount: number }
+        Returns: number
       }
       get_masked_payment_transaction: {
         Args: { p_transaction_id: string }
@@ -1023,20 +1206,9 @@ export type Database = {
           user_id: string
         }[]
       }
-      get_safe_subscription_data: {
+      get_remaining_daily_xp: {
         Args: { p_user_id: string }
-        Returns: {
-          id: string
-          masked_amount: number
-          masked_currency: string
-          status: string
-          subscription_end_date: string
-          subscription_start_date: string
-          subscription_type: string
-          trial_end_date: string
-          trial_start_date: string
-          user_id: string
-        }[]
+        Returns: number
       }
       get_secure_payment_transaction: {
         Args: { p_transaction_id: string }
@@ -1063,6 +1235,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: string
       }
+      get_user_payment_status: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       get_user_payment_transactions: {
         Args: { p_limit?: number }
         Returns: {
@@ -1080,6 +1256,10 @@ export type Database = {
       get_xp_for_next_level: {
         Args: { current_level: number }
         Returns: number
+      }
+      get_xp_thresholds: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       grant_admin_role: {
         Args: {
@@ -1152,6 +1332,14 @@ export type Database = {
         Args: { curlopt: string; value: string }
         Returns: boolean
       }
+      increment_total_journal: {
+        Args: { source_type?: string; user_id_param: string }
+        Returns: undefined
+      }
+      increment_total_verses: {
+        Args: { user_id_param: string }
+        Returns: undefined
+      }
       is_super_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1159,6 +1347,16 @@ export type Database = {
       is_verified_admin: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      log_auth_request: {
+        Args: {
+          p_component_name?: string
+          p_ip_address?: string
+          p_request_type?: string
+          p_user_agent?: string
+          p_user_id?: string
+        }
+        Returns: undefined
       }
       log_data_access: {
         Args: {
@@ -1178,6 +1376,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_notification_type_shown: {
+        Args: { p_notification_type: string; p_user_id: string }
+        Returns: undefined
+      }
       mask_sensitive_payment_data: {
         Args: {
           p_amount: number
@@ -1186,6 +1388,16 @@ export type Database = {
           p_moota_webhook_data: Json
           p_payment_instructions: Json
         }
+        Returns: Json
+      }
+      process_tripay_payment_callback: {
+        Args:
+          | {
+              p_payment_method?: string
+              p_payment_status: string
+              p_tripay_reference: string
+            }
+          | { p_payment_status: string; p_tripay_reference: string }
         Returns: Json
       }
       revoke_admin_role: {
@@ -1205,15 +1417,20 @@ export type Database = {
         }
         Returns: Json
       }
-      start_pro_trial: {
-        Args: { p_email: string; p_ip_address?: string; p_user_id: string }
-        Returns: string
-      }
-      start_vip_trial: {
-        Args: { p_email: string; p_ip_address?: string; p_user_id: string }
+      send_chat_message: {
+        Args: {
+          p_allowed_users?: string[]
+          p_channel_id?: string
+          p_is_private?: boolean
+          p_message: string
+        }
         Returns: string
       }
       sync_all_days_remaining: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      sync_all_days_remaining_table: {
         Args: Record<PropertyKey, never>
         Returns: number
       }
@@ -1225,6 +1442,14 @@ export type Database = {
         Args: { data: string }
         Returns: string
       }
+      update_journal_tracking: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      update_streak: {
+        Args: { user_uuid: string }
+        Returns: undefined
+      }
       update_subscription_status_manually: {
         Args: {
           p_duration_type?: string
@@ -1234,12 +1459,20 @@ export type Database = {
         }
         Returns: Json
       }
+      update_user_streak: {
+        Args: { user_id_param: string }
+        Returns: undefined
+      }
       urlencode: {
         Args: { data: Json } | { string: string } | { string: string }
         Returns: string
       }
       validate_admin_role_operation: {
         Args: { p_operation: string; p_role: string; p_target_user_id: string }
+        Returns: boolean
+      }
+      validate_journal_entry: {
+        Args: { journal_text: string }
         Returns: boolean
       }
       validate_payment_access: {

@@ -225,6 +225,22 @@ const App = () => {
               sessionStorage.setItem(registerKey, 'true');
             }, 1000);
           }
+
+          // Track daily login to update last_login_date
+          setTimeout(async () => {
+            try {
+              const { error } = await supabase.rpc('handle_daily_login', {
+                p_user_id: session.user.id
+              });
+              if (error) {
+                console.error('Error updating login date:', error);
+              } else {
+                console.log('Login date updated successfully');
+              }
+            } catch (error) {
+              console.error('Failed to track login:', error);
+            }
+          }, 500);
           
           // Check for broadcast notifications and unread personal notifications on login (one-time ever)
           // Check database instead of localStorage to survive cache/cookie clear

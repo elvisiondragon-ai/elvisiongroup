@@ -70,7 +70,6 @@ export function Chat() {
                 display_name: session.user.email?.split('@')[0] || 'Anonymous',
                 level: 1,
                 experience_points: 0,
-                total_sessions: 0,
                 streak_days: 0
               })
               .select()
