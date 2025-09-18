@@ -17,6 +17,8 @@ import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
 import { Tutorial } from "./pages/Tutorial";
 import NotFound from "./pages/NotFound";
+import { Terms } from "./pages/Terms";
+import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import type { User } from '@supabase/supabase-js';
 import { AudioProvider } from "@/contexts/AudioContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
@@ -383,9 +385,17 @@ const App = () => {
                 path="/tutorial" 
                 element={user ? <Tutorial /> : <Auth onLogin={setUser} />} 
               />
-              <Route 
-                path="/reset-password" 
-                element={<ResetPassword />} 
+              <Route
+                path="/reset-password"
+                element={<ResetPassword />}
+              />
+              <Route
+                path="/terms"
+                element={<Terms />}
+              />
+              <Route
+                path="/privacy-policy"
+                element={<PrivacyPolicy />}
               />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
