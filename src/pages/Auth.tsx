@@ -198,19 +198,8 @@ export function Auth({ onLogin }: AuthProps) {
       if (error) throw error;
 
       if (data.user) {
-        toast({
-          title: "🎉 Akun Berhasil Dibuat!",
-          description: "Trial anda dimulai! Selamat menikmati fitur Pro selama 3 hari.",
-          duration: 6000,
-        });
-        
-        // Clear form
-        setSignupData({
-          email: '',
-          password: '',
-          confirmPassword: '',
-          displayName: ''
-        });
+        // Set flag for showing toast after refresh
+        localStorage.setItem('signup-trial-success-pending', 'true');
         
         // Force refresh to bypass frontend loading issues
         window.location.reload();
@@ -515,10 +504,8 @@ export function Auth({ onLogin }: AuthProps) {
           // Continue even if email fails
         }
 
-        toast({
-          title: "Akun Berhasil Dibuat!",
-          description: "Anda berhasil mendaftar dan masuk.",
-        });
+        // Set flag for showing toast after refresh
+        localStorage.setItem('signup-success-pending', 'true');
         
         // Force refresh to bypass frontend loading issues
         window.location.reload();

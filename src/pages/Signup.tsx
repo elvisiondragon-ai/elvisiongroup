@@ -166,19 +166,19 @@ export function Signup() {
         }
 
         if (data.user.email_confirmed_at) {
-          // Direct to main app without refresh
+          // Show toast with loading first
           toast({
             title: "Akun Berhasil Dibuat!",
-            description: "Selamat datang! Mengarahkan ke Ecosystem...",
+            description: "🚀 Mengarahkan ke Ecosystem...",
           });
           
-          // Clear cache and navigate smoothly
-          localStorage.removeItem('unified_pro_status_cache');
-          localStorage.removeItem('user_profile_cache');
+          // Set flag for showing welcome toast after refresh
+          localStorage.setItem('signup-welcome-pending', 'true');
           
+          // Wait then redirect and force refresh
           setTimeout(() => {
             window.location.href = '/';
-          }, 1500);
+          }, 2000);
         } else {
           setCurrentView('success');
         }
@@ -212,18 +212,19 @@ export function Signup() {
             <div className="space-y-3 pt-4">
               <Button 
                 onClick={() => {
+                  // Show toast with loading first
                   toast({
-                    title: "Mengarahkan ke Ecosystem...",
+                    title: "🚀 Tunggu Sebentar ⏳ Sedang Mengarahkan ke Ecosystem...",
                     description: "Selamat datang di eL Vision Group!",
                   });
                   
-                  // Clear cache and navigate smoothly
-                  localStorage.removeItem('unified_pro_status_cache');
-                  localStorage.removeItem('user_profile_cache');
+                  // Set flag for showing welcome toast after refresh
+                  localStorage.setItem('signup-welcome-pending', 'true');
                   
+                  // Wait then redirect
                   setTimeout(() => {
                     window.location.href = '/';
-                  }, 1000);
+                  }, 2000);
                 }}
                 className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary transform hover:scale-105 active:scale-95 transition-all duration-200"
               >

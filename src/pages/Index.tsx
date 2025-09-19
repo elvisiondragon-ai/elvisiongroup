@@ -5,6 +5,7 @@ import { Home } from "./Home";
 import { Chat } from "./Chat";
 import { Leaderboard } from "./Leaderboard";
 import { Profile } from "./Profile";
+import { useToast } from "@/hooks/use-toast";
 import { AudioTherapy } from "./AudioTherapy";
 import { SpiritualJournal } from "./SpiritualJournal";
 import { MeditationSessions } from "./MeditationSessions";
@@ -35,6 +36,7 @@ const Index = () => {
   const [showTabWarning, setShowTabWarning] = useState(false);
   const [pendingTab, setPendingTab] = useState<string | null>(null);
   const { isMeditativeActive } = useMeditative();
+  const { toast } = useToast();
 
 
   const handleTabChange = (newTab: string) => {
@@ -45,6 +47,34 @@ const Index = () => {
     }
     setActiveTab(newTab);
   };
+
+  // Handle signup redirect → force refresh → welcome toast pattern
+  useEffect(() => {
+    // Check for signup welcome flag and force refresh
+    if (localStorage.getItem('signup-welcome-pending') === 'true') {
+      
+      // Set flag to show welcome toast after refresh
+      localStorage.setItem('post-signup-welcome', 'true');
+      
+      // Clear the original flag
+      localStorage.removeItem('signup-welcome-pending');
+      
+      // Force refresh
+      window.location.reload();
+      return;
+    }
+    
+    // Check if we just refreshed from signup and show welcome toast
+    if (localStorage.getItem('post-signup-welcome') === 'true') {
+      setTimeout(() => {
+        toast({
+          title: "Selamat Datang!",
+          description: "Selamat datang di eL Vision Group Ecosystem!",
+        });
+        localStorage.removeItem('post-signup-welcome');
+      }, 1000);
+    }
+  }, [toast]);
 
   // Global scroll-to-top functionality for all section navigation
   useEffect(() => {

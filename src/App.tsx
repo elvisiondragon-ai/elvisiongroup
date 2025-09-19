@@ -228,6 +228,29 @@ const App = () => {
             }, 1000);
           }
 
+          // Show signup success toast if pending
+          if (localStorage.getItem('signup-success-pending') === 'true') {
+            setTimeout(() => {
+              toast({
+                title: "Akun Berhasil Dibuat!",
+                description: "Anda berhasil mendaftar dan masuk.",
+              });
+              localStorage.removeItem('signup-success-pending');
+            }, 1000);
+          }
+
+          // Show signup trial success toast if pending
+          if (localStorage.getItem('signup-trial-success-pending') === 'true') {
+            setTimeout(() => {
+              toast({
+                title: "🎉 Akun Berhasil Dibuat!",
+                description: "Trial anda dimulai! Selamat menikmati fitur Pro selama 3 hari.",
+                duration: 6000,
+              });
+              localStorage.removeItem('signup-trial-success-pending');
+            }, 1000);
+          }
+
           // THROTTLED notification registration to prevent spam
           const registerKey = `register_${session.user.id}`;
           if (!sessionStorage.getItem(registerKey)) {
