@@ -17,7 +17,7 @@ import { useAudioCache } from "@/hooks/useAudioCache";
 import { useToast } from "@/hooks/use-toast";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
-import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity, Heart, Smile, Apple, Gem, HelpCircle } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity, Heart, Smile, Apple, Gem, HelpCircle, Crown, CircleUser, Sun } from "lucide-react";
 import { AdminBadge } from "@/components/AdminBadge";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/hero-meditation.jpg";
@@ -200,7 +200,7 @@ export function Home({
     isLive: true
   }, {
     title: t('Verse of eL Vision'),
-    description: "Spiritual frequency healing",
+    description: "Verses Audio Frequency",
     icon: Sparkles,
     color: "text-yellow-500",
     key: "audio-therapy"
@@ -232,7 +232,9 @@ export function Home({
     color: "text-orange-500",
     key: "ignis-quest",
     isNew: true
-  }, {
+  }];
+
+  const educationFeatures = [{
     title: "Peredaran Darah",
     description: "Optimasi aliran darah untuk mencapai keadaan meditatif yang ideal melalui yoga, olahraga, puasa, dan gaya hidup sehat",
     icon: Heart,
@@ -242,7 +244,7 @@ export function Home({
   }, {
     title: "Kecantikan Fisik",
     description: "Rahasia kecantikan sejati dari dalam - bagaimana kesehatan mental dan spiritual mempengaruhi penampilan fisik",
-    icon: Smile,
+    icon: Sun,
     color: "text-rose-400",
     key: "physical-beauty",
     isBeauty: true
@@ -263,7 +265,7 @@ export function Home({
   }];
 
   const tutorialFeature = {
-    title: "Tutorial Video",
+    title: "Cara Menggunakan Ecosystem",
     description: "",
     icon: Play,
     color: "text-blue-500",
@@ -509,7 +511,7 @@ export function Home({
 
       {/* Quick Actions */}
       <div className="px-6 space-y-4">
-        <h2 className="text-xl font-semibold font-orbitron">Explore</h2>
+        <h2 className="text-xl font-semibold font-orbitron">FITUR</h2>
         
         <div className="grid grid-cols-2 gap-4">
           {features.map((feature, index) => {
@@ -531,7 +533,210 @@ export function Home({
               : feature.key === 'audio-therapy'
                 ? actuallyLocked
                   ? 'bg-gradient-to-br from-yellow-300/15 via-amber-400/12 to-orange-500/15 border-yellow-500/30 cursor-pointer opacity-90'
-                  : 'bg-gradient-to-br from-yellow-300/20 via-amber-400/18 to-orange-500/20 hover:from-yellow-300/35 hover:via-amber-400/30 hover:to-orange-500/35 border-yellow-500/40 hover:border-amber-400/70 cursor-pointer'
+                  : 'bg-gradient-to-br from-yellow-300/30 via-amber-400/25 to-orange-500/30 hover:from-yellow-300/45 hover:via-amber-400/40 hover:to-orange-500/45 border-yellow-500/60 hover:border-amber-400/90 cursor-pointer ring-2 ring-yellow-400/50 shadow-lg shadow-yellow-500/25'
+              : feature.key === 'spiritual-journal'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-amber-300/15 via-yellow-500/12 to-orange-400/15 border-amber-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-amber-300/20 via-yellow-500/18 to-orange-400/20 hover:from-amber-300/35 hover:via-yellow-500/30 hover:to-orange-400/35 border-amber-500/40 hover:border-yellow-400/70 cursor-pointer'
+              : feature.key === 'meditation-sessions'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-orange-400/15 via-red-500/12 to-pink-600/15 border-orange-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-orange-400/20 via-red-500/18 to-pink-600/20 hover:from-orange-400/35 hover:via-red-500/30 hover:to-pink-600/35 border-orange-500/40 hover:border-red-500/70 cursor-pointer'
+              : feature.key === 'chat'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-blue-400/15 via-cyan-500/12 to-indigo-600/15 border-blue-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-blue-400/20 via-cyan-500/18 to-indigo-600/20 hover:from-blue-400/35 hover:via-cyan-500/30 hover:to-indigo-600/35 border-blue-500/40 hover:border-cyan-500/70 cursor-pointer'
+              : feature.key === 'elite-habit'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-emerald-400/15 via-green-500/12 to-teal-600/15 border-emerald-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-emerald-400/20 via-green-500/18 to-teal-600/20 hover:from-emerald-400/35 hover:via-green-500/30 hover:to-teal-600/35 border-emerald-500/40 hover:border-green-500/70 cursor-pointer'
+              : feature.key === 'blood-circulation'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-red-600/80 via-pink-500/80 to-rose-500/80 border-red-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-red-600 via-pink-500 to-rose-500 hover:from-red-700 hover:via-pink-600 hover:to-rose-600 border-red-500/40 hover:border-pink-500/70 cursor-pointer'
+              : feature.key === 'physical-beauty'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-rose-600/80 via-amber-500/80 to-yellow-500/80 border-rose-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-rose-600 via-amber-500 to-yellow-500 hover:from-rose-700 hover:via-amber-600 hover:to-yellow-600 border-rose-500/40 hover:border-amber-500/70 cursor-pointer'
+              : feature.key === 'true-diet'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-green-600/80 via-lime-500/80 to-emerald-500/80 border-green-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-green-600 via-lime-500 to-emerald-500 hover:from-green-700 hover:via-lime-600 hover:to-emerald-600 border-green-500/40 hover:border-lime-500/70 cursor-pointer'
+              : feature.key === 'lifestyle'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-purple-600/80 via-violet-500/80 to-indigo-500/80 border-purple-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-purple-600 via-violet-500 to-indigo-500 hover:from-purple-700 hover:via-violet-600 hover:to-indigo-600 border-purple-500/40 hover:border-violet-500/70 cursor-pointer'
+                : actuallyLocked
+                  ? 'bg-card/50 cursor-pointer'
+                  : 'bg-card hover:bg-card/80 hover:border-primary cursor-pointer'
+          } ${feature.isNew ? 'relative' : ''}`} onClick={() => {
+            if (actuallyLocked) {
+              if (isMeditationLocked) {
+                onNavigate("payment"); // Navigate to payment/upgrade page for Pro features
+                return;
+              }
+              if (isIgnisLocked) {
+                // Show fire notification for Ignis Quest level requirement
+                toast({
+                  title: "🔥 Ignis Quest",
+                  description: "🔥 Ignis For lv 8 User ++, Jalani Proses anda terlebih dahulu",
+                  duration: 4000
+                });
+                return;
+              }
+              return; // Do nothing if locked
+            }
+            console.log("Feature clicked:", feature.key);
+            onNavigate(feature.key);
+          }}>
+                {feature.isNew}
+                
+                <div className={`flex flex-col items-center text-center ${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'space-y-1 justify-center h-full' : 'space-y-3'}`}>
+                  <div className={`${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'w-20 h-20 flex items-center justify-center' : 'p-3'} rounded-full relative ${
+                    feature.key === 'meditation-sessions'
+                      ? 'bg-gradient-to-r from-red-600 via-red-500 to-orange-500 shadow-lg shadow-red-500/40 animate-pulse'
+                    : feature.key === 'audio-therapy'
+                      ? 'bg-gradient-to-r from-yellow-600 via-amber-500 to-yellow-400 shadow-lg shadow-yellow-500/30'
+                    : feature.key === 'spiritual-journal'
+                      ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-400 shadow-xl shadow-amber-500/50 border-2 border-amber-300/30'
+                    : feature.key === 'chat'
+                      ? 'bg-gradient-to-r from-cyan-600 via-blue-500 to-purple-600 shadow-xl shadow-cyan-500/50 border-2 border-cyan-300/30'
+                    : feature.key === 'personal-analytics'
+                      ? 'bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 shadow-2xl shadow-violet-500/60 border-2 border-violet-400/40 animate-pulse'
+                    : feature.key === 'elite-habit'
+                      ? 'bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-400 shadow-xl shadow-emerald-500/50 border-2 border-emerald-300/30'
+                    : feature.key === 'ignis-quest'
+                      ? 'bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 shadow-lg shadow-orange-500/50'
+                    : feature.key === 'blood-circulation'
+                      ? 'bg-transparent'
+                    : feature.key === 'physical-beauty'
+                      ? 'bg-transparent'
+                    : feature.key === 'true-diet'
+                      ? 'bg-gradient-to-r from-green-600 via-lime-500 to-emerald-500'
+                    : feature.key === 'lifestyle'
+                      ? 'bg-gradient-to-r from-purple-600 via-violet-500 to-indigo-500'
+                      : 'bg-muted'
+                  } ${feature.color}`}>
+                    <feature.icon className={`${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'w-8 h-8' : 'w-6 h-6'} ${
+                      feature.key === 'meditation-sessions' ? 'text-white animate-pulse'
+                      : feature.key === 'audio-therapy' ? 'text-white animate-pulse'
+                      : feature.key === 'spiritual-journal' ? 'text-white drop-shadow-lg'
+                      : feature.key === 'chat' ? 'text-white drop-shadow-lg'
+                      : feature.key === 'personal-analytics' ? 'text-white drop-shadow-2xl animate-pulse'
+                      : feature.key === 'elite-habit' ? 'text-white drop-shadow-lg animate-pulse'
+                      : feature.key === 'ignis-quest' ? 'text-white animate-pulse'
+                      : feature.key === 'blood-circulation' ? 'text-white drop-shadow-2xl'
+                      : feature.key === 'physical-beauty' ? 'text-white drop-shadow-2xl'
+                      : feature.key === 'true-diet' ? 'text-white drop-shadow-2xl'
+                      : feature.key === 'lifestyle' ? 'text-white drop-shadow-2xl'
+                      : ''
+                    }`} />
+                    {/* Live indicator for meditation sessions */}
+                    {feature.key === 'meditation-sessions' && (
+                      <div className="absolute -top-1 -right-1 flex items-center">
+                        <div className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg">
+                          LIVE
+                        </div>
+                      </div>
+                    )}
+                    {/* Main feature indicator for Verse of eL Vision */}
+                    {feature.key === 'audio-therapy' && (
+                      <div className="absolute -top-1 left-6 flex items-center">
+                        <div className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg">
+                          AUDIO
+                        </div>
+                      </div>
+                    )}
+                    {isMeditationLocked && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
+                        <Lock className="w-4 h-4 text-red-400" />
+                      </div>}
+                    {isLocked && !isMeditationLocked && <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
+                        <Lock className="w-4 h-4 text-muted-foreground" />
+                      </div>}
+                    {isIgnisLocked && <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 rounded-full flex items-center justify-center opacity-80">
+                        <Flame className="w-6 h-6 text-white animate-pulse" />
+                      </div>}
+                  </div>
+                  <div>
+                    <h3 className={`font-medium text-foreground mb-1 ${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'text-sm font-bold' : ''}`}>
+                      {feature.title}
+                    </h3>
+                    {!(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') && (
+                      <p className="text-xs text-muted-foreground">
+                        {feature.description}
+                      </p>
+                    )}
+                    {isMeditationLocked && <div className="text-xs font-medium text-red-400 mt-2">
+                        Upgrade to Pro
+                      </div>}
+                    {isIgnisLocked && <div className="text-xs font-medium text-orange-400 mt-2">
+                        Requires Level 8
+                      </div>}
+                    {isLocked && !isMeditationLocked && !isIgnisLocked && <div className="text-xs font-medium text-muted-foreground mt-2">
+                        Locked
+                      </div>}
+                  </div>
+                </div>
+              </Card>;
+        })}
+
+          {/* Tutorial Button */}
+          <Card
+            className="p-4 border-border transition-all duration-300 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 hover:from-indigo-500/20 hover:via-purple-500/10 hover:to-pink-500/20 border-indigo-500/20 hover:border-indigo-400/40 cursor-pointer relative overflow-hidden group"
+            onClick={(e) => {
+              e.preventDefault();
+              if (!showTutorialModal) setShowTutorialModal(true);
+            }}
+          >
+            {/* Background glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="relative p-3 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 group-hover:scale-110 transition-all duration-300">
+                <tutorialFeature.icon className="w-6 h-6 text-white animate-pulse" />
+              </div>
+
+              <div>
+                <h3 className="font-medium text-foreground mb-1">
+                  {tutorialFeature.title}
+                </h3>
+                {tutorialFeature.description && (
+                  <p className="text-xs text-muted-foreground">
+                    {tutorialFeature.description}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Corner accent */}
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
+          </Card>
+        </div>
+
+        {/* Education Blog Section */}
+        <h2 className="text-xl font-semibold font-orbitron">EDUCATION BLOG</h2>
+        
+        <div className="grid grid-cols-2 gap-4">
+          {educationFeatures.map((feature, index) => {
+          const isLocked = feature.isLocked;
+          const isMeditationSession = feature.key === 'meditation-sessions';
+          const isMeditationLocked = isMeditationSession && !proStatus.isPro;
+          const isIgnisQuest = feature.key === 'ignis-quest';
+          const isIgnisLocked = isIgnisQuest && (userProfile?.level || 1) < 8;
+          const actuallyLocked = isLocked || isIgnisLocked || isMeditationLocked;
+          return <Card key={index} className={`${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'p-2 rounded-full aspect-square max-w-24 max-h-24 mx-auto' : 'p-4'} border-border transition-all duration-300 relative ${
+            feature.key === 'personal-analytics'
+              ? actuallyLocked
+                ? 'bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-fuchsia-500/10 border-violet-500/20 cursor-pointer opacity-90'
+                : 'bg-gradient-to-br from-violet-500/15 via-purple-500/10 to-fuchsia-500/15 hover:from-violet-500/25 hover:via-purple-500/15 hover:to-fuchsia-500/25 border-violet-500/30 hover:border-violet-400/50 cursor-pointer'
+              : feature.key === 'ignis-quest'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-red-500/10 via-orange-500/5 to-yellow-500/10 border-orange-500/20 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-red-500/15 via-orange-500/10 to-yellow-500/15 hover:from-red-500/25 hover:via-orange-500/15 hover:to-yellow-500/25 border-orange-500/30 hover:border-red-400/50 cursor-pointer'
+              : feature.key === 'audio-therapy'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-yellow-300/15 via-amber-400/12 to-orange-500/15 border-yellow-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-yellow-300/30 via-amber-400/25 to-orange-500/30 hover:from-yellow-300/45 hover:via-amber-400/40 hover:to-orange-500/45 border-yellow-500/60 hover:border-amber-400/90 cursor-pointer ring-2 ring-yellow-400/50 shadow-lg shadow-yellow-500/25'
               : feature.key === 'spiritual-journal'
                 ? actuallyLocked
                   ? 'bg-gradient-to-br from-amber-300/15 via-yellow-500/12 to-orange-400/15 border-amber-500/30 cursor-pointer opacity-90'
@@ -669,40 +874,7 @@ export function Home({
                 </div>
               </Card>;
         })}
-
-          {/* Tutorial Button */}
-          <Card
-            className="p-4 border-border transition-all duration-300 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 hover:from-indigo-500/20 hover:via-purple-500/10 hover:to-pink-500/20 border-indigo-500/20 hover:border-indigo-400/40 cursor-pointer relative overflow-hidden group"
-            onClick={(e) => {
-              e.preventDefault();
-              if (!showTutorialModal) setShowTutorialModal(true);
-            }}
-          >
-            {/* Background glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className="relative p-3 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 group-hover:scale-110 transition-all duration-300">
-                <tutorialFeature.icon className="w-6 h-6 text-white animate-pulse" />
-              </div>
-
-              <div>
-                <h3 className="font-medium text-foreground mb-1">
-                  {tutorialFeature.title}
-                </h3>
-                {tutorialFeature.description && (
-                  <p className="text-xs text-muted-foreground">
-                    {tutorialFeature.description}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Corner accent */}
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
-          </Card>
         </div>
-
 
         {/* User Testimonials Section Card */}
         <Card
