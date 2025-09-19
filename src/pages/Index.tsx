@@ -15,9 +15,11 @@ import { Payment } from "./Payment";
 import { JournalAnalytics } from "@/components/JournalAnalytics";
 import { EliteHabit } from "@/components/EliteHabit";
 import { BloodCirculation } from "@/components/BloodCirculation";
+import { Finance } from "@/components/Finance";
 import { KecantikanFisik } from "@/components/KecantikanFisik";
 import { TrueDiet } from "@/components/TrueDiet";
 import { Lifestyle } from "@/components/Lifestyle";
+import { Pasangan } from "@/components/Pasangan";
 import { supabase } from "@/integrations/supabase/client";
 import { useMeditative } from "@/contexts/MeditativeContext";
 import {
@@ -141,6 +143,18 @@ const Index = () => {
             </div>
           </div>
         );
+      case "finance":
+        console.log("Rendering Finance component");
+        return (
+          <div className="min-h-screen bg-background pb-20">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+                Keuangan & Meditasi
+              </h1>
+              <Finance onNavigate={setActiveTab} />
+            </div>
+          </div>
+        );
       case "physical-beauty":
         console.log("Rendering Physical Beauty component");
         return (
@@ -168,6 +182,18 @@ const Index = () => {
       case "lifestyle":
         console.log("Rendering Lifestyle component");
         return <Lifestyle onNavigate={setActiveTab} />;
+      case "pasangan":
+        console.log("Rendering Pasangan component");
+        return (
+          <div className="min-h-screen bg-background pb-20">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+                Pasangan & Ketenangan Diri
+              </h1>
+              <Pasangan onNavigate={setActiveTab} />
+            </div>
+          </div>
+        );
       default:
         return <Home onNavigate={setActiveTab} />;
     }

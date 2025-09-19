@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { AudioUpload } from "@/components/AudioUpload";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown, Shield, Gem, Flame, Eye, Sparkles, Globe, Infinity, Users, TrendingUp, Headphones } from "lucide-react";
+import { Lock, ArrowLeft, Music, Upload as UploadIcon, Star, Zap, Crown, Shield, Gem, Flame, Eye, Sparkles, Globe, Infinity, Users, TrendingUp, Headphones, FileText, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -90,6 +90,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<string>("unlock");
   const [userStats, setUserStats] = useState<any>(null);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
@@ -275,10 +276,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 8,
       title: "Verse 8 - Love Magnet",
       subtitle: "Menarik cinta dan kasih sayang dari orang-orang di sekitar",
-      unlocked: false, // Lock for all users
+      unlocked: true,
       requiredLevel: 9,
       artwork: verse8Artwork,
-      audioPath: null,
+      audioPath: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%208%20-%20Love%20Magnet.MP3",
       language: 'id'
     },
     {
@@ -574,6 +575,18 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                       {verse.subtitle}
                     </p>
                   )}
+                  {verse.id === 8 && (
+                    <div className="mt-3">
+                      <Button
+                        onClick={() => setShowTermsModal(true)}
+                        size="sm"
+                        className="text-xs bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-medium px-3 py-1"
+                      >
+                        <FileText className="w-3 h-3 mr-1" />
+                        Terms - Wajib Baca
+                      </Button>
+                    </div>
+                  )}
                   <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto"></div>
                 </div>
 
@@ -677,6 +690,77 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         reason={upgradeReason}
         userStats={userStats}
       />
+
+      {/* Terms Modal for Verse 8 */}
+      {showTermsModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden border border-pink-500/30">
+            <div className="flex items-center justify-between p-4 border-b border-pink-500/30">
+              <h2 className="text-lg font-semibold text-pink-400 flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Terms - Wajib Baca
+              </h2>
+              <Button 
+                onClick={() => setShowTermsModal(false)}
+                className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95"
+                size="sm"
+              >
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="space-y-4 text-base leading-relaxed">
+                <div className="bg-gradient-to-r from-pink-900/20 to-rose-900/20 border border-pink-500/30 rounded-lg p-4">
+                  <h3 className="font-semibold text-pink-300 mb-2 text-center">💕 Verse 8 - Love Magnet 💕</h3>
+                  <p className="text-pink-200 text-center">
+                    Ilmu yang sangat powerful untuk menarik cinta dan kasih sayang
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <p className="text-foreground">
+                    <strong className="text-yellow-400">Rate Keberhasilan:</strong> 95% dari 100 orang merasakan efek cepat, 
+                    sedangkan 5% memakan waktu bertahun-tahun.
+                  </p>
+                  
+                  <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-3">
+                    <p className="text-orange-200 text-base">
+                      ⚠️ <strong>Penting:</strong> Berdasarkan faktual di lapangan, ini adalah ilmu yang sangat powerful.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
+                    <p className="text-red-200 text-base">
+                      <strong>Pernyataan Tanggung Jawab:</strong>
+                    </p>
+                    <ul className="text-red-200 text-sm mt-2 space-y-1 pl-4">
+                      <li>• Anda menyatakan tidak akan menyalahgunakan ilmu ini untuk merusak hubungan orang lain</li>
+                      <li>• Anda menyatakan tidak akan memainkan perasaan orang lain</li>
+                      <li>• eL Vision Group tidak bertanggung jawab atas perbuatan yang kami tidak setujui</li>
+                      <li>• Gunakan dengan bijak dan penuh kasih sayang</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3">
+                    <p className="text-green-200 text-base text-center">
+                      ✨ Gunakan Love Magnet untuk menciptakan hubungan yang harmonis dan penuh cinta ✨
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-pink-500/30">
+              <Button
+                onClick={() => setShowTermsModal(false)}
+                className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-medium"
+                size="lg"
+              >
+                Setuju
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
