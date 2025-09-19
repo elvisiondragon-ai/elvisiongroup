@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Save, X, User } from "lucide-react";
+import { Upload, Save, X, User, Phone } from "lucide-react";
 
 interface EditProfileProps {
   user: any;
@@ -18,6 +18,7 @@ interface EditProfileProps {
 export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfileProps) {
   const [displayName, setDisplayName] = useState(userProfile?.display_name || user?.email?.split('@')[0] || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [phoneNumber, setPhoneNumber] = useState(userProfile?.phone_number || '');
   const [avatarUrl, setAvatarUrl] = useState(userProfile?.avatar_url || '');
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -85,6 +86,7 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
         display_name: displayName,
         avatar_url: avatarUrl,
         user_email: email,
+        phone_number: phoneNumber,
         updated_at: new Date().toISOString()
       };
 
@@ -204,6 +206,28 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
             className="bg-background border-border focus:border-primary"
             pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone-number" className="text-foreground">
+            Phone Number
+          </Label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="phone-number"
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => {
+                // Phone number validation and sanitization
+                const sanitized = e.target.value.replace(/[^0-9]/g, '');
+                setPhoneNumber(sanitized);
+              }}
+              placeholder="08123456789"
+              className="pl-10 bg-background border-border focus:border-primary"
+              maxLength={13}
+            />
+          </div>
         </div>
       </Card>
 

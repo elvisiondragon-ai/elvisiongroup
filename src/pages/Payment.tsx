@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown } from 'lucide-react';
+import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { EditProfile } from '@/components/EditProfile';
 
 // Meta Pixel declaration
 declare global {
@@ -32,6 +33,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userDataLoading, setUserDataLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [editingProfile, setEditingProfile] = useState(false);
   const { toast } = useToast();
 
   // Meta Pixel initialization
@@ -528,6 +530,24 @@ export function Payment({ onNavigate }: PaymentProps) {
   console.log('🔍 expiredTime:', paymentData?.expiredTime);
   console.log('🔍 paymentType:', paymentData?.paymentType);
 
+  // Show edit profile component if editing
+  if (editingProfile) {
+    return (
+      <div className="pb-20">
+        <EditProfile
+          user={user}
+          userProfile={userProfile}
+          onSave={() => {
+            setEditingProfile(false);
+            // Refresh data after profile update
+            window.location.reload();
+          }}
+          onCancel={() => setEditingProfile(false)}
+        />
+      </div>
+    );
+  }
+
   if (showPaymentInstructions) {
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -741,13 +761,24 @@ export function Payment({ onNavigate }: PaymentProps) {
       <div className="px-6 space-y-6">
         {/* User Information */}
         <div className="space-y-4">
-          <h3 className="text-sm font-medium flex items-center gap-2">
-            <User className="w-4 h-4" />
-            Informasi Pengguna
-            {userDataLoading && (
-              <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
-            )}
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Informasi Pengguna
+              {userDataLoading && (
+                <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+              )}
+            </h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditingProfile(true)}
+              className="text-xs"
+            >
+              <Edit className="w-3 h-3 mr-1" />
+              Edit Profil
+            </Button>
+          </div>
           
           {profileError && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-xs flex items-center justify-between">
