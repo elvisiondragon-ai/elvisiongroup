@@ -69,6 +69,17 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
     try {
       setSaving(true);
 
+      // Validate phone number format before saving
+      if (phoneNumber && !/^08[0-9]{8,13}$/.test(phoneNumber)) {
+        toast({
+          title: "Error",
+          description: "Phone number must start with 08 and be 10-15 digits total (08xxxxxxxxxx)",
+          variant: "destructive",
+        });
+        setSaving(false);
+        return;
+      }
+
       // Update email in auth if changed
       if (email !== user?.email) {
         const { error: emailError } = await supabase.auth.updateUser({
@@ -219,13 +230,21 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
               type="tel"
               value={phoneNumber}
               onChange={(e) => {
-                // Phone number validation and sanitization
-                const sanitized = e.target.value.replace(/[^0-9]/g, '');
+                // Phone number validation and sanitization - must start with 08
+                let sanitized = e.target.value.replace(/[^0-9]/g, '');
+                // Ensure it starts with 08
+                if (sanitized.length > 0 && !sanitized.startsWith('08')) {
+                  sanitized = '08' + sanitized.replace(/^0+/, '');
+                }
+                // Limit to 15 characters max (08 + 13 digits)
+                if (sanitized.length > 15) {
+                  sanitized = sanitized.substring(0, 15);
+                }
                 setPhoneNumber(sanitized);
               }}
               placeholder="08123456789"
               className="pl-10 bg-background border-border focus:border-primary"
-              maxLength={13}
+              maxLength={15}
             />
           </div>
         </div>

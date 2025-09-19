@@ -13,6 +13,7 @@ import { FreeUserNotificationModal } from "@/components/FreeUserNotificationModa
 import { useToast } from "@/hooks/use-toast";
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Auth } from "./pages/Auth";
+import { Signup } from "./pages/Signup";
 import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
 import { TutorialVideo } from "./pages/TutorialVideo";
@@ -396,6 +397,10 @@ const App = () => {
               <Route 
                 path="/auth" 
                 element={user ? <Index /> : <Auth onLogin={setUser} />} 
+              />
+              <Route 
+                path="/signup" 
+                element={user ? <Index /> : <Signup />} 
               />
               <Route 
                 path="/tutorial" 

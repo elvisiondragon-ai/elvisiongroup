@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, Eye, EyeOff, Sparkles, Zap } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Sparkles, Zap, Phone, User } from "lucide-react";
 import { Turnstile } from '@marsidev/react-turnstile';
 import type { User } from '@supabase/supabase-js';
 
@@ -30,7 +30,9 @@ export function Auth({ onLogin }: AuthProps) {
   const [signupData, setSignupData] = useState({
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    displayName: '',
+    phoneNumber: ''
   });
 
   // Forgot password form state
@@ -122,6 +124,16 @@ export function Auth({ onLogin }: AuthProps) {
       return;
     }
 
+    // Validate phone number format if provided
+    if (signupData.phoneNumber && !/^08[0-9]{8,13}$/.test(signupData.phoneNumber)) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Phone number must start with 08 and be 10-15 digits total (08xxxxxxxxxx)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -131,7 +143,11 @@ export function Auth({ onLogin }: AuthProps) {
         email: signupData.email,
         password: signupData.password,
         options: {
-          emailRedirectTo: redirectUrl
+          emailRedirectTo: redirectUrl,
+          data: {
+            display_name: signupData.displayName || signupData.email.split('@')[0],
+            phone_number: signupData.phoneNumber
+          }
         }
       });
 
@@ -148,7 +164,9 @@ export function Auth({ onLogin }: AuthProps) {
         setSignupData({
           email: '',
           password: '',
-          confirmPassword: ''
+          confirmPassword: '',
+          displayName: '',
+          phoneNumber: ''
         });
       }
     } catch (error: any) {
@@ -737,6 +755,23 @@ export function Auth({ onLogin }: AuthProps) {
             <TabsContent value="signup" className="space-y-4">
               <form onSubmit={enhancedHandleSignup} className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="signup-displayname" className="text-foreground">
+                    Display Name
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="signup-displayname"
+                      type="text"
+                      placeholder="Enter your display name"
+                      value={signupData.displayName}
+                      onChange={(e) => setSignupData(prev => ({ ...prev, displayName: e.target.value }))}
+                      className="pl-10 cyber-input"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
                   <Label htmlFor="signup-email" className="text-foreground">
                     Email
                   </Label>
@@ -749,6 +784,36 @@ export function Auth({ onLogin }: AuthProps) {
                       value={signupData.email}
                       onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
                       className="pl-10 cyber-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-phone" className="text-foreground">
+                    Phone Number
+                  </Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="signup-phone"
+                      type="tel"
+                      placeholder="08123456789"
+                      value={signupData.phoneNumber}
+                      onChange={(e) => {
+                        // Phone number validation and sanitization - must start with 08
+                        let sanitized = e.target.value.replace(/[^0-9]/g, '');
+                        // Ensure it starts with 08
+                        if (sanitized.length > 0 && !sanitized.startsWith('08')) {
+                          sanitized = '08' + sanitized.replace(/^0+/, '');
+                        }
+                        // Limit to 15 characters max (08 + 13 digits)
+                        if (sanitized.length > 15) {
+                          sanitized = sanitized.substring(0, 15);
+                        }
+                        setSignupData(prev => ({ ...prev, phoneNumber: sanitized }));
+                      }}
+                      className="pl-10 cyber-input"
+                      maxLength={15}
                     />
                   </div>
                 </div>

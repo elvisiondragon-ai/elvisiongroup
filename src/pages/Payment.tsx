@@ -375,6 +375,11 @@ export function Payment({ onNavigate }: PaymentProps) {
               setFullName(autoFullName);
             }
 
+            // Auto-populate phone number from profile if available
+            if (!phoneNumber.trim() && profile?.phone_number?.trim()) {
+              setPhoneNumber(profile.phone_number.trim());
+            }
+
           } catch (profileError) {
             console.error('Profile fetch failed:', profileError);
             setProfileError('Failed to load profile data');
@@ -834,7 +839,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                 <Input
                   id="phoneNumber"
                   type="tel"
-                  placeholder="08123456789"
+                  placeholder={userDataLoading ? "Memuat nomor telepon..." : "08123456789"}
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   className="pl-10"
