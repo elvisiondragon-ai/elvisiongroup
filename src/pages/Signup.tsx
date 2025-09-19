@@ -16,6 +16,12 @@ export function Signup() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Check for required environment variables
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+  if (!turnstileSiteKey) {
+    console.error('Missing VITE_TURNSTILE_SITE_KEY environment variable');
+  }
+
   // Signup form state
   const [signupData, setSignupData] = useState({
     email: '',
@@ -347,7 +353,7 @@ export function Signup() {
           <div className="flex justify-center">
             <Turnstile
               ref={signupTurnstileRef}
-              siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
+              siteKey={turnstileSiteKey}
               onSuccess={handleCaptchaSuccess}
               onExpire={handleCaptchaExpire}
               onError={handleCaptchaError}

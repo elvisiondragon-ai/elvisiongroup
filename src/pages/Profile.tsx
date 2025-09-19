@@ -281,7 +281,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   return (
     <>
       <LoadingOverlay isVisible={showLoadingOverlay} message={loadingMessage} />
-      <div className="pb-20">
+      <div className="min-h-screen bg-background pb-20">
       {/* Profile Header */}
       <div className="p-6 text-center">
         <Avatar className="w-24 h-24 mx-auto mb-4 border-2 border-primary glow-primary">

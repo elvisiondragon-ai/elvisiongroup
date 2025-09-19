@@ -20,6 +20,12 @@ export function Auth({ onLogin }: AuthProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
 
+  // Check for required environment variables
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+  if (!turnstileSiteKey) {
+    console.error('Missing VITE_TURNSTILE_SITE_KEY environment variable');
+  }
+
   // Login form state
   const [loginData, setLoginData] = useState({
     email: '',
@@ -577,7 +583,7 @@ export function Auth({ onLogin }: AuthProps) {
               <div className="flex justify-center">
                 <Turnstile
                   ref={forgotPasswordTurnstileRef}
-                  siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
+                  siteKey={turnstileSiteKey}
                   onSuccess={handleCaptchaSuccess}
                   onError={handleCaptchaError}
                   onExpire={handleCaptchaExpire}
@@ -819,7 +825,7 @@ export function Auth({ onLogin }: AuthProps) {
                 <div className="flex justify-center">
                   <Turnstile
                     ref={loginTurnstileRef}
-                    siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
+                    siteKey={turnstileSiteKey}
                     onSuccess={handleCaptchaSuccess}
                     onError={handleCaptchaError}
                     onExpire={handleCaptchaExpire}
@@ -984,7 +990,7 @@ export function Auth({ onLogin }: AuthProps) {
                 <div className="flex justify-center">
                   <Turnstile
                     ref={signupTurnstileRef}
-                    siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
+                    siteKey={turnstileSiteKey}
                     onSuccess={handleCaptchaSuccess}
                     onError={handleCaptchaError}
                     onExpire={handleCaptchaExpire}
