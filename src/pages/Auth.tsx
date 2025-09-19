@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -41,6 +41,12 @@ export function Auth({ onLogin }: AuthProps) {
 
   // Captcha token state
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [tokenTimestamp, setTokenTimestamp] = useState<number | null>(null);
+  
+  // Refs for Turnstile widgets
+  const loginTurnstileRef = useRef<any>(null);
+  const signupTurnstileRef = useRef<any>(null);
+  const forgotPasswordTurnstileRef = useRef<any>(null);
 
   // Track current view
   const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent' | 'signup-success'>('auth');
@@ -48,6 +54,49 @@ export function Auth({ onLogin }: AuthProps) {
   // Track active tab and click states
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [isTabClicked, setIsTabClicked] = useState(false);
+
+  // Enhanced CAPTCHA error handling
+  const handleCaptchaSuccess = (token: string) => {
+    setCaptchaToken(token);
+    setTokenTimestamp(Date.now());
+  };
+
+  const handleCaptchaError = (error?: any) => {
+    console.error('CAPTCHA error:', error);
+    setCaptchaToken(null);
+    setTokenTimestamp(null);
+    
+    toast({
+      title: "CAPTCHA Error",
+      description: "Please try the CAPTCHA again. If this persists, refresh the page.",
+      variant: "destructive",
+    });
+  };
+
+  const handleCaptchaExpire = () => {
+    setCaptchaToken(null);
+    setTokenTimestamp(null);
+  };
+
+  const resetCaptcha = (ref: any) => {
+    if (ref?.current) {
+      ref.current.reset();
+    }
+  };
+
+  const checkTokenFreshness = () => {
+    if (captchaToken && tokenTimestamp && Date.now() - tokenTimestamp > 300000) { // 5 minutes
+      setCaptchaToken(null);
+      setTokenTimestamp(null);
+      toast({
+        title: "CAPTCHA Expired",
+        description: "Please complete the CAPTCHA again.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
 
 
   // Check if user is already logged in
@@ -272,10 +321,14 @@ export function Auth({ onLogin }: AuthProps) {
       return;
     }
 
+    if (!checkTokenFreshness()) {
+      resetCaptcha(loginTurnstileRef);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-
       // Clean up any existing auth state
       cleanupAuthState();
 
@@ -294,7 +347,23 @@ export function Auth({ onLogin }: AuthProps) {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Specific handling for CAPTCHA verification failed
+        if (error.message.toLowerCase().includes('captcha') || 
+            error.message.toLowerCase().includes('verification failed') ||
+            error.message.toLowerCase().includes('invalid captcha')) {
+          setCaptchaToken(null);
+          setTokenTimestamp(null);
+          resetCaptcha(loginTurnstileRef);
+          toast({
+            title: "CAPTCHA Verification Failed",
+            description: "Please complete the CAPTCHA again.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
 
       if (data.user) {
         toast({
@@ -338,6 +407,11 @@ export function Auth({ onLogin }: AuthProps) {
       return;
     }
 
+    if (!checkTokenFreshness()) {
+      resetCaptcha(signupTurnstileRef);
+      return;
+    }
+
     // Very lenient password validation - minimum 1 character
     if (signupData.password.length < 1) {
       toast({
@@ -370,6 +444,21 @@ export function Auth({ onLogin }: AuthProps) {
       });
 
       if (error) {
+        // Specific handling for CAPTCHA verification failed
+        if (error.message.toLowerCase().includes('captcha') || 
+            error.message.toLowerCase().includes('verification failed') ||
+            error.message.toLowerCase().includes('invalid captcha')) {
+          setCaptchaToken(null);
+          setTokenTimestamp(null);
+          resetCaptcha(signupTurnstileRef);
+          toast({
+            title: "CAPTCHA Verification Failed",
+            description: "Please complete the CAPTCHA again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         // If user already exists, try to sign them in instead
         if (error.message.includes('already registered')) {
           const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
@@ -470,15 +559,16 @@ export function Auth({ onLogin }: AuthProps) {
               {/* Turnstile CAPTCHA */}
               <div className="flex justify-center">
                 <Turnstile
+                  ref={forgotPasswordTurnstileRef}
                   siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
-                  onSuccess={(token) => {
-                    setCaptchaToken(token);
-                  }}
-                  onError={() => {
-                    setCaptchaToken(null);
-                  }}
-                  onExpire={() => {
-                    setCaptchaToken(null);
+                  onSuccess={handleCaptchaSuccess}
+                  onError={handleCaptchaError}
+                  onExpire={handleCaptchaExpire}
+                  options={{
+                    action: 'forgot-password',
+                    theme: 'light',
+                    size: 'normal',
+                    retry: 'auto'
                   }}
                 />
               </div>
@@ -711,15 +801,16 @@ export function Auth({ onLogin }: AuthProps) {
                 {/* Turnstile CAPTCHA */}
                 <div className="flex justify-center">
                   <Turnstile
+                    ref={loginTurnstileRef}
                     siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
-                    onSuccess={(token) => {
-                      setCaptchaToken(token);
-                    }}
-                    onError={() => {
-                      setCaptchaToken(null);
-                    }}
-                    onExpire={() => {
-                      setCaptchaToken(null);
+                    onSuccess={handleCaptchaSuccess}
+                    onError={handleCaptchaError}
+                    onExpire={handleCaptchaExpire}
+                    options={{
+                      action: 'login',
+                      theme: 'light',
+                      size: 'normal',
+                      retry: 'auto'
                     }}
                   />
                 </div>
@@ -875,15 +966,16 @@ export function Auth({ onLogin }: AuthProps) {
                 {/* Turnstile CAPTCHA */}
                 <div className="flex justify-center">
                   <Turnstile
+                    ref={signupTurnstileRef}
                     siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
-                    onSuccess={(token) => {
-                      setCaptchaToken(token);
-                    }}
-                    onError={() => {
-                      setCaptchaToken(null);
-                    }}
-                    onExpire={() => {
-                      setCaptchaToken(null);
+                    onSuccess={handleCaptchaSuccess}
+                    onError={handleCaptchaError}
+                    onExpire={handleCaptchaExpire}
+                    options={{
+                      action: 'signup',
+                      theme: 'light',
+                      size: 'normal',
+                      retry: 'auto'
                     }}
                   />
                 </div>

@@ -37,8 +37,39 @@ const Index = () => {
   const { isMeditativeActive } = useMeditative();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/auth';
+    // Show immediate logout notification for better UX
+    const { toast } = await import('@/hooks/use-toast');
+    
+    toast.toast({
+      title: "Sedang Logout...",
+      description: "Harap tunggu sebentar.",
+    });
+
+    try {
+      await supabase.auth.signOut();
+      
+      toast.toast({
+        title: "Berhasil Logout",
+        description: "Anda berhasil keluar dari akun.",
+      });
+      
+      // Small delay to show success message
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 1000);
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.toast({
+        title: "Error",
+        description: "Gagal logout, akan tetap diarahkan ke halaman login.",
+        variant: "destructive",
+      });
+      
+      // Redirect anyway after error
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 1500);
+    }
   };
 
   const handleTabChange = (newTab: string) => {

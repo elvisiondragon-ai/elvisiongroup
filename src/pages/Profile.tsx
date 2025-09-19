@@ -69,6 +69,12 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const { toast } = useToast();
 
   const handleLogout = async () => {
+    // Show immediate logout notification for better UX
+    toast({
+      title: "Sedang Logout...",
+      description: "Harap tunggu sebentar.",
+    });
+
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -81,8 +87,8 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
       }
       
       toast({
-        title: "Success", 
-        description: "Logged out successfully",
+        title: "Berhasil Logout",
+        description: "Anda berhasil keluar dari akun.",
       });
       
       onLogout();
@@ -90,7 +96,7 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
       console.error('Logout error:', error);
       toast({
         title: "Error",
-        description: "Failed to logout",
+        description: "Gagal logout, coba lagi.",
         variant: "destructive",
       });
       onLogout();

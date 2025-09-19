@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -26,7 +26,54 @@ export function Signup() {
 
   // Captcha token state
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [tokenTimestamp, setTokenTimestamp] = useState<number | null>(null);
   const [currentView, setCurrentView] = useState<'signup' | 'success'>('signup');
+  
+  // Ref for Turnstile widget
+  const signupTurnstileRef = useRef<any>(null);
+
+  // Enhanced CAPTCHA error handling
+  const handleCaptchaSuccess = (token: string) => {
+    setCaptchaToken(token);
+    setTokenTimestamp(Date.now());
+  };
+
+  const handleCaptchaError = (error?: any) => {
+    console.error('CAPTCHA error:', error);
+    setCaptchaToken(null);
+    setTokenTimestamp(null);
+    
+    toast({
+      title: "CAPTCHA Error",
+      description: "Please try the CAPTCHA again. If this persists, refresh the page.",
+      variant: "destructive",
+    });
+  };
+
+  const handleCaptchaExpire = () => {
+    setCaptchaToken(null);
+    setTokenTimestamp(null);
+  };
+
+  const resetCaptcha = () => {
+    if (signupTurnstileRef?.current) {
+      signupTurnstileRef.current.reset();
+    }
+  };
+
+  const checkTokenFreshness = () => {
+    if (captchaToken && tokenTimestamp && Date.now() - tokenTimestamp > 300000) { // 5 minutes
+      setCaptchaToken(null);
+      setTokenTimestamp(null);
+      toast({
+        title: "CAPTCHA Expired",
+        description: "Please complete the CAPTCHA again.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +84,11 @@ export function Signup() {
         description: "Please complete the captcha verification",
         variant: "destructive",
       });
+      return;
+    }
+
+    if (!checkTokenFreshness()) {
+      resetCaptcha();
       return;
     }
 
@@ -58,7 +110,6 @@ export function Signup() {
       return;
     }
 
-
     setIsLoading(true);
     
     try {
@@ -74,6 +125,21 @@ export function Signup() {
       });
 
       if (error) {
+        // Specific handling for CAPTCHA verification failed
+        if (error.message.toLowerCase().includes('captcha') || 
+            error.message.toLowerCase().includes('verification failed') ||
+            error.message.toLowerCase().includes('invalid captcha')) {
+          setCaptchaToken(null);
+          setTokenTimestamp(null);
+          resetCaptcha();
+          toast({
+            title: "CAPTCHA Verification Failed",
+            description: "Please complete the CAPTCHA again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         toast({
           title: "Signup Error",
           description: error.message,
@@ -249,13 +315,16 @@ export function Signup() {
           {/* Captcha */}
           <div className="flex justify-center">
             <Turnstile
+              ref={signupTurnstileRef}
               siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
-              onSuccess={(token) => setCaptchaToken(token)}
-              onExpire={() => setCaptchaToken(null)}
-              onError={() => setCaptchaToken(null)}
+              onSuccess={handleCaptchaSuccess}
+              onExpire={handleCaptchaExpire}
+              onError={handleCaptchaError}
               options={{
+                action: 'signup',
                 theme: 'light',
-                size: 'normal'
+                size: 'normal',
+                retry: 'auto'
               }}
             />
           </div>
