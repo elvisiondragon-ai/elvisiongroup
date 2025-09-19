@@ -30,6 +30,8 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [userDataLoading, setUserDataLoading] = useState(true);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Meta Pixel initialization
@@ -69,7 +71,37 @@ export function Payment({ onNavigate }: PaymentProps) {
     {
       code: 'QRIS',
       name: 'QRIS',
-      description: 'Bayar dengan QRIS'
+      description: 'Bayar dengan QRIS SEMUA BANK'
+    },
+    {
+      code: 'PERMATAVA',
+      name: 'Permata Virtual Account',
+      description: 'Transfer via Permata Virtual Account'
+    },
+    {
+      code: 'BNIVA',
+      name: 'BNI Virtual Account',
+      description: 'Transfer via BNI Virtual Account'
+    },
+    {
+      code: 'BRIVA',
+      name: 'BRI Virtual Account',
+      description: 'Transfer via BRI Virtual Account'
+    },
+    {
+      code: 'MANDIRIVA',
+      name: 'Mandiri Virtual Account',
+      description: 'Transfer via Mandiri Virtual Account'
+    },
+    {
+      code: 'BSIVA',
+      name: 'BSI Virtual Account',
+      description: 'Transfer via BSI Virtual Account'
+    },
+    {
+      code: 'OCBCVA',
+      name: 'OCBC NISP Virtual Account',
+      description: 'Transfer via OCBC NISP Virtual Account'
     }
   ];
 
@@ -279,39 +311,82 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [showPaymentInstructions, paymentData?.tripay_reference]);
 
   useEffect(() => {
-    const initializeData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      if (user) {
-        setEmail(user.email || '');
-
-        // Fetch user profile
-        const { data: profile } = await supabase
+    const fetchUserProfile = async (userId: string, retryCount = 0): Promise<any> => {
+      try {
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .maybeSingle();
 
-        setUserProfile(profile);
-
-        // Auto-fetch fullName from profile or fallback to email username
-        let autoFullName = '';
-        if (profile?.display_name) {
-          autoFullName = profile.display_name;
-        } else if (user.email) {
-          // Fallback to email username if profile display_name is empty
-          autoFullName = user.email.split('@')[0];
+        if (error) {
+          console.error('Profile fetch error:', error);
+          if (retryCount < 2) {
+            console.log(`Retrying profile fetch (attempt ${retryCount + 2}/3)...`);
+            await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+            return fetchUserProfile(userId, retryCount + 1);
+          }
+          throw error;
         }
 
-        // Only update fullName if it's currently empty to avoid overwriting user input
-        if (!fullName.trim() && autoFullName) {
-          setFullName(autoFullName);
-        }
+        return profile;
+      } catch (error) {
+        console.error('Failed to fetch profile after retries:', error);
+        throw error;
       }
+    };
 
-      // Fetch subscription plans
-      const fetchPlans = async () => {
+    const initializeData = async () => {
+      try {
+        setUserDataLoading(true);
+        setProfileError(null);
+
+        // Get user data
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          throw new Error('Failed to get user data');
+        }
+
+        setUser(user);
+        
+        if (user) {
+          // Set email immediately from auth
+          setEmail(user.email || '');
+
+          try {
+            // Fetch user profile with retry mechanism
+            const profile = await fetchUserProfile(user.id);
+            setUserProfile(profile);
+
+            // Auto-fetch fullName from profile or fallback to email username
+            let autoFullName = '';
+            if (profile?.display_name?.trim()) {
+              autoFullName = profile.display_name.trim();
+            } else if (user.email) {
+              // Fallback to email username if profile display_name is empty
+              autoFullName = user.email.split('@')[0];
+            }
+
+            // Only update fullName if it's currently empty to avoid overwriting user input
+            if (!fullName.trim() && autoFullName) {
+              setFullName(autoFullName);
+            }
+
+          } catch (profileError) {
+            console.error('Profile fetch failed:', profileError);
+            setProfileError('Failed to load profile data');
+            
+            // Fallback: use email username if available
+            if (user.email && !fullName.trim()) {
+              const fallbackName = user.email.split('@')[0];
+              setFullName(fallbackName);
+              console.log('Using fallback name from email:', fallbackName);
+            }
+          }
+        }
+
+        // Fetch subscription plans
         try {
           const { data, error } = await supabase
             .from('subscription_plans')
@@ -336,9 +411,13 @@ export function Payment({ onNavigate }: PaymentProps) {
         } catch (error) {
           console.error('Error fetching subscription plans:', error);
         }
-      };
 
-      fetchPlans();
+      } catch (error) {
+        console.error('Failed to initialize user data:', error);
+        setProfileError('Failed to load user data');
+      } finally {
+        setUserDataLoading(false);
+      }
     };
 
     initializeData();
@@ -440,6 +519,8 @@ export function Payment({ onNavigate }: PaymentProps) {
     });
   };
 
+
+
   // Debug payment data
   console.log('🔍 Payment Data Debug:', paymentData);
   console.log('🔍 payCode:', paymentData?.payCode);
@@ -517,30 +598,34 @@ export function Payment({ onNavigate }: PaymentProps) {
 
           {/* Virtual Account Number */}
           {(paymentData?.payCode || paymentData?.paymentType === 'DIRECT') && paymentData?.paymentMethod !== 'QRIS' && (
-            <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-lg">
-              <CardHeader className="text-center pb-4">
-                <CardTitle className="flex items-center justify-center gap-2 text-blue-700">
+            <Card className="border-2 border-yellow-300 bg-gradient-to-br from-yellow-100 via-yellow-200 to-amber-200 shadow-xl overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-amber-300/30 to-yellow-600/20"></div>
+              <CardHeader className="text-center pb-4 relative z-10">
+                <CardTitle className="flex items-center justify-center gap-2 text-amber-800">
                   <CreditCard className="w-5 h-5" />
-                  Virtual Account {paymentData?.paymentMethod}
+                  Virtual Account {selectedPaymentMethod}
                 </CardTitle>
+                <p className="text-sm text-amber-700 font-medium mt-1">
+                  {paymentData?.paymentMethod}
+                </p>
               </CardHeader>
-              <CardContent className="text-center space-y-4">
-                <div className="bg-white border-2 border-dashed border-blue-300 p-6 rounded-xl">
-                  <p className="font-mono text-lg sm:text-2xl font-bold text-blue-800 tracking-wider mb-2 break-all">
+              <CardContent className="text-center space-y-4 relative z-10">
+                <div className="bg-white/90 backdrop-blur-sm border-2 border-dashed border-amber-400 p-6 rounded-xl shadow-inner">
+                  <p className="font-mono text-lg sm:text-2xl font-bold text-amber-900 tracking-wider mb-2 break-all">
                     {paymentData.payCode || 'Loading...'}
                   </p>
-                  <p className="text-xs text-blue-600 font-medium">
+                  <p className="text-xs text-amber-700 font-medium">
                     Nomor Virtual Account
                   </p>
                 </div>
-                <p className="text-sm text-blue-600 font-medium">
+                <p className="text-sm text-amber-800 font-medium">
                   Salin nomor di atas untuk melakukan transfer
                 </p>
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => copyToClipboard(paymentData.payCode)}
-                  className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                  className="border-amber-400 text-amber-800 hover:bg-amber-50 bg-white/80 backdrop-blur-sm shadow-md"
                 >
                   <Copy className="w-4 h-4 mr-1" />
                   Salin Nomor VA
@@ -618,7 +703,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           <Card className="p-4 bg-card/80 backdrop-blur-sm border border-border">
             <div className="space-y-3">
               <p className="text-center text-sm text-muted-foreground">
-                Pembayaran akan diverifikasi otomatis dalam 1-5 menit
+                Pembayaran akan diverifikasi otomatis dalam 1 Menit
               </p>
               <Button onClick={() => onNavigate("profile")} variant="outline" className="w-full">
                 Kembali ke Profil
@@ -655,7 +740,22 @@ export function Payment({ onNavigate }: PaymentProps) {
           <h3 className="text-sm font-medium flex items-center gap-2">
             <User className="w-4 h-4" />
             Informasi Pengguna
+            {userDataLoading && (
+              <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+            )}
           </h3>
+          
+          {profileError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-xs flex items-center justify-between">
+              <span>{profileError} - Data akan menggunakan fallback dari email</span>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-red-600 hover:text-red-800 underline text-xs ml-2"
+              >
+                Refresh
+              </button>
+            </div>
+          )}
           
           <div className="space-y-3">
             <div>
@@ -665,7 +765,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                 <Input
                   id="fullName"
                   type="text"
-                  placeholder="Masukkan nama lengkap"
+                  placeholder={userDataLoading ? "Memuat nama..." : "Masukkan nama lengkap"}
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="pl-10 bg-muted/50 cursor-not-allowed"
@@ -682,7 +782,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="email@contoh.com"
+                  placeholder={userDataLoading ? "Memuat email..." : "email@contoh.com"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 bg-muted/50 cursor-not-allowed"
@@ -769,7 +869,7 @@ export function Payment({ onNavigate }: PaymentProps) {
       <div className="fixed bottom-20 left-6 right-6">
         <Button 
           onClick={handleCreatePayment}
-          disabled={loading || !selectedPlan || !phoneNumber.trim() || !fullName.trim()}
+          disabled={loading || userDataLoading || !selectedPlan || !phoneNumber.trim() || !fullName.trim()}
           className="w-full"
           size="lg"
         >
@@ -778,7 +878,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           ) : (
             <CreditCard className="w-4 h-4 mr-2" />
           )}
-          {loading ? 'Membuat Pembayaran...' : 'Buat Pembayaran'}
+          {loading ? 'Membuat Pembayaran...' : userDataLoading ? 'Memuat Data Pengguna...' : 'Buat Pembayaran'}
         </Button>
       </div>
 
