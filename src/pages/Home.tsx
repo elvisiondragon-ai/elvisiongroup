@@ -48,6 +48,7 @@ export function Home({
   const { toast } = useToast();
   const [showTutorialModal, setShowTutorialModal] = useState(false);
   const [showPlayButton, setShowPlayButton] = useState(true);
+  const [tutorialThumbnailGenerated, setTutorialThumbnailGenerated] = useState(false);
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<{url: string, type: 'video' | 'image', title: string} | null>(null);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -1011,6 +1012,7 @@ export function Home({
                 onClick={() => {
                   setShowTutorialModal(false);
                   setShowPlayButton(true);
+                  setTutorialThumbnailGenerated(false);
                 }}
                 className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
                 size="sm"
@@ -1023,9 +1025,22 @@ export function Home({
                 <video 
                   className="w-full rounded-lg"
                   controls={!showPlayButton}
-                  preload="none"
+                  preload="metadata"
                   crossOrigin="anonymous"
                   onPlay={() => setShowPlayButton(false)}
+                  onCanPlay={(e) => {
+                    if (!tutorialThumbnailGenerated) {
+                      const video = e.target as HTMLVideoElement;
+                      video.currentTime = 0;
+                      setTutorialThumbnailGenerated(true);
+                    }
+                  }}
+                  onSeeked={(e) => {
+                    const video = e.target as HTMLVideoElement;
+                    if (tutorialThumbnailGenerated && video.currentTime >= 0) {
+                      video.pause();
+                    }
+                  }}
                   onError={(e) => {
                     console.error('Video error:', e);
                     setShowPlayButton(true);
@@ -1042,6 +1057,7 @@ export function Home({
                     className="absolute inset-0 flex items-center justify-center cursor-pointer group"
                     onClick={(e) => {
                       const video = e.currentTarget.previousElementSibling as HTMLVideoElement;
+                      video.currentTime = 0; // Start from beginning
                       video.play();
                       setShowPlayButton(false);
                     }}

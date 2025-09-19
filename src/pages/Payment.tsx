@@ -28,6 +28,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
+
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -313,7 +314,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [showPaymentInstructions, paymentData?.tripay_reference]);
 
   useEffect(() => {
-    const fetchUserProfile = async (userId: string, retryCount = 0): Promise<any> => {
+    const fetchUserProfile = async (userId: string): Promise<any> => {
       try {
         const { data: profile, error } = await supabase
           .from('profiles')
@@ -323,18 +324,13 @@ export function Payment({ onNavigate }: PaymentProps) {
 
         if (error) {
           console.error('Profile fetch error:', error);
-          if (retryCount < 2) {
-            console.log(`Retrying profile fetch (attempt ${retryCount + 2}/3)...`);
-            await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
-            return fetchUserProfile(userId, retryCount + 1);
-          }
-          throw error;
+          return null; // Return null instead of throwing
         }
 
         return profile;
       } catch (error) {
-        console.error('Failed to fetch profile after retries:', error);
-        throw error;
+        console.error('Failed to fetch profile:', error);
+        return null; // Return null instead of throwing
       }
     };
 
@@ -441,10 +437,10 @@ export function Payment({ onNavigate }: PaymentProps) {
     }
     
     // Validate phone number format
-    if (!/^08[0-9]{8,11}$/.test(phoneNumber)) {
+    if (!/^08[0-9]{6,13}$/.test(phoneNumber)) {
       toast({
         title: "Nomor Telepon Tidak Valid",
-        description: "Format: 08xxxxxxxxxx (8-13 digit)",
+        description: "Format: 08xxxx (8-15 digit) Silahkan Klik Edit Profil",
         variant: "destructive",
       });
       return;
