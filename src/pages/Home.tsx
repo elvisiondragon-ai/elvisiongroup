@@ -235,16 +235,16 @@ export function Home({
   }];
 
   const educationFeatures = [{
-    title: "Peredaran Darah",
+    title: "Blood",
     description: "Optimasi aliran darah untuk mencapai keadaan meditatif yang ideal melalui yoga, olahraga, puasa, dan gaya hidup sehat",
-    icon: Heart,
+    icon: Activity,
     color: "text-red-400",
     key: "blood-circulation",
     isBloodFlow: true
   }, {
-    title: "Kecantikan Fisik",
+    title: "Beauty",
     description: "Rahasia kecantikan sejati dari dalam - bagaimana kesehatan mental dan spiritual mempengaruhi penampilan fisik",
-    icon: Sun,
+    icon: Heart,
     color: "text-rose-400",
     key: "physical-beauty",
     isBeauty: true
@@ -658,7 +658,17 @@ export function Home({
                       </div>}
                   </div>
                   <div>
-                    <h3 className={`font-medium text-foreground mb-1 ${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'text-sm font-bold' : ''}`}>
+                    <h3 className={`font-medium text-foreground mb-1 ${
+                      feature.key === 'blood-circulation' 
+                        ? 'text-base font-bold text-center px-2 py-1 bg-gradient-to-r from-red-600 via-pink-500 to-rose-500 text-white rounded-md max-w-20 mx-auto'
+                      : feature.key === 'physical-beauty'
+                        ? 'text-sm font-bold text-center px-2 py-1 bg-gradient-to-r from-rose-600 via-amber-500 to-yellow-500 text-white rounded-md max-w-20 mx-auto'
+                      : feature.key === 'true-diet'
+                        ? 'text-sm font-bold text-center px-2 py-1 bg-gradient-to-r from-green-600 via-lime-500 to-emerald-500 text-white rounded-md max-w-20 mx-auto'
+                      : feature.key === 'lifestyle'
+                        ? 'text-sm font-bold text-center px-2 py-1 bg-gradient-to-r from-purple-600 via-violet-500 to-indigo-500 text-white rounded-md max-w-20 mx-auto'
+                        : ''
+                    }`}>
                       {feature.title}
                     </h3>
                     {!(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') && (
@@ -853,7 +863,17 @@ export function Home({
                       </div>}
                   </div>
                   <div>
-                    <h3 className={`font-medium text-foreground mb-1 ${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') ? 'text-sm font-bold' : ''}`}>
+                    <h3 className={`font-medium text-foreground mb-1 ${
+                      feature.key === 'blood-circulation' 
+                        ? 'text-base font-bold text-center px-2 py-1 bg-gradient-to-r from-red-600 via-pink-500 to-rose-500 text-white rounded-md max-w-20 mx-auto'
+                      : feature.key === 'physical-beauty'
+                        ? 'text-sm font-bold text-center px-2 py-1 bg-gradient-to-r from-rose-600 via-amber-500 to-yellow-500 text-white rounded-md max-w-20 mx-auto'
+                      : feature.key === 'true-diet'
+                        ? 'text-sm font-bold text-center px-2 py-1 bg-gradient-to-r from-green-600 via-lime-500 to-emerald-500 text-white rounded-md max-w-20 mx-auto'
+                      : feature.key === 'lifestyle'
+                        ? 'text-sm font-bold text-center px-2 py-1 bg-gradient-to-r from-purple-600 via-violet-500 to-indigo-500 text-white rounded-md max-w-20 mx-auto'
+                        : ''
+                    }`}>
                       {feature.title}
                     </h3>
                     {!(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle') && (
