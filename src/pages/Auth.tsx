@@ -43,6 +43,10 @@ export function Auth({ onLogin }: AuthProps) {
 
   // Track current view
   const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent'>('auth');
+  
+  // Track active tab and click states
+  const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+  const [isTabClicked, setIsTabClicked] = useState(false);
 
 
   // Check if user is already logged in
@@ -562,13 +566,49 @@ export function Auth({ onLogin }: AuthProps) {
         </div>
 
         <Card className="p-6 bg-gradient-secondary border-border">
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted">
-              <TabsTrigger value="login" className="font-medium">
-                Masuk
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'signup')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-2 rounded-lg backdrop-blur-sm gap-2">
+              <TabsTrigger 
+                value="login" 
+                className={`font-bold text-white transition-all duration-300 relative overflow-hidden rounded-md ${
+                  activeTab === 'login' 
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg' 
+                    : 'hover:bg-muted/50'
+                }`}
+                onClick={() => {
+                  setIsTabClicked(true);
+                  setTimeout(() => setIsTabClicked(false), 150);
+                }}
+              >
+                <span className={`transition-transform duration-150 ${
+                  isTabClicked && activeTab === 'login' ? 'scale-95' : 'scale-100'
+                }`}>
+                  Masuk
+                </span>
+                {activeTab === 'login' && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 animate-pulse rounded-md" />
+                )}
               </TabsTrigger>
-              <TabsTrigger value="signup" className="font-medium">
-                Daftar
+              <TabsTrigger 
+                value="signup" 
+                className={`font-bold text-white transition-all duration-300 relative overflow-hidden rounded-md ${
+                  activeTab === 'signup' 
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg' 
+                    : 'hover:bg-muted/50'
+                }`}
+                onClick={() => {
+                  setIsTabClicked(true);
+                  setTimeout(() => setIsTabClicked(false), 150);
+                }}
+              >
+                <span className={`transition-transform duration-150 ${
+                  isTabClicked && activeTab === 'signup' ? 'scale-95' : 'scale-100'
+                }`}>
+                  Daftar
+                </span>
+                {activeTab === 'signup' && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 animate-pulse rounded-md" />
+                )}
               </TabsTrigger>
             </TabsList>
 
@@ -635,10 +675,13 @@ export function Auth({ onLogin }: AuthProps) {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-medium h-11 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
                   disabled={isLoading || !captchaToken}
                 >
-                  {isLoading ? "Masuk..." : "Masuk"}
+                  <span className="flex items-center justify-center gap-2">
+                    {isLoading ? "Masuk..." : "Masuk"}
+                    {!isLoading && <Zap className="h-4 w-4" />}
+                  </span>
                 </Button>
               </form>
 
@@ -778,10 +821,13 @@ export function Auth({ onLogin }: AuthProps) {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium h-11 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
                   disabled={isLoading || !captchaToken}
                 >
-                  {isLoading ? "Membuat Akun..." : "Buat Akun"}
+                  <span className="flex items-center justify-center gap-2">
+                    {isLoading ? "Membuat Akun..." : "Buat Akun"}
+                    {!isLoading && <Sparkles className="h-4 w-4" />}
+                  </span>
                 </Button>
               </form>
 
