@@ -85,7 +85,10 @@ export function Signup() {
             title: "Welcome!",
             description: "Account created successfully. Please complete your profile.",
           });
-          navigate('/');
+          // Wait for database trigger to complete before redirecting
+          setTimeout(() => {
+            navigate('/');
+          }, 1500);
         } else {
           setCurrentView('success');
         }
