@@ -24,6 +24,7 @@ interface VerseAudioCardProps {
   currentVerseAudio: HTMLAudioElement | null;
   setCurrentVerseAudio: (audio: HTMLAudioElement | null) => void;
   onShowSacredNotification?: (verseName: string) => void;
+  onNavigate?: (tab: string) => void;
 }
 
 export function VerseAudioCard({ 
@@ -33,7 +34,8 @@ export function VerseAudioCard({
   setCurrentPlayingVerse,
   currentVerseAudio,
   setCurrentVerseAudio,
-  onShowSacredNotification
+  onShowSacredNotification,
+  onNavigate
 }: VerseAudioCardProps) {
   const { createProtectedAudio } = useProtectedAudio();
   const { awardXP } = useXPSystem();
@@ -314,7 +316,17 @@ export function VerseAudioCard({
                   </>
                 ) : verse.requiredLevel === 9 ? (
                   <>
-                    Lv 8 & Pro
+                    {verse.id === 8 ? (
+                      <Button
+                        onClick={() => onNavigate && onNavigate('payment')}
+                        size="sm"
+                        className="text-xs bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-medium px-3 py-1"
+                      >
+                        Upgrade Pro to Unlock
+                      </Button>
+                    ) : (
+                      "Lv 8 & Pro"
+                    )}
                   </>
                 ) : verse.requiredLevel === 10 ? (
                   <>

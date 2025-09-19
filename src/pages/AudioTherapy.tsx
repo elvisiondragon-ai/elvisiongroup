@@ -276,7 +276,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 8,
       title: "Verse 8 - Love Magnet",
       subtitle: "Menarik cinta dan kasih sayang dari orang-orang di sekitar",
-      unlocked: true,
+      unlocked: proStatus.isPro && userLevel >= 1,
       requiredLevel: 9,
       artwork: verse8Artwork,
       audioPath: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%208%20-%20Love%20Magnet.MP3",
@@ -604,6 +604,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                       setCurrentVerseName(verseName);
                       setShowSacredNotification(true);
                     }}
+                    onNavigate={onNavigate}
                   />
                 </div>
 
