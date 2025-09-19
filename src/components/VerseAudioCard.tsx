@@ -181,6 +181,15 @@ export function VerseAudioCard({
             <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-accent/20"></div>
           </div>
           
+          {/* Most Wanted indicator for Verse 8 */}
+          {verse.id === 8 && (
+            <div className="absolute -top-1 -right-1 flex items-center">
+              <div className="bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg">
+                MOST WANTED
+              </div>
+            </div>
+          )}
+
           {/* Play Button Overlay */}
           <div 
             className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center transition-all duration-500 cursor-pointer"
@@ -266,6 +275,15 @@ export function VerseAudioCard({
               )}
             </div>
           </div>
+          
+          {/* Most Wanted indicator for Verse 8 - also show when locked */}
+          {verse.id === 8 && (
+            <div className="absolute -top-1 -right-1 flex items-center">
+              <div className="bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg">
+                MOST WANTED
+              </div>
+            </div>
+          )}
           
           {!verse.unlocked && (
             <>
