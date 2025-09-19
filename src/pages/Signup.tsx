@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, Eye, EyeOff, Sparkles, User, ArrowLeft, Phone } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Sparkles, User, ArrowLeft, MessageCircle } from "lucide-react";
 import { Turnstile } from '@marsidev/react-turnstile';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -85,8 +85,7 @@ export function Signup() {
             title: "Welcome!",
             description: "Account created successfully. Please complete your profile.",
           });
-          // Redirect to main app which will show edit profile for new users
-          navigate('/?edit-profile=true');
+          navigate('/');
         } else {
           setCurrentView('success');
         }
@@ -272,7 +271,19 @@ export function Signup() {
           </Button>
         </form>
 
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
+          <Button
+            variant="outline"
+            onClick={() => {
+              const message = encodeURIComponent("Hi kak nanya tentang Ekosistem..");
+              window.open(`https://wa.me/6289532563487?text=${message}`, '_blank');
+            }}
+            className="w-full bg-green-50 hover:bg-green-100 text-green-700 border-green-200 hover:border-green-300"
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            Tanya Customer Service
+          </Button>
+          
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link 

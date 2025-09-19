@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, Eye, EyeOff, Sparkles, Zap, Phone, User } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Sparkles, Zap, Phone, User, MessageCircle } from "lucide-react";
 import { Turnstile } from '@marsidev/react-turnstile';
 import type { User } from '@supabase/supabase-js';
 
@@ -889,6 +889,21 @@ export function Auth({ onLogin }: AuthProps) {
             </TabsContent>
           </Tabs>
         </Card>
+
+        {/* WhatsApp Customer Service Button */}
+        <div className="text-center mt-6">
+          <Button
+            variant="outline"
+            onClick={() => {
+              const message = encodeURIComponent("Hi kak nanya tentang Ekosistem..");
+              window.open(`https://wa.me/6289532563487?text=${message}`, '_blank');
+            }}
+            className="w-full max-w-md bg-green-50 hover:bg-green-100 text-green-700 border-green-200 hover:border-green-300"
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            Tanya Customer Service
+          </Button>
+        </div>
 
         {/* Privacy Policy and Terms Links */}
         <div className="text-center mt-6 space-x-4">
