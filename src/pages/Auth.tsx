@@ -156,6 +156,9 @@ export function Auth({ onLogin }: AuthProps) {
           confirmPassword: '',
           displayName: ''
         });
+        
+        // Force refresh to bypass frontend loading issues
+        window.location.reload();
       }
     } catch (error: any) {
       toast({
@@ -407,8 +410,8 @@ export function Auth({ onLogin }: AuthProps) {
           description: "Anda berhasil mendaftar dan masuk.",
         });
         
-        // Show signup success screen instead of immediate redirect
-        setCurrentView('signup-success');
+        // Force refresh to bypass frontend loading issues
+        window.location.reload();
       }
     } catch (error: any) {
       console.error('Signup error:', error);

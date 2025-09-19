@@ -81,8 +81,8 @@ export function Signup() {
         });
       } else if (data.user) {
         if (data.user.email_confirmed_at) {
-          // Show success screen instead of immediate redirect
-          setCurrentView('success');
+          // Force refresh to bypass frontend loading issues
+          window.location.reload();
         } else {
           setCurrentView('success');
         }

@@ -1,0 +1,24 @@
+  -- Detailed view of last 20 signups
+  SELECT
+      au.email,
+      au.created_at as signup_time,
+      au.email_confirmed_at as confirmed_time,
+      au.last_sign_in_at as last_login,
+      p.display_name,
+      p.user_email as profile_email,
+      p.level,
+      p.experience_points as xp
+  FROM auth.users au
+  LEFT JOIN public.profiles p ON au.id = p.user_id
+  ORDER BY au.created_at DESC
+  LIMIT 20;
+
+  -- Delete last 15 users and their profiles
+  WITH last_15_users AS (
+    SELECT id
+    FROM auth.users
+    ORDER BY created_at DESC
+    LIMIT 15
+  )
+  DELETE FROM auth.users
+  WHERE id IN (SELECT id FROM last_15_users);
