@@ -39,7 +39,6 @@ import {
 } from "lucide-react";
 
 interface ProfileProps {
-  onLogout: () => void;
   onNavigate: (tab: string) => void;
 }
 
@@ -56,7 +55,7 @@ interface UserProfile {
   avatar_url?: string;
 }
 
-export function Profile({ onLogout, onNavigate }: ProfileProps) {
+export function Profile({ onNavigate }: ProfileProps) {
   const { userProfile, user, loading } = useUserProfile();
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -69,12 +68,6 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
   const { toast } = useToast();
 
   const handleLogout = async () => {
-    // Show immediate logout notification for better UX
-    toast({
-      title: "Sedang Logout...",
-      description: "Harap tunggu sebentar.",
-    });
-
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -91,15 +84,16 @@ export function Profile({ onLogout, onNavigate }: ProfileProps) {
         description: "Anda berhasil keluar dari akun.",
       });
       
-      onLogout();
-    } catch (error) {
-      console.error('Logout error:', error);
+      // Small delay to show success message before redirect
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 1000);
+    } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Gagal logout, coba lagi.",
+        title: "Logout Gagal",
+        description: error.message || "Terjadi kesalahan saat logout.",
         variant: "destructive",
       });
-      onLogout();
     }
   };
 

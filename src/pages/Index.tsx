@@ -36,41 +36,6 @@ const Index = () => {
   const [pendingTab, setPendingTab] = useState<string | null>(null);
   const { isMeditativeActive } = useMeditative();
 
-  const handleLogout = async () => {
-    // Show immediate logout notification for better UX
-    const { toast } = await import('@/hooks/use-toast');
-    
-    toast.toast({
-      title: "Sedang Logout...",
-      description: "Harap tunggu sebentar.",
-    });
-
-    try {
-      await supabase.auth.signOut();
-      
-      toast.toast({
-        title: "Berhasil Logout",
-        description: "Anda berhasil keluar dari akun.",
-      });
-      
-      // Small delay to show success message
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 1000);
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast.toast({
-        title: "Error",
-        description: "Gagal logout, akan tetap diarahkan ke halaman login.",
-        variant: "destructive",
-      });
-      
-      // Redirect anyway after error
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 1500);
-    }
-  };
 
   const handleTabChange = (newTab: string) => {
     if (isMeditativeActive && newTab !== activeTab) {
@@ -96,7 +61,7 @@ const Index = () => {
       case "leaderboard":
         return <Leaderboard />;
       case "profile":
-        return <Profile onLogout={handleLogout} onNavigate={setActiveTab} />;
+        return <Profile onNavigate={setActiveTab} />;
       case "audio-therapy":
         return <AudioTherapy onNavigate={setActiveTab} />;
       case "spiritual-journal":
