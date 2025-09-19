@@ -31,8 +31,7 @@ export function Auth({ onLogin }: AuthProps) {
     email: '',
     password: '',
     confirmPassword: '',
-    displayName: '',
-    phoneNumber: ''
+    displayName: ''
   });
 
   // Forgot password form state
@@ -124,15 +123,6 @@ export function Auth({ onLogin }: AuthProps) {
       return;
     }
 
-    // Validate phone number format if provided
-    if (signupData.phoneNumber && !/^08[0-9]{8,13}$/.test(signupData.phoneNumber)) {
-      toast({
-        title: "Invalid Phone Number",
-        description: "Phone number must start with 08 and be 10-15 digits total (08xxxxxxxxxx)",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setIsLoading(true);
 
@@ -145,8 +135,7 @@ export function Auth({ onLogin }: AuthProps) {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            display_name: signupData.displayName || signupData.email.split('@')[0],
-            phone_number: signupData.phoneNumber
+            display_name: signupData.displayName || signupData.email.split('@')[0]
           }
         }
       });
@@ -165,8 +154,7 @@ export function Auth({ onLogin }: AuthProps) {
           email: '',
           password: '',
           confirmPassword: '',
-          displayName: '',
-          phoneNumber: ''
+          displayName: ''
         });
       }
     } catch (error: any) {
@@ -788,35 +776,6 @@ export function Auth({ onLogin }: AuthProps) {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="signup-phone" className="text-foreground">
-                    Phone Number
-                  </Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signup-phone"
-                      type="tel"
-                      placeholder="08123456789"
-                      value={signupData.phoneNumber}
-                      onChange={(e) => {
-                        // Phone number validation and sanitization - must start with 08
-                        let sanitized = e.target.value.replace(/[^0-9]/g, '');
-                        // Ensure it starts with 08
-                        if (sanitized.length > 0 && !sanitized.startsWith('08')) {
-                          sanitized = '08' + sanitized.replace(/^0+/, '');
-                        }
-                        // Limit to 15 characters max (08 + 13 digits)
-                        if (sanitized.length > 15) {
-                          sanitized = sanitized.substring(0, 15);
-                        }
-                        setSignupData(prev => ({ ...prev, phoneNumber: sanitized }));
-                      }}
-                      className="pl-10 cyber-input"
-                      maxLength={15}
-                    />
-                  </div>
-                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="signup-password" className="text-foreground">
