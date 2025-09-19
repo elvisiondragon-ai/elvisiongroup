@@ -284,7 +284,7 @@ export function Signup() {
           {/* Captcha */}
           <div className="flex justify-center">
             <Turnstile
-              siteKey="0x4AAAAAAAiOoQZKI6wPYfKI"
+              siteKey="0x4AAAAAAB1zRiolDtnT61Ah"
               onSuccess={(token) => setCaptchaToken(token)}
               onExpire={() => setCaptchaToken(null)}
               onError={() => setCaptchaToken(null)}
