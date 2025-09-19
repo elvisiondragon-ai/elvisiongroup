@@ -389,13 +389,11 @@ export function Auth({ onLogin }: AuthProps) {
       }
 
       if (data.user) {
-        toast({
-          title: "Selamat datang kembali!",
-          description: "Anda telah berhasil masuk.",
-        });
+        // Set flag for showing toast after refresh
+        localStorage.setItem('login-success-pending', 'true');
         
-        // Force page reload for clean state
-        window.location.href = '/';
+        // Instant refresh
+        window.location.reload();
       }
     } catch (error: any) {
       toast({

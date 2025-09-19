@@ -217,6 +217,17 @@ const App = () => {
             window.history.replaceState(null, '', cleanUrl);
           }
           
+          // Show login success toast if pending
+          if (localStorage.getItem('login-success-pending') === 'true') {
+            setTimeout(() => {
+              toast({
+                title: "Selamat datang kembali!",
+                description: "Anda telah berhasil masuk.",
+              });
+              localStorage.removeItem('login-success-pending');
+            }, 1000);
+          }
+
           // THROTTLED notification registration to prevent spam
           const registerKey = `register_${session.user.id}`;
           if (!sessionStorage.getItem(registerKey)) {
