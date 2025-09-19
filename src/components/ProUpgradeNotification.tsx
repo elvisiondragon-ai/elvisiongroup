@@ -110,9 +110,9 @@ export function ProUpgradeNotification({ onUpgradeClick }: ProUpgradeNotificatio
               zIndex: 50,
               pointerEvents: 'all'
             }}
-            className="text-white/70 hover:text-white active:text-white/50 transition-all duration-200 p-1 hover:scale-110 active:scale-90 transform"
+            className="text-white/70 hover:text-white active:text-white/50 transition-all duration-200 p-2 hover:scale-110 active:scale-90 transform min-w-[40px] min-h-[40px] flex items-center justify-center"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
       </div>

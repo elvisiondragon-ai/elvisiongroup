@@ -43,7 +43,7 @@ export function Auth({ onLogin }: AuthProps) {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   // Track current view
-  const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent'>('auth');
+  const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent' | 'signup-success'>('auth');
   
   // Track active tab and click states
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
@@ -407,8 +407,8 @@ export function Auth({ onLogin }: AuthProps) {
           description: "Anda berhasil mendaftar dan masuk.",
         });
         
-        // Auto login after signup
-        window.location.href = '/';
+        // Show signup success screen instead of immediate redirect
+        setCurrentView('signup-success');
       }
     } catch (error: any) {
       console.error('Signup error:', error);
@@ -505,6 +505,48 @@ export function Auth({ onLogin }: AuthProps) {
   }
 
   // Reset Email Sent View
+  if (currentView === 'signup-success') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md p-8 space-y-6 bg-gradient-secondary border-border">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto glow-primary">
+              <Sparkles className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+              Selamat Akun Dibuat! 🎉
+            </h1>
+            <p className="text-muted-foreground text-center">
+              Akun anda telah berhasil dibuat dan siap digunakan. Mulai perjalanan spiritual anda sekarang!
+            </p>
+            <div className="space-y-3 pt-4">
+              <Button 
+                onClick={() => {
+                  // Clear cache and refresh like auto deploy notification
+                  localStorage.removeItem('unified_pro_status_cache');
+                  localStorage.removeItem('user_profile_cache');
+                  // Force reload to ensure fresh data
+                  window.location.href = '/';
+                }}
+                className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary transform hover:scale-105 active:scale-95 transition-all duration-200"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                MULAI PERJALANAN
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setCurrentView('auth')}
+                className="w-full"
+              >
+                Kembali ke Login
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   if (currentView === 'reset-sent') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">

@@ -81,14 +81,8 @@ export function Signup() {
         });
       } else if (data.user) {
         if (data.user.email_confirmed_at) {
-          toast({
-            title: "Welcome!",
-            description: "Account created successfully. Please complete your profile.",
-          });
-          // Wait for database trigger to complete before redirecting
-          setTimeout(() => {
-            navigate('/');
-          }, 1500);
+          // Show success screen instead of immediate redirect
+          setCurrentView('success');
         } else {
           setCurrentView('success');
         }
@@ -111,28 +105,34 @@ export function Signup() {
         <Card className="w-full max-w-md p-8 space-y-6 bg-gradient-secondary border-border">
           <div className="text-center space-y-4">
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto glow-primary">
-              <Mail className="w-8 h-8 text-primary-foreground" />
+              <Sparkles className="w-8 h-8 text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
-              Check Your Email
+              Selamat Akun Dibuat! 🎉
             </h1>
             <p className="text-muted-foreground text-center">
-              We've sent a verification link to <span className="font-medium text-foreground">{signupData.email}</span>. 
-              Please check your email and click the link to activate your account.
+              Akun anda telah berhasil dibuat dan siap digunakan. Mulai perjalanan spiritual anda sekarang!
             </p>
             <div className="space-y-3 pt-4">
               <Button 
-                onClick={() => navigate('/auth')}
-                className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary"
+                onClick={() => {
+                  // Clear cache and refresh like auto deploy notification
+                  localStorage.removeItem('unified_pro_status_cache');
+                  localStorage.removeItem('user_profile_cache');
+                  // Force reload to ensure fresh data
+                  window.location.href = '/';
+                }}
+                className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary transform hover:scale-105 active:scale-95 transition-all duration-200"
               >
-                Back to Login
+                <Sparkles className="w-4 h-4 mr-2" />
+                MULAI PERJALANAN
               </Button>
               <Button 
                 variant="outline"
                 onClick={() => setCurrentView('signup')}
                 className="w-full"
               >
-                Try Different Email
+                Kembali ke Pendaftaran
               </Button>
             </div>
           </div>
