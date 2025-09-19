@@ -71,7 +71,7 @@ export function Payment({ onNavigate }: PaymentProps) {
     {
       code: 'QRIS',
       name: 'QRIS',
-      description: 'Bayar dengan QRIS SEMUA BANK'
+      description: 'QRIS Bayar ke Semua Bank Termasuk DANA, OVO, SHOPEEPAY'
     },
     {
       code: 'PERMATAVA',
@@ -636,38 +636,40 @@ export function Payment({ onNavigate }: PaymentProps) {
 
           {/* QR Code */}
           {(paymentData?.qrUrl || paymentData?.paymentMethod === 'QRIS') && (
-            <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 shadow-lg">
-              <CardHeader className="text-center pb-4">
-                <CardTitle className="flex items-center justify-center gap-2 text-green-700">
+            <Card className="border-2 border-purple-300 bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 shadow-xl overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-indigo-700/30 to-purple-900/20"></div>
+              <CardHeader className="text-center pb-4 relative z-10">
+                <CardTitle className="flex items-center justify-center gap-2 text-purple-100">
                   📱 QR Code QRIS
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-center space-y-4">
-                <div className="bg-white p-6 rounded-xl border-2 border-dashed border-green-300 inline-block">
+              <CardContent className="text-center space-y-4 relative z-10">
+                <div className="bg-white/95 backdrop-blur-sm p-3 rounded-xl border-2 border-dashed border-purple-300 inline-block shadow-inner">
                   {paymentData?.qrUrl ? (
                     <img 
                       src={paymentData.qrUrl} 
                       alt="QR Code QRIS" 
-                      className="w-48 h-48 mx-auto" 
+                      className="w-64 h-64 mx-auto" 
                       onError={(e) => {
                         console.error('QR Image failed to load:', paymentData.qrUrl);
                       }}
                     />
                   ) : (
-                    <div className="w-48 h-48 mx-auto bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center rounded-lg">
+                    <div className="w-64 h-64 mx-auto bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center rounded-lg">
                       <p className="text-gray-500 text-sm">QR Code Loading...</p>
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-green-600 font-medium">
-                  Scan QR Code QRIS dengan aplikasi e-wallet atau mobile banking
+                <p className="text-sm text-purple-200 font-medium">
+                  Screenshot QR ini dan upload foto di OVO, ShopeePay, DANA, Atau Bank lain yang Anda miliki
                 </p>
-                <p className="text-xs text-green-500">
-                  Mendukung: ShopeePay, GoPay, OVO, DANA, LinkAja, dll
+                <p className="text-xs text-purple-300">
+                  Atau scan langsung dengan aplikasi mobile banking/e-wallet
                 </p>
               </CardContent>
             </Card>
           )}
+
 
           {/* Payment Instructions */}
           {paymentData?.instructions && paymentData.instructions.length > 0 && (
@@ -699,12 +701,14 @@ export function Payment({ onNavigate }: PaymentProps) {
         </div>
 
         {/* Bottom Actions */}
-        <div className="fixed bottom-20 left-6 right-6">
+        <div className="fixed bottom-20 left-6 right-6 z-50">
           <Card className="p-4 bg-card/80 backdrop-blur-sm border border-border">
             <div className="space-y-3">
-              <p className="text-center text-sm text-muted-foreground">
-                Pembayaran akan diverifikasi otomatis dalam 1 Menit
-              </p>
+              <div className="bg-purple-600 px-4 py-2 rounded-lg">
+                <p className="text-center text-sm text-white font-medium">
+                  Pembayaran akan diverifikasi otomatis dalam 1 Menit
+                </p>
+              </div>
               <Button onClick={() => onNavigate("profile")} variant="outline" className="w-full">
                 Kembali ke Profil
               </Button>
