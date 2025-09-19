@@ -247,6 +247,23 @@ export function Auth({ onLogin }: AuthProps) {
 
       if (error) throw error;
 
+      // Check if this is a new user and send welcome email
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // Send welcome email for Google signup
+        try {
+          await supabase.functions.invoke('send-signup-email', {
+            body: {
+              userEmail: session.user.email,
+              userName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0]
+            }
+          });
+        } catch (emailError) {
+          console.error('Failed to send welcome email:', emailError);
+          // Continue even if email fails
+        }
+      }
+
       // The actual user data will be handled by the auth state change listener
       toast({
         title: "Redirecting to Google...",

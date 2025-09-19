@@ -45,8 +45,6 @@ verify_jwt = false
 [functions.send-payment-created-notification]
 verify_jwt = false
 
-[functions.send-welcome-email]
-verify_jwt = false
 
 [functions.send-reset-password-email]
 verify_jwt = false
