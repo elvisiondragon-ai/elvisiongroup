@@ -107,6 +107,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       setIsAdmin(user?.email === "elvisiondragon@gmail.com");
       
       if (user) {
+        console.log('🔄 Initializing verse4 data for user:', user.id);
         await fetchUserProfile(user.id);
       }
       
@@ -116,6 +117,19 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     
     initializeData();
   }, []);
+
+  // Also reload when proStatus changes to ensure sync
+  useEffect(() => {
+    const reloadVerse4Data = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && !loading) {
+        console.log('🔄 Reloading verse4 data on pro status change');
+        await fetchUserProfile(user.id);
+      }
+    };
+    
+    reloadVerse4Data();
+  }, [proStatus.isPro]);
 
   // Refetch audio tracks when language changes
   useEffect(() => {
@@ -128,10 +142,16 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         .from('profiles')
         .select('level, total_verses_completed, current_streak, total_meditations, verse4_used')
         .eq('user_id', userId)
-        .maybeSingle();
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return;
+      }
 
       if (data) {
-        setUserLevel(data.level);
+        console.log('🎵 Verse4 data from DB:', data.verse4_used);
+        setUserLevel(data.level || 1);
         setVerse4Used(data.verse4_used || 0);
         setUserStats({
           totalMeditations: data.total_meditations || 0,
@@ -141,6 +161,9 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      // Set defaults on error
+      setUserLevel(1);
+      setVerse4Used(0);
     }
   };
 
@@ -202,17 +225,36 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
 
-      const newCount = verse4Used + 1;
+      console.log('🎵 Current verse4Used before increment:', verse4Used);
+      
+      // First get current usage from DB to ensure consistency
+      const { data: profile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('verse4_used')
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError) {
+        console.error('❌ Error fetching current verse4_used:', fetchError);
+        return false;
+      }
+
+      const currentUsage = profile?.verse4_used || 0;
+      const newCount = currentUsage + 1;
+      
+      console.log('🎵 Incrementing from DB value:', { currentUsage, newCount });
+
       const { error } = await supabase
         .from('profiles')
         .update({ verse4_used: newCount })
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error updating verse4_used:', error);
+        console.error('❌ Error updating verse4_used:', error);
         return false;
       }
 
+      console.log('✅ Successfully updated verse4_used to:', newCount);
       setVerse4Used(newCount);
       
       if (newCount >= 3) {
@@ -224,7 +266,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       
       return true;
     } catch (error) {
-      console.error('Error handling verse 4 usage:', error);
+      console.error('💥 Error handling verse 4 usage:', error);
       return false;
     }
   };
