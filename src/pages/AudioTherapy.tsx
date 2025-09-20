@@ -42,36 +42,32 @@ interface AudioTherapyProps {
 
 // Meditation Counter Component
 function MeditationCounter() {
-  const [currentlyMeditating, setCurrentlyMeditating] = useState(() => {
-    // Start from base 3472 with small daily variation
-    const today = new Date();
-    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
-    const seed = (dayOfYear * 137) % 200;
-    return 3472 + seed; // 3472-3672 base range
-  });
+  const [currentlyMeditating, setCurrentlyMeditating] = useState(4500);
+  const [cycleCount, setCycleCount] = useState(0);
+  const [isIncreasing, setIsIncreasing] = useState(true);
 
   useEffect(() => {
-    // Simulate realistic daily meditation patterns
+    // Change every 10 minutes (600,000 ms)
     const interval = setInterval(() => {
       setCurrentlyMeditating(prev => {
-        const hour = new Date().getHours();
-        let targetRange;
-
-        // Peak meditation times - night is most active
-        if (hour >= 19 && hour <= 23) targetRange = [4000, 5600]; // Night peak (7PM-11PM)
-        else if (hour >= 6 && hour <= 9) targetRange = [3200, 4200]; // Morning meditation
-        else if (hour >= 0 && hour <= 5) targetRange = [2800, 3800]; // Late night/early morning
-        else targetRange = [2500, 3500]; // Daytime
-
-        const target = targetRange[0] + Math.random() * (targetRange[1] - targetRange[0]);
-        const drift = prev < target ? 1 : -1; // Gentle drift toward target
-        const change = Math.floor(Math.random() * 10) - 4 + drift; // -3 to +6 range
-        return Math.max(2500, Math.min(5600, prev + change));
+        const newCycleCount = cycleCount + 1;
+        
+        if (newCycleCount >= 20) {
+          // After 20 cycles, reverse direction
+          setIsIncreasing(!isIncreasing);
+          setCycleCount(0);
+        } else {
+          setCycleCount(newCycleCount);
+        }
+        
+        // Add or subtract 13 based on direction
+        const change = isIncreasing ? 13 : -13;
+        return Math.max(4240, Math.min(4760, prev + change)); // Keep within reasonable bounds
       });
-    }, 8000);
+    }, 600000); // 10 minutes
 
     return () => clearInterval(interval);
-  }, []);
+  }, [cycleCount, isIncreasing]);
 
   return <span>{currentlyMeditating.toLocaleString()}</span>;
 }
@@ -363,7 +359,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           <div className="flex items-center gap-2 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-full px-4 py-2 shadow-lg">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-green-400 text-sm font-medium">
-              <MeditationCounter /> Anggota Sedang meditasi
+              <MeditationCounter /> Anggota Sedang Aktif
             </span>
           </div>
         </div>
