@@ -25,6 +25,7 @@ interface VerseAudioCardProps {
   setCurrentVerseAudio: (audio: HTMLAudioElement | null) => void;
   onShowSacredNotification?: (verseName: string) => void;
   onNavigate?: (tab: string) => void;
+  onVerse4Usage?: () => Promise<boolean>;
 }
 
 export function VerseAudioCard({ 
@@ -35,7 +36,8 @@ export function VerseAudioCard({
   currentVerseAudio,
   setCurrentVerseAudio,
   onShowSacredNotification,
-  onNavigate
+  onNavigate,
+  onVerse4Usage
 }: VerseAudioCardProps) {
   const { createProtectedAudio } = useProtectedAudio();
   const { awardXP } = useXPSystem();
@@ -109,12 +111,18 @@ export function VerseAudioCard({
       audio.addEventListener('timeupdate', () => {
         setCurrentTime(audio.currentTime);
       });
-      audio.addEventListener('ended', () => {
+      audio.addEventListener('ended', async () => {
         console.log('🎵 Audio ended for verse:', verse.title, 'ID:', verse.id);
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
         setAudioDuration(null);
         setCurrentTime(0);
+        
+        // Increment verse 4 usage when completed
+        if (verse.id === 4 && onVerse4Usage) {
+          await onVerse4Usage();
+        }
+        
         // Award XP - All verses get +10 XP
         const xpAmount = 10; // All verses now give +10 XP
         console.log('🏆 Awarding XP:', xpAmount, 'for verse:', verse.title);
