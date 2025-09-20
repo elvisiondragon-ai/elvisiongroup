@@ -101,14 +101,51 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
   const [currentVerseAudio, setCurrentVerseAudio] = useState<HTMLAudioElement | null>(null);
 
+  // Separate function to fetch just verse4_used
+  const fetchVerse4Count = async (userId: string) => {
+    try {
+      console.log('🎵 Fetching ONLY verse4_used for user:', userId);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('verse4_used')
+        .eq('user_id', userId)
+        .single();
+      
+      console.log('🎵 Verse4 ONLY response:', { data, error });
+      
+      if (!error && data) {
+        const count = data.verse4_used || 0;
+        console.log('🎵 Setting verse4Used to:', count);
+        setVerse4Used(count);
+        return count;
+      }
+      return 0;
+    } catch (error) {
+      console.error('❌ Error fetching verse4_used:', error);
+      return 0;
+    }
+  };
+
   useEffect(() => {
     const initializeData = async () => {
+      setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       setIsAdmin(user?.email === "elvisiondragon@gmail.com");
       
       if (user) {
-        console.log('🔄 Initializing verse4 data for user:', user.id);
+        console.log('🔄 Initializing data for user:', user.id);
+        
+        // Fetch verse4 count specifically first
+        const verse4Count = await fetchVerse4Count(user.id);
+        console.log('🎵 Verse4 count fetched:', verse4Count);
+        
+        // Then fetch full profile
         await fetchUserProfile(user.id);
+        
+        // Double check after profile fetch
+        setTimeout(() => {
+          console.log('🔄 Final verse4Used state:', verse4Used);
+        }, 200);
       }
       
       await fetchAudioTracks();
@@ -117,6 +154,11 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     
     initializeData();
   }, []);
+
+  // Debug effect to track verse4Used changes
+  useEffect(() => {
+    console.log('🎵 verse4Used state changed to:', verse4Used);
+  }, [verse4Used]);
 
   // Also reload when proStatus changes to ensure sync
   useEffect(() => {
@@ -138,29 +180,40 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('🔍 Fetching profile for user:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('level, total_verses_completed, current_streak, total_meditations, verse4_used')
         .eq('user_id', userId)
         .single();
 
+      console.log('📄 Raw DB response:', { data, error });
+
       if (error) {
-        console.error('Error fetching user profile:', error);
+        console.error('❌ Error fetching user profile:', error);
         return;
       }
 
       if (data) {
-        console.log('🎵 Verse4 data from DB:', data.verse4_used);
+        console.log('🎵 Setting verse4Used from DB value:', data.verse4_used);
         setUserLevel(data.level || 1);
         setVerse4Used(data.verse4_used || 0);
+        
+        // Force a small delay to ensure state is set
+        setTimeout(() => {
+          console.log('🔍 Current verse4Used state after setting:', verse4Used);
+        }, 100);
+        
         setUserStats({
           totalMeditations: data.total_meditations || 0,
           daysActive: Math.floor((new Date().getTime() - new Date(userId).getTime()) / (1000 * 60 * 60 * 24)),
           currentStreak: data.current_streak || 0
         });
+        
+        console.log('✅ Profile fetch completed successfully');
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('💥 Error fetching user profile:', error);
       // Set defaults on error
       setUserLevel(1);
       setVerse4Used(0);
@@ -256,6 +309,15 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
 
       console.log('✅ Successfully updated verse4_used to:', newCount);
       setVerse4Used(newCount);
+      
+      // Force refresh data to ensure UI sync
+      setTimeout(async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          console.log('🔄 Force refreshing verse4 data after completion');
+          await fetchUserProfile(user.id);
+        }
+      }, 500);
       
       if (newCount >= 3) {
         // Show upgrade message after completing 3rd use
