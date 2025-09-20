@@ -193,21 +193,8 @@ export function Home({
     progress: 0
   };
 
-  const features = [{
-    title: "Sesi Meditasi",
-    description: "Weekly live meditation sessions",
-    icon: Radio,
-    color: "text-red-500",
-    key: "meditation-sessions",
-    isLocked: !proStatus.isPro,
-    isLive: true
-  }, {
-    title: t('Verse of eL Vision'),
-    description: "Verses Audio Frequency",
-    icon: Sparkles,
-    color: "text-yellow-500",
-    key: "audio-therapy"
-  }, {
+  // FITUR UTAMA - Core features accessible to all users
+  const fiturUtamaFeatures = [{
     title: "Jurnal Spiritual",
     description: "Sacred transformation chronicles",
     icon: Scroll,
@@ -215,12 +202,11 @@ export function Home({
     key: "spiritual-journal",
     isMystical: true
   }, {
-    title: "Elite Habit",
-    description: "Olahraga terkonsentrasi dengan mindfulness untuk ketenangan",
-    icon: Activity,
-    color: "text-emerald-500",
-    key: "elite-habit",
-    isNew: true
+    title: t('Verse of eL Vision'),
+    description: "Verses Audio Frequency",
+    icon: Sparkles,
+    color: "text-yellow-500",
+    key: "audio-therapy"
   }, {
     title: "Personal Analytics",
     description: "AI-powered spiritual journey insights from RENATA",
@@ -229,8 +215,26 @@ export function Home({
     key: "personal-analytics",
     isAnalytics: true
   }, {
+    title: "Elite Habit",
+    description: "Olahraga terkonsentrasi dengan mindfulness untuk ketenangan",
+    icon: Activity,
+    color: "text-emerald-500",
+    key: "elite-habit",
+    isNew: true
+  }];
+
+  // ADVANCE USER - Advanced features with special requirements
+  const advanceUserFeatures = [{
+    title: "Sesi Meditasi",
+    description: "Weekly live meditation sessions",
+    icon: Radio,
+    color: "text-red-500",
+    key: "meditation-sessions",
+    isLocked: !proStatus.isPro,
+    isLive: true
+  }, {
     title: "Ignis Quest",
-    description: "Quest ini berisi langkah-langkah dan strategi untuk meraih harta, tahta, dan cinta, membawamu dari impian ke pencapaian nyata.",
+    description: "Require lv8",
     icon: Flame,
     color: "text-orange-500",
     key: "ignis-quest",
@@ -553,12 +557,54 @@ export function Home({
         </div>
       )}
 
+      {/* Tutorial Section for All New Users */}
+      <div className="px-6 space-y-4">
+        <h2 className="text-xl font-semibold font-orbitron">CARA MENGGUNAKAN</h2>
+        
+        
+        <div className="grid grid-cols-1 gap-4">
+          {/* Tutorial Button */}
+          <Card
+            className="p-4 border-border transition-all duration-300 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 hover:from-indigo-500/20 hover:via-purple-500/10 hover:to-pink-500/20 border-indigo-500/20 hover:border-indigo-400/40 cursor-pointer relative overflow-hidden group"
+            onClick={(e) => {
+              e.preventDefault();
+              if (!showTutorialModal) setShowTutorialModal(true);
+            }}
+          >
+            {/* Background glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="relative p-3 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 group-hover:scale-110 transition-all duration-300">
+                <tutorialFeature.icon className="w-6 h-6 text-white animate-pulse" />
+              </div>
+
+              <div>
+                <h3 className="font-medium text-foreground mb-1">
+                  {tutorialFeature.title}
+                </h3>
+                {tutorialFeature.description && (
+                  <p className="text-xs text-muted-foreground">
+                    {tutorialFeature.description}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Corner accent */}
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
+          </Card>
+        </div>
+      </div>
+
+      <div className="py-4"></div>
+
       {/* Quick Actions */}
       <div className="px-6 space-y-4">
-        <h2 className="text-xl font-semibold font-orbitron">FITUR</h2>
+        <h2 className="text-xl font-semibold font-orbitron">FITUR UTAMA</h2>
         
         <div className="grid grid-cols-2 gap-4">
-          {features.map((feature, index) => {
+          {fiturUtamaFeatures.map((feature, index) => {
           const isLocked = feature.isLocked;
           const isMeditationSession = feature.key === 'meditation-sessions';
           const isMeditationLocked = isMeditationSession && !proStatus.isPro;
@@ -752,37 +798,94 @@ export function Home({
               </Card>;
         })}
 
-          {/* Tutorial Button */}
-          <Card
-            className="p-4 border-border transition-all duration-300 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 hover:from-indigo-500/20 hover:via-purple-500/10 hover:to-pink-500/20 border-indigo-500/20 hover:border-indigo-400/40 cursor-pointer relative overflow-hidden group"
-            onClick={(e) => {
-              e.preventDefault();
-              if (!showTutorialModal) setShowTutorialModal(true);
-            }}
-          >
-            {/* Background glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        </div>
 
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className="relative p-3 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 group-hover:scale-110 transition-all duration-300">
-                <tutorialFeature.icon className="w-6 h-6 text-white animate-pulse" />
-              </div>
-
-              <div>
-                <h3 className="font-medium text-foreground mb-1">
-                  {tutorialFeature.title}
-                </h3>
-                {tutorialFeature.description && (
-                  <p className="text-xs text-muted-foreground">
-                    {tutorialFeature.description}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Corner accent */}
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
+        {/* Advance User Section */}
+        <h2 className="text-xl font-semibold font-orbitron">ADVANCE USER</h2>
+        
+        <div className="grid grid-cols-2 gap-4">
+          {advanceUserFeatures.map((feature, index) => {
+          const isLocked = feature.isLocked;
+          const isMeditationSession = feature.key === 'meditation-sessions';
+          const isMeditationLocked = isMeditationSession && !proStatus.isPro;
+          const isIgnisQuest = feature.key === 'ignis-quest';
+          const isIgnisLocked = isIgnisQuest && (userProfile?.level || 1) < 8;
+          const actuallyLocked = isLocked || isIgnisLocked || isMeditationLocked;
+          return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${
+            feature.key === 'ignis-quest'
+              ? actuallyLocked
+                ? 'bg-gradient-to-br from-red-500/10 via-orange-500/5 to-yellow-500/10 border-orange-500/20 cursor-pointer opacity-90'
+                : 'bg-gradient-to-br from-red-500/15 via-orange-500/10 to-yellow-500/15 hover:from-red-500/25 hover:via-orange-500/15 hover:to-yellow-500/25 border-orange-500/30 hover:border-red-400/50 cursor-pointer'
+              : feature.key === 'meditation-sessions'
+                ? actuallyLocked
+                  ? 'bg-gradient-to-br from-orange-400/15 via-red-500/12 to-pink-600/15 border-orange-500/30 cursor-pointer opacity-90'
+                  : 'bg-gradient-to-br from-orange-400/20 via-red-500/18 to-pink-600/20 hover:from-orange-400/35 hover:via-red-500/30 hover:to-pink-600/35 border-orange-500/40 hover:border-red-500/70 cursor-pointer'
+              : 'hover:border-primary/50 cursor-pointer'
+          }`} 
+          onClick={() => {
+            if (actuallyLocked) {
+              if (isMeditationLocked) {
+                onNavigate("payment"); // Navigate to payment/upgrade page for Pro features
+                return;
+              }
+              if (isIgnisLocked) {
+                // Show fire notification for Ignis Quest level requirement
+                toast({
+                  title: "🔥 Ignis Quest",
+                  description: "🔥 Ignis For lv 8 User ++, Jalani Proses anda terlebih dahulu",
+                  duration: 4000
+                });
+                return;
+              }
+              return; // Do nothing if locked
+            }
+            console.log("Feature clicked:", feature.key);
+            onNavigate(feature.key);
+          }}>
+                {feature.isNew}
+                
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className={`p-3 rounded-full relative ${
+                    feature.key === 'meditation-sessions'
+                      ? 'bg-gradient-to-r from-red-600 via-red-500 to-orange-500 shadow-lg shadow-red-500/40 animate-pulse'
+                    : feature.key === 'ignis-quest'
+                      ? 'bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 shadow-lg shadow-orange-500/50'
+                      : 'bg-muted'
+                  } ${feature.color}`}>
+                    <feature.icon className={`w-6 h-6 ${
+                      feature.key === 'meditation-sessions' ? 'text-white animate-pulse'
+                      : feature.key === 'ignis-quest' ? 'text-white animate-pulse'
+                      : ''
+                    }`} />
+                    {/* Live indicator for meditation sessions */}
+                    {feature.key === 'meditation-sessions' && (
+                      <div className="absolute -top-1 -right-1 flex items-center">
+                        <div className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg">
+                          LIVE
+                        </div>
+                      </div>
+                    )}
+                    {isMeditationLocked && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
+                        <Lock className="w-4 h-4 text-red-400" />
+                      </div>}
+                    {isLocked && !isMeditationLocked && <div className="absolute inset-0 bg-background/80 rounded-full flex items-center justify-center">
+                        <Lock className="w-4 h-4 text-muted-foreground" />
+                      </div>}
+                    {isIgnisLocked && <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 rounded-full flex items-center justify-center opacity-80">
+                        <Flame className="w-6 h-6 text-white animate-pulse" />
+                      </div>}
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-foreground mb-1">
+                      {feature.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
+                </div>
           </Card>
+          })}
         </div>
 
         {/* Education Blog Section */}
@@ -1080,6 +1183,11 @@ export function Home({
               <h3 className="text-xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent font-orbitron">
                 👑 AFFILIATE OF THE MONTH 👑
               </h3>
+              <div className="flex items-center justify-center gap-2">
+                <span className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-full shadow-lg">
+                  September 2025
+                </span>
+              </div>
               <p className="text-sm text-muted-foreground">
                 Selamat kepada Top Tier Affiliate bulan ini!
               </p>
@@ -1134,7 +1242,109 @@ export function Home({
                 <X className="w-3.5 h-3.5" />
               </Button>
             </div>
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+              {/* Visual Step-by-Step Guide */}
+              <div className="mb-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-lg p-4 space-y-4 border border-indigo-200/50 dark:border-indigo-800/50">
+                <h3 className="text-lg font-medium text-center text-indigo-800 dark:text-indigo-200 mb-4">Langkah-langkah Menggunakan Ecosystem</h3>
+                
+                <div className="grid grid-cols-1 gap-3">
+                  {/* Step 1: Verse of eL Vision */}
+                  <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-lg border border-yellow-200/50 dark:border-yellow-800/50">
+                    <div className="flex-shrink-0">
+                      <div className="p-2 rounded-full bg-gradient-to-r from-yellow-600 via-amber-500 to-yellow-400 shadow-lg shadow-yellow-500/30">
+                        <Sparkles className="w-5 h-5 text-white animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-yellow-800 dark:text-yellow-200">1. Dengar Verse of eL Vision</h4>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">Mulai dengan mendengarkan audio frequency</p>
+                    </div>
+                    <div className="text-2xl">🎧</div>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="text-center text-gray-400">
+                    <div className="text-2xl">↓</div>
+                  </div>
+
+                  {/* Step 2: Jurnal Spiritual */}
+                  <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
+                    <div className="flex-shrink-0">
+                      <div className="p-2 rounded-full bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-400 shadow-xl shadow-amber-500/50 border-2 border-amber-300/30">
+                        <Scroll className="w-5 h-5 text-white drop-shadow-lg" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-amber-800 dark:text-amber-200">2. Tulis Jurnal Spiritual</h4>
+                      <p className="text-sm text-amber-700 dark:text-amber-300">Refleksikan perjalanan spiritual Anda → Lepaskan hal yang sedang kamu kejar agar mudah tercapai setelah dengar Audio</p>
+                    </div>
+                    <div className="text-2xl">📝</div>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="text-center text-gray-400">
+                    <div className="text-2xl">↓</div>
+                  </div>
+
+                  {/* Step 3: Elite Habit */}
+                  <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-lg border border-emerald-200/50 dark:border-emerald-800/50">
+                    <div className="flex-shrink-0">
+                      <div className="p-2 rounded-full bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-400 shadow-xl shadow-emerald-500/50 border-2 border-emerald-300/30">
+                        <Activity className="w-5 h-5 text-white drop-shadow-lg animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-emerald-800 dark:text-emerald-200">3. Lakukan Elite Habit</h4>
+                      <p className="text-sm text-emerald-700 dark:text-emerald-300">Olahraga dengan mindfulness melatih ketenangan dan mempercepat pencapaian</p>
+                    </div>
+                    <div className="text-2xl">💪</div>
+                  </div>
+
+                  {/* After 3 days notice */}
+                  <div className="text-center py-2">
+                    <div className="inline-block bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/50 dark:to-indigo-900/50 px-4 py-2 rounded-full border border-purple-200 dark:border-purple-700">
+                      <span className="text-sm font-medium text-purple-800 dark:text-purple-200">⏰ Setelah 3 hari rutin...</span>
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="text-center text-gray-400">
+                    <div className="text-2xl">↓</div>
+                  </div>
+
+                  {/* Step 4: Personal Analytics */}
+                  <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-lg border border-violet-200/50 dark:border-violet-800/50">
+                    <div className="flex-shrink-0">
+                      <div className="p-2 rounded-full bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 shadow-2xl shadow-violet-500/60 border-2 border-violet-400/40 animate-pulse">
+                        <BarChart3 className="w-5 h-5 text-white drop-shadow-2xl animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-violet-800 dark:text-violet-200">4. Click Personal Analytics</h4>
+                      <p className="text-sm text-violet-700 dark:text-violet-300">Dapatkan Powerful Insight dari Analytics tentang jati diri kamu dan solusinya</p>
+                    </div>
+                    <div className="text-2xl">🤯</div>
+                  </div>
+
+                  {/* Result */}
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 p-4 rounded-lg border-2 border-green-200 dark:border-green-800 text-center">
+                    <div className="text-2xl mb-2">✨</div>
+                    <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">Anda akan mendapat jawaban mencengangkan tentang diri Anda!</h4>
+                    <p className="text-sm text-green-700 dark:text-green-300 italic">
+                      *Personal Analytics semakin efektif jika semakin banyak total Verse, total Jurnal Spiritual, dan total Elite Habit
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700 mb-6"></div>
+              
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Video Tutorial</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Tonton video lengkap untuk panduan detail</p>
+              </div>
+              
               <div className="relative">
                 <video 
                   className="w-full rounded-lg"

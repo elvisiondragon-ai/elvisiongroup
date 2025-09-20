@@ -702,17 +702,16 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
               <div className="relative z-10 text-center space-y-6 p-8">
                 {/* Title */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="text-center">
                     <h3 className="text-2xl font-bold font-orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                      {verse.title}
+                      {verse.title.includes(' - ') ? (
+                        <>
+                          {verse.title.split(' - ')[0]}
+                          <br />
+                          {verse.title.split(' - ')[1]}
+                        </>
+                      ) : verse.title}
                     </h3>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      verse.language === 'en' 
-                        ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' 
-                        : 'bg-green-500/20 text-green-300 border border-green-500/30'
-                    }`}>
-                      {verse.language === 'en' ? 'EN' : 'ID'}
-                    </span>
                   </div>
                   {verse.subtitle && (
                     <p className="text-sm text-muted-foreground/80 font-medium">

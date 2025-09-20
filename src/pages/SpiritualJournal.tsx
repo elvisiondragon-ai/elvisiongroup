@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, BarChart3, BookOpen, Trash2 } from "lucide-react";
-import { JournalAnalytics } from "@/components/JournalAnalytics";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +22,6 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("journal");
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
@@ -173,64 +170,105 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       </div>
 
       <div className="px-6 space-y-6">
-        {/* Tabs for Journal and Analytics */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="journal" className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              Jurnal
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Analytics
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="journal" className="space-y-6 mt-6">
 
         {/* Tutorial Section */}
-        <Card className="p-8 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-orange-500/10 border-2 border-amber-400/30 shadow-2xl">
-          <div className="space-y-6 text-center">
-            <h3 className="text-2xl font-bold text-amber-300 tracking-wider" style={{
-              fontFamily: 'serif',
-              fontWeight: 'bold',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-              letterSpacing: '0.1em'
-            }}>
-              Tutorial
-            </h3>
-            <div className="space-y-4">
-              <p className="text-foreground font-serif text-lg leading-relaxed tracking-wide" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontWeight: '500',
-                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-                letterSpacing: '0.02em'
-              }}>
-                Keinginan yang kamu lepaskan, terwujud ke hidupmu..<br/>
-                Emosi negatif yang kamu lepaskan, akan Menjadi Energi Ignis Memory mu..
-              </p>
-              <p className="text-amber-200 text-xl font-serif font-bold leading-relaxed tracking-wide px-4" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontWeight: 'bold',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.4)',
-                letterSpacing: '0.05em',
-                fontSize: '1.25rem'
-              }}>
-                "Riwayat Jurnal eL Vision Ini alat ukurmu setiap bulan, semakin dilepaskan keinginan semakin mudah terjadi"
+        <Card className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 shadow-lg">
+          <div className="space-y-6">
+            <div className="text-center">
+              <h3 className="text-2xl font-semibold text-orange-800 mb-4">
+                Mengapa Melepaskan Membuat Keinginan Terwujud?
+              </h3>
+              <p className="text-orange-700 text-sm leading-relaxed max-w-2xl mx-auto">
+                Keinginan yang kamu lepaskan, terwujud ke hidupmu. Emosi negatif yang kamu lepaskan, akan Menjadi Energi Ignis Memory mu.
               </p>
             </div>
+
+            {/* Real Life Examples */}
+            <div className="space-y-4">
+              <div className="grid gap-4">
+                <div className="p-4 bg-yellow-100/80 rounded-lg border border-orange-300/50">
+                  <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
+                    🎯 Contoh 1: Melepaskan saat sudah hampir putus asa
+                  </h5>
+                  <div className="space-y-2 text-orange-700 leading-relaxed" style={{fontSize: '16px'}}>
+                    <p>Anda pasti pernah bahkan sering saat berusaha mendapatkan sesuatu atau seseorang. Berusaha mati matian namun terus seakan makin sulit dan semakin sulit.</p>
+                    <p>Sampai pada titik anda merasa lelah dan tidak sepadan anda memutuskan melepaskan..</p>
+                    <p className="font-semibold text-orange-800">Alhasil, yang anda inginkan malah mendekati anda jadi mudah.</p>
+                    <p className="font-semibold text-orange-800">Bukan. Itu memang hukum alam, you get what you let go. Kamu dapat yang kamu lepaskan</p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-orange-100/80 rounded-lg border border-yellow-300/50">
+                  <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
+                    ⭐ Contoh 2: Seseorang yang ahli dan mudah
+                  </h5>
+                  <div className="space-y-2 text-orange-700 leading-relaxed" style={{fontSize: '16px'}}>
+                    <p>Anda pasti pernah melihat atau mungkin anda salah satunya. Saat orang tersebut menganggap sesuatu itu mudah dilakukan. Misalnya olahraga, atau mendapat pasangan, atau menyelesaikan pekerjaan..</p>
+                    <p>Orang tersebut merasa itu hal yang mudah sehingga dibawa santai dan mudah dilepaskan. Bawaan nya happy melakukan hal yg terasa sulit bagi kebanyakan orang</p>
+                    <p className="font-semibold text-orange-800">Alhasil ? Hal tersebut jadi mudah untuk orang itu.</p>
+                    <p className="font-semibold text-orange-800">Itu bukan ketidak adilan. Memang begitu Hukum Alam nya</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Famous Examples */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-orange-800 text-center">
+                Contoh Terkenal di Dunia:
+              </h4>
+              
+              <div className="grid gap-3">
+                <div className="p-3 bg-yellow-200/60 rounded-lg border border-orange-300/40">
+                  <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
+                    🏢 Steve Jobs & Apple (1997)
+                  </h5>
+                  <p className="text-orange-700 leading-relaxed" style={{fontSize: '16px'}}>
+                    Setelah dikeluarkan dari Apple, Jobs harus melepaskan ego dan dendam pribadi untuk kembali menyelamatkan perusahaan yang dia dirikan. Hasilnya? Apple menjadi perusahaan paling berharga di dunia.
+                  </p>
+                </div>
+
+                <div className="p-3 bg-orange-200/60 rounded-lg border border-yellow-300/40">
+                  <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
+                    ✍️ Elizabeth Gilbert - Kreativitas
+                  </h5>
+                  <p className="text-orange-700 leading-relaxed" style={{fontSize: '16px'}}>
+                    "Untuk memaksimalkan peluang sukses, kita perlu mencintai proses penciptaan sepenuh hati, lalu melepaskannya tanpa attachment pada hasil."
+                  </p>
+                </div>
+
+                <div className="p-3 bg-yellow-200/60 rounded-lg border border-orange-300/40">
+                  <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
+                    🎯 Paradox Kontrol dalam Bisnis
+                  </h5>
+                  <p className="text-orange-700 leading-relaxed" style={{fontSize: '16px'}}>
+                    Gary Cooper dalam "The Success Paradox": Seorang workaholic yang nyaris mati, kemudian sukses luar biasa setelah belajar "surrender" dan melepaskan kebutuhan mengontrol segalanya.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </Card>
+
+        {/* Quote Card */}
+        <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 shadow-md">
+          <div className="text-center p-6">
+            <p className="text-orange-800 font-semibold leading-relaxed max-w-xl mx-auto" style={{fontSize: '16px'}}>
+              "Riwayat Jurnal eL Vision Ini alat ukurmu setiap bulan, semakin dilepaskan keinginan semakin mudah terjadi"
+            </p>
           </div>
         </Card>
 
         {/* Daily Reflection Section */}
-        <Card className="p-6 bg-gradient-secondary border-2 border-accent/30 glow-accent">
+        <Card className="bg-gradient-to-br from-indigo-600/20 via-purple-500/15 to-pink-600/20 border-2 border-indigo-400/40 shadow-xl backdrop-blur-sm">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold font-orbitron text-foreground">
+            <h3 className="text-lg font-semibold text-white mt-6 mx-6" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}>
               Pertanyaan Hari Ini
             </h3>
             
-            <div className="p-4 rounded-lg bg-card/50 border border-border">
-              <p className="text-foreground leading-relaxed">
+            <div className="p-4 rounded-lg bg-black/60 border border-purple-300/50 shadow-inner">
+              <p className="text-white leading-relaxed" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontSize: '17px'}}>
                 "{currentQuestion}"
               </p>
             </div>
@@ -240,14 +278,16 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                 value={reflection}
                 onChange={(e) => setReflection(e.target.value)}
                 placeholder="Tulis jawabanmu di sini..."
-                className="min-h-32 cyber-input bg-card/30 border-border focus:border-primary resize-none"
+                className="min-h-32 bg-yellow-100/90 border-orange-300/50 focus:border-orange-400 text-orange-800 placeholder:text-orange-600/70 resize-none rounded-lg"
+                style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontSize: '17px'}}
                 rows={6}
               />
               
               <Button
                 onClick={handleSaveReflection}
                 disabled={!reflection.trim()}
-                className="w-full bg-gradient-accent hover:opacity-90 text-background font-medium glow-accent transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0"
+                className="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white font-medium shadow-lg hover:shadow-purple-500/50 transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0 disabled:opacity-50"
+                style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'}}
               >
                 <Save className="w-4 h-4 mr-2" />
                 Simpan Renungan
@@ -257,16 +297,16 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         </Card>
 
         {/* Reflection History */}
-        {reflections.length > 0 && (
-          <Card className="p-6 bg-gradient-subtle border-2 border-muted/30">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold font-orbitron text-foreground">
-                Riwayat Renungan
-              </h3>
+        <Card className="bg-gradient-to-br from-slate-600/15 via-gray-500/10 to-zinc-600/15 border-2 border-slate-400/30 shadow-xl backdrop-blur-sm">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-200 mt-6 mx-6" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}>
+              Riwayat Renungan
+            </h3>
 
-              <div className="space-y-4 max-h-64 overflow-y-auto">
-                {reflections.map((refl) => (
-                  <div key={refl.id} className="relative p-4 rounded-lg bg-card/30 border border-border space-y-2">
+            <div className="space-y-4 max-h-64 overflow-y-auto">
+              {reflections.length > 0 ? (
+                reflections.map((refl) => (
+                  <div key={refl.id} className="relative p-4 rounded-lg bg-black/25 border border-slate-300/30 space-y-2 hover:bg-black/35 transition-colors">
                     {/* Delete Button */}
                     <Button
                       onClick={() => handleDeleteReflection(refl.id)}
@@ -276,7 +316,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
 
-                    <div className="text-sm text-muted-foreground pr-8">
+                    <div className="text-sm text-purple-300 pr-8" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'}}>
                       {new Date(refl.created_at).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "long",
@@ -285,29 +325,26 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                         minute: "2-digit"
                       })}
                     </div>
-                    <div className="text-xs text-muted-foreground italic mb-2">
-                      "{currentQuestion}"
-                    </div>
-                    <div className="text-foreground leading-relaxed">
+                    <div className="text-white leading-relaxed" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontSize: '17px'}}>
                       {refl.reflection}
                     </div>
                   </div>
-                ))}
-              </div>
+                ))
+              ) : (
+                <div className="p-6 text-center">
+                  <p className="text-slate-300 text-sm" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'}}>
+                    Belum ada renungan tersimpan. Mulai tulis renungan pertamamu!
+                  </p>
+                </div>
+              )}
             </div>
-          </Card>
-        )}
+          </div>
+        </Card>
 
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6 mt-6">
-            <JournalAnalytics onUpgradeClick={handleProUpgradeClick} />
-          </TabsContent>
-        </Tabs>
       </div>
 
       {/* Done Button */}
-      <div className="fixed bottom-6 left-6 right-6">
+      <div className="fixed bottom-8 left-8 right-8">
         <Button
           onClick={() => onNavigate("home")}
           className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium py-3 rounded-full glow-primary"
@@ -352,7 +389,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           setShowProUpgrade(false);
           onNavigate("payment");
         }}
-        reason="analytics"
+        reason="journal"
         userStats={{
           totalMeditations: reflections.length * 2,
           daysActive: reflections.length,
