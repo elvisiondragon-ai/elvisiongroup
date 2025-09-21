@@ -386,7 +386,7 @@ export function Signup() {
             variant="outline"
             onClick={() => {
               const message = encodeURIComponent("Hi kak nanya tentang Ekosistem..");
-              window.open(`https://wa.me/6289532563487?text=${message}`, '_blank');
+              window.open(`https://wa.me/62895325633487?text=${message}`, '_blank');
             }}
             className="w-full bg-green-50 hover:bg-green-100 text-green-700 border-green-200 hover:border-green-300"
           >
