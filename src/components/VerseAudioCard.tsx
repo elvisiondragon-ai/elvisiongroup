@@ -65,7 +65,7 @@ export function VerseAudioCard({
   const handlePlayClick = async () => {
     if (!verse.unlocked || !verse.audioPath) return;
     
-    // If this verse is currently playing, stop it
+    // If this verse is currently playing, stop it (pause - don't increment counter)
     if (isPlaying && currentVerseAudio) {
       currentVerseAudio.pause();
       setCurrentPlayingVerse(null);
@@ -85,6 +85,14 @@ export function VerseAudioCard({
     if (currentVerseAudio) {
       currentVerseAudio.pause();
       setCurrentVerseAudio(null);
+    }
+
+    // Increment verse 4 usage when play button is clicked (before audio starts)
+    if (verse.id === 4 && onVerse4Usage) {
+      const canPlay = await onVerse4Usage();
+      if (!canPlay) {
+        return; // User exceeded free limit and not pro
+      }
     }
 
     // Check if first time download
@@ -118,12 +126,7 @@ export function VerseAudioCard({
         setAudioDuration(null);
         setCurrentTime(0);
         
-        // Increment verse 4 usage when completed
-        if (verse.id === 4 && onVerse4Usage) {
-          await onVerse4Usage();
-        }
-        
-        // Award XP - All verses get +10 XP
+        // Award XP - All verses get +10 XP (no longer increment verse4 usage here)
         const xpAmount = 10; // All verses now give +10 XP
         console.log('🏆 Awarding XP:', xpAmount, 'for verse:', verse.title);
         awardXP('verse_completion', xpAmount, `Completed ${verse.title}`);
