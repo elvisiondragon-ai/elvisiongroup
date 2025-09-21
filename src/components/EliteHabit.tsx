@@ -23,12 +23,12 @@ const EXERCISE_OPTIONS = [
   'Lari',
   'Renang',
   'Jalan santai',
-  'Jalan di alam bebas',
+  'Jalan di alam',
   'Push-up',
   'Yoga',
   'Meditasi jalan',
   'Bersepeda',
-  'Senam pernapasan'
+  'Senam'
 ];
 
 export function EliteHabit() {

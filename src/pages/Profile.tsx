@@ -329,7 +329,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         {/* READ TUTORIAL Button */}
         <Button
           variant="outline"
-          className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium px-8 py-2 rounded-full glow-primary border-primary hover:border-primary transition-all duration-200 transform hover:scale-105 active:scale-95"
+          className="bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium font-orbitron px-8 py-2 rounded-full glow-primary border-primary hover:border-primary transition-all duration-200 transform hover:scale-105 active:scale-95"
           onClick={() => {
             onNavigate('tutorial');
           }}

@@ -1229,7 +1229,7 @@ export function Home({
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-xl font-semibold font-orbitron">Cara Menggunakan Aplikasi</h2>
+              <h2 className="text-xl font-semibold">Cara menggunakan Ecosystem</h2>
               <Button 
                 onClick={() => {
                   setShowTutorialModal(false);
@@ -1257,7 +1257,7 @@ export function Home({
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-yellow-800 dark:text-yellow-200">1. Dengar Verse of eL Vision</h4>
-                      <p className="text-sm text-yellow-700 dark:text-yellow-300">Mulai dengan mendengarkan audio frequency</p>
+                      <p className="text-lg text-yellow-700 dark:text-yellow-300">Mulai dengan mendengarkan audio frequency</p>
                     </div>
                     <div className="text-2xl">🎧</div>
                   </div>
@@ -1276,7 +1276,7 @@ export function Home({
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-amber-800 dark:text-amber-200">2. Tulis Jurnal Spiritual</h4>
-                      <p className="text-sm text-amber-700 dark:text-amber-300">Refleksikan perjalanan spiritual Anda → Lepaskan hal yang sedang kamu kejar agar mudah tercapai setelah dengar Audio</p>
+                      <p className="text-lg text-amber-700 dark:text-amber-300">Refleksikan perjalanan spiritual Anda → Lepaskan hal yang sedang kamu kejar agar mudah tercapai setelah dengar Audio</p>
                     </div>
                     <div className="text-2xl">📝</div>
                   </div>
@@ -1295,7 +1295,7 @@ export function Home({
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-emerald-800 dark:text-emerald-200">3. Lakukan Elite Habit</h4>
-                      <p className="text-sm text-emerald-700 dark:text-emerald-300">Olahraga dengan mindfulness melatih ketenangan dan mempercepat pencapaian</p>
+                      <p className="text-lg text-emerald-700 dark:text-emerald-300">Olahraga dengan mindfulness melatih ketenangan dan mempercepat pencapaian</p>
                     </div>
                     <div className="text-2xl">💪</div>
                   </div>
@@ -1303,7 +1303,7 @@ export function Home({
                   {/* After 3 days notice */}
                   <div className="text-center py-2">
                     <div className="inline-block bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/50 dark:to-indigo-900/50 px-4 py-2 rounded-full border border-purple-200 dark:border-purple-700">
-                      <span className="text-sm font-medium text-purple-800 dark:text-purple-200">⏰ Setelah 3 hari rutin...</span>
+                      <span className="text-lg font-medium text-purple-800 dark:text-purple-200">⏰ Setelah 3 hari rutin...</span>
                     </div>
                   </div>
 
@@ -1321,7 +1321,7 @@ export function Home({
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-violet-800 dark:text-violet-200">4. Click Personal Analytics</h4>
-                      <p className="text-sm text-violet-700 dark:text-violet-300">Dapatkan Powerful Insight dari Analytics tentang jati diri kamu dan solusinya</p>
+                      <p className="text-lg text-violet-700 dark:text-violet-300">Dapatkan Powerful Insight dari Analytics tentang jati diri kamu dan solusinya</p>
                     </div>
                     <div className="text-2xl">🤯</div>
                   </div>
@@ -1330,7 +1330,7 @@ export function Home({
                   <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 p-4 rounded-lg border-2 border-green-200 dark:border-green-800 text-center">
                     <div className="text-2xl mb-2">✨</div>
                     <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">Anda akan mendapat jawaban mencengangkan tentang diri Anda!</h4>
-                    <p className="text-sm text-green-700 dark:text-green-300 italic">
+                    <p className="text-lg text-green-700 dark:text-green-300 italic">
                       *Personal Analytics semakin efektif jika semakin banyak total Verse, total Jurnal Spiritual, dan total Elite Habit
                     </p>
                   </div>
@@ -1340,9 +1340,16 @@ export function Home({
               {/* Divider */}
               <div className="border-t border-gray-200 dark:border-gray-700 mb-6"></div>
               
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Video Tutorial</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Tonton video lengkap untuk panduan detail</p>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/50 dark:to-indigo-950/50 p-6 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+                <div className="text-center">
+                  <h3 className="text-lg font-medium text-blue-800 dark:text-blue-200">Video Tutorial</h3>
+                  <p className="text-lg text-blue-600 dark:text-blue-300">Tonton video lengkap untuk panduan detail</p>
+                </div>
+              </div>
+              
+              {/* Arrow pointing down to video */}
+              <div className="text-center text-gray-400 mb-4">
+                <div className="text-4xl font-black">⬇</div>
               </div>
               
               <div className="relative">

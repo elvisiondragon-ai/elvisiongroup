@@ -172,41 +172,41 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       <div className="px-6 space-y-6">
 
         {/* Tutorial Section */}
-        <Card className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 shadow-lg">
+        <Card className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 shadow-lg">
           <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-2xl font-semibold text-orange-800 mb-4">
+              <h3 className="text-2xl font-semibold text-indigo-300 mb-4">
                 Mengapa Melepaskan Membuat Keinginan Terwujud?
               </h3>
-              <p className="text-orange-700 text-sm leading-relaxed max-w-2xl mx-auto">
-                Keinginan yang kamu lepaskan, terwujud ke hidupmu. Emosi negatif yang kamu lepaskan, akan Menjadi Energi Ignis Memory mu.
+              <p className="text-indigo-200 text-sm leading-relaxed max-w-2xl mx-auto">
+                Keinginan yang kamu lepaskan, terwujud ke hidupmu.
               </p>
             </div>
 
             {/* Real Life Examples */}
             <div className="space-y-4">
               <div className="grid gap-4">
-                <div className="p-4 bg-yellow-100/80 rounded-lg border border-orange-300/50">
-                  <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
+                <div className="p-4 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
+                  <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
                     🎯 Contoh 1: Melepaskan saat sudah hampir putus asa
                   </h5>
-                  <div className="space-y-2 text-orange-700 leading-relaxed" style={{fontSize: '16px'}}>
+                  <div className="space-y-2 text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
                     <p>Anda pasti pernah bahkan sering saat berusaha mendapatkan sesuatu atau seseorang. Berusaha mati matian namun terus seakan makin sulit dan semakin sulit.</p>
                     <p>Sampai pada titik anda merasa lelah dan tidak sepadan anda memutuskan melepaskan..</p>
-                    <p className="font-semibold text-orange-800">Alhasil, yang anda inginkan malah mendekati anda jadi mudah.</p>
-                    <p className="font-semibold text-orange-800">Bukan. Itu memang hukum alam, you get what you let go. Kamu dapat yang kamu lepaskan</p>
+                    <p className="font-semibold text-yellow-400">Alhasil, yang anda inginkan malah mendekati anda jadi mudah kan?</p>
+                    <p className="font-semibold text-yellow-400">Itu memang hukum alam, you get what you let go. Kamu dapat yang kamu lepaskan</p>
                   </div>
                 </div>
 
-                <div className="p-4 bg-orange-100/80 rounded-lg border border-yellow-300/50">
-                  <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
+                <div className="p-4 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
+                  <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
                     ⭐ Contoh 2: Seseorang yang ahli dan mudah
                   </h5>
-                  <div className="space-y-2 text-orange-700 leading-relaxed" style={{fontSize: '16px'}}>
+                  <div className="space-y-2 text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
                     <p>Anda pasti pernah melihat atau mungkin anda salah satunya. Saat orang tersebut menganggap sesuatu itu mudah dilakukan. Misalnya olahraga, atau mendapat pasangan, atau menyelesaikan pekerjaan..</p>
                     <p>Orang tersebut merasa itu hal yang mudah sehingga dibawa santai dan mudah dilepaskan. Bawaan nya happy melakukan hal yg terasa sulit bagi kebanyakan orang</p>
-                    <p className="font-semibold text-orange-800">Alhasil ? Hal tersebut jadi mudah untuk orang itu.</p>
-                    <p className="font-semibold text-orange-800">Itu bukan ketidak adilan. Memang begitu Hukum Alam nya</p>
+                    <p className="font-semibold text-yellow-400">Alhasil ? Hal tersebut jadi mudah untuk orang itu.</p>
+                    <p className="font-semibold text-yellow-400">Itu bukan ketidak adilan. Memang begitu Hukum Alam nya</p>
                   </div>
                 </div>
               </div>
@@ -214,34 +214,34 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
             {/* Famous Examples */}
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-orange-800 text-center">
+              <h4 className="text-lg font-semibold text-indigo-300 text-center">
                 Contoh Terkenal di Dunia:
               </h4>
               
               <div className="grid gap-3">
-                <div className="p-3 bg-yellow-200/60 rounded-lg border border-orange-300/40">
-                  <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
+                <div className="p-3 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
+                  <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
                     🏢 Steve Jobs & Apple (1997)
                   </h5>
-                  <p className="text-orange-700 leading-relaxed" style={{fontSize: '16px'}}>
+                  <p className="text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
                     Setelah dikeluarkan dari Apple, Jobs harus melepaskan ego dan dendam pribadi untuk kembali menyelamatkan perusahaan yang dia dirikan. Hasilnya? Apple menjadi perusahaan paling berharga di dunia.
                   </p>
                 </div>
 
-                <div className="p-3 bg-orange-200/60 rounded-lg border border-yellow-300/40">
-                  <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
+                <div className="p-3 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
+                  <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
                     ✍️ Elizabeth Gilbert - Kreativitas
                   </h5>
-                  <p className="text-orange-700 leading-relaxed" style={{fontSize: '16px'}}>
+                  <p className="text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
                     "Untuk memaksimalkan peluang sukses, kita perlu mencintai proses penciptaan sepenuh hati, lalu melepaskannya tanpa attachment pada hasil."
                   </p>
                 </div>
 
-                <div className="p-3 bg-yellow-200/60 rounded-lg border border-orange-300/40">
-                  <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
+                <div className="p-3 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
+                  <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
                     🎯 Paradox Kontrol dalam Bisnis
                   </h5>
-                  <p className="text-orange-700 leading-relaxed" style={{fontSize: '16px'}}>
+                  <p className="text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
                     Gary Cooper dalam "The Success Paradox": Seorang workaholic yang nyaris mati, kemudian sukses luar biasa setelah belajar "surrender" dan melepaskan kebutuhan mengontrol segalanya.
                   </p>
                 </div>
@@ -252,9 +252,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         </Card>
 
         {/* Quote Card */}
-        <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 shadow-md">
+        <Card className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 shadow-md">
           <div className="text-center p-6">
-            <p className="text-orange-800 font-semibold leading-relaxed max-w-xl mx-auto" style={{fontSize: '16px'}}>
+            <p className="text-indigo-200 font-semibold leading-relaxed max-w-xl mx-auto" style={{fontSize: '16px'}}>
               "Riwayat Jurnal eL Vision Ini alat ukurmu setiap bulan, semakin dilepaskan keinginan semakin mudah terjadi"
             </p>
           </div>
@@ -263,12 +263,12 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         {/* Daily Reflection Section */}
         <Card className="bg-gradient-to-br from-indigo-600/20 via-purple-500/15 to-pink-600/20 border-2 border-indigo-400/40 shadow-xl backdrop-blur-sm">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white mt-6 mx-6" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}>
+            <h3 className="text-lg font-semibold text-white mt-6 mx-6" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}>
               Pertanyaan Hari Ini
             </h3>
             
             <div className="p-4 rounded-lg bg-black/60 border border-purple-300/50 shadow-inner">
-              <p className="text-white leading-relaxed" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontSize: '17px'}}>
+              <p className="text-white leading-relaxed" style={{fontSize: '17px'}}>
                 "{currentQuestion}"
               </p>
             </div>
@@ -278,8 +278,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                 value={reflection}
                 onChange={(e) => setReflection(e.target.value)}
                 placeholder="Tulis jawabanmu di sini..."
-                className="min-h-32 bg-yellow-100/90 border-orange-300/50 focus:border-orange-400 text-orange-800 placeholder:text-orange-600/70 resize-none rounded-lg"
-                style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontSize: '17px'}}
+                className="min-h-32 bg-indigo-800/50 border-indigo-400/50 focus:border-indigo-300 text-indigo-100 placeholder:text-indigo-300/70 resize-none rounded-lg"
+                style={{fontSize: '17px'}}
                 rows={6}
               />
               
@@ -287,7 +287,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                 onClick={handleSaveReflection}
                 disabled={!reflection.trim()}
                 className="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white font-medium shadow-lg hover:shadow-purple-500/50 transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0 disabled:opacity-50"
-                style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'}}
+                style={{}}
               >
                 <Save className="w-4 h-4 mr-2" />
                 Simpan Renungan
@@ -299,7 +299,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         {/* Reflection History */}
         <Card className="bg-gradient-to-br from-slate-600/15 via-gray-500/10 to-zinc-600/15 border-2 border-slate-400/30 shadow-xl backdrop-blur-sm">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-200 mt-6 mx-6" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}>
+            <h3 className="text-lg font-semibold text-slate-200 mt-6 mx-6" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}>
               Riwayat Renungan
             </h3>
 
@@ -316,7 +316,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
 
-                    <div className="text-sm text-purple-300 pr-8" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'}}>
+                    <div className="text-sm text-purple-300 pr-8">
                       {new Date(refl.created_at).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "long",
@@ -325,14 +325,14 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                         minute: "2-digit"
                       })}
                     </div>
-                    <div className="text-white leading-relaxed" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontSize: '17px'}}>
+                    <div className="text-white leading-relaxed" style={{fontSize: '17px'}}>
                       {refl.reflection}
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="p-6 text-center">
-                  <p className="text-slate-300 text-sm" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'}}>
+                  <p className="text-slate-300 text-sm">
                     Belum ada renungan tersimpan. Mulai tulis renungan pertamamu!
                   </p>
                 </div>

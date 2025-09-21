@@ -66,6 +66,13 @@ const Index = () => {
       return;
     }
     
+    // Check if we need to redirect to chat after refresh button
+    if (localStorage.getItem('refresh-redirect-to-chat') === 'true') {
+      localStorage.removeItem('refresh-redirect-to-chat');
+      setActiveTab('chat');
+      return;
+    }
+    
     // Check if we just refreshed from signup and show welcome toast
     if (localStorage.getItem('post-signup-welcome') === 'true') {
       setTimeout(() => {

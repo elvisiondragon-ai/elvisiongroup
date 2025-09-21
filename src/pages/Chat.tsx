@@ -509,7 +509,15 @@ export function Chat() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => loadMessages(true)}
+              onClick={() => {
+                setIsRefreshing(true);
+                // Set flag to return to chat after refresh
+                localStorage.setItem('refresh-redirect-to-chat', 'true');
+                // Smooth refresh with longer delay for better UX
+                setTimeout(() => {
+                  window.location.reload();
+                }, 800); // Increased delay for smoother experience
+              }}
               disabled={isRefreshing}
               className="gap-2"
             >
