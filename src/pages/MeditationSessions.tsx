@@ -265,8 +265,13 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
               <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground mb-4">
                 <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
                   <Users className="w-4 h-4 text-primary" />
-                  <span>Live Audience: <span className="text-primary font-semibold">{liveCount.toLocaleString()}</span></span>
+                  <span>Total Audience Terakhir: <span className="text-primary font-semibold">3,877</span></span>
                 </div>
+                {/* I HIDE THIS FOR NOW */}
+                {/* <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                  <Users className="w-4 h-4 text-primary" />
+                  <span>Live Audience: <span className="text-primary font-semibold">{liveCount.toLocaleString()}</span></span>
+                </div> */}
                 <div className="flex items-center gap-2 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">
                   <Heart className="w-4 h-4 text-red-400 animate-pulse" />
                   <span className="text-red-300 font-semibold">Active Listen</span>
