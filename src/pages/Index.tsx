@@ -73,6 +73,13 @@ const Index = () => {
       return;
     }
     
+    // Check if we need to redirect to payment after refresh button
+    if (localStorage.getItem('refresh-redirect-to-payment') === 'true') {
+      localStorage.removeItem('refresh-redirect-to-payment');
+      setActiveTab('payment');
+      return;
+    }
+    
     // Check if we just refreshed from signup and show welcome toast
     if (localStorage.getItem('post-signup-welcome') === 'true') {
       setTimeout(() => {

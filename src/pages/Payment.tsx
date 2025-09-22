@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown, Edit } from 'lucide-react';
+import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown, Edit, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { EditProfile } from '@/components/EditProfile';
@@ -32,7 +32,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [userDataLoading, setUserDataLoading] = useState(true);
+  const [userDataLoading, setUserDataLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const { toast } = useToast();
@@ -64,6 +64,44 @@ export function Payment({ onNavigate }: PaymentProps) {
       window.fbq('track', 'PageView');
     }
   }, []);
+
+  // Instant cache loading for second-time visits
+  useEffect(() => {
+    const cachedData = localStorage.getItem('payment-user-cache');
+    if (cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        console.log('⚡ Loading from cache for instant display');
+        setEmail(parsed.user?.email || '');
+        setFullName(parsed.userProfile?.display_name || parsed.user?.email?.split('@')[0] || '');
+        if (parsed.userProfile?.phone_number) {
+          setPhoneNumber(parsed.userProfile.phone_number);
+        }
+        setUserDataLoading(false);
+      } catch (error) {
+        console.error('Cache error, removing:', error);
+        localStorage.removeItem('payment-user-cache');
+      }
+    }
+  }, []);
+
+  // Cache user data when successfully loaded
+  useEffect(() => {
+    if (user && userProfile && !userDataLoading) {
+      const cacheData = {
+        user: {
+          id: user.id,
+          email: user.email
+        },
+        userProfile: {
+          display_name: userProfile.display_name,
+          phone_number: userProfile.phone_number
+        }
+      };
+      localStorage.setItem('payment-user-cache', JSON.stringify(cacheData));
+      console.log('💾 User data cached for next visit');
+    }
+  }, [user, userProfile, userDataLoading]);
 
   const paymentMethods = [
     {
@@ -426,6 +464,44 @@ export function Payment({ onNavigate }: PaymentProps) {
     initializeData();
   }, []);
 
+  // Instant cache loading for second-time visits
+  useEffect(() => {
+    const cachedData = localStorage.getItem('payment-user-cache');
+    if (cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        console.log('⚡ Loading from cache for instant display');
+        setEmail(parsed.user?.email || '');
+        setFullName(parsed.userProfile?.display_name || parsed.user?.email?.split('@')[0] || '');
+        if (parsed.userProfile?.phone_number) {
+          setPhoneNumber(parsed.userProfile.phone_number);
+        }
+        setUserDataLoading(false);
+      } catch (error) {
+        console.error('Cache error, removing:', error);
+        localStorage.removeItem('payment-user-cache');
+      }
+    }
+  }, []);
+
+  // Cache user data when successfully loaded
+  useEffect(() => {
+    if (user && userProfile && !userDataLoading) {
+      const cacheData = {
+        user: {
+          id: user.id,
+          email: user.email
+        },
+        userProfile: {
+          display_name: userProfile.display_name,
+          phone_number: userProfile.phone_number
+        }
+      };
+      localStorage.setItem('payment-user-cache', JSON.stringify(cacheData));
+      console.log('💾 User data cached for next visit');
+    }
+  }, [user, userProfile, userDataLoading]);
+
   const handleCreatePayment = async () => {
     if (!user || !selectedPlan || !phoneNumber.trim() || !fullName.trim() || !email.trim()) {
       toast({
@@ -773,11 +849,17 @@ export function Payment({ onNavigate }: PaymentProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setEditingProfile(true)}
-              className="text-xs"
+              onClick={() => {
+                console.log('🔄 Refresh Profil clicked - triggering refresh');
+                localStorage.setItem('refresh-redirect-to-payment', 'true');
+                setTimeout(() => {
+                  window.location.reload();
+                }, 800);
+              }}
+              className="text-xs bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-purple-600"
             >
-              <Edit className="w-3 h-3 mr-1" />
-              Edit Profil
+              <RefreshCw className="w-3 h-3 mr-1" />
+              Refresh Profil
             </Button>
           </div>
           

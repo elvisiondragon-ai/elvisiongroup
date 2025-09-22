@@ -36,7 +36,6 @@ import {
   Flame,
   Droplets,
   Activity,
-  RefreshCw
 } from "lucide-react";
 
 interface ProfileProps {
@@ -144,16 +143,6 @@ export function Profile({ onNavigate }: ProfileProps) {
     }
   };
 
-  // Smooth refresh function similar to Chat.tsx
-  const handleSmoothRefresh = () => {
-    setIsRefreshing(true);
-    // Set flag to return to profile upgrade after refresh
-    localStorage.setItem('refresh-redirect-to-profile-upgrade', 'true');
-    // Smooth refresh with longer delay for better UX
-    setTimeout(() => {
-      window.location.reload();
-    }, 800); // Increased delay for smoother experience
-  };
 
   // Check for redirect back to upgrade page after refresh
   useEffect(() => {
@@ -519,19 +508,6 @@ export function Profile({ onNavigate }: ProfileProps) {
             }
           </Button>
           
-          {/* Smooth Refresh Button - only show when Pro */}
-          {proStatus.isPro && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleSmoothRefresh}
-              disabled={isRefreshing}
-              className="border-pro text-pro hover:bg-pro/10 transition-all duration-200 transform hover:scale-105 active:scale-95"
-              title="Refresh Pro Status"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-          )}
         </div>
 
 

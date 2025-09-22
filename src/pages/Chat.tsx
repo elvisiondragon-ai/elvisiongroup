@@ -212,9 +212,33 @@ export function Chat() {
     }
   }, [toast]);
 
+  // Instant cache loading for second-time visits
+  useEffect(() => {
+    const cachedMessages = localStorage.getItem('chat-messages-cache');
+    if (cachedMessages) {
+      try {
+        const parsed = JSON.parse(cachedMessages);
+        console.log('⚡ Loading chat messages from cache for instant display');
+        setMessages(parsed);
+        setIsLoading(false); // Stop loading immediately
+      } catch (error) {
+        console.error('Chat cache error, removing:', error);
+        localStorage.removeItem('chat-messages-cache');
+      }
+    }
+  }, []);
+
   useEffect(() => {
     loadMessages();
   }, [loadMessages]);
+
+  // Cache chat messages when successfully loaded
+  useEffect(() => {
+    if (messages.length > 0 && !isLoading) {
+      localStorage.setItem('chat-messages-cache', JSON.stringify(messages));
+      console.log('💾 Chat messages cached for next visit');
+    }
+  }, [messages, isLoading]);
 
 
   useEffect(() => {
