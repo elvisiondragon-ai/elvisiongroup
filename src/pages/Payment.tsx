@@ -22,7 +22,7 @@ interface PaymentProps {
 
 export function Payment({ onNavigate }: PaymentProps) {
   const [selectedPlan, setSelectedPlan] = useState('1_month');
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('BCAVA');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('QRIS');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -67,14 +67,14 @@ export function Payment({ onNavigate }: PaymentProps) {
 
   const paymentMethods = [
     {
-      code: 'BCAVA',
-      name: 'BCA Virtual Account',
-      description: 'Transfer via BCA Virtual Account'
-    },
-    {
       code: 'QRIS',
       name: 'QRIS',
       description: 'QRIS Bayar ke Semua Bank Termasuk DANA, OVO, SHOPEEPAY'
+    },
+    {
+      code: 'BCAVA',
+      name: 'BCA Virtual Account',
+      description: 'Transfer via BCA Virtual Account'
     },
     {
       code: 'PERMATAVA',

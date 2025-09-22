@@ -35,7 +35,8 @@ import {
   Send,
   Flame,
   Droplets,
-  Activity
+  Activity,
+  RefreshCw
 } from "lucide-react";
 
 interface ProfileProps {
@@ -64,6 +65,7 @@ export function Profile({ onNavigate }: ProfileProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { proStatus } = usePro();
   const { toast } = useToast();
 
@@ -141,6 +143,29 @@ export function Profile({ onNavigate }: ProfileProps) {
       });
     }
   };
+
+  // Smooth refresh function similar to Chat.tsx
+  const handleSmoothRefresh = () => {
+    setIsRefreshing(true);
+    // Set flag to return to profile upgrade after refresh
+    localStorage.setItem('refresh-redirect-to-profile-upgrade', 'true');
+    // Smooth refresh with longer delay for better UX
+    setTimeout(() => {
+      window.location.reload();
+    }, 800); // Increased delay for smoother experience
+  };
+
+  // Check for redirect back to upgrade page after refresh
+  useEffect(() => {
+    const shouldRedirectToUpgrade = localStorage.getItem('refresh-redirect-to-profile-upgrade');
+    if (shouldRedirectToUpgrade === 'true') {
+      localStorage.removeItem('refresh-redirect-to-profile-upgrade');
+      // Small delay to ensure UI is ready
+      setTimeout(() => {
+        onNavigate("payment");
+      }, 500);
+    }
+  }, [onNavigate]);
 
 
   if (loading) {
@@ -474,24 +499,40 @@ export function Profile({ onNavigate }: ProfileProps) {
           <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"></div>
         </Button>
 
-        <Button
-          variant="outline"
-          className={`w-full transition-all duration-200 transform hover:scale-105 active:scale-95 ${proStatus.isPro
-            ? 'border-pro text-pro'
-            : 'bg-gradient-to-r from-black via-gray-900 to-yellow-600 hover:from-gray-900 hover:via-black hover:to-yellow-500 text-white border-none shadow-lg hover:shadow-xl'
-          }`}
-          onClick={() => onNavigate("payment")}
-        >
-          <Crown className={`w-4 h-4 mr-2 ${proStatus.isPro ? '' : 'text-yellow-400'}`} />
-          {proStatus.isPro 
-            ? `Your Pro Plan until ${proStatus.expiresAt ? new Date(proStatus.expiresAt).toLocaleDateString('id-ID', { 
-                year: 'numeric', 
-                month: 'short',
-                day: 'numeric'
-              }) : 'Unknown'}`
-            : 'Upgrade ke Pro'
-          }
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className={`flex-1 transition-all duration-200 transform hover:scale-105 active:scale-95 ${proStatus.isPro
+              ? 'border-pro text-pro'
+              : 'bg-gradient-to-r from-black via-gray-900 to-yellow-600 hover:from-gray-900 hover:via-black hover:to-yellow-500 text-white border-none shadow-lg hover:shadow-xl'
+            }`}
+            onClick={() => onNavigate("payment")}
+          >
+            <Crown className={`w-4 h-4 mr-2 ${proStatus.isPro ? '' : 'text-yellow-400'}`} />
+            {proStatus.isPro 
+              ? `Your Pro Plan until ${proStatus.expiresAt ? new Date(proStatus.expiresAt).toLocaleDateString('id-ID', { 
+                  year: 'numeric', 
+                  month: 'short',
+                  day: 'numeric'
+                }) : 'Unknown'}`
+              : 'Upgrade ke Pro'
+            }
+          </Button>
+          
+          {/* Smooth Refresh Button - only show when Pro */}
+          {proStatus.isPro && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleSmoothRefresh}
+              disabled={isRefreshing}
+              className="border-pro text-pro hover:bg-pro/10 transition-all duration-200 transform hover:scale-105 active:scale-95"
+              title="Refresh Pro Status"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          )}
+        </div>
 
 
         <div className="p-6">

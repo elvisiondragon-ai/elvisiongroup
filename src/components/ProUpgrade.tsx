@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Star, Clock, ArrowRight } from 'lucide-react';
+import { Crown, Star, Clock, ArrowRight, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { usePro } from '@/hooks/usePro';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +15,18 @@ interface ProUpgradeProps {
 export function ProUpgrade({ onClose, onNavigate }: ProUpgradeProps) {
   const { proStatus } = usePro();
   const { toast } = useToast();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Smooth refresh function similar to Chat.tsx and Profile.tsx
+  const handleSmoothRefresh = () => {
+    setIsRefreshing(true);
+    // Set flag to return to upgrade page after refresh
+    localStorage.setItem('refresh-redirect-to-profile-upgrade', 'true');
+    // Smooth refresh with longer delay for better UX
+    setTimeout(() => {
+      window.location.reload();
+    }, 800); // Increased delay for smoother experience
+  };
 
 
   const formatCurrency = (amount: number) => {
@@ -99,6 +111,20 @@ export function ProUpgrade({ onClose, onNavigate }: ProUpgradeProps) {
               </Button>
             </div>
           )}
+          
+          {/* Smooth Refresh Button */}
+          <div className="text-center pt-3 border-t border-border">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSmoothRefresh}
+              disabled={isRefreshing}
+              className="gap-2 border-pro text-pro hover:bg-pro/10 transition-all duration-200 transform hover:scale-105 active:scale-95"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh Status'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
