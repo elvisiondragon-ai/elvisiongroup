@@ -4,10 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown, Edit, RefreshCw } from 'lucide-react';
+import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown, Edit, RefreshCw, Play } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { EditProfile } from '@/components/EditProfile';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 // Meta Pixel declaration
 declare global {
@@ -35,6 +36,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [userDataLoading, setUserDataLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
+  const [showQrisModal, setShowQrisModal] = useState(false);
   const { toast } = useToast();
 
   // Meta Pixel initialization
@@ -926,6 +928,50 @@ export function Payment({ onNavigate }: PaymentProps) {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* QRIS Tutorial Button */}
+        <div className="flex justify-center mb-4">
+          <Dialog open={showQrisModal} onOpenChange={setShowQrisModal}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-purple-600 px-6 py-2 rounded-lg shadow-lg"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                CARA BAYAR QRIS
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-sm p-0 bg-black">
+              <DialogHeader className="p-4 pb-0">
+                <DialogTitle className="text-white text-center">Cara Bayar QRIS</DialogTitle>
+              </DialogHeader>
+              <div className="aspect-[9/16] w-full relative">
+                <video
+                  className="w-full h-full object-cover rounded-b-lg"
+                  controls
+                  poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/QRIS.png"
+                  preload="metadata"
+                >
+                  <source 
+                    src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/QRIS.mp4" 
+                    type="video/mp4" 
+                  />
+                  <p className="text-white text-center p-4">
+                    Browser Anda tidak mendukung video player. 
+                    <a 
+                      href="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/QRIS.mp4"
+                      className="text-purple-400 underline ml-1"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Download video
+                    </a>
+                  </p>
+                </video>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Payment Method Selection */}

@@ -361,7 +361,7 @@ export function Signup() {
               options={{
                 action: 'signup',
                 theme: 'light',
-                size: 'normal',
+                size: 'invisible',
                 retry: 'auto'
               }}
             />
