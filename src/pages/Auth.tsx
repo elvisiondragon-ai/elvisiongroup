@@ -575,7 +575,7 @@ export function Auth({ onLogin }: AuthProps) {
                   options={{
                     action: 'forgot-password',
                     theme: 'light',
-                    size: 'invisible',
+                    size: 'normal',
                     retry: 'auto'
                   }}
                 />
@@ -817,7 +817,7 @@ export function Auth({ onLogin }: AuthProps) {
                     options={{
                       action: 'login',
                       theme: 'light',
-                      size: 'invisible',
+                      size: 'normal',
                       retry: 'auto'
                     }}
                   />
@@ -982,7 +982,7 @@ export function Auth({ onLogin }: AuthProps) {
                     options={{
                       action: 'signup',
                       theme: 'light',
-                      size: 'invisible',
+                      size: 'normal',
                       retry: 'auto'
                     }}
                   />
