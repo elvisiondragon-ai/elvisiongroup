@@ -379,11 +379,33 @@ export function Payment({ onNavigate }: PaymentProps) {
         setUserDataLoading(true);
         setProfileError(null);
 
-        // Get user data
+        // Check cached user ID first
+        const cachedUserId = localStorage.getItem('current-user-id');
+        if (cachedUserId) {
+          console.log('⚡ Loading user ID from cache for instant payment loading');
+          // Create minimal user object for immediate use
+          setUser({ id: cachedUserId });
+        } else {
+          // If no cached ID, fetch session for first visit
+          console.log('⚡ No cached ID found, fetching session for first visit');
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            localStorage.setItem('current-user-id', session.user.id);
+            setUser({ id: session.user.id });
+            console.log('⚡ Session ID cached for instant payment loading');
+          }
+        }
+
+        // Get user data from session
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
         if (userError) {
           throw new Error('Failed to get user data');
+        }
+
+        // Cache user ID for future visits
+        if (user?.id) {
+          localStorage.setItem('current-user-id', user.id);
         }
 
         setUser(user);
