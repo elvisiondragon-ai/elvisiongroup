@@ -8,6 +8,7 @@ ALWAYS NEED TO REMEMBER EACH TIME YOU WANT CODING
   3. Ask clarifying questions about what CLAUDE actually needed
   4. DO NOT assumed problems existed where there weren't any 
   5. HIGHLY FORBIDDEN : DO NOT made unauthorized changes
+  6. WHEN PROVIDE SOLUTION CHOOSE THE MOST SIMPLE SOLUTION, VERY SIMPLE. DO NOT OVERCOMPLICATED OR REDUNDANT USELESS CODING.
 
 Your 
 Pattern: 

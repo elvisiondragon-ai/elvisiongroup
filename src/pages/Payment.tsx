@@ -665,43 +665,6 @@ export function Payment({ onNavigate }: PaymentProps) {
             </div>
           </div>
 
-          {/* Payment Summary Card */}
-          <Card className="overflow-hidden border-2 border-primary/20 shadow-lg">
-            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6">
-              <div className="text-center space-y-2">
-                <h2 className="text-2xl font-bold">{formatCurrency(paymentData?.amount)}</h2>
-                <p className="text-muted-foreground">Total Pembayaran</p>
-              </div>
-            </div>
-            <CardContent className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-xs text-muted-foreground block">Referensi</span>
-                  <span className="font-mono text-xs font-medium break-all">{paymentData?.tripay_reference}</span>
-                </div>
-                <div>
-                  <span className="text-xs text-muted-foreground block">Metode</span>
-                  <span className="text-sm font-medium">{paymentData?.paymentMethod}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-xs text-muted-foreground block">Berlaku Hingga</span>
-                  <span className="text-sm font-medium text-orange-600">
-                    {paymentData?.expiredTime && !isNaN(paymentData.expiredTime)
-                      ? new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
-                          year: 'numeric',
-                          month: 'long', 
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })
-                      : 'Tidak ada batas waktu'
-                    }
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Virtual Account Number */}
           {(paymentData?.payCode || paymentData?.paymentType === 'DIRECT') && paymentData?.paymentMethod !== 'QRIS' && (
             <Card className="border-2 border-yellow-300 bg-gradient-to-br from-yellow-100 via-yellow-200 to-amber-200 shadow-xl overflow-hidden relative">
@@ -740,6 +703,53 @@ export function Payment({ onNavigate }: PaymentProps) {
             </Card>
           )}
 
+          {/* QRIS Tutorial Button */}
+          {(paymentData?.qrUrl || paymentData?.paymentMethod === 'QRIS') && (
+            <div className="flex justify-center mb-4">
+              <Dialog open={showQrisModal} onOpenChange={setShowQrisModal}>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-purple-600 px-4 py-1 rounded-lg shadow-lg text-xs"
+                  >
+                    <Play className="w-3 h-3 mr-1" />
+                    CARA BAYAR QRIS
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-sm p-0 bg-black">
+                  <DialogHeader className="p-4 pb-0">
+                    <DialogTitle className="text-white text-center">Cara Bayar QRIS</DialogTitle>
+                  </DialogHeader>
+                  <div className="aspect-[9/16] w-full relative">
+                    <video
+                      className="w-full h-full object-cover rounded-b-lg"
+                      controls
+                      poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/QRIS.png"
+                      preload="metadata"
+                    >
+                      <source 
+                        src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/QRIS.mp4" 
+                        type="video/mp4" 
+                      />
+                      <p className="text-white text-center p-4">
+                        Browser Anda tidak mendukung video player. 
+                        <a 
+                          href="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/QRIS.mp4"
+                          className="text-purple-400 underline ml-1"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Download video
+                        </a>
+                      </p>
+                    </video>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
+
           {/* QR Code */}
           {(paymentData?.qrUrl || paymentData?.paymentMethod === 'QRIS') && (
             <Card className="border-2 border-purple-300 bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 shadow-xl overflow-hidden relative">
@@ -775,6 +785,43 @@ export function Payment({ onNavigate }: PaymentProps) {
               </CardContent>
             </Card>
           )}
+
+          {/* Payment Summary Card */}
+          <Card className="overflow-hidden border-2 border-primary/20 shadow-lg">
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6">
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl font-bold">{formatCurrency(paymentData?.amount)}</h2>
+                <p className="text-muted-foreground">Total Pembayaran</p>
+              </div>
+            </div>
+            <CardContent className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-xs text-muted-foreground block">Referensi</span>
+                  <span className="font-mono text-xs font-medium break-all">{paymentData?.tripay_reference}</span>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground block">Metode</span>
+                  <span className="text-sm font-medium">{paymentData?.paymentMethod}</span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-xs text-muted-foreground block">Berlaku Hingga</span>
+                  <span className="text-sm font-medium text-orange-600">
+                    {paymentData?.expiredTime && !isNaN(paymentData.expiredTime)
+                      ? new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
+                          year: 'numeric',
+                          month: 'long', 
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      : 'Tidak ada batas waktu'
+                    }
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
 
           {/* Payment Instructions */}
@@ -937,49 +984,6 @@ export function Payment({ onNavigate }: PaymentProps) {
           </div>
         </div>
 
-        {/* QRIS Tutorial Button */}
-        <div className="flex justify-center mb-4">
-          <Dialog open={showQrisModal} onOpenChange={setShowQrisModal}>
-            <DialogTrigger asChild>
-              <Button 
-                variant="outline" 
-                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-purple-600 px-6 py-2 rounded-lg shadow-lg"
-              >
-                <Play className="w-4 h-4 mr-2" />
-                CARA BAYAR QRIS
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-sm p-0 bg-black">
-              <DialogHeader className="p-4 pb-0">
-                <DialogTitle className="text-white text-center">Cara Bayar QRIS</DialogTitle>
-              </DialogHeader>
-              <div className="aspect-[9/16] w-full relative">
-                <video
-                  className="w-full h-full object-cover rounded-b-lg"
-                  controls
-                  poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/QRIS.png"
-                  preload="metadata"
-                >
-                  <source 
-                    src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/QRIS.mp4" 
-                    type="video/mp4" 
-                  />
-                  <p className="text-white text-center p-4">
-                    Browser Anda tidak mendukung video player. 
-                    <a 
-                      href="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/QRIS.mp4"
-                      className="text-purple-400 underline ml-1"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Download video
-                    </a>
-                  </p>
-                </video>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
 
         {/* Payment Method Selection */}
         <div className="space-y-3">

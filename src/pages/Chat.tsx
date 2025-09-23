@@ -60,7 +60,7 @@ export function Chat() {
         // Load profile data in background (don't wait)
         supabase
           .from('profiles')
-          .select('*')
+          .select('display_name, level, achievements, is_pro, subscription_type')
           .eq('user_id', session.user.id)
           .maybeSingle()
           .then(({ data: profile }) => {
@@ -70,7 +70,9 @@ export function Chat() {
                 id: session.user.id,
                 name: profile.display_name || session.user.email?.split('@')[0] || 'Anonymous',
                 level: profile.level || 1,
-                isPro: proStatus.isPro
+                isPro: profile.is_pro || proStatus.isPro,
+                achievements: profile.achievements || [],
+                subscriptionType: profile.subscription_type
               });
             }
           });
