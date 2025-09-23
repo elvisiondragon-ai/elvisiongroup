@@ -58,6 +58,7 @@ interface UserProfile {
 export function Profile({ onNavigate }: ProfileProps) {
   const { userProfile, user, loading } = useUserProfile();
   const [cachedProfile, setCachedProfile] = useState<UserProfile | null>(null);
+  const [cachedUserId, setCachedUserId] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -69,16 +70,37 @@ export function Profile({ onNavigate }: ProfileProps) {
   const { proStatus } = usePro();
   const { toast } = useToast();
 
-  // Load cached profile instantly
+  // Load cached data instantly and fetch session if needed
   useEffect(() => {
-    const cached = localStorage.getItem('profile-cache');
-    if (cached) {
-      try {
-        setCachedProfile(JSON.parse(cached));
-      } catch (error) {
-        localStorage.removeItem('profile-cache');
+    const initializeProfile = async () => {
+      // Load cached profile
+      const cached = localStorage.getItem('profile-cache');
+      if (cached) {
+        try {
+          setCachedProfile(JSON.parse(cached));
+        } catch (error) {
+          localStorage.removeItem('profile-cache');
+        }
       }
-    }
+      
+      // Load cached user ID instantly to avoid black screen
+      const cachedUserIdFromStorage = localStorage.getItem('current-user-id');
+      if (cachedUserIdFromStorage) {
+        console.log('⚡ Loading user ID from cache to avoid black screen');
+        setCachedUserId(cachedUserIdFromStorage);
+      } else {
+        // If no cached ID, fetch session for first visit
+        console.log('⚡ No cached ID found, fetching session for first visit');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          localStorage.setItem('current-user-id', session.user.id);
+          setCachedUserId(session.user.id);
+          console.log('⚡ Session ID cached for instant profile loading');
+        }
+      }
+    };
+
+    initializeProfile();
   }, []);
 
   // Cache profile when loaded
@@ -178,7 +200,7 @@ export function Profile({ onNavigate }: ProfileProps) {
   }, [onNavigate]);
 
 
-  if (loading && !cachedProfile) {
+  if (loading && !cachedProfile && !cachedUserId) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center pb-20">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -186,8 +208,8 @@ export function Profile({ onNavigate }: ProfileProps) {
     );
   }
 
-  // Error handling - if no user, show error state
-  if (!user) {
+  // Error handling - if no user and no cached ID, show error state
+  if (!user && !cachedUserId) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center pb-20">
         <div className="text-center">

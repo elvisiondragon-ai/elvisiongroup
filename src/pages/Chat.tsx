@@ -52,20 +52,8 @@ export function Chat() {
         // Cache user ID immediately for instant delete buttons
         localStorage.setItem('current-user-id', session.user.id);
         
-        // Get display name from session metadata (instant)
-        const sessionDisplayName = session.user.user_metadata?.display_name || 
-                                  session.user.user_metadata?.full_name ||
-                                  session.user.user_metadata?.name;
-        
-        if (sessionDisplayName) {
-          localStorage.setItem('current-user-name', sessionDisplayName);
-        }
-        
-        // Set user data instantly for delete buttons and display
-        setCurrentUser({ 
-          id: session.user.id,
-          name: sessionDisplayName || 'Anonymous'
-        });
+        // Set user ID instantly for delete buttons
+        setCurrentUser({ id: session.user.id });
         
         // Get profile data separately (slow query)
         const { data: profile } = await supabase
@@ -213,11 +201,7 @@ export function Chat() {
     // Load cached user ID instantly for delete buttons
     if (cachedUserId) {
       console.log('⚡ Loading user ID from cache for instant delete buttons');
-      const cachedUserName = localStorage.getItem('current-user-name');
-      setCurrentUser({ 
-        id: cachedUserId,
-        name: cachedUserName || 'Anonymous'
-      });
+      setCurrentUser({ id: cachedUserId });
     }
   }, []);
 
