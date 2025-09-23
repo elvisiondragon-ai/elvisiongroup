@@ -59,7 +59,7 @@ export function Chat() {
         // Set user with display_name priority
         setCurrentUser({
           id: session.user.id,
-          name: profile?.display_name || session.user.email?.split('@')[0] || 'Anonymous',
+          name: profile?.display_name || 'Anonymous',
           level: profile?.level || 1,
           isPro: profile?.is_pro || proStatus.isPro,
           achievements: profile?.achievements || [],
@@ -388,6 +388,28 @@ export function Chat() {
         title: "Authentication Required",
         description: "Please log in to send messages",
         variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if user has valid display name
+    if (!currentUser.name || currentUser.name === 'Anonymous') {
+      toast({
+        title: "Lengkapi Profil untuk Chat",
+        description: "Silakan lengkapi profil Anda terlebih dahulu",
+        variant: "destructive",
+        action: (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              // Navigate to edit profile - you'll need to implement this navigation
+              console.log('Navigate to edit profile');
+            }}
+          >
+            Edit Profil
+          </Button>
+        )
       });
       return;
     }

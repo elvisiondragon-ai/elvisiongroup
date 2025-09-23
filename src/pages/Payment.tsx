@@ -75,7 +75,7 @@ export function Payment({ onNavigate }: PaymentProps) {
         const parsed = JSON.parse(cachedData);
         console.log('⚡ Loading from cache for instant display');
         setEmail(parsed.user?.email || '');
-        setFullName(parsed.userProfile?.display_name || parsed.user?.email?.split('@')[0] || '');
+        setFullName(parsed.userProfile?.display_name || '');
         if (parsed.userProfile?.phone_number) {
           setPhoneNumber(parsed.userProfile.phone_number);
         }
@@ -397,13 +397,10 @@ export function Payment({ onNavigate }: PaymentProps) {
             const profile = await fetchUserProfile(user.id);
             setUserProfile(profile);
 
-            // Auto-fetch fullName from profile or fallback to email username
+            // Auto-fetch fullName from profile only
             let autoFullName = '';
             if (profile?.display_name?.trim()) {
               autoFullName = profile.display_name.trim();
-            } else if (user.email) {
-              // Fallback to email username if profile display_name is empty
-              autoFullName = user.email.split('@')[0];
             }
 
             // Only update fullName if it's currently empty to avoid overwriting user input
@@ -420,12 +417,8 @@ export function Payment({ onNavigate }: PaymentProps) {
             console.error('Profile fetch failed:', profileError);
             setProfileError('Failed to load profile data');
             
-            // Fallback: use email username if available
-            if (user.email && !fullName.trim()) {
-              const fallbackName = user.email.split('@')[0];
-              setFullName(fallbackName);
-              console.log('Using fallback name from email:', fallbackName);
-            }
+            // No fallback - user must have proper display_name
+            console.log('Profile fetch failed, no fallback name available');
           }
         }
 
@@ -474,7 +467,7 @@ export function Payment({ onNavigate }: PaymentProps) {
         const parsed = JSON.parse(cachedData);
         console.log('⚡ Loading from cache for instant display');
         setEmail(parsed.user?.email || '');
-        setFullName(parsed.userProfile?.display_name || parsed.user?.email?.split('@')[0] || '');
+        setFullName(parsed.userProfile?.display_name || '');
         if (parsed.userProfile?.phone_number) {
           setPhoneNumber(parsed.userProfile.phone_number);
         }

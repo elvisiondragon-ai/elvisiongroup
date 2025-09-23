@@ -190,7 +190,7 @@ export function Auth({ onLogin }: AuthProps) {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            display_name: signupData.displayName || signupData.email.split('@')[0]
+            display_name: signupData.displayName
           }
         }
       });
@@ -496,7 +496,7 @@ export function Auth({ onLogin }: AuthProps) {
           await supabase.functions.invoke('send-signup-email', {
             body: {
               userEmail: signupData.email,
-              userName: signupData.email.split('@')[0]
+              userName: signupData.displayName
             }
           });
         } catch (emailError) {
@@ -899,6 +899,7 @@ export function Auth({ onLogin }: AuthProps) {
                       value={signupData.displayName}
                       onChange={(e) => setSignupData(prev => ({ ...prev, displayName: e.target.value }))}
                       className="pl-10 cyber-input"
+                      required
                     />
                   </div>
                 </div>
