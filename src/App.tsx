@@ -119,7 +119,7 @@ const App = () => {
               e.preventDefault();
             }}
             disabled={updateClicked}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
               updateClicked 
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
                 : 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80'
@@ -168,7 +168,7 @@ const App = () => {
                   localStorage.removeItem('unified_pro_status_cache');
                   window.location.reload();
                 }}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95"
               >
                 Refresh Sekarang
               </button>
@@ -186,7 +186,7 @@ const App = () => {
                   localStorage.removeItem('unified_pro_status_cache');
                   window.location.reload();
                 }}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95"
               >
                 🔄 Refresh dan Akses Pro!
               </button>
