@@ -45,68 +45,40 @@ export function Chat() {
   const { i18n, t } = useTranslation();
 
   useEffect(() => {
-    // Get current user
+    // IDENTICAL TO JOURNAL - Get current user INSTANTLY
     const getCurrentUser = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Auth session:', session);
-        
-        if (session?.user) {
-          // Get user profile for level info
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-          
-          console.log('User profile:', profile, 'Error:', profileError);
-          
-          // If no profile exists, create one
-          if (!profile && !profileError) {
-            console.log('Creating profile for user:', session.user.id);
-            const { data: newProfile, error: createError } = await supabase
-              .from('profiles')
-              .insert({
-                user_id: session.user.id,
-                display_name: session.user.email?.split('@')[0] || 'Anonymous',
-                level: 1,
-                experience_points: 0,
-                streak_days: 0
-              })
-              .select()
-              .single();
-            
-            if (createError) {
-              console.error('Error creating profile:', createError);
-            } else {
-              console.log('Profile created:', newProfile);
-            }
-          }
-          
-          const currentUserObj = {
-            id: session.user.id, // Always use session user ID
-            name: profile?.display_name || session.user.email?.split('@')[0] || 'Anonymous',
-            level: profile?.level || 1,
-            isPro: proStatus.isPro // Use unified pro status instead of achievements
-          };
-          
-          console.log('Setting currentUser:', currentUserObj);
-          setCurrentUser(currentUserObj);
-        } else {
-          console.log('No authenticated user found');
-        }
-      } catch (error) {
-        console.error('Error getting current user:', error);
-        toast({
-          title: "Authentication Error",
-          description: "Please try logging in again",
-          variant: "destructive"
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // SET USER IMMEDIATELY - no profile lookup delay
+        setCurrentUser({
+          id: session.user.id,
+          name: session.user.email?.split('@')[0] || 'Anonymous',
+          level: 1,
+          isPro: proStatus.isPro
         });
+        
+        // Load profile data in background (don't wait)
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .maybeSingle()
+          .then(({ data: profile }) => {
+            if (profile) {
+              // Update with real profile data
+              setCurrentUser({
+                id: session.user.id,
+                name: profile.display_name || session.user.email?.split('@')[0] || 'Anonymous',
+                level: profile.level || 1,
+                isPro: proStatus.isPro
+              });
+            }
+          });
       }
     };
 
     getCurrentUser();
-  }, [toast, proStatus.isPro]); // Add proStatus.isPro as dependency
+  }, [toast, proStatus.isPro]);
 
   // Load messages from database
   const loadMessages = useCallback(async (showRefreshState = false) => {
