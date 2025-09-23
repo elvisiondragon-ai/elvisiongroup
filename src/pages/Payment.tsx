@@ -631,12 +631,6 @@ export function Payment({ onNavigate }: PaymentProps) {
 
 
 
-  // Debug payment data
-  console.log('🔍 Payment Data Debug:', paymentData);
-  console.log('🔍 payCode:', paymentData?.payCode);
-  console.log('🔍 qrUrl:', paymentData?.qrUrl);
-  console.log('🔍 expiredTime:', paymentData?.expiredTime);
-  console.log('🔍 paymentType:', paymentData?.paymentType);
 
   // Show edit profile component if editing
   if (editingProfile) {

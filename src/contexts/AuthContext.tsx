@@ -49,32 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // OPTIMIZATION: Add rate limiting check before making RPC calls
-          try {
-            const rateLimitResponse = await fetch(
-              'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/auth-rate-limit',
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${session.access_token}`
-                }
-              }
-            );
-            
-            if (rateLimitResponse.ok) {
-              await checkProStatus(session.user.id, event === 'SIGNED_IN');
-            } else {
-              console.log('🚫 Rate limited - using cached status or default');
-              if (proStatusCache) {
-                setProStatus(proStatusCache.data);
-              }
-              setLoading(false);
-            }
-          } catch (rateLimitError) {
-            console.warn('Rate limit check failed, proceeding with pro status check:', rateLimitError);
-            await checkProStatus(session.user.id, event === 'SIGNED_IN');
-          }
+          // TEMP: Skip rate limiting due to function error
+          await checkProStatus(session.user.id, event === 'SIGNED_IN');
         } else {
           setProStatus(null);
           setLoading(false);

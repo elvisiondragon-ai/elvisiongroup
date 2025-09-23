@@ -12,8 +12,6 @@ export function ProUpgradeNotification({ onUpgradeClick }: ProUpgradeNotificatio
   const [isHidden, setIsHidden] = useState(false);
   const [showAfterDelay, setShowAfterDelay] = useState(false);
 
-  // Debug logging
-  console.log('🔍 ProUpgradeNotification - user:', !!user, 'isPro:', proStatus?.isPro);
 
   // Set 30-second delay before showing notification for non-Pro users
   useEffect(() => {

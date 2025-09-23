@@ -1,0 +1,16 @@
+Supabase Backup Information
+==========================
+
+Backup Date: Tue Sep 23 21:21:11 WIB 2025
+Source Database: db.nlrgdhpmsittuwiiindq.supabase.co
+Supabase URL: https://nlrgdhpmsittuwiiindq.supabase.co
+Backup Method: pg_dump + API calls
+
+Files Created:
+- database_complete.dump (2.1M)
+- schema_only.sql (384K)
+- data_only.sql (4.8M)
+- Individual table backups
+- API data exports
+
+Total Backup Size: 8.0M

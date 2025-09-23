@@ -98,7 +98,6 @@ const Index = () => {
   }, [activeTab]);
 
   const renderContent = () => {
-    console.log("Current activeTab:", activeTab);
     switch (activeTab) {
       case "home":
         return <Home onNavigate={setActiveTab} />;
@@ -111,10 +110,8 @@ const Index = () => {
       case "audio-therapy":
         return <AudioTherapy onNavigate={setActiveTab} />;
       case "spiritual-journal":
-        console.log("Rendering SpiritualJournal component");
         return <SpiritualJournal onNavigate={setActiveTab} />;
       case "personal-analytics":
-        console.log("Rendering Personal Analytics component");
         return (
           <div className="min-h-screen bg-background pb-20">
             <div className="p-6">

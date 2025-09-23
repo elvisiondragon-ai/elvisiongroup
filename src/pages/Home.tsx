@@ -64,7 +64,7 @@ export function Home({
   // Preload audio files for better performance
   useEffect(() => {
     const audioFiles = [
-      'Verse1 - Calm Clarity.MP3',
+      'Verse1 - The Space Hill.MP3',
       'Verse2 - Lucid Beach.MP3',
       'Verse 3 - Syukur.MP3',
       'Verse 4 - Prosperity Stream Vol. 1.MP3',
@@ -126,10 +126,12 @@ export function Home({
           setOnlineCount(4500 + onlineUsers); // Base 4500 + actual online users
         })
         .on('presence', { event: 'join' }, ({ newPresences }) => {
-          console.log('User joined:', newPresences);
+          console.log('🟢 User joined:', newPresences);
+          console.log('🔢 Join event count:', Date.now());
         })
         .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-          console.log('User left:', leftPresences);
+          console.log('🔴 User left:', leftPresences);
+          console.log('🔢 Leave event count:', Date.now());
         })
         .subscribe(async (status) => {
           if (status === 'SUBSCRIBED') {
