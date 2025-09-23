@@ -525,6 +525,13 @@ export function Payment({ onNavigate }: PaymentProps) {
     }
     
     setLoading(true);
+    
+    // Show immediate feedback to user
+    toast({
+      title: "Membuat Pembayaran...",
+      description: "Sedang memproses permintaan Anda, mohon tunggu",
+    });
+    
     try {
       const plan = subscriptionPlans.find(p => p.id === selectedPlan);
       if (!plan) throw new Error('Plan not found');
