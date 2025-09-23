@@ -49,14 +49,20 @@ export function Chat() {
     const getCurrentUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        // Get profile first to prioritize display_name
+        // Cache user ID immediately for instant delete buttons
+        localStorage.setItem('current-user-id', session.user.id);
+        
+        // Set user ID instantly for delete buttons
+        setCurrentUser({ id: session.user.id });
+        
+        // Get profile data separately (slow query)
         const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, level, achievements, is_pro, subscription_type')
           .eq('user_id', session.user.id)
           .maybeSingle();
 
-        // Set user with display_name priority
+        // Update with full profile data when available
         setCurrentUser({
           id: session.user.id,
           name: profile?.display_name || 'Anonymous',
@@ -178,6 +184,8 @@ export function Chat() {
   // Instant cache loading for second-time visits
   useEffect(() => {
     const cachedMessages = localStorage.getItem('chat-messages-cache');
+    const cachedUserId = localStorage.getItem('current-user-id');
+    
     if (cachedMessages) {
       try {
         const parsed = JSON.parse(cachedMessages);
@@ -188,6 +196,12 @@ export function Chat() {
         console.error('Chat cache error, removing:', error);
         localStorage.removeItem('chat-messages-cache');
       }
+    }
+
+    // Load cached user ID instantly for delete buttons
+    if (cachedUserId) {
+      console.log('⚡ Loading user ID from cache for instant delete buttons');
+      setCurrentUser({ id: cachedUserId });
     }
   }, []);
 
