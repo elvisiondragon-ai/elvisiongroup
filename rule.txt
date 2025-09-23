@@ -13,6 +13,6 @@ ALWAYS NEED TO REMEMBER EACH TIME YOU WANT CODING
 Your 
 Pattern: 
 -> Read the ENTIRE REQUESTED component first 
--> CLAUDE Traced the execution flow -> give user SQL in assist_code folder to check schema/function or what you need  
+-> CLAUDE Traced the execution flow -> Ugive user SQL in assist_code folder to check schema/Real table sctructure or function or what you need  
 -> CLAUDE Found the gap -> SQL to FIX + SQL to verify the fix if it's working (both in 1 file)
 -> CLAUDE Save Report on migration

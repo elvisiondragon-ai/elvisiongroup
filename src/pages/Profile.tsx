@@ -57,6 +57,7 @@ interface UserProfile {
 
 export function Profile({ onNavigate }: ProfileProps) {
   const { userProfile, user, loading } = useUserProfile();
+  const [cachedProfile, setCachedProfile] = useState<UserProfile | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -67,6 +68,26 @@ export function Profile({ onNavigate }: ProfileProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { proStatus } = usePro();
   const { toast } = useToast();
+
+  // Load cached profile instantly
+  useEffect(() => {
+    const cached = localStorage.getItem('profile-cache');
+    if (cached) {
+      try {
+        setCachedProfile(JSON.parse(cached));
+      } catch (error) {
+        localStorage.removeItem('profile-cache');
+      }
+    }
+  }, []);
+
+  // Cache profile when loaded
+  useEffect(() => {
+    if (userProfile) {
+      localStorage.setItem('profile-cache', JSON.stringify(userProfile));
+      setCachedProfile(userProfile);
+    }
+  }, [userProfile]);
 
   const handleLogout = async () => {
     try {
@@ -157,7 +178,7 @@ export function Profile({ onNavigate }: ProfileProps) {
   }, [onNavigate]);
 
 
-  if (loading) {
+  if (loading && !cachedProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center pb-20">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -179,8 +200,8 @@ export function Profile({ onNavigate }: ProfileProps) {
     );
   }
 
-  // Simple profile handling
-  const profile = userProfile || {
+  // Priority: cachedProfile > userProfile > fallback
+  const profile = cachedProfile || userProfile || {
     display_name: user?.email?.split('@')[0] || "User",
     level: 1,
     experience_points: 0,

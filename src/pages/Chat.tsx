@@ -49,33 +49,22 @@ export function Chat() {
     const getCurrentUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        // SET USER IMMEDIATELY - no profile lookup delay
-        setCurrentUser({
-          id: session.user.id,
-          name: session.user.email?.split('@')[0] || 'Anonymous',
-          level: 1,
-          isPro: proStatus.isPro
-        });
-        
-        // Load profile data in background (don't wait)
-        supabase
+        // Get profile first to prioritize display_name
+        const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, level, achievements, is_pro, subscription_type')
           .eq('user_id', session.user.id)
-          .maybeSingle()
-          .then(({ data: profile }) => {
-            if (profile) {
-              // Update with real profile data
-              setCurrentUser({
-                id: session.user.id,
-                name: profile.display_name || session.user.email?.split('@')[0] || 'Anonymous',
-                level: profile.level || 1,
-                isPro: profile.is_pro || proStatus.isPro,
-                achievements: profile.achievements || [],
-                subscriptionType: profile.subscription_type
-              });
-            }
-          });
+          .maybeSingle();
+
+        // Set user with display_name priority
+        setCurrentUser({
+          id: session.user.id,
+          name: profile?.display_name || session.user.email?.split('@')[0] || 'Anonymous',
+          level: profile?.level || 1,
+          isPro: profile?.is_pro || proStatus.isPro,
+          achievements: profile?.achievements || [],
+          subscriptionType: profile?.subscription_type
+        });
       }
     };
 
