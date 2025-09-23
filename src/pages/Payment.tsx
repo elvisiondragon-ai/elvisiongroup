@@ -902,21 +902,6 @@ export function Payment({ onNavigate }: PaymentProps) {
                 <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
               )}
             </h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                console.log('🔄 Refresh Profil clicked - triggering refresh');
-                localStorage.setItem('refresh-redirect-to-payment', 'true');
-                setTimeout(() => {
-                  window.location.reload();
-                }, 800);
-              }}
-              className="text-xs bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-purple-600"
-            >
-              <RefreshCw className="w-3 h-3 mr-1" />
-              Refresh Profil
-            </Button>
           </div>
           
           {profileError && (
@@ -964,6 +949,23 @@ export function Payment({ onNavigate }: PaymentProps) {
                   disabled
                 />
               </div>
+              
+              {/* Refresh Profile Button - moved under email */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  console.log('🔄 Refresh Profil clicked - triggering refresh');
+                  localStorage.setItem('refresh-redirect-to-payment', 'true');
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 800);
+                }}
+                className="text-xs bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-purple-600 mt-2 transition-all duration-200 transform hover:scale-105 active:scale-95"
+              >
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Refresh Profil
+              </Button>
             </div>
 
             <div>
