@@ -41,10 +41,31 @@ const UserProfileContext = createContext<UserProfileContextType | undefined>(und
 export function UserProfileProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [dailyLoginProcessed, setDailyLoginProcessed] = useState(false);
   const { toast } = useToast();
   const { calculateXPProgress } = useXPSystem();
+
+  // INSTANT CACHE LOADING
+  useEffect(() => {
+    const cachedProfile = localStorage.getItem('user-profile-cache');
+    const cachedUser = localStorage.getItem('user-cache');
+
+    if (cachedProfile && cachedUser) {
+      try {
+        const profileData = JSON.parse(cachedProfile);
+        const userData = JSON.parse(cachedUser);
+        console.log('⚡ SPEED FIX: Loading from cache instantly');
+        setUserProfile(profileData);
+        setUser(userData);
+        setLoading(false);
+      } catch (error) {
+        // ONLY delete cache if there's an error parsing
+        localStorage.removeItem('user-profile-cache');
+        localStorage.removeItem('user-cache');
+      }
+    }
+  }, []);
 
   const fetchUserProfile = useCallback(async (userId: string) => {
     try {
@@ -160,33 +181,41 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
   }, [user, dailyLoginProcessed, toast, refreshProfile]);
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      if (user) {
-        const profile = await fetchUserProfile(user.id);
-        setUserProfile(profile);
-        
-        // Handle daily login after getting profile - single call with session check
-        const sessionKey = `daily_login_${new Date().toDateString()}_${user.id}`;
-        const hasProcessedToday = sessionStorage.getItem(sessionKey);
-        
-        if (!hasProcessedToday && !dailyLoginProcessed) {
-          setTimeout(() => {
-            handleDailyLogin();
-            sessionStorage.setItem(sessionKey, 'true');
-          }, 1000);
+    const backgroundFetch = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const userData = {
+            id: user.id,
+            email: user.email,
+            user_metadata: user.user_metadata
+          };
+          localStorage.setItem('user-cache', JSON.stringify(userData));
+          setUser(userData);
+          
+          const profile = await fetchUserProfile(user.id);
+          if (profile) {
+            localStorage.setItem('user-profile-cache', JSON.stringify(profile));
+            setUserProfile(profile);
+            
+            const sessionKey = `daily_login_${new Date().toDateString()}_${user.id}`;
+            const hasProcessedToday = sessionStorage.getItem(sessionKey);
+            
+            if (!hasProcessedToday && !dailyLoginProcessed) {
+              setTimeout(() => {
+                handleDailyLogin();
+                sessionStorage.setItem(sessionKey, 'true');
+              }, 2000);
+            }
+          }
         }
+      } catch (error) {
+        console.error('Background fetch error:', error);
       }
-      
-      setLoading(false);
     };
 
-    // REMOVE DUPLICATE AUTH LISTENER - App.tsx already handles this
-    // Only get initial user state, no auth state listener here
-    getUser();
-  }, []); // FIXED: Empty dependencies to prevent loops
+    backgroundFetch();
+  }, []);
 
   // Listen for XP updates to refresh profile - THROTTLED
   useEffect(() => {

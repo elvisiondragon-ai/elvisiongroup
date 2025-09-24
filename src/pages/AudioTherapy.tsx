@@ -14,6 +14,7 @@ import { VerseAudioCard } from "@/components/VerseAudioCard";
 import { useProtectedAudio } from "@/contexts/AudioContext";
 import { SacredFocusNotification } from "@/components/SacredFocusNotification";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
+import { useUserProfile } from '@/contexts/UserProfileContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -96,6 +97,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
+  const { user, userProfile } = useUserProfile();
 
   // Local audio state (better for XP tracking)
   const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
@@ -129,24 +131,11 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   useEffect(() => {
     const initializeData = async () => {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
       setIsAdmin(user?.email === "elvisiondragon@gmail.com");
       
       if (user) {
-        console.log('🔄 Initializing data for user:', user.id);
-        
-        // Fetch verse4 count specifically first
         const verse4Count = await fetchVerse4Count(user.id);
-        console.log('🎵 Verse4 count fetched:', verse4Count);
-        
-        // Then fetch full profile
         await fetchUserProfile(user.id);
-        
-        // Double check after profile fetch
-        setTimeout(() => {
-          console.log('🔄 Final verse4Used state:', verse4Used);
-        }, 200);
       }
       
       await fetchAudioTracks();
@@ -154,26 +143,18 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     };
     
     initializeData();
-  }, []);
+  }, [user]);
 
   // Debug effect to track verse4Used changes
   useEffect(() => {
     console.log('🎵 verse4Used state changed to:', verse4Used);
   }, [verse4Used]);
 
-  // Also reload when proStatus changes to ensure sync
   useEffect(() => {
-    const reloadVerse4Data = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (user && !loading) {
-        console.log('🔄 Reloading verse4 data on pro status change');
-        await fetchUserProfile(user.id);
-      }
-    };
-    
-    reloadVerse4Data();
-  }, [proStatus.isPro]);
+    if (user && !loading) {
+      fetchUserProfile(user.id);
+    }
+  }, [proStatus.isPro, user, loading]);
 
   // Refetch audio tracks when language changes
   useEffect(() => {
@@ -277,8 +258,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     if (proStatus.isPro) return true; // Pro users have unlimited access
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
       if (!user) return false;
 
       console.log('🎵 Current verse4Used before increment:', verse4Used);
@@ -315,8 +294,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       
       // Force refresh data to ensure UI sync
       setTimeout(async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
         if (user) {
           console.log('🔄 Force refreshing verse4 data after completion');
           await fetchUserProfile(user.id);

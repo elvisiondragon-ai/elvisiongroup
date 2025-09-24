@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { EditProfile } from '@/components/EditProfile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 
 // Meta Pixel declaration
 declare global {
@@ -31,9 +32,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [paymentData, setPaymentData] = useState<any>(null);
 
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [userDataLoading, setUserDataLoading] = useState(true);
+  const { userProfile, user, loading: userDataLoading } = useUserProfile();
   const [profileError, setProfileError] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [showQrisModal, setShowQrisModal] = useState(false);
@@ -361,197 +360,14 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [showPaymentInstructions, paymentData?.tripay_reference]);
 
   useEffect(() => {
-    const fetchUserProfile = async (userId: string): Promise<any> => {
-      try {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', userId)
-          .maybeSingle();
-
-        if (error) {
-          console.error('Profile fetch error:', error);
-          return null; // Return null instead of throwing
-        }
-
-        return profile;
-      } catch (error) {
-        console.error('Failed to fetch profile:', error);
-        return null; // Return null instead of throwing
-      }
-    };
-
-    const initializeData = async () => {
-      try {
-        setUserDataLoading(true);
-        setProfileError(null);
-
-        // Check cached user ID first
-        const cachedUserId = localStorage.getItem('current-user-id');
-        if (cachedUserId) {
-          console.log('⚡ Loading user ID from cache for instant payment loading');
-          // Create minimal user object for immediate use
-          setUser({ id: cachedUserId });
-        } else {
-          // If no cached ID, fetch user for first visit - OPTIMIZED: using getUser() instead of getSession()
-          console.log('⚡ No cached ID found, fetching user for first visit');
-          const { data: { session } } = await supabase.auth.getSession();
-          const user = session?.user;
-          if (user) {
-            localStorage.setItem('current-user-id', user.id);
-            setUser({ id: user.id });
-            console.log('⚡ User ID cached for instant payment loading');
-          }
-        }
-
-        // Get user data from session
-        const { data: { session }, error: userError } = await supabase.auth.getSession();
-        const user = session?.user;
-        
-        if (userError) {
-          throw new Error('Failed to get user data');
-        }
-
-        // Cache user ID for future visits
-        if (user?.id) {
-          localStorage.setItem('current-user-id', user.id);
-        }
-
-        setUser(user);
-        
-        if (user) {
-          // Set email immediately from auth
-          setEmail(user.email || '');
-
-          // INSTANT NAME LOADING: Check auth metadata first
-          let instantName = '';
-          if (user.user_metadata?.display_name?.trim()) {
-            instantName = user.user_metadata.display_name.trim();
-            console.log('⚡ Instant name from auth metadata:', instantName);
-          } else if (user.email) {
-            // Fallback for instant display
-            instantName = 'User';
-            console.log('⚡ Using fallback name:', instantName);
-          }
-
-          // Set name instantly if field is empty
-          if (!fullName.trim() && instantName) {
-            setFullName(instantName);
-            setUserDataLoading(false); // Stop loading immediately
-          }
-
-          try {
-            // Fetch user profile for additional data (non-blocking)
-            const profile = await fetchUserProfile(user.id);
-            setUserProfile(profile);
-
-            // Only update fullName if metadata was empty and profile has better data
-            if (!user.user_metadata?.display_name?.trim() && profile?.display_name?.trim()) {
-              const profileName = profile.display_name.trim();
-              if (!fullName.trim()) {
-                setFullName(profileName);
-                console.log('Updated name from profile:', profileName);
-              }
-            }
-
-            // Auto-populate phone number from profile if available
-            if (!phoneNumber.trim() && profile?.phone_number?.trim()) {
-              setPhoneNumber(profile.phone_number.trim());
-            }
-
-          } catch (profileError) {
-            console.error('Profile fetch failed:', profileError);
-            setProfileError('Failed to load profile data');
-            
-            // Final fallback if no name is available
-            if (!fullName.trim()) {
-              setFullName('User');
-              console.log('Using final fallback name: User');
-            }
-          }
-        }
-
-        // Fetch subscription plans
-        try {
-          const { data, error } = await supabase
-            .from('subscription_plans')
-            .select('*')
-            .eq('is_active', true)
-            .order('price', { ascending: false });
-          
-          if (data && !error) {
-            const formattedPlans = data.map(plan => ({
-              id: plan.id,
-              name: plan.name,
-              description: plan.description,
-              price: plan.price,
-              currency: plan.currency,
-              paymentMethodCode: plan.payment_method_code,
-              paymentMethod: plan.payment_method,
-              duration: `${plan.duration_days} ${plan.duration_days === 1 ? 'hari' : 'hari'}`,
-              durationDays: plan.duration_days
-            }));
-            setSubscriptionPlans(formattedPlans);
-          }
-        } catch (error) {
-          console.error('Error fetching subscription plans:', error);
-        }
-
-      } catch (error) {
-        console.error('Failed to initialize user data:', error);
-        setProfileError('Failed to load user data');
-      } finally {
-        setUserDataLoading(false);
-      }
-    };
-
-    initializeData();
-  }, []);
-
-  // Instant cache loading for second-time visits
-  useEffect(() => {
-    const cachedData = localStorage.getItem('payment-user-cache');
-    if (cachedData) {
-      try {
-        const parsed = JSON.parse(cachedData);
-        console.log('⚡ Loading from cache for instant display');
-        setEmail(parsed.user?.email || '');
-        
-        // PRIORITIZE: cached profile > auth metadata > fallback
-        const cachedName = parsed.userProfile?.display_name || 
-                          parsed.user?.user_metadata?.display_name || 
-                          'User';
-        setFullName(cachedName);
-        console.log('⚡ Cached name priority - metadata:', parsed.user?.user_metadata?.display_name, 'profile:', parsed.userProfile?.display_name);
-        if (parsed.userProfile?.phone_number) {
-          setPhoneNumber(parsed.userProfile.phone_number);
-        }
-        setUserDataLoading(false);
-      } catch (error) {
-        console.error('Cache error, removing:', error);
-        localStorage.removeItem('payment-user-cache');
+    if (user && userProfile) {
+      setEmail(user.email || '');
+      setFullName(userProfile.display_name || 'User');
+      if (userProfile.phone_number) {
+        setPhoneNumber(userProfile.phone_number);
       }
     }
-  }, []);
-
-  // Cache user data when successfully loaded
-  useEffect(() => {
-    if (user && userProfile && !userDataLoading) {
-      const cacheData = {
-        user: {
-          id: user.id,
-          email: user.email,
-          user_metadata: user.user_metadata // Cache metadata for instant 2nd visit
-        },
-        userProfile: {
-          display_name: userProfile.display_name,
-          phone_number: userProfile.phone_number
-        }
-      };
-      localStorage.setItem('payment-user-cache', JSON.stringify(cacheData));
-      console.log('💾 User data cached for next visit');
-    }
-  }, [user, userProfile, userDataLoading]);
+  }, [user, userProfile]);
 
   const handleCreatePayment = async () => {
     if (!user || !selectedPlan || !phoneNumber.trim() || !fullName.trim() || !email.trim()) {

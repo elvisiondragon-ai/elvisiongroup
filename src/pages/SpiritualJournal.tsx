@@ -6,6 +6,7 @@ import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useXPSystem } from '@/hooks/useXPSystem';
 
 interface SpiritualJournalProps {
@@ -21,8 +22,7 @@ interface Reflection {
 export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
   const [reflections, setReflections] = useState<Reflection[]>([]);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userDataLoading, setUserDataLoading] = useState(true);
+  const { user: currentUser, loading: userDataLoading } = useUserProfile();
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
@@ -34,36 +34,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
 
   useEffect(() => {
-    // Get current user and load reflections - using getSession() for complete user data
-    const getCurrentUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (user) {
-        // Set auth user first for immediate functionality
-        setCurrentUser(user);
-        setUserDataLoading(false);
-        
-        // Get profile data to populate total_journal counter and display_name
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name, total_journal')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        // Update user with profile data when available
-        if (profile) {
-          setCurrentUser({
-            ...user,
-            profile: profile
-          });
-        }
-        
-        loadReflections(user.id);
-      }
-    };
-
-    getCurrentUser();
-  }, []);
+    if (currentUser) {
+      loadReflections(currentUser.id);
+    }
+  }, [currentUser]);
 
   const loadReflections = async (userId: string) => {
     console.log('🔍 Loading reflections for user:', userId);

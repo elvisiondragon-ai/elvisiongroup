@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
 import { useTranslation } from "react-i18next";
+import { useUserProfile } from '@/contexts/UserProfileContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,8 +38,7 @@ export function Chat({ onNavigate }: ChatProps) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userDataLoading, setUserDataLoading] = useState(true);
+  const { user: currentUser, loading: userDataLoading } = useUserProfile();
   const [isTranslating, setIsTranslating] = useState(false);
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -49,41 +49,6 @@ export function Chat({ onNavigate }: ChatProps) {
   const { proStatus } = usePro();
   const { i18n, t } = useTranslation();
 
-  useEffect(() => {
-    // OPTIMIZED: Get current user INSTANTLY using getUser() instead of getSession()
-    const getCurrentUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (user) {
-        // Cache user ID immediately for instant delete buttons
-        localStorage.setItem('current-user-id', user.id);
-        
-        // Get profile data first - DON'T set loading false until both auth + profile loaded
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name, level, achievements, is_pro, subscription_type')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        // Set COMPLETE user data with both auth + profile
-        const finalName = profile?.display_name || user.user_metadata?.display_name || 'Anonymous';
-        setCurrentUser({
-          id: user.id,
-          email: user.email,
-          name: finalName,
-          level: profile?.level || 1,
-          isPro: profile?.is_pro || proStatus.isPro,
-          achievements: profile?.achievements || [],
-          subscriptionType: profile?.subscription_type || null
-        });
-        
-        // ONLY NOW set loading complete - user has full data
-        setUserDataLoading(false);
-      }
-    };
-
-    getCurrentUser();
-  }, [toast, proStatus.isPro]);
 
   // Load messages from database
   const loadMessages = useCallback(async (showRefreshState = false) => {
@@ -189,29 +154,6 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [toast]);
 
-  // Instant cache loading for second-time visits
-  useEffect(() => {
-    const cachedMessages = localStorage.getItem('chat-messages-cache');
-    const cachedUserId = localStorage.getItem('current-user-id');
-    
-    if (cachedMessages) {
-      try {
-        const parsed = JSON.parse(cachedMessages);
-        console.log('⚡ Loading chat messages from cache for instant display');
-        setMessages(parsed);
-        setIsLoading(false); // Stop loading immediately
-      } catch (error) {
-        console.error('Chat cache error, removing:', error);
-        localStorage.removeItem('chat-messages-cache');
-      }
-    }
-
-    // Load cached user ID instantly for delete buttons
-    if (cachedUserId) {
-      console.log('⚡ Loading user ID from cache for instant delete buttons');
-      setCurrentUser({ id: cachedUserId });
-    }
-  }, []);
 
   useEffect(() => {
     loadMessages();
