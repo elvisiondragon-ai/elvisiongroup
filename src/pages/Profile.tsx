@@ -38,7 +38,7 @@ import {
   Activity,
   Globe,
 } from "lucide-react";
-import { GiCrownCoin, GiBatMask } from "react-icons/gi";
+import { GiCrownCoin, GiBatMask, GiTrophy, GiFire, GiMeditation, GiCrown, GiFootsteps } from "react-icons/gi";
 
 interface ProfileProps {
   onNavigate: (tab: string) => void;
@@ -480,45 +480,72 @@ export function Profile({ onNavigate }: ProfileProps) {
           {achievements.map((achievement, index) => (
             <Card 
               key={index} 
-              className={`p-4 border-border ${
+              className={`p-4 border-border transition-all duration-300 hover:scale-105 backdrop-blur-sm ${
                 achievement.unlocked && achievement.isHandOfMidas
-                  ? "bg-gradient-to-r from-yellow-900 via-amber-800 to-yellow-900 border-yellow-500 shadow-lg shadow-yellow-500/25" 
+                  ? "bg-gradient-to-r from-yellow-900/80 via-amber-800/80 to-yellow-900/80 border-yellow-500 shadow-lg shadow-yellow-500/25 animate-pulse" 
                   : achievement.unlocked && achievement.isIgnisLord
-                    ? "bg-gradient-to-r from-red-900 via-red-800 to-orange-900 border-red-500 shadow-lg shadow-red-500/25" 
+                    ? "bg-gradient-to-r from-red-900/80 via-red-800/80 to-orange-900/80 border-red-500 shadow-lg shadow-red-500/25 animate-pulse" 
                     : achievement.unlocked && achievement.isRealityMaster
-                      ? "bg-gradient-to-r from-purple-900 via-purple-800 to-blue-900 border-purple-500 shadow-lg shadow-purple-500/25"
+                      ? "bg-gradient-to-r from-purple-900/80 via-purple-800/80 to-blue-900/80 border-purple-500 shadow-lg shadow-purple-500/25 animate-pulse"
                       : achievement.unlocked && achievement.isTheVoid
-                        ? "bg-gradient-to-r from-black via-gray-900 to-black border-gray-500 shadow-lg shadow-gray-500/25"
-                        : achievement.unlocked 
-                          ? "bg-gradient-secondary opacity-100" 
-                          : "bg-muted/30 opacity-50"
+                        ? "bg-gradient-to-r from-black/80 via-gray-900/80 to-black/80 border-gray-500 shadow-lg shadow-gray-500/25 animate-pulse"
+                        : achievement.name === "Week Warrior" && achievement.unlocked
+                          ? "bg-gradient-to-r from-yellow-800/80 via-yellow-700/80 to-orange-800/80 border-yellow-400 shadow-lg shadow-yellow-400/25" 
+                          : achievement.name === "Zen Master" && achievement.unlocked
+                            ? "bg-gradient-to-r from-blue-800/80 via-blue-700/80 to-indigo-800/80 border-blue-400 shadow-lg shadow-blue-400/25"
+                            : achievement.name === "Soul Leader" && achievement.unlocked
+                              ? "bg-gradient-to-r from-indigo-800/80 via-purple-700/80 to-purple-800/80 border-indigo-400 shadow-lg shadow-indigo-400/25"
+                              : achievement.name === "First Step" && achievement.unlocked
+                                ? "bg-gradient-to-r from-green-800/80 via-emerald-700/80 to-green-800/80 border-green-400 shadow-lg shadow-green-400/25"
+                                : achievement.unlocked 
+                                  ? "bg-gradient-secondary/80 opacity-100" 
+                                  : "bg-muted/20 opacity-50"
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center relative overflow-hidden ${
                   achievement.unlocked && achievement.isHandOfMidas
-                    ? "bg-gradient-to-r from-yellow-600 to-amber-600 text-white animate-pulse" 
+                    ? "bg-gradient-to-r from-yellow-700 to-amber-700 text-amber-100 animate-pulse" 
                     : achievement.unlocked && achievement.isIgnisLord
-                      ? "bg-gradient-to-r from-red-600 to-orange-600 text-white animate-pulse" 
+                      ? "bg-gradient-to-r from-red-700 to-orange-700 text-orange-100 animate-pulse" 
                       : achievement.unlocked && achievement.isRealityMaster
-                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white animate-pulse"
+                        ? "bg-gradient-to-r from-purple-700 to-blue-700 text-blue-100 animate-pulse"
                         : achievement.unlocked && achievement.isTheVoid
-                          ? "bg-gradient-to-r from-gray-600 to-black text-white animate-pulse"
-                          : achievement.unlocked 
-                            ? "bg-gradient-primary text-primary-foreground glow-primary" 
-                            : "bg-muted text-muted-foreground"
+                          ? "bg-gradient-to-r from-gray-700 to-black text-gray-100 animate-pulse"
+                          : achievement.name === "Week Warrior" && achievement.unlocked
+                            ? "bg-gradient-to-r from-yellow-700 to-orange-700 text-yellow-100"
+                            : achievement.name === "Zen Master" && achievement.unlocked
+                              ? "bg-gradient-to-r from-blue-700 to-indigo-700 text-blue-100"
+                              : achievement.name === "Soul Leader" && achievement.unlocked
+                                ? "bg-gradient-to-r from-indigo-700 to-purple-700 text-indigo-100"
+                                : achievement.name === "First Step" && achievement.unlocked
+                                  ? "bg-gradient-to-r from-green-700 to-emerald-700 text-green-100"
+                                  : achievement.unlocked 
+                                    ? "bg-gradient-primary text-primary-foreground glow-primary" 
+                                    : "bg-muted text-muted-foreground"
                 }`}>
-                  {achievement.isHandOfMidas && achievement.unlocked ? (
-                    <GiCrownCoin className="w-5 h-5 animate-bounce" />
-                  ) : achievement.isIgnisLord && achievement.unlocked ? (
-                    <Flame className="w-5 h-5 animate-bounce" />
-                  ) : achievement.isRealityMaster && achievement.unlocked ? (
-                    <Globe className="w-5 h-5 animate-spin" />
-                  ) : achievement.isTheVoid && achievement.unlocked ? (
-                    <GiBatMask className="w-5 h-5 animate-pulse" />
-                  ) : (
-                    <Award className="w-5 h-5" />
-                  )}
+                  <div className="absolute inset-0 bg-black/20 rounded-full"></div>
+                  <div className="relative z-10">
+                    {achievement.isHandOfMidas && achievement.unlocked ? (
+                      <GiCrownCoin className="w-7 h-7 animate-bounce drop-shadow-lg" />
+                    ) : achievement.isIgnisLord && achievement.unlocked ? (
+                      <GiFire className="w-7 h-7 animate-bounce drop-shadow-lg" />
+                    ) : achievement.isRealityMaster && achievement.unlocked ? (
+                      <Globe className="w-7 h-7 animate-spin drop-shadow-lg" />
+                    ) : achievement.isTheVoid && achievement.unlocked ? (
+                      <GiBatMask className="w-7 h-7 animate-pulse drop-shadow-lg" />
+                    ) : achievement.name === "Week Warrior" && achievement.unlocked ? (
+                      <GiTrophy className="w-7 h-7 animate-pulse drop-shadow-lg" />
+                    ) : achievement.name === "Zen Master" && achievement.unlocked ? (
+                      <GiMeditation className="w-7 h-7 animate-pulse drop-shadow-lg" />
+                    ) : achievement.name === "Soul Leader" && achievement.unlocked ? (
+                      <GiCrown className="w-7 h-7 animate-pulse drop-shadow-lg" />
+                    ) : achievement.name === "First Step" && achievement.unlocked ? (
+                      <GiFootsteps className="w-7 h-7 animate-pulse drop-shadow-lg" />
+                    ) : (
+                      <Award className="w-5 h-5 text-gray-400" />
+                    )}
+                  </div>
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-foreground">
