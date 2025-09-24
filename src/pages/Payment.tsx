@@ -38,31 +38,43 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [showQrisModal, setShowQrisModal] = useState(false);
   const { toast } = useToast();
 
-  // Meta Pixel initialization
+  // Meta Pixel initialization with error handling
   useEffect(() => {
     // Initialize Meta Pixel if not already loaded
     if (typeof window !== 'undefined' && !window.fbq) {
-      (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-        if (f.fbq) return;
-        n = f.fbq = function(...args: any[]) {
-          n.callMethod ?
-            n.callMethod.apply(n, args) : n.queue.push(args)
-        };
-        if (!f._fbq) f._fbq = n;
-        n.push = n;
-        n.loaded = !0;
-        n.version = '2.0';
-        n.queue = [];
-        t = b.createElement(e);
-        t.async = !0;
-        t.src = v;
-        s = b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t, s)
-      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+      try {
+        (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
+          if (f.fbq) return;
+          n = f.fbq = function(...args: any[]) {
+            n.callMethod ?
+              n.callMethod.apply(n, args) : n.queue.push(args)
+          };
+          if (!f._fbq) f._fbq = n;
+          n.push = n;
+          n.loaded = !0;
+          n.version = '2.0';
+          n.queue = [];
+          t = b.createElement(e);
+          t.async = !0;
+          t.src = v;
+          t.onerror = () => {
+            // Silently fail if Facebook Pixel can't load
+            console.warn('Facebook Pixel failed to load (blocked or network issue)');
+          };
+          s = b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t, s)
+        })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
-      // Initialize with your Pixel ID
-      window.fbq('init', '3319324491540889');
-      window.fbq('track', 'PageView');
+        // Initialize with your Pixel ID (with error handling)
+        setTimeout(() => {
+          if (window.fbq) {
+            window.fbq('init', '3319324491540889');
+            window.fbq('track', 'PageView');
+          }
+        }, 1000);
+      } catch (error) {
+        console.warn('Facebook Pixel initialization failed:', error);
+      }
     }
   }, []);
 

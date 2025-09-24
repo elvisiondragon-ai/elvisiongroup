@@ -1,69 +1,12 @@
-Claude Job = Front end
-User Job = SQL Backend Check
 
-ALWAYS NEED TO REMEMBER RULE TXT EACH TIME YOU WANT CODING
-- STEP BY STEP DO NOT BRUTAL GIVING USELESS CODE IF NOT SURE OR SYNTAX ERROR
-- MAIN RULE *DO NOT FUCKING ASSUMPT YOU ARE TOO FUCKING STUPID, FIND VALIDATION* I MEANT THIS EXPLICITLY
-
-**Claude have disgusting legacy BEHAVIOR - OVERCOMPLICATED, and become OVERLY STUPID by it**
-  1. DO NOT jumped to solutions without fully understanding THE system
-  2. DO NOT added unnecessary complexity when user system worked fine
-  3. Ask clarifying questions about what CLAUDE actually needed
-  4. DO NOT assumed problems existed where there weren't any 
-  5. HIGHLY FORBIDDEN : DO NOT made unauthorized changes
-  6. WHEN PROVIDE SOLUTION CHOOSE THE MOST SIMPLE SOLUTION, VERY SIMPLE. DO NOT OVERCOMPLICATED OR REDUNDANT USELESS CODING.
-
-Your 
-OUTPUT 1 - ANALYTICS SESSION
--> Read the ENTIRE REQUESTED component first, ANALYTICS MODE 
+CLAUDE CODE BEHAVIOR
+~ ALWAYS OPEN THIS rule.txt everytime want to code ~
+1. ANALYTICS SESSION - *OPEN only if needed*, Check SCHEMA.yaml | AUTH.yaml | METADATA.yaml
 -> CLAUDE Traced the execution flow 
--> give user SQL in assist_code folder to check schema/Real table sctructure or function or what you need  
--> CLAUDE Found the gap 
-SIMPLE FIX MODE
--> SQL to FIX the simplest also simple frontend if needed+ SQL to verify the fix if it's working (both in 1 file)
--> CLAUDE Save Report on migration
+-> FIND THE GAP
+-> NOT ALLOWED ASSUMPT or Giving Code by assumption, ONLY VALIDATION FROM DATA, Explain why it is the issue and give option 
 
-
-SCHEMA 
-
-  -- Check profiles table structure
-  SELECT
-      column_name,
-      data_type,
-      is_nullable
-  FROM information_schema.columns
-  WHERE table_name = 'profiles'
-      AND table_schema = 'public'
-  ORDER BY ordinal_position;
-
-| column_name            | data_type                | is_nullable |
-| ---------------------- | ------------------------ | ----------- |
-| id                     | uuid                     | NO          |
-| user_id                | uuid                     | NO          |
-| display_name           | text                     | YES         |
-| level                  | integer                  | NO          |
-| experience_points      | integer                  | NO          |
-| streak_days            | integer                  | NO          |
-| achievements           | ARRAY                    | YES         |
-| created_at             | timestamp with time zone | NO          |
-| updated_at             | timestamp with time zone | NO          |
-| avatar_url             | text                     | YES         |
-| preferred_language     | text                     | YES         |
-| last_login_date        | date                     | YES         |
-| last_streak_bonus_date | date                     | YES         |
-| total_verses           | integer                  | YES         |
-| total_journal          | integer                  | YES         |
-| daily_xp_earned        | integer                  | YES         |
-| app_version            | integer                  | YES         |
-| user_email             | text                     | YES         |
-| total_elite_habit      | integer                  | YES         |
-| analytics_used         | integer                  | YES         |
-| last_analytics_date    | date                     | YES         |
-| is_admin               | boolean                  | YES         |
-| phone_number           | text                     | YES         |
-| verse4_used            | integer                  | YES         |
-| is_pro                 | boolean                  | YES         |
-| subscription_type      | text                     | YES         |
-| last_notification_time | timestamp with time zone | YES         |
-
+FIX SESSION - GIVE CODE Not From assumption but VALID DATA
+2. GIVE SIMPLEST SOLUTION, IF CODE SQL Give shortest but most effective code after understand schema + Verification code in 1 file at assist_code folder.
+3. IF Frontend code, ONLY FIX WHAT REQUESTED, DO NOT CHANGE beyond what requested, it cross the line!
 

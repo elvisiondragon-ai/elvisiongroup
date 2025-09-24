@@ -77,7 +77,6 @@ export function Chat({ onNavigate }: ChatProps) {
       let adminUsers = new Set();
       const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
       adminUsers.add(knownAdminId);
-      console.log('✅ Using known admin user:', knownAdminId);
         
       // If the join fails, fall back to simple query
       if (error || !chatMessages) {
@@ -171,7 +170,6 @@ export function Chat({ onNavigate }: ChatProps) {
     if (cachedMessages) {
       try {
         const parsed = JSON.parse(cachedMessages);
-        console.log('⚡ Loading chat messages from cache for instant display');
         setMessages(parsed);
         setIsLoading(false);
       } catch (error) {
@@ -188,11 +186,16 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [currentUser, userDataLoading, loadMessages]);
 
-  // Cache chat messages when successfully loaded
+  // Cache chat messages when successfully loaded (prevent duplicate saves)
   useEffect(() => {
     if (messages.length > 0 && !isLoading) {
-      localStorage.setItem('chat-messages-cache', JSON.stringify(messages));
-      console.log('💾 Chat messages cached for next visit');
+      const currentCache = localStorage.getItem('chat-messages-cache');
+      const newCache = JSON.stringify(messages);
+      
+      // Only save if cache is different
+      if (currentCache !== newCache) {
+        localStorage.setItem('chat-messages-cache', newCache);
+      }
     }
   }, [messages, isLoading]);
 
