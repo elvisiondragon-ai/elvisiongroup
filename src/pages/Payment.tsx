@@ -75,7 +75,13 @@ export function Payment({ onNavigate }: PaymentProps) {
         const parsed = JSON.parse(cachedData);
         console.log('⚡ Loading from cache for instant display');
         setEmail(parsed.user?.email || '');
-        setFullName(parsed.userProfile?.display_name || parsed.user?.email?.split('@')[0] || '');
+        
+        // PRIORITIZE: auth metadata > cached profile > email username
+        const cachedName = parsed.user?.user_metadata?.display_name || 
+                          parsed.userProfile?.display_name || 
+                          parsed.user?.email?.split('@')[0] || '';
+        setFullName(cachedName);
+        console.log('⚡ Cached name priority - metadata:', parsed.user?.user_metadata?.display_name, 'profile:', parsed.userProfile?.display_name);
         if (parsed.userProfile?.phone_number) {
           setPhoneNumber(parsed.userProfile.phone_number);
         }
@@ -93,7 +99,8 @@ export function Payment({ onNavigate }: PaymentProps) {
       const cacheData = {
         user: {
           id: user.id,
-          email: user.email
+          email: user.email,
+          user_metadata: user.user_metadata // Cache metadata for instant 2nd visit
         },
         userProfile: {
           display_name: userProfile.display_name,
@@ -414,23 +421,35 @@ export function Payment({ onNavigate }: PaymentProps) {
           // Set email immediately from auth
           setEmail(user.email || '');
 
+          // INSTANT NAME LOADING: Check auth metadata first
+          let instantName = '';
+          if (user.user_metadata?.display_name?.trim()) {
+            instantName = user.user_metadata.display_name.trim();
+            console.log('⚡ Instant name from auth metadata:', instantName);
+          } else if (user.email) {
+            // Fallback to email username for instant display
+            instantName = user.email.split('@')[0];
+            console.log('⚡ Instant name from email:', instantName);
+          }
+
+          // Set name instantly if field is empty
+          if (!fullName.trim() && instantName) {
+            setFullName(instantName);
+            setUserDataLoading(false); // Stop loading immediately
+          }
+
           try {
-            // Fetch user profile with retry mechanism
+            // Fetch user profile for additional data (non-blocking)
             const profile = await fetchUserProfile(user.id);
             setUserProfile(profile);
 
-            // Auto-fetch fullName from profile or fallback to email username
-            let autoFullName = '';
-            if (profile?.display_name?.trim()) {
-              autoFullName = profile.display_name.trim();
-            } else if (user.email) {
-              // Fallback to email username if profile display_name is empty
-              autoFullName = user.email.split('@')[0];
-            }
-
-            // Only update fullName if it's currently empty to avoid overwriting user input
-            if (!fullName.trim() && autoFullName) {
-              setFullName(autoFullName);
+            // Only update fullName if metadata was empty and profile has better data
+            if (!user.user_metadata?.display_name?.trim() && profile?.display_name?.trim()) {
+              const profileName = profile.display_name.trim();
+              if (!fullName.trim() || fullName === user.email?.split('@')[0]) {
+                setFullName(profileName);
+                console.log('Updated name from profile:', profileName);
+              }
             }
 
             // Auto-populate phone number from profile if available
@@ -496,7 +515,13 @@ export function Payment({ onNavigate }: PaymentProps) {
         const parsed = JSON.parse(cachedData);
         console.log('⚡ Loading from cache for instant display');
         setEmail(parsed.user?.email || '');
-        setFullName(parsed.userProfile?.display_name || parsed.user?.email?.split('@')[0] || '');
+        
+        // PRIORITIZE: auth metadata > cached profile > email username
+        const cachedName = parsed.user?.user_metadata?.display_name || 
+                          parsed.userProfile?.display_name || 
+                          parsed.user?.email?.split('@')[0] || '';
+        setFullName(cachedName);
+        console.log('⚡ Cached name priority - metadata:', parsed.user?.user_metadata?.display_name, 'profile:', parsed.userProfile?.display_name);
         if (parsed.userProfile?.phone_number) {
           setPhoneNumber(parsed.userProfile.phone_number);
         }
@@ -514,7 +539,8 @@ export function Payment({ onNavigate }: PaymentProps) {
       const cacheData = {
         user: {
           id: user.id,
-          email: user.email
+          email: user.email,
+          user_metadata: user.user_metadata // Cache metadata for instant 2nd visit
         },
         userProfile: {
           display_name: userProfile.display_name,

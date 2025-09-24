@@ -102,7 +102,7 @@ const Index = () => {
       case "home":
         return <Home onNavigate={setActiveTab} />;
       case "chat":
-        return <Chat />;
+        return <Chat onNavigate={setActiveTab} />;
       case "leaderboard":
         return <Leaderboard />;
       case "profile":

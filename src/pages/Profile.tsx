@@ -199,6 +199,18 @@ export function Profile({ onNavigate }: ProfileProps) {
     }
   }, [onNavigate]);
 
+  // Check for auto-edit profile flag from chat
+  useEffect(() => {
+    const shouldAutoEdit = localStorage.getItem('auto-edit-profile');
+    if (shouldAutoEdit === 'true') {
+      localStorage.removeItem('auto-edit-profile');
+      // Small delay to ensure profile is loaded
+      setTimeout(() => {
+        setEditingProfile(true);
+      }, 300);
+    }
+  }, []);
+
 
   if (loading && !cachedProfile && !cachedUserId) {
     return (

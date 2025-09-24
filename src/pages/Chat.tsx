@@ -29,7 +29,11 @@ interface ChatMessageData {
   translatedMessage?: string;
 }
 
-export function Chat() {
+interface ChatProps {
+  onNavigate: (tab: string) => void;
+}
+
+export function Chat({ onNavigate }: ChatProps) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,25 +56,38 @@ export function Chat() {
         // Cache user ID immediately for instant delete buttons
         localStorage.setItem('current-user-id', user.id);
         
-        // Set user ID instantly for delete buttons
-        setCurrentUser({ id: user.id });
+        // INSTANT NAME LOADING: Check auth metadata first
+        const instantName = user.user_metadata?.display_name || 'Anonymous';
         
-        // Get profile data separately (slow query)
+        // Set user data instantly for immediate UI update
+        setCurrentUser({ 
+          id: user.id, 
+          name: instantName,
+          level: 1, // Default values for instant display
+          isPro: proStatus.isPro,
+          achievements: [],
+          subscriptionType: null
+        });
+        
+        // Get profile data separately (non-blocking background update)
         const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, level, achievements, is_pro, subscription_type')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        // Update with full profile data when available
-        setCurrentUser({
-          id: user.id,
-          name: profile?.display_name || 'Anonymous',
-          level: profile?.level || 1,
-          isPro: profile?.is_pro || proStatus.isPro,
-          achievements: profile?.achievements || [],
-          subscriptionType: profile?.subscription_type
-        });
+        // Update with full profile data when available, only if metadata was empty
+        if (profile) {
+          const finalName = user.user_metadata?.display_name || profile.display_name || 'Anonymous';
+          setCurrentUser({
+            id: user.id,
+            name: finalName,
+            level: profile.level || 1,
+            isPro: profile.is_pro || proStatus.isPro,
+            achievements: profile.achievements || [],
+            subscriptionType: profile.subscription_type
+          });
+        }
       }
     };
 
@@ -410,18 +427,18 @@ export function Chat() {
     if (!currentUser.name || currentUser.name === 'Anonymous') {
       toast({
         title: "Lengkapi Profil untuk Chat",
-        description: "Silakan lengkapi profil Anda terlebih dahulu",
+        description: "Silakan pilih Edit Profil memastikan Nama anda untuk chat",
         variant: "destructive",
         action: (
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => {
-              // Navigate to edit profile - you'll need to implement this navigation
-              console.log('Navigate to edit profile');
+              localStorage.setItem('auto-edit-profile', 'true');
+              onNavigate('profile');
             }}
           >
-            Edit Profil
+            Arahkan Ke Profil
           </Button>
         )
       });

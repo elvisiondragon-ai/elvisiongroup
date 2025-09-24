@@ -183,7 +183,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       console.log('🔍 Fetching profile for user:', userId);
       const { data, error } = await supabase
         .from('profiles')
-        .select('level, total_verses_completed, current_streak, total_meditations, verse4_used')
+        .select('level, total_verses, streak_days, verse4_used')
         .eq('user_id', userId)
         .single();
 
@@ -205,9 +205,9 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         }, 100);
         
         setUserStats({
-          totalMeditations: data.total_meditations || 0,
+          totalMeditations: data.total_verses || 0, // Using total_verses as meditation count
           daysActive: Math.floor((new Date().getTime() - new Date(userId).getTime()) / (1000 * 60 * 60 * 24)),
-          currentStreak: data.current_streak || 0
+          currentStreak: data.streak_days || 0 // Using streak_days
         });
         
         console.log('✅ Profile fetch completed successfully');
