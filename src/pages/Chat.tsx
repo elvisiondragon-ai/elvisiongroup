@@ -154,22 +154,6 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [toast]);
 
-  // Instant cache loading for chat messages
-  useEffect(() => {
-    const cachedMessages = localStorage.getItem('chat-messages-cache');
-    
-    if (cachedMessages) {
-      try {
-        const parsed = JSON.parse(cachedMessages);
-        console.log('⚡ Loading chat messages from cache for instant display');
-        setMessages(parsed);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Chat cache error, removing:', error);
-        localStorage.removeItem('chat-messages-cache');
-      }
-    }
-  }, []);
 
   useEffect(() => {
     loadMessages();

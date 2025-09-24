@@ -71,8 +71,8 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
         .maybeSingle();
 
       if (error || !data) {
-        console.log('No session data found, using fallback');
-        // Fallback to hardcoded data if database fetch fails or no data
+        console.error('Error fetching session data:', error);
+        // Fallback to hardcoded data if database fetch fails
         setSessionData({
           title: 'Monday Live Session 736',
           description: 'Join our weekly guided meditation session with thousands of practitioners worldwide.',
