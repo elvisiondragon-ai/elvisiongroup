@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Minus, Check, Activity, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { Plus, Minus, Check, Activity, ChevronLeft, ChevronRight, Calendar, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useXPSystem } from '@/hooks/useXPSystem';
+import { useToast } from '@/hooks/use-toast';
 
 interface EliteHabitEntry {
   id?: string;
@@ -34,6 +35,8 @@ const EXERCISE_OPTIONS = [
 export function EliteHabit() {
   const { userProfile, user, refreshProfile } = useUserProfile();
   const { awardXP } = useXPSystem();
+  const { toast } = useToast();
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [selectedExercise, setSelectedExercise] = useState('');
   const [duration, setDuration] = useState(5);
   const [notes, setNotes] = useState('');
@@ -46,21 +49,66 @@ export function EliteHabit() {
 
   const today = new Date().toDateString();
 
-  // Load today's entries and total count
+  // IDENTICAL TO CHAT - Get current user INSTANTLY
   useEffect(() => {
-    if (!user) return;
-    loadHabitData();
-  }, [user]);
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // Cache user ID immediately for instant delete buttons
+        localStorage.setItem('current-user-id', session.user.id);
+        
+        // Set user ID instantly for delete buttons
+        setCurrentUser({ id: session.user.id });
+        
+        // Get profile data separately (slow query)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name, level, achievements, is_pro, subscription_type')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        // Update with full profile data when available
+        setCurrentUser({
+          id: session.user.id,
+          name: profile?.display_name || 'Anonymous',
+          level: profile?.level || 1,
+          isPro: profile?.is_pro || false,
+          achievements: profile?.achievements || [],
+          subscriptionType: profile?.subscription_type
+        });
+      }
+    };
+
+    getCurrentUser();
+  }, []);
+
+  // Instant cache loading for second-time visits
+  useEffect(() => {
+    const cachedUserId = localStorage.getItem('current-user-id');
+    
+    // Load cached user ID instantly for delete buttons
+    if (cachedUserId) {
+      console.log('⚡ Loading user ID from cache for instant delete buttons');
+      setCurrentUser({ id: cachedUserId });
+    }
+  }, []);
+
+  // Load habit data when currentUser is available
+  useEffect(() => {
+    if (currentUser?.id) {
+      loadHabitData();
+    }
+  }, [currentUser]);
 
   const loadHabitData = async () => {
-    if (!user) return;
+    if (!currentUser?.id) return;
 
     try {
       // Load today's entries
       const { data: todayData } = await supabase
         .from('elite_habits')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.id)
         .gte('created_at', new Date(today).toISOString())
         .lt('created_at', new Date(new Date(today).getTime() + 24*60*60*1000).toISOString());
 
@@ -75,7 +123,7 @@ export function EliteHabit() {
       const { data: allData } = await supabase
         .from('elite_habits')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.id)
         .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false });
 
@@ -127,7 +175,7 @@ export function EliteHabit() {
   };
 
   const submitHabit = async () => {
-    if (!selectedExercise || !user || !notes.trim()) return;
+    if (!selectedExercise || !currentUser?.id || !notes.trim()) return;
 
     setLoading(true);
     try {
@@ -135,8 +183,8 @@ export function EliteHabit() {
       const { error: insertError } = await supabase
         .from('elite_habits')
         .insert({
-          user_id: user.id,
-          user_email: user.email,
+          user_id: currentUser.id,
+          user_email: currentUser.email || 'anonymous',
           exercise_type: selectedExercise,
           duration_minutes: duration,
           date: today,
@@ -164,6 +212,43 @@ export function EliteHabit() {
       console.error('Elite habit error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteHabit = async (habitId: string) => {
+    if (!currentUser?.id) return;
+
+    try {
+      const { error } = await supabase
+        .from('elite_habits')
+        .delete()
+        .eq('id', habitId)
+        .eq('user_id', currentUser.id);
+
+      if (error) {
+        toast({
+          title: "❌ Gagal menghapus",
+          description: "Terjadi kesalahan saat menghapus elite habit",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Elite Habit Deleted 🔥",
+        variant: "default"
+      });
+
+      // Reload data and refresh profile
+      loadHabitData();
+      refreshProfile();
+    } catch (error) {
+      console.error("Error deleting elite habit:", error);
+      toast({
+        title: "❌ Gagal menghapus", 
+        description: "Terjadi kesalahan sistem",
+        variant: "destructive"
+      });
     }
   };
 
@@ -202,8 +287,17 @@ export function EliteHabit() {
           <h3 className="font-semibold mb-3 text-emerald-400">Hari Ini:</h3>
           <div className="space-y-2">
             {todayEntries.map((entry, index) => (
-              <div key={index} className="p-3 bg-emerald-900/20 rounded-lg space-y-2">
-                <div className="flex items-center justify-between">
+              <div key={index} className="relative p-3 bg-emerald-900/20 rounded-lg space-y-2">
+                {/* Delete Button */}
+                <Button
+                  onClick={() => handleDeleteHabit(entry.id!)}
+                  className="absolute top-2 right-2 w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
+                  size="sm"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+
+                <div className="flex items-center justify-between pr-8">
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-emerald-400" />
                     <span className="font-medium">{entry.exercise_type}</span>
@@ -315,7 +409,7 @@ export function EliteHabit() {
             console.log('BUTTON CLICKED!');
             submitHabit();
           }}
-          disabled={!selectedExercise || !notes.trim() || loading}
+          disabled={!selectedExercise || !notes.trim() || loading || !currentUser?.id}
           className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-gray-500 disabled:to-gray-600"
           size="lg"
         >
@@ -396,9 +490,18 @@ export function EliteHabit() {
               {currentEntries.map((entry, index) => (
                 <div
                   key={entry.id || index}
-                  className="p-4 bg-emerald-800/20 rounded-lg border border-emerald-500/20 space-y-2"
+                  className="relative p-4 bg-emerald-800/20 rounded-lg border border-emerald-500/20 space-y-2"
                 >
-                  <div className="flex items-center justify-between">
+                  {/* Delete Button */}
+                  <Button
+                    onClick={() => handleDeleteHabit(entry.id!)}
+                    className="absolute top-2 right-2 w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
+                    size="sm"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+
+                  <div className="flex items-center justify-between pr-8">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-emerald-600/20 flex items-center justify-center">
                         <Activity className="w-4 h-4 text-emerald-400" />

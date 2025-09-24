@@ -123,7 +123,6 @@ const Index = () => {
           </div>
         );
       case "elite-habit":
-        console.log("Rendering Elite Habit component");
         return (
           <div className="min-h-screen bg-background pb-20">
             <div className="p-6">

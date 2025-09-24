@@ -7,6 +7,7 @@ import { ArrowLeft, Play, Pause, Volume2, Users, Radio, Heart, Star, Sparkles, H
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useProtectedAudio } from "@/contexts/AudioContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import faviconImage from "@/assets/favicon.png";
 
 interface MeditationSessionsProps {
@@ -17,6 +18,8 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   const { t } = useTranslation();
   const { userProfile } = useUserProfile();
   const { createProtectedAudio } = useProtectedAudio();
+  const { toast } = useToast();
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -26,6 +29,50 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   const [sessionData, setSessionData] = useState<any>(null);
   const [audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // IDENTICAL TO CHAT - Get current user INSTANTLY
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // Cache user ID immediately for instant access
+        localStorage.setItem('current-user-id', session.user.id);
+        
+        // Set user ID instantly
+        setCurrentUser({ id: session.user.id });
+        
+        // Get profile data separately (slow query)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name, level, achievements, is_pro, subscription_type')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        // Update with full profile data when available
+        setCurrentUser({
+          id: session.user.id,
+          name: profile?.display_name || 'Anonymous',
+          level: profile?.level || 1,
+          isPro: profile?.is_pro || false,
+          achievements: profile?.achievements || [],
+          subscriptionType: profile?.subscription_type
+        });
+      }
+    };
+
+    getCurrentUser();
+  }, []);
+
+  // Instant cache loading for second-time visits
+  useEffect(() => {
+    const cachedUserId = localStorage.getItem('current-user-id');
+    
+    // Load cached user ID instantly
+    if (cachedUserId) {
+      console.log('⚡ Loading user ID from cache for instant access');
+      setCurrentUser({ id: cachedUserId });
+    }
+  }, []);
 
   // Simulate live audience count updates
   useEffect(() => {
