@@ -72,15 +72,23 @@ export function Profile({ onNavigate }: ProfileProps) {
   const { proStatus } = usePro();
   const { toast } = useToast();
 
-  // Load cached data instantly and fetch session if needed
+  // Load cached data instantly and fetch user if needed
   useEffect(() => {
     const initializeProfile = async () => {
       // Load cached profile
       const cached = localStorage.getItem('profile-cache');
       if (cached) {
         try {
-          setCachedProfile(JSON.parse(cached));
+          const cachedData = JSON.parse(cached);
+          // Validate cached profile structure
+          if (cachedData && typeof cachedData === 'object' && cachedData.display_name !== undefined) {
+            setCachedProfile(cachedData);
+          } else {
+            console.log('⚡ Invalid profile cache detected, clearing...');
+            localStorage.removeItem('profile-cache');
+          }
         } catch (error) {
+          console.log('⚡ Corrupted profile cache detected, clearing...');
           localStorage.removeItem('profile-cache');
         }
       }
@@ -89,12 +97,26 @@ export function Profile({ onNavigate }: ProfileProps) {
       const cachedUserIdFromStorage = localStorage.getItem('current-user-id');
       if (cachedUserIdFromStorage) {
         console.log('⚡ Loading user ID from cache to avoid black screen');
-        setCachedUserId(cachedUserIdFromStorage);
+        // Verify cached user ID is still valid
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user || user.id !== cachedUserIdFromStorage) {
+          console.log('⚡ Cached user ID is invalid, clearing cache...');
+          localStorage.removeItem('current-user-id');
+          localStorage.removeItem('profile-cache');
+          setCachedUserId(null);
+          setCachedProfile(null);
+          if (user) {
+            localStorage.setItem('current-user-id', user.id);
+            setCachedUserId(user.id);
+            console.log('⚡ Updated user ID cache with fresh data');
+          }
+        } else {
+          setCachedUserId(cachedUserIdFromStorage);
+        }
       } else {
-        // If no cached ID, fetch user for first visit - using getSession() for complete data
+        // If no cached ID, fetch user for first visit - using getUser() for complete data
         console.log('⚡ No cached ID found, fetching user for first visit');
-        const { data: { session } } = await supabase.auth.getSession();
-        const user = session?.user;
+        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           localStorage.setItem('current-user-id', user.id);
           setCachedUserId(user.id);

@@ -110,7 +110,11 @@ export function Auth({ onLogin }: AuthProps) {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        onLogin(session.user);
+        // Set flag for showing toast after refresh
+        localStorage.setItem('login-success-pending', 'true');
+        
+        // Force refresh to ensure proper auth flow
+        window.location.reload();
       }
     };
     checkUser();
@@ -139,11 +143,11 @@ export function Auth({ onLogin }: AuthProps) {
       if (error) throw error;
 
       if (data.user) {
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully logged in.",
-        });
-        onLogin(data.user);
+        // Set flag for showing toast after refresh
+        localStorage.setItem('login-success-pending', 'true');
+        
+        // Force refresh to ensure proper auth flow
+        window.location.reload();
       }
     } catch (error: any) {
       toast({

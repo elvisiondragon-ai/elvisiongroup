@@ -1,7 +1,7 @@
 
 CLAUDE CODE BEHAVIOR
 ~ ALWAYS OPEN THIS rule.txt everytime want to code ~
-1. ANALYTICS SESSION - *OPEN only if needed*, Check SCHEMA.yaml | AUTH.yaml | METADATA.yaml
+1. ANALYTICS SESSION - *if need data structure say request to open folder help* if user allowed you can go check: Check SCHEMA.yaml | AUTH.yaml | METADATA.yaml, if user say no, continue next step.
 -> CLAUDE Traced the execution flow 
 -> FIND THE GAP
 -> NOT ALLOWED ASSUMPT or Giving Code by assumption, ONLY VALIDATION FROM DATA, Explain why it is the issue and give option 

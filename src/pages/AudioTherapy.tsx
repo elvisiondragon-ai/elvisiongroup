@@ -14,7 +14,7 @@ import { VerseAudioCard } from "@/components/VerseAudioCard";
 import { useProtectedAudio } from "@/contexts/AudioContext";
 import { SacredFocusNotification } from "@/components/SacredFocusNotification";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
-import { useUserProfile } from '@/contexts/UserProfileContext';
+// Removed slow UserProfileContext - now using fast auth
 import {
   AlertDialog,
   AlertDialogAction,
@@ -97,7 +97,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
-  const { user, userProfile } = useUserProfile();
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Local audio state (better for XP tracking)
   const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
@@ -129,11 +129,54 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   };
 
   useEffect(() => {
+    // Only clear old profile cache ONCE if it still exists
+    const needsCacheClearing = !localStorage.getItem('audio-therapy-migration-done');
+    if (needsCacheClearing) {
+      const oldCacheKeys = [
+        'user-profile-cache',
+        'user_profile_cache', 
+        'unified_pro_status_cache',
+        'audio-therapy-user-cache'
+      ];
+      oldCacheKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+          console.log('🧹 One-time clearing old profile cache:', key);
+          localStorage.removeItem(key);
+        }
+      });
+      localStorage.setItem('audio-therapy-migration-done', 'true');
+      console.log('✅ Audio Therapy cache migration completed - now using fast auth');
+    }
+
+    // Try loading from auth cache first for instant second visits
+    const cachedAuth = localStorage.getItem('audio-therapy-auth-cache');
+    if (cachedAuth) {
+      try {
+        const cached = JSON.parse(cachedAuth);
+        console.log('⚡ Loading user from auth cache for instant access');
+        setCurrentUser(cached.user);
+        setIsAdmin(cached.user.email === "elvisiondragon@gmail.com");
+        setLoading(false);
+      } catch (error) {
+        console.error('Cache error, removing:', error);
+        localStorage.removeItem('audio-therapy-auth-cache');
+      }
+    }
+
     const initializeData = async () => {
       setLoading(true);
-      setIsAdmin(user?.email === "elvisiondragon@gmail.com");
       
+      // Get user immediately using fast auth
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        setCurrentUser(user);
+        setIsAdmin(user.email === "elvisiondragon@gmail.com");
+        
+        // Cache the user data for instant future visits (no expiry)
+        localStorage.setItem('audio-therapy-auth-cache', JSON.stringify({
+          user: user
+        }));
+        
         const verse4Count = await fetchVerse4Count(user.id);
         await fetchUserProfile(user.id);
       }
@@ -143,7 +186,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     };
     
     initializeData();
-  }, [user]);
+  }, []);
 
   // Debug effect to track verse4Used changes
   useEffect(() => {
@@ -151,10 +194,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   }, [verse4Used]);
 
   useEffect(() => {
-    if (user && !loading) {
-      fetchUserProfile(user.id);
+    if (currentUser && !loading) {
+      fetchUserProfile(currentUser.id);
     }
-  }, [proStatus.isPro, user, loading]);
+  }, [proStatus.isPro, currentUser, loading]);
 
   // Refetch audio tracks when language changes
   useEffect(() => {
@@ -266,7 +309,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       const { data: profile, error: fetchError } = await supabase
         .from('profiles')
         .select('verse4_used')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.id)
         .single();
 
       if (fetchError) {
@@ -282,7 +325,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       const { error } = await supabase
         .from('profiles')
         .update({ verse4_used: newCount })
-        .eq('user_id', user.id);
+        .eq('user_id', currentUser.id);
 
       if (error) {
         console.error('❌ Error updating verse4_used:', error);
@@ -294,9 +337,9 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       
       // Force refresh data to ensure UI sync
       setTimeout(async () => {
-        if (user) {
+        if (currentUser) {
           console.log('🔄 Force refreshing verse4 data after completion');
-          await fetchUserProfile(user.id);
+          await fetchUserProfile(currentUser.id);
         }
       }, 500);
       

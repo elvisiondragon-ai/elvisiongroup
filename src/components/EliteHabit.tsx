@@ -50,50 +50,37 @@ export function EliteHabit() {
 
   const today = new Date().toDateString();
 
-  // IDENTICAL TO CHAT - Get current user INSTANTLY
   useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        // Cache user ID immediately for instant delete buttons
-        localStorage.setItem('current-user-id', session.user.id);
-        
-        // Set user ID instantly for delete buttons
-        setCurrentUser({ id: session.user.id });
-        setUserDataLoading(false);
-        
-        // Get profile data separately (slow query)
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name, level, achievements, is_pro, subscription_type, total_elite_habit')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+    // Only clear old profile cache ONCE if it still exists
+    const needsCacheClearing = !localStorage.getItem('elite-habit-migration-done');
+    if (needsCacheClearing) {
+      const oldCacheKeys = [
+        'user-profile-cache',
+        'user_profile_cache', 
+        'unified_pro_status_cache',
+        'elite-habit-user-cache',
+        'current-user-id' // Old user ID cache
+      ];
+      oldCacheKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+          console.log('🧹 One-time clearing old profile cache:', key);
+          localStorage.removeItem(key);
+        }
+      });
+      localStorage.setItem('elite-habit-migration-done', 'true');
+      console.log('✅ Elite Habit cache migration completed - now using fast auth');
+    }
 
-        // Update with full profile data when available
-        setCurrentUser({
-          id: session.user.id,
-          name: profile?.display_name || 'Anonymous',
-          level: profile?.level || 1,
-          isPro: profile?.is_pro || false,
-          achievements: profile?.achievements || [],
-          subscriptionType: profile?.subscription_type,
-          profile: profile
-        });
+    // Get user immediately for habit functionality using fast auth
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser({ id: user.id });
+        setUserDataLoading(false);
       }
     };
-
-    getCurrentUser();
-  }, []);
-
-  // Instant cache loading for second-time visits
-  useEffect(() => {
-    const cachedUserId = localStorage.getItem('current-user-id');
     
-    // Load cached user ID instantly for delete buttons
-    if (cachedUserId) {
-      console.log('⚡ Loading user ID from cache for instant delete buttons');
-      setCurrentUser({ id: cachedUserId });
-    }
+    getUser();
   }, []);
 
   // Load habit data when currentUser is available
@@ -196,11 +183,18 @@ export function EliteHabit() {
 
       if (insertError) throw insertError;
 
-      // Update total_elite_habit counter FIRST in profiles table
+      // Update total_elite_habit counter FIRST - get fresh count from DB to prevent mismatch
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('total_elite_habit')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+
+      const currentCount = currentProfile?.total_elite_habit || 0;
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
-          total_elite_habit: (currentUser.profile?.total_elite_habit || 0) + 1,
+          total_elite_habit: currentCount + 1,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', currentUser.id);
@@ -250,11 +244,18 @@ export function EliteHabit() {
         return;
       }
 
-      // Update total_elite_habit counter (decrement)
+      // Update total_elite_habit counter (decrement) - get fresh count from DB
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('total_elite_habit')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+
+      const currentCount = currentProfile?.total_elite_habit || 0;
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
-          total_elite_habit: Math.max(0, (currentUser.profile?.total_elite_habit || 1) - 1),
+          total_elite_habit: Math.max(0, currentCount - 1),
           updated_at: new Date().toISOString()
         })
         .eq('user_id', currentUser.id);

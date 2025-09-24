@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ArrowLeft, Play, Pause, Volume2, Users, Radio, Heart, Star, Sparkles, Headphones, Clock, Crown, Eye, Loader2 } from "lucide-react";
-import { useUserProfile } from "@/contexts/UserProfileContext";
+// Removed slow UserProfileContext - now using fast auth
 import { useProtectedAudio } from "@/contexts/AudioContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +16,7 @@ interface MeditationSessionsProps {
 
 export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   const { t } = useTranslation();
-  const { userProfile, user } = useUserProfile();
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const { createProtectedAudio } = useProtectedAudio();
   const { toast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -29,7 +29,36 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   const [audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  useEffect(() => {
+    // Only clear old profile cache ONCE if it still exists
+    const needsCacheClearing = !localStorage.getItem('meditation-migration-done');
+    if (needsCacheClearing) {
+      const oldCacheKeys = [
+        'user-profile-cache',
+        'user_profile_cache', 
+        'unified_pro_status_cache',
+        'meditation-user-cache'
+      ];
+      oldCacheKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+          console.log('🧹 One-time clearing old profile cache:', key);
+          localStorage.removeItem(key);
+        }
+      });
+      localStorage.setItem('meditation-migration-done', 'true');
+      console.log('✅ Meditation cache migration completed - now using fast auth');
+    }
 
+    // Get user immediately using fast auth
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser(user);
+      }
+    };
+    
+    getUser();
+  }, []);
 
   // Simulate live audience count updates
   useEffect(() => {

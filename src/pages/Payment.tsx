@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { EditProfile } from '@/components/EditProfile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useUserProfile } from '@/contexts/UserProfileContext';
 
 // Meta Pixel declaration
 declare global {
@@ -32,7 +31,8 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [paymentData, setPaymentData] = useState<any>(null);
 
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
-  const { userProfile, user, loading: userDataLoading } = useUserProfile();
+  const [user, setUser] = useState<any>(null);
+  const [userDataLoading, setUserDataLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [showQrisModal, setShowQrisModal] = useState(false);
@@ -78,50 +78,6 @@ export function Payment({ onNavigate }: PaymentProps) {
     }
   }, []);
 
-  // Instant cache loading for second-time visits
-  useEffect(() => {
-    const cachedData = localStorage.getItem('payment-user-cache');
-    if (cachedData) {
-      try {
-        const parsed = JSON.parse(cachedData);
-        console.log('⚡ Loading from cache for instant display');
-        setEmail(parsed.user?.email || '');
-        
-        // PRIORITIZE: cached profile > auth metadata > fallback
-        const cachedName = parsed.userProfile?.display_name || 
-                          parsed.user?.user_metadata?.display_name || 
-                          'User';
-        setFullName(cachedName);
-        console.log('⚡ Cached name priority - metadata:', parsed.user?.user_metadata?.display_name, 'profile:', parsed.userProfile?.display_name);
-        if (parsed.userProfile?.phone_number) {
-          setPhoneNumber(parsed.userProfile.phone_number);
-        }
-        setUserDataLoading(false);
-      } catch (error) {
-        console.error('Cache error, removing:', error);
-        localStorage.removeItem('payment-user-cache');
-      }
-    }
-  }, []);
-
-  // Cache user data when successfully loaded
-  useEffect(() => {
-    if (user && userProfile && !userDataLoading) {
-      const cacheData = {
-        user: {
-          id: user.id,
-          email: user.email,
-          user_metadata: user.user_metadata // Cache metadata for instant 2nd visit
-        },
-        userProfile: {
-          display_name: userProfile.display_name,
-          phone_number: userProfile.phone_number
-        }
-      };
-      localStorage.setItem('payment-user-cache', JSON.stringify(cacheData));
-      console.log('💾 User data cached for next visit');
-    }
-  }, [user, userProfile, userDataLoading]);
 
   const paymentMethods = [
     {
@@ -371,15 +327,42 @@ export function Payment({ onNavigate }: PaymentProps) {
     };
   }, [showPaymentInstructions, paymentData?.tripay_reference]);
 
+  // Instant cache loading for second-time visits
   useEffect(() => {
-    if (user && userProfile) {
-      setEmail(user.email || '');
-      setFullName(userProfile.display_name || 'User');
-      if (userProfile.phone_number) {
-        setPhoneNumber(userProfile.phone_number);
+    const cachedData = localStorage.getItem('payment-user-cache');
+    if (cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        setEmail(parsed.email || '');
+        setFullName(parsed.display_name || 'User');
+        if (parsed.phone_number) {
+          setPhoneNumber(parsed.phone_number);
+        }
+      } catch (error) {
+        localStorage.removeItem('payment-user-cache');
       }
     }
-  }, [user, userProfile]);
+  }, []);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUser(user);
+        setEmail(user.email || '');
+        setFullName(user.user_metadata?.display_name || 'User');
+        
+        // Cache for next visit
+        localStorage.setItem('payment-user-cache', JSON.stringify({
+          email: user.email,
+          display_name: user.user_metadata?.display_name,
+          phone_number: phoneNumber
+        }));
+      }
+    };
+    
+    getUser();
+  }, [phoneNumber]);
 
   const handleCreatePayment = async () => {
     if (!user || !selectedPlan || !phoneNumber.trim() || !fullName.trim() || !email.trim()) {

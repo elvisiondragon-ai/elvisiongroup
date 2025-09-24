@@ -6,7 +6,6 @@ import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useXPSystem } from '@/hooks/useXPSystem';
 
 interface SpiritualJournalProps {
@@ -22,7 +21,7 @@ interface Reflection {
 export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
   const [reflections, setReflections] = useState<Reflection[]>([]);
-  const { user: currentUser, loading: userDataLoading } = useUserProfile();
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
@@ -34,10 +33,36 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
 
   useEffect(() => {
-    if (currentUser) {
-      loadReflections(currentUser.id);
+    // Only clear old profile cache ONCE if it still exists
+    const needsCacheClearing = !localStorage.getItem('journal-migration-done');
+    if (needsCacheClearing) {
+      const oldCacheKeys = [
+        'user-profile-cache',
+        'user_profile_cache', 
+        'unified_pro_status_cache',
+        'journal-user-profile-cache'
+      ];
+      oldCacheKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+          console.log('🧹 One-time clearing old profile cache:', key);
+          localStorage.removeItem(key);
+        }
+      });
+      localStorage.setItem('journal-migration-done', 'true');
+      console.log('✅ Journal cache migration completed - now using fast auth');
     }
-  }, [currentUser]);
+
+    // Get user immediately for journal functionality using fast auth
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser(user);
+        loadReflections(user.id);
+      }
+    };
+    
+    getUser();
+  }, []);
 
   const loadReflections = async (userId: string) => {
     console.log('🔍 Loading reflections for user:', userId);
@@ -102,7 +127,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         .from('profiles')
         .select('total_journal')
         .eq('user_id', currentUser.id)
-        .single();
+        .maybeSingle();
 
       const currentCount = currentProfile?.total_journal || 0;
       const { error: profileError } = await supabase

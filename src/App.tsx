@@ -96,8 +96,44 @@ const App = () => {
               console.log('🔄 User clicked update, clearing localStorage')
               localStorage.removeItem('app-needs-update')
               
-              // Set flag for success message after reload
+              // 25 SEP ONLY UNTUK CLEAR OLD CACHE, CABUT TANGGAL 26
+              // Nuke Refresh - Clear all cache and cookies for this update only
+              console.log('💥 NUKE REFRESH: Clearing all cache and cookies (25 SEP ONLY)');
+              
+              // Clear all localStorage
+              localStorage.clear();
+              
+              // Clear all sessionStorage
+              sessionStorage.clear();
+              
+              // Clear all cookies
+              document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+              });
+              
+              // Clear IndexedDB if available
+              if ('indexedDB' in window) {
+                indexedDB.databases().then(databases => {
+                  databases.forEach(db => {
+                    if (db.name) {
+                      indexedDB.deleteDatabase(db.name);
+                    }
+                  });
+                });
+              }
+              
+              // Clear service worker caches
+              if ('caches' in window) {
+                caches.keys().then(names => {
+                  names.forEach(name => {
+                    caches.delete(name);
+                  });
+                });
+              }
+              
+              // Re-set flag for success message after reload (since we cleared localStorage)
               localStorage.setItem('update-success-pending', 'true');
+              // END 25 SEP ONLY CLEAR CACHE CODE
               
               // iOS-specific timing adjustments
               const updateDelay = isIOS ? 200 : 50;

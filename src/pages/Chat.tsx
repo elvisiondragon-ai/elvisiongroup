@@ -1,4 +1,6 @@
 // @ts-nocheck
+// ⚡ PERFORMANCE: Now uses instant metadata instead of slow profile table queries
+// All user data (display_name, level, is_pro, achievements) comes from auth.user_metadata
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
 import { useTranslation } from "react-i18next";
-import { useUserProfile } from '@/contexts/UserProfileContext';
+// Removed slow UserProfileContext - now using fast metadata
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,17 +40,76 @@ export function Chat({ onNavigate }: ChatProps) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user, userProfile, loading: userDataLoading } = useUserProfile();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userDataLoading, setUserDataLoading] = useState(true);
   
-  // Build currentUser object for chat compatibility
-  const currentUser = user && userProfile ? {
-    id: user.id,
-    name: userProfile.display_name || user.user_metadata?.display_name || 'Anonymous',
-    level: userProfile.level || 1,
-    isPro: userProfile.is_pro || false,
-    achievements: userProfile.achievements || [],
-    subscriptionType: userProfile.subscription_type || null
-  } : null;
+  // Get user data from fast metadata instead of slow profile table
+  useEffect(() => {
+    // Only clear cache ONCE when switching from profile-based to metadata-based
+    const needsCacheClearing = !localStorage.getItem('metadata-migration-done');
+    if (needsCacheClearing) {
+      const oldCacheKeys = [
+        'user-profile-cache',
+        'user_profile_cache', 
+        'unified_pro_status_cache',
+        'chat-user-profile-cache'
+      ];
+      oldCacheKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+          console.log('🧹 One-time clearing old profile cache:', key);
+          localStorage.removeItem(key);
+        }
+      });
+      localStorage.setItem('metadata-migration-done', 'true');
+      console.log('✅ Cache migration completed - future visits will use metadata caching');
+    }
+
+    // Try loading from metadata cache first for instant second visits
+    const cachedMetadata = localStorage.getItem('user-metadata-cache');
+    if (cachedMetadata) {
+      try {
+        const cached = JSON.parse(cachedMetadata);
+        console.log('⚡ Loading user from metadata cache for instant access');
+        setCurrentUser(cached.user);
+        setUserDataLoading(false);
+        // Still fetch fresh data in background
+      } catch (error) {
+        console.error('Cache error, removing:', error);
+        localStorage.removeItem('user-metadata-cache');
+      }
+    }
+
+    const getCurrentUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Build currentUser from fast metadata instead of slow profile table
+          const metadata = user.user_metadata || {};
+          const currentUserData = {
+            id: user.id,
+            name: metadata.display_name || 'Anonymous',
+            level: metadata.level || 1,
+            isPro: metadata.is_pro || false,
+            achievements: metadata.achievements || [],
+            subscriptionType: metadata.subscription_type || null
+          };
+          
+          setCurrentUser(currentUserData);
+          
+          // Cache the metadata for instant future visits (no expiry)
+          localStorage.setItem('user-metadata-cache', JSON.stringify({
+            user: currentUserData
+          }));
+        }
+      } catch (error) {
+        console.error('Error getting user:', error);
+      } finally {
+        setUserDataLoading(false);
+      }
+    };
+    
+    getCurrentUser();
+  }, []);
   const [isTranslating, setIsTranslating] = useState(false);
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -180,7 +241,7 @@ export function Chat({ onNavigate }: ChatProps) {
   }, []);
 
   useEffect(() => {
-    // Only load messages AFTER user profile is ready
+    // Load messages AFTER user metadata is ready (much faster now)
     if (currentUser && !userDataLoading) {
       loadMessages();
     }
@@ -388,7 +449,7 @@ export function Chat({ onNavigate }: ChatProps) {
       return;
     }
 
-    // Check if user has valid display name
+    // Check if user has valid display name from metadata
     if (!currentUser.name || currentUser.name === 'Anonymous') {
       toast({
         title: "Lengkapi Profil untuk Chat",
