@@ -67,11 +67,12 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
         .select('*')
         .eq('category', 'meditation_session')
         .eq('is_public', true)
-        .single();
+        .limit(1)
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching session data:', error);
-        // Fallback to hardcoded data if database fetch fails
+      if (error || !data) {
+        console.log('No session data found, using fallback');
+        // Fallback to hardcoded data if database fetch fails or no data
         setSessionData({
           title: 'Monday Live Session 736',
           description: 'Join our weekly guided meditation session with thousands of practitioners worldwide.',

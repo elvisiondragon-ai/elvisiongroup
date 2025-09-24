@@ -215,7 +215,7 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
             }}
             placeholder="Enter your email address"
             className="bg-background border-border focus:border-primary"
-            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+            pattern="[a-z0-9._%\\+-]+@[a-z0-9.\\-]+\\.[a-z]{2,}$"
           />
         </div>
 
