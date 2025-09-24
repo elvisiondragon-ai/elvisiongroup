@@ -38,7 +38,17 @@ export function Chat({ onNavigate }: ChatProps) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user: currentUser, loading: userDataLoading } = useUserProfile();
+  const { user, userProfile, loading: userDataLoading } = useUserProfile();
+  
+  // Build currentUser object for chat compatibility
+  const currentUser = user && userProfile ? {
+    id: user.id,
+    name: userProfile.display_name || user.user_metadata?.display_name || 'Anonymous',
+    level: userProfile.level || 1,
+    isPro: userProfile.is_pro || false,
+    achievements: userProfile.achievements || [],
+    subscriptionType: userProfile.subscription_type || null
+  } : null;
   const [isTranslating, setIsTranslating] = useState(false);
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -154,7 +164,7 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [toast]);
 
-  // Instant cache loading for chat messages  
+  // Instant cache loading for chat messages
   useEffect(() => {
     const cachedMessages = localStorage.getItem('chat-messages-cache');
     
@@ -172,8 +182,11 @@ export function Chat({ onNavigate }: ChatProps) {
   }, []);
 
   useEffect(() => {
-    loadMessages();
-  }, [loadMessages]);
+    // Only load messages AFTER user profile is ready
+    if (currentUser && !userDataLoading) {
+      loadMessages();
+    }
+  }, [currentUser, userDataLoading, loadMessages]);
 
   // Cache chat messages when successfully loaded
   useEffect(() => {
