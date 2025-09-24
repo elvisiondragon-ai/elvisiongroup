@@ -38,6 +38,7 @@ export function Chat({ onNavigate }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userDataLoading, setUserDataLoading] = useState(true);
   const [isTranslating, setIsTranslating] = useState(false);
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -68,6 +69,7 @@ export function Chat({ onNavigate }: ChatProps) {
           achievements: [],
           subscriptionType: null
         });
+        setUserDataLoading(false);
         
         // Get profile data separately (non-blocking background update)
         const { data: profile } = await supabase

@@ -33,7 +33,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [userDataLoading, setUserDataLoading] = useState(false);
+  const [userDataLoading, setUserDataLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [showQrisModal, setShowQrisModal] = useState(false);

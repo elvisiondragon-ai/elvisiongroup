@@ -37,6 +37,7 @@ export function EliteHabit() {
   const { awardXP } = useXPSystem();
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userDataLoading, setUserDataLoading] = useState(true);
   const [selectedExercise, setSelectedExercise] = useState('');
   const [duration, setDuration] = useState(5);
   const [notes, setNotes] = useState('');
@@ -59,6 +60,7 @@ export function EliteHabit() {
         
         // Set user ID instantly for delete buttons
         setCurrentUser({ id: session.user.id });
+        setUserDataLoading(false);
         
         // Get profile data separately (slow query)
         const { data: profile } = await supabase

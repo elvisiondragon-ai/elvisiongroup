@@ -22,6 +22,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userDataLoading, setUserDataLoading] = useState(true);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
@@ -39,6 +40,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       if (user) {
         // Set auth user first for immediate functionality
         setCurrentUser(user);
+        setUserDataLoading(false);
         
         // Get profile data to populate total_journal counter and display_name
         const { data: profile } = await supabase
