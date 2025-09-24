@@ -76,10 +76,10 @@ export function Payment({ onNavigate }: PaymentProps) {
         console.log('⚡ Loading from cache for instant display');
         setEmail(parsed.user?.email || '');
         
-        // PRIORITIZE: auth metadata > cached profile > email username
-        const cachedName = parsed.user?.user_metadata?.display_name || 
-                          parsed.userProfile?.display_name || 
-                          parsed.user?.email?.split('@')[0] || '';
+        // PRIORITIZE: cached profile > auth metadata > fallback
+        const cachedName = parsed.userProfile?.display_name || 
+                          parsed.user?.user_metadata?.display_name || 
+                          'User';
         setFullName(cachedName);
         console.log('⚡ Cached name priority - metadata:', parsed.user?.user_metadata?.display_name, 'profile:', parsed.userProfile?.display_name);
         if (parsed.userProfile?.phone_number) {
@@ -395,7 +395,8 @@ export function Payment({ onNavigate }: PaymentProps) {
         } else {
           // If no cached ID, fetch user for first visit - OPTIMIZED: using getUser() instead of getSession()
           console.log('⚡ No cached ID found, fetching user for first visit');
-          const { data: { user } } = await supabase.auth.getUser();
+          const { data: { session } } = await supabase.auth.getSession();
+          const user = session?.user;
           if (user) {
             localStorage.setItem('current-user-id', user.id);
             setUser({ id: user.id });
@@ -404,7 +405,8 @@ export function Payment({ onNavigate }: PaymentProps) {
         }
 
         // Get user data from session
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        const { data: { session }, error: userError } = await supabase.auth.getSession();
+        const user = session?.user;
         
         if (userError) {
           throw new Error('Failed to get user data');
@@ -427,9 +429,9 @@ export function Payment({ onNavigate }: PaymentProps) {
             instantName = user.user_metadata.display_name.trim();
             console.log('⚡ Instant name from auth metadata:', instantName);
           } else if (user.email) {
-            // Fallback to email username for instant display
-            instantName = user.email.split('@')[0];
-            console.log('⚡ Instant name from email:', instantName);
+            // Fallback for instant display
+            instantName = 'User';
+            console.log('⚡ Using fallback name:', instantName);
           }
 
           // Set name instantly if field is empty
@@ -446,7 +448,7 @@ export function Payment({ onNavigate }: PaymentProps) {
             // Only update fullName if metadata was empty and profile has better data
             if (!user.user_metadata?.display_name?.trim() && profile?.display_name?.trim()) {
               const profileName = profile.display_name.trim();
-              if (!fullName.trim() || fullName === user.email?.split('@')[0]) {
+              if (!fullName.trim()) {
                 setFullName(profileName);
                 console.log('Updated name from profile:', profileName);
               }
@@ -461,11 +463,10 @@ export function Payment({ onNavigate }: PaymentProps) {
             console.error('Profile fetch failed:', profileError);
             setProfileError('Failed to load profile data');
             
-            // Fallback: use email username if available
-            if (user.email && !fullName.trim()) {
-              const fallbackName = user.email.split('@')[0];
-              setFullName(fallbackName);
-              console.log('Using fallback name from email:', fallbackName);
+            // Final fallback if no name is available
+            if (!fullName.trim()) {
+              setFullName('User');
+              console.log('Using final fallback name: User');
             }
           }
         }
@@ -516,10 +517,10 @@ export function Payment({ onNavigate }: PaymentProps) {
         console.log('⚡ Loading from cache for instant display');
         setEmail(parsed.user?.email || '');
         
-        // PRIORITIZE: auth metadata > cached profile > email username
-        const cachedName = parsed.user?.user_metadata?.display_name || 
-                          parsed.userProfile?.display_name || 
-                          parsed.user?.email?.split('@')[0] || '';
+        // PRIORITIZE: cached profile > auth metadata > fallback
+        const cachedName = parsed.userProfile?.display_name || 
+                          parsed.user?.user_metadata?.display_name || 
+                          'User';
         setFullName(cachedName);
         console.log('⚡ Cached name priority - metadata:', parsed.user?.user_metadata?.display_name, 'profile:', parsed.userProfile?.display_name);
         if (parsed.userProfile?.phone_number) {

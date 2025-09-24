@@ -34,9 +34,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
 
   useEffect(() => {
-    // Get current user and load reflections - OPTIMIZED: using getUser() instead of getSession()
+    // Get current user and load reflections - using getSession() for complete user data
     const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (user) {
         // Set auth user first for immediate functionality
         setCurrentUser(user);

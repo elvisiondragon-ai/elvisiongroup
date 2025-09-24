@@ -52,44 +52,33 @@ export function Chat({ onNavigate }: ChatProps) {
   useEffect(() => {
     // OPTIMIZED: Get current user INSTANTLY using getUser() instead of getSession()
     const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (user) {
         // Cache user ID immediately for instant delete buttons
         localStorage.setItem('current-user-id', user.id);
         
-        // INSTANT NAME LOADING: Check auth metadata first
-        const instantName = user.user_metadata?.display_name || 'Anonymous';
-        
-        // Set user data instantly for immediate UI update
-        setCurrentUser({ 
-          id: user.id, 
-          name: instantName,
-          level: 1, // Default values for instant display
-          isPro: proStatus.isPro,
-          achievements: [],
-          subscriptionType: null
-        });
-        setUserDataLoading(false);
-        
-        // Get profile data separately (non-blocking background update)
+        // Get profile data first - DON'T set loading false until both auth + profile loaded
         const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, level, achievements, is_pro, subscription_type')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        // Update with full profile data when available, only if metadata was empty
-        if (profile) {
-          const finalName = user.user_metadata?.display_name || profile.display_name || 'Anonymous';
-          setCurrentUser({
-            id: user.id,
-            name: finalName,
-            level: profile.level || 1,
-            isPro: profile.is_pro || proStatus.isPro,
-            achievements: profile.achievements || [],
-            subscriptionType: profile.subscription_type
-          });
-        }
+        // Set COMPLETE user data with both auth + profile
+        const finalName = profile?.display_name || user.user_metadata?.display_name || 'Anonymous';
+        setCurrentUser({
+          id: user.id,
+          email: user.email,
+          name: finalName,
+          level: profile?.level || 1,
+          isPro: profile?.is_pro || proStatus.isPro,
+          achievements: profile?.achievements || [],
+          subscriptionType: profile?.subscription_type || null
+        });
+        
+        // ONLY NOW set loading complete - user has full data
+        setUserDataLoading(false);
       }
     };
 

@@ -91,9 +91,10 @@ export function Profile({ onNavigate }: ProfileProps) {
         console.log('⚡ Loading user ID from cache to avoid black screen');
         setCachedUserId(cachedUserIdFromStorage);
       } else {
-        // If no cached ID, fetch user for first visit - OPTIMIZED: using getUser() instead of getSession()
+        // If no cached ID, fetch user for first visit - using getSession() for complete data
         console.log('⚡ No cached ID found, fetching user for first visit');
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
         if (user) {
           localStorage.setItem('current-user-id', user.id);
           setCachedUserId(user.id);
@@ -238,7 +239,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
   // Priority: cachedProfile > userProfile > fallback
   const profile = cachedProfile || userProfile || {
-    display_name: user?.email?.split('@')[0] || "User",
+    display_name: "User",
     level: 1,
     experience_points: 0,
     streak_days: 0,
@@ -249,7 +250,7 @@ export function Profile({ onNavigate }: ProfileProps) {
     created_at: new Date().toISOString()
   };
 
-  const displayName = profile.display_name || user?.email?.split('@')[0] || "User";
+  const displayName = profile.display_name || "User";
   const isAdmin = user?.id === '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
   
   // Correct XP calculation using proper thresholds

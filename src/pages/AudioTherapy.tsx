@@ -129,7 +129,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   useEffect(() => {
     const initializeData = async () => {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       setIsAdmin(user?.email === "elvisiondragon@gmail.com");
       
       if (user) {
@@ -163,7 +164,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   // Also reload when proStatus changes to ensure sync
   useEffect(() => {
     const reloadVerse4Data = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (user && !loading) {
         console.log('🔄 Reloading verse4 data on pro status change');
         await fetchUserProfile(user.id);
@@ -275,7 +277,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     if (proStatus.isPro) return true; // Pro users have unlimited access
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return false;
 
       console.log('🎵 Current verse4Used before increment:', verse4Used);
@@ -312,7 +315,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       
       // Force refresh data to ensure UI sync
       setTimeout(async () => {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
         if (user) {
           console.log('🔄 Force refreshing verse4 data after completion');
           await fetchUserProfile(user.id);

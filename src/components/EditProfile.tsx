@@ -16,7 +16,7 @@ interface EditProfileProps {
 }
 
 export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfileProps) {
-  const [displayName, setDisplayName] = useState(userProfile?.display_name || user?.email?.split('@')[0] || '');
+  const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(userProfile?.phone_number || '');
   const [avatarUrl, setAvatarUrl] = useState(userProfile?.avatar_url || '');
