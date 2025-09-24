@@ -41,8 +41,21 @@ export function useXPSystem(): XPSystemHook {
       
       // Check if daily limit was reached
       if (!result.success && result.reason === 'daily_limit_reached') {
-        // Don't show notification for daily limit - just silently return
-        return;
+        // Show toast that counters still work even when XP limit reached
+        if (showNotification) {
+          let toastTitle = "Total Verses +1";
+          if (activityType === 'elite_habit_completion') {
+            toastTitle = "Total Elite Habit +1";
+          } else if (activityType === 'journal_completion') {
+            toastTitle = "Total Journal +1";
+          }
+          
+          toast({
+            title: toastTitle,
+            description: "",
+          });
+        }
+        return; // Still return early but only for notifications
       }
       
       // Only show notifications if showNotification is true

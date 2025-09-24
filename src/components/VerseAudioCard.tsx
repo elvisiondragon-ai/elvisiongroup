@@ -4,6 +4,8 @@ import { useXPSystem } from '@/hooks/useXPSystem';
 import { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Verse {
   id: number;
@@ -41,6 +43,7 @@ export function VerseAudioCard({
 }: VerseAudioCardProps) {
   const { createProtectedAudio } = useProtectedAudio();
   const { awardXP } = useXPSystem();
+  const { toast } = useToast();
   
   // Audio state
   const [audioDuration, setAudioDuration] = useState<number | null>(null);
@@ -126,7 +129,31 @@ export function VerseAudioCard({
         setAudioDuration(null);
         setCurrentTime(0);
         
-        // Award XP - All verses get +10 XP (no longer increment verse4 usage here)
+        // Update total_verses counter FIRST in profiles
+        const updateTotalVerses = async () => {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            // Get current count first, then increment
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('total_verses')
+              .eq('user_id', user.id)
+              .single();
+              
+            const currentCount = profile?.total_verses || 0;
+            const { error } = await supabase
+              .from('profiles')
+              .update({ 
+                total_verses: currentCount + 1,
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', user.id);
+            if (error) console.error('Error updating total_verses:', error);
+          }
+        };
+        await updateTotalVerses();
+
+        // Award XP AFTER counter increment (XP can be blocked by daily limit)
         const xpAmount = 10; // All verses now give +10 XP
         console.log('🏆 Awarding XP:', xpAmount, 'for verse:', verse.title);
         awardXP('verse_completion', xpAmount, `Completed ${verse.title}`);

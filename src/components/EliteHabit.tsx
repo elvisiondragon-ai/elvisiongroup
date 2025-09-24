@@ -63,7 +63,7 @@ export function EliteHabit() {
         // Get profile data separately (slow query)
         const { data: profile } = await supabase
           .from('profiles')
-          .select('display_name, level, achievements, is_pro, subscription_type')
+          .select('display_name, level, achievements, is_pro, subscription_type, total_elite_habit')
           .eq('user_id', session.user.id)
           .maybeSingle();
 
@@ -74,7 +74,8 @@ export function EliteHabit() {
           level: profile?.level || 1,
           isPro: profile?.is_pro || false,
           achievements: profile?.achievements || [],
-          subscriptionType: profile?.subscription_type
+          subscriptionType: profile?.subscription_type,
+          profile: profile
         });
       }
     };
@@ -193,7 +194,20 @@ export function EliteHabit() {
 
       if (insertError) throw insertError;
 
-      // Award XP for elite habit completion (this will show XP notification)
+      // Update total_elite_habit counter FIRST in profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          total_elite_habit: (currentUser.profile?.total_elite_habit || 0) + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', currentUser.id);
+
+      if (profileError) {
+        console.error('Error updating profile total_elite_habit:', profileError);
+      }
+
+      // Award XP AFTER counter increment (XP can be blocked by daily limit)
       awardXP('elite_habit_completion', 10, 'Completed elite habit exercise');
 
       // Reset form
@@ -232,6 +246,19 @@ export function EliteHabit() {
           variant: "destructive"
         });
         return;
+      }
+
+      // Update total_elite_habit counter (decrement)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          total_elite_habit: Math.max(0, (currentUser.profile?.total_elite_habit || 1) - 1),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', currentUser.id);
+
+      if (profileError) {
+        console.error('Error updating profile total_elite_habit:', profileError);
       }
 
       toast({

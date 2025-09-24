@@ -37,7 +37,24 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Set auth user first for immediate functionality
         setCurrentUser(user);
+        
+        // Get profile data to populate total_journal counter and display_name
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name, total_journal')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        // Update user with profile data when available
+        if (profile) {
+          setCurrentUser({
+            ...user,
+            profile: profile
+          });
+        }
+        
         loadReflections(user.id);
       }
     };
@@ -64,6 +81,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     }
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleSaveReflection = async () => {
     if (!reflection.trim() || !currentUser) {
       toast({
@@ -73,6 +92,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       });
       return;
     }
+
+    // Prevent rapid clicks
+    if (isSaving) return;
+    setIsSaving(true);
 
     console.log('💾 Attempting to save reflection for user:', currentUser.id);
     console.log('📝 Reflection content:', reflection.trim());
@@ -93,20 +116,36 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         description: `Gagal menyimpan renungan: ${error.message}`,
         variant: "destructive"
       });
+      setIsSaving(false);
     } else {
       console.log('✅ Reflection saved successfully:', data);
 
-      // Award XP for completing spiritual journal reflection (without showing separate XP notification)
-      awardXP('journal_completion', 1, 'Completed spiritual journal reflection', {}, false);
+      // Update total_journal counter FIRST - get fresh count from DB to prevent mismatch
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('total_journal')
+        .eq('user_id', currentUser.id)
+        .single();
 
-      toast({
-        title: "Reflection Stored 🚀",
-        description: "+1 EXP",
-        variant: "default"
-      });
+      const currentCount = currentProfile?.total_journal || 0;
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          total_journal: currentCount + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', currentUser.id);
+
+      if (profileError) {
+        console.error('Error updating profile total_journal:', profileError);
+      }
+
+      // Award XP AFTER counter increment (XP can be blocked by daily limit)
+      awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
 
       setReflection("");
       loadReflections(currentUser.id);
+      setIsSaving(false);
     }
   };
 
@@ -131,6 +170,19 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           variant: "destructive"
         });
         return;
+      }
+
+      // Update total_journal counter (decrement)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          total_journal: Math.max(0, (currentUser.profile?.total_journal || 1) - 1),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', currentUser.id);
+
+      if (profileError) {
+        console.error('Error updating profile total_journal:', profileError);
       }
 
       toast({
@@ -285,7 +337,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
               
               <Button
                 onClick={handleSaveReflection}
-                disabled={!reflection.trim()}
+                disabled={!reflection.trim() || isSaving}
                 className="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white font-medium shadow-lg hover:shadow-purple-500/50 transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0 disabled:opacity-50"
                 style={{}}
               >

@@ -185,7 +185,7 @@ export function Home({
     };
   }, []);
 
-  const displayName = userProfile?.display_name || user?.email?.split('@')[0] || "User";
+  const displayName = userProfile?.display_name || "User";
   const isAdmin = user?.id === '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
 
   // Calculate XP progress using the XP system

@@ -36,7 +36,9 @@ import {
   Flame,
   Droplets,
   Activity,
+  Globe,
 } from "lucide-react";
+import { GiCrownCoin, GiBatMask } from "react-icons/gi";
 
 interface ProfileProps {
   onNavigate: (tab: string) => void;
@@ -268,10 +270,48 @@ export function Profile({ onNavigate }: ProfileProps) {
   });
 
   const achievements = [
-    { name: "First Step", description: "Joined eL Vision Group", unlocked: true },
-    { name: "Week Warrior", description: "7 days streak", unlocked: profile.streak_days >= 7 },
-    { name: "Zen Master", description: "Complete 100 journal entries", unlocked: profile.total_journal >= 100 },
-    { name: "Soul Leader", description: "Reach level 5", unlocked: profile.level >= 5 },
+    ...(profile.total_verses >= 900 
+      ? [{ 
+          name: "Hand of Midas", 
+          description: "Berhasil raih 1 Milyar setelah gabung Ignis", 
+          unlocked: true,
+          isHandOfMidas: true
+        }]
+      : [{ name: "First Step", description: "Joined eL Vision Group", unlocked: true }]
+    ),
+    ...(profile.streak_days >= 300 
+      ? [{ 
+          name: "Ignis Lord", 
+          description: `${profile.streak_days} days streak`, 
+          unlocked: true,
+          isIgnisLord: true
+        }]
+      : profile.streak_days >= 7 
+        ? [{ name: "Week Warrior", description: "7 days streak", unlocked: true }]
+        : [{ name: "Week Warrior", description: "7 days streak", unlocked: false }]
+    ),
+    ...(profile.total_journal >= 1200 
+      ? [{ 
+          name: "Reality Master", 
+          description: `${profile.total_journal} journal entries`, 
+          unlocked: true,
+          isRealityMaster: true
+        }]
+      : profile.total_journal >= 100 
+        ? [{ name: "Zen Master", description: "Complete 100 journal entries", unlocked: true }]
+        : [{ name: "Zen Master", description: "Complete 100 journal entries", unlocked: false }]
+    ),
+    ...(profile.level >= 9 
+      ? [{ 
+          name: "The Void", 
+          description: `Reach level ${profile.level}`, 
+          unlocked: true,
+          isTheVoid: true
+        }]
+      : profile.level >= 5 
+        ? [{ name: "Soul Leader", description: "Reach level 5", unlocked: true }]
+        : [{ name: "Soul Leader", description: "Reach level 5", unlocked: false }]
+    ),
   ];
 
   const stats = [
@@ -440,18 +480,44 @@ export function Profile({ onNavigate }: ProfileProps) {
             <Card 
               key={index} 
               className={`p-4 border-border ${
-                achievement.unlocked 
-                  ? "bg-gradient-secondary opacity-100" 
-                  : "bg-muted/30 opacity-50"
+                achievement.unlocked && achievement.isHandOfMidas
+                  ? "bg-gradient-to-r from-yellow-900 via-amber-800 to-yellow-900 border-yellow-500 shadow-lg shadow-yellow-500/25" 
+                  : achievement.unlocked && achievement.isIgnisLord
+                    ? "bg-gradient-to-r from-red-900 via-red-800 to-orange-900 border-red-500 shadow-lg shadow-red-500/25" 
+                    : achievement.unlocked && achievement.isRealityMaster
+                      ? "bg-gradient-to-r from-purple-900 via-purple-800 to-blue-900 border-purple-500 shadow-lg shadow-purple-500/25"
+                      : achievement.unlocked && achievement.isTheVoid
+                        ? "bg-gradient-to-r from-black via-gray-900 to-black border-gray-500 shadow-lg shadow-gray-500/25"
+                        : achievement.unlocked 
+                          ? "bg-gradient-secondary opacity-100" 
+                          : "bg-muted/30 opacity-50"
               }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  achievement.unlocked 
-                    ? "bg-gradient-primary text-primary-foreground glow-primary" 
-                    : "bg-muted text-muted-foreground"
+                  achievement.unlocked && achievement.isHandOfMidas
+                    ? "bg-gradient-to-r from-yellow-600 to-amber-600 text-white animate-pulse" 
+                    : achievement.unlocked && achievement.isIgnisLord
+                      ? "bg-gradient-to-r from-red-600 to-orange-600 text-white animate-pulse" 
+                      : achievement.unlocked && achievement.isRealityMaster
+                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white animate-pulse"
+                        : achievement.unlocked && achievement.isTheVoid
+                          ? "bg-gradient-to-r from-gray-600 to-black text-white animate-pulse"
+                          : achievement.unlocked 
+                            ? "bg-gradient-primary text-primary-foreground glow-primary" 
+                            : "bg-muted text-muted-foreground"
                 }`}>
-                  <Award className="w-5 h-5" />
+                  {achievement.isHandOfMidas && achievement.unlocked ? (
+                    <GiCrownCoin className="w-5 h-5 animate-bounce" />
+                  ) : achievement.isIgnisLord && achievement.unlocked ? (
+                    <Flame className="w-5 h-5 animate-bounce" />
+                  ) : achievement.isRealityMaster && achievement.unlocked ? (
+                    <Globe className="w-5 h-5 animate-spin" />
+                  ) : achievement.isTheVoid && achievement.unlocked ? (
+                    <GiBatMask className="w-5 h-5 animate-pulse" />
+                  ) : (
+                    <Award className="w-5 h-5" />
+                  )}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-foreground">

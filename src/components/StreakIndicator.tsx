@@ -45,16 +45,24 @@ export function StreakIndicator({ streakDays, className, size = 'md' }: StreakIn
   const currentSize = sizes[size];
   const StreakIcon = getStreakIcon();
   const isWeeklyStreak = streakDays >= 7;
+  const isIgnisHorsemen = streakDays >= 300;
   const daysUntilBonus = 7 - (streakDays % 7);
 
   return (
     <Card className={cn(
-      "bg-gradient-secondary border-border flex items-center gap-2 w-fit",
+      "border-border flex items-center gap-2 w-fit",
+      isIgnisHorsemen 
+        ? "bg-gradient-to-r from-red-900 via-red-800 to-orange-900 border-red-500 shadow-lg shadow-red-500/25" 
+        : "bg-gradient-secondary",
       currentSize.card,
       className
     )}>
       <div className={cn("flex items-center gap-1", getStreakColor())}>
-        <StreakIcon className={currentSize.icon} />
+        <StreakIcon className={cn(
+          currentSize.icon,
+          isIgnisHorsemen && "animate-bounce",
+          streakDays >= 7 && streakDays < 300 && "animate-pulse"
+        )} />
         <span className={cn("font-medium font-orbitron", currentSize.text)}>
           {streakDays}
         </span>
@@ -64,12 +72,21 @@ export function StreakIndicator({ streakDays, className, size = 'md' }: StreakIn
         days
       </div>
 
-      {isWeeklyStreak && (
+      {isIgnisHorsemen && (
+        <div className={cn(
+          "bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-full font-bold animate-pulse border border-red-400",
+          currentSize.badge
+        )}>
+          Ignis Lord
+        </div>
+      )}
+
+      {isWeeklyStreak && !isIgnisHorsemen && (
         <div className={cn(
           "bg-gradient-primary text-primary-foreground rounded-full font-medium",
           currentSize.badge
         )}>
-          Week Warrior!
+          Week Warrior
         </div>
       )}
 
