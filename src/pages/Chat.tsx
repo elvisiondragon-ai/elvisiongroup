@@ -45,26 +45,26 @@ export function Chat() {
   const { i18n, t } = useTranslation();
 
   useEffect(() => {
-    // IDENTICAL TO JOURNAL - Get current user INSTANTLY
+    // OPTIMIZED: Get current user INSTANTLY using getUser() instead of getSession()
     const getCurrentUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
         // Cache user ID immediately for instant delete buttons
-        localStorage.setItem('current-user-id', session.user.id);
+        localStorage.setItem('current-user-id', user.id);
         
         // Set user ID instantly for delete buttons
-        setCurrentUser({ id: session.user.id });
+        setCurrentUser({ id: user.id });
         
         // Get profile data separately (slow query)
         const { data: profile } = await supabase
           .from('profiles')
           .select('display_name, level, achievements, is_pro, subscription_type')
-          .eq('user_id', session.user.id)
+          .eq('user_id', user.id)
           .maybeSingle();
 
         // Update with full profile data when available
         setCurrentUser({
-          id: session.user.id,
+          id: user.id,
           name: profile?.display_name || 'Anonymous',
           level: profile?.level || 1,
           isPro: profile?.is_pro || proStatus.isPro,

@@ -89,13 +89,13 @@ export function Profile({ onNavigate }: ProfileProps) {
         console.log('⚡ Loading user ID from cache to avoid black screen');
         setCachedUserId(cachedUserIdFromStorage);
       } else {
-        // If no cached ID, fetch session for first visit
-        console.log('⚡ No cached ID found, fetching session for first visit');
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          localStorage.setItem('current-user-id', session.user.id);
-          setCachedUserId(session.user.id);
-          console.log('⚡ Session ID cached for instant profile loading');
+        // If no cached ID, fetch user for first visit - OPTIMIZED: using getUser() instead of getSession()
+        console.log('⚡ No cached ID found, fetching user for first visit');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          localStorage.setItem('current-user-id', user.id);
+          setCachedUserId(user.id);
+          console.log('⚡ User ID cached for instant profile loading');
         }
       }
     };

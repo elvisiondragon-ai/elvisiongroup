@@ -386,13 +386,13 @@ export function Payment({ onNavigate }: PaymentProps) {
           // Create minimal user object for immediate use
           setUser({ id: cachedUserId });
         } else {
-          // If no cached ID, fetch session for first visit
-          console.log('⚡ No cached ID found, fetching session for first visit');
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user) {
-            localStorage.setItem('current-user-id', session.user.id);
-            setUser({ id: session.user.id });
-            console.log('⚡ Session ID cached for instant payment loading');
+          // If no cached ID, fetch user for first visit - OPTIMIZED: using getUser() instead of getSession()
+          console.log('⚡ No cached ID found, fetching user for first visit');
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            localStorage.setItem('current-user-id', user.id);
+            setUser({ id: user.id });
+            console.log('⚡ User ID cached for instant payment loading');
           }
         }
 
