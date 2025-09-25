@@ -23,6 +23,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
+  const [isLoadingReflections, setIsLoadingReflections] = useState(true);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
   const { user, handleButtonTimeout } = useUserProfile();
@@ -34,33 +35,45 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
 
 
+  // Load reflections immediately when user is available
+  useEffect(() => {
+    if (user?.id) {
+      loadReflections(user.id);
+    } else {
+      setIsLoadingReflections(false);
+    }
+  }, [user?.id]);
+
   useEffect(() => {
     // Listen for auth changes to get user reliably
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        setCurrentUser(session.user);
         loadReflections(session.user.id);
       } else {
-        setCurrentUser(null);
         setReflections([]);
+        setIsLoadingReflections(false);
       }
     });
 
-    // Also get current user immediately
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setCurrentUser(user);
-        loadReflections(user.id);
-      }
-    });
+    // Also get current user immediately if not already available
+    if (!user) {
+      supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+        if (currentUser) {
+          loadReflections(currentUser.id);
+        } else {
+          setIsLoadingReflections(false);
+        }
+      });
+    }
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [user]);
 
   const loadReflections = async (userId: string) => {
     console.log('🔍 Loading reflections for user:', userId);
+    setIsLoadingReflections(true);
 
     const { data, error } = await supabase
       .from('reflections')
@@ -76,6 +89,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       console.log('✅ Successfully loaded reflections:', data?.length || 0, 'entries');
       setReflections(data || []);
     }
+    
+    setIsLoadingReflections(false);
   };
 
   const [isSaving, setIsSaving] = useState(false);
@@ -351,7 +366,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           </div>
         </Card>
 
-        {/* Reflection History */}
+        {/* Reflection History - Always Visible */}
         <Card className="bg-gradient-to-br from-slate-600/15 via-gray-500/10 to-zinc-600/15 border-2 border-slate-400/30 shadow-xl backdrop-blur-sm">
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-200 mt-6 mx-6" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}>
@@ -359,7 +374,14 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
             </h3>
 
             <div className="space-y-4 max-h-64 overflow-y-auto">
-              {reflections.length > 0 ? (
+              {isLoadingReflections ? (
+                <div className="p-6 text-center">
+                  <div className="w-6 h-6 border-2 border-slate-300 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  <p className="text-slate-300 text-sm">
+                    Memuat riwayat renungan...
+                  </p>
+                </div>
+              ) : reflections.length > 0 ? (
                 reflections.map((refl) => (
                   <div key={refl.id} className="relative p-4 rounded-lg bg-black/25 border border-slate-300/30 space-y-2 hover:bg-black/35 transition-colors">
                     {/* Delete Button */}

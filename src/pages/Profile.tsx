@@ -297,16 +297,43 @@ export function Profile({ onNavigate }: ProfileProps) {
         }]
       : [{ name: "First Step", description: "Joined eL Vision Group", unlocked: true }]
     ),
+    // Streak tier achievements - spiritual progression
     ...(profile.streak_days >= 320 
       ? [{ 
-          name: "Ignis Horsemen", 
-          description: `${profile.streak_days} days streak`, 
+          name: "Ignis", 
+          description: `${profile.streak_days} days streak - Divine Flame`, 
           unlocked: true,
           isIgnisLord: true
         }]
-      : profile.streak_days >= 7 
-        ? [{ name: "Week Warrior", description: "7 days streak", unlocked: true }]
-        : [{ name: "Week Warrior", description: "7 days streak", unlocked: false }]
+      : profile.streak_days >= 90 
+        ? [{ 
+            name: "Wanderer", 
+            description: `${profile.streak_days} days streak - Wise Traveler`, 
+            unlocked: true,
+            isWanderer: true
+          }]
+        : profile.streak_days >= 60 
+          ? [{ 
+              name: "Lumina", 
+              description: `${profile.streak_days} days streak - Light Bringer`, 
+              unlocked: true,
+              isLumina: true
+            }]
+          : profile.streak_days >= 30 
+            ? [{ 
+                name: "Seeker", 
+                description: `${profile.streak_days} days streak - Truth Finder`, 
+                unlocked: true,
+                isSeeker: true
+              }]
+            : profile.streak_days >= 7 
+              ? [{ 
+                  name: "Warrior", 
+                  description: `${profile.streak_days} days streak - Spiritual Fighter`, 
+                  unlocked: true,
+                  isWarrior: true
+                }]
+              : [{ name: "Warrior", description: "7 days streak - Begin your journey", unlocked: false }]
     ),
     ...(profile.total_journal >= 1200 
       ? [{ 
@@ -506,12 +533,18 @@ export function Profile({ onNavigate }: ProfileProps) {
                       ? "bg-gradient-to-r from-purple-900/80 via-purple-800/80 to-blue-900/80 border-purple-500 shadow-lg shadow-purple-500/25 animate-pulse"
                       : achievement.unlocked && achievement.isTheVoid
                         ? "bg-gradient-to-r from-black/80 via-gray-900/80 to-black/80 border-gray-500 shadow-lg shadow-gray-500/25 animate-pulse"
-                        : achievement.name === "Week Warrior" && achievement.unlocked
-                          ? "bg-gradient-to-r from-yellow-800/80 via-yellow-700/80 to-orange-800/80 border-yellow-400 shadow-lg shadow-yellow-400/25" 
-                          : achievement.name === "Zen Master" && achievement.unlocked
-                            ? "bg-gradient-to-r from-blue-800/80 via-blue-700/80 to-indigo-800/80 border-blue-400 shadow-lg shadow-blue-400/25"
-                            : achievement.name === "Soul Leader" && achievement.unlocked
-                              ? "bg-gradient-to-r from-indigo-800/80 via-purple-700/80 to-purple-800/80 border-indigo-400 shadow-lg shadow-indigo-400/25"
+                        : achievement.unlocked && achievement.isWanderer
+                          ? "bg-gradient-to-r from-green-800/80 via-green-700/80 to-emerald-800/80 border-green-500 shadow-lg shadow-green-500/25" 
+                          : achievement.unlocked && achievement.isLumina
+                            ? "bg-gradient-to-r from-blue-800/80 via-blue-700/80 to-cyan-800/80 border-blue-500 shadow-lg shadow-blue-500/25"
+                            : achievement.unlocked && achievement.isSeeker
+                              ? "bg-gradient-to-r from-orange-800/80 via-orange-700/80 to-red-800/80 border-orange-500 shadow-lg shadow-orange-500/25"
+                              : achievement.unlocked && achievement.isWarrior
+                                ? "bg-gradient-to-r from-yellow-800/80 via-yellow-700/80 to-orange-800/80 border-yellow-400 shadow-lg shadow-yellow-400/25" 
+                                : achievement.name === "Zen Master" && achievement.unlocked
+                                  ? "bg-gradient-to-r from-blue-800/80 via-blue-700/80 to-indigo-800/80 border-blue-400 shadow-lg shadow-blue-400/25"
+                                  : achievement.name === "Soul Leader" && achievement.unlocked
+                                    ? "bg-gradient-to-r from-indigo-800/80 via-purple-700/80 to-purple-800/80 border-indigo-400 shadow-lg shadow-indigo-400/25"
                               : achievement.name === "First Step" && achievement.unlocked
                                 ? "bg-gradient-to-r from-green-800/80 via-emerald-700/80 to-green-800/80 border-green-400 shadow-lg shadow-green-400/25"
                                 : achievement.unlocked 

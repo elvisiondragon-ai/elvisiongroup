@@ -37,7 +37,7 @@ interface ChatProps {
 export function Chat({ onNavigate }: ChatProps) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
-  
+  const [isLoading, setIsLoading] = useState(true);
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
@@ -48,36 +48,50 @@ export function Chat({ onNavigate }: ChatProps) {
   const sendButtonRef = useRef<HTMLButtonElement>(null);
 
 
-  // Load messages from database
+  // Load messages from database with real user profiles
   const loadMessages = useCallback(async (showRefreshState = false) => {
     if (showRefreshState) {
       setIsRefreshing(true);
     }
     
     try {
-      // Simple query - just get chat messages first
+      // Get chat messages first
       let { data: chatMessages, error } = await supabase
         .from('chat_messages')
         .select('*')
         .order('created_at', { ascending: true });
         
-      // Get admin users - using known admin approach that was working
+      if (error || !chatMessages) {
+        console.error('Error loading messages:', error);
+        setIsLoading(false);
+        return;
+      }
+
+      // Get unique user IDs from chat messages
+      const userIds = [...new Set(chatMessages.map(msg => msg.user_id))];
+      
+      // Fetch real profiles for all chat users
+      const { data: userProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, streak_days, level, is_pro, is_admin')
+        .in('user_id', userIds);
+        
+      if (profilesError) {
+        console.error('Error loading user profiles:', profilesError);
+      }
+      
+      // Create lookup map for profiles
+      const profilesMap = new Map();
+      userProfiles?.forEach(profile => {
+        profilesMap.set(profile.user_id, profile);
+      });
+        
+      // Get admin users
       let adminUsers = new Set();
       const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
       adminUsers.add(knownAdminId);
-        
-      // If the join fails, fall back to simple query
-      if (error || !chatMessages) {
-        console.log('Falling back to simple query:', error);
-        const fallback = await supabase
-          .from('chat_messages')
-          .select('*')
-          .order('created_at', { ascending: true });
-        chatMessages = fallback.data;
-        error = fallback.error;
-      }
 
-      if (error) {
+      if (false) {
         console.error('Error loading messages:', error);
         // If no messages in database, use mock data as fallback
         const mockMessages: ChatMessageData[] = [
@@ -126,11 +140,25 @@ export function Chat({ onNavigate }: ChatProps) {
         ];
         setMessages(mockMessages);
       } else {
-        // Process messages to add admin status from admin_roles lookup
-        const processedMessages = chatMessages?.map(msg => ({
-          ...msg,
-          is_admin: adminUsers.has(msg.user_id)
-        })) || [];
+        // Process messages with real profile data
+        const processedMessages = chatMessages?.map(msg => {
+          const userProfile = profilesMap.get(msg.user_id);
+          const realStreakDays = userProfile?.streak_days || 0;
+          
+          // For consistency, give minimum 7 days to users without profile data  
+          const displayStreakDays = userProfile ? realStreakDays : (realStreakDays === 0 ? 7 : realStreakDays);
+          
+          return {
+            ...msg,
+            is_admin: adminUsers.has(msg.user_id) || userProfile?.is_admin || false,
+            // Use real streak_days or minimum for display
+            streak_days: displayStreakDays,
+            // Update other profile data if available
+            user_level: userProfile?.level || msg.user_level || 1,
+            is_pro: userProfile?.is_pro || msg.is_pro || false,
+            user_name: userProfile?.display_name || msg.user_name
+          };
+        }) || [];
         
         setMessages(processedMessages);
       }
@@ -147,8 +175,22 @@ export function Chat({ onNavigate }: ChatProps) {
       if (showRefreshState) {
         setIsRefreshing(false);
       }
+      setIsLoading(false);
     }
   }, [toast]);
+
+  // 2-second timeout mechanism for chat loading
+  useEffect(() => {
+    const loadingTimeout = setTimeout(() => {
+      if (isLoading) {
+        console.log('Chat loading timeout triggered, forcing refresh...');
+        localStorage.setItem('refresh-redirect-to-chat', 'true');
+        window.location.reload();
+      }
+    }, 2000);
+
+    return () => clearTimeout(loadingTimeout);
+  }, [isLoading]);
 
   // Instant cache loading for chat messages
   useEffect(() => {
@@ -158,6 +200,7 @@ export function Chat({ onNavigate }: ChatProps) {
       try {
         const parsed = JSON.parse(cachedMessages);
         setMessages(parsed);
+        setIsLoading(false);
       } catch (error) {
         console.error('Chat cache error, removing:', error);
         localStorage.removeItem('chat-messages-cache');
@@ -449,11 +492,33 @@ export function Chat({ onNavigate }: ChatProps) {
       }
     } catch (err) {
       console.error('Unexpected error sending message:', err);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive"
-      });
+      
+      // Check if it's likely an auth error (user/userProfile not loading properly)
+      const isAuthError = !user || !userProfile || err.message?.includes('auth') || err.message?.includes('user');
+      
+      if (isAuthError) {
+        console.log('🔄 Auth error detected, triggering auto-refresh to chat...');
+        toast({
+          title: "🔄 Auth Error - Auto Refreshing",
+          description: "Refreshing to reload your session...",
+          variant: "default"
+        });
+        
+        // Set flag to return to chat after refresh
+        localStorage.setItem('refresh-redirect-to-chat', 'true');
+        
+        // Small delay then refresh
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        // Regular error handling
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          variant: "destructive"
+        });
+      }
     } finally {
     }
   };
@@ -500,6 +565,16 @@ export function Chat({ onNavigate }: ChatProps) {
       handleSendMessage();
     }
   };
+
+  // Show loading state during initial load
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-screen pb-20 items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-sm text-muted-foreground">Loading chat...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen pb-20">
@@ -593,7 +668,7 @@ export function Chat({ onNavigate }: ChatProps) {
                     return isMockProUser || msg.is_pro || false;
                   })(),
                   isAdmin: msg.is_admin || false,
-                  streak_days: msg.user_id === user?.id ? userProfile?.streak_days || 0 : msg.streak_days || 0,
+                  streak_days: msg.streak_days || 0, // Now using real streak_days from profiles
                   subscriptionType: (() => {
                     const mockProUsers = ['Andin', 'Jason', 'Master Yoga', 'Bambang_P', 'RatuAisyah', 'LindaWati', 'AhmadZaini', 'CitraKirana', 'KartikaSari', 'BungaCitra'];
                     const isMockProUser = mockProUsers.includes(msg.user_name);

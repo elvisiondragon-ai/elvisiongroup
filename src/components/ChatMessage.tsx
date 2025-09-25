@@ -5,7 +5,8 @@ import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { GiTrophy, GiFire } from "react-icons/gi";
+// Updated spiritual icons for streak tiers
+import { GiTrophy, GiFire, GiHorseHead, GiWalkingBoot, GiMoon, GiMeditation } from "react-icons/gi";
 
 interface ChatMessageProps {
   id: string;
@@ -57,7 +58,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className={cn(
                 "font-semibold transition-all duration-300",
                 user.isAdmin 
@@ -69,18 +70,33 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
               <TierBadge level={user.level} isPro={user.isPro} isAdmin={user.isAdmin} achievements={[]} subscriptionType={user.subscriptionType} />
             </div>
             
-            {/* Streak badges below username */}
+            {/* Streak badges - Under username - Multiple Tiers */}
             {user.streak_days >= 7 && (
               <div className="flex items-center gap-1">
                 {user.streak_days >= 320 ? (
                   <div className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gradient-to-r from-red-800/80 via-red-700/80 to-orange-800/80 border border-red-500 text-orange-100 shadow-sm">
-                    <GiFire className="w-3 h-3 drop-shadow-sm" />
-                    <span className="font-medium">Ignis Horsemen 320+ Streak Days</span>
+                    <GiHorseHead className="w-3 h-3 drop-shadow-sm flex-shrink-0" />
+                    <span className="font-medium">Ignis 320+</span>
+                  </div>
+                ) : user.streak_days >= 90 ? (
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gradient-to-r from-green-800/80 via-green-700/80 to-emerald-800/80 border border-green-500 text-green-100 shadow-sm">
+                    <GiMeditation className="w-3 h-3 drop-shadow-sm flex-shrink-0" />
+                    <span className="font-medium">Wanderer 90+</span>
+                  </div>
+                ) : user.streak_days >= 60 ? (
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gradient-to-r from-blue-800/80 via-blue-700/80 to-cyan-800/80 border border-blue-500 text-blue-100 shadow-sm">
+                    <GiMoon className="w-3 h-3 drop-shadow-sm flex-shrink-0" />
+                    <span className="font-medium">Lumina 60+</span>
+                  </div>
+                ) : user.streak_days >= 30 ? (
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gradient-to-r from-orange-800/80 via-orange-700/80 to-red-800/80 border border-orange-500 text-orange-100 shadow-sm">
+                    <GiWalkingBoot className="w-3 h-3 drop-shadow-sm flex-shrink-0" />
+                    <span className="font-medium">Seeker 30+</span>
                   </div>
                 ) : (
                   <div className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gradient-to-r from-yellow-800/80 via-yellow-700/80 to-orange-800/80 border border-yellow-400 text-yellow-100 shadow-sm">
-                    <GiTrophy className="w-3 h-3 drop-shadow-sm" />
-                    <span className="font-medium">Week Warrior</span>
+                    <GiTrophy className="w-3 h-3 drop-shadow-sm flex-shrink-0" />
+                    <span className="font-medium">Warrior 7+</span>
                   </div>
                 )}
               </div>
