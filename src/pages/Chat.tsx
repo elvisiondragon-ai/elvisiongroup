@@ -45,20 +45,6 @@ export function Chat({ onNavigate }: ChatProps) {
   // Get user data from fast metadata instead of slow profile table
   useEffect(() => {
 
-    // Try loading from metadata cache first for instant second visits
-    const cachedMetadata = localStorage.getItem('user-metadata-cache');
-    if (cachedMetadata) {
-      try {
-        const cached = JSON.parse(cachedMetadata);
-        console.log('⚡ Loading user from metadata cache for instant access');
-        setCurrentUser(cached.user);
-        setUserDataLoading(false);
-        // Still fetch fresh data in background
-      } catch (error) {
-        console.error('Cache error, removing:', error);
-        localStorage.removeItem('user-metadata-cache');
-      }
-    }
 
     const buildUserData = (user: any) => {
       const metadata = user.user_metadata || {};
@@ -78,10 +64,6 @@ export function Chat({ onNavigate }: ChatProps) {
         const currentUserData = buildUserData(session.user);
         setCurrentUser(currentUserData);
         
-        // Cache the metadata for instant future visits (no expiry)
-        localStorage.setItem('user-metadata-cache', JSON.stringify({
-          user: currentUserData
-        }));
       } else {
         setCurrentUser(null);
         localStorage.removeItem('user-metadata-cache');
@@ -95,9 +77,6 @@ export function Chat({ onNavigate }: ChatProps) {
         const currentUserData = buildUserData(user);
         setCurrentUser(currentUserData);
         
-        localStorage.setItem('user-metadata-cache', JSON.stringify({
-          user: currentUserData
-        }));
       }
       setUserDataLoading(false);
     }).catch((error) => {

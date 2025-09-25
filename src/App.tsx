@@ -93,18 +93,57 @@ const App = () => {
               e.stopPropagation();
               setUpdateClicked(true);
               
-              console.log('🔄 User clicked update, clearing localStorage')
+              console.log('🔄 User clicked Auto Deploy button')
               localStorage.removeItem('app-needs-update')
               
-              // 25 SEP ONLY UNTUK CLEAR OLD CACHE, CABUT TANGGAL 26
-              // Nuke Refresh - Clear all cache and cookies for this update only
-              console.log('💥 NUKE REFRESH: Clearing all cache and cookies (25 SEP ONLY)');
+              // Check which page to refresh cache for
+              const currentPath = window.location.pathname;
               
-              // Clear all localStorage
-              localStorage.clear();
-              
-              // Clear all sessionStorage
-              sessionStorage.clear();
+              if (currentPath.includes('spiritual-journal') || window.location.hash.includes('journal')) {
+                console.log('💥 SPIRITUAL JOURNAL: Clearing cache completely');
+                // Clear journal-specific caches
+                localStorage.removeItem('user-profile-cache');
+                localStorage.removeItem('profile-metadata'); 
+                localStorage.removeItem('user-cache');
+                sessionStorage.clear();
+                localStorage.setItem('refresh-redirect-to-journal', 'true');
+              } else if (currentPath.includes('elite-habit') || window.location.hash.includes('habit')) {
+                console.log('💥 ELITE HABIT: Clearing cache completely');
+                localStorage.removeItem('user-profile-cache');
+                localStorage.removeItem('profile-metadata');
+                localStorage.removeItem('user-cache');
+                sessionStorage.clear();
+                localStorage.setItem('refresh-redirect-to-elite-habit', 'true');
+              } else if (currentPath.includes('meditation') || window.location.hash.includes('sesi')) {
+                console.log('💥 MEDITATION: Clearing cache completely');
+                localStorage.removeItem('user-profile-cache');
+                localStorage.removeItem('profile-metadata');
+                localStorage.removeItem('user-cache');
+                localStorage.removeItem('meditation-cache');
+                sessionStorage.clear();
+                localStorage.setItem('refresh-redirect-to-meditation', 'true');
+              } else {
+                // 25 SEP ONLY UNTUK CLEAR OLD CACHE, CABUT TANGGAL 26
+                // Nuke Refresh - Clear all cache and cookies for this update only
+                console.log('💥 NUKE REFRESH: Clearing all cache and cookies (25 SEP ONLY)');
+                
+                // Save auth tokens before clearing
+                const authTokens = localStorage.getItem('sb-' + 'ehffgmrhjnqwnifbpxwy' + '-auth-token');
+                
+                // Clear all localStorage
+                localStorage.clear();
+                
+                // Restore auth tokens so user stays logged in
+                if (authTokens) {
+                  localStorage.setItem('sb-' + 'ehffgmrhjnqwnifbpxwy' + '-auth-token', authTokens);
+                }
+                
+                // Set redirect to home after refresh
+                localStorage.setItem('refresh-redirect-to-home', 'true');
+                
+                // Clear all sessionStorage
+                sessionStorage.clear();
+              }
               
               // Clear all cookies
               document.cookie.split(";").forEach(function(c) { 

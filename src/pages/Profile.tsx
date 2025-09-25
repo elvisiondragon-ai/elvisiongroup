@@ -68,8 +68,43 @@ export function Profile({ onNavigate }: ProfileProps) {
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // INSTANT AUTH STATE - for immediate logout button response
+  const [currentAuthUser, setCurrentAuthUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  
   const { proStatus } = usePro();
   const { toast } = useToast();
+
+  // INSTANT AUTH EVENT LISTENER - for immediate logout button detection
+  useEffect(() => {
+    // Get current user immediately for instant logout button
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentAuthUser(user);
+      setAuthLoading(false);
+    });
+
+    // Listen for auth changes - INSTANT logout detection
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 Profile auth event:', event);
+      
+      if (event === 'SIGNED_OUT') {
+        setCurrentAuthUser(null);
+        setAuthLoading(false);
+        // Immediate redirect on logout event
+        setTimeout(() => {
+          window.location.href = '/auth';
+        }, 500);
+      } else if (session?.user) {
+        setCurrentAuthUser(session.user);
+        setAuthLoading(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // Cache management - event-based, no TTL
   useEffect(() => {
@@ -100,12 +135,31 @@ export function Profile({ onNavigate }: ProfileProps) {
 
 
   const handleLogout = async () => {
+    // INSTANT RESPONSE - no waiting for context loading
+    if (!currentAuthUser) {
+      toast({
+        title: "Already logged out",
+        description: "You are not logged in.",
+        variant: "default",
+      });
+      window.location.href = '/auth';
+      return;
+    }
+
     try {
-      // Clear all cached data
-      localStorage.removeItem('profile-metadata');
+      console.log('🚀 INSTANT logout initiated for user:', currentAuthUser.id);
       
+      // Clear caches immediately (no delay)
+      localStorage.removeItem('profile-metadata');
+      localStorage.removeItem('user-profile-cache');
+      localStorage.removeItem('user-cache');
+      localStorage.removeItem('user-metadata-cache');
+      
+      // Immediate logout - event listener will handle redirect
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
+        console.error('Logout error:', error);
         toast({
           title: "Error",
           description: error.message,
@@ -119,10 +173,15 @@ export function Profile({ onNavigate }: ProfileProps) {
         description: "Anda berhasil keluar dari akun.",
       });
       
+      // Event listener will handle redirect, but backup timeout
       setTimeout(() => {
-        window.location.href = '/auth';
-      }, 1000);
+        if (window.location.pathname !== '/auth') {
+          window.location.href = '/auth';
+        }
+      }, 2000);
+      
     } catch (error: any) {
+      console.error('Unexpected logout error:', error);
       toast({
         title: "Logout Gagal",
         description: error.message || "Terjadi kesalahan saat logout.",
@@ -210,8 +269,8 @@ export function Profile({ onNavigate }: ProfileProps) {
     );
   }
 
-  // Error handling - if no user, show error state
-  if (!user) {
+  // Error handling - if no auth user AND context user, show error state  
+  if (!currentAuthUser && !user && !authLoading && !loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center pb-20">
         <div className="text-center">

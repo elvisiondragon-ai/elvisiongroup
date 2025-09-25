@@ -79,6 +79,13 @@ const Index = () => {
       setActiveTab('payment');
       return;
     }
+
+    // Check if we need to redirect to home after auto-deploy refresh
+    if (localStorage.getItem('refresh-redirect-to-home') === 'true') {
+      localStorage.removeItem('refresh-redirect-to-home');
+      setActiveTab('home');
+      return;
+    }
     
     // Check if we just refreshed from signup and show welcome toast
     if (localStorage.getItem('post-signup-welcome') === 'true') {

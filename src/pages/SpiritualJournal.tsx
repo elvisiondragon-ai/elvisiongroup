@@ -26,6 +26,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
 
+
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
 
@@ -79,7 +80,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveReflection = async () => {
-    if (!reflection.trim() || !currentUser) {
+    if (!reflection.trim() || !currentUser?.id) {
       toast({
         title: "Error",
         description: "Silakan tulis renungan Anda terlebih dahulu",
@@ -137,6 +138,11 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
       // Award XP AFTER counter increment (XP can be blocked by daily limit)
       awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
+
+      toast({
+        title: "✨ Renungan Tersimpan",
+        description: `Total journal: ${currentCount + 1}`,
+      });
 
       setReflection("");
       loadReflections(currentUser.id);
