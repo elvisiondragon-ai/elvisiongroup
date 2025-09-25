@@ -162,6 +162,17 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   }, []);
 
   const togglePlayPause = async () => {
+    // Simple getSession check
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({
+        title: "Please Log In",
+        description: "You need to log in to play meditation audio",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (!sessionData?.file_url) {
       setAudioError('Session data not available');
       return;

@@ -44,32 +44,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     }
   }, [user?.id]);
 
-  useEffect(() => {
-    // Listen for auth changes to get user reliably
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        loadReflections(session.user.id);
-      } else {
-        setReflections([]);
-        setIsLoadingReflections(false);
-      }
-    });
-
-    // Also get current user immediately if not already available
-    if (!user) {
-      supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
-        if (currentUser) {
-          loadReflections(currentUser.id);
-        } else {
-          setIsLoadingReflections(false);
-        }
-      });
-    }
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [user]);
+  // Remove auth listener - App.tsx handles this
 
   const loadReflections = async (userId: string) => {
     console.log('🔍 Loading reflections for user:', userId);
@@ -349,7 +324,18 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
               
               <Button
                 ref={saveButtonRef}
-                onClick={() => {
+                onClick={async () => {
+                  // Simple getSession check
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (!session) {
+                    toast({
+                      title: "Please Log In",
+                      description: "You need to log in to save reflections",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  
                   handleButtonTimeout(
                     () => handleSaveReflection(),
                     saveButtonRef.current || undefined

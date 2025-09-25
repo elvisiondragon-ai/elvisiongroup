@@ -38,16 +38,31 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
   };
 
   const handleDelete = async () => {
-    // Call parent handler which handles database delete + UI update
-    if (onDelete) {
-      await onDelete(id);
+    // Make message disappear from UI immediately with cool slide left animation
+    const messageElement = document.querySelector(`[data-message-id="${id}"]`);
+    if (messageElement) {
+      messageElement.style.opacity = '0';
+      messageElement.style.transform = 'translateX(-100%)';
+      messageElement.style.transition = 'all 0.3s ease-out';
+      
+      // Remove from DOM after animation
+      setTimeout(() => {
+        if (onDelete) {
+          onDelete(id);
+        }
+      }, 300);
+    } else {
+      // Fallback if element not found
+      if (onDelete) {
+        onDelete(id);
+      }
     }
   };
 
   const canDelete = currentUserId === user.id;
 
   return (
-    <div className="flex gap-3 p-4 hover:bg-card/50 transition-colors">
+    <div data-message-id={id} className="flex gap-3 p-4 hover:bg-card/50 transition-colors">
       <Avatar className="w-10 h-10 border border-border">
         <AvatarImage src={user.avatar} />
         <AvatarFallback className="bg-muted text-muted-foreground font-orbitron">
@@ -70,8 +85,8 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
               <TierBadge level={user.level} isPro={user.isPro} isAdmin={user.isAdmin} achievements={[]} subscriptionType={user.subscriptionType} />
             </div>
             
-            {/* Streak badges - Under username - Multiple Tiers */}
-            {user.streak_days >= 7 && (
+            {/* Streak badges - Under username - Multiple Tiers - Hidden for Admin */}
+            {!user.isAdmin && user.streak_days >= 7 && (
               <div className="flex items-center gap-1">
                 {user.streak_days >= 320 ? (
                   <div className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gradient-to-r from-red-800/80 via-red-700/80 to-orange-800/80 border border-red-500 text-orange-100 shadow-sm">

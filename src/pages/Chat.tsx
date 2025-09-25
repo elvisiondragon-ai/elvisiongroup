@@ -394,21 +394,17 @@ export function Chat({ onNavigate }: ChatProps) {
   };
 
   const handleSendMessage = async () => {
+    // Check if user is connected/authenticated before validation
+    if (!user) {
+      console.log('No current user found, button disabled');
+      return; // Do nothing if user not authenticated
+    }
+
     const validationError = validateMessage(message);
     if (validationError) {
       toast({
         title: "Invalid Message",
         description: validationError,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!user) {
-      console.log('No current user found, cannot send message');
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to send messages",
         variant: "destructive"
       });
       return;
@@ -524,8 +520,11 @@ export function Chat({ onNavigate }: ChatProps) {
   };
 
   const handleDeleteMessage = async (messageId: string) => {
+    // Remove from UI immediately (animation handled in ChatMessage component)
+    setMessages(current => current.filter(msg => msg.id !== messageId));
+    
     try {
-      // Wait for database delete to complete first
+      // Try to delete from database in background
       const { error } = await supabase
         .from('chat_messages')
         .delete()
@@ -533,29 +532,10 @@ export function Chat({ onNavigate }: ChatProps) {
 
       if (error) {
         console.error('Delete failed:', error);
-        toast({
-          title: "❌ Delete Failed",
-          description: "Refresh terlebih dahulu",
-          variant: "destructive"
-        });
-        return;
       }
-
-      // Only remove from UI after successful database deletion
-      setMessages(current => current.filter(msg => msg.id !== messageId));
-      
-      toast({
-        title: "Message Deleted 🔥",
-        description: ""
-      });
 
     } catch (err) {
       console.error('Delete error:', err);
-      toast({
-        title: "❌ Delete Failed", 
-        description: "Refresh terlebih dahulu",
-        variant: "destructive"
-      });
     }
   };
 
@@ -706,7 +686,18 @@ export function Chat({ onNavigate }: ChatProps) {
           />
           <Button
             ref={sendButtonRef}
-            onClick={() => {
+            onClick={async () => {
+              // Simple getSession check
+              const { data: { session } } = await supabase.auth.getSession();
+              if (!session) {
+                toast({
+                  title: "Please Log In",
+                  description: "You need to log in to send messages",
+                  variant: "destructive"
+                });
+                return;
+              }
+              
               handleButtonTimeout(
                 () => handleSendMessage(),
                 sendButtonRef.current || undefined

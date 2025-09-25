@@ -23,14 +23,8 @@ export function ResetPassword() {
   });
 
   useEffect(() => {
-    // Simple auth state listener - let Supabase handle token validation
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state change in reset:', event, session?.user?.email);
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    // Auth listener removed - App.tsx handles this now
+    // Password reset will be handled through App.tsx auth flow
   }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {

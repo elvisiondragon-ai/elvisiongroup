@@ -713,7 +713,17 @@ export function Profile({ onNavigate }: ProfileProps) {
         <div className="p-6">
           <Button
             variant="destructive"
-            onClick={handleLogout}
+            onClick={async () => {
+              // Simple getSession check
+              const { data: { session } } = await supabase.auth.getSession();
+              if (!session) {
+                // Already logged out, clear cache and redirect
+                localStorage.clear();
+                window.location.href = '/auth';
+                return;
+              }
+              handleLogout();
+            }}
             className="w-full transition-all duration-200 transform hover:scale-105 active:scale-95"
           >
             <LogOut className="w-4 h-4 mr-2" />

@@ -41,23 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Listen for auth changes - this replaces multiple getUser() calls
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        // console.log('🔄 Auth state changed:', event); // Silenced for development
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // TEMP: Skip rate limiting due to function error
-          await checkProStatus(session.user.id, event === 'SIGNED_IN');
-        } else {
-          setProStatus(null);
-          setLoading(false);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    // Auth listener removed - App.tsx handles this now
   }, []);
 
   const checkProStatus = async (userId: string, force: boolean = false) => {

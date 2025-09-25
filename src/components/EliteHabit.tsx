@@ -417,7 +417,18 @@ export function EliteHabit() {
         {/* Submit Button */}
         <Button
           ref={submitButtonRef}
-          onClick={() => {
+          onClick={async () => {
+            // Simple getSession check
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+              toast({
+                title: "Please Log In",
+                description: "You need to log in to save elite habits",
+                variant: "destructive"
+              });
+              return;
+            }
+            
             console.log('BUTTON CLICKED!');
             handleButtonTimeout(
               () => submitHabit(submitButtonRef.current || undefined),
