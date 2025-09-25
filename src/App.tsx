@@ -122,27 +122,43 @@ const App = () => {
                 localStorage.removeItem('meditation-cache');
                 sessionStorage.clear();
                 localStorage.setItem('refresh-redirect-to-meditation', 'true');
-              } else {
-                // 25 SEP ONLY UNTUK CLEAR OLD CACHE, CABUT TANGGAL 26
-                // Nuke Refresh - Clear all cache and cookies for this update only
-                console.log('💥 NUKE REFRESH: Clearing all cache and cookies (25 SEP ONLY)');
-                
-                // Save auth tokens before clearing
-                const authTokens = localStorage.getItem('sb-' + 'ehffgmrhjnqwnifbpxwy' + '-auth-token');
-                
-                // Clear all localStorage
-                localStorage.clear();
-                
-                // Restore auth tokens so user stays logged in
-                if (authTokens) {
-                  localStorage.setItem('sb-' + 'ehffgmrhjnqwnifbpxwy' + '-auth-token', authTokens);
-                }
-                
-                // Set redirect to home after refresh
-                localStorage.setItem('refresh-redirect-to-home', 'true');
-                
-                // Clear all sessionStorage
+              } else if (currentPath.includes('payment') || window.location.hash.includes('payment')) {
+                console.log('💥 PAYMENT: Clearing cache completely');
+                // Selective cache cleaner
+                localStorage.removeItem('user-profile-cache');
+                localStorage.removeItem('profile-metadata');
+                localStorage.removeItem('user-cache');
                 sessionStorage.clear();
+                localStorage.setItem('refresh-redirect-to-payment', 'true');
+              } else if (currentPath.includes('profile') || window.location.hash.includes('profile')) {
+                console.log('💥 PROFILE: Clearing cache completely');
+                // Selective cache cleaner
+                localStorage.removeItem('user-profile-cache');
+                localStorage.removeItem('profile-metadata');
+                localStorage.removeItem('user-cache');
+                sessionStorage.clear();
+                localStorage.setItem('refresh-redirect-to-profile', 'true');
+              } else if (currentPath.includes('chat') || window.location.hash.includes('chat')) {
+                console.log('💥 CHAT: Clearing cache completely');
+                // Selective cache cleaner
+                localStorage.removeItem('user-profile-cache');
+                localStorage.removeItem('profile-metadata');
+                localStorage.removeItem('user-cache');
+                localStorage.removeItem('chat-messages-cache');
+                sessionStorage.clear();
+                localStorage.setItem('refresh-redirect-to-chat', 'true');
+              } else if (currentPath.includes('audio') || window.location.hash.includes('audio')) {
+                console.log('💥 AUDIO THERAPY: Clearing cache completely');
+                // Selective cache cleaner
+                localStorage.removeItem('user-profile-cache');
+                localStorage.removeItem('profile-metadata');
+                localStorage.removeItem('user-cache');
+                localStorage.removeItem('audio-cache');
+                sessionStorage.clear();
+                localStorage.setItem('refresh-redirect-to-audio', 'true');
+              } else {
+                // Default: Just update service worker, no cache clearing
+                console.log('🔄 DEFAULT: Just updating service worker');
               }
               
               // Clear all cookies
@@ -282,6 +298,16 @@ const App = () => {
         // console.log('Auth state change:', event, session?.user?.email); // Silenced for development
         
         if (event === 'SIGNED_IN' && session?.user) {
+          // Selective cache bomb - Clear all caches on login to prevent stale data issues
+          console.log('💣 SIGNIN: Selective cache bomb clearing all caches');
+          localStorage.removeItem('user-profile-cache');
+          localStorage.removeItem('profile-metadata');
+          localStorage.removeItem('user-cache');
+          localStorage.removeItem('chat-messages-cache');
+          localStorage.removeItem('meditation-cache');
+          localStorage.removeItem('audio-cache');
+          sessionStorage.clear();
+          
           // Handle successful sign in (both login and signup)
           setUser(session.user);
           setIsLoading(false);

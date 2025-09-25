@@ -139,6 +139,16 @@ export function Auth({ onLogin }: AuthProps) {
       if (error) throw error;
 
       if (data.user) {
+        // Selective cache bomb - Clear all caches on login to prevent stale data issues
+        console.log('💣 LOGIN: Selective cache bomb clearing all caches');
+        localStorage.removeItem('user-profile-cache');
+        localStorage.removeItem('profile-metadata');
+        localStorage.removeItem('user-cache');
+        localStorage.removeItem('chat-messages-cache');
+        localStorage.removeItem('meditation-cache');
+        localStorage.removeItem('audio-cache');
+        sessionStorage.clear();
+        
         onLogin(data.user);
       }
     } catch (error: any) {
@@ -194,6 +204,16 @@ export function Auth({ onLogin }: AuthProps) {
       if (error) throw error;
 
       if (data.user) {
+        // Selective cache bomb - Clear all caches on login to prevent stale data issues
+        console.log('💣 LOGIN: Selective cache bomb clearing all caches');
+        localStorage.removeItem('user-profile-cache');
+        localStorage.removeItem('profile-metadata');
+        localStorage.removeItem('user-cache');
+        localStorage.removeItem('chat-messages-cache');
+        localStorage.removeItem('meditation-cache');
+        localStorage.removeItem('audio-cache');
+        sessionStorage.clear();
+        
         onLogin(data.user);
       }
     } catch (error: any) {
@@ -370,6 +390,16 @@ export function Auth({ onLogin }: AuthProps) {
       }
 
       if (data.user) {
+        // Selective cache bomb - Clear all caches on login to prevent stale data issues
+        console.log('💣 LOGIN: Selective cache bomb clearing all caches');
+        localStorage.removeItem('user-profile-cache');
+        localStorage.removeItem('profile-metadata');
+        localStorage.removeItem('user-cache');
+        localStorage.removeItem('chat-messages-cache');
+        localStorage.removeItem('meditation-cache');
+        localStorage.removeItem('audio-cache');
+        sessionStorage.clear();
+        
         onLogin(data.user);
       }
     } catch (error: any) {

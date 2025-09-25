@@ -139,11 +139,6 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       // Award XP AFTER counter increment (XP can be blocked by daily limit)
       awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
 
-      toast({
-        title: "✨ Renungan Tersimpan",
-        description: `Total journal: ${currentCount + 1}`,
-      });
-
       setReflection("");
       loadReflections(currentUser.id);
       setIsSaving(false);

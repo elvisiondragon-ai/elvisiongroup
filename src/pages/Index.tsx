@@ -80,10 +80,34 @@ const Index = () => {
       return;
     }
 
-    // Check if we need to redirect to home after auto-deploy refresh
-    if (localStorage.getItem('refresh-redirect-to-home') === 'true') {
-      localStorage.removeItem('refresh-redirect-to-home');
-      setActiveTab('home');
+    // Auto-deploy selective cache cleaner redirects
+    if (localStorage.getItem('refresh-redirect-to-journal') === 'true') {
+      localStorage.removeItem('refresh-redirect-to-journal');
+      setActiveTab('journal');
+      return;
+    }
+
+    if (localStorage.getItem('refresh-redirect-to-elite-habit') === 'true') {
+      localStorage.removeItem('refresh-redirect-to-elite-habit');
+      setActiveTab('elite-habit');
+      return;
+    }
+
+    if (localStorage.getItem('refresh-redirect-to-meditation') === 'true') {
+      localStorage.removeItem('refresh-redirect-to-meditation');
+      setActiveTab('sesi-meditasi');
+      return;
+    }
+
+    if (localStorage.getItem('refresh-redirect-to-profile') === 'true') {
+      localStorage.removeItem('refresh-redirect-to-profile');
+      setActiveTab('profile');
+      return;
+    }
+
+    if (localStorage.getItem('refresh-redirect-to-audio') === 'true') {
+      localStorage.removeItem('refresh-redirect-to-audio');
+      setActiveTab('audio-therapy');
       return;
     }
     

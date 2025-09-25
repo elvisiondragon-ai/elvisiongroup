@@ -43,16 +43,20 @@ export function useXPSystem(): XPSystemHook {
       if (!result.success && result.reason === 'daily_limit_reached') {
         // Show toast that counters still work even when XP limit reached
         if (showNotification) {
-          let toastTitle = "Total Verses +1";
+          let toastTitle = "🎵 Verse Terselesaikan";
+          let toastDescription = "Total Verses +1";
+          
           if (activityType === 'elite_habit_completion') {
-            toastTitle = "Total Elite Habit +1";
+            toastTitle = "🏋️ Elite Habit Tersimpan";
+            toastDescription = "Total Elite Habit +1";
           } else if (activityType === 'journal_completion') {
-            toastTitle = "Total Journal +1";
+            toastTitle = "✨ Renungan Tersimpan";
+            toastDescription = "Total Journal +1";
           }
           
           toast({
             title: toastTitle,
-            description: "",
+            description: toastDescription,
           });
         }
         return; // Still return early but only for notifications
