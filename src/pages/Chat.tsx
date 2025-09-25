@@ -10,7 +10,7 @@ import { Send, Users, Languages, Globe, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
-import { usePro } from "@/hooks/usePro";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTranslation } from "react-i18next";
 // Removed slow UserProfileContext - now using fast metadata
 import {
@@ -39,30 +39,11 @@ interface ChatProps {
 export function Chat({ onNavigate }: ChatProps) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userDataLoading, setUserDataLoading] = useState(true);
   
   // Get user data from fast metadata instead of slow profile table
   useEffect(() => {
-    // Only clear cache ONCE when switching from profile-based to metadata-based
-    const needsCacheClearing = !localStorage.getItem('metadata-migration-done');
-    if (needsCacheClearing) {
-      const oldCacheKeys = [
-        'user-profile-cache',
-        'user_profile_cache', 
-        'unified_pro_status_cache',
-        'chat-user-profile-cache'
-      ];
-      oldCacheKeys.forEach(key => {
-        if (localStorage.getItem(key)) {
-          console.log('🧹 One-time clearing old profile cache:', key);
-          localStorage.removeItem(key);
-        }
-      });
-      localStorage.setItem('metadata-migration-done', 'true');
-      console.log('✅ Cache migration completed - future visits will use metadata caching');
-    }
 
     // Try loading from metadata cache first for instant second visits
     const cachedMetadata = localStorage.getItem('user-metadata-cache');
@@ -79,45 +60,61 @@ export function Chat({ onNavigate }: ChatProps) {
       }
     }
 
-    const getCurrentUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          // Build currentUser from fast metadata instead of slow profile table
-          const metadata = user.user_metadata || {};
-          const currentUserData = {
-            id: user.id,
-            name: metadata.display_name || 'Anonymous',
-            level: metadata.level || 1,
-            isPro: metadata.is_pro || false,
-            achievements: metadata.achievements || [],
-            subscriptionType: metadata.subscription_type || null
-          };
-          
-          setCurrentUser(currentUserData);
-          
-          // Cache the metadata for instant future visits (no expiry)
-          localStorage.setItem('user-metadata-cache', JSON.stringify({
-            user: currentUserData
-          }));
-        }
-      } catch (error) {
-        console.error('Error getting user:', error);
-      } finally {
-        setUserDataLoading(false);
-      }
+    const buildUserData = (user: any) => {
+      const metadata = user.user_metadata || {};
+      return {
+        id: user.id,
+        name: metadata.display_name || 'Anonymous',
+        level: metadata.level || 1,
+        isPro: metadata.is_pro || (userProfile && userProfile.user_id === user.id ? true : false),
+        achievements: metadata.achievements || [],
+        subscriptionType: metadata.subscription_type || null
+      };
     };
-    
-    getCurrentUser();
+
+    // Listen for auth changes to get user reliably
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        const currentUserData = buildUserData(session.user);
+        setCurrentUser(currentUserData);
+        
+        // Cache the metadata for instant future visits (no expiry)
+        localStorage.setItem('user-metadata-cache', JSON.stringify({
+          user: currentUserData
+        }));
+      } else {
+        setCurrentUser(null);
+        localStorage.removeItem('user-metadata-cache');
+      }
+      setUserDataLoading(false);
+    });
+
+    // Also get current user immediately
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        const currentUserData = buildUserData(user);
+        setCurrentUser(currentUserData);
+        
+        localStorage.setItem('user-metadata-cache', JSON.stringify({
+          user: currentUserData
+        }));
+      }
+      setUserDataLoading(false);
+    }).catch((error) => {
+      console.error('Error getting user:', error);
+      setUserDataLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
-  const [isTranslating, setIsTranslating] = useState(false);
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isSending, setIsSending] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
-  const { proStatus } = usePro();
+  const { userProfile } = useUserProfile();
   const { i18n, t } = useTranslation();
 
 
@@ -209,7 +206,6 @@ export function Chat({ onNavigate }: ChatProps) {
       }
       
       setLastUpdate(new Date());
-      setIsLoading(false);
     } catch (error) {
       console.error('Error loading messages:', error);
       toast({
@@ -232,7 +228,6 @@ export function Chat({ onNavigate }: ChatProps) {
       try {
         const parsed = JSON.parse(cachedMessages);
         setMessages(parsed);
-        setIsLoading(false);
       } catch (error) {
         console.error('Chat cache error, removing:', error);
         localStorage.removeItem('chat-messages-cache');
@@ -249,7 +244,7 @@ export function Chat({ onNavigate }: ChatProps) {
 
   // Cache chat messages when successfully loaded (prevent duplicate saves)
   useEffect(() => {
-    if (messages.length > 0 && !isLoading) {
+    if (messages.length > 0) {
       const currentCache = localStorage.getItem('chat-messages-cache');
       const newCache = JSON.stringify(messages);
       
@@ -258,7 +253,7 @@ export function Chat({ onNavigate }: ChatProps) {
         localStorage.setItem('chat-messages-cache', newCache);
       }
     }
-  }, [messages, isLoading]);
+  }, [messages]);
 
 
   useEffect(() => {
@@ -314,9 +309,7 @@ export function Chat({ onNavigate }: ChatProps) {
   };
 
   const translateAllMessages = async () => {
-    if (isTranslating) return;
     
-    setIsTranslating(true);
     
     try {
       const messagesToTranslate = messages.filter(msg => !msg.translatedMessage);
@@ -343,7 +336,6 @@ export function Chat({ onNavigate }: ChatProps) {
         variant: "destructive"
       });
     } finally {
-      setIsTranslating(false);
     }
   };
 
@@ -471,7 +463,6 @@ export function Chat({ onNavigate }: ChatProps) {
       return;
     }
 
-    setIsSending(true);
 
     try {
       console.log('🚀 Starting message insert at:', new Date().toISOString());
@@ -534,7 +525,6 @@ export function Chat({ onNavigate }: ChatProps) {
         variant: "destructive"
       });
     } finally {
-      setIsSending(false);
     }
   };
 
@@ -596,13 +586,11 @@ export function Chat({ onNavigate }: ChatProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={isTranslating}
+                  disabled={false}
                   className="gap-2 bg-gradient-primary text-primary-foreground hover:opacity-90"
                 >
                   <Globe className="w-4 h-4" />
-                  {isTranslating ? "Translating..." : (
-                    i18n.language === 'en' ? "English" : "Indonesia"
-                  )}
+                  {i18n.language === 'en' ? "English" : "Indonesia"}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -628,12 +616,7 @@ export function Chat({ onNavigate }: ChatProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
-        {isLoading ? (
-          <div className="flex items-center justify-center p-8">
-            <p className="text-muted-foreground">Loading chat history...</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-border" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
+        <div className="divide-y divide-border" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
             {messages.slice().reverse().map((msg) => (
               <ChatMessage
                 key={msg.id}
@@ -670,7 +653,6 @@ export function Chat({ onNavigate }: ChatProps) {
               />
             ))}
           </div>
-        )}
       </div>
 
       {/* Message Input */}
@@ -686,14 +668,10 @@ export function Chat({ onNavigate }: ChatProps) {
           />
           <Button
             onClick={handleSendMessage}
-            disabled={!message.trim() || isSending}
+            disabled={!message.trim()}
             className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-4 transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0"
           >
-            {isSending ? (
-              <div className="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
+            <Send className="w-4 h-4" />
           </Button>
         </div>
       </div>

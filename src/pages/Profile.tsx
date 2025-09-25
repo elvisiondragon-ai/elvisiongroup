@@ -60,7 +60,6 @@ interface UserProfile {
 export function Profile({ onNavigate }: ProfileProps) {
   const { userProfile, user, loading } = useUserProfile();
   const [cachedProfile, setCachedProfile] = useState<UserProfile | null>(null);
-  const [cachedUserId, setCachedUserId] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -72,72 +71,39 @@ export function Profile({ onNavigate }: ProfileProps) {
   const { proStatus } = usePro();
   const { toast } = useToast();
 
-  // Load cached data instantly and fetch user if needed
+  // Cache management - event-based, no TTL
   useEffect(() => {
-    const initializeProfile = async () => {
-      // Load cached profile
-      const cached = localStorage.getItem('profile-cache');
+    const loadCache = () => {
+      const cached = localStorage.getItem('profile-metadata');
       if (cached) {
         try {
-          const cachedData = JSON.parse(cached);
-          // Validate cached profile structure
-          if (cachedData && typeof cachedData === 'object' && cachedData.display_name !== undefined) {
-            setCachedProfile(cachedData);
-          } else {
-            console.log('⚡ Invalid profile cache detected, clearing...');
-            localStorage.removeItem('profile-cache');
-          }
-        } catch (error) {
-          console.log('⚡ Corrupted profile cache detected, clearing...');
-          localStorage.removeItem('profile-cache');
-        }
-      }
-      
-      // Load cached user ID instantly to avoid black screen
-      const cachedUserIdFromStorage = localStorage.getItem('current-user-id');
-      if (cachedUserIdFromStorage) {
-        console.log('⚡ Loading user ID from cache to avoid black screen');
-        // Verify cached user ID is still valid
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user || user.id !== cachedUserIdFromStorage) {
-          console.log('⚡ Cached user ID is invalid, clearing cache...');
-          localStorage.removeItem('current-user-id');
-          localStorage.removeItem('profile-cache');
-          setCachedUserId(null);
-          setCachedProfile(null);
-          if (user) {
-            localStorage.setItem('current-user-id', user.id);
-            setCachedUserId(user.id);
-            console.log('⚡ Updated user ID cache with fresh data');
-          }
-        } else {
-          setCachedUserId(cachedUserIdFromStorage);
-        }
-      } else {
-        // If no cached ID, fetch user for first visit - using getUser() for complete data
-        console.log('⚡ No cached ID found, fetching user for first visit');
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          localStorage.setItem('current-user-id', user.id);
-          setCachedUserId(user.id);
-          console.log('⚡ User ID cached for instant profile loading');
+          const data = JSON.parse(cached);
+          setCachedProfile(data.profile);
+        } catch {
+          localStorage.removeItem('profile-metadata');
         }
       }
     };
-
-    initializeProfile();
+    loadCache();
   }, []);
 
-  // Cache profile when loaded
+  // Update cache when profile changes (event-based)
   useEffect(() => {
     if (userProfile) {
-      localStorage.setItem('profile-cache', JSON.stringify(userProfile));
+      const cacheData = {
+        profile: userProfile
+      };
+      localStorage.setItem('profile-metadata', JSON.stringify(cacheData));
       setCachedProfile(userProfile);
     }
   }, [userProfile]);
 
+
   const handleLogout = async () => {
     try {
+      // Clear all cached data
+      localStorage.removeItem('profile-metadata');
+      
       const { error } = await supabase.auth.signOut();
       if (error) {
         toast({
@@ -153,7 +119,6 @@ export function Profile({ onNavigate }: ProfileProps) {
         description: "Anda berhasil keluar dari akun.",
       });
       
-      // Small delay to show success message before redirect
       setTimeout(() => {
         window.location.href = '/auth';
       }, 1000);
@@ -237,7 +202,7 @@ export function Profile({ onNavigate }: ProfileProps) {
   }, []);
 
 
-  if (loading && !cachedProfile && !cachedUserId) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center pb-20">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -245,8 +210,8 @@ export function Profile({ onNavigate }: ProfileProps) {
     );
   }
 
-  // Error handling - if no user and no cached ID, show error state
-  if (!user && !cachedUserId) {
+  // Error handling - if no user, show error state
+  if (!user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center pb-20">
         <div className="text-center">
@@ -259,7 +224,7 @@ export function Profile({ onNavigate }: ProfileProps) {
     );
   }
 
-  // Priority: cachedProfile > userProfile > fallback
+  // Use cached profile for instant display, fallback to userProfile or default
   const profile = cachedProfile || userProfile || {
     display_name: "User",
     level: 1,

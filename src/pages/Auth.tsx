@@ -110,11 +110,7 @@ export function Auth({ onLogin }: AuthProps) {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        // Set flag for showing toast after refresh
-        localStorage.setItem('login-success-pending', 'true');
-        
-        // Force refresh to ensure proper auth flow
-        window.location.reload();
+        onLogin(session.user);
       }
     };
     checkUser();
@@ -143,11 +139,7 @@ export function Auth({ onLogin }: AuthProps) {
       if (error) throw error;
 
       if (data.user) {
-        // Set flag for showing toast after refresh
-        localStorage.setItem('login-success-pending', 'true');
-        
-        // Force refresh to ensure proper auth flow
-        window.location.reload();
+        onLogin(data.user);
       }
     } catch (error: any) {
       toast({
@@ -202,11 +194,7 @@ export function Auth({ onLogin }: AuthProps) {
       if (error) throw error;
 
       if (data.user) {
-        // Set flag for showing toast after refresh
-        localStorage.setItem('signup-trial-success-pending', 'true');
-        
-        // Force refresh to bypass frontend loading issues
-        window.location.reload();
+        onLogin(data.user);
       }
     } catch (error: any) {
       toast({
@@ -382,11 +370,7 @@ export function Auth({ onLogin }: AuthProps) {
       }
 
       if (data.user) {
-        // Set flag for showing toast after refresh
-        localStorage.setItem('login-success-pending', 'true');
-        
-        // Instant refresh
-        window.location.reload();
+        onLogin(data.user);
       }
     } catch (error: any) {
       toast({
@@ -487,7 +471,7 @@ export function Auth({ onLogin }: AuthProps) {
               title: "Berhasil Masuk!",
               description: "Email sudah terdaftar, Anda berhasil masuk.",
             });
-            window.location.href = '/';
+            onLogin(loginData.user);
             return;
           }
         }
@@ -508,11 +492,7 @@ export function Auth({ onLogin }: AuthProps) {
           // Continue even if email fails
         }
 
-        // Set flag for showing toast after refresh
-        localStorage.setItem('signup-success-pending', 'true');
-        
-        // Force refresh to bypass frontend loading issues
-        window.location.reload();
+        onLogin(data.user);
       }
     } catch (error: any) {
       console.error('Signup error:', error);
@@ -626,13 +606,7 @@ export function Auth({ onLogin }: AuthProps) {
             </p>
             <div className="space-y-3 pt-4">
               <Button 
-                onClick={() => {
-                  // Clear cache and refresh like auto deploy notification
-                  localStorage.removeItem('unified_pro_status_cache');
-                  localStorage.removeItem('user_profile_cache');
-                  // Force reload to ensure fresh data
-                  window.location.href = '/';
-                }}
+                onClick={() => setCurrentView('auth')}
                 className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary transform hover:scale-105 active:scale-95 transition-all duration-200"
               >
                 <Sparkles className="w-4 h-4 mr-2" />

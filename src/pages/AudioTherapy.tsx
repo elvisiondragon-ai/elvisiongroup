@@ -81,7 +81,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { t, i18n } = useTranslation();
   const [userLevel, setUserLevel] = useState(1);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [audioTracks, setAudioTracks] = useState<any[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showWarningDialog, setShowWarningDialog] = useState(false);
@@ -129,39 +128,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   };
 
   useEffect(() => {
-    // Only clear old profile cache ONCE if it still exists
-    const needsCacheClearing = !localStorage.getItem('audio-therapy-migration-done');
-    if (needsCacheClearing) {
-      const oldCacheKeys = [
-        'user-profile-cache',
-        'user_profile_cache', 
-        'unified_pro_status_cache',
-        'audio-therapy-user-cache'
-      ];
-      oldCacheKeys.forEach(key => {
-        if (localStorage.getItem(key)) {
-          console.log('🧹 One-time clearing old profile cache:', key);
-          localStorage.removeItem(key);
-        }
-      });
-      localStorage.setItem('audio-therapy-migration-done', 'true');
-      console.log('✅ Audio Therapy cache migration completed - now using fast auth');
-    }
-
-    // Try loading from auth cache first for instant second visits
-    const cachedAuth = localStorage.getItem('audio-therapy-auth-cache');
-    if (cachedAuth) {
-      try {
-        const cached = JSON.parse(cachedAuth);
-        console.log('⚡ Loading user from auth cache for instant access');
-        setCurrentUser(cached.user);
-        setIsAdmin(cached.user.email === "elvisiondragon@gmail.com");
-        setLoading(false);
-      } catch (error) {
-        console.error('Cache error, removing:', error);
-        localStorage.removeItem('audio-therapy-auth-cache');
-      }
-    }
 
     const initializeData = async () => {
       setLoading(true);
@@ -172,16 +138,11 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         setCurrentUser(user);
         setIsAdmin(user.email === "elvisiondragon@gmail.com");
         
-        // Cache the user data for instant future visits (no expiry)
-        localStorage.setItem('audio-therapy-auth-cache', JSON.stringify({
-          user: user
-        }));
         
         const verse4Count = await fetchVerse4Count(user.id);
         await fetchUserProfile(user.id);
       }
       
-      await fetchAudioTracks();
       setLoading(false);
     };
     
@@ -199,10 +160,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     }
   }, [proStatus.isPro, currentUser, loading]);
 
-  // Refetch audio tracks when language changes
-  useEffect(() => {
-    fetchAudioTracks();
-  }, [i18n.language]);
 
   const fetchUserProfile = async (userId: string) => {
     try {
@@ -246,28 +203,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     }
   };
 
-  const fetchAudioTracks = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('audio_tracks')
-        .select('*')
-        .eq('category', 'verse')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching audio tracks:', error);
-        return;
-      }
-
-      setAudioTracks(data || []);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
 
   const handleUploadComplete = () => {
-    fetchAudioTracks(); // Refresh the tracks list
     setShowUpload(false);
   };
 
@@ -828,22 +765,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         })}
       </div>
 
-      {/* Audio Tracks Section - Show only first 2 tracks */}
-      {audioTracks.length > 0 && (
-        <div className="px-6 space-y-4">
-          <h2 className="text-xl font-semibold font-orbitron text-foreground">
-            {t('audioTherapy.availableTracks')}
-          </h2>
-          {audioTracks.slice(0, 2).map((track) => (
-            <AudioPlayer
-              key={track.id}
-              title={track.title}
-              description={track.description}
-              src={track.file_url}
-            />
-          ))}
-        </div>
-      )}
 
       {/* Loading State */}
       {loading && (

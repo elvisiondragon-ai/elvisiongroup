@@ -8,7 +8,6 @@ export interface ProStatus {
   subscriptionType: string | null;
   status: string | null;
   expiresAt: string | null;
-  daysRemaining: number | null;
   verseAccess: boolean;
   proBadge: boolean;
   loading: boolean;
@@ -20,7 +19,6 @@ export function usePro() {
     subscriptionType: null,
     status: null,
     expiresAt: null,
-    daysRemaining: null,
     verseAccess: false,
     proBadge: false,
     loading: true
@@ -36,7 +34,6 @@ export function usePro() {
       subscriptionType: null,
       status: null,
       expiresAt: null,
-      daysRemaining: null,
       verseAccess: false,
       proBadge: false,
       loading: false,
@@ -73,7 +70,6 @@ export function usePro() {
           subscriptionType: statusData.subscription_type,
           status: statusData.status,
           expiresAt: statusData.expires_at,
-          daysRemaining: statusData.days_remaining,
           verseAccess: statusData.verse_access,
           proBadge: statusData.pro_badge,
         };
@@ -94,7 +90,6 @@ export function usePro() {
             subscriptionType: null,
             status: null,
             expiresAt: null,
-            daysRemaining: null,
             verseAccess: false,
             proBadge: false,
           },

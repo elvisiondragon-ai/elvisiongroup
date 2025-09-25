@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown, Edit, RefreshCw, Play } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { EditProfile } from '@/components/EditProfile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 
 // Meta Pixel declaration
 declare global {
@@ -22,6 +22,7 @@ interface PaymentProps {
 }
 
 export function Payment({ onNavigate }: PaymentProps) {
+  const { user, userProfile, loading: userDataLoading } = useUserProfile();
   const [selectedPlan, setSelectedPlan] = useState('1_month');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('QRIS');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -31,10 +32,6 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [paymentData, setPaymentData] = useState<any>(null);
 
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [userDataLoading, setUserDataLoading] = useState(false);
-  const [profileError, setProfileError] = useState<string | null>(null);
-  const [editingProfile, setEditingProfile] = useState(false);
   const [showQrisModal, setShowQrisModal] = useState(false);
   const { toast } = useToast();
 
@@ -180,7 +177,7 @@ export function Payment({ onNavigate }: PaymentProps) {
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'pro_subscriptions',
           filter: `tripay_reference=eq.${paymentData.tripay_reference}`
@@ -247,9 +244,6 @@ export function Payment({ onNavigate }: PaymentProps) {
                 <button 
                   onClick={() => {
                     console.log('🔄 User clicked refresh after payment success')
-                    // Clear all pro status caches before refresh
-                    localStorage.removeItem('unified_pro_status_cache')
-                    localStorage.removeItem('pro-status-change')
                     window.location.reload()
                   }}
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
@@ -293,9 +287,6 @@ export function Payment({ onNavigate }: PaymentProps) {
             if (refreshBtn) {
               refreshBtn.addEventListener('click', () => {
                 console.log('🔄 User clicked refresh from payment success modal');
-                // Clear all pro status caches before refresh
-                localStorage.removeItem('unified_pro_status_cache');
-                localStorage.removeItem('pro-status-change');
                 clearInterval(timer);
                 document.body.removeChild(modal);
                 window.location.reload();
@@ -327,42 +318,31 @@ export function Payment({ onNavigate }: PaymentProps) {
     };
   }, [showPaymentInstructions, paymentData?.tripay_reference]);
 
-  // Instant cache loading for second-time visits
+
+  // Auto-fill form with user data from UserProfileContext
   useEffect(() => {
-    const cachedData = localStorage.getItem('payment-user-cache');
-    if (cachedData) {
-      try {
-        const parsed = JSON.parse(cachedData);
-        setEmail(parsed.email || '');
-        setFullName(parsed.display_name || 'User');
-        if (parsed.phone_number) {
-          setPhoneNumber(parsed.phone_number);
-        }
-      } catch (error) {
-        localStorage.removeItem('payment-user-cache');
+    if (user && userProfile) {
+      setEmail(user.email || '');
+      
+      // Get name from profile display_name or user metadata
+      const profileName = userProfile.display_name;
+      const metadataName = user.user_metadata?.display_name;
+      if (profileName && !fullName) {
+        setFullName(profileName);
+      } else if (metadataName && !fullName) {
+        setFullName(metadataName);
+      }
+      
+      // Get phone from profile first, then metadata as fallback
+      const profilePhone = userProfile?.phone_number;
+      const metadataPhone = user.user_metadata?.phone_number;
+      if (profilePhone && !phoneNumber) {
+        setPhoneNumber(profilePhone);
+      } else if (metadataPhone && !phoneNumber) {
+        setPhoneNumber(metadataPhone);
       }
     }
-  }, []);
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUser(user);
-        setEmail(user.email || '');
-        setFullName(user.user_metadata?.display_name || 'User');
-        
-        // Cache for next visit
-        localStorage.setItem('payment-user-cache', JSON.stringify({
-          email: user.email,
-          display_name: user.user_metadata?.display_name,
-          phone_number: phoneNumber
-        }));
-      }
-    };
-    
-    getUser();
-  }, [phoneNumber]);
+  }, [user, userProfile, phoneNumber, fullName]);
 
   const handleCreatePayment = async () => {
     if (!user || !selectedPlan || !phoneNumber.trim() || !fullName.trim() || !email.trim()) {
@@ -470,23 +450,6 @@ export function Payment({ onNavigate }: PaymentProps) {
 
 
 
-  // Show edit profile component if editing
-  if (editingProfile) {
-    return (
-      <div className="pb-20">
-        <EditProfile
-          user={user}
-          userProfile={userProfile}
-          onSave={() => {
-            setEditingProfile(false);
-            // Refresh data after profile update
-            window.location.reload();
-          }}
-          onCancel={() => setEditingProfile(false)}
-        />
-      </div>
-    );
-  }
 
   if (showPaymentInstructions) {
     return (
@@ -758,17 +721,6 @@ export function Payment({ onNavigate }: PaymentProps) {
             </h3>
           </div>
           
-          {profileError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-xs flex items-center justify-between">
-              <span>{profileError} - Data akan menggunakan fallback dari email</span>
-              <button
-                onClick={() => window.location.reload()}
-                className="text-red-600 hover:text-red-800 underline text-xs ml-2"
-              >
-                Refresh
-              </button>
-            </div>
-          )}
           
           <div className="space-y-3">
             <div>
@@ -778,12 +730,11 @@ export function Payment({ onNavigate }: PaymentProps) {
                 <Input
                   id="fullName"
                   type="text"
-                  placeholder={userDataLoading ? "Memuat nama..." : "Masukkan nama lengkap"}
+                  placeholder="Tulis Nama anda disini"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="pl-10 bg-muted/50 cursor-not-allowed"
+                  className="pl-10"
                   required
-                  disabled
                 />
               </div>
             </div>
@@ -804,22 +755,6 @@ export function Payment({ onNavigate }: PaymentProps) {
                 />
               </div>
               
-              {/* Refresh Profile Button - moved under email */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  console.log('🔄 Refresh Profil clicked - triggering refresh');
-                  localStorage.setItem('refresh-redirect-to-payment', 'true');
-                  setTimeout(() => {
-                    window.location.reload();
-                  }, 800);
-                }}
-                className="text-xs bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-purple-600 mt-2 transition-all duration-200 transform hover:scale-105 active:scale-95"
-              >
-                <RefreshCw className="w-3 h-3 mr-1" />
-                Refresh Profil
-              </Button>
             </div>
 
             <div>

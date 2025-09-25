@@ -67,10 +67,12 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
 
   const handleSave = async () => {
     try {
+      console.log('🔄 Starting save...');
       setSaving(true);
 
       // Validate phone number format before saving
       if (phoneNumber && !/^08[0-9]{8,13}$/.test(phoneNumber)) {
+        console.log('❌ Phone validation failed');
         toast({
           title: "Error",
           description: "Phone number must start with 08 and be 10-15 digits total (08xxxxxxxxxx)",
@@ -80,17 +82,11 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
         return;
       }
 
-      // Update email in auth if changed
-      if (email !== user?.email) {
-        const { error: emailError } = await supabase.auth.updateUser({
-          email: email
-        });
+      console.log('✅ Phone validation passed');
 
-        if (emailError) {
-          throw emailError;
-        }
-      }
-
+      // Skip auth update, just update profile
+      console.log('🔄 Updating profile...');
+      
       // Update or insert profile data
       const profileData = {
         user_id: user?.id,
@@ -101,6 +97,8 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
         updated_at: new Date().toISOString()
       };
 
+      console.log('📝 Profile data:', profileData);
+
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert(profileData, {
@@ -108,8 +106,11 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
         });
 
       if (profileError) {
+        console.error('❌ Profile error:', profileError);
         throw profileError;
       }
+
+      console.log('✅ Profile updated successfully');
 
       toast({
         title: "Success",
@@ -118,12 +119,14 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
 
       onSave();
     } catch (error: any) {
+      console.error('💥 Save error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to update profile",
         variant: "destructive",
       });
     } finally {
+      console.log('🏁 Save completed, setting saving to false');
       setSaving(false);
     }
   };

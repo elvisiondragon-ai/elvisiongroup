@@ -11,7 +11,6 @@ interface AuthContextType {
     subscriptionType: string | null;
     status: string | null;
     expiresAt: string | null;
-    daysRemaining: number | null;
   } | null;
 }
 

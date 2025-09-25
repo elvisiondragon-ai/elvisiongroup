@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Minus, Check, Activity, ChevronLeft, ChevronRight, Calendar, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useToast } from '@/hooks/use-toast';
 
@@ -33,11 +32,9 @@ const EXERCISE_OPTIONS = [
 ];
 
 export function EliteHabit() {
-  const { userProfile, user, refreshProfile } = useUserProfile();
   const { awardXP } = useXPSystem();
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userDataLoading, setUserDataLoading] = useState(true);
   const [selectedExercise, setSelectedExercise] = useState('');
   const [duration, setDuration] = useState(5);
   const [notes, setNotes] = useState('');
@@ -51,36 +48,25 @@ export function EliteHabit() {
   const today = new Date().toDateString();
 
   useEffect(() => {
-    // Only clear old profile cache ONCE if it still exists
-    const needsCacheClearing = !localStorage.getItem('elite-habit-migration-done');
-    if (needsCacheClearing) {
-      const oldCacheKeys = [
-        'user-profile-cache',
-        'user_profile_cache', 
-        'unified_pro_status_cache',
-        'elite-habit-user-cache',
-        'current-user-id' // Old user ID cache
-      ];
-      oldCacheKeys.forEach(key => {
-        if (localStorage.getItem(key)) {
-          console.log('🧹 One-time clearing old profile cache:', key);
-          localStorage.removeItem(key);
-        }
-      });
-      localStorage.setItem('elite-habit-migration-done', 'true');
-      console.log('✅ Elite Habit cache migration completed - now using fast auth');
-    }
+    // Listen for auth changes to get user reliably
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setCurrentUser({ id: session.user.id });
+      } else {
+        setCurrentUser(null);
+      }
+    });
 
-    // Get user immediately for habit functionality using fast auth
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+    // Also get current user immediately
+    supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setCurrentUser({ id: user.id });
-        setUserDataLoading(false);
       }
+    });
+
+    return () => {
+      subscription.unsubscribe();
     };
-    
-    getUser();
   }, []);
 
   // Load habit data when currentUser is available
@@ -121,9 +107,15 @@ export function EliteHabit() {
         setAllEntries(allData);
       }
 
-      // Load total count from profile
-      if (userProfile?.total_elite_habit) {
-        setTotalEliteHabits(userProfile.total_elite_habit);
+      // Load total count from database
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('total_elite_habit')
+        .eq('user_id', currentUser.id)
+        .single();
+        
+      if (profileData) {
+        setTotalEliteHabits(profileData.total_elite_habit || 0);
       }
     } catch (error) {
       console.error('Error loading habit data:', error);
@@ -211,9 +203,8 @@ export function EliteHabit() {
       setDuration(5);
       setNotes('');
 
-      // Reload data and refresh profile context
+      // Reload data
       loadHabitData();
-      refreshProfile();
 
       // Auto-show reports after submitting
       setShowReports(true);
@@ -269,9 +260,8 @@ export function EliteHabit() {
         variant: "default"
       });
 
-      // Reload data and refresh profile
+      // Reload data
       loadHabitData();
-      refreshProfile();
     } catch (error) {
       console.error("Error deleting elite habit:", error);
       toast({

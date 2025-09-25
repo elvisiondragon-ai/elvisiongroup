@@ -215,6 +215,34 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     };
 
     backgroundFetch();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const userData = {
+          id: session.user.id,
+          email: session.user.email,
+          user_metadata: session.user.user_metadata
+        };
+        localStorage.setItem('user-cache', JSON.stringify(userData));
+        setUser(userData);
+        
+        const profile = await fetchUserProfile(session.user.id);
+        if (profile) {
+          localStorage.setItem('user-profile-cache', JSON.stringify(profile));
+          setUserProfile(profile);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setUserProfile(null);
+        localStorage.removeItem('user-cache');
+        localStorage.removeItem('user-profile-cache');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Listen for XP updates to refresh profile - THROTTLED

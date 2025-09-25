@@ -15,7 +15,6 @@ interface UserSubscriptionData {
   email: string;
   display_name: string;
   subscription_type: string;
-  days_remaining: number;
   subscription_start_date: string;
   subscription_end_date: string;
   trial_start_date: string;

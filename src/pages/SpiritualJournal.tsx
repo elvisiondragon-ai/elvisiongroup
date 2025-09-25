@@ -33,35 +33,28 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
 
   useEffect(() => {
-    // Only clear old profile cache ONCE if it still exists
-    const needsCacheClearing = !localStorage.getItem('journal-migration-done');
-    if (needsCacheClearing) {
-      const oldCacheKeys = [
-        'user-profile-cache',
-        'user_profile_cache', 
-        'unified_pro_status_cache',
-        'journal-user-profile-cache'
-      ];
-      oldCacheKeys.forEach(key => {
-        if (localStorage.getItem(key)) {
-          console.log('🧹 One-time clearing old profile cache:', key);
-          localStorage.removeItem(key);
-        }
-      });
-      localStorage.setItem('journal-migration-done', 'true');
-      console.log('✅ Journal cache migration completed - now using fast auth');
-    }
+    // Listen for auth changes to get user reliably
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+        loadReflections(session.user.id);
+      } else {
+        setCurrentUser(null);
+        setReflections([]);
+      }
+    });
 
-    // Get user immediately for journal functionality using fast auth
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+    // Also get current user immediately
+    supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setCurrentUser(user);
         loadReflections(user.id);
       }
+    });
+
+    return () => {
+      subscription.unsubscribe();
     };
-    
-    getUser();
   }, []);
 
   const loadReflections = async (userId: string) => {
