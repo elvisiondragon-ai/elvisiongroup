@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +6,7 @@ import { Plus, Minus, Check, Activity, ChevronLeft, ChevronRight, Calendar, Tras
 import { supabase } from '@/integrations/supabase/client';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useToast } from '@/hooks/use-toast';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 
 interface EliteHabitEntry {
   id?: string;
@@ -34,7 +35,7 @@ const EXERCISE_OPTIONS = [
 export function EliteHabit() {
   const { awardXP } = useXPSystem();
   const { toast } = useToast();
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { user, userProfile, handleAuthError, handleButtonTimeout } = useUserProfile();
   const [selectedExercise, setSelectedExercise] = useState('');
   const [duration, setDuration] = useState(5);
   const [notes, setNotes] = useState('');
@@ -44,47 +45,26 @@ export function EliteHabit() {
   const [allEntries, setAllEntries] = useState<EliteHabitEntry[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [showReports, setShowReports] = useState(false);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const today = new Date().toDateString();
 
+  // Load habit data when user is available
   useEffect(() => {
-    // Listen for auth changes to get user reliably
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        setCurrentUser({ id: session.user.id });
-      } else {
-        setCurrentUser(null);
-      }
-    });
-
-    // Also get current user immediately
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setCurrentUser({ id: user.id });
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // Load habit data when currentUser is available
-  useEffect(() => {
-    if (currentUser?.id) {
+    if (user?.id) {
       loadHabitData();
     }
-  }, [currentUser]);
+  }, [user]);
 
   const loadHabitData = async () => {
-    if (!currentUser?.id) return;
+    if (!user?.id) return;
 
     try {
       // Load today's entries
       const { data: todayData } = await supabase
         .from('elite_habits')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', user.id)
         .gte('created_at', new Date(today).toISOString())
         .lt('created_at', new Date(new Date(today).getTime() + 24*60*60*1000).toISOString());
 
@@ -99,7 +79,7 @@ export function EliteHabit() {
       const { data: allData } = await supabase
         .from('elite_habits')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', user.id)
         .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false });
 
@@ -107,15 +87,19 @@ export function EliteHabit() {
         setAllEntries(allData);
       }
 
-      // Load total count from database
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('total_elite_habit')
-        .eq('user_id', currentUser.id)
-        .single();
-        
-      if (profileData) {
-        setTotalEliteHabits(profileData.total_elite_habit || 0);
+      // Use cached total from userProfile context or fetch if not available
+      if (userProfile?.total_elite_habit !== undefined) {
+        setTotalEliteHabits(userProfile.total_elite_habit);
+      } else {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('total_elite_habit')
+          .eq('user_id', user.id)
+          .single();
+          
+        if (profileData) {
+          setTotalEliteHabits(profileData.total_elite_habit || 0);
+        }
       }
     } catch (error) {
       console.error('Error loading habit data:', error);
@@ -156,8 +140,14 @@ export function EliteHabit() {
     }
   };
 
-  const submitHabit = async () => {
-    if (!selectedExercise || !currentUser?.id || !notes.trim()) return;
+  const submitHabit = async (buttonElement?: HTMLElement) => {
+    if (!selectedExercise || !notes.trim()) return;
+
+    // Check if user is not loaded properly
+    if (!user?.id) {
+      handleAuthError(buttonElement);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -165,8 +155,8 @@ export function EliteHabit() {
       const { error: insertError } = await supabase
         .from('elite_habits')
         .insert({
-          user_id: currentUser.id,
-          user_email: currentUser.email || 'anonymous',
+          user_id: user.id,
+          user_email: user.email || 'anonymous',
           exercise_type: selectedExercise,
           duration_minutes: duration,
           date: today,
@@ -179,7 +169,7 @@ export function EliteHabit() {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_elite_habit')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_elite_habit || 0;
@@ -189,7 +179,7 @@ export function EliteHabit() {
           total_elite_habit: currentCount + 1,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', currentUser.id);
+        .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile total_elite_habit:', profileError);
@@ -217,14 +207,14 @@ export function EliteHabit() {
   };
 
   const handleDeleteHabit = async (habitId: string) => {
-    if (!currentUser?.id) return;
+    if (!user?.id) return;
 
     try {
       const { error } = await supabase
         .from('elite_habits')
         .delete()
         .eq('id', habitId)
-        .eq('user_id', currentUser.id);
+        .eq('user_id', user.id);
 
       if (error) {
         toast({
@@ -239,7 +229,7 @@ export function EliteHabit() {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_elite_habit')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_elite_habit || 0;
@@ -249,7 +239,7 @@ export function EliteHabit() {
           total_elite_habit: Math.max(0, currentCount - 1),
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', currentUser.id);
+        .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile total_elite_habit:', profileError);
@@ -271,6 +261,7 @@ export function EliteHabit() {
       });
     }
   };
+
 
   return (
     <div className="space-y-6">
@@ -425,11 +416,15 @@ export function EliteHabit() {
 
         {/* Submit Button */}
         <Button
+          ref={submitButtonRef}
           onClick={() => {
             console.log('BUTTON CLICKED!');
-            submitHabit();
+            handleButtonTimeout(
+              () => submitHabit(submitButtonRef.current || undefined),
+              submitButtonRef.current || undefined
+            );
           }}
-          disabled={!selectedExercise || !notes.trim() || loading || !currentUser?.id}
+          disabled={!selectedExercise || !notes.trim() || loading}
           className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-gray-500 disabled:to-gray-600"
           size="lg"
         >

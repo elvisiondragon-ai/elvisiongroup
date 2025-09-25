@@ -34,6 +34,8 @@ interface UserProfileContextType {
   refreshProfile: () => Promise<void>;
   handleDailyLogin: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  handleButtonTimeout: (buttonAction: () => void, buttonElement?: HTMLElement) => void;
+  handleAuthError: (buttonElement?: HTMLElement) => void;
 }
 
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);
@@ -45,6 +47,65 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
   const [dailyLoginProcessed, setDailyLoginProcessed] = useState(false);
   const { toast } = useToast();
   const { calculateXPProgress } = useXPSystem();
+
+  // Button timeout handler
+  const handleButtonTimeout = useCallback((buttonAction: () => void, buttonElement?: HTMLElement) => {
+    const timeoutId = setTimeout(() => {
+      console.log('⏰ Button timeout - auto refresh triggered');
+      toast({
+        title: "🔄 Auto Refresh",
+        description: "Button took too long, refreshing page...",
+        variant: "default"
+      });
+      
+      // Refresh page
+      window.location.reload();
+      
+      // After refresh, scroll to button location
+      setTimeout(() => {
+        if (buttonElement) {
+          buttonElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          buttonElement.focus();
+        }
+      }, 100);
+    }, 2000); // 2 seconds
+
+    // Execute button action
+    try {
+      buttonAction();
+      clearTimeout(timeoutId); // Cancel timeout if action succeeds
+    } catch (error) {
+      console.error('Button action failed:', error);
+      clearTimeout(timeoutId);
+    }
+  }, [toast]);
+
+  // Handle auth errors when user exists but profile fails to load
+  const handleAuthError = useCallback((buttonElement?: HTMLElement) => {
+    console.log('🔄 Auth error detected - profile not loading properly');
+    toast({
+      title: "🔄 Reloading Profile",
+      description: "Profile data not loaded, refreshing...",
+      variant: "default"
+    });
+    
+    // Refresh page
+    window.location.reload();
+    
+    // After refresh, scroll to button location
+    setTimeout(() => {
+      if (buttonElement) {
+        buttonElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+        buttonElement.focus();
+      }
+    }, 100);
+  }, [toast]);
 
   // INSTANT CACHE LOADING
   useEffect(() => {
@@ -283,6 +344,8 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     refreshProfile,
     handleDailyLogin,
     updateProfile,
+    handleButtonTimeout,
+    handleAuthError,
   };
 
   return (

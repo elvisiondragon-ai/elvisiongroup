@@ -39,6 +39,7 @@ import {
   Globe,
 } from "lucide-react";
 import { GiCrownCoin, GiBatMask, GiTrophy, GiFire, GiMeditation, GiCrown, GiFootsteps } from "react-icons/gi";
+import { Leaf } from "lucide-react";
 
 interface ProfileProps {
   onNavigate: (tab: string) => void;
@@ -70,41 +71,10 @@ export function Profile({ onNavigate }: ProfileProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   
   // INSTANT AUTH STATE - for immediate logout button response
-  const [currentAuthUser, setCurrentAuthUser] = useState<any>(null);
-  const [authLoading, setAuthLoading] = useState(true);
   
   const { proStatus } = usePro();
   const { toast } = useToast();
 
-  // INSTANT AUTH EVENT LISTENER - for immediate logout button detection
-  useEffect(() => {
-    // Get current user immediately for instant logout button
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setCurrentAuthUser(user);
-      setAuthLoading(false);
-    });
-
-    // Listen for auth changes - INSTANT logout detection
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔄 Profile auth event:', event);
-      
-      if (event === 'SIGNED_OUT') {
-        setCurrentAuthUser(null);
-        setAuthLoading(false);
-        // Immediate redirect on logout event
-        setTimeout(() => {
-          window.location.href = '/auth';
-        }, 500);
-      } else if (session?.user) {
-        setCurrentAuthUser(session.user);
-        setAuthLoading(false);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
 
   // Cache management - event-based, no TTL
   useEffect(() => {
@@ -136,7 +106,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
   const handleLogout = async () => {
     // INSTANT RESPONSE - no waiting for context loading
-    if (!currentAuthUser) {
+    if (!user) {
       toast({
         title: "Already logged out",
         description: "You are not logged in.",
@@ -147,7 +117,7 @@ export function Profile({ onNavigate }: ProfileProps) {
     }
 
     try {
-      console.log('🚀 INSTANT logout initiated for user:', currentAuthUser.id);
+      console.log('🚀 INSTANT logout initiated for user:', user.id);
       
       // Clear caches immediately (no delay)
       localStorage.removeItem('profile-metadata');
@@ -270,7 +240,7 @@ export function Profile({ onNavigate }: ProfileProps) {
   }
 
   // Error handling - if no auth user AND context user, show error state  
-  if (!currentAuthUser && !user && !authLoading && !loading) {
+  if (!user && !loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center pb-20">
         <div className="text-center">
@@ -316,6 +286,7 @@ export function Profile({ onNavigate }: ProfileProps) {
     month: 'short' 
   });
 
+
   const achievements = [
     ...(profile.total_verses >= 900 
       ? [{ 
@@ -326,9 +297,9 @@ export function Profile({ onNavigate }: ProfileProps) {
         }]
       : [{ name: "First Step", description: "Joined eL Vision Group", unlocked: true }]
     ),
-    ...(profile.streak_days >= 300 
+    ...(profile.streak_days >= 320 
       ? [{ 
-          name: "Ignis Lord", 
+          name: "Ignis Horsemen", 
           description: `${profile.streak_days} days streak`, 
           unlocked: true,
           isIgnisLord: true
@@ -585,7 +556,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                     ) : achievement.name === "Zen Master" && achievement.unlocked ? (
                       <GiMeditation className="w-7 h-7 animate-pulse drop-shadow-lg" />
                     ) : achievement.name === "Soul Leader" && achievement.unlocked ? (
-                      <GiCrown className="w-7 h-7 animate-pulse drop-shadow-lg" />
+                      <Leaf className="w-7 h-7 animate-pulse drop-shadow-lg" />
                     ) : achievement.name === "First Step" && achievement.unlocked ? (
                       <GiFootsteps className="w-7 h-7 animate-pulse drop-shadow-lg" />
                     ) : (

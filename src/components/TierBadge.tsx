@@ -1,4 +1,5 @@
 import { Crown, Star, Zap, Leaf, Droplets, Flame } from "lucide-react";
+import { GiBatMask } from "react-icons/gi";
 import { cn } from "@/lib/utils";
 import { ProBadge } from "./ProBadge";
 import { AdminBadge } from "./AdminBadge";
@@ -35,7 +36,7 @@ export function TierBadge({ level, isPro = false, isAdmin = false, className, sh
 
   const getTierIcon = () => {
     if (level >= 10) return <Crown className="w-3 h-3" />;
-    if (level >= 9) return <Flame className="w-3 h-3" />;
+    if (level >= 9) return <GiBatMask className="w-3 h-3" />;
     if (level >= 7) return <Droplets className="w-3 h-3" />;
     if (level >= 5) return <Leaf className="w-3 h-3" />;
     if (level >= 3 || hasLevel3Achievement) return <Zap className="w-3 h-3" />;

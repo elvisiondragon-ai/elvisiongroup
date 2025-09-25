@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { GiTrophy, GiFire } from "react-icons/gi";
 
 interface ChatMessageProps {
   id: string;
@@ -16,6 +17,7 @@ interface ChatMessageProps {
     isPro?: boolean;
     isAdmin?: boolean;
     subscriptionType?: string;
+    streak_days?: number;
   };
   message: string;
   timestamp: Date;
@@ -35,30 +37,10 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
   };
 
   const handleDelete = async () => {
-    // Immediate optimistic UI update for ultra-fast feel
+    // Call parent handler which handles database delete + UI update
     if (onDelete) {
-      onDelete(id);
+      await onDelete(id);
     }
-
-    toast({
-      title: "Message Deleted 🔥",
-      description: ""
-    });
-
-    // Fire database delete in background - don't wait
-    supabase
-      .from('chat_messages')
-      .delete()
-      .eq('id', id)
-      .then(({ error }) => {
-        if (error) {
-          console.error('Background delete failed:', error);
-          // Could add rollback logic here if needed
-        }
-      })
-      .catch(err => {
-        console.error('Background delete error:', err);
-      });
   };
 
   const canDelete = currentUserId === user.id;
@@ -74,16 +56,35 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
       
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className={cn(
-              "font-semibold transition-all duration-300",
-              user.isAdmin 
-                ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 rounded-lg shadow-2xl shadow-red-500/25 hover:from-red-700 hover:via-red-800 hover:to-red-900"
-                : "text-foreground"
-            )}>
-              {user.name}
-            </span>
-            <TierBadge level={user.level} isPro={user.isPro} isAdmin={user.isAdmin} achievements={[]} subscriptionType={user.subscriptionType} />
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "font-semibold transition-all duration-300",
+                user.isAdmin 
+                  ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 rounded-lg shadow-2xl shadow-red-500/25 hover:from-red-700 hover:via-red-800 hover:to-red-900"
+                  : "text-foreground"
+              )}>
+                {user.name}
+              </span>
+              <TierBadge level={user.level} isPro={user.isPro} isAdmin={user.isAdmin} achievements={[]} subscriptionType={user.subscriptionType} />
+            </div>
+            
+            {/* Streak badges below username */}
+            {user.streak_days >= 7 && (
+              <div className="flex items-center gap-1">
+                {user.streak_days >= 320 ? (
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gradient-to-r from-red-800/80 via-red-700/80 to-orange-800/80 border border-red-500 text-orange-100 shadow-sm">
+                    <GiFire className="w-3 h-3 drop-shadow-sm" />
+                    <span className="font-medium">Ignis Horsemen 320+ Streak Days</span>
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gradient-to-r from-yellow-800/80 via-yellow-700/80 to-orange-800/80 border border-yellow-400 text-yellow-100 shadow-sm">
+                    <GiTrophy className="w-3 h-3 drop-shadow-sm" />
+                    <span className="font-medium">Week Warrior</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           {canDelete && (

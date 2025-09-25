@@ -1,7 +1,5 @@
 // @ts-nocheck
-// ⚡ PERFORMANCE: Now uses instant metadata instead of slow profile table queries
-// All user data (display_name, level, is_pro, achievements) comes from auth.user_metadata
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -12,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTranslation } from "react-i18next";
-// Removed slow UserProfileContext - now using fast metadata
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +27,7 @@ interface ChatMessageData {
   message: string;
   created_at: string;
   translatedMessage?: string;
+  streak_days?: number;
 }
 
 interface ChatProps {
@@ -39,62 +37,15 @@ interface ChatProps {
 export function Chat({ onNavigate }: ChatProps) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userDataLoading, setUserDataLoading] = useState(true);
   
-  // Get user data from fast metadata instead of slow profile table
-  useEffect(() => {
-
-
-    const buildUserData = (user: any) => {
-      const metadata = user.user_metadata || {};
-      return {
-        id: user.id,
-        name: metadata.display_name || 'Anonymous',
-        level: metadata.level || 1,
-        isPro: metadata.is_pro || (userProfile && userProfile.user_id === user.id ? true : false),
-        achievements: metadata.achievements || [],
-        subscriptionType: metadata.subscription_type || null
-      };
-    };
-
-    // Listen for auth changes to get user reliably
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        const currentUserData = buildUserData(session.user);
-        setCurrentUser(currentUserData);
-        
-      } else {
-        setCurrentUser(null);
-        localStorage.removeItem('user-metadata-cache');
-      }
-      setUserDataLoading(false);
-    });
-
-    // Also get current user immediately
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        const currentUserData = buildUserData(user);
-        setCurrentUser(currentUserData);
-        
-      }
-      setUserDataLoading(false);
-    }).catch((error) => {
-      console.error('Error getting user:', error);
-      setUserDataLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
-  const { userProfile } = useUserProfile();
+  const { user, userProfile, handleButtonTimeout } = useUserProfile();
   const { i18n, t } = useTranslation();
+  const sendButtonRef = useRef<HTMLButtonElement>(null);
 
 
   // Load messages from database
@@ -215,11 +166,11 @@ export function Chat({ onNavigate }: ChatProps) {
   }, []);
 
   useEffect(() => {
-    // Load messages AFTER user metadata is ready (much faster now)
-    if (currentUser && !userDataLoading) {
+    // Load messages when user is available
+    if (user) {
       loadMessages();
     }
-  }, [currentUser, userDataLoading, loadMessages]);
+  }, [user, loadMessages]);
 
   // Cache chat messages when successfully loaded (prevent duplicate saves)
   useEffect(() => {
@@ -410,7 +361,7 @@ export function Chat({ onNavigate }: ChatProps) {
       return;
     }
 
-    if (!currentUser) {
+    if (!user) {
       console.log('No current user found, cannot send message');
       toast({
         title: "Authentication Required",
@@ -420,8 +371,8 @@ export function Chat({ onNavigate }: ChatProps) {
       return;
     }
 
-    // Check if user has valid display name from metadata
-    if (!currentUser.name || currentUser.name === 'Anonymous') {
+    // Check if user has valid display name
+    if (!userProfile?.display_name || userProfile.display_name === 'Anonymous') {
       toast({
         title: "Lengkapi Profil untuk Chat",
         description: "Silakan pilih Edit Profil memastikan Nama anda untuk chat",
@@ -450,10 +401,10 @@ export function Chat({ onNavigate }: ChatProps) {
       const insertPromise = supabase
         .from('chat_messages')
         .insert({
-          user_id: currentUser.id,
-          user_name: currentUser.name,
-          user_level: currentUser.level,
-          is_pro: currentUser.isPro,
+          user_id: user.id,
+          user_name: userProfile?.display_name || 'Anonymous',
+          user_level: userProfile?.level || 1,
+          is_pro: userProfile?.is_pro || false,
           message: message.trim()
         });
 
@@ -478,11 +429,11 @@ export function Chat({ onNavigate }: ChatProps) {
         const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
         const newMessage: ChatMessageData = {
           id: `temp-${Date.now()}`, // Temporary ID
-          user_id: currentUser.id,
-          user_name: currentUser.name,
-          user_level: currentUser.level,
-          is_pro: currentUser.isPro,
-          is_admin: currentUser.id === knownAdminId, // Add admin status for new messages
+          user_id: user.id,
+          user_name: userProfile?.display_name || 'Anonymous',
+          user_level: userProfile?.level || 1,
+          is_pro: userProfile?.is_pro || false,
+          is_admin: user.id === knownAdminId, // Add admin status for new messages
           message: message.trim(),
           created_at: new Date().toISOString()
         };
@@ -507,8 +458,40 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   };
 
-  const handleDeleteMessage = (messageId: string) => {
-    setMessages(current => current.filter(msg => msg.id !== messageId));
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      // Wait for database delete to complete first
+      const { error } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('id', messageId);
+
+      if (error) {
+        console.error('Delete failed:', error);
+        toast({
+          title: "❌ Delete Failed",
+          description: "Refresh terlebih dahulu",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Only remove from UI after successful database deletion
+      setMessages(current => current.filter(msg => msg.id !== messageId));
+      
+      toast({
+        title: "Message Deleted 🔥",
+        description: ""
+      });
+
+    } catch (err) {
+      console.error('Delete error:', err);
+      toast({
+        title: "❌ Delete Failed", 
+        description: "Refresh terlebih dahulu",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -610,6 +593,7 @@ export function Chat({ onNavigate }: ChatProps) {
                     return isMockProUser || msg.is_pro || false;
                   })(),
                   isAdmin: msg.is_admin || false,
+                  streak_days: msg.user_id === user?.id ? userProfile?.streak_days || 0 : msg.streak_days || 0,
                   subscriptionType: (() => {
                     const mockProUsers = ['Andin', 'Jason', 'Master Yoga', 'Bambang_P', 'RatuAisyah', 'LindaWati', 'AhmadZaini', 'CitraKirana', 'KartikaSari', 'BungaCitra'];
                     const isMockProUser = mockProUsers.includes(msg.user_name);
@@ -627,7 +611,7 @@ export function Chat({ onNavigate }: ChatProps) {
                 }}
                 message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
                 timestamp={new Date(msg.created_at)}
-                currentUserId={currentUser?.id}
+                currentUserId={user?.id}
                 onDelete={handleDeleteMessage}
               />
             ))}
@@ -646,7 +630,13 @@ export function Chat({ onNavigate }: ChatProps) {
             maxLength={500}
           />
           <Button
-            onClick={handleSendMessage}
+            ref={sendButtonRef}
+            onClick={() => {
+              handleButtonTimeout(
+                () => handleSendMessage(),
+                sendButtonRef.current || undefined
+              );
+            }}
             disabled={!message.trim()}
             className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-4 transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0"
           >

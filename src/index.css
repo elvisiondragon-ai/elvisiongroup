@@ -232,10 +232,11 @@
   }
   
   .tier-fire {
-    @apply text-white;
-    background: linear-gradient(135deg, #dc2626 0%, #ef4444 25%, #f97316 50%, #fbbf24 75%, #facc15 100%);
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), 0 0 40px rgba(251, 191, 36, 0.3);
-    border: 1px solid rgba(251, 191, 36, 0.4);
+    @apply text-gray-100;
+    background: linear-gradient(135deg, #000000 0%, #1f2937 50%, #000000 100%);
+    box-shadow: 0 0 20px rgba(107, 114, 128, 0.25), 0 0 40px rgba(107, 114, 128, 0.25);
+    border: 1px solid #6b7280;
+    animation: pulse 2s infinite;
   }
   
   .tier-master {

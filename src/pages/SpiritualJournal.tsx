@@ -3,10 +3,11 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useXPSystem } from '@/hooks/useXPSystem';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 
 interface SpiritualJournalProps {
   onNavigate: (tab: string) => void;
@@ -21,11 +22,11 @@ interface Reflection {
 export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflection, setReflection] = useState("");
   const [reflections, setReflections] = useState<Reflection[]>([]);
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
-
+  const { user, handleButtonTimeout } = useUserProfile();
+  const saveButtonRef = useRef<HTMLButtonElement>(null);
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
 
@@ -80,7 +81,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveReflection = async () => {
-    if (!reflection.trim() || !currentUser?.id) {
+    if (!reflection.trim() || !user?.id) {
       toast({
         title: "Error",
         description: "Silakan tulis renungan Anda terlebih dahulu",
@@ -93,14 +94,14 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     if (isSaving) return;
     setIsSaving(true);
 
-    console.log('💾 Attempting to save reflection for user:', currentUser.id);
+    console.log('💾 Attempting to save reflection for user:', user.id);
     console.log('📝 Reflection content:', reflection.trim());
 
     const { data, error } = await supabase
       .from('reflections')
       .insert({
-        user_id: currentUser.id,
-        user_email: currentUser.email,
+        user_id: user.id,
+        user_email: user.email,
         reflection: reflection.trim()
       })
       .select(); // Return the inserted data to verify
@@ -120,7 +121,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_journal')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_journal || 0;
@@ -130,7 +131,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           total_journal: currentCount + 1,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', currentUser.id);
+        .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile total_journal:', profileError);
@@ -140,7 +141,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
 
       setReflection("");
-      loadReflections(currentUser.id);
+      loadReflections(user.id);
       setIsSaving(false);
     }
   };
@@ -150,14 +151,14 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   };
 
   const handleDeleteReflection = async (reflectionId: string) => {
-    if (!currentUser) return;
+    if (!user) return;
 
     try {
       const { error } = await supabase
         .from('reflections')
         .delete()
         .eq('id', reflectionId)
-        .eq('user_id', currentUser.id);
+        .eq('user_id', user.id);
 
       if (error) {
         toast({
@@ -172,10 +173,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
-          total_journal: Math.max(0, (currentUser.profile?.total_journal || 1) - 1),
+          total_journal: Math.max(0, (user.profile?.total_journal || 1) - 1),
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', currentUser.id);
+        .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile total_journal:', profileError);
@@ -187,7 +188,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       });
 
       // Reload reflections
-      loadReflections(currentUser.id);
+      loadReflections(user.id);
     } catch (error) {
       console.error("Error deleting reflection:", error);
       toast({
@@ -332,7 +333,13 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
               />
               
               <Button
-                onClick={handleSaveReflection}
+                ref={saveButtonRef}
+                onClick={() => {
+                  handleButtonTimeout(
+                    () => handleSaveReflection(),
+                    saveButtonRef.current || undefined
+                  );
+                }}
                 disabled={!reflection.trim() || isSaving}
                 className="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white font-medium shadow-lg hover:shadow-purple-500/50 transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0 disabled:opacity-50"
                 style={{}}
