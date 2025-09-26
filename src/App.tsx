@@ -102,28 +102,8 @@ const App = () => {
               console.log('🔄 User clicked Auto Deploy button')
               localStorage.removeItem('app-needs-update')
               
-              
-              // Clear specific caches but preserve user session
-              sessionStorage.clear();
-              
               // Set redirect to home after update  
               localStorage.setItem('refresh-redirect-to-home', 'true');
-              
-              // Clear all cookies
-              document.cookie.split(";").forEach(function(c) { 
-                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-              });
-              
-              // Clear IndexedDB if available
-              if ('indexedDB' in window) {
-                indexedDB.databases().then(databases => {
-                  databases.forEach(db => {
-                    if (db.name) {
-                      indexedDB.deleteDatabase(db.name);
-                    }
-                  });
-                });
-              }
               
               // Clear service worker caches
               if ('caches' in window) {
@@ -134,7 +114,7 @@ const App = () => {
                 });
               }
               
-              // Re-set flag for success message after reload (since we cleared localStorage)
+              // Re-set flag for success message after reload
               localStorage.setItem('update-success-pending', 'true');
               // END 25 SEP ONLY CLEAR CACHE CODE
               
