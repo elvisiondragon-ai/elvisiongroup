@@ -102,6 +102,10 @@ const App = () => {
               console.log('🔄 User clicked Auto Deploy button')
               localStorage.removeItem('app-needs-update')
               
+              // Nuke all cache and clear broken system
+              localStorage.clear();
+              sessionStorage.clear();
+              
               // Set redirect to home after update
               localStorage.setItem('refresh-redirect-to-home', 'true');
               

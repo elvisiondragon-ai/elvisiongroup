@@ -458,7 +458,7 @@ export function Chat({ onNavigate }: ChatProps) {
     };
 
     setMessages(current => [...current, optimisticMessage]);
-    setMessage("");
+    setMessage(""); // Button becomes disabled immediately
 
     try {
       // Send to database without timeout
