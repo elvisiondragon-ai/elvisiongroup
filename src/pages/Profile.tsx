@@ -105,12 +105,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
 
   const handleLogout = async () => {
-    // Clear ALL cache and refresh session like Chat.tsx  
-    localStorage.removeItem('chat-messages-cache');
-    localStorage.removeItem('profile-metadata');
-    localStorage.removeItem('user-profile-cache');
-    localStorage.removeItem('user-cache');
-    localStorage.removeItem('user-metadata-cache');
+    // Clear stale auth tokens to enable button
     sessionStorage.clear();
     
     const { data: { session } } = await supabase.auth.refreshSession();
@@ -721,17 +716,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         <div className="p-6">
           <Button
             variant="destructive"
-            onClick={async () => {
-              // Simple getSession check
-              const { data: { session } } = await supabase.auth.getSession();
-              if (!session) {
-                // Already logged out, clear cache and redirect
-                localStorage.clear();
-                window.location.href = '/auth';
-                return;
-              }
-              handleLogout();
-            }}
+            onClick={handleLogout}
             className="w-full transition-all duration-200 transform hover:scale-105 active:scale-95"
           >
             <LogOut className="w-4 h-4 mr-2" />

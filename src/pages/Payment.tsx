@@ -845,20 +845,7 @@ export function Payment({ onNavigate }: PaymentProps) {
       {/* Fixed Bottom Button */}
       <div className="fixed bottom-20 left-6 right-6">
         <Button 
-          onClick={async () => {
-            // Simple getSession check
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-              toast({
-                title: "Please Log In",
-                description: "You need to log in to create payment",
-                variant: "destructive"
-              });
-              return;
-            }
-            
-            handleCreatePayment();
-          }}
+          onClick={handleCreatePayment}
           disabled={loading || userDataLoading || !selectedPlan || !phoneNumber.trim() || !fullName.trim()}
           className="w-full"
           size="lg"

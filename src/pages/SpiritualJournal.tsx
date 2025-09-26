@@ -356,9 +356,13 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
               <Button
                 ref={saveButtonRef}
                 onClick={async () => {
-                  // Simple getSession check
-                  const { data: { session } } = await supabase.auth.getSession();
-                  if (!session) {
+                  // Clear cache and refresh session like Chat.tsx
+                  sessionStorage.clear();
+                  
+                  const { data: { session } } = await supabase.auth.refreshSession();
+                  const validUser = session?.user;
+                  
+                  if (!validUser) {
                     toast({
                       title: "Please Log In",
                       description: "You need to log in to save reflections",
@@ -400,10 +404,26 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                 </div>
               ) : reflections.length > 0 ? (
                 reflections.map((refl) => (
-                  <div key={refl.id} className="relative p-4 rounded-lg bg-black/25 border border-slate-300/30 space-y-2 hover:bg-black/35 transition-colors">
+                  <div key={refl.id} data-reflection-id={refl.id} className="relative p-4 rounded-lg bg-black/25 border border-slate-300/30 space-y-2 hover:bg-black/35 transition-colors">
                     {/* Delete Button */}
                     <Button
-                      onClick={() => handleDeleteReflection(refl.id)}
+                      onClick={() => {
+                        // Make reflection disappear with cool slide left animation
+                        const reflectionElement = document.querySelector(`[data-reflection-id="${refl.id}"]`);
+                        if (reflectionElement) {
+                          reflectionElement.style.opacity = '0';
+                          reflectionElement.style.transform = 'translateX(-100%)';
+                          reflectionElement.style.transition = 'all 0.3s ease-out';
+                          
+                          // Remove from database after animation
+                          setTimeout(() => {
+                            handleDeleteReflection(refl.id);
+                          }, 300);
+                        } else {
+                          // Fallback if element not found
+                          handleDeleteReflection(refl.id);
+                        }
+                      }}
                       className="absolute top-2 right-2 w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
                       size="sm"
                     >

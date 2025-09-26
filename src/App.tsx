@@ -102,19 +102,11 @@ const App = () => {
               console.log('🔄 User clicked Auto Deploy button')
               localStorage.removeItem('app-needs-update')
               
-              // iOS-specific success notification
-              if (isIOS) {
-                toast({
-                  title: "🚀 Deploy Diproses",
-                  duration: 2000,
-                });
-              }
               
-              // Nuke all cache and clear broken system
-              localStorage.clear();
+              // Clear specific caches but preserve user session
               sessionStorage.clear();
               
-              // Set redirect to home after update
+              // Set redirect to home after update  
               localStorage.setItem('refresh-redirect-to-home', 'true');
               
               // Clear all cookies
@@ -172,7 +164,7 @@ const App = () => {
                 : 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80'
             }`}
           >
-            Tekan disini untuk update otomatis
+            Double Click disini untuk update
           </button>
         ),
         duration: 0, // Don't auto-dismiss

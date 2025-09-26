@@ -410,10 +410,26 @@ export function EliteHabit() {
           <h3 className="font-semibold mb-3 text-emerald-400">Hari Ini:</h3>
           <div className="space-y-2">
             {todayEntries.map((entry, index) => (
-              <div key={index} className="relative p-3 bg-emerald-900/20 rounded-lg space-y-2">
+              <div key={index} data-habit-id={entry.id} className="relative p-3 bg-emerald-900/20 rounded-lg space-y-2">
                 {/* Delete Button */}
                 <Button
-                  onClick={() => handleDeleteHabit(entry.id!)}
+                  onClick={() => {
+                    // Make habit disappear with cool slide left animation
+                    const habitElement = document.querySelector(`[data-habit-id="${entry.id}"]`);
+                    if (habitElement) {
+                      habitElement.style.opacity = '0';
+                      habitElement.style.transform = 'translateX(-100%)';
+                      habitElement.style.transition = 'all 0.3s ease-out';
+                      
+                      // Remove from database after animation
+                      setTimeout(() => {
+                        handleDeleteHabit(entry.id!);
+                      }, 300);
+                    } else {
+                      // Fallback if element not found
+                      handleDeleteHabit(entry.id!);
+                    }
+                  }}
                   className="absolute top-2 right-2 w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
                   size="sm"
                 >
@@ -530,9 +546,13 @@ export function EliteHabit() {
         <Button
           ref={submitButtonRef}
           onClick={async () => {
-            // Simple getSession check
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
+            // Clear cache and refresh session like Chat.tsx
+            sessionStorage.clear();
+            
+            const { data: { session } } = await supabase.auth.refreshSession();
+            const validUser = session?.user;
+            
+            if (!validUser) {
               toast({
                 title: "Please Log In",
                 description: "You need to log in to save elite habits",
@@ -541,7 +561,6 @@ export function EliteHabit() {
               return;
             }
             
-            console.log('BUTTON CLICKED!');
             handleButtonTimeout(
               () => submitHabit(submitButtonRef.current || undefined),
               submitButtonRef.current || undefined
@@ -593,11 +612,28 @@ export function EliteHabit() {
               {allEntries.map((entry, index) => (
                 <div
                   key={entry.id || index}
+                  data-habit-id={entry.id}
                   className="relative p-4 bg-emerald-800/20 rounded-lg border border-emerald-500/20 space-y-2"
                 >
                   {/* Delete Button */}
                   <Button
-                    onClick={() => handleDeleteHabit(entry.id!)}
+                    onClick={() => {
+                      // Make habit disappear with cool slide left animation
+                      const habitElement = document.querySelector(`[data-habit-id="${entry.id}"]`);
+                      if (habitElement) {
+                        habitElement.style.opacity = '0';
+                        habitElement.style.transform = 'translateX(-100%)';
+                        habitElement.style.transition = 'all 0.3s ease-out';
+                        
+                        // Remove from database after animation
+                        setTimeout(() => {
+                          handleDeleteHabit(entry.id!);
+                        }, 300);
+                      } else {
+                        // Fallback if element not found
+                        handleDeleteHabit(entry.id!);
+                      }
+                    }}
                     className="absolute top-2 right-2 w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
                     size="sm"
                   >
