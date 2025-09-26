@@ -30,6 +30,10 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
+  
+  // Cache session user ID and profile for fast payment processing
+  const [cachedUserId, setCachedUserId] = useState<string | null>(null);
+  const [cachedProfile, setCachedProfile] = useState<any>(null);
 
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
   const [showQrisModal, setShowQrisModal] = useState(false);
@@ -319,37 +323,34 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [showPaymentInstructions, paymentData?.tripay_reference]);
 
 
-  // Auto-fill form with user data from UserProfileContext
+  // Cache session and profile data in memory for fast payment processing
   useEffect(() => {
-    if (user && userProfile) {
+    if (user?.id && userProfile) {
+      setCachedUserId(user.id);
+      setCachedProfile(userProfile);
+      
       setEmail(user.email || '');
       
-      // Get name from profile display_name or user metadata
-      const profileName = userProfile.display_name;
-      const metadataName = user.user_metadata?.display_name;
-      if (profileName && !fullName) {
-        setFullName(profileName);
-      } else if (metadataName && !fullName) {
-        setFullName(metadataName);
+      if (userProfile.display_name && !fullName) {
+        setFullName(userProfile.display_name);
       }
       
-      // Get phone from profile first, then metadata as fallback
-      const profilePhone = userProfile?.phone_number;
-      const metadataPhone = user.user_metadata?.phone_number;
-      if (profilePhone && !phoneNumber) {
-        setPhoneNumber(profilePhone);
-      } else if (metadataPhone && !phoneNumber) {
-        setPhoneNumber(metadataPhone);
+      if (userProfile.phone_number && !phoneNumber) {
+        setPhoneNumber(userProfile.phone_number);
       }
     }
   }, [user, userProfile, phoneNumber, fullName]);
 
   const handleCreatePayment = async () => {
-    // Get fresh auth ID
-    const { data: { session } } = await supabase.auth.refreshSession();
-    const validUser = session?.user;
+    // Use cached data for fast payment processing
+    const userId = cachedUserId || user?.id;
+    const profile = cachedProfile || userProfile;
     
-    if (!validUser || !selectedPlan || !phoneNumber.trim() || !fullName.trim() || !email.trim()) {
+    // Use form data if profile data not available
+    const finalPhoneNumber = profile?.phone_number?.trim() || phoneNumber.trim();
+    const finalDisplayName = profile?.display_name?.trim() || fullName.trim();
+    
+    if (!userId || !selectedPlan || !finalPhoneNumber || !finalDisplayName || !user?.email?.trim()) {
       toast({
         title: "Data Tidak Lengkap", 
         description: "Mohon lengkapi nama lengkap, nomor telepon, dan email",
@@ -358,13 +359,7 @@ export function Payment({ onNavigate }: PaymentProps) {
       return;
     }
     
-    // Get fresh metadata from current user
-    const currentEmail = currentUser.data.user.email || '';
-    const currentDisplayName = userProfile?.display_name || currentUser.data.user.user_metadata?.display_name || '';
-    const currentPhoneNumber = userProfile?.phone_number || currentUser.data.user.user_metadata?.phone_number || phoneNumber;
-    
-    // Validate phone number format
-    if (!/^08[0-9]{6,13}$/.test(currentPhoneNumber)) {
+    if (!/^08[0-9]{6,13}$/.test(finalPhoneNumber)) {
       toast({
         title: "Nomor Telepon Tidak Valid",
         description: "Format: 08xxxx (8-15 digit) Silahkan Klik Edit Profil",
@@ -373,9 +368,16 @@ export function Payment({ onNavigate }: PaymentProps) {
       return;
     }
     
+    // Auto-save to profile if not exists
+    if (!profile?.phone_number && finalPhoneNumber) {
+      supabase.from('profiles').update({ phone_number: finalPhoneNumber }).eq('user_id', userId);
+    }
+    if (!profile?.display_name && finalDisplayName) {
+      supabase.from('profiles').update({ display_name: finalDisplayName }).eq('user_id', userId);
+    }
+    
     setLoading(true);
     
-    // Show immediate feedback to user
     toast({
       title: "Membuat Pembayaran...",
       description: "Sedang memproses permintaan Anda, mohon tunggu",
@@ -389,9 +391,9 @@ export function Payment({ onNavigate }: PaymentProps) {
         body: {
           subscriptionType: plan.id,
           paymentMethod: selectedPaymentMethod,
-          userName: fullName,
-          userEmail: email,
-          phoneNumber: phoneNumber,
+          userName: finalDisplayName,
+          userEmail: user.email,
+          phoneNumber: finalPhoneNumber,
           amount: plan.price
         }
       });

@@ -29,12 +29,19 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }, []);
   
   const clearCache = useCallback(async () => {
-    // Clean up blob URLs to prevent memory leaks
-    audioCache.forEach(blobUrl => URL.revokeObjectURL(blobUrl));
-    audioCache.clear();
+    // PROTECTED: Do not clear audio cache - //Nevertouch Audio-cache
+    console.log('🔒 Audio cache clearing blocked - user protection active');
     
-    // Clear IndexedDB cache as well
-    await indexedDBCache.clear();
+    // Only clear if explicitly requested by user (not auto-deploy)
+    const userRequested = confirm('Are you sure you want to clear audio cache? Downloads will be needed again.');
+    if (userRequested) {
+      // Clean up blob URLs to prevent memory leaks
+      audioCache.forEach(blobUrl => URL.revokeObjectURL(blobUrl));
+      audioCache.clear();
+      
+      // Clear IndexedDB cache as well
+      await indexedDBCache.clear();
+    }
   }, [audioCache]);
 
   const getCacheStats = useCallback(async () => {
@@ -59,7 +66,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     return cachedBlob !== null;
   }, [audioCache]);
 
-  // Enhanced audio creation with local caching and loading feedback
+  // Enhanced audio creation with USER-INITIATED downloads only - //Nevertouch Audio-cache
   const createProtectedAudio = useCallback(async (audioPath: string, onLoadingChange?: (loading: boolean) => void): Promise<HTMLAudioElement> => {
     // Check memory cache first
     const cachedUrl = audioCache.get(audioPath);
@@ -131,20 +138,20 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       return audio;
     }
 
-    console.log('🎵 Caching audio:', audioPath);
+    console.log('🎵 USER-INITIATED download/caching audio:', audioPath); // Only downloads when user plays
     
-    // Show loading state for iOS cache miss
+    // Show loading state for iOS cache miss - //Nevertouch Audio-cache
     onLoadingChange?.(true);
     
     try {
       // Get the URL (check if it's already a full URL)
       const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
       
-      // Fetch and cache the audio file with iOS-optimized headers
+      // USER-INITIATED fetch and cache - no auto-prefetch - //Nevertouch Audio-cache
       const response = await fetch(audioUrl, {
         headers: {
-          'Cache-Control': 'max-age=2592000, must-revalidate', // 30 days with validation
-          'Pragma': 'no-cache', // Force validation on iOS
+          'Cache-Control': 'max-age=31536000, immutable', // 1 year cache - protected from clearing
+          'Pragma': 'cache', // Keep cache persistent
           'If-Modified-Since': new Date(0).toUTCString(), // Always check if modified
         },
         cache: 'force-cache' // Use browser cache when available

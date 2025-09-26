@@ -41,7 +41,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     const loadInitialReflections = async () => {
       const currentUser = await supabase.auth.getUser();
       if (currentUser.data.user) {
-        loadReflections(currentUser.data.user.id);
+        loadReflections(user.id);
       } else {
         setIsLoadingReflections(false);
       }
@@ -76,15 +76,26 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveReflection = async () => {
-    // Ensure user is available
-    const currentUser = await supabase.auth.getUser();
-    if (!reflection.trim() || !currentUser.data.user) {
+    if (!reflection.trim()) {
       toast({
         title: "Error",
         description: "Silakan tulis renungan Anda terlebih dahulu",
         variant: "destructive"
       });
       return;
+    }
+
+    if (!user?.id) {
+      // Fallback: get session if cached user not available
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        toast({
+          title: "Error",
+          description: "Silakan login terlebih dahulu",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     // Prevent rapid clicks
@@ -97,8 +108,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     const { data, error } = await supabase
       .from('reflections')
       .insert({
-        user_id: currentUser.data.user.id,
-        user_email: currentUser.data.user.email,
+        user_id: user.id,
+        user_email: user.email,
         reflection: reflection.trim()
       })
       .select(); // Return the inserted data to verify
@@ -118,7 +129,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_journal')
-        .eq('user_id', currentUser.data.user.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_journal || 0;
@@ -128,7 +139,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           total_journal: currentCount + 1,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', currentUser.data.user.id);
+        .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile total_journal:', profileError);
@@ -138,8 +149,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
 
       setReflection("");
-      loadReflections(currentUser.data.user.id);
       setIsSaving(false);
+      
+      // Load reflections after UI update
+      setTimeout(() => loadReflections(user.id), 0);
     }
   };
 
@@ -148,19 +161,18 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   };
 
   const handleDeleteReflection = async (reflectionId: string) => {
-    // Clear cache and refresh session like Chat.tsx
-    
-    const { data: { session } } = await supabase.auth.refreshSession();
-    const validUser = session?.user;
-    
-    if (!validUser) return;
+    if (!user?.id) {
+      // Fallback: get session if cached user not available
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+    }
 
     try {
       const { error } = await supabase
         .from('reflections')
         .delete()
         .eq('id', reflectionId)
-        .eq('user_id', validUser.id);
+        .eq('user_id', user.id);
 
       if (error) {
         toast({
@@ -178,7 +190,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           total_journal: Math.max(0, (userProfile?.total_journal || 1) - 1),
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', validUser.id);
+        .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile total_journal:', profileError);
@@ -189,8 +201,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         variant: "default"
       });
 
-      // Reload reflections
-      loadReflections(validUser.id);
+      loadReflections(user.id);
     } catch (error) {
       console.error("Error deleting reflection:", error);
       toast({
@@ -354,13 +365,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
               
               <Button
                 ref={saveButtonRef}
-                onClick={async () => {
-                  // Clear cache and refresh session like Chat.tsx
-                  
-                  const { data: { session } } = await supabase.auth.refreshSession();
-                  const validUser = session?.user;
-                  
-                  if (!validUser) {
+                onClick={() => {
+                  if (!user?.id) {
                     toast({
                       title: "Please Log In",
                       description: "You need to log in to save reflections",
@@ -369,6 +375,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                     return;
                   }
                   
+                  // Non-blocking call
                   handleButtonTimeout(
                     () => handleSaveReflection(),
                     saveButtonRef.current || undefined

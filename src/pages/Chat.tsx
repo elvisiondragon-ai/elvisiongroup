@@ -4,18 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ChatMessage } from "@/components/ChatMessage";
-import { Send, Users, Languages, Globe, RefreshCw } from "lucide-react";
+import { Send, Users, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTranslation } from "react-i18next";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface ChatMessageData {
   id: string;
@@ -41,6 +35,7 @@ export function Chat({ onNavigate }: ChatProps) {
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const realtimeChannel = useRef<any>(null);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
   const { user, userProfile, handleButtonTimeout } = useUserProfile();
@@ -211,13 +206,70 @@ export function Chat({ onNavigate }: ChatProps) {
   useEffect(() => {
     // Load fresh messages with idle-safe auth
     const loadFreshMessages = async () => {
-      const currentUser = await supabase.auth.getUser();
-      if (currentUser.data.user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
         loadMessages();
       }
     };
     loadFreshMessages();
   }, [loadMessages]);
+
+  // Realtime subscription for WhatsApp-like instant messaging
+  useEffect(() => {
+    const initRealtime = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      // Create realtime channel for chat messages
+      const channel = supabase.channel('chat-community', {
+        config: {
+          broadcast: { self: true }
+        }
+      });
+
+      // Listen for new chat message inserts
+      channel.on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `channel_id=eq.community` // Filter to community channel
+        },
+        (payload) => {
+          console.log('💬 Realtime message received:', payload.new);
+          
+          // Add new message to state if it's not from current user (avoid duplicates)
+          const newMessage = payload.new as ChatMessageData;
+          if (newMessage.user_id !== session.user.id) {
+            setMessages(current => {
+              // Check if message already exists to prevent duplicates
+              const exists = current.some(msg => msg.id === newMessage.id);
+              if (exists) return current;
+              
+              return [...current, newMessage];
+            });
+          }
+        }
+      );
+
+      channel.subscribe((status) => {
+        console.log('🔴 Chat realtime status:', status);
+      });
+
+      realtimeChannel.current = channel;
+    };
+
+    initRealtime();
+
+    return () => {
+      console.log('🔴 Cleaning up chat realtime subscription');
+      if (realtimeChannel.current) {
+        supabase.removeChannel(realtimeChannel.current);
+        realtimeChannel.current = null;
+      }
+    };
+  }, [user]); // Depend on user to recreate subscription on auth change
 
   // Cache chat messages when successfully loaded (prevent duplicate saves)
   useEffect(() => {
@@ -398,14 +450,12 @@ export function Chat({ onNavigate }: ChatProps) {
   };
 
   const handleSendMessage = async () => {
-    // Clear old cache and refresh session
     localStorage.removeItem('chat-messages-cache');
     
-    const { data: { session } } = await supabase.auth.refreshSession();
-    const validUser = session?.user;
-    
-    if (!validUser) {
-      return; // Do nothing if user not authenticated
+    if (!user?.id) {
+      // Fallback: get session if cached user not available
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
     }
 
     const validationError = validateMessage(message);
@@ -446,11 +496,11 @@ export function Chat({ onNavigate }: ChatProps) {
     const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
     const optimisticMessage: ChatMessageData = {
       id: tempId,
-      user_id: validUser.id,
+      user_id: user.id,
       user_name: userProfile?.display_name || 'Anonymous',
       user_level: userProfile?.level || 1,
       is_pro: userProfile?.is_pro || false,
-      is_admin: validUser.id === knownAdminId,
+      is_admin: user.id === knownAdminId,
       message: message.trim(),
       created_at: new Date().toISOString()
     };
@@ -463,7 +513,7 @@ export function Chat({ onNavigate }: ChatProps) {
       const { data, error } = await supabase
         .from('chat_messages')
         .insert({
-          user_id: validUser.id,
+          user_id: user.id,
           user_name: userProfile?.display_name || 'Anonymous',
           user_level: userProfile?.level || 1,
           is_pro: userProfile?.is_pro || false,
@@ -528,28 +578,36 @@ export function Chat({ onNavigate }: ChatProps) {
   };
 
   const handleDeleteMessage = async (messageId: string) => {
-    // Remove from UI immediately (animation handled in ChatMessage component)
     setMessages(current => current.filter(msg => msg.id !== messageId));
     
-    // Don't try to delete temporary messages from database
     if (messageId.startsWith('temp-')) {
-      console.log('Skipping database delete for temporary message:', messageId);
       return;
     }
     
+    if (!user?.id) return;
+    
     try {
-      // Try to delete from database in background
       const { error } = await supabase
         .from('chat_messages')
         .delete()
-        .eq('id', messageId);
+        .eq('id', messageId)
+        .eq('user_id', user.id);
 
       if (error) {
-        console.error('Delete failed:', error);
+        const messageToRestore = messages.find(msg => msg.id === messageId);
+        if (messageToRestore) {
+          setMessages(current => [...current, messageToRestore].sort((a, b) => 
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          ));
+        }
       }
-
     } catch (err) {
-      console.error('Delete error:', err);
+      const messageToRestore = messages.find(msg => msg.id === messageId);
+      if (messageToRestore) {
+        setMessages(current => [...current, messageToRestore].sort((a, b) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        ));
+      }
     }
   };
 
@@ -611,36 +669,6 @@ export function Chat({ onNavigate }: ChatProps) {
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
             
-            {/* Translate Button with Language Options */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={false}
-                  className="gap-2 bg-gradient-primary text-primary-foreground hover:opacity-90"
-                >
-                  <Globe className="w-4 h-4" />
-                  {i18n.language === 'en' ? "English" : "Indonesia"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  onClick={() => changeLanguage('id')}
-                  className="flex items-center justify-between"
-                >
-                  <span>🇮🇩 Indonesia</span>
-                  {i18n.language === 'id' && <div className="w-2 h-2 bg-primary rounded-full" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => changeLanguage('en')}
-                  className="flex items-center justify-between"
-                >
-                  <span>🇺🇸 English</span>
-                  {i18n.language === 'en' && <div className="w-2 h-2 bg-primary rounded-full" />}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -700,7 +728,10 @@ export function Chat({ onNavigate }: ChatProps) {
           />
           <Button
             ref={sendButtonRef}
-            onClick={() => handleSendMessage()}
+            onClick={() => {
+              // Non-blocking call
+              handleSendMessage();
+            }}
             disabled={!message.trim()}
             className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-4 transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0"
           >

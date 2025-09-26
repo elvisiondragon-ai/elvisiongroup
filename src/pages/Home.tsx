@@ -61,20 +61,7 @@ export function Home({
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const testimonialsRef = useRef<HTMLDivElement>(null);
 
-  // Preload audio files for better performance
-  useEffect(() => {
-    const audioFiles = [
-      'Verse1 - The Space Hill.MP3',
-      'Verse2 - Lucid Beach.MP3',
-      'Verse 3 - Syukur.MP3',
-      'Verse 4 - Prosperity Stream Vol. 1.MP3',
-      'Verse4-English.MP3',
-      'Verse5 - Virtality Vortex.MP3'
-    ];
-    
-    // Preload audio files in background for offline access
-    preloadAudioFiles(audioFiles);
-  }, [preloadAudioFiles]);
+  // Audio files will be cached only when user plays them
 
   // Video control system - only one video can play at a time
   useEffect(() => {

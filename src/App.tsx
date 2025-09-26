@@ -106,11 +106,14 @@ const App = () => {
               // Set redirect to home after update  
               localStorage.setItem('refresh-redirect-to-home', 'true');
               
-              // Clear service worker caches only
+              // Clear service worker caches only - //Nevertouch Audio-cache
               if ('caches' in window) {
                 caches.keys().then(names => {
                   names.forEach(name => {
-                    caches.delete(name);
+                    // Protect audio cache from auto-deploy clearing
+                    if (!name.includes('audio') && !name.includes('mp3') && !name.includes('MP3')) {
+                      caches.delete(name);
+                    }
                   });
                 });
               }
@@ -219,29 +222,43 @@ const App = () => {
     }
   }, [toast]);
 
-  // Global session rehydration handlers
-  const handleFocus = () => {
-    console.log('🎯 Window focused, rehydrating session');
-    // Trigger rehydration in UserProfileContext
+  // Token freshness protection - satellite protection for user activity
+  const handleFocus = async () => {
+    console.log('🎯 Window focused - checking token freshness');
+    if (user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.expires_at) {
+        const expiryTime = new Date(session.expires_at * 1000).getTime();
+        const currentTime = Date.now();
+        const timeUntilExpiry = expiryTime - currentTime;
+        const fiveMinutes = 5 * 60 * 1000;
+        
+        // Refresh if near expiry (within 5 minutes)
+        if (timeUntilExpiry < fiveMinutes) {
+          console.log('🔄 Token near expiry, refreshing session');
+          await supabase.auth.refreshSession();
+        }
+      }
+    }
   };
 
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === 'visible') {
-      console.log('👁️ Tab became visible, rehydrating session');
-      // Trigger rehydration in UserProfileContext
+  const handleVisibilityChange = async () => {
+    if (document.visibilityState === 'visible' && user) {
+      console.log('👁️ Tab visible - ensuring token freshness');
+      await handleFocus(); // Reuse same logic
     }
   };
 
   useEffect(() => {
-    // Disabled: causing conflicts with manual auth operations
-    // window.addEventListener('focus', handleFocus);
-    // document.addEventListener('visibilitychange', handleVisibilityChange);
+    // Enable satellite protection for user activity tracking
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
-      // window.removeEventListener('focus', handleFocus);
-      // document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     // Set up auth state listener FIRST

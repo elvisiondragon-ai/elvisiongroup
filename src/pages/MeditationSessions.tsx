@@ -49,11 +49,11 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
       console.log('✅ Meditation cache migration completed - now using fast auth');
     }
 
-    // Get user immediately using fast auth
+    // Use session.user.id from state memory
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUser(user);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUser(session.user);
       }
     };
     

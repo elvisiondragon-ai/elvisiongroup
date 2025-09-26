@@ -11,7 +11,7 @@ import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
 import { useMeditative } from "@/contexts/MeditativeContext";
 import { VerseAudioCard } from "@/components/VerseAudioCard";
-import { useProtectedAudio } from "@/contexts/AudioContext";
+import { useProtectedAudio } from "@/contexts/AudioContext"; // //Nevertouch Audio-cache
 import { SacredFocusNotification } from "@/components/SacredFocusNotification";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 // Removed slow UserProfileContext - now using fast auth
@@ -98,7 +98,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { setMeditativeActive } = useMeditative();
   const [currentUser, setCurrentUser] = useState<any>(null);
 
-  // Local audio state (better for XP tracking)
+  // Local audio state (better for XP tracking) - USER-INITIATED downloads only //Nevertouch Audio-cache
   const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
   const [currentVerseAudio, setCurrentVerseAudio] = useState<HTMLAudioElement | null>(null);
 
@@ -132,15 +132,14 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     const initializeData = async () => {
       setLoading(true);
       
-      // Get user immediately using fast auth
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUser(user);
-        setIsAdmin(user.email === "elvisiondragon@gmail.com");
+      // Use session.user.id from state memory, fallback to getSession() if not exist
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUser(session.user);
+        setIsAdmin(session.user.email === "elvisiondragon@gmail.com");
         
-        
-        const verse4Count = await fetchVerse4Count(user.id);
-        await fetchUserProfile(user.id);
+        const verse4Count = await fetchVerse4Count(session.user.id);
+        await fetchUserProfile(session.user.id);
       }
       
       setLoading(false);
@@ -238,7 +237,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     if (proStatus.isPro) return true; // Pro users have unlimited access
 
     try {
-      if (!user) return false;
+      if (!currentUser) return false;
 
       console.log('🎵 Current verse4Used before increment:', verse4Used);
       

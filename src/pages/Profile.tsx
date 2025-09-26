@@ -105,23 +105,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
 
   const handleLogout = async () => {
-    // Clear stale auth tokens to enable button
-    
-    const { data: { session } } = await supabase.auth.refreshSession();
-    const validUser = session?.user;
-    
-    if (!validUser) {
-      toast({
-        title: "Already logged out",
-        description: "You are not logged in.",
-        variant: "default",
-      });
-      window.location.href = '/auth';
-      return;
-    }
-
     try {
-      // Immediate logout - event listener will handle redirect
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -157,7 +141,11 @@ export function Profile({ onNavigate }: ProfileProps) {
   };
 
   const handleDeleteAccount = async () => {
-    if (!user) return;
+    if (!user?.id) {
+      // Fallback: get session if cached user not available
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+    }
     
     try {
       // Delete all user data first

@@ -131,11 +131,13 @@ export function EliteHabit() {
   const submitHabit = async (buttonElement?: HTMLElement) => {
     if (!selectedExercise || !notes.trim()) return;
 
-    // Ensure user is available
-    const currentUser = await supabase.auth.getUser();
-    if (!currentUser.data.user) {
-      handleAuthError(buttonElement);
-      return;
+    if (!user?.id) {
+      // Fallback: get session if cached user not available
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        handleAuthError(buttonElement);
+        return;
+      }
     }
 
     setLoading(true);
@@ -158,7 +160,7 @@ export function EliteHabit() {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_elite_habit')
-        .eq('user_id', currentUser.data.user.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_elite_habit || 0;
@@ -168,7 +170,7 @@ export function EliteHabit() {
           total_elite_habit: currentCount + 1,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', currentUser.data.user.id);
+        .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile total_elite_habit:', profileError);
@@ -182,11 +184,11 @@ export function EliteHabit() {
       setDuration(5);
       setNotes('');
 
-      // Reload data
-      loadHabitData();
-
       // Auto-show reports after submitting
       setShowReports(true);
+
+      // Reload data after UI update
+      setTimeout(() => loadHabitData(), 0);
 
     } catch (error) {
       console.error('Elite habit error:', error);
@@ -196,19 +198,18 @@ export function EliteHabit() {
   };
 
   const handleDeleteHabit = async (habitId: string) => {
-    // Clear cache and refresh session like Chat.tsx
-    
-    const { data: { session } } = await supabase.auth.refreshSession();
-    const validUser = session?.user;
-    
-    if (!validUser) return;
+    if (!user?.id) {
+      // Fallback: get session if cached user not available
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+    }
 
     try {
       const { error } = await supabase
         .from('elite_habits')
         .delete()
         .eq('id', habitId)
-        .eq('user_id', validUser.id);
+        .eq('user_id', user.id);
 
       if (error) {
         toast({
@@ -223,7 +224,7 @@ export function EliteHabit() {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_elite_habit')
-        .eq('user_id', validUser.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_elite_habit || 0;
@@ -233,7 +234,7 @@ export function EliteHabit() {
           total_elite_habit: Math.max(0, currentCount - 1),
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', validUser.id);
+        .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile total_elite_habit:', profileError);
@@ -244,8 +245,8 @@ export function EliteHabit() {
         variant: "default"
       });
 
-      // Reload data
-      loadHabitData();
+      // Reload data after UI update
+      setTimeout(() => loadHabitData(), 0);
     } catch (error) {
       console.error("Error deleting elite habit:", error);
       toast({
@@ -544,21 +545,7 @@ export function EliteHabit() {
         {/* Submit Button */}
         <Button
           ref={submitButtonRef}
-          onClick={async () => {
-            // Clear cache and refresh session like Chat.tsx
-            
-            const { data: { session } } = await supabase.auth.refreshSession();
-            const validUser = session?.user;
-            
-            if (!validUser) {
-              toast({
-                title: "Please Log In",
-                description: "You need to log in to save elite habits",
-                variant: "destructive"
-              });
-              return;
-            }
-            
+          onClick={() => {
             handleButtonTimeout(
               () => submitHabit(submitButtonRef.current || undefined),
               submitButtonRef.current || undefined
