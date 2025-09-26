@@ -87,36 +87,28 @@ const App = () => {
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
           <button 
-            onClick={async () => {
-              console.log('🔄 User clicked Auto Deploy button - SUPER REFRESH')
+            onClick={() => {
+              console.log('🔄 User clicked Auto Deploy button')
+              localStorage.removeItem('app-needs-update')
               
-              // NUKE ALL STORAGE
-              localStorage.clear();
-              sessionStorage.clear();
+              // Set redirect to home after update  
+              localStorage.setItem('refresh-redirect-to-home', 'true');
               
-              // Clear cookies
-              document.cookie.split(";").forEach(function(c) { 
-                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-              });
-              
-              // Clear all caches
+              // Clear service worker caches
               if ('caches' in window) {
-                const cacheNames = await caches.keys();
-                await Promise.all(
-                  cacheNames.map(cacheName => caches.delete(cacheName))
-                );
+                caches.keys().then(names => {
+                  names.forEach(name => {
+                    caches.delete(name);
+                  });
+                });
               }
               
-              // Unregister all service workers
-              if ('serviceWorker' in navigator) {
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                await Promise.all(
-                  registrations.map(registration => registration.unregister())
-                );
-              }
+              // Re-set flag for success message after reload
+              localStorage.setItem('update-success-pending', 'true');
               
-              // Force reload from server (bypass cache)
-              window.location.reload();
+              updateServiceWorker(true)
+              setNeedRefresh(false)
+              setToastId(null);
             }}
             className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80"
           >
