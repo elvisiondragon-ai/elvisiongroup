@@ -287,15 +287,17 @@
   }
   
   .streak-seeker {
-    background: linear-gradient(135deg, rgba(154, 52, 18, 0.8), rgba(194, 65, 12, 0.8), rgba(153, 27, 27, 0.8));
-    border-color: #f97316;
+    background: linear-gradient(135deg, #451a03, #7c2d12, #92400e, #b45309);
+    border-color: #92400e;
     color: #fed7aa;
+    box-shadow: 0 4px 15px rgba(69, 26, 3, 0.4);
   }
   
   .streak-lumina {
-    background: linear-gradient(135deg, rgba(30, 64, 175, 0.8), rgba(29, 78, 216, 0.8), rgba(21, 94, 117, 0.8));
+    background: linear-gradient(135deg, #1e40af, #2563eb, #3b82f6, #60a5fa);
     border-color: #3b82f6;
-    color: #dbeafe;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
   }
   
   .streak-wanderer {
