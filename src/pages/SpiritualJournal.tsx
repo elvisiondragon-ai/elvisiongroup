@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ArrowLeft, Save, Trash2, BookOpen, ChevronDown } from "lucide-react";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,12 +38,16 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
   // Load reflections immediately when user is available
   useEffect(() => {
-    if (user?.id) {
-      loadReflections(user.id);
-    } else {
-      setIsLoadingReflections(false);
-    }
-  }, [user?.id]);
+    const loadInitialReflections = async () => {
+      const currentUser = await supabase.auth.getUser();
+      if (currentUser.data.user) {
+        loadReflections(currentUser.data.user.id);
+      } else {
+        setIsLoadingReflections(false);
+      }
+    };
+    loadInitialReflections();
+  }, []);
 
   // Remove auth listener - App.tsx handles this
 
@@ -71,7 +76,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveReflection = async () => {
-    if (!reflection.trim() || !user?.id) {
+    // Ensure user is available
+    const currentUser = await supabase.auth.getUser();
+    if (!reflection.trim() || !currentUser.data.user) {
       toast({
         title: "Error",
         description: "Silakan tulis renungan Anda terlebih dahulu",
@@ -90,8 +97,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
     const { data, error } = await supabase
       .from('reflections')
       .insert({
-        user_id: user.id,
-        user_email: user.email,
+        user_id: currentUser.data.user.id,
+        user_email: currentUser.data.user.email,
         reflection: reflection.trim()
       })
       .select(); // Return the inserted data to verify
@@ -111,7 +118,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_journal')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.data.user.id)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_journal || 0;
@@ -121,7 +128,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           total_journal: currentCount + 1,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', user.id);
+        .eq('user_id', currentUser.data.user.id);
 
       if (profileError) {
         console.error('Error updating profile total_journal:', profileError);
@@ -131,7 +138,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
 
       setReflection("");
-      loadReflections(user.id);
+      loadReflections(currentUser.data.user.id);
       setIsSaving(false);
     }
   };
@@ -178,7 +185,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       });
 
       // Reload reflections
-      loadReflections(user.id);
+      loadReflections(currentUser.data.user.id);
     } catch (error) {
       console.error("Error deleting reflection:", error);
       toast({
@@ -210,84 +217,102 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
       <div className="px-6 space-y-6">
 
-        {/* Tutorial Section */}
+        {/* Tutorial Section - Accordion */}
         <Card className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 shadow-lg">
-          <div className="space-y-6">
-            <div className="text-center">
-              <h3 className="text-2xl font-semibold text-indigo-300 mb-4">
-                Mengapa Melepaskan Membuat Keinginan Terwujud?
-              </h3>
-              <p className="text-indigo-200 text-sm leading-relaxed max-w-2xl mx-auto">
-                Keinginan yang kamu lepaskan, terwujud ke hidupmu.
-              </p>
-            </div>
-
-            {/* Real Life Examples */}
-            <div className="space-y-4">
-              <div className="grid gap-4">
-                <div className="p-4 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
-                  <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
-                    🎯 Contoh 1: Melepaskan saat sudah hampir putus asa
-                  </h5>
-                  <div className="space-y-2 text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
-                    <p>Anda pasti pernah bahkan sering saat berusaha mendapatkan sesuatu atau seseorang. Berusaha mati matian namun terus seakan makin sulit dan semakin sulit.</p>
-                    <p>Sampai pada titik anda merasa lelah dan tidak sepadan anda memutuskan melepaskan..</p>
-                    <p className="font-semibold text-yellow-400">Alhasil, yang anda inginkan malah mendekati anda jadi mudah kan?</p>
-                    <p className="font-semibold text-yellow-400">Itu memang hukum alam, you get what you let go. Kamu dapat yang kamu lepaskan</p>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="tutorial">
+              <AccordionTrigger className="px-6 text-indigo-300 hover:text-indigo-200 hover:bg-indigo-800/20 rounded-lg transition-colors">
+                <div className="text-left flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full shadow-lg animate-pulse">
+                    <BookOpen className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold flex items-center gap-2">
+                      Mengapa Melepaskan Membuat Keinginan Terwujud?
+                      <span className="text-yellow-400 text-2xl animate-bounce">👇</span>
+                    </h3>
+                    <p className="text-sm text-yellow-300 mt-1 font-medium">
+                      💡 Click Untuk Paham - Sebelum memulai ⚡
+                    </p>
                   </div>
                 </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6">
+                <div className="space-y-6 pt-2">
+                  <div className="text-center">
+                    <p className="text-indigo-200 text-sm leading-relaxed max-w-2xl mx-auto">
+                      Keinginan yang kamu lepaskan, terwujud ke hidupmu.
+                    </p>
+                  </div>
 
-                <div className="p-4 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
-                  <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
-                    ⭐ Contoh 2: Seseorang yang ahli dan mudah
-                  </h5>
-                  <div className="space-y-2 text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
-                    <p>Anda pasti pernah melihat atau mungkin anda salah satunya. Saat orang tersebut menganggap sesuatu itu mudah dilakukan. Misalnya olahraga, atau mendapat pasangan, atau menyelesaikan pekerjaan..</p>
-                    <p>Orang tersebut merasa itu hal yang mudah sehingga dibawa santai dan mudah dilepaskan. Bawaan nya happy melakukan hal yg terasa sulit bagi kebanyakan orang</p>
-                    <p className="font-semibold text-yellow-400">Alhasil ? Hal tersebut jadi mudah untuk orang itu.</p>
-                    <p className="font-semibold text-yellow-400">Itu bukan ketidak adilan. Memang begitu Hukum Alam nya</p>
+                  {/* Real Life Examples */}
+                  <div className="space-y-4">
+                    <div className="grid gap-4">
+                      <div className="p-4 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
+                        <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
+                          🎯 Contoh 1: Melepaskan saat sudah hampir putus asa
+                        </h5>
+                        <div className="space-y-2 text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
+                          <p>Anda pasti pernah bahkan sering saat berusaha mendapatkan sesuatu atau seseorang. Berusaha mati matian namun terus seakan makin sulit dan semakin sulit.</p>
+                          <p>Sampai pada titik anda merasa lelah dan tidak sepadan anda memutuskan melepaskan..</p>
+                          <p className="font-semibold text-yellow-400">Alhasil, yang anda inginkan malah mendekati anda jadi mudah kan?</p>
+                          <p className="font-semibold text-yellow-400">Itu memang hukum alam, you get what you let go. Kamu dapat yang kamu lepaskan</p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
+                        <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
+                          ⭐ Contoh 2: Seseorang yang ahli dan mudah
+                        </h5>
+                        <div className="space-y-2 text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
+                          <p>Anda pasti pernah melihat atau mungkin anda salah satunya. Saat orang tersebut menganggap sesuatu itu mudah dilakukan. Misalnya olahraga, atau mendapat pasangan, atau menyelesaikan pekerjaan..</p>
+                          <p>Orang tersebut merasa itu hal yang mudah sehingga dibawa santai dan mudah dilepaskan. Bawaan nya happy melakukan hal yg terasa sulit bagi kebanyakan orang</p>
+                          <p className="font-semibold text-yellow-400">Alhasil ? Hal tersebut jadi mudah untuk orang itu.</p>
+                          <p className="font-semibold text-yellow-400">Itu bukan ketidak adilan. Memang begitu Hukum Alam nya</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Famous Examples */}
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-indigo-300 text-center">
+                      Contoh Terkenal di Dunia:
+                    </h4>
+                    
+                    <div className="grid gap-3">
+                      <div className="p-3 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
+                        <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
+                          🏢 Steve Jobs & Apple (1997)
+                        </h5>
+                        <p className="text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
+                          Setelah dikeluarkan dari Apple, Jobs harus melepaskan ego dan dendam pribadi untuk kembali menyelamatkan perusahaan yang dia dirikan. Hasilnya? Apple menjadi perusahaan paling berharga di dunia.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
+                        <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
+                          ✍️ Elizabeth Gilbert - Kreativitas
+                        </h5>
+                        <p className="text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
+                          "Untuk memaksimalkan peluang sukses, kita perlu mencintai proses penciptaan sepenuh hati, lalu melepaskannya tanpa attachment pada hasil."
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
+                        <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
+                          🎯 Paradox Kontrol dalam Bisnis
+                        </h5>
+                        <p className="text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
+                          Gary Cooper dalam "The Success Paradox": Seorang workaholic yang nyaris mati, kemudian sukses luar biasa setelah belajar "surrender" dan melepaskan kebutuhan mengontrol segalanya.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Famous Examples */}
-            <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-indigo-300 text-center">
-                Contoh Terkenal di Dunia:
-              </h4>
-              
-              <div className="grid gap-3">
-                <div className="p-3 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
-                  <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
-                    🏢 Steve Jobs & Apple (1997)
-                  </h5>
-                  <p className="text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
-                    Setelah dikeluarkan dari Apple, Jobs harus melepaskan ego dan dendam pribadi untuk kembali menyelamatkan perusahaan yang dia dirikan. Hasilnya? Apple menjadi perusahaan paling berharga di dunia.
-                  </p>
-                </div>
-
-                <div className="p-3 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
-                  <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
-                    ✍️ Elizabeth Gilbert - Kreativitas
-                  </h5>
-                  <p className="text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
-                    "Untuk memaksimalkan peluang sukses, kita perlu mencintai proses penciptaan sepenuh hati, lalu melepaskannya tanpa attachment pada hasil."
-                  </p>
-                </div>
-
-                <div className="p-3 bg-indigo-800/30 rounded-lg border border-indigo-500/30">
-                  <h5 className="font-medium text-indigo-300 mb-2 flex items-center gap-2">
-                    🎯 Paradox Kontrol dalam Bisnis
-                  </h5>
-                  <p className="text-indigo-200 leading-relaxed" style={{fontSize: '16px'}}>
-                    Gary Cooper dalam "The Success Paradox": Seorang workaholic yang nyaris mati, kemudian sukses luar biasa setelah belajar "surrender" dan melepaskan kebutuhan mengontrol segalanya.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-          </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </Card>
 
         {/* Quote Card */}
@@ -306,8 +331,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
               Pertanyaan Hari Ini
             </h3>
             
-            <div className="p-4 rounded-lg bg-black/60 border border-purple-300/50 shadow-inner">
-              <p className="text-white leading-relaxed" style={{fontSize: '17px'}}>
+            <div className="p-4 rounded-lg bg-indigo-800/50 border border-indigo-400/50 shadow-inner">
+              <p className="text-indigo-100 leading-relaxed" style={{fontSize: '17px'}}>
                 "{currentQuestion}"
               </p>
             </div>
@@ -317,7 +342,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                 value={reflection}
                 onChange={(e) => setReflection(e.target.value)}
                 placeholder="Tulis jawabanmu di sini..."
-                className="min-h-32 bg-indigo-800/50 border-indigo-400/50 focus:border-indigo-300 text-indigo-100 placeholder:text-indigo-300/70 resize-none rounded-lg"
+                className="min-h-32 bg-black/60 border-purple-300/50 focus:border-purple-300 text-white placeholder:text-purple-300/70 resize-none rounded-lg"
                 style={{fontSize: '17px'}}
                 rows={6}
               />

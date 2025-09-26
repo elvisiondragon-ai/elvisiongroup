@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Minus, Check, Activity, ChevronLeft, ChevronRight, Calendar, Trash2 } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Plus, Minus, Check, Activity, ChevronLeft, ChevronRight, Calendar, Trash2, BookOpen } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useToast } from '@/hooks/use-toast';
@@ -44,27 +45,32 @@ export function EliteHabit() {
   const [loading, setLoading] = useState(false);
   const [allEntries, setAllEntries] = useState<EliteHabitEntry[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const [showReports, setShowReports] = useState(false);
+  const [showReports, setShowReports] = useState(true);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const today = new Date().toDateString();
 
   // Load habit data when user is available
   useEffect(() => {
-    if (user?.id) {
-      loadHabitData();
-    }
-  }, [user]);
+    const loadInitialData = async () => {
+      const currentUser = await supabase.auth.getUser();
+      if (currentUser.data.user) {
+        loadHabitData();
+      }
+    };
+    loadInitialData();
+  }, []);
 
   const loadHabitData = async () => {
-    if (!user?.id) return;
+    const currentUser = await supabase.auth.getUser();
+    if (!currentUser.data.user) return;
 
     try {
       // Load today's entries
       const { data: todayData } = await supabase
         .from('elite_habits')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.data.user.id)
         .gte('created_at', new Date(today).toISOString())
         .lt('created_at', new Date(new Date(today).getTime() + 24*60*60*1000).toISOString());
 
@@ -79,7 +85,7 @@ export function EliteHabit() {
       const { data: allData } = await supabase
         .from('elite_habits')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.data.user.id)
         .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false });
 
@@ -94,7 +100,7 @@ export function EliteHabit() {
         const { data: profileData } = await supabase
           .from('profiles')
           .select('total_elite_habit')
-          .eq('user_id', user.id)
+          .eq('user_id', currentUser.data.user.id)
           .single();
           
         if (profileData) {
@@ -120,31 +126,14 @@ export function EliteHabit() {
     });
   };
 
-  // Pagination for reports
-  const ITEMS_PER_PAGE = 5;
-  const totalPages = Math.ceil(allEntries.length / ITEMS_PER_PAGE);
-  const currentEntries = allEntries.slice(
-    currentPage * ITEMS_PER_PAGE,
-    (currentPage + 1) * ITEMS_PER_PAGE
-  );
-
-  const nextPage = () => {
-    if (currentPage < totalPages - 1) {
-      setCurrentPage(prev => prev + 1);
-    }
-  };
-
-  const prevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(prev => prev - 1);
-    }
-  };
+  // No pagination - show all entries with scrollable container
 
   const submitHabit = async (buttonElement?: HTMLElement) => {
     if (!selectedExercise || !notes.trim()) return;
 
-    // Check if user is not loaded properly
-    if (!user?.id) {
+    // Ensure user is available
+    const currentUser = await supabase.auth.getUser();
+    if (!currentUser.data.user) {
       handleAuthError(buttonElement);
       return;
     }
@@ -169,7 +158,7 @@ export function EliteHabit() {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_elite_habit')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.data.user.id)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_elite_habit || 0;
@@ -179,7 +168,7 @@ export function EliteHabit() {
           total_elite_habit: currentCount + 1,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', user.id);
+        .eq('user_id', currentUser.data.user.id);
 
       if (profileError) {
         console.error('Error updating profile total_elite_habit:', profileError);
@@ -214,7 +203,7 @@ export function EliteHabit() {
         .from('elite_habits')
         .delete()
         .eq('id', habitId)
-        .eq('user_id', user.id);
+        .eq('user_id', currentUser.data.user.id);
 
       if (error) {
         toast({
@@ -229,7 +218,7 @@ export function EliteHabit() {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_elite_habit')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.data.user.id)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_elite_habit || 0;
@@ -239,7 +228,7 @@ export function EliteHabit() {
           total_elite_habit: Math.max(0, currentCount - 1),
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', user.id);
+        .eq('user_id', currentUser.data.user.id);
 
       if (profileError) {
         console.error('Error updating profile total_elite_habit:', profileError);
@@ -280,6 +269,123 @@ export function EliteHabit() {
         </CardHeader>
       </Card>
 
+      {/* Tutorial Section - Accordion */}
+      <Card className="bg-gradient-to-br from-emerald-900/20 to-teal-900/20 border border-emerald-500/30 shadow-lg">
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="tutorial">
+            <AccordionTrigger className="px-6 text-emerald-300 hover:text-emerald-200 hover:bg-emerald-800/20 rounded-lg transition-colors">
+              <div className="text-left flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-lg animate-pulse">
+                  <BookOpen className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold flex items-center gap-2">
+                    Mengapa Elite Habit Berbeda dari Olahraga Biasa?
+                    <span className="text-emerald-400 text-2xl animate-bounce">👇</span>
+                  </h3>
+                  <p className="text-sm text-teal-300 mt-1 font-medium">
+                    💡 Click Untuk Paham - Fokus Natural Training ⚡
+                  </p>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6">
+              <div className="space-y-6 pt-2">
+                <div className="text-center">
+                  <p className="text-emerald-200 text-sm leading-relaxed max-w-2xl mx-auto">
+                    Elite Habit adalah latihan fokus alami dengan tekanan ringan untuk kehidupan nyata.
+                  </p>
+                </div>
+
+                {/* Core Difference */}
+                <div className="space-y-4">
+                  <div className="grid gap-4">
+                    <div className="p-4 bg-emerald-800/30 rounded-lg border border-emerald-500/30">
+                      <h5 className="font-medium text-emerald-300 mb-2 flex items-center gap-2">
+                        🎯 Olahraga Biasa vs Elite Habit
+                      </h5>
+                      <div className="space-y-3 text-emerald-200 leading-relaxed" style={{fontSize: '16px'}}>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div className="p-3 bg-red-900/20 rounded border-l-4 border-red-500">
+                            <h6 className="font-semibold text-red-300 mb-1">🏃 Olahraga Biasa:</h6>
+                            <p>Fokus pada hasil: kalori terbakar, otot terbentuk, target tercapai</p>
+                          </div>
+                          <div className="p-3 bg-emerald-900/20 rounded border-l-4 border-emerald-500">
+                            <h6 className="font-semibold text-emerald-300 mb-1">⭐ Elite Habit:</h6>
+                            <p>Fokus pada proses: menikmati setiap tahapan, mindfulness, ketenangan</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-emerald-800/30 rounded-lg border border-emerald-500/30">
+                      <h5 className="font-medium text-emerald-300 mb-2 flex items-center gap-2">
+                        🧘 Contoh Elite Habit dalam Praktek
+                      </h5>
+                      <div className="space-y-3 text-emerald-200 leading-relaxed" style={{fontSize: '16px'}}>
+                        <div className="space-y-3">
+                          <div className="p-3 bg-emerald-700/20 rounded">
+                            <h6 className="font-semibold text-teal-300">💪 Gym / Push-up:</h6>
+                            <p>Nikmati napas saat angkat beban, rasakan grip tangan, fokus pada ritme pernapasan</p>
+                          </div>
+                          <div className="p-3 bg-emerald-700/20 rounded">
+                            <h6 className="font-semibold text-teal-300">🚶 Jalan Santai:</h6>
+                            <p>Rasakan kaki menyentuh tanah, dengarkan suara burung, nikmati daun-daun di taman</p>
+                          </div>
+                          <div className="p-3 bg-emerald-700/20 rounded">
+                            <h6 className="font-semibold text-teal-300">🏊 Renang:</h6>
+                            <p>Fokus pada gerakan air, suara gelembung, ritme napas yang teratur</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* The Goal */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-emerald-300 text-center">
+                    🎯 Tujuan Elite Habit:
+                  </h4>
+                  
+                  <div className="grid gap-3">
+                    <div className="p-4 bg-gradient-to-r from-emerald-800/30 to-teal-800/30 rounded-lg border border-emerald-500/30">
+                      <h5 className="font-medium text-emerald-300 mb-2 flex items-center gap-2">
+                        🏋️ Melatih Fokus dengan Tekanan Ringan
+                      </h5>
+                      <p className="text-emerald-200 leading-relaxed" style={{fontSize: '16px'}}>
+                        Seperti warm-up sebelum tantangan besar. Elite Habit melatih kemampuan memindahkan fokus ke hal menenangkan 
+                        saat tubuh dalam "tekanan ringan" (olahraga).
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-gradient-to-r from-teal-800/30 to-emerald-800/30 rounded-lg border border-teal-500/30">
+                      <h5 className="font-medium text-teal-300 mb-2 flex items-center gap-2">
+                        🎯 Aplikasi di Kehidupan Nyata
+                      </h5>
+                      <p className="text-teal-200 leading-relaxed" style={{fontSize: '16px'}}>
+                        Saat menghadapi tekanan hidup (deadline, konflik, stress), Anda terlatih untuk memindahkan fokus 
+                        ke hal menenangkan daripada mengikuti pola pikir kacau.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-gradient-to-r from-emerald-700/30 to-green-700/30 rounded-lg border border-green-500/30">
+                      <h5 className="font-medium text-green-300 mb-2 flex items-center gap-2">
+                        💎 Hasil Akhir: Disiplin Mental
+                      </h5>
+                      <p className="text-green-200 leading-relaxed font-medium" style={{fontSize: '16px'}}>
+                        Anda menjadi terlatih untuk tetap tenang dan fokus pada solusi, bukan terjebak dalam kekacauan pikiran 
+                        saat menghadapi tantangan hidup.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </Card>
+
       {/* Stats */}
       <Card className="p-4">
         <div className="text-center">
@@ -292,8 +398,8 @@ export function EliteHabit() {
         </div>
       </Card>
 
-      {/* Today's Entries */}
-      {todayEntries.length > 0 && (
+      {/* Today's entries removed - all entries now show in main report below */}
+      {false && todayEntries.length > 0 && (
         <Card className="p-4">
           <h3 className="font-semibold mb-3 text-emerald-400">Hari Ini:</h3>
           <div className="space-y-2">
@@ -453,54 +559,19 @@ export function EliteHabit() {
           )}
         </Button>
 
-        {/* Toggle Reports Button */}
-        <Button
-          variant="outline"
-          onClick={() => setShowReports(!showReports)}
-          className="w-full mt-4 border-emerald-500/30 hover:border-emerald-500"
-        >
-          <Calendar className="w-4 h-4 mr-2" />
-          {showReports ? 'Sembunyikan' : 'Lihat'} Laporan Elite Habit
-          {allEntries.length > 0 && (
-            <Badge variant="secondary" className="ml-2">
-              {allEntries.length}
-            </Badge>
-          )}
-        </Button>
+        {/* Reports always visible - no toggle needed */}
       </Card>
 
-      {/* Sliding Reports Section */}
-      {showReports && (
+      {/* Reports Section - Always Visible */}
+      {(
         <Card className="p-6 bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-500/30">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-emerald-400">
               Laporan Elite Habit (30 Hari Terakhir)
             </h3>
-            {totalPages > 1 && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={prevPage}
-                  disabled={currentPage === 0}
-                  className="border-emerald-500/30 hover:border-emerald-500"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="text-sm text-emerald-300">
-                  {currentPage + 1} / {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={nextPage}
-                  disabled={currentPage >= totalPages - 1}
-                  className="border-emerald-500/30 hover:border-emerald-500"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
+            <Badge variant="secondary" className="ml-2">
+              {allEntries.length}
+            </Badge>
           </div>
 
           {allEntries.length === 0 ? (
@@ -512,8 +583,8 @@ export function EliteHabit() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {currentEntries.map((entry, index) => (
+            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+              {allEntries.map((entry, index) => (
                 <div
                   key={entry.id || index}
                   className="relative p-4 bg-emerald-800/20 rounded-lg border border-emerald-500/20 space-y-2"

@@ -35,6 +35,12 @@ const App = () => {
   const [updateClicked, setUpdateClicked] = useState(false);
   const [toastId, setToastId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Helper function to ensure user ID is available
+  const ensureUserId = async () => {
+    const { data } = await supabase.auth.getUser();
+    return data.user;
+  };
   
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -96,70 +102,8 @@ const App = () => {
               console.log('🔄 User clicked Auto Deploy button')
               localStorage.removeItem('app-needs-update')
               
-              // Check which page to refresh cache for
-              const currentPath = window.location.pathname;
-              
-              if (currentPath.includes('spiritual-journal') || window.location.hash.includes('journal')) {
-                console.log('💥 SPIRITUAL JOURNAL: Clearing cache completely');
-                // Clear journal-specific caches
-                localStorage.removeItem('user-profile-cache');
-                localStorage.removeItem('profile-metadata'); 
-                localStorage.removeItem('user-cache');
-                sessionStorage.clear();
-                localStorage.setItem('refresh-redirect-to-journal', 'true');
-              } else if (currentPath.includes('elite-habit') || window.location.hash.includes('habit')) {
-                console.log('💥 ELITE HABIT: Clearing cache completely');
-                localStorage.removeItem('user-profile-cache');
-                localStorage.removeItem('profile-metadata');
-                localStorage.removeItem('user-cache');
-                sessionStorage.clear();
-                localStorage.setItem('refresh-redirect-to-elite-habit', 'true');
-              } else if (currentPath.includes('meditation') || window.location.hash.includes('sesi')) {
-                console.log('💥 MEDITATION: Clearing cache completely');
-                localStorage.removeItem('user-profile-cache');
-                localStorage.removeItem('profile-metadata');
-                localStorage.removeItem('user-cache');
-                localStorage.removeItem('meditation-cache');
-                sessionStorage.clear();
-                localStorage.setItem('refresh-redirect-to-meditation', 'true');
-              } else if (currentPath.includes('payment') || window.location.hash.includes('payment')) {
-                console.log('💥 PAYMENT: Clearing cache completely');
-                // Selective cache cleaner
-                localStorage.removeItem('user-profile-cache');
-                localStorage.removeItem('profile-metadata');
-                localStorage.removeItem('user-cache');
-                sessionStorage.clear();
-                localStorage.setItem('refresh-redirect-to-payment', 'true');
-              } else if (currentPath.includes('profile') || window.location.hash.includes('profile')) {
-                console.log('💥 PROFILE: Clearing cache completely');
-                // Selective cache cleaner
-                localStorage.removeItem('user-profile-cache');
-                localStorage.removeItem('profile-metadata');
-                localStorage.removeItem('user-cache');
-                sessionStorage.clear();
-                localStorage.setItem('refresh-redirect-to-profile', 'true');
-              } else if (currentPath.includes('chat') || window.location.hash.includes('chat')) {
-                console.log('💥 CHAT: Clearing cache completely');
-                // Selective cache cleaner
-                localStorage.removeItem('user-profile-cache');
-                localStorage.removeItem('profile-metadata');
-                localStorage.removeItem('user-cache');
-                localStorage.removeItem('chat-messages-cache');
-                sessionStorage.clear();
-                localStorage.setItem('refresh-redirect-to-chat', 'true');
-              } else if (currentPath.includes('audio') || window.location.hash.includes('audio')) {
-                console.log('💥 AUDIO THERAPY: Clearing cache completely');
-                // Selective cache cleaner
-                localStorage.removeItem('user-profile-cache');
-                localStorage.removeItem('profile-metadata');
-                localStorage.removeItem('user-cache');
-                localStorage.removeItem('audio-cache');
-                sessionStorage.clear();
-                localStorage.setItem('refresh-redirect-to-audio', 'true');
-              } else {
-                // Default: Just update service worker, no cache clearing
-                console.log('🔄 DEFAULT: Just updating service worker');
-              }
+              // Set redirect to home after update
+              localStorage.setItem('refresh-redirect-to-home', 'true');
               
               // Clear all cookies
               document.cookie.split(";").forEach(function(c) { 
@@ -291,6 +235,29 @@ const App = () => {
     }
   }, [toast]);
 
+  // Global session rehydration handlers
+  const handleFocus = () => {
+    console.log('🎯 Window focused, rehydrating session');
+    // Trigger rehydration in UserProfileContext
+  };
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      console.log('👁️ Tab became visible, rehydrating session');
+      // Trigger rehydration in UserProfileContext
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -298,16 +265,6 @@ const App = () => {
         // console.log('Auth state change:', event, session?.user?.email); // Silenced for development
         
         if (event === 'SIGNED_IN' && session?.user) {
-          // Selective cache bomb - Clear all caches on login to prevent stale data issues
-          console.log('💣 SIGNIN: Selective cache bomb clearing all caches');
-          localStorage.removeItem('user-profile-cache');
-          localStorage.removeItem('profile-metadata');
-          localStorage.removeItem('user-cache');
-          localStorage.removeItem('chat-messages-cache');
-          localStorage.removeItem('meditation-cache');
-          localStorage.removeItem('audio-cache');
-          sessionStorage.clear();
-          
           // Handle successful sign in (both login and signup)
           setUser(session.user);
           setIsLoading(false);

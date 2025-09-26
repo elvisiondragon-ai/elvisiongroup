@@ -105,8 +105,9 @@ export function Profile({ onNavigate }: ProfileProps) {
 
 
   const handleLogout = async () => {
-    // INSTANT RESPONSE - no waiting for context loading
-    if (!user) {
+    // Ensure user is available
+    const currentUser = await supabase.auth.getUser();
+    if (!currentUser.data.user) {
       toast({
         title: "Already logged out",
         description: "You are not logged in.",
@@ -117,7 +118,7 @@ export function Profile({ onNavigate }: ProfileProps) {
     }
 
     try {
-      console.log('🚀 INSTANT logout initiated for user:', user.id);
+      console.log('🚀 INSTANT logout initiated for user:', currentUser.data.user.id);
       
       // Clear caches immediately (no delay)
       localStorage.removeItem('profile-metadata');
@@ -528,7 +529,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                 achievement.unlocked && achievement.isHandOfMidas
                   ? "bg-gradient-to-r from-yellow-900/80 via-amber-800/80 to-yellow-900/80 border-yellow-500 shadow-lg shadow-yellow-500/25 animate-pulse" 
                   : achievement.unlocked && achievement.isIgnisLord
-                    ? "bg-gradient-to-r from-red-900/80 via-red-800/80 to-orange-900/80 border-red-500 shadow-lg shadow-red-500/25 animate-pulse" 
+                    ? "bg-gradient-to-r from-red-800/80 via-red-700/80 to-orange-800/80 border-red-500 shadow-lg shadow-red-500/25 animate-pulse" 
                     : achievement.unlocked && achievement.isRealityMaster
                       ? "bg-gradient-to-r from-purple-900/80 via-purple-800/80 to-blue-900/80 border-purple-500 shadow-lg shadow-purple-500/25 animate-pulse"
                       : achievement.unlocked && achievement.isTheVoid
@@ -557,19 +558,25 @@ export function Profile({ onNavigate }: ProfileProps) {
                   achievement.unlocked && achievement.isHandOfMidas
                     ? "bg-gradient-to-r from-yellow-700 to-amber-700 text-amber-100 animate-pulse" 
                     : achievement.unlocked && achievement.isIgnisLord
-                      ? "bg-gradient-to-r from-red-700 to-orange-700 text-orange-100 animate-pulse" 
+                      ? "bg-gradient-to-r from-red-800 to-orange-800 text-orange-100 animate-pulse" 
                       : achievement.unlocked && achievement.isRealityMaster
                         ? "bg-gradient-to-r from-purple-700 to-blue-700 text-blue-100 animate-pulse"
                         : achievement.unlocked && achievement.isTheVoid
                           ? "bg-gradient-to-r from-gray-700 to-black text-gray-100 animate-pulse"
-                          : achievement.name === "Week Warrior" && achievement.unlocked
-                            ? "bg-gradient-to-r from-yellow-700 to-orange-700 text-yellow-100"
-                            : achievement.name === "Zen Master" && achievement.unlocked
-                              ? "bg-gradient-to-r from-blue-700 to-indigo-700 text-blue-100"
-                              : achievement.name === "Soul Leader" && achievement.unlocked
-                                ? "bg-gradient-to-r from-indigo-700 to-purple-700 text-indigo-100"
-                                : achievement.name === "First Step" && achievement.unlocked
-                                  ? "bg-gradient-to-r from-green-700 to-emerald-700 text-green-100"
+                          : achievement.unlocked && achievement.isWanderer
+                            ? "bg-gradient-to-r from-green-800 to-emerald-800 text-green-100"
+                            : achievement.unlocked && achievement.isLumina
+                              ? "bg-gradient-to-r from-blue-800 to-cyan-800 text-blue-100"
+                              : achievement.unlocked && achievement.isSeeker
+                                ? "bg-gradient-to-r from-orange-800 to-red-800 text-orange-100"
+                                : achievement.unlocked && achievement.isWarrior
+                                  ? "bg-gradient-to-r from-yellow-800 to-orange-800 text-yellow-100"
+                                  : achievement.name === "Zen Master" && achievement.unlocked
+                                    ? "bg-gradient-to-r from-blue-700 to-indigo-700 text-blue-100"
+                                    : achievement.name === "Soul Leader" && achievement.unlocked
+                                      ? "bg-gradient-to-r from-indigo-700 to-purple-700 text-indigo-100"
+                                      : achievement.name === "First Step" && achievement.unlocked
+                                        ? "bg-gradient-to-r from-green-700 to-emerald-700 text-green-100"
                                   : achievement.unlocked 
                                     ? "bg-gradient-primary text-primary-foreground glow-primary" 
                                     : "bg-muted text-muted-foreground"
@@ -584,7 +591,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                       <Globe className="w-7 h-7 animate-spin drop-shadow-lg" />
                     ) : achievement.isTheVoid && achievement.unlocked ? (
                       <GiBatMask className="w-7 h-7 animate-pulse drop-shadow-lg" />
-                    ) : achievement.name === "Week Warrior" && achievement.unlocked ? (
+                    ) : achievement.isWarrior && achievement.unlocked ? (
                       <GiTrophy className="w-7 h-7 animate-pulse drop-shadow-lg" />
                     ) : achievement.name === "Zen Master" && achievement.unlocked ? (
                       <GiMeditation className="w-7 h-7 animate-pulse drop-shadow-lg" />

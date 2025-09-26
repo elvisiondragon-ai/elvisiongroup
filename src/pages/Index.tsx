@@ -110,6 +110,11 @@ const Index = () => {
       setActiveTab('audio-therapy');
       return;
     }
+    if (localStorage.getItem('refresh-redirect-to-home') === 'true') {
+      localStorage.removeItem('refresh-redirect-to-home');
+      setActiveTab('home');
+      return;
+    }
     
     // Check if we just refreshed from signup and show welcome toast
     if (localStorage.getItem('post-signup-welcome') === 'true') {

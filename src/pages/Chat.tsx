@@ -209,11 +209,15 @@ export function Chat({ onNavigate }: ChatProps) {
   }, []);
 
   useEffect(() => {
-    // Load messages when user is available
-    if (user) {
-      loadMessages();
-    }
-  }, [user, loadMessages]);
+    // Load fresh messages with idle-safe auth
+    const loadFreshMessages = async () => {
+      const currentUser = await supabase.auth.getUser();
+      if (currentUser.data.user) {
+        loadMessages();
+      }
+    };
+    loadFreshMessages();
+  }, [loadMessages]);
 
   // Cache chat messages when successfully loaded (prevent duplicate saves)
   useEffect(() => {
@@ -394,8 +398,14 @@ export function Chat({ onNavigate }: ChatProps) {
   };
 
   const handleSendMessage = async () => {
-    // Check if user is connected/authenticated before validation
-    if (!user) {
+    // Clear old cache and refresh session
+    localStorage.removeItem('chat-messages-cache');
+    sessionStorage.clear();
+    
+    const { data: { session } } = await supabase.auth.refreshSession();
+    const validUser = session?.user;
+    
+    if (!validUser) {
       console.log('No current user found, button disabled');
       return; // Do nothing if user not authenticated
     }
@@ -433,29 +443,41 @@ export function Chat({ onNavigate }: ChatProps) {
     }
 
 
-    try {
-      console.log('🚀 Starting message insert at:', new Date().toISOString());
+    // Add optimistic message immediately
+    const tempId = `temp-${Date.now()}`;
+    const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
+    const optimisticMessage: ChatMessageData = {
+      id: tempId,
+      user_id: validUser.id,
+      user_name: userProfile?.display_name || 'Anonymous',
+      user_level: userProfile?.level || 1,
+      is_pro: userProfile?.is_pro || false,
+      is_admin: validUser.id === knownAdminId,
+      message: message.trim(),
+      created_at: new Date().toISOString()
+    };
 
-      // Add timeout to prevent hanging
-      const insertPromise = supabase
+    setMessages(current => [...current, optimisticMessage]);
+    setMessage("");
+
+    try {
+      // Send to database without timeout
+      const { data, error } = await supabase
         .from('chat_messages')
         .insert({
-          user_id: user.id,
+          user_id: validUser.id,
           user_name: userProfile?.display_name || 'Anonymous',
           user_level: userProfile?.level || 1,
           is_pro: userProfile?.is_pro || false,
           message: message.trim()
-        });
-
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Database timeout after 3 seconds')), 3000)
-      );
-
-      const { error } = await Promise.race([insertPromise, timeoutPromise]);
-      console.log('✅ Message insert completed at:', new Date().toISOString());
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('Error sending message:', error);
+        // Remove optimistic message on error
+        setMessages(current => current.filter(msg => msg.id !== tempId));
         toast({
           title: "Error",
           description: `Failed to send message: ${error.message}`,
@@ -463,22 +485,10 @@ export function Chat({ onNavigate }: ChatProps) {
         });
       } else {
         console.log('Message sent successfully');
-
-        // Optimistically add the message to UI immediately
-        const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
-        const newMessage: ChatMessageData = {
-          id: `temp-${Date.now()}`, // Temporary ID
-          user_id: user.id,
-          user_name: userProfile?.display_name || 'Anonymous',
-          user_level: userProfile?.level || 1,
-          is_pro: userProfile?.is_pro || false,
-          is_admin: user.id === knownAdminId, // Add admin status for new messages
-          message: message.trim(),
-          created_at: new Date().toISOString()
-        };
-
-        setMessages(current => [...current, newMessage]);
-        setMessage("");
+        // Replace optimistic message with real one
+        setMessages(current => current.map(msg => 
+          msg.id === tempId ? { ...optimisticMessage, id: data.id } : msg
+        ));
 
         toast({
           title: "Message Sent 🚀",
@@ -522,6 +532,12 @@ export function Chat({ onNavigate }: ChatProps) {
   const handleDeleteMessage = async (messageId: string) => {
     // Remove from UI immediately (animation handled in ChatMessage component)
     setMessages(current => current.filter(msg => msg.id !== messageId));
+    
+    // Don't try to delete temporary messages from database
+    if (messageId.startsWith('temp-')) {
+      console.log('Skipping database delete for temporary message:', messageId);
+      return;
+    }
     
     try {
       // Try to delete from database in background
@@ -686,23 +702,7 @@ export function Chat({ onNavigate }: ChatProps) {
           />
           <Button
             ref={sendButtonRef}
-            onClick={async () => {
-              // Simple getSession check
-              const { data: { session } } = await supabase.auth.getSession();
-              if (!session) {
-                toast({
-                  title: "Please Log In",
-                  description: "You need to log in to send messages",
-                  variant: "destructive"
-                });
-                return;
-              }
-              
-              handleButtonTimeout(
-                () => handleSendMessage(),
-                sendButtonRef.current || undefined
-              );
-            }}
+            onClick={() => handleSendMessage()}
             disabled={!message.trim()}
             className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-4 transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0"
           >

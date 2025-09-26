@@ -345,7 +345,9 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [user, userProfile, phoneNumber, fullName]);
 
   const handleCreatePayment = async () => {
-    if (!user || !selectedPlan || !phoneNumber.trim() || !fullName.trim() || !email.trim()) {
+    // Ensure user is available
+    const currentUser = await supabase.auth.getUser();
+    if (!currentUser.data.user || !selectedPlan || !phoneNumber.trim() || !fullName.trim() || !email.trim()) {
       toast({
         title: "Data Tidak Lengkap", 
         description: "Mohon lengkapi nama lengkap, nomor telepon, dan email",
@@ -354,8 +356,13 @@ export function Payment({ onNavigate }: PaymentProps) {
       return;
     }
     
+    // Get fresh metadata from current user
+    const currentEmail = currentUser.data.user.email || '';
+    const currentDisplayName = userProfile?.display_name || currentUser.data.user.user_metadata?.display_name || '';
+    const currentPhoneNumber = userProfile?.phone_number || currentUser.data.user.user_metadata?.phone_number || phoneNumber;
+    
     // Validate phone number format
-    if (!/^08[0-9]{6,13}$/.test(phoneNumber)) {
+    if (!/^08[0-9]{6,13}$/.test(currentPhoneNumber)) {
       toast({
         title: "Nomor Telepon Tidak Valid",
         description: "Format: 08xxxx (8-15 digit) Silahkan Klik Edit Profil",
