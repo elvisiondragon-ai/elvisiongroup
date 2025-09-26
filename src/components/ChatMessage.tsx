@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 // Updated spiritual icons for streak tiers
-import { GiTrophy, GiFire, GiHorseHead, GiWalkingBoot, GiMoon, GiMeditation } from "react-icons/gi";
+import { GiTrophy, GiFire, GiHorseHead, GiSailboat, GiMoon, GiMeditation } from "react-icons/gi";
 
 interface ChatMessageProps {
   id: string;
@@ -95,7 +95,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
                   </div>
                 ) : user.streak_days >= 90 ? (
                   <div className="streak-badge streak-wanderer shadow-sm">
-                    <GiMeditation className="w-3 h-3" style={{ flexShrink: 0 }} />
+                    <GiSailboat className="w-3 h-3" style={{ flexShrink: 0 }} />
                     <span className="font-medium">Wanderer 90+</span>
                   </div>
                 ) : user.streak_days >= 60 ? (
@@ -105,7 +105,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
                   </div>
                 ) : user.streak_days >= 30 ? (
                   <div className="streak-badge streak-seeker shadow-sm">
-                    <GiWalkingBoot className="w-3 h-3" style={{ flexShrink: 0 }} />
+                    <GiSailboat className="w-3 h-3" style={{ flexShrink: 0 }} />
                     <span className="font-medium">Seeker 30+</span>
                   </div>
                 ) : (
