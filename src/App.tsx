@@ -32,7 +32,6 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [updateClicked, setUpdateClicked] = useState(false);
   const [toastId, setToastId] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -42,8 +41,6 @@ const App = () => {
     return data.user;
   };
   
-  // iOS detection
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   
   // Initialize push notifications for authenticated users
   const { registerForNotifications } = usePushNotifications();
@@ -90,61 +87,40 @@ const App = () => {
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
           <button 
-            onClick={(e) => {
-              // Prevent double clicks on iOS
-              if (updateClicked) return;
+            onClick={async () => {
+              console.log('🔄 User clicked Auto Deploy button - SUPER REFRESH')
               
-              // iOS-specific event handling
-              e.preventDefault();
-              e.stopPropagation();
-              setUpdateClicked(true);
+              // NUKE ALL STORAGE
+              localStorage.clear();
+              sessionStorage.clear();
               
-              console.log('🔄 User clicked Auto Deploy button')
-              localStorage.removeItem('app-needs-update')
+              // Clear cookies
+              document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+              });
               
-              // Set redirect to home after update  
-              localStorage.setItem('refresh-redirect-to-home', 'true');
-              
-              // Clear service worker caches
+              // Clear all caches
               if ('caches' in window) {
-                caches.keys().then(names => {
-                  names.forEach(name => {
-                    caches.delete(name);
-                  });
-                });
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                  cacheNames.map(cacheName => caches.delete(cacheName))
+                );
               }
               
-              // Re-set flag for success message after reload
-              localStorage.setItem('update-success-pending', 'true');
-              // END 25 SEP ONLY CLEAR CACHE CODE
+              // Unregister all service workers
+              if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(
+                  registrations.map(registration => registration.unregister())
+                );
+              }
               
-              // iOS-specific timing adjustments
-              const updateDelay = isIOS ? 200 : 50;
-              const resetDelay = isIOS ? 3000 : 2000;
-              
-              setTimeout(() => {
-                updateServiceWorker(true)
-                setNeedRefresh(false)
-                setToastId(null); // Clear toast reference
-                
-                // Reset state after update completes
-                setTimeout(() => {
-                  setUpdateClicked(false);
-                }, resetDelay);
-              }, updateDelay);
+              // Force reload from server (bypass cache)
+              window.location.reload();
             }}
-            onTouchStart={(e) => {
-              // iOS-specific: Handle touch events properly
-              e.preventDefault();
-            }}
-            disabled={updateClicked}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
-              updateClicked 
-                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                : 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80'
-            }`}
+            className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80"
           >
-            Double Click disini untuk update
+            Double Click Untuk Update
           </button>
         ),
         duration: 0, // Don't auto-dismiss
