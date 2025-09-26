@@ -345,9 +345,13 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [user, userProfile, phoneNumber, fullName]);
 
   const handleCreatePayment = async () => {
-    // Ensure user is available
-    const currentUser = await supabase.auth.getUser();
-    if (!currentUser.data.user || !selectedPlan || !phoneNumber.trim() || !fullName.trim() || !email.trim()) {
+    // Clear cache and refresh session like Chat.tsx
+    sessionStorage.clear();
+    
+    const { data: { session } } = await supabase.auth.refreshSession();
+    const validUser = session?.user;
+    
+    if (!validUser || !selectedPlan || !phoneNumber.trim() || !fullName.trim() || !email.trim()) {
       toast({
         title: "Data Tidak Lengkap", 
         description: "Mohon lengkapi nama lengkap, nomor telepon, dan email",

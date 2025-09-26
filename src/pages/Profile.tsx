@@ -127,7 +127,6 @@ export function Profile({ onNavigate }: ProfileProps) {
     }
 
     try {
-      
       // Immediate logout - event listener will handle redirect
       const { error } = await supabase.auth.signOut();
       

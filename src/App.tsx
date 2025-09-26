@@ -102,6 +102,14 @@ const App = () => {
               console.log('🔄 User clicked Auto Deploy button')
               localStorage.removeItem('app-needs-update')
               
+              // iOS-specific success notification
+              if (isIOS) {
+                toast({
+                  title: "🚀 Deploy Diproses",
+                  duration: 2000,
+                });
+              }
+              
               // Nuke all cache and clear broken system
               localStorage.clear();
               sessionStorage.clear();
