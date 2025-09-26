@@ -684,7 +684,21 @@ export function Profile({ onNavigate }: ProfileProps) {
               ? 'border-pro text-pro'
               : 'bg-gradient-to-r from-black via-gray-900 to-yellow-600 hover:from-gray-900 hover:via-black hover:to-yellow-500 text-white border-none shadow-lg hover:shadow-xl'
             }`}
-            onClick={() => onNavigate("payment")}
+            onClick={async () => {
+              // Validate session before navigating to payment
+              if (!user?.id) {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (!session?.user?.id || error) {
+                  toast({
+                    title: "Memproses Upgrade..",
+                  });
+                  localStorage.setItem('refresh-redirect-to-payment', 'true');
+                  window.location.reload();
+                  return;
+                }
+              }
+              onNavigate("payment");
+            }}
           >
             <Crown className={`w-4 h-4 mr-2 ${proStatus.isPro ? '' : 'text-yellow-400'}`} />
             {proStatus.isPro 

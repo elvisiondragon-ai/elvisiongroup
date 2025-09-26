@@ -342,8 +342,24 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [user, userProfile, phoneNumber, fullName]);
 
   const handleCreatePayment = async () => {
+    // Validate session before creating payment
+    let sessionUserId = cachedUserId || user?.id;
+    if (!sessionUserId) {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (!session?.user?.id || error) {
+        toast({
+          title: "Memproses Upgrade..",
+        });
+        localStorage.setItem('refresh-redirect-to-payment', 'true');
+        window.location.reload();
+        return;
+      }
+      sessionUserId = session.user.id;
+      setCachedUserId(sessionUserId);
+    }
+    
     // Use cached data for fast payment processing
-    const userId = cachedUserId || user?.id;
+    const userId = sessionUserId;
     const profile = cachedProfile || userProfile;
     
     // Use form data if profile data not available
