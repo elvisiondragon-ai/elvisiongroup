@@ -32,8 +32,12 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [updateClicked, setUpdateClicked] = useState(false);
   const [toastId, setToastId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // iOS detection
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   // Helper function to ensure user ID is available
   const ensureUserId = async () => {
@@ -87,14 +91,22 @@ const App = () => {
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
           <button 
-            onClick={() => {
+            onClick={(e) => {
+              // Prevent double clicks on iOS
+              if (updateClicked) return;
+              
+              // iOS-specific event handling
+              e.preventDefault();
+              e.stopPropagation();
+              setUpdateClicked(true);
+              
               console.log('🔄 User clicked Auto Deploy button')
               localStorage.removeItem('app-needs-update')
               
               // Set redirect to home after update  
               localStorage.setItem('refresh-redirect-to-home', 'true');
               
-              // Clear service worker caches
+              // Clear service worker caches only
               if ('caches' in window) {
                 caches.keys().then(names => {
                   names.forEach(name => {
@@ -106,13 +118,33 @@ const App = () => {
               // Re-set flag for success message after reload
               localStorage.setItem('update-success-pending', 'true');
               
-              updateServiceWorker(true)
-              setNeedRefresh(false)
-              setToastId(null);
+              // iOS-specific timing adjustments
+              const updateDelay = isIOS ? 200 : 50;
+              const resetDelay = isIOS ? 3000 : 2000;
+              
+              setTimeout(() => {
+                updateServiceWorker(true)
+                setNeedRefresh(false)
+                setToastId(null);
+                
+                // Reset state after update completes
+                setTimeout(() => {
+                  setUpdateClicked(false);
+                }, resetDelay);
+              }, updateDelay);
             }}
-            className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80"
+            onTouchStart={(e) => {
+              // iOS-specific: Handle touch events properly
+              e.preventDefault();
+            }}
+            disabled={updateClicked}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+              updateClicked 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80'
+            }`}
           >
-            Double Click Untuk Update
+            Double Click disini untuk update
           </button>
         ),
         duration: 0, // Don't auto-dismiss
