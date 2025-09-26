@@ -131,7 +131,7 @@ Log out button
 BUTTON CLICKED
 
 Delete buton 
-1. Clear specific cache that BLOCK that button   sessionStorage.clear(); // ALL session storage
+1. Clear session id cache that BLOCK that button   sessionStorage.clear(); // ALL session storage
 2. when click button -> awaken Auth id if Null (IDLE) supabase.auth.refreshSession()
 3. Require To truly send real data customer from ProfileContextProvider (name email phone)
 BUTTON CLICKED

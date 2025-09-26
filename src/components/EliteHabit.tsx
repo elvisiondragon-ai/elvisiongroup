@@ -197,7 +197,6 @@ export function EliteHabit() {
 
   const handleDeleteHabit = async (habitId: string) => {
     // Clear cache and refresh session like Chat.tsx
-    sessionStorage.clear();
     
     const { data: { session } } = await supabase.auth.refreshSession();
     const validUser = session?.user;
@@ -547,7 +546,6 @@ export function EliteHabit() {
           ref={submitButtonRef}
           onClick={async () => {
             // Clear cache and refresh session like Chat.tsx
-            sessionStorage.clear();
             
             const { data: { session } } = await supabase.auth.refreshSession();
             const validUser = session?.user;

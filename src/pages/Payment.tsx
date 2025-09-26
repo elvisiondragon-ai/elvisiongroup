@@ -345,9 +345,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [user, userProfile, phoneNumber, fullName]);
 
   const handleCreatePayment = async () => {
-    // Clear cache and refresh session like Chat.tsx
-    sessionStorage.clear();
-    
+    // Get fresh auth ID
     const { data: { session } } = await supabase.auth.refreshSession();
     const validUser = session?.user;
     

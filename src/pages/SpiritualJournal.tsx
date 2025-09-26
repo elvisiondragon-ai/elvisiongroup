@@ -149,7 +149,6 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
 
   const handleDeleteReflection = async (reflectionId: string) => {
     // Clear cache and refresh session like Chat.tsx
-    sessionStorage.clear();
     
     const { data: { session } } = await supabase.auth.refreshSession();
     const validUser = session?.user;
@@ -357,7 +356,6 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
                 ref={saveButtonRef}
                 onClick={async () => {
                   // Clear cache and refresh session like Chat.tsx
-                  sessionStorage.clear();
                   
                   const { data: { session } } = await supabase.auth.refreshSession();
                   const validUser = session?.user;

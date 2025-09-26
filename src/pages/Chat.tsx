@@ -400,7 +400,6 @@ export function Chat({ onNavigate }: ChatProps) {
   const handleSendMessage = async () => {
     // Clear old cache and refresh session
     localStorage.removeItem('chat-messages-cache');
-    sessionStorage.clear();
     
     const { data: { session } } = await supabase.auth.refreshSession();
     const validUser = session?.user;

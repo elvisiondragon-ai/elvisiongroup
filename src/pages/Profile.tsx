@@ -106,7 +106,6 @@ export function Profile({ onNavigate }: ProfileProps) {
 
   const handleLogout = async () => {
     // Clear stale auth tokens to enable button
-    sessionStorage.clear();
     
     const { data: { session } } = await supabase.auth.refreshSession();
     const validUser = session?.user;
