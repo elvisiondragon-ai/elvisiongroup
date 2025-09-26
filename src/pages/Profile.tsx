@@ -105,9 +105,18 @@ export function Profile({ onNavigate }: ProfileProps) {
 
 
   const handleLogout = async () => {
-    // Ensure user is available
-    const currentUser = await supabase.auth.getUser();
-    if (!currentUser.data.user) {
+    // Clear ALL cache and refresh session like Chat.tsx  
+    localStorage.removeItem('chat-messages-cache');
+    localStorage.removeItem('profile-metadata');
+    localStorage.removeItem('user-profile-cache');
+    localStorage.removeItem('user-cache');
+    localStorage.removeItem('user-metadata-cache');
+    sessionStorage.clear();
+    
+    const { data: { session } } = await supabase.auth.refreshSession();
+    const validUser = session?.user;
+    
+    if (!validUser) {
       toast({
         title: "Already logged out",
         description: "You are not logged in.",
@@ -118,13 +127,6 @@ export function Profile({ onNavigate }: ProfileProps) {
     }
 
     try {
-      console.log('🚀 INSTANT logout initiated for user:', currentUser.data.user.id);
-      
-      // Clear caches immediately (no delay)
-      localStorage.removeItem('profile-metadata');
-      localStorage.removeItem('user-profile-cache');
-      localStorage.removeItem('user-cache');
-      localStorage.removeItem('user-metadata-cache');
       
       // Immediate logout - event listener will handle redirect
       const { error } = await supabase.auth.signOut();

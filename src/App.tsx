@@ -253,12 +253,13 @@ const App = () => {
   };
 
   useEffect(() => {
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    // Disabled: causing conflicts with manual auth operations
+    // window.addEventListener('focus', handleFocus);
+    // document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // window.removeEventListener('focus', handleFocus);
+      // document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 

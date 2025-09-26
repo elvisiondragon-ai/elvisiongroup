@@ -3,6 +3,13 @@ import { Quote, Star } from "lucide-react";
 
 const testimonials = [
   {
+    name: "Arif - Pro User",
+    text: "Berkali kali Lipat rezeki berdatangan setelah rutin mendengarkan Verse of eL Vision secara rutin. pertolongan dari Allah. Luar Biasa !",
+    rating: 5,
+    type: "video",
+    videoIndex: 0
+  },
+  {
     name: "Hadi - Pro User",
     text: "eL Vision Group bukan sekadar aplikasi - ini adalah teknologi spiritual yang mengubah kebiasaan digital menjadi kehidupan yang tercerahkan. Benar-benar mengubah cara manusia berhubungan dengan teknologi dan pertumbuhan batin.",
     rating: 5,
@@ -85,6 +92,10 @@ interface TestimonialsProps {
 
 // Map testimonial names to their video URLs
 const videoMap: Record<string, { url: string; title: string }> = {
+  "Arif - Pro User": {
+    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4",
+    title: "Pengalaman Arif"
+  },
   "Kiki": {
     url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/kikireact.mp4",
     title: "Pengalaman Kiki"

@@ -27,7 +27,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [isLoadingReflections, setIsLoadingReflections] = useState(true);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
-  const { user, handleButtonTimeout } = useUserProfile();
+  const { user, userProfile, handleButtonTimeout } = useUserProfile();
   const saveButtonRef = useRef<HTMLButtonElement>(null);
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
@@ -148,14 +148,20 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   };
 
   const handleDeleteReflection = async (reflectionId: string) => {
-    if (!user) return;
+    // Clear cache and refresh session like Chat.tsx
+    sessionStorage.clear();
+    
+    const { data: { session } } = await supabase.auth.refreshSession();
+    const validUser = session?.user;
+    
+    if (!validUser) return;
 
     try {
       const { error } = await supabase
         .from('reflections')
         .delete()
         .eq('id', reflectionId)
-        .eq('user_id', user.id);
+        .eq('user_id', validUser.id);
 
       if (error) {
         toast({
@@ -170,10 +176,10 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
-          total_journal: Math.max(0, (user.profile?.total_journal || 1) - 1),
+          total_journal: Math.max(0, (userProfile?.total_journal || 1) - 1),
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', user.id);
+        .eq('user_id', validUser.id);
 
       if (profileError) {
         console.error('Error updating profile total_journal:', profileError);
@@ -185,7 +191,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       });
 
       // Reload reflections
-      loadReflections(currentUser.data.user.id);
+      loadReflections(validUser.id);
     } catch (error) {
       console.error("Error deleting reflection:", error);
       toast({

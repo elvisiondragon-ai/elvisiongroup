@@ -196,14 +196,20 @@ export function EliteHabit() {
   };
 
   const handleDeleteHabit = async (habitId: string) => {
-    if (!user?.id) return;
+    // Clear cache and refresh session like Chat.tsx
+    sessionStorage.clear();
+    
+    const { data: { session } } = await supabase.auth.refreshSession();
+    const validUser = session?.user;
+    
+    if (!validUser) return;
 
     try {
       const { error } = await supabase
         .from('elite_habits')
         .delete()
         .eq('id', habitId)
-        .eq('user_id', currentUser.data.user.id);
+        .eq('user_id', validUser.id);
 
       if (error) {
         toast({
@@ -218,7 +224,7 @@ export function EliteHabit() {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_elite_habit')
-        .eq('user_id', currentUser.data.user.id)
+        .eq('user_id', validUser.id)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_elite_habit || 0;
@@ -228,7 +234,7 @@ export function EliteHabit() {
           total_elite_habit: Math.max(0, currentCount - 1),
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', currentUser.data.user.id);
+        .eq('user_id', validUser.id);
 
       if (profileError) {
         console.error('Error updating profile total_elite_habit:', profileError);

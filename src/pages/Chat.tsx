@@ -406,7 +406,6 @@ export function Chat({ onNavigate }: ChatProps) {
     const validUser = session?.user;
     
     if (!validUser) {
-      console.log('No current user found, button disabled');
       return; // Do nothing if user not authenticated
     }
 
