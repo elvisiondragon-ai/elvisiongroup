@@ -134,8 +134,12 @@ export function EliteHabit() {
     if (!user?.id) {
       // Fallback: get session if cached user not available
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        handleAuthError(buttonElement);
+      if (!session?.user?.id) {
+        toast({
+          title: "Memproses Elite Habit..",
+        });
+        localStorage.setItem('refresh-redirect-to-elitehabit', 'true');
+        window.location.reload();
         return;
       }
     }

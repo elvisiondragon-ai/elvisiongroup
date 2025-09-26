@@ -68,7 +68,7 @@ export function Chat({ onNavigate }: ChatProps) {
       // Fetch real profiles for all chat users
       const { data: userProfiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, display_name, streak_days, level, is_pro, is_admin')
+        .select('user_id, display_name, streak_days, level, is_pro, is_admin, user_email')
         .in('user_id', userIds);
         
       if (profilesError) {
@@ -131,7 +131,10 @@ export function Chat({ onNavigate }: ChatProps) {
           { id: '40', user_id: '40', user_name: 'BungaCitra', user_level: 3, is_pro: false, message: 'pokoknya aplot konten baru terus ya min, jangan kasih kendor', created_at: new Date('2024-01-20T15:12:00').toISOString() },
           { id: '41', user_id: '41', user_name: 'CandraWijaya', user_level: 4, is_pro: true, message: 'setiap hari pasti buka aplikasi ini, udah jadi kebiasaan', created_at: new Date('2024-01-20T15:20:00').toISOString() },
           { id: '42', user_id: '42', user_name: 'DoniSaputra', user_level: 4, is_pro: true, message: 'sama, pagi2 dengerin audio disini bikin semangat kerja', created_at: new Date('2024-01-20T15:21:00').toISOString() },
-          { id: '44', user_id: 'sam-165-user-id', user_name: 'Sam_165', user_level: 3, is_pro: false, message: 'Halo semua! Baru aja naik level 3 nih, seneng banget!', created_at: new Date('2024-01-20T15:30:00').toISOString() }
+          { id: '44', user_id: 'sam-165-user-id', user_name: 'Sam_165', user_level: 3, is_pro: false, message: 'Halo semua! Baru aja naik level 3 nih, seneng banget!', created_at: new Date('2024-01-20T15:30:00').toISOString() },
+          { id: '45', user_id: 'test-seeker-30', user_name: 'TestSeeker', user_level: 2, is_pro: false, message: 'Testing Seeker 30 badge', created_at: new Date('2024-01-20T15:31:00').toISOString(), streak_days: 30 },
+          { id: '46', user_id: 'test-lumina-60', user_name: 'TestLumina', user_level: 2, is_pro: false, message: 'Testing Lumina 60 badge', created_at: new Date('2024-01-20T15:32:00').toISOString(), streak_days: 60 },
+          { id: '47', user_id: 'test-wanderer-90', user_name: 'TestWanderer', user_level: 2, is_pro: false, message: 'Testing Wanderer 90 badge', created_at: new Date('2024-01-20T15:33:00').toISOString(), streak_days: 90 }
         ];
         setMessages(mockMessages);
       } else {
@@ -142,6 +145,7 @@ export function Chat({ onNavigate }: ChatProps) {
           
           // For consistency, give minimum 7 days to users without profile data  
           const displayStreakDays = userProfile ? realStreakDays : (realStreakDays === 0 ? 7 : realStreakDays);
+          
           
           return {
             ...msg,

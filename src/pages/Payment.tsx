@@ -31,8 +31,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   
-  // Cache session user ID and profile for fast payment processing
-  const [cachedUserId, setCachedUserId] = useState<string | null>(null);
+  // Cache profile for fast payment processing
   const [cachedProfile, setCachedProfile] = useState<any>(null);
 
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
@@ -326,7 +325,6 @@ export function Payment({ onNavigate }: PaymentProps) {
   // Cache session and profile data in memory for fast payment processing
   useEffect(() => {
     if (user?.id && userProfile) {
-      setCachedUserId(user.id);
       setCachedProfile(userProfile);
       
       setEmail(user.email || '');
@@ -342,9 +340,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [user, userProfile, phoneNumber, fullName]);
 
   const handleCreatePayment = async () => {
-    // Validate session before creating payment
-    let sessionUserId = cachedUserId || user?.id;
-    if (!sessionUserId) {
+    if (!user?.id) {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (!session?.user?.id || error) {
         toast({
@@ -354,12 +350,10 @@ export function Payment({ onNavigate }: PaymentProps) {
         window.location.reload();
         return;
       }
-      sessionUserId = session.user.id;
-      setCachedUserId(sessionUserId);
     }
     
     // Use cached data for fast payment processing
-    const userId = sessionUserId;
+    const userId = user.id;
     const profile = cachedProfile || userProfile;
     
     // Use form data if profile data not available

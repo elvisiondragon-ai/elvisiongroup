@@ -34,7 +34,10 @@ const App = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateClicked, setUpdateClicked] = useState(false);
   const [toastId, setToastId] = useState<string | null>(null);
+  const [cachedUserId, setCachedUserId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const clearCachedUserId = () => setCachedUserId(null);
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -279,6 +282,10 @@ const App = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         // console.log('Auth state change:', event, session?.user?.email); // Silenced for development
+        
+        const id = session?.user?.id ?? null;
+        if (id) setCachedUserId(id);
+        else clearCachedUserId();
         
         if (event === 'SIGNED_IN' && session?.user) {
           // Handle successful sign in (both login and signup)
