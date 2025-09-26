@@ -89,27 +89,27 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
             {!user.isAdmin && user.streak_days >= 7 && (
               <div className="flex items-center gap-1" style={{ minHeight: '24px' }}>
                 {user.streak_days >= 320 ? (
-                  <div className="flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-red-500 text-orange-100 shadow-sm" style={{ backgroundColor: 'rgba(153, 27, 27, 0.8)', backgroundImage: 'linear-gradient(to right, rgba(153, 27, 27, 0.8), rgba(194, 65, 12, 0.8), rgba(154, 52, 18, 0.8))' }}>
+                  <div className="streak-badge streak-ignis shadow-sm">
                     <GiHorseHead className="w-3 h-3" style={{ flexShrink: 0 }} />
                     <span className="font-medium">Ignis 320+</span>
                   </div>
                 ) : user.streak_days >= 90 ? (
-                  <div className="flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-green-500 text-green-100 shadow-sm" style={{ backgroundColor: 'rgba(22, 101, 52, 0.8)', backgroundImage: 'linear-gradient(to right, rgba(22, 101, 52, 0.8), rgba(21, 128, 61, 0.8), rgba(6, 95, 70, 0.8))' }}>
+                  <div className="streak-badge streak-wanderer shadow-sm">
                     <GiMeditation className="w-3 h-3" style={{ flexShrink: 0 }} />
                     <span className="font-medium">Wanderer 90+</span>
                   </div>
                 ) : user.streak_days >= 60 ? (
-                  <div className="flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-blue-500 text-blue-100 shadow-sm" style={{ backgroundColor: 'rgba(30, 64, 175, 0.8)', backgroundImage: 'linear-gradient(to right, rgba(30, 64, 175, 0.8), rgba(29, 78, 216, 0.8), rgba(21, 94, 117, 0.8))' }}>
+                  <div className="streak-badge streak-lumina shadow-sm">
                     <GiMoon className="w-3 h-3" style={{ flexShrink: 0 }} />
                     <span className="font-medium">Lumina 60+</span>
                   </div>
                 ) : user.streak_days >= 30 ? (
-                  <div className="flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-orange-500 text-orange-100 shadow-sm" style={{ backgroundColor: 'rgba(154, 52, 18, 0.8)', backgroundImage: 'linear-gradient(to right, rgba(154, 52, 18, 0.8), rgba(194, 65, 12, 0.8), rgba(153, 27, 27, 0.8))' }}>
+                  <div className="streak-badge streak-seeker shadow-sm">
                     <GiWalkingBoot className="w-3 h-3" style={{ flexShrink: 0 }} />
                     <span className="font-medium">Seeker 30+</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1 px-2 py-1 text-xs rounded-full border border-yellow-400 text-yellow-100 shadow-sm" style={{ backgroundColor: 'rgba(133, 77, 14, 0.8)', backgroundImage: 'linear-gradient(to right, rgba(133, 77, 14, 0.8), rgba(146, 64, 14, 0.8), rgba(154, 52, 18, 0.8))' }}>
+                  <div className="streak-badge streak-warrior shadow-sm">
                     <GiTrophy className="w-3 h-3" style={{ flexShrink: 0 }} />
                     <span className="font-medium">Warrior 7+</span>
                   </div>
