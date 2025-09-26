@@ -93,53 +93,93 @@ const App = () => {
         title: "🎯 Ada Update Terbaru! - Auto Deploy Notification",
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
-          <div className="flex gap-2">
-            <button 
-              onClick={(e) => {
-                // Disabled auto deploy button
-                e.preventDefault();
-                console.log('🚫 Auto Deploy button is disabled')
-              }}
-              disabled={true}
-              className="px-4 py-2 rounded-md text-sm font-medium bg-gray-400 text-gray-200 cursor-not-allowed opacity-50"
-            >
-              Auto Deploy (Disabled)
-            </button>
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                console.log('🔄 User clicked Force Refresh button')
-                
-                // Clear ALL localStorage
-                localStorage.clear();
-                
-                // Clear sessionStorage
-                sessionStorage.clear();
-                
-                // Clear all caches
-                if ('caches' in window) {
-                  caches.keys().then(names => {
-                    names.forEach(name => {
+          <button 
+            onClick={(e) => {
+              // Prevent double clicks on iOS
+              if (updateClicked) return;
+              
+              // iOS-specific event handling
+              e.preventDefault();
+              e.stopPropagation();
+              setUpdateClicked(true);
+              
+              console.log('🔄 User clicked Force Refresh button')
+              localStorage.removeItem('app-needs-update')
+              
+              // Set redirect to home after update  
+              localStorage.setItem('refresh-redirect-to-home', 'true');
+              
+              // Clear ALL localStorage
+              localStorage.clear();
+              
+              // Block future notifications
+              localStorage.setItem('force-refresh-completed', 'true');
+              
+              // Clear sessionStorage
+              sessionStorage.clear();
+              
+              // Clear all caches except AUDIO - //CLAUDE DONT CLEAR THIS CACHE!
+              if ('caches' in window) {
+                caches.keys().then(names => {
+                  names.forEach(name => {
+                    // Protect audio cache from clearing - //CLAUDE DONT CLEAR THIS CACHE!
+                    if (!name.includes('audio') && !name.includes('mp3') && !name.includes('MP3')) {
                       caches.delete(name);
-                    });
+                    }
                   });
+                });
+              }
+              
+              // Clear cookies
+              document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+              });
+              
+              // Re-set flag for success message after reload
+              localStorage.setItem('update-success-pending', 'true');
+              
+              // iOS-specific timing adjustments
+              const updateDelay = isIOS ? 200 : 50;
+              const resetDelay = isIOS ? 2000 : 1500;
+              
+              setTimeout(() => {
+                try {
+                  updateServiceWorker(true)
+                  setNeedRefresh(false)
+                  setToastId(null);
+                  
+                  // iOS fallback: Force reload if service worker fails
+                  if (isIOS) {
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 1000);
+                  }
+                } catch (error) {
+                  console.error('Service worker update failed:', error);
+                  // Fallback: manual reload
+                  window.location.reload();
                 }
                 
-                // Clear cookies
-                document.cookie.split(";").forEach(function(c) { 
-                  document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-                });
-                
-                // Force reload until kicked out
-                window.location.reload();
-              }}
-              className="px-4 py-2 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition-all duration-300 transform hover:scale-105 active:scale-95"
-            >
-              Force Refresh & Clear All
-            </button>
-          </div>
+                // Always reset state after delay (in case reload fails)
+                setTimeout(() => {
+                  setUpdateClicked(false);
+                  setToastId(null);
+                }, resetDelay);
+              }, updateDelay);
+            }}
+            onTouchStart={(e) => {
+              // iOS-specific: Handle touch events properly
+              e.preventDefault();
+            }}
+            disabled={updateClicked}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+              updateClicked 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80'
+            }`}
+          >
+            Double Click disini untuk update
+          </button>
         ),
         duration: 0, // Don't auto-dismiss
       });
@@ -149,8 +189,9 @@ const App = () => {
 
     // Check if update is available from SW or localStorage
     const hasUpdate = needRefresh || localStorage.getItem('app-needs-update') === 'true'
+    const forceRefreshCompleted = localStorage.getItem('force-refresh-completed') === 'true'
     
-    if (hasUpdate && !toastId) {
+    if (hasUpdate && !toastId && !forceRefreshCompleted) {
       console.log('📢 Showing update notification')
       showUpdateToast()
     }
