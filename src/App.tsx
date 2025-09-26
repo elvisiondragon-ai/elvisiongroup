@@ -123,16 +123,30 @@ const App = () => {
               
               // iOS-specific timing adjustments
               const updateDelay = isIOS ? 200 : 50;
-              const resetDelay = isIOS ? 3000 : 2000;
+              const resetDelay = isIOS ? 2000 : 1500;
               
               setTimeout(() => {
-                updateServiceWorker(true)
-                setNeedRefresh(false)
-                setToastId(null);
+                try {
+                  updateServiceWorker(true)
+                  setNeedRefresh(false)
+                  setToastId(null);
+                  
+                  // iOS fallback: Force reload if service worker fails
+                  if (isIOS) {
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 1000);
+                  }
+                } catch (error) {
+                  console.error('Service worker update failed:', error);
+                  // Fallback: manual reload
+                  window.location.reload();
+                }
                 
-                // Reset state after update completes
+                // Always reset state after delay (in case reload fails)
                 setTimeout(() => {
                   setUpdateClicked(false);
+                  setToastId(null);
                 }, resetDelay);
               }, updateDelay);
             }}
