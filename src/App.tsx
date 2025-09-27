@@ -23,42 +23,25 @@ import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import type { User } from '@supabase/supabase-js';
 import { AudioProvider } from "@/contexts/AudioContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+const AppContent = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateClicked, setUpdateClicked] = useState(false);
   const [toastId, setToastId] = useState<string | null>(null);
-  const [cachedUserId, setCachedUserId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user, loading } = useAuth();
 
-  const clearCachedUserId = () => setCachedUserId(null);
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-  // Helper function to ensure user ID is available
-  const ensureUserId = async () => {
-    const { data } = await supabase.auth.getUser();
-    return data.user;
-  };
   
   
-  // Initialize push notifications for authenticated users
-  const { registerForNotifications } = usePushNotifications();
-  
-  // Initialize real-time notifications
-  useRealTimeNotifications(user);
 
-  // Initialize app updates check
-  useAppUpdates(user);
-
-  // Initialize free user daily notifications
   const {
     showModal,
     currentReason,
@@ -254,243 +237,9 @@ const App = () => {
     }
   }, [toast]);
 
-  // Token freshness protection - satellite protection for user activity
-  const handleFocus = async () => {
-    console.log('🎯 Window focused - checking token freshness');
-    if (user) {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.expires_at) {
-        const expiryTime = new Date(session.expires_at * 1000).getTime();
-        const currentTime = Date.now();
-        const timeUntilExpiry = expiryTime - currentTime;
-        const fiveMinutes = 5 * 60 * 1000;
-        
-        // Refresh if near expiry (within 5 minutes)
-        if (timeUntilExpiry < fiveMinutes) {
-          console.log('🔄 Token near expiry, refreshing session');
-          await supabase.auth.refreshSession();
-        }
-      }
-    }
-  };
-
-  const handleVisibilityChange = async () => {
-    if (document.visibilityState === 'visible' && user) {
-      console.log('👁️ Tab visible - ensuring token freshness');
-      await handleFocus(); // Reuse same logic
-    }
-  };
-
-  useEffect(() => {
-    // Enable satellite protection for user activity tracking
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [user]);
-
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        // console.log('Auth state change:', event, session?.user?.email); // Silenced for development
-        
-        const id = session?.user?.id ?? null;
-        if (id) setCachedUserId(id);
-        else clearCachedUserId();
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          // Handle successful sign in (both login and signup)
-          setUser(session.user);
-          setIsLoading(false);
-          
-          // Clear OAuth hash and query params from URL after successful login - Safari fix
-          if (window.location.hash || window.location.search.includes('access_token')) {
-            const cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
-            window.history.replaceState(null, '', cleanUrl);
-          }
-          
-          // Show login success toast if pending
-          if (localStorage.getItem('login-success-pending') === 'true') {
-            setTimeout(() => {
-              toast({
-                title: "Selamat datang kembali!",
-                description: "Anda telah berhasil masuk.",
-              });
-              localStorage.removeItem('login-success-pending');
-            }, 1000);
-          }
-
-          // Show signup success toast if pending
-          if (localStorage.getItem('signup-success-pending') === 'true') {
-            setTimeout(() => {
-              toast({
-                title: "Akun Berhasil Dibuat!",
-                description: "Anda berhasil mendaftar dan masuk.",
-              });
-              localStorage.removeItem('signup-success-pending');
-            }, 1000);
-          }
 
 
-          // THROTTLED notification registration to prevent spam
-          const registerKey = `register_${session.user.id}`;
-          if (!sessionStorage.getItem(registerKey)) {
-            setTimeout(() => {
-              console.log('User authenticated successfully:', session.user.email);
-              registerForNotifications();
-              sessionStorage.setItem(registerKey, 'true');
-            }, 1000);
-          }
-
-          // Track daily login to update last_login_date
-          setTimeout(async () => {
-            try {
-              const { error } = await supabase.rpc('handle_daily_login', {
-                p_user_id: session.user.id
-              });
-              if (error) {
-                console.error('Error updating login date:', error);
-              } else {
-                console.log('Login date updated successfully');
-              }
-            } catch (error) {
-              console.error('Failed to track login:', error);
-            }
-          }, 500);
-          
-          // Check for broadcast notifications and unread personal notifications on login (one-time ever)
-          // Check database instead of localStorage to survive cache/cookie clear
-          setTimeout(async () => {
-            try {
-              // Check if user has already been shown broadcast notifications
-              const { data: hasSeenBroadcasts, error: checkError } = await supabase
-                .rpc('check_user_notification_shown', {
-                  p_user_id: session.user.id,
-                  p_notification_type: 'broadcasts_checked'
-                });
-
-              if (checkError) {
-                console.error('Error checking notification status:', checkError);
-                return;
-              }
-
-              // Only show notifications if user hasn't seen them before
-              if (!hasSeenBroadcasts) {
-                // Check broadcast notifications (global announcements)
-                const { data: broadcasts, error: broadcastError } = await supabase
-                  .from('broadcast_notifications')
-                  .select('*')
-                  .gt('expires_at', new Date().toISOString())
-                  .order('created_at', { ascending: false });
-
-                // Check personal notifications
-                const { data: notifications, error: notificationError } = await supabase
-                  .from('notifications')
-                  .select('*')
-                  .eq('user_id', session.user.id)
-                  .eq('read', false)
-                  .order('created_at', { ascending: false });
-
-                if (broadcastError) {
-                  console.error('Error fetching broadcast notifications:', broadcastError);
-                }
-
-                if (notificationError) {
-                  console.error('Error fetching notifications:', notificationError);
-                }
-
-                // Combine broadcasts and personal notifications
-                const allNotifications = [
-                  ...(broadcasts || []).map(n => ({ ...n, isBroadcast: true })),
-                  ...(notifications || []).map(n => ({ ...n, isBroadcast: false }))
-                ];
-
-                // Show each notification only if not shown before
-                allNotifications.forEach((notification, index) => {
-                  setTimeout(() => {
-                    toast({
-                      title: notification.title,
-                      description: notification.message,
-                      variant: notification.type === 'error' ? 'destructive' : 'default',
-                      duration: 15000,
-                    });
-                    
-                    // Mark personal notifications as read (broadcasts don't need marking)
-                    if (!notification.isBroadcast) {
-                      supabase
-                        .from('notifications')
-                        .update({ read: true })
-                        .eq('id', notification.id)
-                        .then(() => console.log('Notification marked as read:', notification.id));
-                    }
-                  }, index * 1000); // Stagger notifications by 1 second each
-                });
-
-                // Mark notifications as checked forever in database
-                await supabase.rpc('mark_notification_type_shown', {
-                  p_user_id: session.user.id,
-                  p_notification_type: 'broadcasts_checked'
-                });
-              }
-            } catch (error) {
-              console.error('Error checking notifications:', error);
-            }
-          }, 1500);
-          
-          // Show one-time update notification
-          const updateNotificationKey = `update_notification_2025_08_31`;
-          if (!localStorage.getItem(updateNotificationKey)) {
-            setTimeout(() => {
-              toast({
-                title: "🎉 Sukses Update! - Auto Deploy Notification",
-                description: "Anda sudah di Versi Terbaru, Selamat menikmati 🚀",
-                duration: 8000,
-              });
-              localStorage.setItem(updateNotificationKey, 'true');
-            }, 2000);
-          }
-          
-          // Show update success notification after manual update (iOS fix)
-          const updateSuccessPending = localStorage.getItem('update-success-pending');
-          if (updateSuccessPending) {
-            setTimeout(() => {
-              toast({
-                title: "🚀 Update Berhasil!",
-                description: "Aplikasi berhasil diperbarui ke versi terbaru ✅",
-                duration: 6000,
-              });
-              localStorage.removeItem('update-success-pending');
-            }, 1000);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setIsLoading(false);
-          // Clear session data on signout
-          sessionStorage.clear();
-        } else if (event === 'TOKEN_REFRESHED') {
-          setUser(session?.user ?? null);
-        }
-      }
-    );
-
-    // THEN check for existing session - ONLY ONCE
-    let hasCheckedSession = false;
-    if (!hasCheckedSession) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        setUser(session?.user ?? null);
-        setIsLoading(false);
-        hasCheckedSession = true;
-      });
-    }
-
-    return () => subscription.unsubscribe();
-  }, [registerForNotifications]); // FIXED: Add dependency
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -499,22 +248,19 @@ const App = () => {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <AudioProvider>
-            <MeditativeProvider>
-              <UserProfileProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true
-              }}>
+    <AudioProvider>
+      <MeditativeProvider>
+        <UserProfileProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true
+          }}>
             <Routes>
               <Route 
                 path="/" 
-                element={user ? <Index /> : <Auth onLogin={setUser} />} 
+                element={user ? <Index /> : <Auth />} 
               />
               <Route 
                 path="/auth" 
@@ -526,7 +272,7 @@ const App = () => {
               />
               <Route 
                 path="/tutorial" 
-                element={user ? <TutorialVideo /> : <Auth onLogin={setUser} />} 
+                element={user ? <TutorialVideo /> : <Auth />} 
               />
               <Route
                 path="/reset-password"
@@ -544,18 +290,27 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-              </UserProfileProvider>
-            </MeditativeProvider>
-          </AudioProvider>
-        </AuthProvider>
 
-        {/* Free User Notification Modal */}
-        <FreeUserNotificationModal
-          isVisible={showModal}
-          onClose={handleModalClose}
-          onNavigate={handleModalNavigate}
-          reason={currentReason}
-        />
+          {/* Free User Notification Modal */}
+          <FreeUserNotificationModal
+            isVisible={showModal}
+            onClose={handleModalClose}
+            onNavigate={handleModalNavigate}
+            reason={currentReason}
+          />
+        </UserProfileProvider>
+      </MeditativeProvider>
+    </AudioProvider>
+  );
+};
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

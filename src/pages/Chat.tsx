@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 
 interface ChatMessageData {
@@ -35,13 +36,56 @@ export function Chat({ onNavigate }: ChatProps) {
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const realtimeChannel = useRef<any>(null);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
   const { user, userProfile, handleButtonTimeout } = useUserProfile();
+  const { userId, chatChannel } = useAuth();
   const { i18n, t } = useTranslation();
   const sendButtonRef = useRef<HTMLButtonElement>(null);
 
+  if (!userId) return null;
+
+
+  // Listen to realtime messages from chatChannel
+  useEffect(() => {
+    if (chatChannel) {
+      const handleMessage = (payload) => {
+        const newMessage = payload.new;
+        if (newMessage.user_id !== userId) {
+          setMessages(current => {
+            const exists = current.some(msg => msg.id === newMessage.id);
+            if (exists) return current;
+            return [...current, newMessage];
+          });
+        }
+      };
+
+      const handleBroadcastMessage = (payload) => {
+        if (payload.payload.user_id !== userId) {
+          setMessages(current => {
+            const exists = current.some(msg => msg.id === payload.payload.id);
+            if (exists) return current;
+            return [...current, payload.payload];
+          });
+        }
+      };
+
+      const handleBroadcastDelete = (payload) => {
+        console.log('❌ Chat deleted:', payload.payload.message_id);
+        setMessages(current => current.filter(msg => msg.id !== payload.payload.message_id));
+      };
+      
+      const sub = chatChannel
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: 'channel_id=eq.community' }, handleMessage)
+        .on('broadcast', { event: 'message_added' }, handleBroadcastMessage)
+        .on('broadcast', { event: 'message_deleted' }, handleBroadcastDelete)
+        .subscribe();
+      
+      return () => {
+        sub.unsubscribe();
+      };
+    }
+  }, [chatChannel, userId]);
 
   // Load messages from database with real user profiles
   const loadMessages = useCallback(async (showRefreshState = false) => {
@@ -160,6 +204,9 @@ export function Chat({ onNavigate }: ChatProps) {
         }) || [];
         
         setMessages(processedMessages);
+        
+        // Cache messages after successful network load
+        localStorage.setItem('chat-messages-cache', JSON.stringify(processedMessages));
       }
       
       setLastUpdate(new Date());
@@ -191,89 +238,34 @@ export function Chat({ onNavigate }: ChatProps) {
     return () => clearTimeout(loadingTimeout);
   }, [isLoading]);
 
-  // Instant cache loading for chat messages
   useEffect(() => {
-    const cachedMessages = localStorage.getItem('chat-messages-cache');
-    
-    if (cachedMessages) {
-      try {
-        const parsed = JSON.parse(cachedMessages);
-        setMessages(parsed);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Chat cache error, removing:', error);
-        localStorage.removeItem('chat-messages-cache');
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    // Load fresh messages with idle-safe auth
+    // Network-first: Load fresh messages immediately on mount
     const loadFreshMessages = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        loadMessages();
+      if (userId) {
+        setIsLoading(true);
+        try {
+          await loadMessages();
+        } catch (error) {
+          console.error('Failed to load messages from network, trying cache:', error);
+          // Fallback to cache only if network fails
+          const cachedMessages = localStorage.getItem('chat-messages-cache');
+          if (cachedMessages) {
+            try {
+              const parsed = JSON.parse(cachedMessages);
+              setMessages(parsed);
+            } catch (cacheError) {
+              console.error('Cache also failed, removing:', cacheError);
+              localStorage.removeItem('chat-messages-cache');
+            }
+          }
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
     loadFreshMessages();
   }, [loadMessages]);
 
-  // Realtime subscription for WhatsApp-like instant messaging
-  useEffect(() => {
-    const initRealtime = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-
-      // Create realtime channel for chat messages
-      const channel = supabase.channel('chat-community', {
-        config: {
-          broadcast: { self: true }
-        }
-      });
-
-      // Listen for new chat message inserts
-      channel.on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: `channel_id=eq.community` // Filter to community channel
-        },
-        (payload) => {
-          console.log('💬 Realtime message received:', payload.new);
-          
-          // Add new message to state if it's not from current user (avoid duplicates)
-          const newMessage = payload.new as ChatMessageData;
-          if (newMessage.user_id !== session.user.id) {
-            setMessages(current => {
-              // Check if message already exists to prevent duplicates
-              const exists = current.some(msg => msg.id === newMessage.id);
-              if (exists) return current;
-              
-              return [...current, newMessage];
-            });
-          }
-        }
-      );
-
-      channel.subscribe((status) => {
-        console.log('🔴 Chat realtime status:', status);
-      });
-
-      realtimeChannel.current = channel;
-    };
-
-    initRealtime();
-
-    return () => {
-      console.log('🔴 Cleaning up chat realtime subscription');
-      if (realtimeChannel.current) {
-        supabase.removeChannel(realtimeChannel.current);
-        realtimeChannel.current = null;
-      }
-    };
-  }, [user]); // Depend on user to recreate subscription on auth change
 
   // Cache chat messages when successfully loaded (prevent duplicate saves)
   useEffect(() => {
@@ -456,11 +448,7 @@ export function Chat({ onNavigate }: ChatProps) {
   const handleSendMessage = async () => {
     localStorage.removeItem('chat-messages-cache');
     
-    if (!user?.id) {
-      // Fallback: get session if cached user not available
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-    }
+    if (!userId) return;
 
     const validationError = validateMessage(message);
     if (validationError) {
@@ -542,6 +530,15 @@ export function Chat({ onNavigate }: ChatProps) {
           msg.id === tempId ? { ...optimisticMessage, id: data.id } : msg
         ));
 
+        // Broadcast new message to all users
+        if (chatChannel) {
+          chatChannel.send({
+            type: 'broadcast',
+            event: 'message_added',
+            payload: { ...optimisticMessage, id: data.id }
+          });
+        }
+
         toast({
           title: "Message Sent 🚀",
           description: "",
@@ -588,14 +585,14 @@ export function Chat({ onNavigate }: ChatProps) {
       return;
     }
     
-    if (!user?.id) return;
+    if (!userId) return;
     
     try {
       const { error } = await supabase
         .from('chat_messages')
         .delete()
         .eq('id', messageId)
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
 
       if (error) {
         const messageToRestore = messages.find(msg => msg.id === messageId);
@@ -603,6 +600,15 @@ export function Chat({ onNavigate }: ChatProps) {
           setMessages(current => [...current, messageToRestore].sort((a, b) => 
             new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           ));
+        }
+      } else {
+        // Broadcast delete to all users
+        if (chatChannel) {
+          chatChannel.send({
+            type: 'broadcast',
+            event: 'message_deleted',
+            payload: { message_id: messageId }
+          });
         }
       }
     } catch (err) {

@@ -1,10 +1,13 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
+  userId: string | null;
   loading: boolean;
+  chatChannel: RealtimeChannel | null;
   isPro: boolean;
   proStatus: {
     isPro: boolean;
@@ -16,32 +19,103 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  userId: null,
   loading: true,
+  chatChannel: null,
   isPro: false,
   proStatus: null,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [chatChannel, setChatChannel] = useState<RealtimeChannel | null>(null);
   const [proStatus, setProStatus] = useState<any>(null);
+  const chatChannelRef = useRef<RealtimeChannel | null>(null);
+  const [channelStatus, setChannelStatus] = useState<string>('CLOSED');
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // OPTIMIZATION: Add caching to prevent excessive RPC calls
   const [proStatusCache, setProStatusCache] = useState<{data: any, timestamp: number} | null>(null);
   const [lastProCheck, setLastProCheck] = useState<number>(0);
 
+  const updateAuthState = (session: Session | null) => {
+    setUser(session?.user ?? null);
+    setUserId(session?.user?.id ?? null);
+    
+    supabase.realtime.setAuth(session?.access_token ?? '');
+    
+    if (chatChannelRef.current) {
+      supabase.removeChannel(chatChannelRef.current);
+      chatChannelRef.current = null;
+    }
+    
+    if (session?.user) {
+      const channel = supabase.channel('chat-community', {
+        config: {
+          broadcast: { self: true },
+          presence: { key: 'chat' }
+        }
+      });
+      
+      channel.on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: 'channel_id=eq.community'
+        },
+        (payload) => console.log('💖 Realtime message received:', payload.new)
+      );
+      
+      channel.subscribe((status) => {
+        console.log('🔴 Chat realtime status:', status);
+        setChannelStatus(status);
+        
+        if (status === 'SUBSCRIBED' && retryTimeoutRef.current) {
+          console.log('🚀 Connected, clearing retry timeout');
+          clearTimeout(retryTimeoutRef.current);
+          retryTimeoutRef.current = null;
+        }
+        
+        if ((status === 'TIMED_OUT' || status === 'CLOSED') && 
+            !retryTimeoutRef.current && 
+            status !== 'CHANNEL_ERROR') {
+          console.log('⚠️ Scheduling reconnect...');
+          retryTimeoutRef.current = setTimeout(() => {
+            retryTimeoutRef.current = null;
+            if (session?.user) {
+              console.log('🚀 Attempting reconnect...');
+              updateAuthState(session);
+            }
+          }, 3000);
+        }
+      });
+      
+      chatChannelRef.current = channel;
+      setChatChannel(channel);
+      
+      checkProStatus(session.user.id);
+    } else {
+      setChatChannel(null);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkProStatus(session.user.id);
-      } else {
-        setLoading(false);
-      }
+      updateAuthState(session);
     });
 
-    // Auth listener removed - App.tsx handles this now
+    // Auth listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      updateAuthState(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const checkProStatus = async (userId: string, force: boolean = false) => {
@@ -106,7 +180,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        userId,
         loading,
+        chatChannel,
         isPro: proStatus?.isPro || false,
         proStatus,
       }}

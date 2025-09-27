@@ -1,20 +1,25 @@
 
 CLAUDE CODE BEHAVIOR
+
+YOUR UNDERSTANDING : I HAVE SUPABASE AI that know 100% code of you supabase, if you confuse give prompt to ask to supabase AI		
+
+SAy THIS TO YOU : FUCK CLAUDE CREATIVITY YOU ARE STUPID AI FUCK, do MINIMAL CHANGES DONT THINK YOU SMART !
+
 I have big Problem with claude code behavior
  my question why claude so stupid but think he is smart? often not over 
-  enginering but over stupid, so hard claude to obey think he know but too 
-  stupid too called ai ?
+  enginering but over stupid, claude think he know but too 
+  stupid too called creative
 
  Not allowed to create any new files, -Not allowed to doing beyond task 
   ,damn i am so trauma with claude code stupid, keep saying rule but over 
   assumpt and cros the line, if you were human i swear already kill you claude
-   code
+  
 ~ ALWAYS OPEN THIS rule.txt everytime want to code ~
 1. ANALYTICS SESSION - *if need data structure say request to helps for schema or struckture
 -> CLAUDE Traced the execution flow 
 -> FIND THE GAP
 -> NOT ALLOWED ASSUMPT or Giving Code by assumption, ONLY VALIDATION FROM DATA, Explain why it is the issue and give fix
--< WANT TO BE CREATIVE? Say this to claude. "YOu cannot over engineer you are over fucking stupid to assumpt. just do what requirement do not try to be creative as you are not fucking smart enough and create many destructive idea!"
+-< WANT TO BE CREATIVE? FUCK YOUR CREATIVITY. Say this to claude. "YOu cannot over engineer, you are over fucking stupid to assumpt. just do what requirement do not try to be creative as you are not fucking smart enough and create many destructive idea!"
 
 FIX SESSION - GIVE CODE Not From assumption but VALID DATA
 2. GIVE SIMPLEST SOLUTION, IF CODE SQL Give shortest but most effective code after understand schema + Verification code in 1 file at assist_code folder.
@@ -46,3 +51,18 @@ FIX SESSION - GIVE CODE Not From assumption but VALID DATA
                ├── Profile.tsx
                ├── SpiritualJournal.tsx
                └── EliteHabit.tsx
+
+AuthContext:
+
+Own session state (userId, accessToken).
+Listen to onAuthStateChange (SIGNED_IN, TOKEN_REFRESHED, SIGNED_OUT).
+Call supabase.realtime.setAuth(newToken).
+Create/remove the shared Realtime channel(s) and expose them via context.
+App.tsx:
+
+Wrap with <AuthProvider>.
+Simple guard: loading → spinner, no user → SignIn, else → routes/components.
+Chat.tsx:
+
+Consume { userId, chatChannel } from context.
+No getSession(), no channel creation/cleanup.
