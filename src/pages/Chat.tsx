@@ -227,8 +227,6 @@ export function Chat({ onNavigate }: ChatProps) {
         
         setMessages(processedMessages);
         
-        // Cache messages after successful network load
-        localStorage.setItem('chat-messages-cache', JSON.stringify(processedMessages));
       }
       
       setLastUpdate(new Date());
@@ -268,18 +266,7 @@ export function Chat({ onNavigate }: ChatProps) {
         try {
           await loadMessages();
         } catch (error) {
-          console.error('Failed to load messages from network, trying cache:', error);
-          // Fallback to cache only if network fails
-          const cachedMessages = localStorage.getItem('chat-messages-cache');
-          if (cachedMessages) {
-            try {
-              const parsed = JSON.parse(cachedMessages);
-              setMessages(parsed);
-            } catch (cacheError) {
-              console.error('Cache also failed, removing:', cacheError);
-              localStorage.removeItem('chat-messages-cache');
-            }
-          }
+          console.error('Failed to load messages from network:', error);
         } finally {
           setIsLoading(false);
         }
@@ -289,18 +276,6 @@ export function Chat({ onNavigate }: ChatProps) {
   }, [loadMessages]);
 
 
-  // Cache chat messages when successfully loaded (prevent duplicate saves)
-  useEffect(() => {
-    if (messages.length > 0) {
-      const currentCache = localStorage.getItem('chat-messages-cache');
-      const newCache = JSON.stringify(messages);
-      
-      // Only save if cache is different
-      if (currentCache !== newCache) {
-        localStorage.setItem('chat-messages-cache', newCache);
-      }
-    }
-  }, [messages]);
 
 
   useEffect(() => {
@@ -468,7 +443,6 @@ export function Chat({ onNavigate }: ChatProps) {
   };
 
   const handleSendMessage = async () => {
-    localStorage.removeItem('chat-messages-cache');
     
     if (!userId) return;
 

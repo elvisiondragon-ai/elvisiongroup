@@ -1,6 +1,5 @@
 import { Crown, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { usePro } from "@/hooks/usePro";
 
 interface ProBadgeProps {
   className?: string;
@@ -11,22 +10,11 @@ interface ProBadgeProps {
 }
 
 export function ProBadge({ className, size = 'md', showLabel = true, targetUserIsPro, targetUserSubscriptionType }: ProBadgeProps) {
-  const { proStatus } = usePro();
+  // Use only the passed subscription type - no fallback to current user
+  const subscriptionType = targetUserSubscriptionType;
 
-  // FIXED: For other users, ONLY show their actual subscription type
-  // For current user (when no target specified), use current user's status
-  const subscriptionType = targetUserSubscriptionType !== undefined 
-    ? targetUserSubscriptionType 
-    : proStatus.subscriptionType;
-
-  // CRITICAL FIX: If this is for another user (targetUserSubscriptionType was passed)
-  // and they don't have a subscription, don't show badge at all - NO FALLBACK TO VIEWER
-  if (targetUserSubscriptionType !== undefined && !targetUserSubscriptionType) {
-    return null;
-  }
-  
-  // For current user, show badge only if they have subscription
-  if (targetUserSubscriptionType === undefined && !subscriptionType) {
+  // Only show badge if target user has a subscription
+  if (!subscriptionType) {
     return null;
   }
 
