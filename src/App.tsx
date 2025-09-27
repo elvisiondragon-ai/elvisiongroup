@@ -70,12 +70,12 @@ const AppContent = () => {
 
   // Show update notification when available
   useEffect(() => {
-    const showUpdateToast = () => {
+    const showSoftUpdateToast = () => {
       // Prevent multiple toasts
       if (toastId) return;
       
       const newToastId = toast({
-        title: "🎯 Ada Update Terbaru! - Auto Deploy Notification",
+        title: "🎯 Ada Update Terbaru! - Soft Update",
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
           <button 
@@ -88,7 +88,98 @@ const AppContent = () => {
               e.stopPropagation();
               setUpdateClicked(true);
               
-              console.log('🔄 User clicked Force Refresh button')
+              console.log('🔄 User clicked Soft Update button')
+              localStorage.removeItem('app-needs-update')
+              
+              // Soft update - only clear app cache, preserve auth
+              localStorage.setItem('force-refresh-completed', 'true');
+              
+              // Clear only non-auth sessionStorage
+              // sessionStorage.clear(); // DISABLED for soft update
+              
+              // Clear all caches except AUDIO - //CLAUDE DONT CLEAR THIS CACHE!
+              if ('caches' in window) {
+                caches.keys().then(names => {
+                  names.forEach(name => {
+                    // Protect audio cache from clearing - //CLAUDE DONT CLEAR THIS CACHE!
+                    if (!name.includes('audio') && !name.includes('mp3') && !name.includes('MP3')) {
+                      caches.delete(name);
+                    }
+                  });
+                });
+              }
+              
+              // Re-set flag for success message after reload
+              localStorage.setItem('update-success-pending', 'true');
+              
+              // iOS-specific timing adjustments
+              const updateDelay = isIOS ? 200 : 50;
+              const resetDelay = isIOS ? 2000 : 1500;
+              
+              setTimeout(() => {
+                try {
+                  updateServiceWorker(true)
+                  setNeedRefresh(false)
+                  setToastId(null);
+                  
+                  // iOS fallback: Force reload if service worker fails
+                  if (isIOS) {
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 1000);
+                  }
+                } catch (error) {
+                  console.error('Service worker update failed:', error);
+                  // Fallback: manual reload
+                  window.location.reload();
+                }
+                
+                // Always reset state after delay (in case reload fails)
+                setTimeout(() => {
+                  setUpdateClicked(false);
+                  setToastId(null);
+                }, resetDelay);
+              }, updateDelay);
+            }}
+            onTouchStart={(e) => {
+              // iOS-specific: Handle touch events properly
+              e.preventDefault();
+            }}
+            disabled={updateClicked}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+              updateClicked 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80'
+            }`}
+          >
+            Double Click disini untuk update
+          </button>
+        ),
+        duration: 0, // Don't auto-dismiss
+      });
+      
+      setToastId(newToastId);
+    }
+
+    const showMajorUpdateToast = () => {
+      // Prevent multiple toasts
+      if (toastId) return;
+      
+      const newToastId = toast({
+        title: "🎯 Ada Update Terbaru! - Major Update",
+        description: "Klik untuk update ke versi terbaru aplikasi",
+        action: (
+          <button 
+            onClick={(e) => {
+              // Prevent double clicks on iOS
+              if (updateClicked) return;
+              
+              // iOS-specific event handling
+              e.preventDefault();
+              e.stopPropagation();
+              setUpdateClicked(true);
+              
+              console.log('🔄 User clicked Major Update button')
               localStorage.removeItem('app-needs-update')
               
               // Clear ALL localStorage FIRST
@@ -158,7 +249,7 @@ const AppContent = () => {
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
               updateClicked 
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                : 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80'
+                : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white'
             }`}
           >
             Double Click disini untuk update
@@ -174,9 +265,17 @@ const AppContent = () => {
     const hasUpdate = needRefresh || localStorage.getItem('app-needs-update') === 'true'
     const forceRefreshCompleted = localStorage.getItem('force-refresh-completed') === 'true'
     
+    // Control which update card to show
+    const majorUpdateEnabled = false; // DISABLED - Change to true to enable
+    const softUpdateEnabled = true;   // ENABLED - Change to false to disable
+    
     if (hasUpdate && !toastId && !forceRefreshCompleted) {
       console.log('📢 Showing update notification')
-      showUpdateToast()
+      if (softUpdateEnabled) {
+        showSoftUpdateToast()
+      } else if (majorUpdateEnabled) {
+        showMajorUpdateToast()
+      }
     }
     
     // Cleanup toast ID when update completes
