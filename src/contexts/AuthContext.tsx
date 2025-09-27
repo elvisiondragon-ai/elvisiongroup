@@ -92,7 +92,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               const open = ch && ch.status === 'open';
               if (open || connecting) return;
               console.log('🚀 Attempting reconnect...');
-              updateAuthState(session);
+              // Rejoin existing channels
+              const channels = (supabase as any).getChannels?.() ?? [];
+              channels.forEach((ch: any) => {
+                try { ch.rejoin?.(); } catch {}
+              });
+              
+              // Ensure socket is connected
+              // @ts-ignore: sdk version check
+              supabase.realtime.connect?.();
             }
           }, 3000);
         }
