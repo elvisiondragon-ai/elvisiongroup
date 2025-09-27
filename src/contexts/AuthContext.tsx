@@ -87,6 +87,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           retryTimeoutRef.current = setTimeout(() => {
             retryTimeoutRef.current = null;
             if (session?.user) {
+              const ch = chatChannelRef.current;
+              const connecting = ch && ['subscribing', 'joining'].includes(ch.status);
+              const open = ch && ch.status === 'open';
+              if (open || connecting) return;
               console.log('🚀 Attempting reconnect...');
               updateAuthState(session);
             }

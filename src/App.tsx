@@ -237,7 +237,18 @@ const AppContent = () => {
     }
   }, [toast]);
 
-
+  // Show success notification after refresh
+  useEffect(() => {
+    const updateSuccess = localStorage.getItem('update-success-pending');
+    if (updateSuccess === 'true') {
+      localStorage.removeItem('update-success-pending');
+      toast({
+        title: "🚀 Update berhasil diperbarui",
+        description: "Aplikasi telah diperbarui ke versi terbaru",
+        variant: "default"
+      });
+    }
+  }, [toast]);
 
   if (loading) {
     return (
