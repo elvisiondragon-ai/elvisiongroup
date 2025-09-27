@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useUserProfile } from '@/contexts/UserProfileContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Meta Pixel declaration
 declare global {
@@ -23,6 +24,7 @@ interface PaymentProps {
 
 export function Payment({ onNavigate }: PaymentProps) {
   const { user, userProfile, loading: userDataLoading } = useUserProfile();
+  const { userId } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState('1_month');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('QRIS');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -340,20 +342,16 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [user, userProfile, phoneNumber, fullName]);
 
   const handleCreatePayment = async () => {
-    if (!user?.id) {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (!session?.user?.id || error) {
-        toast({
-          title: "Memproses Upgrade..",
-        });
-        localStorage.setItem('refresh-redirect-to-payment', 'true');
-        window.location.reload();
-        return;
-      }
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "Silakan login terlebih dahulu",
+        variant: "destructive"
+      });
+      return;
     }
     
     // Use cached data for fast payment processing
-    const userId = user.id;
     const profile = cachedProfile || userProfile;
     
     // Use form data if profile data not available
@@ -378,12 +376,17 @@ export function Payment({ onNavigate }: PaymentProps) {
       return;
     }
     
-    // Auto-save to profile if not exists
-    if (!profile?.phone_number && finalPhoneNumber) {
-      supabase.from('profiles').update({ phone_number: finalPhoneNumber }).eq('user_id', userId);
-    }
-    if (!profile?.display_name && finalDisplayName) {
-      supabase.from('profiles').update({ display_name: finalDisplayName }).eq('user_id', userId);
+    // Always save payment form data to profile (like clicking "edit profil")
+    if (finalPhoneNumber && finalDisplayName) {
+      console.log('💾 Auto-saving payment data to profile:', { 
+        phone_number: finalPhoneNumber, 
+        display_name: finalDisplayName 
+      });
+      await supabase.from('profiles').update({ 
+        phone_number: finalPhoneNumber,
+        display_name: finalDisplayName,
+        updated_at: new Date().toISOString()
+      }).eq('user_id', userId);
     }
     
     setLoading(true);
@@ -396,6 +399,17 @@ export function Payment({ onNavigate }: PaymentProps) {
     try {
       const plan = subscriptionPlans.find(p => p.id === selectedPlan);
       if (!plan) throw new Error('Plan not found');
+
+      console.log('💳 Attempting payment creation for user:', userId);
+      console.log('💰 Payment data:', {
+        user_id: userId,
+        user_name: finalDisplayName,
+        user_email: user?.email,
+        phone_number: finalPhoneNumber,
+        subscription_type: selectedPlan,
+        payment_method: selectedPaymentMethod,
+        amount: plan.price
+      });
 
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
@@ -855,8 +869,24 @@ export function Payment({ onNavigate }: PaymentProps) {
       {/* Fixed Bottom Button */}
       <div className="fixed bottom-20 left-6 right-6">
         <Button 
-          onClick={handleCreatePayment}
-          disabled={loading || userDataLoading || !selectedPlan || !phoneNumber.trim() || !fullName.trim()}
+          onClick={() => {
+            // Use final data that will actually be sent to payment
+            const profile = cachedProfile || userProfile;
+            const finalPhoneNumber = profile?.phone_number?.trim() || phoneNumber.trim();
+            const finalDisplayName = profile?.display_name?.trim() || fullName.trim();
+            
+            console.log('%c🎁 Payment button clicked:', 'color: green; font-weight: bold;', {
+              name: finalDisplayName,
+              email: user?.email, // AUTH email
+              phone: finalPhoneNumber,
+              user_id: userId, // AUTH ID
+              subscription_plan: selectedPlan
+            });
+            handleCreatePayment();
+          }}
+          disabled={loading || userDataLoading || !selectedPlan || 
+            !(cachedProfile?.phone_number?.trim() || phoneNumber.trim()) || 
+            !(cachedProfile?.display_name?.trim() || fullName.trim())}
           className="w-full"
           size="lg"
         >

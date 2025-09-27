@@ -537,6 +537,7 @@ export function Chat({ onNavigate }: ChatProps) {
             event: 'message_added',
             payload: { ...optimisticMessage, id: data.id }
           });
+          console.log('🧊 Message sent:', data.id);
         }
 
         toast({

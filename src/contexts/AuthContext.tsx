@@ -101,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               // Ensure socket is connected
               // @ts-ignore: sdk version check
               supabase.realtime.connect?.();
+              console.log('⚡️ Sukses konek');
             }
           }, 3000);
         }

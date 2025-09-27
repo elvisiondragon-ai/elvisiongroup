@@ -17,6 +17,7 @@ import { usePro } from "@/hooks/usePro";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import { useAuth } from '@/contexts/AuthContext';
 import { StreakIndicator } from "@/components/StreakIndicator";
 import {
   User,
@@ -60,6 +61,7 @@ interface UserProfile {
 
 export function Profile({ onNavigate }: ProfileProps) {
   const { userProfile, user, loading } = useUserProfile();
+  const { userId } = useAuth();
   const [cachedProfile, setCachedProfile] = useState<UserProfile | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -141,18 +143,14 @@ export function Profile({ onNavigate }: ProfileProps) {
   };
 
   const handleDeleteAccount = async () => {
-    if (!user?.id) {
-      // Fallback: get session if cached user not available
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-    }
+    if (!userId) return;
     
     try {
       // Delete all user data first
       const { error: profileError } = await supabase
         .from('profiles')
         .delete()
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
 
       if (profileError) {
         console.error('Error deleting profile:', profileError);
@@ -160,14 +158,14 @@ export function Profile({ onNavigate }: ProfileProps) {
 
       // Delete related data
       await Promise.all([
-        supabase.from('chat_messages').delete().eq('user_id', user.id),
-        supabase.from('reflections').delete().eq('user_id', user.id),
-        supabase.from('user_activities').delete().eq('user_id', user.id),
-        supabase.from('xp_transactions').delete().eq('user_id', user.id),
-        supabase.from('device_tokens').delete().eq('user_id', user.id),
-        supabase.from('notification_settings').delete().eq('user_id', user.id),
-        supabase.from('pro_subscriptions').delete().eq('user_id', user.id),
-        supabase.from('payment_transactions').delete().eq('user_id', user.id),
+        supabase.from('chat_messages').delete().eq('user_id', userId),
+        supabase.from('reflections').delete().eq('user_id', userId),
+        supabase.from('user_activities').delete().eq('user_id', userId),
+        supabase.from('xp_transactions').delete().eq('user_id', userId),
+        supabase.from('device_tokens').delete().eq('user_id', userId),
+        supabase.from('notification_settings').delete().eq('user_id', userId),
+        supabase.from('pro_subscriptions').delete().eq('user_id', userId),
+        supabase.from('payment_transactions').delete().eq('user_id', userId),
       ]);
 
       // Sign out the user after data deletion
@@ -685,17 +683,13 @@ export function Profile({ onNavigate }: ProfileProps) {
               : 'bg-gradient-to-r from-black via-gray-900 to-yellow-600 hover:from-gray-900 hover:via-black hover:to-yellow-500 text-white border-none shadow-lg hover:shadow-xl'
             }`}
             onClick={async () => {
-              // Validate session before navigating to payment
-              if (!user?.id) {
-                const { data: { session }, error } = await supabase.auth.getSession();
-                if (!session?.user?.id || error) {
-                  toast({
-                    title: "Memproses Upgrade..",
-                  });
-                  localStorage.setItem('refresh-redirect-to-payment', 'true');
-                  window.location.reload();
-                  return;
-                }
+              if (!userId) {
+                toast({
+                  title: "Error",
+                  description: "Silakan login terlebih dahulu",
+                  variant: "destructive"
+                });
+                return;
               }
               onNavigate("payment");
             }}

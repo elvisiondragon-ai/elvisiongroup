@@ -441,7 +441,13 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
           )}
 
           <Button
-            onClick={generateAIReport}
+            onClick={() => {
+              console.log('%c🧠 Analytics button clicked:', 'color: green; font-weight: bold;', {
+                email: user?.email || 'unknown',
+                id: user?.id || 'unknown'
+              });
+              generateAIReport();
+            }}
             disabled={loading || (freeReportsUsed >= 1 && !proStatus.isPro)}
             className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
             size="lg"

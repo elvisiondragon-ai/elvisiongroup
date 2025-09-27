@@ -89,13 +89,11 @@ const AppContent = () => {
               console.log('🔄 User clicked Force Refresh button')
               localStorage.removeItem('app-needs-update')
               
-              // Set redirect to home after update  
-              localStorage.setItem('refresh-redirect-to-home', 'true');
-              
-              // Clear ALL localStorage
+              // Clear ALL localStorage FIRST
               localStorage.clear();
               
-              // Block future notifications
+              // Set flags AFTER clearing
+              localStorage.setItem('refresh-redirect-to-home', 'true');
               localStorage.setItem('force-refresh-completed', 'true');
               
               // Clear sessionStorage

@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ArrowLeft, Play, Pause, Volume2, Users, Radio, Heart, Star, Sparkles, Headphones, Clock, Crown, Eye, Loader2 } from "lucide-react";
 // Removed slow UserProfileContext - now using fast auth
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useProtectedAudio } from "@/contexts/AudioContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,9 +18,20 @@ interface MeditationSessionsProps {
 
 export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   const { t } = useTranslation();
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { userId } = useAuth();
+  const { user } = useUserProfile();
   const { createProtectedAudio } = useProtectedAudio();
   const { toast } = useToast();
+
+  // Log entry on component mount
+  useEffect(() => {
+    if (userId) {
+      console.log('%c☯️ Entering Sesi Meditasi page:', 'color: green; font-weight: bold;', {
+        user_id: userId, // AUTH ID
+        email: user?.email || 'loading...' // AUTH email
+      });
+    }
+  }, [userId, user?.email]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -49,15 +62,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
       console.log('✅ Meditation cache migration completed - now using fast auth');
     }
 
-    // Use session.user.id from state memory
-    const getUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setCurrentUser(session.user);
-      }
-    };
-    
-    getUser();
+    // No need to fetch user - AuthContext provides userId
   }, []);
 
   // Simulate live audience count updates
@@ -162,12 +167,10 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   }, []);
 
   const togglePlayPause = async () => {
-    // Simple getSession check
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!userId) {
       toast({
-        title: "Please Log In",
-        description: "You need to log in to play meditation audio",
+        title: "Error",
+        description: "Silakan login terlebih dahulu",
         variant: "destructive"
       });
       return;

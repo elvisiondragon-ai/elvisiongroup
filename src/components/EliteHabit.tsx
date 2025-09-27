@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useToast } from '@/hooks/use-toast';
 import { useUserProfile } from '@/contexts/UserProfileContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface EliteHabitEntry {
   id?: string;
@@ -36,7 +37,8 @@ const EXERCISE_OPTIONS = [
 export function EliteHabit() {
   const { awardXP } = useXPSystem();
   const { toast } = useToast();
-  const { user, userProfile, handleAuthError, handleButtonTimeout } = useUserProfile();
+  const { user, userProfile, handleAuthError } = useUserProfile();
+  const { userId } = useAuth();
   const [selectedExercise, setSelectedExercise] = useState('');
   const [duration, setDuration] = useState(5);
   const [notes, setNotes] = useState('');
@@ -50,27 +52,22 @@ export function EliteHabit() {
 
   const today = new Date().toDateString();
 
-  // Load habit data when user is available
+  // Load habit data when userId is available
   useEffect(() => {
-    const loadInitialData = async () => {
-      const currentUser = await supabase.auth.getUser();
-      if (currentUser.data.user) {
-        loadHabitData();
-      }
-    };
-    loadInitialData();
-  }, []);
+    if (userId) {
+      loadHabitData();
+    }
+  }, [userId]);
 
   const loadHabitData = async () => {
-    const currentUser = await supabase.auth.getUser();
-    if (!currentUser.data.user) return;
+    if (!userId) return;
 
     try {
       // Load today's entries
       const { data: todayData } = await supabase
         .from('elite_habits')
         .select('*')
-        .eq('user_id', currentUser.data.user.id)
+        .eq('user_id', userId)
         .gte('created_at', new Date(today).toISOString())
         .lt('created_at', new Date(new Date(today).getTime() + 24*60*60*1000).toISOString());
 
@@ -85,7 +82,7 @@ export function EliteHabit() {
       const { data: allData } = await supabase
         .from('elite_habits')
         .select('*')
-        .eq('user_id', currentUser.data.user.id)
+        .eq('user_id', userId)
         .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false });
 
@@ -100,7 +97,7 @@ export function EliteHabit() {
         const { data: profileData } = await supabase
           .from('profiles')
           .select('total_elite_habit')
-          .eq('user_id', currentUser.data.user.id)
+          .eq('user_id', userId)
           .single();
           
         if (profileData) {
@@ -131,40 +128,55 @@ export function EliteHabit() {
   const submitHabit = async (buttonElement?: HTMLElement) => {
     if (!selectedExercise || !notes.trim()) return;
 
-    if (!user?.id) {
-      // Fallback: get session if cached user not available
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) {
-        toast({
-          title: "Memproses Elite Habit..",
-        });
-        localStorage.setItem('refresh-redirect-to-elitehabit', 'true');
-        window.location.reload();
-        return;
-      }
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "Silakan login terlebih dahulu",
+        variant: "destructive"
+      });
+      return;
     }
 
     setLoading(true);
     try {
+      console.log('💾 Attempting to save elite habit for user:', userId);
+      console.log('🏃 Elite habit content:', {
+        exercise_type: selectedExercise,
+        duration_minutes: duration,
+        notes: notes.trim()
+      });
+
       // Insert habit entry
-      const { error: insertError } = await supabase
+      const { data, error: insertError } = await supabase
         .from('elite_habits')
         .insert({
-          user_id: user.id,
-          user_email: user.email || 'anonymous',
+          user_id: userId,
+          user_email: user?.email || 'anonymous',
           exercise_type: selectedExercise,
           duration_minutes: duration,
           date: today,
           notes: notes.trim()
-        });
+        })
+        .select(); // Return the inserted data to verify
 
       if (insertError) throw insertError;
+
+      console.log('%c✅ Elite habit saved successfully:', 'color: green; font-weight: bold;', data);
+      console.log('%c🏃 Elite habit query result - what was written:', 'color: green; font-weight: bold;', {
+        user_id: userId,
+        user_email: user?.email || 'anonymous',
+        exercise_type: selectedExercise,
+        duration_minutes: duration,
+        date: today,
+        notes: notes.trim(),
+        saved_data: data
+      });
 
       // Update total_elite_habit counter FIRST - get fresh count from DB to prevent mismatch
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_elite_habit')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_elite_habit || 0;
@@ -174,7 +186,7 @@ export function EliteHabit() {
           total_elite_habit: currentCount + 1,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
 
       if (profileError) {
         console.error('Error updating profile total_elite_habit:', profileError);
@@ -190,7 +202,10 @@ export function EliteHabit() {
 
       // Auto-show reports after submitting
       setShowReports(true);
-
+      
+      // Update total display immediately
+      setTotalEliteHabits(prev => prev + 1);
+      
       // Reload data after UI update
       setTimeout(() => loadHabitData(), 0);
 
@@ -202,18 +217,14 @@ export function EliteHabit() {
   };
 
   const handleDeleteHabit = async (habitId: string) => {
-    if (!user?.id) {
-      // Fallback: get session if cached user not available
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-    }
+    if (!userId) return;
 
     try {
       const { error } = await supabase
         .from('elite_habits')
         .delete()
         .eq('id', habitId)
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
 
       if (error) {
         toast({
@@ -228,7 +239,7 @@ export function EliteHabit() {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('total_elite_habit')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle();
 
       const currentCount = currentProfile?.total_elite_habit || 0;
@@ -238,19 +249,24 @@ export function EliteHabit() {
           total_elite_habit: Math.max(0, currentCount - 1),
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
 
       if (profileError) {
         console.error('Error updating profile total_elite_habit:', profileError);
       }
 
+      console.log('%c❌ Elite habit deleted', 'color: red; font-weight: bold;', habitId);
       toast({
         title: "Elite Habit Deleted 🔥",
         variant: "default"
       });
 
-      // Reload data after UI update
-      setTimeout(() => loadHabitData(), 0);
+      // Update total display immediately
+      setTotalEliteHabits(prev => Math.max(0, prev - 1));
+
+      // Update local state instead of DB reload
+      setAllEntries(prev => prev.filter(h => h.id !== habitId));
+      setTodayEntries(prev => prev.filter(h => h.id !== habitId));
     } catch (error) {
       console.error("Error deleting elite habit:", error);
       toast({
@@ -550,10 +566,7 @@ export function EliteHabit() {
         <Button
           ref={submitButtonRef}
           onClick={() => {
-            handleButtonTimeout(
-              () => submitHabit(submitButtonRef.current || undefined),
-              submitButtonRef.current || undefined
-            );
+            submitHabit(submitButtonRef.current || undefined);
           }}
           disabled={!selectedExercise || !notes.trim() || loading}
           className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-gray-500 disabled:to-gray-600"

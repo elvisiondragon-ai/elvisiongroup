@@ -15,6 +15,8 @@ import { useProtectedAudio } from "@/contexts/AudioContext"; // //Nevertouch Aud
 import { SacredFocusNotification } from "@/components/SacredFocusNotification";
 import { ProUpgradeModal } from "@/components/ProUpgradeModal";
 // Removed slow UserProfileContext - now using fast auth
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/contexts/UserProfileContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -96,7 +98,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { userId } = useAuth();
+  const { user } = useUserProfile();
 
   // Local audio state (better for XP tracking) - USER-INITIATED downloads only //Nevertouch Audio-cache
   const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
@@ -128,25 +131,26 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   };
 
   useEffect(() => {
-
     const initializeData = async () => {
       setLoading(true);
       
-      // Use session.user.id from state memory, fallback to getSession() if not exist
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setCurrentUser(session.user);
-        setIsAdmin(session.user.email === "elvisiondragon@gmail.com");
+      if (userId) {
+        console.log('%c🌹 Entering AudioTherapy page:', 'color: green; font-weight: bold;', {
+          user_id: userId, // AUTH ID
+          email: user?.email || 'loading...' // AUTH email
+        });
         
-        const verse4Count = await fetchVerse4Count(session.user.id);
-        await fetchUserProfile(session.user.id);
+        setIsAdmin(userId === "3da83afb-aa8c-4c55-b3b0-8aa64000205f"); // Use actual admin ID
+        
+        const verse4Count = await fetchVerse4Count(userId);
+        await fetchUserProfile(userId);
       }
       
       setLoading(false);
     };
     
     initializeData();
-  }, []);
+  }, [userId]);
 
   // Debug effect to track verse4Used changes
   useEffect(() => {
@@ -154,10 +158,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   }, [verse4Used]);
 
   useEffect(() => {
-    if (currentUser && !loading) {
-      fetchUserProfile(currentUser.id);
+    if (userId && !loading) {
+      fetchUserProfile(userId);
     }
-  }, [proStatus.isPro, currentUser, loading]);
+  }, [proStatus.isPro, userId, loading]);
 
 
   const fetchUserProfile = async (userId: string) => {
@@ -237,7 +241,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     if (proStatus.isPro) return true; // Pro users have unlimited access
 
     try {
-      if (!currentUser) return false;
+      if (!userId) return false;
 
       console.log('🎵 Current verse4Used before increment:', verse4Used);
       
@@ -245,7 +249,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       const { data: profile, error: fetchError } = await supabase
         .from('profiles')
         .select('verse4_used')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .single();
 
       if (fetchError) {
@@ -261,7 +265,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       const { error } = await supabase
         .from('profiles')
         .update({ verse4_used: newCount })
-        .eq('user_id', currentUser.id);
+        .eq('user_id', userId);
 
       if (error) {
         console.error('❌ Error updating verse4_used:', error);
@@ -273,9 +277,9 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       
       // Force refresh data to ensure UI sync
       setTimeout(async () => {
-        if (currentUser) {
+        if (userId) {
           console.log('🔄 Force refreshing verse4 data after completion');
-          await fetchUserProfile(currentUser.id);
+          await fetchUserProfile(userId);
         }
       }, 500);
       
