@@ -16,13 +16,11 @@ interface TierBadgeProps {
 }
 
 export function TierBadge({ level, isPro = false, isAdmin = false, className, showProBadge = true, achievements = [], subscriptionType }: TierBadgeProps) {
-  const { proStatus } = usePro();
-  
   // Check if user has level 3 achievement from passed achievements
   const hasLevel3Achievement = achievements?.includes('level_3') ?? false;
   
-  // FIXED: Only show ProBadge if user actually has subscription (prevents mirror bug)
-  // Don't show ProBadge if disabled OR if this specific user has no subscription OR if user is admin
+  // Show ProBadge based on THIS specific user's subscription status (isPro/subscriptionType)
+  // Everyone can see everyone's Pro status in chat
   const shouldShowProBadge = showProBadge && (subscriptionType || isPro) && !isAdmin;
   
   const getTierStyle = () => {

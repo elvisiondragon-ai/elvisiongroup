@@ -82,7 +82,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
               )}>
                 {user.name}
               </span>
-              <TierBadge level={user.level} isPro={user.isPro} isAdmin={user.isAdmin} achievements={[]} subscriptionType={user.subscriptionType} />
+              <TierBadge level={user.level} isPro={user.isPro} isAdmin={user.isAdmin} achievements={[]} subscriptionType={user.subscriptionType} showProBadge={true} />
             </div>
             
             {/* Streak badges - Under username - Multiple Tiers - Hidden for Admin */}
