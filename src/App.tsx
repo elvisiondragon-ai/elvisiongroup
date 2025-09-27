@@ -75,7 +75,7 @@ const AppContent = () => {
       if (toastId) return;
       
       const newToastId = toast({
-        title: "🎯 Ada Update Terbaru! - Soft Update",
+        title: "🔵 SOFT UPDATE 🛜",
         description: "Klik untuk update ke versi terbaru aplikasi",
         action: (
           <button 
@@ -88,29 +88,20 @@ const AppContent = () => {
               e.stopPropagation();
               setUpdateClicked(true);
               
-              console.log('🔄 User clicked Soft Update button')
+              console.log('🔵 User clicked SOFT UPDATE button')
               localStorage.removeItem('app-needs-update')
               
-              // Soft update - only clear app cache, preserve auth
+              // SOFT UPDATE - PRESERVE ALL AUTH DATA, ONLY UPDATE SERVICE WORKER
+              // Don't touch localStorage at all except for required flags
               localStorage.setItem('force-refresh-completed', 'true');
-              
-              // Clear only non-auth sessionStorage
-              // sessionStorage.clear(); // DISABLED for soft update
-              
-              // Clear all caches except AUDIO - //CLAUDE DONT CLEAR THIS CACHE!
-              if ('caches' in window) {
-                caches.keys().then(names => {
-                  names.forEach(name => {
-                    // Protect audio cache from clearing - //CLAUDE DONT CLEAR THIS CACHE!
-                    if (!name.includes('audio') && !name.includes('mp3') && !name.includes('MP3')) {
-                      caches.delete(name);
-                    }
-                  });
-                });
-              }
-              
-              // Re-set flag for success message after reload
               localStorage.setItem('update-success-pending', 'true');
+              
+              // Don't clear sessionStorage - preserve auth
+              // Don't clear cookies - preserve auth
+              // Don't clear caches - preserve everything including auth cache
+              
+              // ONLY update service worker for soft update
+              console.log('🔵 SOFT UPDATE: Only updating service worker, preserving all user data');
               
               // iOS-specific timing adjustments
               const updateDelay = isIOS ? 200 : 50;

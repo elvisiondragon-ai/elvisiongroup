@@ -81,6 +81,8 @@ export function Chat({ onNavigate }: ChatProps) {
         .on('broadcast', { event: 'message_deleted' }, handleBroadcastDelete)
         .subscribe();
       
+      console.log('🔵 Chat realtime status: SUBSCRIBED');
+      
       return () => {
         sub.unsubscribe();
       };
@@ -112,8 +114,24 @@ export function Chat({ onNavigate }: ChatProps) {
       // Fetch real profiles for all chat users
       const { data: userProfiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, display_name, streak_days, level, is_pro, is_admin, user_email')
+        .select('user_id, display_name, streak_days, level, is_admin, user_email')
         .in('user_id', userIds);
+        
+      // Fetch subscription data directly from pro_subscriptions table
+      const { data: subscriptions } = await supabase
+        .from('pro_subscriptions')
+        .select('user_id, subscription_type')
+        .in('user_id', userIds)
+        .eq('status', 'active');
+      
+      // Create subscription map
+      const subscriptionMap = new Map();
+      subscriptions?.forEach(sub => {
+        subscriptionMap.set(sub.user_id, {
+          is_pro: true,
+          subscription_type: sub.subscription_type
+        });
+      });
         
       if (profilesError) {
         console.error('Error loading user profiles:', profilesError);
@@ -191,6 +209,9 @@ export function Chat({ onNavigate }: ChatProps) {
           const displayStreakDays = userProfile ? realStreakDays : (realStreakDays === 0 ? 7 : realStreakDays);
           
           
+          // Get subscription data from unified RPC
+          const subscriptionData = subscriptionMap.get(msg.user_id);
+          
           return {
             ...msg,
             is_admin: adminUsers.has(msg.user_id) || userProfile?.is_admin || false,
@@ -198,7 +219,8 @@ export function Chat({ onNavigate }: ChatProps) {
             streak_days: displayStreakDays,
             // Update other profile data if available
             user_level: userProfile?.level || msg.user_level || 1,
-            is_pro: userProfile?.is_pro || msg.is_pro || false,
+            is_pro: subscriptionData?.is_pro || false,
+            subscription_type: subscriptionData?.subscription_type || null,
             user_name: userProfile?.display_name || msg.user_name
           };
         }) || [];
@@ -229,7 +251,7 @@ export function Chat({ onNavigate }: ChatProps) {
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
       if (isLoading) {
-        console.log('Chat loading timeout triggered, forcing refresh...');
+        console.log('Chat loading timeout triggered (2000ms), forcing refresh...');
         localStorage.setItem('refresh-redirect-to-chat', 'true');
         window.location.reload();
       }
@@ -508,8 +530,8 @@ export function Chat({ onNavigate }: ChatProps) {
           user_id: user.id,
           user_name: userProfile?.display_name || 'Anonymous',
           user_level: userProfile?.level || 1,
-          is_pro: userProfile?.is_pro || false,
-          message: message.trim()
+          message: message.trim(),
+          channel_id: 'community'
         })
         .select()
         .single();
@@ -695,26 +717,10 @@ export function Chat({ onNavigate }: ChatProps) {
                   id: msg.user_id,
                   name: msg.user_name,
                   level: msg.user_level,
-                  isPro: (() => {
-                    const mockProUsers = ['Andin', 'Jason', 'Master Yoga', 'Bambang_P', 'RatuAisyah', 'LindaWati', 'AhmadZaini', 'CitraKirana', 'KartikaSari', 'BungaCitra'];
-                    const isMockProUser = mockProUsers.includes(msg.user_name);
-                    return isMockProUser || msg.is_pro || false;
-                  })(),
+                  isPro: msg.is_pro || false,
                   isAdmin: msg.is_admin || false,
                   streak_days: msg.streak_days || 0, // Now using real streak_days from profiles
-                  subscriptionType: (() => {
-                    const mockProUsers = ['Andin', 'Jason', 'Master Yoga', 'Bambang_P', 'RatuAisyah', 'LindaWati', 'AhmadZaini', 'CitraKirana', 'KartikaSari', 'BungaCitra'];
-                    const isMockProUser = mockProUsers.includes(msg.user_name);
-                    
-                    if (msg.subscription_type) {
-                      return msg.subscription_type;
-                    } else if (isMockProUser) {
-                      return '1_year'; // Mock users get Crown badges
-                    } else if (msg.is_pro) {
-                      return '1_month'; // Other pro users get Star badges
-                    }
-                    return undefined;
-                  })(),
+                  subscriptionType: msg.subscription_type || undefined,
                   avatar: ""
                 }}
                 message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}

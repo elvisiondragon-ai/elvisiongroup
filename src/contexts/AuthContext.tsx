@@ -40,81 +40,105 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [proStatusCache, setProStatusCache] = useState<{data: any, timestamp: number} | null>(null);
   const [lastProCheck, setLastProCheck] = useState<number>(0);
 
+  // UNIFIED FLOW: Single function handles all channel management
+  const rebuildChatChannel = async (session: Session | null, reason: string) => {
+    console.log(`🔧 Rebuilding chat channel - Reason: ${reason}`);
+    
+    // 1. Clear existing timers
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+    
+    // 2. Teardown old channel
+    if (chatChannelRef.current) {
+      console.log('☠️ Chat realtime status Unsubscribe');
+      try {
+        await chatChannelRef.current.unsubscribe();
+      } catch (e) {
+        console.log('⚠️ Unsubscribe failed, continuing...');
+      }
+      supabase.removeChannel(chatChannelRef.current);
+      chatChannelRef.current = null;
+      setChatChannel(null);
+    }
+    
+    if (!session?.user) {
+      setLoading(false);
+      return;
+    }
+    
+    // 3. Set auth FIRST
+    console.log('🔑 WebSocket Auth token updated');
+    supabase.realtime.setAuth(session.access_token);
+    
+    // 4. Wait for auth propagation
+    console.log('⏳ WebSocket Auth propagation...');
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // 5. Ensure WebSocket connected
+    console.log('⚡️ WebSocket Sukses konek');
+    supabase.realtime.connect();
+    
+    // 6. Create new channel
+    console.log('🔧 Channel recreated with new auth');
+    const channel = supabase.channel('chat-community', {
+      config: {
+        broadcast: { self: true },
+        presence: { key: 'chat' }
+      }
+    });
+    
+    // 7. Add event listeners
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: 'channel_id=eq.community'
+      },
+      (payload) => console.log('💖 Realtime message received:', payload.new)
+    );
+    
+    // 8. Subscribe with unified error handling
+    channel.subscribe((status) => {
+      setChannelStatus(status);
+      
+      if (status === 'SUBSCRIBED') {
+        console.log('💥 Chat realtime status Reconnect');
+        // Clear any pending retry timeouts
+        if (retryTimeoutRef.current) {
+          clearTimeout(retryTimeoutRef.current);
+          retryTimeoutRef.current = null;
+        }
+        chatChannelRef.current = channel;
+        setChatChannel(channel);
+        setLoading(false);
+      } else if (status === 'TIMED_OUT' || status === 'CLOSED') {
+        console.log('⚠️ WebSocket Scheduling reconnect...');
+        // Retry with backoff
+        if (!retryTimeoutRef.current) {
+          retryTimeoutRef.current = setTimeout(() => {
+            retryTimeoutRef.current = null;
+            console.log('🚀 WebSocket Attempting reconnect...');
+            rebuildChatChannel(session, 'retry after timeout').catch(() => {});
+          }, 3000);
+        }
+      }
+    });
+    
+    if (session.user) {
+      checkProStatus(session.user.id);
+    }
+  };
+
   const updateAuthState = (session: Session | null) => {
     setUser(session?.user ?? null);
     setUserId(session?.user?.id ?? null);
     
-    supabase.realtime.setAuth(session?.access_token ?? '');
-    
-    if (chatChannelRef.current) {
-      supabase.removeChannel(chatChannelRef.current);
-      chatChannelRef.current = null;
-    }
-    
-    if (session?.user) {
-      const channel = supabase.channel('chat-community', {
-        config: {
-          broadcast: { self: true },
-          presence: { key: 'chat' }
-        }
-      });
-      
-      channel.on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: 'channel_id=eq.community'
-        },
-        (payload) => console.log('💖 Realtime message received:', payload.new)
-      );
-      
-      channel.subscribe((status) => {
-        console.log('🔴 Chat realtime status:', status);
-        setChannelStatus(status);
-        
-        if (status === 'SUBSCRIBED' && retryTimeoutRef.current) {
-          console.log('🚀 Connected, clearing retry timeout');
-          clearTimeout(retryTimeoutRef.current);
-          retryTimeoutRef.current = null;
-        }
-        
-        if ((status === 'TIMED_OUT' || status === 'CLOSED') && 
-            !retryTimeoutRef.current && 
-            status !== 'CHANNEL_ERROR') {
-          console.log('⚠️ Scheduling reconnect...');
-          retryTimeoutRef.current = setTimeout(() => {
-            retryTimeoutRef.current = null;
-            if (session?.user) {
-              const ch = chatChannelRef.current;
-              const connecting = ch && ['subscribing', 'joining'].includes(ch.status);
-              const open = ch && ch.status === 'open';
-              if (open || connecting) return;
-              console.log('🚀 Attempting reconnect...');
-              // Rejoin existing channels
-              const channels = (supabase as any).getChannels?.() ?? [];
-              channels.forEach((ch: any) => {
-                try { ch.rejoin?.(); } catch {}
-              });
-              
-              // Ensure socket is connected
-              // @ts-ignore: sdk version check
-              supabase.realtime.connect?.();
-              console.log('⚡️ Sukses konek');
-            }
-          }, 3000);
-        }
-      });
-      
-      chatChannelRef.current = channel;
-      setChatChannel(channel);
-      
-      checkProStatus(session.user.id);
-    } else {
-      setChatChannel(null);
-      setLoading(false);
-    }
+    // Use unified flow for all channel management
+    rebuildChatChannel(session, 'auth state change').catch(() => {});
   };
 
   useEffect(() => {
