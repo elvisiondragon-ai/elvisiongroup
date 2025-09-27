@@ -63,6 +63,8 @@ const AppContent = () => {
     onNeedRefresh() {
       console.log('🔄 Update available, saving to localStorage')
       localStorage.setItem('app-needs-update', 'true')
+      // Reset blocker so notification can show for new updates
+      localStorage.removeItem('force-refresh-completed')
     }
   })
 
