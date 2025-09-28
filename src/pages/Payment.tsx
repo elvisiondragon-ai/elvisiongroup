@@ -197,6 +197,7 @@ export function Payment({ onNavigate }: PaymentProps) {
             // Track Meta Pixel Purchase - Only when truly PAID
             const plan = subscriptionPlans.find(p => p.id === selectedPlan);
             if (window.fbq && paymentData) {
+              console.log('✨ Purchase Event Pixel - Payment completed');
               console.log('📊 Tracking Meta Pixel Purchase:', {
                 value: paymentData.amount,
                 currency: 'IDR',
@@ -223,7 +224,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                 },
                 body: JSON.stringify({
                   pixel_id: '3319324491540889',
-                  access_token: 'EAAGuZBVYmBugBPHXEpB2VcmWW1UoTE46sgMQaVZC4jtP4kmG223z324ZB7gpe5bI0UzeQgcehTZAUnbZCL0kTSxVu84fNlj8sxjtcZArwgA3FlGMxsXndZBZAGHoeW8oZAc8ZBCbfeRdGoxGmWasm18sH4lSnsf3hrWX2Ymn6Qzq80C1dnXeeQrlVZChzW53V0UnXJ6hwZDZD',
+                  access_token: 'EAAGuZBVYmBugBPmoDLsM8AIQGndW3Dx7DSmZAdfSOia1XrGQpyS6c9zMro8wUOnI9BcjhwL3efZBFeYPbxqwjq4wxrtXQVY0Nu9uMRZBNRsmtAsKBIEDY8Axt8dciEvUbTUGADvDqLsxmMkiSrfTfBHop9Yb9F88tY9RN6hs7bzjJULW3ijSsOh92zyjBZC5bLAZDZD',
                   event_name: 'Purchase',
                   user_data: {
                     email: email,
@@ -234,7 +235,8 @@ export function Payment({ onNavigate }: PaymentProps) {
                     currency: 'IDR',
                     content_name: plan.name,
                     transaction_id: paymentData.tripay_reference
-                  }
+                  },
+                  test_event_code: 'TEST52099'
                 })
               }).catch(error => {
                 console.log('📡 Meta CAPI backup failed (not critical):', error);
