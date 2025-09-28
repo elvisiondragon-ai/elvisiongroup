@@ -117,20 +117,19 @@ export function Chat({ onNavigate }: ChatProps) {
         .select('user_id, display_name, streak_days, level, is_admin, user_email')
         .in('user_id', userIds);
         
-      // Fetch subscription data directly from pro_subscriptions table
+      // Fetch Pro status for all chat users using public RPC (bypasses RLS)
       const { data: subscriptions } = await supabase
-        .from('pro_subscriptions')
-        .select('user_id, subscription_type')
-        .in('user_id', userIds)
-        .eq('status', 'active');
+        .rpc('get_public_pro_status', { user_ids: userIds });
       
       // Create subscription map
       const subscriptionMap = new Map();
       subscriptions?.forEach(sub => {
-        subscriptionMap.set(sub.user_id, {
-          is_pro: true,
-          subscription_type: sub.subscription_type
-        });
+        if (sub.is_pro) {
+          subscriptionMap.set(sub.user_id, {
+            is_pro: true,
+            subscription_type: sub.subscription_type
+          });
+        }
       });
         
       if (profilesError) {

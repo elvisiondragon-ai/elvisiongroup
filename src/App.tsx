@@ -29,25 +29,13 @@ import { MeditativeProvider } from "@/contexts/MeditativeContext";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const [isUpdating, setIsUpdating] = useState(false);
   const [updateClicked, setUpdateClicked] = useState(false);
   const [toastId, setToastId] = useState<string | null>(null);
   const { toast } = useToast();
   const { user, loading } = useAuth();
 
-
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-  
-  
-
-  const {
-    showModal,
-    currentReason,
-    handleModalNavigate,
-    handleModalClose
-  } = useFreeUserNotifications();
 
   // PWA Update Logic
   const {
@@ -68,7 +56,7 @@ const AppContent = () => {
     }
   })
 
-  // Show update notification when available
+  // Show soft update notification when available
   useEffect(() => {
     const showSoftUpdateToast = () => {
       // Prevent multiple toasts
@@ -152,121 +140,13 @@ const AppContent = () => {
       setToastId(newToastId);
     }
 
-    const showMajorUpdateToast = () => {
-      // Prevent multiple toasts
-      if (toastId) return;
-      
-      const newToastId = toast({
-        title: "🎯 Ada Update Terbaru! - Major Update",
-        description: "Klik untuk update ke versi terbaru aplikasi",
-        action: (
-          <button 
-            onClick={(e) => {
-              // Prevent double clicks on iOS
-              if (updateClicked) return;
-              
-              // iOS-specific event handling
-              e.preventDefault();
-              e.stopPropagation();
-              setUpdateClicked(true);
-              
-              console.log('🔄 User clicked Major Update button')
-              localStorage.removeItem('app-needs-update')
-              
-              // Clear ALL localStorage FIRST
-              localStorage.clear();
-              
-              // Set flags AFTER clearing
-              localStorage.setItem('refresh-redirect-to-home', 'true');
-              localStorage.setItem('force-refresh-completed', 'true');
-              
-              // Clear sessionStorage
-              sessionStorage.clear();
-              
-              // Clear all caches except AUDIO - //CLAUDE DONT CLEAR THIS CACHE!
-              if ('caches' in window) {
-                caches.keys().then(names => {
-                  names.forEach(name => {
-                    // Protect audio cache from clearing - //CLAUDE DONT CLEAR THIS CACHE!
-                    if (!name.includes('audio') && !name.includes('mp3') && !name.includes('MP3')) {
-                      caches.delete(name);
-                    }
-                  });
-                });
-              }
-              
-              // Clear cookies
-              document.cookie.split(";").forEach(function(c) { 
-                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-              });
-              
-              // Re-set flag for success message after reload
-              localStorage.setItem('update-success-pending', 'true');
-              
-              // iOS-specific timing adjustments
-              const updateDelay = isIOS ? 200 : 50;
-              const resetDelay = isIOS ? 2000 : 1500;
-              
-              setTimeout(() => {
-                try {
-                  updateServiceWorker(true)
-                  setNeedRefresh(false)
-                  setToastId(null);
-                  
-                  // iOS fallback: Force reload if service worker fails
-                  if (isIOS) {
-                    setTimeout(() => {
-                      window.location.reload();
-                    }, 1000);
-                  }
-                } catch (error) {
-                  console.error('Service worker update failed:', error);
-                  // Fallback: manual reload
-                  window.location.reload();
-                }
-                
-                // Always reset state after delay (in case reload fails)
-                setTimeout(() => {
-                  setUpdateClicked(false);
-                  setToastId(null);
-                }, resetDelay);
-              }, updateDelay);
-            }}
-            onTouchStart={(e) => {
-              // iOS-specific: Handle touch events properly
-              e.preventDefault();
-            }}
-            disabled={updateClicked}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
-              updateClicked 
-                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white'
-            }`}
-          >
-            Double Click disini untuk update
-          </button>
-        ),
-        duration: 0, // Don't auto-dismiss
-      });
-      
-      setToastId(newToastId);
-    }
-
     // Check if update is available from SW or localStorage
     const hasUpdate = needRefresh || localStorage.getItem('app-needs-update') === 'true'
     const forceRefreshCompleted = localStorage.getItem('force-refresh-completed') === 'true'
     
-    // Control which update card to show
-    const majorUpdateEnabled = false; // DISABLED - Change to true to enable
-    const softUpdateEnabled = true;   // ENABLED - Change to false to disable
-    
     if (hasUpdate && !toastId && !forceRefreshCompleted) {
-      console.log('📢 Showing update notification')
-      if (softUpdateEnabled) {
-        showSoftUpdateToast()
-      } else if (majorUpdateEnabled) {
-        showMajorUpdateToast()
-      }
+      console.log('📢 Showing soft update notification')
+      showSoftUpdateToast()
     }
     
     // Cleanup toast ID when update completes
@@ -276,6 +156,26 @@ const AppContent = () => {
       }
     };
   }, [needRefresh, toast, updateServiceWorker, setNeedRefresh, toastId]);
+
+  // Show success notification after refresh
+  useEffect(() => {
+    const updateSuccess = localStorage.getItem('update-success-pending');
+    if (updateSuccess === 'true') {
+      localStorage.removeItem('update-success-pending');
+      toast({
+        title: "🚀 Update berhasil diperbarui",
+        description: "Aplikasi telah diperbarui ke versi terbaru",
+        variant: "default"
+      });
+    }
+  }, [toast]);
+
+  const {
+    showModal,
+    currentReason,
+    handleModalNavigate,
+    handleModalClose
+  } = useFreeUserNotifications();
 
   // Pro status change notification (persistent like deploy notification)
   useEffect(() => {
@@ -327,18 +227,6 @@ const AppContent = () => {
     }
   }, [toast]);
 
-  // Show success notification after refresh
-  useEffect(() => {
-    const updateSuccess = localStorage.getItem('update-success-pending');
-    if (updateSuccess === 'true') {
-      localStorage.removeItem('update-success-pending');
-      toast({
-        title: "🚀 Update berhasil diperbarui",
-        description: "Aplikasi telah diperbarui ke versi terbaru",
-        variant: "default"
-      });
-    }
-  }, [toast]);
 
   if (loading) {
     return (
