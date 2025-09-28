@@ -113,6 +113,19 @@ export function FreeUserNotificationModal({
           buttonText: 'Upgrade Sekarang',
           buttonGradient: 'from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700'
         };
+      case 'unlock-pro-experience':
+        return {
+          title: '🔓 Unlock Pro untuk Pengalaman Penuh',
+          description: 'Rasakan potensi spiritual maksimal dengan fitur Pro eksklusif',
+          highlight: 'Unlimited akses semua Verses',
+          icon: Crown,
+          iconColor: 'text-yellow-400',
+          gradientFrom: 'from-yellow-500/20',
+          gradientTo: 'to-orange-500/20',
+          borderColor: 'border-yellow-500/50',
+          buttonText: 'Unlock Pro Sekarang',
+          buttonGradient: 'from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700'
+        };
       default:
         return {
           title: '✨ Jelajahi eL Vision',
@@ -140,18 +153,29 @@ export function FreeUserNotificationModal({
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-start justify-center pt-[5vh] pb-0 px-4">
       <Card className={`
-        w-full max-w-sm max-h-[95vh] overflow-y-auto mx-auto bg-gradient-to-br ${content.gradientFrom} via-slate-900 ${content.gradientTo}
+        w-full max-w-md max-h-[95vh] overflow-y-auto mx-auto bg-gradient-to-br ${content.gradientFrom} via-slate-900 ${content.gradientTo}
         border-2 ${content.borderColor} shadow-2xl shadow-purple-500/25
         ${showAnimation ? 'animate-in zoom-in-95 duration-500' : ''}
       `}>
         <CardHeader className="text-center relative">
+          {/* Enhanced Close Button - Larger and More Visible */}
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="absolute top-2 right-2 text-gray-400 hover:text-white hover:bg-gray-800/50"
+            className="absolute -top-2 -right-2 w-10 h-10 bg-red-600/80 hover:bg-red-600 text-white rounded-full shadow-lg border-2 border-white/20 hover:scale-110 transition-all duration-200 z-10"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
+          </Button>
+          
+          {/* Additional text close option */}
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            className="absolute top-2 left-2 text-gray-300 hover:text-white text-sm underline"
+            size="sm"
+          >
+            Tutup
           </Button>
 
           <div className={`w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r ${content.buttonGradient} flex items-center justify-center shadow-lg`}>
@@ -258,9 +282,9 @@ export function FreeUserNotificationModal({
             <Button
               onClick={onClose}
               variant="outline"
-              className="w-full border-gray-600 text-gray-300 hover:bg-gray-800/30 hover:text-white"
+              className="w-full border-gray-600 text-gray-300 hover:bg-gray-800/30 hover:text-white py-3 text-lg font-semibold"
             >
-              Nanti Saja
+              ❌ Tutup / Nanti Saja
             </Button>
           </div>
         </CardContent>

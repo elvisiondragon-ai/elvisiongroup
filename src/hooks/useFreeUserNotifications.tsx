@@ -104,6 +104,20 @@ export const useFreeUserNotifications = () => {
     if (!user) return false; // No notifications for unauthenticated users
     if (proStatus.isPro) return false; // No notifications for Pro users
 
+    // Check if notifications are delayed due to user closing modal
+    const delayUntil = localStorage.getItem('notificationDelayUntil');
+    if (delayUntil) {
+      const delayTime = parseInt(delayUntil);
+      const now = new Date().getTime();
+      if (now < delayTime) {
+        console.log('🕐 Notifications still delayed for', Math.round((delayTime - now) / 60000), 'minutes');
+        return false;
+      } else {
+        // Delay expired, remove it
+        localStorage.removeItem('notificationDelayUntil');
+      }
+    }
+
     const tracker = getStoredTracker();
     const today = new Date().toDateString();
 
@@ -165,6 +179,11 @@ export const useFreeUserNotifications = () => {
   const handleModalClose = () => {
     setShowModal(false);
     setCurrentReason('');
+    
+    // Set 1-hour delay before showing next notification
+    const oneHourFromNow = new Date().getTime() + (60 * 60 * 1000); // 1 hour in milliseconds
+    localStorage.setItem('notificationDelayUntil', oneHourFromNow.toString());
+    console.log('🕐 User closed modal - notifications delayed for 1 hour');
   };
 
   // Main notification scheduler

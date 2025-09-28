@@ -54,18 +54,18 @@ export function ProUpgradeNotification({ onUpgradeClick }: ProUpgradeNotificatio
   return (
     <>
       <div className="fixed top-0 left-0 right-0 w-full bg-gradient-to-r from-purple-600/95 to-pink-600/95 backdrop-blur-sm border-b border-white/10 z-50">
-        <div className="flex items-center justify-between py-2 px-4">
+        <div className="flex items-center justify-between py-1 px-2">
         <div className="flex items-center gap-2 flex-1">
           <div className="bg-white/20 rounded-full p-1">
             <Crown className="w-4 h-4 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white font-medium text-sm truncate">
-              Unlock Pro untuk Pengalaman Penuh
+            <p className="text-white font-medium text-xs truncate">
+              Unlock Pro
             </p>
             <div className="flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-yellow-300" />
-              <span className="text-white/80 text-xs">Akses semua fitur premium</span>
+              <Sparkles className="w-2 h-2 text-yellow-300" />
+              <span className="text-white/80 text-xs">Premium</span>
             </div>
           </div>
         </div>
@@ -101,16 +101,16 @@ export function ProUpgradeNotification({ onUpgradeClick }: ProUpgradeNotificatio
                 console.log('🔄 ProUpgradeNotification - Returning after 10 seconds');
                 setIsHidden(false);
                 setIsMinimized(false);
-              }, 10000);
+              }, 60 * 60 * 1000); // 1 hour instead of 10 seconds
             }}
             style={{
               cursor: 'pointer',
               zIndex: 50,
               pointerEvents: 'all'
             }}
-            className="text-white/70 hover:text-white active:text-white/50 transition-all duration-200 p-2 hover:scale-110 active:scale-90 transform min-w-[40px] min-h-[40px] flex items-center justify-center"
+            className="text-white/70 hover:text-white active:text-white/50 transition-all duration-200 p-1 hover:scale-110 active:scale-90 transform min-w-[32px] min-h-[32px] flex items-center justify-center bg-red-500/50 rounded-full border border-white/30"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       </div>

@@ -20,6 +20,7 @@ import { TutorialVideo } from "./pages/TutorialVideo";
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
+import { ArifTestimonial } from "./pages/ArifTestimonial";
 import type { User } from '@supabase/supabase-js';
 import { AudioProvider } from "@/contexts/AudioContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
@@ -274,6 +275,10 @@ const AppContent = () => {
               <Route
                 path="/privacy-policy"
                 element={<PrivacyPolicy />}
+              />
+              <Route 
+                path="/testi/arif" 
+                element={<ArifTestimonial />}
               />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
