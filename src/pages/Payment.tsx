@@ -72,6 +72,8 @@ export function Payment({ onNavigate }: PaymentProps) {
           if (window.fbq) {
             window.fbq('init', '3319324491540889');
             window.fbq('track', 'PageView');
+            console.log('🛒 Add to Cart Event Pixel - User entered payment page');
+            window.fbq('track', 'AddToCart');
           }
         }, 1000);
       } catch (error) {
@@ -212,34 +214,6 @@ export function Payment({ onNavigate }: PaymentProps) {
                 content_ids: [selectedPlan],
                 content_type: 'subscription',
                 transaction_id: paymentData.tripay_reference
-              });
-            }
-            
-            // Send to Meta CAPI as backup for better tracking reliability
-            if (paymentData && plan) {
-              fetch('/api/meta-capi-purchase', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  pixel_id: '3319324491540889',
-                  access_token: 'EAAGuZBVYmBugBPmoDLsM8AIQGndW3Dx7DSmZAdfSOia1XrGQpyS6c9zMro8wUOnI9BcjhwL3efZBFeYPbxqwjq4wxrtXQVY0Nu9uMRZBNRsmtAsKBIEDY8Axt8dciEvUbTUGADvDqLsxmMkiSrfTfBHop9Yb9F88tY9RN6hs7bzjJULW3ijSsOh92zyjBZC5bLAZDZD',
-                  event_name: 'Purchase',
-                  user_data: {
-                    email: email,
-                    phone: phoneNumber,
-                  },
-                  custom_data: {
-                    value: paymentData.amount,
-                    currency: 'IDR',
-                    content_name: plan.name,
-                    transaction_id: paymentData.tripay_reference
-                  },
-                  test_event_code: 'TEST52099'
-                })
-              }).catch(error => {
-                console.log('📡 Meta CAPI backup failed (not critical):', error);
               });
             }
             

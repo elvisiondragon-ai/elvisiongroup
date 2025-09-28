@@ -37,6 +37,7 @@ if (typeof window !== 'undefined' && !window.fbq) {
     t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
   })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
   window.fbq('init', '3319324491540889');
+  console.log('⭐️ View Content Event Pixel - Home page loaded');
   window.fbq('track', 'PageView');
 }
 
