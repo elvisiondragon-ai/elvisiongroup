@@ -38,9 +38,6 @@ if (typeof window !== 'undefined' && !window.fbq) {
   })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
   window.fbq('init', '3319324491540889');
   window.fbq('track', 'PageView');
-  console.log('⭐️ View Content Event Pixel - Home page loaded');
-  window.fbq('track', 'ViewContent');
-  window.fbq('trackCustom', 'TestEvent', {}, { test_event_code: 'TEST52099' });
 }
 
 interface HomeProps {
