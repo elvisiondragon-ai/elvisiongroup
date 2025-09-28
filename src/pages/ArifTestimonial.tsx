@@ -29,7 +29,7 @@ export function ArifTestimonial() {
 
   return (
     <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-lg max-w-md w-full max-h-[90vh] overflow-hidden border border-emerald-500/20 shadow-2xl">
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto border border-emerald-500/20 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-emerald-500/20">
           <h2 className="text-xl font-semibold text-white flex items-center gap-2">
@@ -76,13 +76,13 @@ export function ArifTestimonial() {
               Video Testimonial
             </h4>
             
-            <div className="aspect-video bg-black rounded-lg overflow-hidden border border-emerald-500/20">
+            <div className="aspect-[9/16] bg-black rounded-lg overflow-hidden border border-emerald-500/20 max-w-xs mx-auto">
               <video 
                 controls 
                 className="w-full h-full object-cover"
-                poster="/api/placeholder/400/225"
+                poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.jpg"
               >
-                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi_jpg/arifreact.mp4" type="video/mp4" />
+                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -93,9 +93,9 @@ export function ArifTestimonial() {
             <Button
               onClick={handleClose}
               variant="outline"
-              className="border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10 hover:text-white"
+              className="border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10 hover:text-white flex items-center gap-2"
             >
-              Tutup
+              ✨ Semoga anda menjadi salah satunya segera ✨
             </Button>
           </div>
         </div>
