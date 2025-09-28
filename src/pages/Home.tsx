@@ -23,14 +23,14 @@ import { AdminBadge } from "@/components/AdminBadge";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/hero-meditation.jpg";
 import faviconImage from "@/assets/favicon.png";
-import { handleFbcCookie, trackPixelEvent, initFacebookPixel } from "@/utils/fbpixel";
+import { handleFbcCookieManager, trackPageViewEvent, initFacebookPixelWithLogging } from "@/utils/fbpixel";
 
 // Initialize pixel on first load
 if (typeof window !== 'undefined') {
-  initFacebookPixel('3319324491540889');
+  initFacebookPixelWithLogging('3319324491540889');
   console.log('⭐️ View Content Event Pixel - Home page loaded');
-  handleFbcCookie();
-  trackPixelEvent('PageView');
+  handleFbcCookieManager();
+  trackPageViewEvent();
 }
 
 interface HomeProps {

@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { handleFbcCookie, trackPixelEvent, initFacebookPixel } from '@/utils/fbpixel';
+import { handleFbcCookieManager, trackPageViewEvent, trackAddToCartEvent, trackPurchaseEvent, initFacebookPixelWithLogging } from '@/utils/fbpixel';
 
 interface PaymentProps {
   onNavigate: (tab: string) => void;
@@ -36,15 +36,15 @@ export function Payment({ onNavigate }: PaymentProps) {
 
   // Initialize pixel and track PageView
   useEffect(() => {
-    initFacebookPixel('3319324491540889');
-    trackPixelEvent('PageView');
+    initFacebookPixelWithLogging('3319324491540889');
+    trackPageViewEvent();
   }, []);
 
   // Track AddToCart when component mounts (user enters payment page)
   useEffect(() => {
     console.log('🛒 Add to Cart Event Pixel - User entered payment page');
-    handleFbcCookie();
-    trackPixelEvent('AddToCart');
+    handleFbcCookieManager();
+    trackAddToCartEvent();
   }, []);
 
   const paymentMethods = [
@@ -171,14 +171,14 @@ export function Payment({ onNavigate }: PaymentProps) {
                 transaction_id: paymentData.tripay_reference
               });
               
-              trackPixelEvent('Purchase', {
+              trackPurchaseEvent({
                 value: paymentData.amount || 0,
                 currency: 'IDR',
                 content_name: plan?.name || 'Pro Subscription',
                 content_ids: [selectedPlan],
                 content_type: 'subscription',
                 transaction_id: paymentData.tripay_reference
-              });
+              }, email, fullName);
             }
             
             // Show success notification with refresh button
