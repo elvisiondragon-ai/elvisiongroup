@@ -72,8 +72,6 @@ export function Payment({ onNavigate }: PaymentProps) {
           if (window.fbq) {
             window.fbq('init', '3319324491540889');
             window.fbq('track', 'PageView');
-            console.log('🛒 Add to Cart Event Pixel - User entered payment page');
-            window.fbq('track', 'AddToCart');
           }
         }, 1000);
       } catch (error) {
@@ -82,6 +80,20 @@ export function Payment({ onNavigate }: PaymentProps) {
     }
   }, []);
 
+  // Track AddToCart when component mounts (user enters payment page)
+  useEffect(() => {
+    const trackAddToCart = () => {
+      if (window.fbq) {
+        console.log('🛒 Add to Cart Event Pixel - User entered payment page');
+        window.fbq('track', 'AddToCart');
+      } else {
+        // Retry if fbq not loaded yet
+        setTimeout(trackAddToCart, 500);
+      }
+    };
+    
+    trackAddToCart();
+  }, []);
 
   const paymentMethods = [
     {
