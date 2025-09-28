@@ -58,7 +58,7 @@ export function ProUpgradeModal({
         return {
           title: '✨ Waktunya Upgrade ke Pro!',
           description: 'Buka semua fitur premium dan konten eksklusif',
-          highlight: 'Bergabung dengan 1,247+ anggota Pro'
+          highlight: 'Bergabung dengan 10,927+ anggota Pro'
         };
     }
   };

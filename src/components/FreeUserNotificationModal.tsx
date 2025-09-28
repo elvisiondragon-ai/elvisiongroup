@@ -151,67 +151,67 @@ export function FreeUserNotificationModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-start justify-center pt-[5vh] pb-0 px-4">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center px-4">
       <Card className={`
-        w-full max-w-md max-h-[95vh] overflow-y-auto mx-auto bg-gradient-to-br ${content.gradientFrom} via-slate-900 ${content.gradientTo}
-        border-2 ${content.borderColor} shadow-2xl shadow-purple-500/25
+        w-full max-w-sm max-h-[90vh] overflow-y-auto mx-auto bg-gradient-to-br ${content.gradientFrom} via-slate-900 ${content.gradientTo}
+        border-2 ${content.borderColor} shadow-2xl shadow-purple-500/25 relative
         ${showAnimation ? 'animate-in zoom-in-95 duration-500' : ''}
       `}>
-        <CardHeader className="text-center relative">
-          {/* Enhanced Close Button - Larger and More Visible */}
+        <CardHeader className="text-center relative pt-8 pb-6">
+          {/* Enhanced Close Button - Fixed positioning within card */}
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="absolute -top-2 -right-2 w-10 h-10 bg-red-600/80 hover:bg-red-600 text-white rounded-full shadow-lg border-2 border-white/20 hover:scale-110 transition-all duration-200 z-10"
+            className="absolute top-2 right-2 w-8 h-8 bg-red-600/80 hover:bg-red-600 text-white rounded-full shadow-lg hover:scale-110 transition-all duration-200 z-10"
           >
-            <X className="w-6 h-6" />
+            <X className="w-4 h-4" />
           </Button>
           
-          {/* Additional text close option */}
+          {/* Text close option - repositioned */}
           <Button
             variant="ghost"
             onClick={onClose}
-            className="absolute top-2 left-2 text-gray-300 hover:text-white text-sm underline"
+            className="absolute top-2 left-2 text-gray-400 hover:text-white text-xs px-2 py-1"
             size="sm"
           >
             Tutup
           </Button>
 
-          <div className={`w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r ${content.buttonGradient} flex items-center justify-center shadow-lg`}>
-            <IconComponent className={`w-10 h-10 text-white`} />
+          <div className={`w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-r ${content.buttonGradient} flex items-center justify-center shadow-lg`}>
+            <IconComponent className={`w-8 h-8 text-white`} />
           </div>
 
-          <CardTitle className={`text-2xl font-bold text-transparent bg-gradient-to-r ${content.buttonGradient} bg-clip-text`}>
+          <CardTitle className={`text-xl font-bold text-transparent bg-gradient-to-r ${content.buttonGradient} bg-clip-text`}>
             {content.title}
           </CardTitle>
 
-          <CardDescription className="text-gray-300 text-lg mt-3 leading-relaxed">
+          <CardDescription className="text-gray-300 text-base mt-2 leading-relaxed px-2">
             {content.description}
           </CardDescription>
 
-          <div className={`mt-4 p-4 bg-gradient-to-r ${content.gradientFrom} ${content.gradientTo} rounded-lg border ${content.borderColor}`}>
-            <p className={`${content.iconColor} font-semibold text-sm flex items-center justify-center gap-2`}>
-              <Sparkles className="w-4 h-4" />
+          <div className={`mt-3 p-3 bg-gradient-to-r ${content.gradientFrom} ${content.gradientTo} rounded-lg border ${content.borderColor}`}>
+            <p className={`${content.iconColor} font-semibold text-xs flex items-center justify-center gap-2`}>
+              <Sparkles className="w-3 h-3" />
               {content.highlight}
             </p>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 px-4 pb-4">
           {/* Benefits for this feature */}
-          <div className="space-y-3">
-            <h4 className="text-gray-200 font-semibold">Yang Anda Dapatkan:</h4>
-            <div className="space-y-2">
+          <div className="space-y-2">
+            <h4 className="text-gray-200 font-semibold text-sm">Yang Anda Dapatkan:</h4>
+            <div className="space-y-1">
               {reason === 'pengalaman-anggota' && (
                 <>
-                  <div className="flex items-center gap-3 text-gray-100">
-                    <Users className="w-4 h-4 text-purple-400" />
-                    <span className="text-sm">Testimoni autentik dari 1,200+ member</span>
+                  <div className="flex items-center gap-2 text-gray-100">
+                    <Users className="w-3 h-3 text-purple-400" />
+                    <span className="text-xs">Testimoni autentik dari 1,200+ member</span>
                   </div>
-                  <div className="flex items-center gap-3 text-gray-100">
-                    <TrendingUp className="w-4 h-4 text-purple-400" />
-                    <span className="text-sm">Inspirasi perubahan hidup nyata</span>
+                  <div className="flex items-center gap-2 text-gray-100">
+                    <TrendingUp className="w-3 h-3 text-purple-400" />
+                    <span className="text-xs">Inspirasi perubahan hidup nyata</span>
                   </div>
                 </>
               )}

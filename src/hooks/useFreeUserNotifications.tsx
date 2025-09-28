@@ -15,7 +15,7 @@ const PENGALAMAN_VIDEOS = [
   'CLEARING-SPACE-HEALING'
 ];
 
-// Notification configuration - 6 notifications, 10 minutes apart
+// Notification configuration - 3 notifications, 1 hour apart
 const NOTIFICATIONS = [
   {
     id: 1,
@@ -40,30 +40,6 @@ const NOTIFICATIONS = [
     buttonText: "Analisis Sekarang",
     buttonClass: "bg-indigo-600 hover:bg-indigo-700",
     action: 'personal-analytics'
-  },
-  {
-    id: 4,
-    title: "📖 Cara Menggunakan Aplikasi",
-    description: "Panduan lengkap untuk memaksimalkan pengalaman spiritual",
-    buttonText: "Pelajari Sekarang",
-    buttonClass: "bg-green-600 hover:bg-green-700",
-    action: 'tutorial'
-  },
-  {
-    id: 5,
-    title: "⚡ Hall of Energy",
-    description: "Jelajahi pusat energi spiritual dan transformasi diri",
-    buttonText: "Masuki Hall",
-    buttonClass: "bg-yellow-600 hover:bg-yellow-700",
-    action: 'hall-of-energy'
-  },
-  {
-    id: 6,
-    title: "🌟 Upgrade ke Pro",
-    description: "Buka semua fitur premium untuk perjalanan spiritual lebih dalam",
-    buttonText: "Upgrade Sekarang",
-    buttonClass: "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700",
-    action: 'upgrade-pro'
   }
 ];
 
@@ -196,12 +172,12 @@ export const useFreeUserNotifications = () => {
 
       // Start notification sequence 5 seconds after app loads
       const initialDelay = setTimeout(() => {
-        // Show all 6 notifications with 10-minute intervals
+        // Show all 3 notifications with 1-hour intervals
         NOTIFICATIONS.forEach((notification, index) => {
-          const delay = index * 10 * 60 * 1000; // 10 minutes in milliseconds
+          const delay = index * 60 * 60 * 1000; // 1 hour in milliseconds
 
           setTimeout(() => {
-            console.log(`🔔 Showing notification ${index + 1}/6:`, notification.title);
+            console.log(`🔔 Showing notification ${index + 1}/3:`, notification.title);
             showNotification(notification, index);
           }, delay);
         });

@@ -47,7 +47,7 @@ export function Payment({ onNavigate }: PaymentProps) {
     trackAddToCartEvent();
   }, []);
 
-  const paymentMethods = [
+  const primaryPaymentMethods = [
     {
       code: 'QRIS',
       name: 'QRIS',
@@ -57,7 +57,10 @@ export function Payment({ onNavigate }: PaymentProps) {
       code: 'BCAVA',
       name: 'BCA Virtual Account',
       description: 'Transfer via BCA Virtual Account'
-    },
+    }
+  ];
+
+  const virtualBankMethods = [
     {
       code: 'PERMATAVA',
       name: 'Permata Virtual Account',
@@ -90,6 +93,8 @@ export function Payment({ onNavigate }: PaymentProps) {
     }
   ];
 
+  const paymentMethods = [...primaryPaymentMethods, ...virtualBankMethods];
+
   const [subscriptionPlans, setSubscriptionPlans] = useState([
     {
       id: '1_month',
@@ -103,17 +108,6 @@ export function Payment({ onNavigate }: PaymentProps) {
       durationDays: 30
     },
     {
-      id: '1_day',
-      name: 'Berlangganan 1 Hari',
-      description: 'Berlangganan harian dengan akses penuh',
-      price: 4000,
-      currency: 'IDR',
-      paymentMethodCode: 'BCAVA', 
-      paymentMethod: 'BCA Virtual Account',
-      duration: '1 hari',
-      durationDays: 1
-    },
-    {
       id: '1_year',
       name: 'Berlangganan 1 Tahun (30% Lebih Hemat)',
       description: 'Berlangganan tahunan dengan akses penuh',
@@ -123,6 +117,17 @@ export function Payment({ onNavigate }: PaymentProps) {
       paymentMethod: 'BCA Virtual Account',
       duration: '365 hari',
       durationDays: 365
+    },
+    {
+      id: '1_day',
+      name: 'Berlangganan 1 Hari',
+      description: 'Berlangganan harian dengan akses penuh',
+      price: 4000,
+      currency: 'IDR',
+      paymentMethodCode: 'BCAVA', 
+      paymentMethod: 'BCA Virtual Account',
+      duration: '1 hari',
+      durationDays: 1
     },
     {
       id: '1_week',
@@ -751,25 +756,7 @@ export function Payment({ onNavigate }: PaymentProps) {
         </div>
 
 
-        {/* Payment Method Selection */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium">Metode Pembayaran</h3>
-          <RadioGroup value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod} className="space-y-2">
-            {paymentMethods.map((method) => (
-              <div key={method.code} className="flex items-center space-x-3">
-                <RadioGroupItem value={method.code} id={method.code} />
-                <Label htmlFor={method.code} className="flex-1 cursor-pointer">
-                  <div className="flex flex-col">
-                    <span className="font-medium text-sm">{method.name}</span>
-                    <span className="text-xs text-muted-foreground">{method.description}</span>
-                  </div>
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
-
-        {/* Subscription Plans */}
+        {/* Subscription Plans - MOVED TO TOP */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium flex items-center gap-2">
             <CreditCard className="w-4 h-4" />
@@ -781,11 +768,17 @@ export function Payment({ onNavigate }: PaymentProps) {
               <div key={plan.id} className="flex items-start space-x-3">
                 <RadioGroupItem value={plan.id} id={plan.id} className="mt-3" />
                 <Label htmlFor={plan.id} className="flex-1 cursor-pointer">
-                  <Card className="p-3 hover:bg-muted/50 transition-colors">
+                  <Card className={`p-3 transition-all duration-300 ${
+                    selectedPlan === plan.id 
+                      ? 'bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-purple-500/50 shadow-lg' 
+                      : 'hover:bg-muted/50'
+                  }`}>
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-medium text-sm">{plan.name}</h3>
+                          <h3 className={`font-medium text-sm ${
+                            selectedPlan === plan.id ? 'text-purple-700 dark:text-purple-300' : ''
+                          }`}>{plan.name}</h3>
                           {/* Crown logo for 1 year subscription */}
                           {(plan.durationDays === 365 || plan.name.includes('Tahun') || plan.name.includes('Year')) && (
                             <Crown className="w-4 h-4 text-yellow-500" />
@@ -794,7 +787,9 @@ export function Payment({ onNavigate }: PaymentProps) {
                         <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
                       </div>
                       <div className="text-right ml-3">
-                        <div className="font-bold text-base">{formatCurrency(plan.price)}</div>
+                        <div className={`font-bold text-base ${
+                          selectedPlan === plan.id ? 'text-purple-700 dark:text-purple-300' : ''
+                        }`}>{formatCurrency(plan.price)}</div>
                         <div className="text-xs text-muted-foreground">{plan.duration}</div>
                       </div>
                     </div>
@@ -804,7 +799,34 @@ export function Payment({ onNavigate }: PaymentProps) {
             ))}
           </RadioGroup>
         </div>
+
+        {/* Payment Method Selection - MOVED TO BOTTOM */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium">Metode Pembayaran</h3>
+          <RadioGroup value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod} className="space-y-2">
+            {paymentMethods.map((method) => (
+              <div key={method.code} className="flex items-center space-x-3">
+                <RadioGroupItem value={method.code} id={method.code} />
+                <Label htmlFor={method.code} className="flex-1 cursor-pointer">
+                  <div className={`flex flex-col p-3 rounded-lg transition-all duration-300 ${
+                    selectedPaymentMethod === method.code 
+                      ? 'bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/50 shadow-lg' 
+                      : 'hover:bg-muted/20'
+                  }`}>
+                    <span className={`font-medium text-sm ${
+                      selectedPaymentMethod === method.code ? 'text-purple-700 dark:text-purple-300' : ''
+                    }`}>{method.name}</span>
+                    <span className="text-xs text-muted-foreground">{method.description}</span>
+                  </div>
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
       </div>
+
+      {/* Tiny margin space before bottom button */}
+      <div className="h-4"></div>
 
       {/* Fixed Bottom Button */}
       <div className="fixed bottom-20 left-6 right-6">
