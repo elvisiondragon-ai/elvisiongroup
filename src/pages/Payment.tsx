@@ -10,13 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useAuth } from '@/contexts/AuthContext';
-
-// Meta Pixel declaration
-declare global {
-  interface Window {
-    fbq?: any;
-  }
-}
+import { handleFbcCookie, trackPixelEvent, initFacebookPixel } from '@/utils/fbpixel';
 
 interface PaymentProps {
   onNavigate: (tab: string) => void;
@@ -40,59 +34,17 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [showQrisModal, setShowQrisModal] = useState(false);
   const { toast } = useToast();
 
-  // Meta Pixel initialization with error handling
+  // Initialize pixel and track PageView
   useEffect(() => {
-    // Initialize Meta Pixel if not already loaded
-    if (typeof window !== 'undefined' && !window.fbq) {
-      try {
-        (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-          if (f.fbq) return;
-          n = f.fbq = function(...args: any[]) {
-            n.callMethod ?
-              n.callMethod.apply(n, args) : n.queue.push(args)
-          };
-          if (!f._fbq) f._fbq = n;
-          n.push = n;
-          n.loaded = !0;
-          n.version = '2.0';
-          n.queue = [];
-          t = b.createElement(e);
-          t.async = !0;
-          t.src = v;
-          t.onerror = () => {
-            // Silently fail if Facebook Pixel can't load
-            console.warn('Facebook Pixel failed to load (blocked or network issue)');
-          };
-          s = b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t, s)
-        })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-
-        // Initialize with your Pixel ID (with error handling)
-        setTimeout(() => {
-          if (window.fbq) {
-            window.fbq('init', '3319324491540889');
-            window.fbq('track', 'PageView');
-          }
-        }, 1000);
-      } catch (error) {
-        console.warn('Facebook Pixel initialization failed:', error);
-      }
-    }
+    initFacebookPixel('3319324491540889');
+    trackPixelEvent('PageView');
   }, []);
 
   // Track AddToCart when component mounts (user enters payment page)
   useEffect(() => {
-    const trackAddToCart = () => {
-      if (window.fbq) {
-        console.log('🛒 Add to Cart Event Pixel - User entered payment page');
-        window.fbq('track', 'AddToCart');
-      } else {
-        // Retry if fbq not loaded yet
-        setTimeout(trackAddToCart, 500);
-      }
-    };
-    
-    trackAddToCart();
+    console.log('🛒 Add to Cart Event Pixel - User entered payment page');
+    handleFbcCookie();
+    trackPixelEvent('AddToCart');
   }, []);
 
   const paymentMethods = [
@@ -219,7 +171,7 @@ export function Payment({ onNavigate }: PaymentProps) {
                 transaction_id: paymentData.tripay_reference
               });
               
-              window.fbq('track', 'Purchase', {
+              trackPixelEvent('Purchase', {
                 value: paymentData.amount || 0,
                 currency: 'IDR',
                 content_name: plan?.name || 'Pro Subscription',
