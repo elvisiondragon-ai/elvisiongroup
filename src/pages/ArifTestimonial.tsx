@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { X, Quote, Star, Play } from "lucide-react";
 
 export function ArifTestimonial() {
   const [showModal, setShowModal] = useState(false);
+  const [showPlayButton, setShowPlayButton] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Auto-open modal when page loads
   useEffect(() => {
@@ -76,15 +78,33 @@ export function ArifTestimonial() {
               Video Testimonial
             </h4>
             
-            <div className="aspect-[9/16] bg-black rounded-lg overflow-hidden border border-emerald-500/20 max-w-xs mx-auto">
+            <div className="aspect-[9/16] bg-black rounded-lg overflow-hidden border border-emerald-500/20 max-w-xs mx-auto relative group">
               <video 
+                ref={videoRef}
                 controls 
                 className="w-full h-full object-cover"
                 poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.jpg"
+                onPlay={() => setShowPlayButton(false)}
+                onPause={() => setShowPlayButton(true)}
               >
                 <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
+              
+              {/* Play Button Overlay - Only show when video is paused */}
+              {showPlayButton && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-all duration-300">
+                  <div 
+                    onClick={() => {
+                      videoRef.current?.play();
+                      setShowPlayButton(false);
+                    }}
+                    className="w-16 h-16 bg-emerald-500/80 hover:bg-emerald-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all duration-300 cursor-pointer backdrop-blur-sm border-2 border-white/30"
+                  >
+                    <Play className="w-8 h-8 text-white ml-1" />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
