@@ -21,7 +21,7 @@ export function TierBadge({ level, isPro = false, isAdmin = false, className, sh
   
   // Show ProBadge based on THIS specific user's subscription status (isPro/subscriptionType)
   // Everyone can see everyone's Pro status in chat
-  const shouldShowProBadge = showProBadge && (subscriptionType || isPro) && !isAdmin;
+  const shouldShowProBadge = showProBadge && subscriptionType && subscriptionType !== 'false' && subscriptionType !== '' && !isAdmin;
   
   const getTierStyle = () => {
     if (level >= 10) return "tier-master";

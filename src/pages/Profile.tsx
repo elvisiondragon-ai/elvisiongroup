@@ -19,6 +19,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useAuth } from '@/contexts/AuthContext';
 import { StreakIndicator } from "@/components/StreakIndicator";
+// Updated spiritual icons for streak tiers
+import { GiTrophy, GiFire, GiHorseHead, GiSailboat, GiMoon, GiMeditation } from "react-icons/gi";
 import {
   User,
   Settings,
@@ -39,7 +41,7 @@ import {
   Activity,
   Globe,
 } from "lucide-react";
-import { GiCrownCoin, GiBatMask, GiTrophy, GiFire, GiMeditation, GiCrown, GiFootsteps } from "react-icons/gi";
+import { GiCrownCoin, GiBatMask, GiCrown, GiFootsteps } from "react-icons/gi";
 import { Leaf } from "lucide-react";
 
 interface ProfileProps {
@@ -282,35 +284,35 @@ export function Profile({ onNavigate }: ProfileProps) {
     // Streak tier achievements - spiritual progression
     ...(profile.streak_days >= 320 
       ? [{ 
-          name: "Ignis", 
+          name: "Ignis 320+", 
           description: `${profile.streak_days} days streak - Divine Flame`, 
           unlocked: true,
           isIgnisLord: true
         }]
       : profile.streak_days >= 90 
         ? [{ 
-            name: "Wanderer", 
+            name: "Wanderer 90+", 
             description: `${profile.streak_days} days streak - Wise Traveler`, 
             unlocked: true,
             isWanderer: true
           }]
         : profile.streak_days >= 60 
           ? [{ 
-              name: "Lumina", 
+              name: "Lumina 60+", 
               description: `${profile.streak_days} days streak - Light Bringer`, 
               unlocked: true,
               isLumina: true
             }]
           : profile.streak_days >= 30 
             ? [{ 
-                name: "Seeker", 
+                name: "Seeker 30+", 
                 description: `${profile.streak_days} days streak - Truth Finder`, 
                 unlocked: true,
                 isSeeker: true
               }]
             : profile.streak_days >= 7 
               ? [{ 
-                  name: "Warrior", 
+                  name: "Warrior 7+", 
                   description: `${profile.streak_days} days streak - Spiritual Fighter`, 
                   unlocked: true,
                   isWarrior: true
@@ -431,13 +433,8 @@ export function Profile({ onNavigate }: ProfileProps) {
             {displayName}
           </h1>
           {isAdmin && <AdminBadge size="md" />}
+          {!isAdmin && <TierBadge level={profile.level} isPro={proStatus.isPro} achievements={profile.achievements || []} subscriptionType={proStatus.subscriptionType} />}
         </div>
-        
-        {!isAdmin && (
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <TierBadge level={profile.level} isPro={proStatus.isPro} achievements={profile.achievements || []} />
-          </div>
-        )}
         
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="text-sm text-muted-foreground">
@@ -458,7 +455,34 @@ export function Profile({ onNavigate }: ProfileProps) {
             <p className="text-xs text-muted-foreground">
               {currentLevel >= 10 ? 'MAX LEVEL REACHED' : `${Math.max(nextLevelXp - currentXP, 0)} XP untuk level selanjutnya`}
             </p>
-            <StreakIndicator streakDays={profile.streak_days} size="sm" />
+            {profile.streak_days >= 320 ? (
+              <div className="streak-badge streak-ignis shadow-sm">
+                <GiHorseHead className="w-3 h-3" style={{ flexShrink: 0 }} />
+                <span className="font-medium">Ignis 320+</span>
+              </div>
+            ) : profile.streak_days >= 90 ? (
+              <div className="streak-badge streak-wanderer shadow-sm">
+                <GiSailboat className="w-3 h-3" style={{ flexShrink: 0 }} />
+                <span className="font-medium">Wanderer 90+</span>
+              </div>
+            ) : profile.streak_days >= 60 ? (
+              <div className="streak-badge streak-lumina shadow-sm">
+                <GiMoon className="w-3 h-3" style={{ flexShrink: 0 }} />
+                <span className="font-medium">Lumina 60+</span>
+              </div>
+            ) : profile.streak_days >= 30 ? (
+              <div className="streak-badge streak-seeker shadow-sm">
+                <GiSailboat className="w-3 h-3" style={{ flexShrink: 0 }} />
+                <span className="font-medium">Seeker 30+</span>
+              </div>
+            ) : profile.streak_days >= 7 ? (
+              <div className="streak-badge streak-warrior shadow-sm">
+                <GiTrophy className="w-3 h-3" style={{ flexShrink: 0 }} />
+                <span className="font-medium">Warrior 7+</span>
+              </div>
+            ) : (
+              <span className="text-xs text-muted-foreground">{profile.streak_days} days</span>
+            )}
           </div>
         </div>
 

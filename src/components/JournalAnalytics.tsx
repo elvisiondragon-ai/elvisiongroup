@@ -535,7 +535,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
       {analytics && (
         <div className="space-y-4">
           {/* Overview Stats */}
-          <Card className="p-6">
+          <Card className="p-0">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-green-500" />
@@ -566,7 +566,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
 
           {/* Focus Goals */}
           {analytics.focusGoals.length > 0 && (
-            <Card className="p-6">
+            <Card className="p-0">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2">
                   <Target className="w-5 h-5 text-orange-500" />
@@ -585,7 +585,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
                         <span className="text-sm text-muted-foreground">
                           {typeof goal.count === 'number' ? `${goal.count}x` : goal.count}
                         </span>
-                        <Badge variant="secondary">{goal.percentage}%</Badge>
+                        {goal.percentage && <Badge variant="secondary">{goal.percentage}%</Badge>}
                       </div>
                     </div>
                   ))}
@@ -595,7 +595,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
           )}
 
           {/* AI Insights */}
-          <Card className="p-6">
+          <Card className="p-0">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-blue-500" />
@@ -605,8 +605,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
             <CardContent className="pt-0">
               <div className="space-y-3">
                 {analytics.insights.map((insight, index) => (
-                  <div key={index} className="p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg">
-                    <p className="text-blue-100 leading-relaxed">{insight}</p>
+                  <div key={index} className="p-0 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg">
+                    <p className="text-blue-100 leading-relaxed p-3">{insight}</p>
                   </div>
                 ))}
               </div>
@@ -615,7 +615,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
 
           {/* Recommendation */}
           {analytics.recommendation && (
-            <Card className="p-6 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30">
+            <Card className="p-0 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-green-400">
                   <Sparkles className="w-5 h-5" />
@@ -625,8 +625,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
               <CardContent className="pt-0">
                 <div className="space-y-3">
                   {analytics.recommendation.map((rec, index) => (
-                    <div key={index} className="p-4 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg">
-                      <p className="text-green-100 leading-relaxed">{rec}</p>
+                    <div key={index} className="p-0 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg">
+                      <p className="text-green-100 leading-relaxed p-3">{rec}</p>
                     </div>
                   ))}
                 </div>

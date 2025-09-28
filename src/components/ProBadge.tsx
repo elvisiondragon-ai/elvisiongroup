@@ -19,7 +19,7 @@ export function ProBadge({ className, size = 'md', showLabel = true, targetUserI
   }
 
   const sizeClasses = {
-    sm: 'px-1.5 py-0.5 text-xs gap-1',
+    sm: 'px-2 py-1 text-xs gap-1',
     md: 'px-2 py-1 text-sm gap-1.5', 
     lg: 'px-3 py-1.5 text-base gap-2'
   };

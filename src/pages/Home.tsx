@@ -493,8 +493,7 @@ export function Home({
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="mb-2">
-                {!isAdmin && <TierBadge level={userProfile?.level || 1} isPro={proStatus.isPro} achievements={userProfile?.achievements || []} />}
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2">
                   <h3 className={cn(
                     "font-semibold transition-all duration-300",
                     isAdmin 
@@ -504,6 +503,7 @@ export function Home({
                     {displayName}
                   </h3>
                   {isAdmin && <AdminBadge size="sm" />}
+                  {!isAdmin && <TierBadge level={userProfile?.level || 1} isPro={proStatus.isPro} achievements={userProfile?.achievements || []} subscriptionType={proStatus.subscriptionType} />}
                 </div>
               </div>
               <StreakIndicator streakDays={userProfile?.streak_days || 0} size="sm" />
