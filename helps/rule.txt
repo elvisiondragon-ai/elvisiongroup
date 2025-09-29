@@ -10,3 +10,18 @@ FIX SESSION - GIVE CODE Not From assumption but VALID DATA
 2. GIVE SIMPLEST SOLUTION, IF CODE SQL Give shortest but most effective code after understand schema + Verification code in 1 file at assist_code folder.
 3. IF Frontend code, ONLY FIX WHAT REQUESTED, DO NOT CHANGE beyond what requested, it cross the line!
 
+📁 Parent Hierarchy:
+
+  main.tsx (entry point)
+   └── App.tsx (ROOT PARENT) 🏠
+       ├── AuthProvider (context wrapper)
+       ├── UserProfileProvider (context wrapper)
+       ├── MeditativeProvider (context wrapper)
+       └── Routes
+           └── Index.tsx (main app pages)
+               ├── Home.tsx
+               ├── Chat.tsx
+               ├── Payment.tsx
+               ├── Profile.tsx
+               ├── SpiritualJournal.tsx
+               └── EliteHabit.tsx

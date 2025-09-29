@@ -282,14 +282,21 @@ export function Profile({ onNavigate }: ProfileProps) {
       : [{ name: "First Step", description: "Joined eL Vision Group", unlocked: true }]
     ),
     // Streak tier achievements - spiritual progression
-    ...(profile.streak_days >= 320 
+    ...(profile.streak_days >= 500 
       ? [{ 
-          name: "Ignis 320+", 
-          description: `${profile.streak_days} days streak - Divine Flame`, 
+          name: "Ignis Lord 500+", 
+          description: `${profile.streak_days} days streak - Eternal Fire`, 
           unlocked: true,
-          isIgnisLord: true
+          isIgnisLordMaster: true
         }]
-      : profile.streak_days >= 90 
+      : profile.streak_days >= 320 
+        ? [{ 
+            name: "Horsemen 320+", 
+            description: `${profile.streak_days} days streak - Divine Flame`, 
+            unlocked: true,
+            isHorsemen: true
+          }]
+        : profile.streak_days >= 90 
         ? [{ 
             name: "Wanderer 90+", 
             description: `${profile.streak_days} days streak - Wise Traveler`, 
@@ -455,10 +462,15 @@ export function Profile({ onNavigate }: ProfileProps) {
             <p className="text-xs text-muted-foreground">
               {currentLevel >= 10 ? 'MAX LEVEL REACHED' : `${Math.max(nextLevelXp - currentXP, 0)} XP untuk level selanjutnya`}
             </p>
-            {profile.streak_days >= 320 ? (
+            {profile.streak_days >= 500 ? (
               <div className="streak-badge streak-ignis shadow-sm">
+                <GiFire className="w-3 h-3" style={{ flexShrink: 0 }} />
+                <span className="font-medium">Ignis 500+</span>
+              </div>
+            ) : profile.streak_days >= 320 ? (
+              <div className="streak-badge streak-horsemen shadow-sm">
                 <GiHorseHead className="w-3 h-3" style={{ flexShrink: 0 }} />
-                <span className="font-medium">Ignis 320+</span>
+                <span className="font-medium">Horsemen 320+</span>
               </div>
             ) : profile.streak_days >= 90 ? (
               <div className="streak-badge streak-wanderer shadow-sm">
@@ -532,13 +544,15 @@ export function Profile({ onNavigate }: ProfileProps) {
               key={index} 
               className={`p-4 border-border transition-all duration-300 hover:scale-105 backdrop-blur-sm ${
                 achievement.unlocked && achievement.isHandOfMidas
-                  ? "bg-gradient-to-r from-yellow-900/80 via-amber-800/80 to-yellow-900/80 border-yellow-500 shadow-lg shadow-yellow-500/25 animate-pulse" 
-                  : achievement.unlocked && achievement.isIgnisLord
-                    ? "bg-gradient-to-r from-red-800/80 via-red-700/80 to-orange-800/80 border-red-500 shadow-lg shadow-red-500/25 animate-pulse" 
+                  ? "bg-gradient-to-r from-yellow-900/80 via-amber-800/80 to-yellow-900/80 border-yellow-500 shadow-lg shadow-yellow-500/25" 
+                  : achievement.unlocked && achievement.isIgnisLordMaster
+                    ? "bg-gradient-to-r from-red-900/80 via-orange-800/80 to-red-800/80 border-red-600 shadow-lg shadow-red-600/25"
+                    : achievement.unlocked && achievement.isHorsemen
+                      ? "bg-gradient-to-r from-purple-800/80 via-pink-700/80 to-purple-800/80 border-purple-500 shadow-lg shadow-purple-500/25" 
                     : achievement.unlocked && achievement.isRealityMaster
-                      ? "bg-gradient-to-r from-purple-900/80 via-purple-800/80 to-blue-900/80 border-purple-500 shadow-lg shadow-purple-500/25 animate-pulse"
+                      ? "bg-gradient-to-r from-purple-900/80 via-purple-800/80 to-blue-900/80 border-purple-500 shadow-lg shadow-purple-500/25"
                       : achievement.unlocked && achievement.isTheVoid
-                        ? "bg-gradient-to-r from-black/80 via-gray-900/80 to-black/80 border-gray-500 shadow-lg shadow-gray-500/25 animate-pulse"
+                        ? "bg-gradient-to-r from-black/80 via-gray-900/80 to-black/80 border-gray-500 shadow-lg shadow-gray-500/25"
                         : achievement.unlocked && achievement.isWanderer
                           ? "bg-gradient-to-r from-green-800/80 via-green-700/80 to-emerald-800/80 border-green-500 shadow-lg shadow-green-500/25" 
                           : achievement.unlocked && achievement.isLumina
@@ -561,13 +575,15 @@ export function Profile({ onNavigate }: ProfileProps) {
               <div className="flex items-center gap-3">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center relative overflow-hidden ${
                   achievement.unlocked && achievement.isHandOfMidas
-                    ? "bg-gradient-to-r from-yellow-700 to-amber-700 text-amber-100 animate-pulse" 
-                    : achievement.unlocked && achievement.isIgnisLord
-                      ? "bg-gradient-to-r from-red-800 to-orange-800 text-orange-100 animate-pulse" 
+                    ? "bg-gradient-to-r from-yellow-700 to-amber-700 text-amber-100" 
+                    : achievement.unlocked && achievement.isIgnisLordMaster
+                      ? "bg-gradient-to-r from-red-800 to-orange-700 text-red-100"
+                      : achievement.unlocked && achievement.isHorsemen
+                        ? "bg-gradient-to-r from-purple-700 to-pink-600 text-purple-100" 
                       : achievement.unlocked && achievement.isRealityMaster
-                        ? "bg-gradient-to-r from-purple-700 to-blue-700 text-blue-100 animate-pulse"
+                        ? "bg-gradient-to-r from-purple-700 to-blue-700 text-blue-100"
                         : achievement.unlocked && achievement.isTheVoid
-                          ? "bg-gradient-to-r from-gray-700 to-black text-gray-100 animate-pulse"
+                          ? "bg-gradient-to-r from-gray-700 to-black text-gray-100"
                           : achievement.unlocked && achievement.isWanderer
                             ? "bg-gradient-to-r from-green-800 to-emerald-800 text-green-100"
                             : achievement.unlocked && achievement.isLumina
@@ -590,8 +606,10 @@ export function Profile({ onNavigate }: ProfileProps) {
                   <div className="relative z-10">
                     {achievement.isHandOfMidas && achievement.unlocked ? (
                       <GiCrownCoin className="w-7 h-7 animate-bounce drop-shadow-lg" />
-                    ) : achievement.isIgnisLord && achievement.unlocked ? (
+                    ) : achievement.isIgnisLordMaster && achievement.unlocked ? (
                       <GiFire className="w-7 h-7 animate-bounce drop-shadow-lg" />
+                    ) : achievement.isHorsemen && achievement.unlocked ? (
+                      <GiHorseHead className="w-7 h-7 animate-bounce drop-shadow-lg" />
                     ) : achievement.isRealityMaster && achievement.unlocked ? (
                       <Globe className="w-7 h-7 animate-spin drop-shadow-lg" />
                     ) : achievement.isTheVoid && achievement.unlocked ? (

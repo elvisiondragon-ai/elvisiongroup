@@ -88,10 +88,15 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
             {/* Streak badges - Under username - Multiple Tiers - Hidden for Admin */}
             {!user.isAdmin && user.streak_days >= 7 && (
               <div className="flex items-center gap-1" style={{ minHeight: '24px' }}>
-                {user.streak_days >= 320 ? (
+                {user.streak_days >= 500 ? (
                   <div className="streak-badge streak-ignis shadow-sm">
+                    <GiFire className="w-3 h-3" style={{ flexShrink: 0 }} />
+                    <span className="font-medium">Ignis 500+</span>
+                  </div>
+                ) : user.streak_days >= 320 ? (
+                  <div className="streak-badge streak-horsemen shadow-sm">
                     <GiHorseHead className="w-3 h-3" style={{ flexShrink: 0 }} />
-                    <span className="font-medium">Ignis 320+</span>
+                    <span className="font-medium">Horsemen 320+</span>
                   </div>
                 ) : user.streak_days >= 90 ? (
                   <div className="streak-badge streak-wanderer shadow-sm">

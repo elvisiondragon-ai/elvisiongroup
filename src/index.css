@@ -312,6 +312,12 @@
     color: #fef2f2;
   }
 
+  .streak-horsemen {
+    background: linear-gradient(135deg, rgba(139, 69, 19, 0.8), rgba(168, 85, 247, 0.8), rgba(236, 72, 153, 0.8));
+    border-color: #a855f7;
+    color: #fdf4ff;
+  }
+
   @keyframes master-glow {
     0% { 
       box-shadow: 
