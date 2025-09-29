@@ -717,6 +717,9 @@ export function Payment({ onNavigate }: PaymentProps) {
                   required
                 />
               </div>
+              {!fullName.trim() && !userProfile?.display_name?.trim() && (
+                <p className="text-red-500 text-xs mt-1">*Wajib isi Nama Terlebih Dahulu</p>
+              )}
             </div>
 
             <div>
@@ -751,6 +754,9 @@ export function Payment({ onNavigate }: PaymentProps) {
                   required
                 />
               </div>
+              {!phoneNumber.trim() && !userProfile?.phone_number?.trim() && (
+                <p className="text-red-500 text-xs mt-1">*Wajib isi Telepon Terlebih Dahulu</p>
+              )}
             </div>
           </div>
         </div>
@@ -846,10 +852,8 @@ export function Payment({ onNavigate }: PaymentProps) {
             });
             handleCreatePayment();
           }}
-          disabled={loading || userDataLoading || !selectedPlan || 
-            !(cachedProfile?.phone_number?.trim() || phoneNumber.trim()) || 
-            !(cachedProfile?.display_name?.trim() || fullName.trim())}
-          className="w-full"
+          disabled={loading || userDataLoading}
+          className="w-full transition-all duration-150 transform hover:scale-105 active:scale-95 active:bg-primary/90"
           size="lg"
         >
           {loading ? (
