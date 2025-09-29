@@ -137,6 +137,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(session?.user ?? null);
     setUserId(session?.user?.id ?? null);
     
+    // Check token expiry and log warning
+    if (session?.expires_at) {
+      const expiryTime = new Date(session.expires_at * 1000);
+      const now = new Date();
+      const timeUntilExpiry = expiryTime.getTime() - now.getTime();
+      const hoursUntilExpiry = Math.floor(timeUntilExpiry / (1000 * 60 * 60));
+      const minutesUntilExpiry = Math.floor((timeUntilExpiry % (1000 * 60 * 60)) / (1000 * 60));
+      
+      if (timeUntilExpiry > 0) {
+        console.log(`🆘🚀 Token habis dalam ${hoursUntilExpiry} jam ${minutesUntilExpiry} menit | Token Expiry in ${hoursUntilExpiry}h ${minutesUntilExpiry}m`);
+      } else {
+        console.log('🆘🚀 Token sudah expired! | Token already expired!');
+      }
+    }
+    
     // Use unified flow for all channel management
     rebuildChatChannel(session, 'auth state change').catch(() => {});
   };

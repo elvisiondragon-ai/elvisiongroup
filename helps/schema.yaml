@@ -1,0 +1,136 @@
+SCHEMA 
+
+  -- Check profiles table structure
+  SELECT
+      column_name,
+      data_type,
+      is_nullable
+  FROM information_schema.columns
+  WHERE table_name = 'profiles'
+      AND table_schema = 'public'
+  ORDER BY ordinal_position;
+
+| column_name            | data_type                | is_nullable |
+| ---------------------- | ------------------------ | ----------- |
+| id                     | uuid                     | NO          |
+| user_id                | uuid                     | NO          |
+| display_name           | text                     | YES         |
+| level                  | integer                  | NO          |
+| experience_points      | integer                  | NO          |
+| streak_days            | integer                  | NO          |
+| achievements           | ARRAY                    | YES         |
+| created_at             | timestamp with time zone | NO          |
+| updated_at             | timestamp with time zone | NO          |
+| avatar_url             | text                     | YES         |
+| preferred_language     | text                     | YES         |
+| last_login_date        | date                     | YES         |
+| last_streak_bonus_date | date                     | YES         |
+| total_verses           | integer                  | YES         |
+| total_journal          | integer                  | YES         |
+| daily_xp_earned        | integer                  | YES         |
+| app_version            | integer                  | YES         |
+| user_email             | text                     | YES         |
+| total_elite_habit      | integer                  | YES         |
+| analytics_used         | integer                  | YES         |
+| last_analytics_date    | date                     | YES         |
+| is_admin               | boolean                  | YES         |
+| phone_number           | text                     | YES         |
+| verse4_used            | integer                  | YES         |
+| is_pro                 | boolean                  | YES         |
+| subscription_type      | text                     | YES         |
+| last_notification_time | timestamp with time zone | YES         |
+
+------------------------------------------------------------------------
+
+-- Check schema for pro_subscriptions table
+SELECT 
+    column_name,
+    data_type,
+    is_nullable,
+    column_default,
+    character_maximum_length
+FROM information_schema.columns 
+WHERE table_name = 'pro_subscriptions'
+ORDER BY ordinal_position;
+
+| column_name             | data_type                | is_nullable | column_default    | character_maximum_length |
+| ----------------------- | ------------------------ | ----------- | ----------------- | ------------------------ |
+| id                      | uuid                     | NO          | gen_random_uuid() | null                     |
+| user_id                 | uuid                     | YES         | null              | null                     |
+| ip_address              | text                     | YES         | null              | null                     |
+| subscription_type       | text                     | NO          | 'trial'::text     | null                     |
+| status                  | text                     | NO          | 'pending'::text   | null                     |
+| subscription_start_date | timestamp with time zone | YES         | null              | null                     |
+| subscription_end_date   | timestamp with time zone | YES         | null              | null                     |
+| amount_paid             | numeric                  | YES         | null              | null                     |
+| currency                | text                     | YES         | 'IDR'::text       | null                     |
+| tripay_reference        | text                     | YES         | null              | null                     |
+| created_at              | timestamp with time zone | NO          | now()             | null                     |
+| updated_at              | timestamp with time zone | NO          | now()             | null                     |
+| user_email              | text                     | YES         | null              | null                     |
+| customer_phone          | text                     | YES         | null              | null                     |
+| verse_access            | boolean                  | YES         | true              | null                     |
+| pro_badge               | boolean                  | YES         | true              | null                     |
+| days_remaining          | integer                  | NO          | 0                 | null                     |
+
+------------------------------------------------------------------------
+-- Check schema for xp_transactions table
+SELECT 
+    column_name,
+    data_type,
+    is_nullable,
+    column_default,
+    character_maximum_length
+FROM information_schema.columns 
+WHERE table_name = 'xp_transactions'
+ORDER BY ordinal_position;
+
+| column_name      | data_type                | is_nullable | column_default    | character_maximum_length |
+| ---------------- | ------------------------ | ----------- | ----------------- | ------------------------ |
+| id               | uuid                     | NO          | gen_random_uuid() | null                     |
+| user_id          | uuid                     | NO          | null              | null                     |
+| xp_amount        | integer                  | NO          | null              | null                     |
+| transaction_type | text                     | NO          | null              | null                     |
+| reason           | text                     | YES         | null              | null                     |
+| activity_id      | uuid                     | YES         | null              | null                     |
+| created_at       | timestamp with time zone | NO          | now()             | null                     |
+
+------------------------------------------------------------------------
+
+-- Check schema for subscription_plans table
+SELECT 
+    column_name,
+    data_type,
+    is_nullable,
+    column_default,
+    character_maximum_length
+FROM information_schema.columns 
+WHERE table_name = 'subscription_plans'
+ORDER BY ordinal_position;
+
+| column_name         | data_type                | is_nullable | column_default              | character_maximum_length |
+| ------------------- | ------------------------ | ----------- | --------------------------- | ------------------------ |
+| id                  | text                     | NO          | null                        | null                     |
+| name                | text                     | NO          | null                        | null                     |
+| description         | text                     | YES         | null                        | null                     |
+| price               | integer                  | NO          | null                        | null                     |
+| currency            | text                     | YES         | 'IDR'::text                 | null                     |
+| duration_days       | integer                  | NO          | null                        | null                     |
+| payment_method_code | text                     | YES         | 'BCAVA'::text               | null                     |
+| payment_method      | text                     | YES         | 'BCA Virtual Account'::text | null                     |
+| is_active           | boolean                  | YES         | true                        | null                     |
+| created_at          | timestamp with time zone | YES         | now()                       | null                     |
+| updated_at          | timestamp with time zone | YES         | now()                       | null                     |
+
+------------------------------------------------------------------------
+
+
+-- Alternative using DESCRIBE (if using MySQL)
+-- DESCRIBE pro_subscriptions;
+-- DESCRIBE xp_transactions;
+-- DESCRIBE subscription_plans;
+
+-- Alternative using \d (if using PostgreSQL)
+-- \d pro_subscriptions
+-- \d xp_transactions
+-- \d subscription_plans

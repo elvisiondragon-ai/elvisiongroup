@@ -141,25 +141,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         saved_data: data
       });
 
-      // Update total_journal counter FIRST - get fresh count from DB to prevent mismatch
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('total_journal')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      const currentCount = currentProfile?.total_journal || 0;
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          total_journal: currentCount + 1,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
-
-      if (profileError) {
-        console.error('Error updating profile total_journal:', profileError);
-      }
+      // Database triggers handle counter increment automatically - no manual update needed
 
       // Award XP AFTER counter increment (XP can be blocked by daily limit)
       awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
@@ -198,18 +180,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         return;
       }
 
-      // Update total_journal counter (decrement)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          total_journal: Math.max(0, (userProfile?.total_journal || 1) - 1),
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
-
-      if (profileError) {
-        console.error('Error updating profile total_journal:', profileError);
-      }
+      // Database triggers handle counter decrement automatically - no manual update needed
 
       console.log('%c❌ Reflection deleted', 'color: red; font-weight: bold;', reflectionId);
       toast({
@@ -364,7 +335,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         <Card className="p-4">
           <div className="text-center">
             <div className="text-3xl font-bold text-indigo-400 mb-1">
-              {totalReflections}
+              {reflections.length}
             </div>
             <div className="text-sm text-muted-foreground">
               Total Reflections

@@ -75,15 +75,11 @@ export function EliteHabit() {
         setTodayEntries(todayData);
       }
 
-      // Load all entries for reports (last 30 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
+      // Load all entries for reports (all time)
       const { data: allData } = await supabase
         .from('elite_habits')
         .select('*')
         .eq('user_id', userId)
-        .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false });
 
       if (allData) {
@@ -172,25 +168,7 @@ export function EliteHabit() {
         saved_data: data
       });
 
-      // Update total_elite_habit counter FIRST - get fresh count from DB to prevent mismatch
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('total_elite_habit')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      const currentCount = currentProfile?.total_elite_habit || 0;
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          total_elite_habit: currentCount + 1,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
-
-      if (profileError) {
-        console.error('Error updating profile total_elite_habit:', profileError);
-      }
+      // Database triggers handle counter increment automatically - no manual update needed
 
       // Award XP AFTER counter increment (XP can be blocked by daily limit)
       awardXP('elite_habit_completion', 10, 'Completed elite habit exercise');
@@ -235,25 +213,7 @@ export function EliteHabit() {
         return;
       }
 
-      // Update total_elite_habit counter (decrement) - get fresh count from DB
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('total_elite_habit')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      const currentCount = currentProfile?.total_elite_habit || 0;
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          total_elite_habit: Math.max(0, currentCount - 1),
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
-
-      if (profileError) {
-        console.error('Error updating profile total_elite_habit:', profileError);
-      }
+      // Database triggers handle counter decrement automatically - no manual update needed
 
       console.log('%c❌ Elite habit deleted', 'color: red; font-weight: bold;', habitId);
       toast({
@@ -416,7 +376,7 @@ export function EliteHabit() {
       <Card className="p-4">
         <div className="text-center">
           <div className="text-3xl font-bold text-emerald-400 mb-1">
-            {totalEliteHabits}
+            {allEntries.length}
           </div>
           <div className="text-sm text-muted-foreground">
             Total Elite Habits
@@ -594,7 +554,7 @@ export function EliteHabit() {
         <Card className="p-6 bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-500/30">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-emerald-400">
-              Laporan Elite Habit (30 Hari Terakhir)
+              Laporan Elite Habit
             </h3>
             <Badge variant="secondary" className="ml-2">
               {allEntries.length}
