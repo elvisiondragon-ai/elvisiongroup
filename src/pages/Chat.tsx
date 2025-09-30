@@ -611,7 +611,7 @@ export function Chat({ onNavigate }: ChatProps) {
   return (
     <div className="flex flex-col h-screen pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-card border-b border-border p-4">
+      <div className="sticky top-0 z-50 bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
@@ -681,7 +681,7 @@ export function Chat({ onNavigate }: ChatProps) {
       </div>
 
       {/* Message Input */}
-      <div className="sticky bottom-16 bg-background border-t border-border p-4">
+      <div className="sticky bottom-16 bg-background border-t border-border p-4 z-50">
         <div className="flex gap-2">
           <Input
             value={message}
