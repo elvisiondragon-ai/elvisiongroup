@@ -80,17 +80,20 @@ const AppContent = () => {
               console.log('🔵 User clicked SOFT UPDATE button')
               localStorage.removeItem('app-needs-update')
               
-              // SOFT UPDATE - PRESERVE ALL AUTH DATA, ONLY UPDATE SERVICE WORKER
-              // Don't touch localStorage at all except for required flags
+              // Backup auth tokens before SW update
+              const authKeys = Object.keys(localStorage).filter(key => 
+                key.startsWith('sb-') || key.includes('auth') || key.includes('session')
+              );
+              const authBackup: Record<string, string> = {};
+              authKeys.forEach(key => {
+                authBackup[key] = localStorage.getItem(key) || '';
+              });
+              sessionStorage.setItem('auth-backup', JSON.stringify(authBackup));
+              
               localStorage.setItem('force-refresh-completed', 'true');
               localStorage.setItem('update-success-pending', 'true');
               
-              // Don't clear sessionStorage - preserve auth
-              // Don't clear cookies - preserve auth
-              // Don't clear caches - preserve everything including auth cache
-              
-              // ONLY update service worker for soft update
-              console.log('🔵 SOFT UPDATE: Only updating service worker, preserving all user data');
+              console.log('🔵 SOFT UPDATE: Auth backed up, updating service worker');
               
               // iOS-specific timing adjustments
               const updateDelay = isIOS ? 200 : 50;
@@ -102,6 +105,20 @@ const AppContent = () => {
                   setNeedRefresh(false)
                   setToastId(null);
                   
+                  // Restore auth after SW update
+                  setTimeout(() => {
+                    const backup = sessionStorage.getItem('auth-backup');
+                    if (backup) {
+                      const authData = JSON.parse(backup);
+                      Object.keys(authData).forEach(key => {
+                        if (authData[key] && !localStorage.getItem(key)) {
+                          localStorage.setItem(key, authData[key]);
+                        }
+                      });
+                      sessionStorage.removeItem('auth-backup');
+                    }
+                  }, 100);
+                  
                   // iOS fallback: Force reload if service worker fails
                   if (isIOS) {
                     setTimeout(() => {
@@ -110,7 +127,14 @@ const AppContent = () => {
                   }
                 } catch (error) {
                   console.error('Service worker update failed:', error);
-                  // Fallback: manual reload
+                  // Restore auth before fallback reload
+                  const backup = sessionStorage.getItem('auth-backup');
+                  if (backup) {
+                    const authData = JSON.parse(backup);
+                    Object.keys(authData).forEach(key => {
+                      if (authData[key]) localStorage.setItem(key, authData[key]);
+                    });
+                  }
                   window.location.reload();
                 }
                 
