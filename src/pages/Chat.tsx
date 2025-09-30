@@ -23,6 +23,7 @@ interface ChatMessageData {
   created_at: string;
   translatedMessage?: string;
   streak_days?: number;
+  subscription_type?: string | null;
 }
 
 interface ChatProps {
@@ -31,7 +32,6 @@ interface ChatProps {
 
 export function Chat({ onNavigate }: ChatProps) {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -39,7 +39,7 @@ export function Chat({ onNavigate }: ChatProps) {
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
   const { user, userProfile, handleButtonTimeout } = useUserProfile();
-  const { userId, chatChannel, isPro, proStatus } = useAuth();
+  const { userId, chatChannel, isPro, proStatus, messages, setMessages, addMessage, removeMessage, broadcastMessage, broadcastDelete } = useAuth();
   const { i18n, t } = useTranslation();
   const sendButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -67,53 +67,13 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [user, userProfile, isPro, proStatus]);
 
-  // Listen to realtime messages from chatChannel
+  // Load initial messages when channel is ready
   useEffect(() => {
     if (chatChannel) {
-      const handleMessage = (payload) => {
-        const newMessage = payload.new;
-        if (newMessage.user_id !== userId) {
-          setMessages(current => {
-            const exists = current.some(msg => msg.id === newMessage.id);
-            if (exists) return current;
-            return [...current, newMessage];
-          });
-        }
-      };
-
-      const handleBroadcastMessage = (payload) => {
-        if (payload.payload.user_id !== userId) {
-          setMessages(current => {
-            const exists = current.some(msg => msg.id === payload.payload.id);
-            if (exists) return current;
-            return [...current, payload.payload];
-          });
-        }
-      };
-
-      const handleBroadcastDelete = (payload) => {
-        console.log('❌ Chat deleted:', payload.payload.message_id);
-        setMessages(current => current.filter(msg => msg.id !== payload.payload.message_id));
-      };
-      
-      const sub = chatChannel
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: 'channel_id=eq.community' }, handleMessage)
-        .on('broadcast', { event: 'message_added' }, handleBroadcastMessage)
-        .on('broadcast', { event: 'message_deleted' }, handleBroadcastDelete)
-        .subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            // Hydrate to cover any gap before realtime starts delivering events
-            await loadMessages(); // ensure this fetches latest for channel_id='community'
-          }
-        });
-      
-      console.log('🔵 Chat realtime status: SUBSCRIBED');
-      
-      return () => {
-        sub.unsubscribe();
-      };
+      console.log('🔵 Chat realtime status: SUBSCRIBED - Loading initial messages');
+      loadMessages();
     }
-  }, [chatChannel, userId]);
+  }, [chatChannel]);
 
   // Load messages from database with real user profiles
   const loadMessages = useCallback(async (showRefreshState = false) => {
@@ -287,7 +247,7 @@ export function Chat({ onNavigate }: ChatProps) {
   useEffect(() => {
     // Network-first: Load fresh messages immediately on mount
     const loadFreshMessages = async () => {
-      if (userId) {
+      if (userId && messages.length === 0) {
         setIsLoading(true);
         try {
           await loadMessages();
@@ -296,10 +256,12 @@ export function Chat({ onNavigate }: ChatProps) {
         } finally {
           setIsLoading(false);
         }
+      } else if (messages.length > 0) {
+        setIsLoading(false);
       }
     };
     loadFreshMessages();
-  }, [loadMessages]);
+  }, [loadMessages, messages.length, userId]);
 
 
 
@@ -521,7 +483,7 @@ export function Chat({ onNavigate }: ChatProps) {
       subscription_type: userBadgeCache.subscription_type
     };
 
-    setMessages(current => [...current, optimisticMessage]);
+    addMessage(optimisticMessage);
     setMessage(""); // Button becomes disabled immediately
 
     try {
@@ -541,7 +503,7 @@ export function Chat({ onNavigate }: ChatProps) {
       if (error) {
         console.error('Error sending message:', error);
         // Remove optimistic message on error
-        setMessages(current => current.filter(msg => msg.id !== tempId));
+        removeMessage(tempId);
         toast({
           title: "Error",
           description: `Failed to send message: ${error.message}`,
@@ -554,15 +516,8 @@ export function Chat({ onNavigate }: ChatProps) {
           msg.id === tempId ? { ...optimisticMessage, id: data.id } : msg
         ));
 
-        // Broadcast new message to all users
-        if (chatChannel) {
-          chatChannel.send({
-            type: 'broadcast',
-            event: 'message_added',
-            payload: { ...optimisticMessage, id: data.id }
-          });
-          console.log('🧊 Message sent:', data.id);
-        }
+        // Broadcast new message to all users using AuthContext
+        broadcastMessage({ ...optimisticMessage, id: data.id });
 
         toast({
           title: "Message Sent 🚀",
@@ -604,7 +559,7 @@ export function Chat({ onNavigate }: ChatProps) {
   };
 
   const handleDeleteMessage = async (messageId: string) => {
-    setMessages(current => current.filter(msg => msg.id !== messageId));
+    removeMessage(messageId);
     
     if (messageId.startsWith('temp-')) {
       return;
@@ -622,26 +577,16 @@ export function Chat({ onNavigate }: ChatProps) {
       if (error) {
         const messageToRestore = messages.find(msg => msg.id === messageId);
         if (messageToRestore) {
-          setMessages(current => [...current, messageToRestore].sort((a, b) => 
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-          ));
+          addMessage(messageToRestore);
         }
       } else {
-        // Broadcast delete to all users
-        if (chatChannel) {
-          chatChannel.send({
-            type: 'broadcast',
-            event: 'message_deleted',
-            payload: { message_id: messageId }
-          });
-        }
+        // Broadcast delete to all users using AuthContext
+        broadcastDelete(messageId);
       }
     } catch (err) {
       const messageToRestore = messages.find(msg => msg.id === messageId);
       if (messageToRestore) {
-        setMessages(current => [...current, messageToRestore].sort((a, b) => 
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        ));
+        addMessage(messageToRestore);
       }
     }
   };

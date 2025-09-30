@@ -3,6 +3,20 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
+interface ChatMessageData {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_level: number;
+  is_pro: boolean;
+  is_admin?: boolean;
+  message: string;
+  created_at: string;
+  translatedMessage?: string;
+  streak_days?: number;
+  subscription_type?: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
   userId: string | null;
@@ -15,6 +29,13 @@ interface AuthContextType {
     status: string | null;
     expiresAt: string | null;
   } | null;
+  // Chat message state and actions
+  messages: ChatMessageData[];
+  setMessages: React.Dispatch<React.SetStateAction<ChatMessageData[]>>;
+  addMessage: (message: ChatMessageData) => void;
+  removeMessage: (messageId: string) => void;
+  broadcastMessage: (message: ChatMessageData) => void;
+  broadcastDelete: (messageId: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,6 +45,12 @@ const AuthContext = createContext<AuthContextType>({
   chatChannel: null,
   isPro: false,
   proStatus: null,
+  messages: [],
+  setMessages: () => {},
+  addMessage: () => {},
+  removeMessage: () => {},
+  broadcastMessage: () => {},
+  broadcastDelete: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -35,6 +62,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const chatChannelRef = useRef<RealtimeChannel | null>(null);
   const [channelStatus, setChannelStatus] = useState<string>('CLOSED');
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Chat messages state
+  const [messages, setMessages] = useState<ChatMessageData[]>([]);
   
   // OPTIMIZATION: Add caching to prevent excessive RPC calls
   const [proStatusCache, setProStatusCache] = useState<{data: any, timestamp: number} | null>(null);
@@ -89,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
     
-    // 7. Add event listeners
+    // 7. Add event listeners for chat messages
     channel.on(
       'postgres_changes',
       {
@@ -98,8 +128,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         table: 'chat_messages',
         filter: 'channel_id=eq.community'
       },
-      (payload) => console.log('💖 Realtime message received:', payload.new)
+      (payload) => {
+        console.log('💖 Realtime message received:', payload.new);
+        const newMessage = payload.new as ChatMessageData;
+        if (newMessage.user_id !== session?.user?.id) {
+          setMessages(current => {
+            const exists = current.some(msg => msg.id === newMessage.id);
+            if (exists) return current;
+            return [...current, newMessage];
+          });
+        }
+      }
     );
+    
+    // Add broadcast listeners
+    channel.on('broadcast', { event: 'message_added' }, (payload) => {
+      const newMessage = payload.payload as ChatMessageData;
+      if (newMessage.user_id !== session?.user?.id) {
+        setMessages(current => {
+          const exists = current.some(msg => msg.id === newMessage.id);
+          if (exists) return current;
+          return [...current, newMessage];
+        });
+      }
+    });
+    
+    channel.on('broadcast', { event: 'message_deleted' }, (payload) => {
+      console.log('❌ Chat deleted:', payload.payload.message_id);
+      setMessages(current => current.filter(msg => msg.id !== payload.payload.message_id));
+    });
     
     // 8. Subscribe with unified error handling
     channel.subscribe((status) => {
@@ -228,6 +285,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Chat message actions
+  const addMessage = (message: ChatMessageData) => {
+    setMessages(current => {
+      const exists = current.some(msg => msg.id === message.id);
+      if (exists) return current;
+      return [...current, message];
+    });
+  };
+
+  const removeMessage = (messageId: string) => {
+    setMessages(current => current.filter(msg => msg.id !== messageId));
+  };
+
+  const broadcastMessage = (message: ChatMessageData) => {
+    if (chatChannel) {
+      chatChannel.send({
+        type: 'broadcast',
+        event: 'message_added',
+        payload: message
+      });
+      console.log('🧊 Message broadcasted:', message.id);
+    }
+  };
+
+  const broadcastDelete = (messageId: string) => {
+    if (chatChannel) {
+      chatChannel.send({
+        type: 'broadcast',
+        event: 'message_deleted',
+        payload: { message_id: messageId }
+      });
+      console.log('🗑️ Delete broadcasted:', messageId);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -237,6 +329,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         chatChannel,
         isPro: proStatus?.isPro || false,
         proStatus,
+        messages,
+        setMessages,
+        addMessage,
+        removeMessage,
+        broadcastMessage,
+        broadcastDelete,
       }}
     >
       {children}
