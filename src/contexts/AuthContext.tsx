@@ -218,6 +218,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       // If no session, try to recover from deployment backup
       if (!session) {
+        // Try manual update backup first
         const deploymentRecover = sessionStorage.getItem('auth-backup');
         if (deploymentRecover) {
           try {
@@ -231,6 +232,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           } catch (e) {
             console.warn('Failed to recover session:', e);
+          }
+        }
+
+        // iOS: Try automatic deployment backup
+        const iosNeedsRecovery = localStorage.getItem('ios-needs-recovery');
+        if (iosNeedsRecovery === 'true') {
+          const iosBackup = sessionStorage.getItem('ios-deploy-backup');
+          if (iosBackup) {
+            try {
+              const authData = JSON.parse(iosBackup);
+              if (authData._session_backup) {
+                const backupSession = JSON.parse(authData._session_backup);
+                await supabase.auth.setSession(backupSession);
+                console.log('📱 iOS recovered from auto-deployment logout');
+                sessionStorage.removeItem('ios-deploy-backup');
+                localStorage.removeItem('ios-needs-recovery');
+                return;
+              }
+            } catch (e) {
+              console.warn('iOS recovery failed:', e);
+              localStorage.removeItem('ios-needs-recovery');
+            }
           }
         }
       }

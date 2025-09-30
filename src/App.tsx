@@ -50,9 +50,39 @@ const AppContent = () => {
       console.log('SW registration error', error)
     },
     onNeedRefresh() {
-      console.log('🔄 Update available, saving to localStorage')
+      console.log('🔄 Update available - latest version ready')
+      
+      // iOS-specific: Backup auth IMMEDIATELY when update is detected
+      if (isIOS) {
+        console.log('📱 iOS deployment detected - backing up auth')
+        const authKeys = Object.keys(localStorage).filter(key => 
+          key.startsWith('sb-') || 
+          key.includes('auth') || 
+          key.includes('session') ||
+          key.includes('supabase') ||
+          key.includes('token') ||
+          key.match(/^supabase\.auth\./)
+        );
+        const authBackup: Record<string, string> = {};
+        authKeys.forEach(key => {
+          const value = localStorage.getItem(key);
+          if (value) authBackup[key] = value;
+        });
+        
+        // Also backup current session from Supabase
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session) {
+            authBackup['_session_backup'] = JSON.stringify(session);
+          }
+          sessionStorage.setItem('ios-deploy-backup', JSON.stringify(authBackup));
+          localStorage.setItem('ios-needs-recovery', 'true');
+        });
+      }
+      
+      // Always mark as needing update - this will refresh existing button to latest version
       localStorage.setItem('app-needs-update', 'true')
-      // Reset blocker so notification can show for new updates
+      localStorage.setItem('update-timestamp', Date.now().toString())
+      // Reset blocker so notification can show for new updates  
       localStorage.removeItem('force-refresh-completed')
     }
   })
@@ -199,10 +229,19 @@ const AppContent = () => {
     // Check if update is available from SW or localStorage
     const hasUpdate = needRefresh || localStorage.getItem('app-needs-update') === 'true'
     const forceRefreshCompleted = localStorage.getItem('force-refresh-completed') === 'true'
+    const updateTimestamp = localStorage.getItem('update-timestamp')
     
-    if (hasUpdate && !toastId && !forceRefreshCompleted) {
-      console.log('📢 Showing soft update notification')
-      showSoftUpdateToast()
+    if (hasUpdate && !forceRefreshCompleted) {
+      // If we already have a toast but there's a newer update, dismiss old one first
+      if (toastId && updateTimestamp) {
+        console.log('🔄 Newer update available, refreshing notification')
+        // The existing toast will be replaced by the new one
+      }
+      
+      if (!toastId || updateTimestamp) {
+        console.log('📢 Showing latest update notification')
+        showSoftUpdateToast()
+      }
     }
     
     // Cleanup toast ID when update completes
