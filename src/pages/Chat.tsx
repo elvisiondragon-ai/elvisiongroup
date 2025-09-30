@@ -79,7 +79,12 @@ export function Chat({ onNavigate }: ChatProps) {
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: 'channel_id=eq.community' }, handleMessage)
         .on('broadcast', { event: 'message_added' }, handleBroadcastMessage)
         .on('broadcast', { event: 'message_deleted' }, handleBroadcastDelete)
-        .subscribe();
+        .subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            // Hydrate to cover any gap before realtime starts delivering events
+            await loadMessages(); // ensure this fetches latest for channel_id='community'
+          }
+        });
       
       console.log('🔵 Chat realtime status: SUBSCRIBED');
       
@@ -100,6 +105,7 @@ export function Chat({ onNavigate }: ChatProps) {
       let { data: chatMessages, error } = await supabase
         .from('chat_messages')
         .select('*')
+        .eq('channel_id', 'community')
         .order('created_at', { ascending: true });
         
       if (error || !chatMessages) {
