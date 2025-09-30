@@ -43,7 +43,20 @@ export function Chat({ onNavigate }: ChatProps) {
   const { i18n, t } = useTranslation();
   const sendButtonRef = useRef<HTMLButtonElement>(null);
 
-  // User badge cache for optimistic UI consistency
+  // Independent pro badge cache for Chat.tsx optimistic UI
+  const [chatProBadgeCache, setChatProBadgeCache] = useState(() => {
+    const saved = localStorage.getItem('chat-pro-badge-cache');
+    return saved ? JSON.parse(saved) : {
+      is_pro: false,
+      subscription_type: null,
+      streak_days: 0,
+      user_name: '',
+      user_level: 1,
+      timestamp: 0
+    };
+  });
+
+  // User badge cache for optimistic UI consistency (existing)
   const [userBadgeCache, setUserBadgeCache] = useState({
     is_pro: false,
     subscription_type: null,
@@ -54,16 +67,24 @@ export function Chat({ onNavigate }: ChatProps) {
 
   if (!userId) return null;
 
-  // Update user badge cache when user data changes
+  // Update independent chat pro badge cache with persistence
   useEffect(() => {
     if (user && userProfile) {
-      setUserBadgeCache({
+      const cacheData = {
         is_pro: isPro || proStatus?.isPro || false,
         subscription_type: proStatus?.subscriptionType || null,
         streak_days: userProfile?.streak_days || 0,
         user_name: userProfile?.display_name || 'Anonymous',
-        user_level: userProfile?.level || 1
-      });
+        user_level: userProfile?.level || 1,
+        timestamp: Date.now()
+      };
+      
+      // Update both caches
+      setChatProBadgeCache(cacheData);
+      setUserBadgeCache(cacheData);
+      
+      // Persist chat-specific cache to localStorage
+      localStorage.setItem('chat-pro-badge-cache', JSON.stringify(cacheData));
     }
   }, [user, userProfile, isPro, proStatus]);
 
@@ -467,20 +488,20 @@ export function Chat({ onNavigate }: ChatProps) {
     }
 
 
-    // Add optimistic message immediately with cached badge data
+    // Add optimistic message immediately with cached badge data (using chat-specific cache)
     const tempId = `temp-${Date.now()}`;
     const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
     const optimisticMessage: ChatMessageData = {
       id: tempId,
       user_id: user.id,
-      user_name: userBadgeCache.user_name,
-      user_level: userBadgeCache.user_level,
-      is_pro: userBadgeCache.is_pro,
+      user_name: chatProBadgeCache.user_name || userBadgeCache.user_name,
+      user_level: chatProBadgeCache.user_level || userBadgeCache.user_level,
+      is_pro: chatProBadgeCache.is_pro || userBadgeCache.is_pro,
       is_admin: user.id === knownAdminId,
       message: message.trim(),
       created_at: new Date().toISOString(),
-      streak_days: userBadgeCache.streak_days,
-      subscription_type: userBadgeCache.subscription_type
+      streak_days: chatProBadgeCache.streak_days || userBadgeCache.streak_days,
+      subscription_type: chatProBadgeCache.subscription_type || userBadgeCache.subscription_type
     };
 
     addMessage(optimisticMessage);

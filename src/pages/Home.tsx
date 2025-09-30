@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAudioCache } from "@/hooks/useAudioCache";
 import { useToast } from "@/hooks/use-toast";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
@@ -50,7 +51,11 @@ export function Home({
   onNavigate
 }: HomeProps) {
   const { t } = useTranslation();
-  const { userProfile, user } = useUserProfile();
+  const { userProfile, user: contextUser } = useUserProfile();
+  const { userId, user: authUser } = useAuth();
+  
+  // Use AuthContext as primary source, fallback to UserProfileContext
+  const user = authUser || contextUser;
   const [onlineCount, setOnlineCount] = useState(4500); // Base count of 4500
   const { calculateXPProgress } = useXPSystem();
   const { proStatus } = usePro();
@@ -69,6 +74,28 @@ export function Home({
   const [showAffiliateModal, setShowAffiliateModal] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const testimonialsRef = useRef<HTMLDivElement>(null);
+
+  // Cache for user profile data to prevent "User" fallback
+  const [cachedUserProfile, setCachedUserProfile] = useState(() => {
+    const cached = localStorage.getItem('home-user-profile-cache');
+    return cached ? JSON.parse(cached) : null;
+  });
+
+  // Update cache when userProfile changes
+  useEffect(() => {
+    if (userProfile && (user || userId)) {
+      const cacheData = {
+        display_name: userProfile.display_name,
+        level: userProfile.level,
+        experience_points: userProfile.experience_points,
+        streak_days: userProfile.streak_days,
+        timestamp: Date.now(),
+        userId: userId || user?.id
+      };
+      localStorage.setItem('home-user-profile-cache', JSON.stringify(cacheData));
+      setCachedUserProfile(cacheData);
+    }
+  }, [userProfile, user, userId]);
 
   // Audio files will be cached only when user plays them
 
@@ -181,11 +208,13 @@ export function Home({
     };
   }, []);
 
-  const displayName = userProfile?.display_name || "User";
+  // Use cached profile data for instant display, with better fallback
+  const effectiveProfile = userProfile || cachedUserProfile;
+  const displayName = effectiveProfile?.display_name || user?.email?.split('@')[0] || "User";
   const isAdmin = user?.id === '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
 
-  // Calculate XP progress using the XP system
-  const xpProgress = userProfile ? calculateXPProgress(userProfile.experience_points, userProfile.level) : {
+  // Calculate XP progress using the XP system with effective profile
+  const xpProgress = effectiveProfile ? calculateXPProgress(effectiveProfile.experience_points, effectiveProfile.level) : {
     currentLevelXP: 0,
     xpForNextLevel: 100,
     progress: 0
@@ -503,14 +532,14 @@ export function Home({
                     {displayName}
                   </h3>
                   {isAdmin && <AdminBadge size="sm" />}
-                  {!isAdmin && <TierBadge level={userProfile?.level || 1} isPro={proStatus.isPro} achievements={userProfile?.achievements || []} subscriptionType={proStatus.subscriptionType} />}
+                  {!isAdmin && <TierBadge level={effectiveProfile?.level || 1} isPro={proStatus.isPro} achievements={effectiveProfile?.achievements || []} subscriptionType={proStatus.subscriptionType} />}
                 </div>
               </div>
-              <StreakIndicator streakDays={userProfile?.streak_days || 0} size="sm" />
+              <StreakIndicator streakDays={effectiveProfile?.streak_days || 0} size="sm" />
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold font-orbitron text-primary">
-                {userProfile?.experience_points || 0} XP
+                {effectiveProfile?.experience_points || 0} XP
               </div>
               <div className="text-xs text-muted-foreground">
                 {xpProgress.xpForNextLevel - xpProgress.currentLevelXP} XP to next level
@@ -520,7 +549,7 @@ export function Home({
           
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Level {userProfile?.level || 1} Progress</span>
+              <span>Level {effectiveProfile?.level || 1} Progress</span>
               <span>{Math.round(xpProgress.progress)}%</span>
             </div>
             <Progress value={xpProgress.progress} className="h-2" />
@@ -607,7 +636,7 @@ export function Home({
           const isMeditationSession = feature.key === 'meditation-sessions';
           const isMeditationLocked = isMeditationSession && !proStatus.isPro;
           const isIgnisQuest = feature.key === 'ignis-quest';
-          const isIgnisLocked = isIgnisQuest && (userProfile?.level || 1) < 8;
+          const isIgnisLocked = isIgnisQuest && (effectiveProfile?.level || 1) < 8;
           const actuallyLocked = isLocked || isIgnisLocked || isMeditationLocked;
           return <Card key={index} className={`${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle' || feature.key === 'finance' || feature.key === 'pasangan') ? 'p-2 rounded-full aspect-square max-w-24 max-h-24 mx-auto' : 'p-4'} border-border transition-all duration-300 relative ${
             feature.key === 'personal-analytics'
@@ -807,7 +836,7 @@ export function Home({
           const isMeditationSession = feature.key === 'meditation-sessions';
           const isMeditationLocked = isMeditationSession && !proStatus.isPro;
           const isIgnisQuest = feature.key === 'ignis-quest';
-          const isIgnisLocked = isIgnisQuest && (userProfile?.level || 1) < 8;
+          const isIgnisLocked = isIgnisQuest && (effectiveProfile?.level || 1) < 8;
           const actuallyLocked = isLocked || isIgnisLocked || isMeditationLocked;
           return <Card key={index} className={`p-4 border-border transition-all duration-300 relative ${
             feature.key === 'ignis-quest'
@@ -895,7 +924,7 @@ export function Home({
           const isMeditationSession = feature.key === 'meditation-sessions';
           const isMeditationLocked = isMeditationSession && !proStatus.isPro;
           const isIgnisQuest = feature.key === 'ignis-quest';
-          const isIgnisLocked = isIgnisQuest && (userProfile?.level || 1) < 8;
+          const isIgnisLocked = isIgnisQuest && (effectiveProfile?.level || 1) < 8;
           const actuallyLocked = isLocked || isIgnisLocked || isMeditationLocked;
           return <Card key={index} className={`${(feature.key === 'physical-beauty' || feature.key === 'true-diet' || feature.key === 'blood-circulation' || feature.key === 'lifestyle' || feature.key === 'finance' || feature.key === 'pasangan') ? 'p-2 rounded-full aspect-square max-w-24 max-h-24 mx-auto' : 'p-4'} border-border transition-all duration-300 relative ${
             feature.key === 'personal-analytics'

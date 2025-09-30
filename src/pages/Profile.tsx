@@ -62,8 +62,11 @@ interface UserProfile {
 }
 
 export function Profile({ onNavigate }: ProfileProps) {
-  const { userProfile, user, loading } = useUserProfile();
-  const { userId } = useAuth();
+  const { userProfile, user: contextUser, loading } = useUserProfile();
+  const { userId, user: authUser } = useAuth();
+  
+  // Use AuthContext as primary source, fallback to UserProfileContext
+  const user = authUser || contextUser;
   const [cachedProfile, setCachedProfile] = useState<UserProfile | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -80,7 +83,7 @@ export function Profile({ onNavigate }: ProfileProps) {
   const { toast } = useToast();
 
 
-  // Cache management - event-based, no TTL
+  // Enhanced cache management with user auth data
   useEffect(() => {
     const loadCache = () => {
       const cached = localStorage.getItem('profile-metadata');
@@ -98,14 +101,16 @@ export function Profile({ onNavigate }: ProfileProps) {
 
   // Update cache when profile changes (event-based)
   useEffect(() => {
-    if (userProfile) {
+    if (userProfile && (user || userId)) {
       const cacheData = {
-        profile: userProfile
+        profile: userProfile,
+        timestamp: Date.now(),
+        userId: userId || user?.id
       };
       localStorage.setItem('profile-metadata', JSON.stringify(cacheData));
       setCachedProfile(userProfile);
     }
-  }, [userProfile]);
+  }, [userProfile, user, userId]);
 
 
   const handleLogout = async () => {
@@ -223,12 +228,14 @@ export function Profile({ onNavigate }: ProfileProps) {
     );
   }
 
-  // Error handling - if no auth user AND context user, show error state  
-  if (!user && !loading) {
+  // Enhanced error handling with fallback auth check
+  if (!user && !userId && !loading) {
+    // Try to get session from AuthContext before showing error
     return (
       <div className="min-h-screen bg-background flex items-center justify-center pb-20">
         <div className="text-center">
           <p className="text-destructive">Error loading profile</p>
+          <p className="text-sm text-muted-foreground mb-4">Please check your connection</p>
           <Button onClick={() => window.location.reload()} className="mt-4">
             Retry
           </Button>
@@ -237,9 +244,18 @@ export function Profile({ onNavigate }: ProfileProps) {
     );
   }
 
-  // Use cached profile for instant display, fallback to userProfile or default
+  // If we have userId from AuthContext but no user object yet, show loading
+  if (userId && !user && !loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center pb-20">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Use cached profile for instant display, fallback to userProfile or safe default
   const profile = cachedProfile || userProfile || {
-    display_name: "User",
+    display_name: user?.email?.split('@')[0] || "User", // Use email username if available
     level: 1,
     experience_points: 0,
     streak_days: 0,
