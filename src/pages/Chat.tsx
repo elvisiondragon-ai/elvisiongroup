@@ -39,12 +39,33 @@ export function Chat({ onNavigate }: ChatProps) {
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
   const { user, userProfile, handleButtonTimeout } = useUserProfile();
-  const { userId, chatChannel } = useAuth();
+  const { userId, chatChannel, isPro, proStatus } = useAuth();
   const { i18n, t } = useTranslation();
   const sendButtonRef = useRef<HTMLButtonElement>(null);
 
+  // User badge cache for optimistic UI consistency
+  const [userBadgeCache, setUserBadgeCache] = useState({
+    is_pro: false,
+    subscription_type: null,
+    streak_days: 0,
+    user_name: '',
+    user_level: 1
+  });
+
   if (!userId) return null;
 
+  // Update user badge cache when user data changes
+  useEffect(() => {
+    if (user && userProfile) {
+      setUserBadgeCache({
+        is_pro: isPro || proStatus?.isPro || false,
+        subscription_type: proStatus?.subscriptionType || null,
+        streak_days: userProfile?.streak_days || 0,
+        user_name: userProfile?.display_name || 'Anonymous',
+        user_level: userProfile?.level || 1
+      });
+    }
+  }, [user, userProfile, isPro, proStatus]);
 
   // Listen to realtime messages from chatChannel
   useEffect(() => {
@@ -484,18 +505,20 @@ export function Chat({ onNavigate }: ChatProps) {
     }
 
 
-    // Add optimistic message immediately
+    // Add optimistic message immediately with cached badge data
     const tempId = `temp-${Date.now()}`;
     const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
     const optimisticMessage: ChatMessageData = {
       id: tempId,
       user_id: user.id,
-      user_name: userProfile?.display_name || 'Anonymous',
-      user_level: userProfile?.level || 1,
-      is_pro: userProfile?.is_pro || false,
+      user_name: userBadgeCache.user_name,
+      user_level: userBadgeCache.user_level,
+      is_pro: userBadgeCache.is_pro,
       is_admin: user.id === knownAdminId,
       message: message.trim(),
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      streak_days: userBadgeCache.streak_days,
+      subscription_type: userBadgeCache.subscription_type
     };
 
     setMessages(current => [...current, optimisticMessage]);

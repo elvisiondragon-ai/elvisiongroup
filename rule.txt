@@ -6,6 +6,9 @@ CLAUDE CODE BEHAVIOR
 -> FIND THE GAP
 -> NOT ALLOWED ASSUMPT or Giving Code by assumption, ONLY VALIDATION FROM DATA, Explain why it is the issue and give option 
 
+BEFORE FIX ACTION->
+*YOU ARE NOT ALLOW TO ASSUMPT OR CONCLUSION CLAUDE CODE IS VERY STUPID ON ASSUMPTION OR CONCLUSION, GIVE QUESTION BEFORE YOU ACTIVE TO SUPABASE AI IN CHAT IS YOUR ACTION IS VALID OR NOT, ALWAYS ASK BEFORE EXECUTE ACTION*
+
 FIX SESSION - GIVE CODE Not From assumption but VALID DATA
 2. GIVE SIMPLEST SOLUTION, IF CODE SQL Give shortest but most effective code after understand schema + Verification code in 1 file at assist_code folder.
 3. IF Frontend code, ONLY FIX WHAT REQUESTED, DO NOT CHANGE beyond what requested, it cross the line!
