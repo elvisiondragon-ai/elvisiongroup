@@ -126,6 +126,18 @@ const Index = () => {
         localStorage.removeItem('post-signup-welcome');
       }, 1000);
     }
+
+    // Check for login success and show welcome back toast
+    if (localStorage.getItem('login-success-pending') === 'true') {
+      setTimeout(() => {
+        toast({
+          title: "Selamat Datang kembali! 🎉",
+          description: "Anda berhasil masuk ke eL Vision Group.",
+          variant: "default",
+        });
+        localStorage.removeItem('login-success-pending');
+      }, 1000);
+    }
   }, [toast]);
 
   // Global scroll-to-top functionality for all section navigation

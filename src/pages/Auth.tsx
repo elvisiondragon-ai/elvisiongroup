@@ -149,11 +149,11 @@ export function Auth({ onLogin }: AuthProps) {
         localStorage.removeItem('audio-cache');
         sessionStorage.clear();
         
-        // Set flag for welcome toast and hard refresh
+        // Set login success flag for post-reload toast
         localStorage.setItem('login-success-pending', 'true');
         
-        // Hard refresh to home
-        window.location.href = '/';
+        // Force refresh after login
+        window.location.reload();
       }
     } catch (error: any) {
       toast({
@@ -218,11 +218,11 @@ export function Auth({ onLogin }: AuthProps) {
         localStorage.removeItem('audio-cache');
         sessionStorage.clear();
         
-        // Set flag for welcome toast and hard refresh
+        // Set login success flag for post-reload toast
         localStorage.setItem('login-success-pending', 'true');
         
-        // Hard refresh to home
-        window.location.href = '/';
+        // Force refresh after login
+        window.location.reload();
       }
     } catch (error: any) {
       toast({
@@ -408,11 +408,11 @@ export function Auth({ onLogin }: AuthProps) {
         localStorage.removeItem('audio-cache');
         sessionStorage.clear();
         
-        // Set flag for welcome toast and hard refresh
+        // Set login success flag for post-reload toast
         localStorage.setItem('login-success-pending', 'true');
         
-        // Hard refresh to home
-        window.location.href = '/';
+        // Force refresh after login
+        window.location.reload();
       }
     } catch (error: any) {
       toast({

@@ -111,7 +111,7 @@ const AppContent = () => {
                     if (backup) {
                       const authData = JSON.parse(backup);
                       Object.keys(authData).forEach(key => {
-                        if (authData[key] && !localStorage.getItem(key)) {
+                        if (authData[key]) {
                           localStorage.setItem(key, authData[key]);
                         }
                       });

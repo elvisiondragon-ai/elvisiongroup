@@ -32,7 +32,7 @@ self.addEventListener('install', (event) => {
       });
     })
   );
-  self.skipWaiting(); // Activate immediately
+  // self.skipWaiting(); // DISABLED - wait for user action to update
 });
 
 // Fetch event with special handling for audio files
