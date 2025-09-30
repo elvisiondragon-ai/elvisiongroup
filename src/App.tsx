@@ -80,14 +80,29 @@ const AppContent = () => {
               console.log('🔵 User clicked SOFT UPDATE button')
               localStorage.removeItem('app-needs-update')
               
-              // Backup auth tokens before SW update
+              // Backup ALL auth tokens before SW update
               const authKeys = Object.keys(localStorage).filter(key => 
-                key.startsWith('sb-') || key.includes('auth') || key.includes('session')
+                key.startsWith('sb-') || 
+                key.includes('auth') || 
+                key.includes('session') ||
+                key.includes('supabase') ||
+                key.includes('token') ||
+                key.match(/^supabase\.auth\./)
               );
               const authBackup: Record<string, string> = {};
               authKeys.forEach(key => {
-                authBackup[key] = localStorage.getItem(key) || '';
+                const value = localStorage.getItem(key);
+                if (value) authBackup[key] = value;
               });
+              
+              // Also backup current session from Supabase
+              supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session) {
+                  authBackup['_session_backup'] = JSON.stringify(session);
+                }
+                sessionStorage.setItem('auth-backup', JSON.stringify(authBackup));
+              });
+              
               sessionStorage.setItem('auth-backup', JSON.stringify(authBackup));
               
               localStorage.setItem('force-refresh-completed', 'true');
@@ -105,19 +120,33 @@ const AppContent = () => {
                   setNeedRefresh(false)
                   setToastId(null);
                   
-                  // Restore auth after SW update
-                  setTimeout(() => {
+                  // Restore auth after SW update with better timing
+                  setTimeout(async () => {
                     const backup = sessionStorage.getItem('auth-backup');
                     if (backup) {
                       const authData = JSON.parse(backup);
+                      
+                      // Restore localStorage items first
                       Object.keys(authData).forEach(key => {
-                        if (authData[key]) {
+                        if (key !== '_session_backup' && authData[key]) {
                           localStorage.setItem(key, authData[key]);
                         }
                       });
+                      
+                      // Then restore session if available
+                      if (authData._session_backup) {
+                        try {
+                          const session = JSON.parse(authData._session_backup);
+                          await supabase.auth.setSession(session);
+                          console.log('🔄 Session restored from backup');
+                        } catch (e) {
+                          console.warn('⚠️ Failed to restore session:', e);
+                        }
+                      }
+                      
                       sessionStorage.removeItem('auth-backup');
                     }
-                  }, 100);
+                  }, 500);
                   
                   // iOS fallback: Force reload if service worker fails
                   if (isIOS) {
@@ -132,7 +161,9 @@ const AppContent = () => {
                   if (backup) {
                     const authData = JSON.parse(backup);
                     Object.keys(authData).forEach(key => {
-                      if (authData[key]) localStorage.setItem(key, authData[key]);
+                      if (key !== '_session_backup' && authData[key]) {
+                        localStorage.setItem(key, authData[key]);
+                      }
                     });
                   }
                   window.location.reload();

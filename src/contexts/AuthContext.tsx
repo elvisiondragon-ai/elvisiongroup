@@ -215,12 +215,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      // If no session, try to recover from deployment backup
+      if (!session) {
+        const deploymentRecover = sessionStorage.getItem('auth-backup');
+        if (deploymentRecover) {
+          try {
+            const authData = JSON.parse(deploymentRecover);
+            if (authData._session_backup) {
+              const backupSession = JSON.parse(authData._session_backup);
+              await supabase.auth.setSession(backupSession);
+              console.log('🚀 Recovered from deployment logout');
+              sessionStorage.removeItem('auth-backup');
+              return; // Don't call updateAuthState yet, let onAuthStateChange handle it
+            }
+          } catch (e) {
+            console.warn('Failed to recover session:', e);
+          }
+        }
+      }
+      
       updateAuthState(session);
     });
 
     // Auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log(`🔵🔵🔵 Auth State Change: ${event}`, { userId: session?.user?.id, hasSession: !!session });
+      
+      // Backup session on every auth change for deployment recovery
+      if (session && event !== 'SIGNED_OUT') {
+        sessionStorage.setItem('last-valid-session', JSON.stringify({
+          session,
+          timestamp: Date.now()
+        }));
+      } else if (event === 'SIGNED_OUT') {
+        sessionStorage.removeItem('last-valid-session');
+      }
+      
       updateAuthState(session);
     });
 
