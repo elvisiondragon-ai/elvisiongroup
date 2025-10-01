@@ -73,8 +73,14 @@ export function Chat({ onNavigate }: ChatProps) {
   useEffect(() => {
     if (user && userProfile) {
       const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
+      const currentProStatus = isPro || proStatus?.isPro || false;
+      
+      // Check if pro status changed (for pro upgrade/downgrade detection)
+      const proStatusChanged = chatProBadgeCache.timestamp > 0 && 
+        chatProBadgeCache.is_pro !== currentProStatus;
+      
       const cacheData = {
-        is_pro: isPro || proStatus?.isPro || false,
+        is_pro: currentProStatus,
         is_admin: user.id === knownAdminId || userProfile?.is_admin || false,
         subscription_type: proStatus?.subscriptionType || null,
         streak_days: userProfile?.streak_days || 0,
@@ -82,6 +88,14 @@ export function Chat({ onNavigate }: ChatProps) {
         user_level: userProfile?.level || 1,
         timestamp: Date.now()
       };
+      
+      // Always update cache if pro status changed
+      if (proStatusChanged) {
+        console.log('🔄 Pro status changed, refreshing badge cache:', {
+          old: chatProBadgeCache.is_pro,
+          new: currentProStatus
+        });
+      }
       
       // Update both caches
       setChatProBadgeCache(cacheData);
@@ -491,12 +505,14 @@ export function Chat({ onNavigate }: ChatProps) {
       return;
     }
 
-    // Only refresh badge cache if no cached data exists or cache is empty
-    if (user && userProfile && (!chatProBadgeCache.user_name || chatProBadgeCache.timestamp === 0)) {
-      const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
+    // Refresh badge cache if no cached data exists OR for admin users to ensure admin status
+    const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
+    const isAdmin = user.id === knownAdminId || userProfile?.is_admin || false;
+    
+    if (user && userProfile && (!chatProBadgeCache.user_name || chatProBadgeCache.timestamp === 0 || isAdmin)) {
       const freshCacheData = {
         is_pro: isPro || proStatus?.isPro || false,
-        is_admin: user.id === knownAdminId || userProfile?.is_admin || false,
+        is_admin: isAdmin,
         subscription_type: proStatus?.subscriptionType || null,
         streak_days: userProfile?.streak_days || 0,
         user_name: userProfile?.display_name || 'Anonymous',
