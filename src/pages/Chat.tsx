@@ -799,7 +799,20 @@ export function Chat({ onNavigate }: ChatProps) {
 
       {/* Messages */}
       {/* IOS HANDLER (VITAL) - Enables immediate touch scrolling without requiring click first */}
-        <div className="flex-1 overflow-y-auto" style={{ display: 'flex', flexDirection: 'column-reverse', WebkitOverflowScrolling: 'touch' }} onTouchStart={() => {}}>
+        <div 
+          className="flex-1 overflow-y-auto" 
+          style={{ 
+            display: 'flex', 
+            flexDirection: 'column-reverse', 
+            WebkitOverflowScrolling: 'touch',
+            position: 'relative',
+            touchAction: 'pan-y'
+          }} 
+          onTouchStart={(e) => {
+            // Prevent body scroll on iOS
+            e.stopPropagation();
+          }}
+        >
         <div className="divide-y divide-border" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
             {messages.slice().reverse().map((msg) => (
               <ChatMessage
