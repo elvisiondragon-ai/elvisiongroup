@@ -84,23 +84,26 @@ const AppContent = () => {
       });
     };
 
-    // GLOBAL notification every 10 minutes (:00, :10, :20, :30, :40, :50)
+    // GLOBAL notification every 10 minutes (:00, :10, :20, :30, :40, :50) - UTC+7 JAKARTA TIME
     const scheduleGlobalNotification = () => {
       const now = new Date();
-      const nextTenMinutes = new Date(now);
+      // Convert to Jakarta time (UTC+7)
+      const jakartaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
+      const nextTenMinutes = new Date(jakartaTime);
       
-      // Calculate next 10-minute mark
-      const currentMinutes = now.getMinutes();
+      // Calculate next 10-minute mark based on Jakarta time
+      const currentMinutes = jakartaTime.getMinutes();
       const nextMinuteMark = Math.ceil(currentMinutes / 10) * 10;
       
       nextTenMinutes.setMinutes(nextMinuteMark, 0, 0); // Set to next 10-minute mark
       
       // If we're already at a 10-minute mark, go to next one
-      if (nextTenMinutes <= now) {
+      if (nextTenMinutes <= jakartaTime) {
         nextTenMinutes.setMinutes(nextMinuteMark + 10, 0, 0);
       }
       
-      const timeUntilNext = nextTenMinutes - now;
+      // Calculate time difference back to local time for setTimeout
+      const timeUntilNext = nextTenMinutes - jakartaTime;
       
       console.log('⏰ Next notification in:', Math.round(timeUntilNext / 1000 / 60), 'minutes');
       
