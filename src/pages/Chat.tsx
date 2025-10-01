@@ -72,6 +72,12 @@ export function Chat({ onNavigate }: ChatProps) {
 
   if (!userId) return null;
 
+  // Invalidate user cache when pro status changes
+  const invalidateUserCache = (userId: string) => {
+    localStorage.removeItem(`user-data-${userId}`);
+    console.log(`🗑️ Invalidated cache for user: ${userId}`);
+  };
+
   // Update independent chat pro badge cache with persistence
   useEffect(() => {
     if (user && userProfile) {
@@ -95,10 +101,12 @@ export function Chat({ onNavigate }: ChatProps) {
       
       // Always update cache if pro status changed
       if (proStatusChanged) {
-        console.log('🔄 Pro status changed, refreshing badge cache:', {
+        console.log('🔄 Pro status changed, invalidating user cache:', {
           old: chatProBadgeCache.is_pro,
           new: currentProStatus
         });
+        // Invalidate cache when pro status changes
+        invalidateUserCache(user.id);
       }
       
       // Update both caches
@@ -118,7 +126,30 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [chatChannel]);
 
-  // Load messages from database with real user profiles
+  // Smart user data cache with TTL (24 hours)
+  const getUserDataFromCache = (userId: string) => {
+    const cached = localStorage.getItem(`user-data-${userId}`);
+    if (!cached) return null;
+    
+    const { data, timestamp } = JSON.parse(cached);
+    const TTL = 24 * 60 * 60 * 1000; // 24 hours
+    
+    if (Date.now() - timestamp > TTL) {
+      localStorage.removeItem(`user-data-${userId}`);
+      return null;
+    }
+    
+    return data;
+  };
+
+  const cacheUserData = (userId: string, data: any) => {
+    localStorage.setItem(`user-data-${userId}`, JSON.stringify({
+      data,
+      timestamp: Date.now()
+    }));
+  };
+
+  // Load messages from database with smart caching
   const loadMessages = useCallback(async (showRefreshState = false) => {
     if (showRefreshState) {
       setIsRefreshing(true);
@@ -141,36 +172,70 @@ export function Chat({ onNavigate }: ChatProps) {
       // Get unique user IDs from chat messages
       const userIds = [...new Set(chatMessages.map(msg => msg.user_id))];
       
-      // Fetch real profiles for all chat users
-      const { data: userProfiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, display_name, streak_days, level, is_admin, user_email, avatar_url')
-        .in('user_id', userIds);
-        
-      // Fetch Pro status for all chat users using public RPC (bypasses RLS)
-      const { data: subscriptions } = await supabase
-        .rpc('get_public_pro_status', { user_ids: userIds });
-      
-      // Create subscription map
-      const subscriptionMap = new Map();
-      subscriptions?.forEach(sub => {
-        if (sub.is_pro) {
-          subscriptionMap.set(sub.user_id, {
-            is_pro: true,
-            subscription_type: sub.subscription_type
-          });
+      // Check cache for existing user data
+      const cachedProfiles = new Map();
+      const cachedSubscriptions = new Map();
+      const uncachedUserIds = [];
+
+      userIds.forEach(userId => {
+        const cached = getUserDataFromCache(userId);
+        if (cached) {
+          cachedProfiles.set(userId, cached.profile);
+          if (cached.subscription) {
+            cachedSubscriptions.set(userId, cached.subscription);
+          }
+        } else {
+          uncachedUserIds.push(userId);
         }
       });
+
+      console.log(`💾 Cache hit: ${userIds.length - uncachedUserIds.length}/${userIds.length} users, fetching: ${uncachedUserIds.length}`);
+
+      // Only fetch data for uncached users
+      let userProfiles = [];
+      let subscriptions = [];
+
+      if (uncachedUserIds.length > 0) {
+        // Fetch real profiles for uncached users only
+        const { data: newUserProfiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, streak_days, level, is_admin, user_email, avatar_url')
+          .in('user_id', uncachedUserIds);
+          
+        // Fetch Pro status for uncached users only using public RPC
+        const { data: newSubscriptions } = await supabase
+          .rpc('get_public_pro_status', { user_ids: uncachedUserIds });
         
-      if (profilesError) {
-        console.error('Error loading user profiles:', profilesError);
+        userProfiles = newUserProfiles || [];
+        subscriptions = newSubscriptions || [];
+
+        // Cache the new data
+        userProfiles.forEach(profile => {
+          const subscription = subscriptions.find(sub => sub.user_id === profile.user_id);
+          cacheUserData(profile.user_id, {
+            profile,
+            subscription: subscription ? {
+              is_pro: subscription.is_pro,
+              subscription_type: subscription.subscription_type
+            } : null
+          });
+          cachedProfiles.set(profile.user_id, profile);
+          if (subscription?.is_pro) {
+            cachedSubscriptions.set(profile.user_id, {
+              is_pro: true,
+              subscription_type: subscription.subscription_type
+            });
+          }
+        });
+
+        if (profilesError) {
+          console.error('Error loading user profiles:', profilesError);
+        }
       }
-      
-      // Create lookup map for profiles
-      const profilesMap = new Map();
-      userProfiles?.forEach(profile => {
-        profilesMap.set(profile.user_id, profile);
-      });
+
+      // Create maps from combined cached + fresh data
+      const profilesMap = cachedProfiles;
+      const subscriptionMap = cachedSubscriptions;
         
       // Get admin users
       let adminUsers = new Set();
@@ -510,41 +575,56 @@ export function Chat({ onNavigate }: ChatProps) {
       return;
     }
 
-    // Refresh badge cache if no cached data exists OR for admin users to ensure admin status
+    // Get current user data from cache or fallback to profile
     const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
     const isAdmin = user.id === knownAdminId || userProfile?.is_admin || false;
     
-    if (user && userProfile && (!chatProBadgeCache.user_name || chatProBadgeCache.timestamp === 0 || isAdmin)) {
-      const freshCacheData = {
-        is_pro: isPro || proStatus?.isPro || false,
-        is_admin: isAdmin,
-        subscription_type: proStatus?.subscriptionType || null,
-        streak_days: userProfile?.streak_days || 0,
-        user_name: userProfile?.display_name || 'Anonymous',
-        user_level: userProfile?.level || 1,
-        avatar_url: userProfile?.avatar_url || '',
-        timestamp: Date.now()
+    // Try to get fresh user data from cache first
+    const cachedUserData = getUserDataFromCache(user.id);
+    let userData = {
+      is_pro: isPro || proStatus?.isPro || false,
+      is_admin: isAdmin,
+      subscription_type: proStatus?.subscriptionType || null,
+      streak_days: userProfile?.streak_days || 0,
+      user_name: userProfile?.display_name || 'Anonymous',
+      user_level: userProfile?.level || 1,
+      avatar_url: userProfile?.avatar_url || ''
+    };
+
+    // Use cached data if available and fresher
+    if (cachedUserData) {
+      userData = {
+        is_pro: cachedUserData.subscription?.is_pro || userData.is_pro,
+        is_admin: cachedUserData.profile?.is_admin || userData.is_admin,
+        subscription_type: cachedUserData.subscription?.subscription_type || userData.subscription_type,
+        streak_days: cachedUserData.profile?.streak_days || userData.streak_days,
+        user_name: cachedUserData.profile?.display_name || userData.user_name,
+        user_level: cachedUserData.profile?.level || userData.user_level,
+        avatar_url: cachedUserData.profile?.avatar_url || userData.avatar_url
       };
-      
-      setChatProBadgeCache(freshCacheData);
-      setUserBadgeCache(freshCacheData);
-      localStorage.setItem('chat-pro-badge-cache', JSON.stringify(freshCacheData));
     }
 
-    // Add optimistic message immediately with cached badge data (using chat-specific cache)
+    // Update caches with latest data
+    if (user && userProfile) {
+      setChatProBadgeCache({ ...userData, timestamp: Date.now() });
+      setUserBadgeCache(userData);
+      localStorage.setItem('chat-pro-badge-cache', JSON.stringify({ ...userData, timestamp: Date.now() }));
+    }
+
+    // Add optimistic message immediately with best available data
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage: ChatMessageData = {
       id: tempId,
       user_id: user.id,
-      user_name: chatProBadgeCache.user_name || userBadgeCache.user_name,
-      user_level: chatProBadgeCache.user_level || userBadgeCache.user_level,
-      is_pro: chatProBadgeCache.is_pro || userBadgeCache.is_pro,
-      is_admin: chatProBadgeCache.is_admin || userBadgeCache.is_admin,
+      user_name: userData.user_name,
+      user_level: userData.user_level,
+      is_pro: userData.is_pro,
+      is_admin: userData.is_admin,
       message: message.trim(),
       created_at: new Date().toISOString(),
-      streak_days: chatProBadgeCache.streak_days || userBadgeCache.streak_days,
-      subscription_type: chatProBadgeCache.subscription_type || userBadgeCache.subscription_type,
-      avatar_url: chatProBadgeCache.avatar_url || userBadgeCache.avatar_url
+      streak_days: userData.streak_days,
+      subscription_type: userData.subscription_type,
+      avatar_url: userData.avatar_url
     };
 
     addMessage(optimisticMessage);
