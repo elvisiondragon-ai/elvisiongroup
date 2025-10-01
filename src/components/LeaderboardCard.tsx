@@ -11,6 +11,7 @@ interface LeaderboardUser {
   isPro?: boolean;
   rank: number;
   subscriptionType?: string;
+  streak_days?: number;
 }
 
 interface LeaderboardCardProps {
@@ -49,6 +50,13 @@ export function LeaderboardCard({ user }: LeaderboardCardProps) {
         </Avatar>
         
         <div className="flex-1 min-w-0">
+          {user.streak_days && (
+            <div className="text-xs mb-1">
+              <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-1 rounded-full font-medium shadow-sm">
+                🔥 {user.streak_days} days streak
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-1 sm:gap-2 mb-1 flex-wrap">
             <span className="font-semibold text-foreground truncate text-sm sm:text-base">{user.name}</span>
             <div className="flex-shrink-0">

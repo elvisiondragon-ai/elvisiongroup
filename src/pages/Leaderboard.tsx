@@ -3,16 +3,16 @@ import { LeaderboardCard } from "@/components/LeaderboardCard";
 import { Trophy, Star, Crown } from "lucide-react";
 
 const mockLeaderboard = [
-  { id: "1", name: "Andin", level: 10, xp: 15200, rank: 1, isPro: true, avatar: "", subscriptionType: "1_year" },
-  { id: "coach-senz", name: "Abdul Hakikat", level: 9, xp: 12200, rank: 2, isPro: true, avatar: "", subscriptionType: "1_year" },
-  { id: "3", name: "Jason", level: 8, xp: 9900, rank: 3, isPro: true, avatar: "", subscriptionType: "1_year" },
-  { id: "4", name: "Spiritual Seeker", level: 8, xp: 9380, rank: 4, isPro: true, avatar: "", subscriptionType: "1_year" },
-  { id: "2", name: "Master Yoga", level: 7, xp: 8300, rank: 5, isPro: true, avatar: "", subscriptionType: "1_year" },
-  { id: "5", name: "Andrew", level: 7, xp: 7940, rank: 6, isPro: true, avatar: "", subscriptionType: "1_year" },
-  { id: "7", name: "Zen Master", level: 7, xp: 7340, rank: 7, isPro: true, avatar: "", subscriptionType: "1_year" },
-  { id: "8", name: "Cosmic Soul", level: 7, xp: 7100, rank: 8, isPro: true, avatar: "", subscriptionType: "1_year" },
-  { id: "9", name: "Sam_Rindu", level: 6, xp: 6900, rank: 9, isPro: true, avatar: "", subscriptionType: "1_year" },
-  { id: "10", name: "Nanawati", level: 6, xp: 6760, rank: 10, isPro: true, avatar: "", subscriptionType: "1_year" },
+  { id: "1", name: "Amirrudin Sayid", level: 10, xp: 14400, rank: 1, isPro: true, avatar: "", subscriptionType: "1_year", streak_days: 520 },
+  { id: "coach-senz", name: "Abdul Hakikat", level: 9, xp: 12200, rank: 2, isPro: true, avatar: "", subscriptionType: "1_year", streak_days: 472 },
+  { id: "3", name: "Jason", level: 8, xp: 9900, rank: 3, isPro: true, avatar: "", subscriptionType: "1_year", streak_days: 400 },
+  { id: "4", name: "Spiritual Seeker", level: 8, xp: 9380, rank: 4, isPro: true, avatar: "", subscriptionType: "1_year", streak_days: 380 },
+  { id: "2", name: "Master Yoga", level: 7, xp: 8300, rank: 5, isPro: true, avatar: "", subscriptionType: "1_year", streak_days: 420 },
+  { id: "5", name: "Andrew", level: 7, xp: 7940, rank: 6, isPro: true, avatar: "", subscriptionType: "1_year", streak_days: 390 },
+  { id: "7", name: "Zen Master", level: 7, xp: 7340, rank: 7, isPro: true, avatar: "", subscriptionType: "1_year", streak_days: 377 },
+  { id: "8", name: "Cosmic Soul", level: 7, xp: 7100, rank: 8, isPro: true, avatar: "", subscriptionType: "1_year", streak_days: 365 },
+  { id: "9", name: "Sam_Rindu", level: 6, xp: 6900, rank: 9, isPro: true, avatar: "", subscriptionType: "1_year", streak_days: 362 },
+  { id: "10", name: "Nanawati", level: 6, xp: 6760, rank: 10, isPro: true, avatar: "", subscriptionType: "1_year", streak_days: 347 },
 ];
 
 export function Leaderboard() {
@@ -69,14 +69,14 @@ export function Leaderboard() {
       <div className="p-6">
         <Card className="p-4 bg-gradient-accent border-accent">
           <div className="text-center">
-            <h3 className="font-semibold font-orbitron text-background mb-2">
-              Peringkat Anda
+            <h3 className="font-semibold font-orbitron text-white mb-2">
+              🔵 Peringkat Anda 🔵
             </h3>
-            <div className="text-2xl font-bold font-orbitron text-background mb-1">
+            <div className="text-2xl font-bold font-orbitron text-white mb-1">
               #Tidak ditemukan
             </div>
-            <p className="text-sm text-background/80">
-              Tetap konsisten untuk naik peringkat!
+            <p className="text-sm text-white">
+              Peringkat anda berdasarkan Konsistensi menggunakan ecosystem, Karena konsistensi adalah kunci keberhasilan
             </p>
           </div>
         </Card>
