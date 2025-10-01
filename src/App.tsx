@@ -79,11 +79,15 @@ const AppContent = () => {
         });
       }
       
-      // Always mark as needing update - this will refresh existing button to latest version
+      // Option 1 - Manual Deploy : 🟢ON (jika mau off pakai //)
       localStorage.setItem('app-needs-update', 'true')
       localStorage.setItem('update-timestamp', Date.now().toString())
       // Reset blocker so notification can show for new updates  
       localStorage.removeItem('force-refresh-completed')
+
+      // Option 2 - Instant Deploy no notif : 🔴OFF (jika mau on -> Option 1 harus di Off kan pakai //)
+      // updateServiceWorker(true)
+      // setNeedRefresh(false)
     }
   })
 

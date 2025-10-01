@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eL Vision Group</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5; padding: 7px 20px;">
+        <tr>
+            <td align="center">
+                <!-- Main Container -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background: linear-gradient(135deg, #ffffff 0%, #f9f7f0 50%, #faf8f3 100%); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="padding: 7px 7px 30px 7px; text-align: center; border-bottom: 2px solid #d4af37;">
+                            <h1 style="margin: 0; font-size: 16px; font-weight: 700; color: #2c2c2c; letter-spacing: 1px;">
+                                eL Vision Group
+                            </h1>
+                        </td>
+                    </tr>
+
+                    <!-- Main Title -->
+                    <tr>
+                        <td style="padding: 7px 7px 20px 7px;">
+                            <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: #1a1a1a; line-height: 1.4; text-align: center;">
+                                Transformasi Nyata dari Para Pengguna Kami
+                            </h2>
+                        </td>
+                    </tr>
+
+                    <!-- Testimonial 1 -->
+                    <tr>
+                        <td style="padding: 20px 7px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="padding: 25px; background-color: #ffffff; border-left: 4px solid #d4af37; border-radius: 4px; margin-bottom: 20px;">
+                                        <p style="margin: 0; font-size: 16px; line-height: 1.7; color: #333333;">
+                                            <strong style="color: #d4af37;">Vio</strong> bercerita bagaimana hidupnya berubah total - dari yang sering bertemu orang toxic, kini dia terus bertemu dengan orang-orang baru yang menyenangkan dan positif.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Testimonial 2 -->
+                    <tr>
+                        <td style="padding: 0 7px 20px 7px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="padding: 25px; background-color: #ffffff; border-left: 4px solid #d4af37; border-radius: 4px;">
+                                        <p style="margin: 0; font-size: 16px; line-height: 1.7; color: #333333;">
+                                            <strong style="color: #d4af37;">Felicia</strong> mengalami perubahan dramatis dari kebiasaan overthinking yang menguras energi, kini dia mulai santai menjalani hidup dan merasa hidup menjadi jauh lebih mudah.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Testimonial 3 -->
+                    <tr>
+                        <td style="padding: 0 7px 20px 7px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="padding: 25px; background-color: #ffffff; border-left: 4px solid #d4af37; border-radius: 4px;">
+                                        <p style="margin: 0; font-size: 16px; line-height: 1.7; color: #333333;">
+                                            <strong style="color: #d4af37;">Dr. Gumilar</strong>, seorang profesional, mengaku transformasi dari sifat perfeksionis yang membuatnya stuck - kini dia mulai menerima realita dan kenyataan, yang justru membuka solusi satu per satu dengan lebih efektif.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Additional Info -->
+                    <tr>
+                        <td style="padding: 10px 7px 30px 7px;">
+                            <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #555555; text-align: center; font-style: italic;">
+                                Dan masih banyak testimoni lainnya tentang transformasi di bidang finansial, kesehatan, dan hubungan interpersonal.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- What's Surprising Section -->
+                    <tr>
+                        <td style="padding: 30px 7px 20px 7px;">
+                            <h3 style="margin: 0 0 20px 0; font-size: 22px; font-weight: 700; color: #1a1a1a; text-align: center;">
+                                Yang Mengejutkan:
+                            </h3>
+                            <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.7; color: #333333;">
+                                Semua transformasi ini hanya dengan:
+                            </p>
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;">
+                                <tr>
+                                    <td style="padding: 15px 20px; background-color: #ffffff; border-radius: 4px; margin-bottom: 10px;">
+                                        <p style="margin: 0; font-size: 16px; color: #333333; line-height: 1.6;">
+                                            <span style="color: #d4af37; font-weight: 700; font-size: 16px;">1.</span> Mendengarkan audio
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr><td style="height: 10px;"></td></tr>
+                                <tr>
+                                    <td style="padding: 15px 20px; background-color: #ffffff; border-radius: 4px;">
+                                        <p style="margin: 0; font-size: 16px; color: #333333; line-height: 1.6;">
+                                            <span style="color: #d4af37; font-weight: 700; font-size: 16px;">2.</span> Menulis jurnal pelepasan
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr><td style="height: 10px;"></td></tr>
+                                <tr>
+                                    <td style="padding: 15px 20px; background-color: #ffffff; border-radius: 4px;">
+                                        <p style="margin: 0; font-size: 16px; color: #333333; line-height: 1.6;">
+                                            <span style="color: #d4af37; font-weight: 700; font-size: 16px;">3.</span> Melakukan elite habit ringan
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Results -->
+                    <tr>
+                        <td style="padding: 20px 7px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="padding: 25px; background: linear-gradient(135deg, #d4af37 0%, #c9a332 100%); border-radius: 4px; text-align: center;">
+                                        <p style="margin: 0; font-size: 16px; font-weight: 700; color: #ffffff; line-height: 1.6;">
+                                            Hasilnya? Impian yang selama 5 tahun terus gagal, berhasil dicapai dalam 6 bulan.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Why Section -->
+                    <tr>
+                        <td style="padding: 30px 7px 10px 7px;">
+                            <h3 style="margin: 0 0 15px 0; font-size: 22px; font-weight: 700; color: #1a1a1a; text-align: center;">
+                                Kenapa bisa?
+                            </h3>
+                            <p style="margin: 0 0 20px 0; font-size: 16px; font-weight: 700; color: #d4af37; text-align: center; line-height: 1.4;">
+                                Frekuensi mengubah segalanya.
+                            </p>
+                            <p style="margin: 0; font-size: 16px; line-height: 1.7; color: #333333; text-align: center;">
+                                Fakta menunjukkan semua orang yang berhasil, berhasil memperbaiki frekuensi mereka dari internal. Dan kami tahu betapa sulitnya itu di tengah lingkungan yang terus membombardir Anda dengan negativitas.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- CTA Section -->
+                    <tr>
+                        <td style="padding: 7px 7px 30px 7px; text-align: center;">
+                            <h3 style="margin: 0 0 25px 0; font-size: 22px; font-weight: 700; color: #1a1a1a;">
+                                Solusi Praktis:
+                            </h3>
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <a href="https://app.elvisiongroup.com" style="display: inline-block; padding: 18px 50px; background: linear-gradient(135deg, #d4af37 0%, #c9a332 100%); color: #ffffff; text-decoration: none; font-size: 30px; font-weight: 700; border-radius: 4px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);">
+                                            eL Vision Group 👉
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Final Message -->
+                    <tr>
+                        <td style="padding: 0 7px 7px 7px;">
+                            <p style="margin: 0; font-size: 16px; line-height: 1.7; color: #333333; text-align: center;">
+                                Ribuan orang sudah merasakan manfaatnya, termasuk kalangan intelektual seperti Dr. dr, magister hukum, ahli hipnoterapi - karena ini <strong style="color: #d4af37;">valid</strong>, bukan cocoklogi atau pseudoscience!
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 7px; background-color: #f9f7f0; border-top: 2px solid #d4af37; text-align: center;">
+                            <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #666666;">
+                                Kalo %%email%% Ga Mau Terima Email dari Saya Lagi<br>
+                                Klik &gt;&gt; <a href="%%unsubscribelink%%" style="color: #d4af37; text-decoration: underline;">Unsubscribe</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
