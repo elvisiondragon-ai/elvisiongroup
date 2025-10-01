@@ -224,8 +224,6 @@ const AppContent = () => {
       // Reset blocker so notification can show for new updates  
       localStorage.removeItem('force-refresh-completed')
 
-      //Hanya 1 OKTOBER ONLY (REMOVE LATER) - Auto update service worker
-      updateServiceWorker(true)
 
     }
   })
