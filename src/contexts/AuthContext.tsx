@@ -363,7 +363,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             if (refreshedSession?.session && !error) {
               console.log('🩵🩵🩵 IDLE USER HANDLER - Token refreshed successfully');
-              // Don't process signout, let the TOKEN_REFRESHED event handle it
+              // CHANNEL FIX: Don't call updateAuthState, just update state directly to avoid channel rebuild
+              setUser(refreshedSession.session.user);
+              setUserId(refreshedSession.session.user.id);
+              currentTokenRef.current = refreshedSession.session.access_token;
+              // Just update auth token without rebuilding channels
+              supabase.realtime.setAuth(refreshedSession.session.access_token);
               return;
             } else {
               console.log('🩵🩵🩵 IDLE USER HANDLER - Refresh failed, trying getSession fallback');
@@ -373,7 +378,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               
               if (fallbackSession && !sessionError) {
                 console.log('🩵🩵🩵 IDLE USER HANDLER - Session recovered via getSession');
-                updateAuthState(fallbackSession);
+                // CHANNEL FIX: Don't call updateAuthState, just update state directly
+                setUser(fallbackSession.user);
+                setUserId(fallbackSession.user.id);
+                currentTokenRef.current = fallbackSession.access_token;
+                supabase.realtime.setAuth(fallbackSession.access_token);
                 return;
               }
             }
