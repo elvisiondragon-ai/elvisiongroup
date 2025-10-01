@@ -147,7 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔥 WebSocket: Skipping connection - already connecting');
     }
     
-    // 6. Create new channel
+    // 6. Create new channel with full realtime capabilities  
     console.log('🔧 Channel recreated with new auth');
     const channel = supabase.channel('chat-community', {
       config: {
@@ -156,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
     
-    // 7. Add event listeners for chat messages
+    // 7. Add event listeners for chat messages (with error handling)
     channel.on(
       'postgres_changes',
       {

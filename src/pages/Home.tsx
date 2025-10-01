@@ -136,44 +136,8 @@ export function Home({
   useEffect(() => {
     if (!user) return;
 
-    // Skip realtime in development environments that don't support WebSocket
-    const isDevelopment = window.location.hostname.includes('sandbox') || window.location.hostname.includes('localhost');
-    
-    try {
-      const channel = supabase.channel('online_users');
-      
-      channel
-        .on('presence', { event: 'sync' }, () => {
-          const presenceState = channel.presenceState();
-          const onlineUsers = Object.keys(presenceState).length;
-          setOnlineCount(4500 + onlineUsers); // Base 4500 + actual online users
-        })
-        .on('presence', { event: 'join' }, ({ newPresences }) => {
-          // console.log('🟢 User joined:', newPresences);
-          // console.log('🔢 Join event count:', Date.now());
-        })
-        .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-          // console.log('🔴 User left:', leftPresences);
-          // console.log('🔢 Leave event count:', Date.now());
-        })
-        .subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            // Track current user's presence
-            await channel.track({
-              user_id: user.id,
-              online_at: new Date().toISOString()
-            });
-          }
-        });
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    } catch (error) {
-      // Fallback for environments without WebSocket support (like Lovable sandbox)
-      console.log('WebSocket not available, using fallback online count');
-      setOnlineCount(4500); // Just use base count
-    }
+    // Use static online count instead of realtime presence to avoid WebSocket conflicts
+    setOnlineCount(4500); // Static base count
   }, [user]);
 
   // Check for scroll to testimonials flag from notification

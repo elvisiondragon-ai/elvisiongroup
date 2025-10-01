@@ -68,9 +68,16 @@ const AppContent = () => {
     ];
 
     const showRandomActivity = () => {
-      // Show mock activity
-      const randomUser = userList[Math.floor(Math.random() * userList.length)];
-      const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+      // Create synchronized seed based on current 10-minute slot in Jakarta time
+      const jakartaTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
+      const currentSlot = Math.floor(jakartaTime.getTime() / (10 * 60 * 1000)); // 10-minute slots
+      
+      // Use seed to ensure all users see same name and verse at same time
+      const userIndex = currentSlot % userList.length;
+      const activityIndex = currentSlot % activities.length;
+      
+      const randomUser = userList[userIndex];
+      const randomActivity = activities[activityIndex];
       const displayName = randomUser;
       
       // Extract verse title from activity

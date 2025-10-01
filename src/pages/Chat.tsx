@@ -24,6 +24,7 @@ interface ChatMessageData {
   translatedMessage?: string;
   streak_days?: number;
   subscription_type?: string | null;
+  avatar_url?: string;
 }
 
 interface ChatProps {
@@ -53,6 +54,7 @@ export function Chat({ onNavigate }: ChatProps) {
       streak_days: 0,
       user_name: '',
       user_level: 1,
+      avatar_url: '',
       timestamp: 0
     };
   });
@@ -64,7 +66,8 @@ export function Chat({ onNavigate }: ChatProps) {
     subscription_type: null,
     streak_days: 0,
     user_name: '',
-    user_level: 1
+    user_level: 1,
+    avatar_url: ''
   });
 
   if (!userId) return null;
@@ -86,6 +89,7 @@ export function Chat({ onNavigate }: ChatProps) {
         streak_days: userProfile?.streak_days || 0,
         user_name: userProfile?.display_name || 'Anonymous',
         user_level: userProfile?.level || 1,
+        avatar_url: userProfile?.avatar_url || '',
         timestamp: Date.now()
       };
       
@@ -140,7 +144,7 @@ export function Chat({ onNavigate }: ChatProps) {
       // Fetch real profiles for all chat users
       const { data: userProfiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, display_name, streak_days, level, is_admin, user_email')
+        .select('user_id, display_name, streak_days, level, is_admin, user_email, avatar_url')
         .in('user_id', userIds);
         
       // Fetch Pro status for all chat users using public RPC (bypasses RLS)
@@ -246,7 +250,8 @@ export function Chat({ onNavigate }: ChatProps) {
             user_level: userProfile?.level || msg.user_level || 1,
             is_pro: subscriptionData?.is_pro || false,
             subscription_type: subscriptionData?.subscription_type || null,
-            user_name: userProfile?.display_name || msg.user_name
+            user_name: userProfile?.display_name || msg.user_name,
+            avatar_url: userProfile?.avatar_url || undefined
           };
         }) || [];
         
@@ -517,6 +522,7 @@ export function Chat({ onNavigate }: ChatProps) {
         streak_days: userProfile?.streak_days || 0,
         user_name: userProfile?.display_name || 'Anonymous',
         user_level: userProfile?.level || 1,
+        avatar_url: userProfile?.avatar_url || '',
         timestamp: Date.now()
       };
       
@@ -537,7 +543,8 @@ export function Chat({ onNavigate }: ChatProps) {
       message: message.trim(),
       created_at: new Date().toISOString(),
       streak_days: chatProBadgeCache.streak_days || userBadgeCache.streak_days,
-      subscription_type: chatProBadgeCache.subscription_type || userBadgeCache.subscription_type
+      subscription_type: chatProBadgeCache.subscription_type || userBadgeCache.subscription_type,
+      avatar_url: chatProBadgeCache.avatar_url || userBadgeCache.avatar_url
     };
 
     addMessage(optimisticMessage);
@@ -726,7 +733,7 @@ export function Chat({ onNavigate }: ChatProps) {
                   isAdmin: msg.is_admin || false,
                   streak_days: msg.streak_days || 0, // Now using real streak_days from profiles
                   subscriptionType: msg.subscription_type || undefined,
-                  avatar: ""
+                  avatar: msg.avatar_url || ""
                 }}
                 message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
                 timestamp={new Date(msg.created_at)}
