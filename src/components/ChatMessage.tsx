@@ -63,8 +63,34 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
 
   return (
     <div data-message-id={id} className="flex gap-3 p-4 hover:bg-card/50 transition-colors">
-      <Avatar className="w-10 h-10 border border-border" onContextMenu={(e) => e.preventDefault()}>
-        <AvatarImage src={user.avatar} onContextMenu={(e) => e.preventDefault()} draggable={false} />
+      <Avatar 
+        className="w-10 h-10 border border-border" 
+        onContextMenu={(e) => e.preventDefault()}
+        onTouchStart={(e) => e.preventDefault()}
+        onTouchEnd={(e) => e.preventDefault()}
+        onTouchMove={(e) => e.preventDefault()}
+        style={{ 
+          userSelect: 'none', 
+          WebkitUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+          WebkitTapHighlightColor: 'transparent'
+        }}
+      >
+        <AvatarImage 
+          src={user.avatar} 
+          onContextMenu={(e) => e.preventDefault()} 
+          onTouchStart={(e) => e.preventDefault()}
+          onTouchEnd={(e) => e.preventDefault()}
+          onTouchMove={(e) => e.preventDefault()}
+          draggable={false}
+          style={{ 
+            userSelect: 'none', 
+            WebkitUserSelect: 'none',
+            WebkitTouchCallout: 'none',
+            WebkitTapHighlightColor: 'transparent',
+            pointerEvents: 'none'
+          }}
+        />
         <AvatarFallback className="bg-muted text-muted-foreground font-orbitron">
           {getInitials(user.name)}
         </AvatarFallback>
