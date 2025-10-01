@@ -84,15 +84,36 @@ const AppContent = () => {
       });
     };
 
-    // Show first notification after 10 seconds of login
-    const initialTimer = setTimeout(showRandomActivity, 10000);
+    // GLOBAL notification every 10 minutes (:00, :10, :20, :30, :40, :50)
+    const scheduleGlobalNotification = () => {
+      const now = new Date();
+      const nextTenMinutes = new Date(now);
+      
+      // Calculate next 10-minute mark
+      const currentMinutes = now.getMinutes();
+      const nextMinuteMark = Math.ceil(currentMinutes / 10) * 10;
+      
+      nextTenMinutes.setMinutes(nextMinuteMark, 0, 0); // Set to next 10-minute mark
+      
+      // If we're already at a 10-minute mark, go to next one
+      if (nextTenMinutes <= now) {
+        nextTenMinutes.setMinutes(nextMinuteMark + 10, 0, 0);
+      }
+      
+      const timeUntilNext = nextTenMinutes - now;
+      
+      console.log('⏰ Next notification in:', Math.round(timeUntilNext / 1000 / 60), 'minutes');
+      
+      setTimeout(() => {
+        showRandomActivity();
+        scheduleGlobalNotification(); // Schedule next one
+      }, timeUntilNext);
+    };
 
-    // Then show every 20 minutes (1200000ms)
-    const recurringTimer = setInterval(showRandomActivity, 1200000);
+    scheduleGlobalNotification();
 
     return () => {
-      clearTimeout(initialTimer);
-      clearInterval(recurringTimer);
+      // No cleanup needed as we use single setTimeout chain
     };
   }, [user, toast]);
 
