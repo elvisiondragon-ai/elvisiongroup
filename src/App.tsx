@@ -226,6 +226,11 @@ const AppContent = () => {
       // Reset blocker so notification can show for new updates  
       // localStorage.removeItem('force-refresh-completed')
       
+      // Clear any old update flags and toasts
+      localStorage.removeItem('app-needs-update')
+      localStorage.removeItem('force-refresh-completed')
+      localStorage.removeItem('update-timestamp')
+      
       // Instant update without user interaction
       updateServiceWorker(true)
       
