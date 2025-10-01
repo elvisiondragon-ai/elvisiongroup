@@ -125,7 +125,7 @@ const AppContent = () => {
     return () => {
       // No cleanup needed as we use single setTimeout chain
     };
-  }, [user, toast]);
+  }, [user]);
 
   // Real User Verse Notification System
   useEffect(() => {
@@ -172,7 +172,7 @@ const AppContent = () => {
       console.log('🔌 Unsubscribing from verse notifications');
       subscription.unsubscribe();
     };
-  }, [user, toast]);
+  }, [user]);
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -218,17 +218,31 @@ const AppContent = () => {
         });
       }
       
+      // TO RESTORE TOAST SYSTEM: See BACKUP-TOAST-RESTORE.md
+      
       // Option 1 - Manual Deploy : 🟢ON (jika mau off pakai //)
-      localStorage.setItem('app-needs-update', 'true')
-      localStorage.setItem('update-timestamp', Date.now().toString())
+      // localStorage.setItem('app-needs-update', 'true')
+      // localStorage.setItem('update-timestamp', Date.now().toString())
       // Reset blocker so notification can show for new updates  
-      localStorage.removeItem('force-refresh-completed')
+      // localStorage.removeItem('force-refresh-completed')
+      
+      // Instant update without user interaction
+      updateServiceWorker(true)
+      
+      // Show mini success notification
+      toast({
+        title: "Mini Update Selesai 🔥",
+        duration: 3000,
+        className: "bg-yellow-100 border-yellow-400 text-yellow-800"
+      });
 
 
     }
   })
 
-  // Show soft update notification when available
+  // DISABLED - Show soft update notification when available
+  // TO RESTORE: See BACKUP-TOAST-RESTORE.md
+  /*
   useEffect(() => {
     const showSoftUpdateToast = () => {
       // Prevent multiple toasts
@@ -240,12 +254,6 @@ const AppContent = () => {
         action: (
           <button 
             onClick={(e) => {
-              // Prevent double clicks on iOS
-              if (updateClicked) return;
-              
-              // iOS-specific event handling
-              e.preventDefault();
-              e.stopPropagation();
               setUpdateClicked(true);
               
               console.log('🔵 User clicked SOFT UPDATE button')
@@ -347,10 +355,6 @@ const AppContent = () => {
                 }, resetDelay);
               }, updateDelay);
             }}
-            onTouchStart={(e) => {
-              // iOS-specific: Handle touch events properly
-              e.preventDefault();
-            }}
             disabled={updateClicked}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
               updateClicked 
@@ -392,8 +396,11 @@ const AppContent = () => {
       }
     };
   }, [needRefresh, toast, updateServiceWorker, setNeedRefresh, toastId]);
+  */
 
-  // Show success notification after refresh
+  // DISABLED - Show success notification after refresh
+  // TO RESTORE: See BACKUP-TOAST-RESTORE.md
+  /*
   useEffect(() => {
     const updateSuccess = localStorage.getItem('update-success-pending');
     if (updateSuccess === 'true') {
@@ -405,6 +412,7 @@ const AppContent = () => {
       });
     }
   }, [toast]);
+  */
 
   const {
     showModal,
