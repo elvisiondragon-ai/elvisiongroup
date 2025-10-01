@@ -63,7 +63,7 @@ interface UserProfile {
 
 export function Profile({ onNavigate }: ProfileProps) {
   const { userProfile, user: contextUser, loading } = useUserProfile();
-  const { userId, user: authUser } = useAuth();
+  const { userId, user: authUser, cleanupSupabase } = useAuth();
   
   // Use AuthContext as primary source, fallback to UserProfileContext
   const user = authUser || contextUser;
@@ -115,7 +115,13 @@ export function Profile({ onNavigate }: ProfileProps) {
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      // Set manual logout flag immediately to prevent IDLE USER HANDLER
+      localStorage.setItem('manual-logout-flag', 'true');
+      
+      // Clean up Supabase connections before signOut
+      await cleanupSupabase();
+      
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
       
       if (error) {
         console.error('Logout error:', error);
@@ -176,6 +182,7 @@ export function Profile({ onNavigate }: ProfileProps) {
       ]);
 
       // Sign out the user after data deletion
+      localStorage.setItem('manual-logout-flag', 'true');
       await supabase.auth.signOut();
 
       toast({

@@ -29,7 +29,7 @@ import { handleFbcCookieManager, trackPageViewEvent, initFacebookPixelWithLoggin
 // Initialize pixel on first load
 if (typeof window !== 'undefined') {
   initFacebookPixelWithLogging('3319324491540889');
-  console.log('⭐️ View Content Event Pixel - Home page loaded');
+  // console.log('⭐️ View Content Event Pixel - Home page loaded');
   handleFbcCookieManager();
   trackPageViewEvent();
 }
@@ -149,12 +149,12 @@ export function Home({
           setOnlineCount(4500 + onlineUsers); // Base 4500 + actual online users
         })
         .on('presence', { event: 'join' }, ({ newPresences }) => {
-          console.log('🟢 User joined:', newPresences);
-          console.log('🔢 Join event count:', Date.now());
+          // console.log('🟢 User joined:', newPresences);
+          // console.log('🔢 Join event count:', Date.now());
         })
         .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-          console.log('🔴 User left:', leftPresences);
-          console.log('🔢 Leave event count:', Date.now());
+          // console.log('🔴 User left:', leftPresences);
+          // console.log('🔢 Leave event count:', Date.now());
         })
         .subscribe(async (status) => {
           if (status === 'SUBSCRIBED') {

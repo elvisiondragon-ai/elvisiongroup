@@ -186,12 +186,7 @@ export function Auth({ onLogin }: AuthProps) {
       // Clean up any existing auth state first
       cleanupAuthState();
       
-      // Attempt global sign out to ensure clean state
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
+      // Keep existing session if available - removed signOut to avoid conflicts
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -287,12 +282,7 @@ export function Auth({ onLogin }: AuthProps) {
       // Clean up any existing auth state
       cleanupAuthState();
 
-      // Attempt global sign out first
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
+      // Keep existing session if available - removed signOut to avoid conflicts
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
@@ -674,6 +664,7 @@ export function Auth({ onLogin }: AuthProps) {
                       value={loginData.email}
                       onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
                       className="pl-10 cyber-input"
+                      autoComplete="email"
                     />
                   </div>
                 </div>
@@ -691,6 +682,7 @@ export function Auth({ onLogin }: AuthProps) {
                       value={loginData.password}
                       onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
                       className="pl-10 pr-10 cyber-input"
+                      autoComplete="current-password"
                       required
                     />
                     <button
@@ -816,6 +808,7 @@ export function Auth({ onLogin }: AuthProps) {
                       value={signupData.password}
                       onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
                       className="pl-10 pr-10 cyber-input"
+                      autoComplete="new-password"
                       required
                     />
                     <button
@@ -841,6 +834,7 @@ export function Auth({ onLogin }: AuthProps) {
                       value={signupData.confirmPassword}
                       onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                       className="pl-10 pr-10 cyber-input"
+                      autoComplete="new-password"
                       required
                     />
                     <button

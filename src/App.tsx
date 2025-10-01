@@ -1,9 +1,9 @@
+import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
@@ -34,6 +34,67 @@ const AppContent = () => {
   const [toastId, setToastId] = useState<string | null>(null);
   const { toast } = useToast();
   const { user, loading } = useAuth();
+
+  // Random User Activity Notification System
+  useEffect(() => {
+    if (!user) return;
+
+    const userList = [
+      'Gustian', 'Dr. Hendro Wijaya', 'Mega Sari', 'Dani Pratama', 'Lina Maharani', 'Budi Hartono',
+      'Fitri Handayani', 'Made Bangli', 'Putri Wahyudi', 'Tian Leeeee', 'Agustinus', 'Suyin Bekasi',
+      'Sari Kusuma', 'Ahmad Santoso', 'Dewi Anggraini, A.Md.Keb', 'Rina Puspita', 'Dr. Maya Sari',
+      'S.Kom Andi Nugroho', 'Prof. Joko', 'drg. Susi Ramdani', 'dr. hendri', 'Bambang Sutomo',
+      'S.E. Sinta Dewi', 'Prof. Wahyu', 'M.T. ratnapermata', 'prof. bayu', 'Retno Wulandari',
+      'Dr. Endah Lestari', 'S.T. budiartanto', 'Ir. Teguh', 'A.Md.Keb sintalesmana', 'ir. imam',
+      'Nita Anggraeni', 'M.M. Bayu Pradana', 'Prof. Dr. Citra', 'drg. budiciamissol', 'dr. maya',
+      'Yudi Hermawan', 'S.H. Silvia Maharani', 'Prof. aisyah', 'M.E. andihartawan', 'ir. rina',
+      'Irfan Maulana', 'Dr. Rika Permata', 'S.Psi. sintalaksana', 'Prof. Bima', 'drg. mayasusanti',
+      'dr. yudi', 'Dimas Pratama', 'S.Farm. Sari Handayani', 'Prof. rizkianugerah', 'M.Kom dewiratna',
+      'ir. andi', 'Joni Setiawan', 'Dr. Wulan Sari', 'Sinta Dewi', 'rudihartono', 'mayasusanti',
+      'rudiciputra', 'bayu', 'Agus Wibowo', 'rinaanggraeni', 'rizkianugerah', 'rinadarmawan',
+      'rina', 'Lina Rahayu', 'bayuwibowo', 'dewiratna', 'bayutegarino', 'andi', 'Doni Setiawan',
+      'citradewi', 'bagusindra', 'citranirmala'
+    ];
+
+    const activities = [
+      'Sedang Mendengarkan Verse 1 - The Space Hill',
+      'Sedang Mendengarkan Verse 2 - Lucid Beach',
+      'Sedang Mendengarkan Verse 3 - Syukur Meditation',
+      'Sedang Mendengarkan Verse 4 - Prosperity Stream',
+      'Sedang Mendengarkan Verse 5 - Vitality Vortex',
+      'Sedang Mendengarkan Verse 8 - Love Magnet',
+      'Sedang Mendengarkan Guided to Inner Silence',
+      'Sedang Mendengarkan eL Vision Delta Breathing'
+    ];
+
+    const showRandomActivity = () => {
+      // Show mock activity
+      const randomUser = userList[Math.floor(Math.random() * userList.length)];
+      const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+      const displayName = randomUser;
+      
+      // Extract verse title from activity
+      const verseTitle = randomActivity.replace('Sedang Mendengarkan ', '');
+
+      toast({
+        title: `${displayName} Sedang Mendengarkan 🎧`,
+        description: `${verseTitle} 🔥`,
+        duration: 4000,
+        className: "p-3 pr-4 space-x-3 [&>div>*:first-child]:text-sm [&>div>*:last-child]:text-sm",
+      });
+    };
+
+    // Show first notification after 10 seconds of login
+    const initialTimer = setTimeout(showRandomActivity, 10000);
+
+    // Then show every 20 minutes (1200000ms)
+    const recurringTimer = setInterval(showRandomActivity, 1200000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(recurringTimer);
+    };
+  }, [user, toast]);
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);

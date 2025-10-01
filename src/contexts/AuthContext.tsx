@@ -36,6 +36,7 @@ interface AuthContextType {
   removeMessage: (messageId: string) => void;
   broadcastMessage: (message: ChatMessageData) => void;
   broadcastDelete: (messageId: string) => void;
+  cleanupSupabase: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -51,6 +52,7 @@ const AuthContext = createContext<AuthContextType>({
   removeMessage: () => {},
   broadcastMessage: () => {},
   broadcastDelete: () => {},
+  cleanupSupabase: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -62,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const chatChannelRef = useRef<RealtimeChannel | null>(null);
   const [channelStatus, setChannelStatus] = useState<string>('CLOSED');
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const currentTokenRef = useRef<string | null>(null);
   
   // Chat messages state
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
@@ -72,7 +75,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // UNIFIED FLOW: Single function handles all channel management
   const rebuildChatChannel = async (session: Session | null, reason: string) => {
-    console.log(`🔧 Rebuilding chat channel - Reason: ${reason}`);
+    const newToken = session?.access_token || null;
+    
+    // Only prevent rebuilds for duplicate auth state changes with same token
+    if (reason === 'auth state change' && currentTokenRef.current === newToken && newToken !== null) {
+      console.log('⏭️ Skipping channel rebuild - same token');
+      return;
+    }
+    
+    console.log(`🔧 Rebuilding chat channel - Reason: ${reason} | Token changed: ${currentTokenRef.current !== newToken}`);
+    currentTokenRef.current = newToken;
     
     // 1. Clear existing timers
     if (retryTimeoutRef.current) {
@@ -268,18 +280,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Auth listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`🔵🔵🔵 Auth State Change: ${event}`, { userId: session?.user?.id, hasSession: !!session });
       
-      // Track logout reason that survives refresh
+      // IDLE USER HANDLER - Prevent unwanted signouts
       if (event === 'SIGNED_OUT') {
         const now = new Date().toISOString();
         const logoutReason = session ? '🔑 User manually clicked sign out' : '☠️ Token expired/disconnected';
-        const logEntry = `${now} - 🔑 ☠️ Reason Signed out: ${logoutReason}`;
+        
+        // Check if this is an unwanted idle signout
+        if (!session && !localStorage.getItem('manual-logout-flag')) {
+          console.log('🩵🩵🩵 IDLE USER HANDLER - Attempting token refresh before signout');
+          
+          try {
+            // Try to refresh the session
+            const { data: refreshedSession, error } = await supabase.auth.refreshSession();
+            
+            if (refreshedSession?.session && !error) {
+              console.log('🩵🩵🩵 IDLE USER HANDLER - Token refreshed successfully');
+              // Don't process signout, let the TOKEN_REFRESHED event handle it
+              return;
+            } else {
+              console.log('🩵🩵🩵 IDLE USER HANDLER - Refresh failed, trying getSession fallback');
+              
+              // Fallback: Try getSession to recover
+              const { data: { session: fallbackSession }, error: sessionError } = await supabase.auth.getSession();
+              
+              if (fallbackSession && !sessionError) {
+                console.log('🩵🩵🩵 IDLE USER HANDLER - Session recovered via getSession');
+                updateAuthState(fallbackSession);
+                return;
+              }
+            }
+          } catch (e) {
+            console.warn('🩵🩵🩵 IDLE USER HANDLER - All recovery attempts failed:', e);
+          }
+        }
+        
+        const logEntry = `${now} - 🟡🟡🟡 Reason Signed out: ${logoutReason}`;
         
         // Store in localStorage to survive refresh
         localStorage.setItem('last-logout-reason', logEntry);
         console.log(logEntry);
+        
+        // Clear manual logout flag after processing
+        localStorage.removeItem('manual-logout-flag');
+        
+        // Clear token reference on logout to prevent confusion
+        currentTokenRef.current = null;
       }
       
       // Backup session on every auth change for deployment recovery
@@ -297,6 +345,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Cleanup function for proper logout
+  const cleanupSupabase = async () => {
+    console.log('🧹 Cleaning up Supabase connections');
+    
+    // Set manual logout flag to prevent IDLE USER HANDLER interference
+    localStorage.setItem('manual-logout-flag', 'true');
+    
+    // Clear token reference
+    currentTokenRef.current = null;
+    
+    // Clear timers
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+    
+    // Unsubscribe and remove chat channel
+    if (chatChannelRef.current) {
+      try {
+        await chatChannelRef.current.unsubscribe();
+      } catch (e) {
+        console.log('⚠️ Channel unsubscribe failed during cleanup');
+      }
+      supabase.removeChannel(chatChannelRef.current);
+      chatChannelRef.current = null;
+      setChatChannel(null);
+    }
+    
+    // Clear state
+    setMessages([]);
+    setProStatus(null);
+    setProStatusCache(null);
+    setChannelStatus('CLOSED');
+  };
 
   const checkProStatus = async (userId: string, force: boolean = false) => {
     const now = Date.now();
@@ -406,6 +489,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         removeMessage,
         broadcastMessage,
         broadcastDelete,
+        cleanupSupabase,
       }}
     >
       {children}

@@ -61,6 +61,7 @@ export function VerseAudioCard({
         // Audio stopped but state says it's playing - sync the state
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
+        
       }
     }
   }, [isPlaying, currentVerseAudio, setCurrentPlayingVerse, setCurrentVerseAudio]);
@@ -73,6 +74,11 @@ export function VerseAudioCard({
       currentVerseAudio.pause();
       setCurrentPlayingVerse(null);
       setCurrentVerseAudio(null);
+      
+      // Notify globally that audio stopped playing
+      window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { 
+        detail: null 
+      }));
       return;
     }
 
@@ -88,6 +94,11 @@ export function VerseAudioCard({
     if (currentVerseAudio) {
       currentVerseAudio.pause();
       setCurrentVerseAudio(null);
+      
+      // Notify globally that audio stopped playing
+      window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { 
+        detail: null 
+      }));
     }
 
     // Increment verse 4 usage when play button is clicked (before audio starts)
@@ -129,6 +140,7 @@ export function VerseAudioCard({
         setAudioDuration(null);
         setCurrentTime(0);
         
+        
         // Update total_verses counter FIRST in profiles
         const updateTotalVerses = async () => {
           const { data: { user } } = await supabase.auth.getUser();
@@ -165,12 +177,14 @@ export function VerseAudioCard({
         setCurrentVerseAudio(null);
         setAudioDuration(null);
         setCurrentTime(0);
+        
       });
 
       // Play audio first
       await audio.play();
       setCurrentPlayingVerse(verse.id);
       setCurrentVerseAudio(audio);
+      
       
       // Show sacred notification after 3 seconds delay
       if (onShowSacredNotification) {
@@ -205,7 +219,7 @@ export function VerseAudioCard({
   const progress = audioDuration ? (currentTime / audioDuration) * 100 : 0;
 
   return (
-    <div className="relative group cursor-pointer">
+    <div className="relative group cursor-pointer" data-verse-title={verse.title}>
       {verse.unlocked && verse.artwork ? (
         <div>
           {/* Outer glow ring */}

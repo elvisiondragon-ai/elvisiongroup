@@ -35,7 +35,7 @@ export const handleFbcCookieManager = (): void => {
     const formattedFbc = formatFbcCookieValue(fbclid);
     const expires = new Date(Date.now() + 90*24*60*60*1000).toUTCString();
     document.cookie = `_fbc=${formattedFbc}; expires=${expires}; path=/`;
-    console.log('🔗 FBC Cookie Manager - Click ID stored:', formattedFbc);
+    // console.log('🔗 FBC Cookie Manager - Click ID stored:', formattedFbc);
   }
 };
 
@@ -67,19 +67,19 @@ export const getEnhancedTrackingParams = (email?: string, firstName?: string): {
   
   if (fbc) {
     params.fbc = fbc;
-    console.log('📊 FBC Click ID Parameter - Found:', fbc);
+    // console.log('📊 FBC Click ID Parameter - Found:', fbc);
   }
   if (fbp) {
     params.fbp = fbp;
-    console.log('📊 FBP Browser Parameter - Found:', fbp);
+    // console.log('📊 FBP Browser Parameter - Found:', fbp);
   }
   if (email) {
     params.em = hashEmailForPixel(email);
-    console.log('📧 Email Parameter - Hashed and added');
+    // console.log('📧 Email Parameter - Hashed and added');
   }
   if (firstName) {
     params.fn = hashFirstNameForPixel(firstName);
-    console.log('👤 First Name Parameter - Hashed and added');
+    // console.log('👤 First Name Parameter - Hashed and added');
   }
   
   return params;
@@ -95,7 +95,7 @@ export const getFbcFbpTrackingParams = (): { fbc?: string; fbp?: string } => {
 export const initFacebookPixelWithLogging = (pixelId: string): void => {
   if (typeof window === 'undefined' || window.fbq) return;
 
-  console.log('🚀 Pixel Initializer - Starting Facebook Pixel setup');
+  // console.log('🚀 Pixel Initializer - Starting Facebook Pixel setup');
   
   (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
     if (f.fbq) return; n = f.fbq = function() { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
@@ -104,7 +104,7 @@ export const initFacebookPixelWithLogging = (pixelId: string): void => {
   })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
   
   window.fbq('init', pixelId);
-  console.log('🚀 Pixel Initializer - Facebook Pixel ready with ID:', pixelId);
+  // console.log('🚀 Pixel Initializer - Facebook Pixel ready with ID:', pixelId);
 };
 
 // ⭐ View Content Tracker - Track ViewContent events with enhanced data
@@ -113,7 +113,7 @@ export const trackViewContentEvent = (eventData: any = {}, email?: string, first
   
   const trackingParams = getEnhancedTrackingParams(email, firstName);
   
-  console.log('⭐ View Content Tracker - Tracking ViewContent event');
+  // console.log('⭐ View Content Tracker - Tracking ViewContent event');
   window.fbq('track', 'ViewContent', eventData, trackingParams);
 };
 
@@ -123,7 +123,7 @@ export const trackPageViewEvent = (eventData: any = {}, email?: string, firstNam
   
   const trackingParams = getEnhancedTrackingParams(email, firstName);
   
-  console.log('📄 Page View Tracker - Tracking PageView event');
+  // console.log('📄 Page View Tracker - Tracking PageView event');
   window.fbq('track', 'PageView', eventData, trackingParams);
 };
 
@@ -133,7 +133,7 @@ export const trackAddToCartEvent = (eventData: any = {}, email?: string, firstNa
   
   const trackingParams = getEnhancedTrackingParams(email, firstName);
   
-  console.log('🛒 Add to Cart Tracker - Tracking AddToCart event');
+  // console.log('🛒 Add to Cart Tracker - Tracking AddToCart event');
   window.fbq('track', 'AddToCart', eventData, trackingParams);
 };
 
@@ -143,8 +143,8 @@ export const trackPurchaseEvent = (eventData: any = {}, email?: string, firstNam
   
   const trackingParams = getEnhancedTrackingParams(email, firstName);
   
-  console.log('💰 Purchase Tracker - Tracking Purchase event');
-  console.log('💰 Purchase Data:', eventData);
+  // console.log('💰 Purchase Tracker - Tracking Purchase event');
+  // console.log('💰 Purchase Data:', eventData);
   window.fbq('track', 'Purchase', eventData, trackingParams);
 };
 
@@ -155,6 +155,6 @@ export const trackGenericPixelEvent = (eventName: string, eventData: any = {}, c
   const trackingParams = getFbcFbpTrackingParams();
   const enhancedCustomData = { ...customData, ...trackingParams };
   
-  console.log(`🎯 Generic Event Tracker - Tracking ${eventName} event`);
+  // console.log(`🎯 Generic Event Tracker - Tracking ${eventName} event`);
   window.fbq('track', eventName, eventData, enhancedCustomData);
 };

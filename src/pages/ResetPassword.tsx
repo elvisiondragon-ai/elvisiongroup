@@ -166,6 +166,7 @@ export function ResetPassword() {
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   className="pl-10 pr-10 cyber-input"
+                  autoComplete="new-password"
                   required
                 />
                 <button
@@ -191,6 +192,7 @@ export function ResetPassword() {
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                   className="pl-10 pr-10 cyber-input"
+                  autoComplete="new-password"
                   required
                 />
                 <button

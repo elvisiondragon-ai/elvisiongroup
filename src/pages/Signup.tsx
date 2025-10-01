@@ -234,6 +234,7 @@ export function Signup() {
                 value={signupData.password}
                 onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
                 className="pl-10 pr-10"
+                autoComplete="new-password"
                 required
               />
               <button
@@ -257,6 +258,7 @@ export function Signup() {
                 value={signupData.confirmPassword}
                 onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                 className="pl-10 pr-10"
+                autoComplete="new-password"
                 required
               />
               <button
