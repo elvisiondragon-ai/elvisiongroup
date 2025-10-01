@@ -246,7 +246,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }, 3000);
         }
       } else if (status === 'CHANNEL_ERROR' || status === 'CONNECTION_ERROR' || status === 'FAILED') {
-        console.error('🔥 WebSocket connection failed with status:', status);
+        console.error('🔥 WebSocket connection failed with status:', status, {
+          channelName: 'chat-community',
+          currentToken: currentTokenRef.current ? 'present' : 'missing',
+          realtimeStatus: supabase.realtime.status,
+          isConnecting: isConnectingRef.current,
+          hasSession: !!session,
+          userId: session?.user?.id
+        });
         // Retry failed connections with longer delay
         if (!retryTimeoutRef.current) {
           retryTimeoutRef.current = setTimeout(() => {
