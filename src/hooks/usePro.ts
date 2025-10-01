@@ -165,6 +165,7 @@ export function usePro() {
       if (!user) return;
 
       // Listen for ALL pro_subscriptions changes (payment success + admin grants/cancels)
+      console.log('🔷 SUBSCRIBE From Auth - pro_status_changes channel');
       subscription = supabase
         .channel('pro_status_changes')
         .on('postgres_changes', {
@@ -240,6 +241,7 @@ export function usePro() {
     // Cleanup listener on unmount
     return () => {
       if (subscription) {
+        console.log('🔶 UNSUBSCRIBE From Auth - pro_status_changes channel');
         supabase.removeChannel(subscription);
       }
     };

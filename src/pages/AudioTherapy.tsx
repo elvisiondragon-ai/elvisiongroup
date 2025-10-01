@@ -101,6 +101,16 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { userId } = useAuth();
   const { user } = useUserProfile();
 
+  // Tab-level pro status logging
+  useEffect(() => {
+    if (proStatus) {
+      console.log('🔵 Subscribe From AudioTherapy tab - pro_status_changes channel');
+      return () => {
+        console.log('🟣 Unsubscribe From AudioTherapy tab - pro_status_changes channel');
+      };
+    }
+  }, [proStatus]);
+
   // Local audio state (better for XP tracking) - USER-INITIATED downloads only //Nevertouch Audio-cache
   const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
   const [currentVerseAudio, setCurrentVerseAudio] = useState<HTMLAudioElement | null>(null);

@@ -249,7 +249,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('🔥 WebSocket connection failed with status:', status, {
           channelName: 'chat-community',
           currentToken: currentTokenRef.current ? 'present' : 'missing',
-          realtimeStatus: supabase.realtime.status,
+          realtimeConnected: supabase.realtime.isConnected(),
           isConnecting: isConnectingRef.current,
           hasSession: !!session,
           userId: session?.user?.id

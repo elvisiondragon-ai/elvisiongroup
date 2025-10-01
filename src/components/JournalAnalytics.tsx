@@ -30,6 +30,16 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
   const { proStatus } = usePro();
   const { userProfile, user } = useUserProfile();
   const { toast } = useToast();
+
+  // Tab-level pro status logging
+  useEffect(() => {
+    if (proStatus) {
+      console.log('🔵 Subscribe From JournalAnalytics tab - pro_status_changes channel');
+      return () => {
+        console.log('🟣 Unsubscribe From JournalAnalytics tab - pro_status_changes channel');
+      };
+    }
+  }, [proStatus]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [freeReportsUsed, setFreeReportsUsed] = useState(0);

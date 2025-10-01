@@ -82,6 +82,16 @@ export function Profile({ onNavigate }: ProfileProps) {
   const { proStatus } = usePro();
   const { toast } = useToast();
 
+  // Tab-level pro status logging
+  useEffect(() => {
+    if (proStatus) {
+      console.log('🔵 Subscribe From Profile tab - pro_status_changes channel');
+      return () => {
+        console.log('🟣 Unsubscribe From Profile tab - pro_status_changes channel');
+      };
+    }
+  }, [proStatus]);
+
 
   // Enhanced cache management with user auth data
   useEffect(() => {

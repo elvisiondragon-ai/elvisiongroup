@@ -287,6 +287,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     if (!user) return;
 
     let throttleTimeout: NodeJS.Timeout;
+    console.log('🔷 SUBSCRIBE From Auth - profile_changes channel');
     const channel = supabase
       .channel('profile_changes')
       .on(
@@ -309,6 +310,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
 
     return () => {
       clearTimeout(throttleTimeout);
+      console.log('🔶 UNSUBSCRIBE From Auth - profile_changes channel');
       supabase.removeChannel(channel);
     };
   }, [user?.id]); // FIXED: Only depend on user.id, not refreshProfile
