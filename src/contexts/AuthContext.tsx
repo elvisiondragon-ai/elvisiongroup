@@ -178,7 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
     
-    // Add broadcast listeners
+    // Add broadcast listeners for chat
     channel.on('broadcast', { event: 'message_added' }, (payload) => {
       const newMessage = payload.payload as ChatMessageData;
       if (newMessage.user_id !== session?.user?.id) {
@@ -194,13 +194,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('❌ Chat deleted:', payload.payload.message_id);
       setMessages(current => current.filter(msg => msg.id !== payload.payload.message_id));
     });
+
+    // Add verse notification listener to unified channel
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'verse_notif'
+      },
+      (payload) => {
+        const { display_name, verse_title } = payload.new;
+        console.log(`🔔 ${display_name} - ${verse_title}`);
+        console.log('🐢🐢 1 sec delay before notif');
+        // 1 second delay: ensures listener is ready + nice UX timing
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('verse_notification', { 
+            detail: payload.new 
+          }));
+        }, 1000);
+      }
+    );
     
     // 8. Subscribe with unified error handling
     channel.subscribe((status) => {
       setChannelStatus(status);
       
       if (status === 'SUBSCRIBED') {
-        console.log('💥 Chat realtime status Reconnect');
+        // Check if this was a recovery from failure
+        const wasRetrying = retryTimeoutRef.current !== null;
+        console.log(wasRetrying ? '🚀⚡️ WebSocket connection recovered successfully!' : '💥 Chat realtime status Connected');
+        
         // Clear any pending retry timeouts
         if (retryTimeoutRef.current) {
           clearTimeout(retryTimeoutRef.current);

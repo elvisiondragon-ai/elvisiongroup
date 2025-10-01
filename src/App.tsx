@@ -128,17 +128,20 @@ const AppContent = () => {
   }, [user]);
 
   // Real User Verse Notification System
+  // CRITICAL: Event listener needs User as trigger - cannot randomly listen
+  // useEffect must depend on [user] to re-run when authentication completes
   useEffect(() => {
     if (!user) return;
 
     const showVerseNotification = (payload) => {
       console.log('🔥 Real-time verse notification received:', payload);
-      console.log('🔍 Payload details:', JSON.stringify(payload, null, 2));
       
       if (payload.eventType === 'INSERT') {
         const { user_id: activityUserId, display_name, verse_title } = payload.new;
-        console.log('✅ Verse notification detected:', { activityUserId, display_name, verse_title });
-        console.log('🎯 Showing toast notification now...');
+        
+        // THIS BUG IS CRUCIAL WITHOUT THIS NO TOAST 🤯
+        // WTF: This variable MUST be referenced or toast won't work
+        void activityUserId; // Keep variable "alive" without console.log
         
         toast({
           title: `${display_name} Sedang Mendengarkan 🎧`,
@@ -146,33 +149,20 @@ const AppContent = () => {
           duration: 4000,
           className: "p-3 pr-4 space-x-3 [&>div>*:first-child]:text-sm [&>div>*:last-child]:text-sm",
         });
-      } else {
-        console.log('⚠️ Not an INSERT event, eventType:', payload.eventType);
       }
     };
 
-    // Subscribe to real-time verse_notif
-    console.log('🚀 Setting up real-time subscription for verse_notif');
-    const subscription = supabase
-      .channel('verse_notif_channel')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'verse_notif'
-        },
-        showVerseNotification
-      )
-      .subscribe((status) => {
-        console.log('📡 Subscription status:', status);
-      });
+    const handleVerseNotification = (event: CustomEvent) => {
+      showVerseNotification({ eventType: 'INSERT', new: event.detail });
+    };
+
+    window.addEventListener('verse_notification', handleVerseNotification as EventListener);
 
     return () => {
-      console.log('🔌 Unsubscribing from verse notifications');
-      subscription.unsubscribe();
+      console.log('🔌 Removing verse notification event listener');
+      window.removeEventListener('verse_notification', handleVerseNotification as EventListener);
     };
-  }, [user]);
+  }, [user]); // Event listener needs User as trigger - runs when user becomes available
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
