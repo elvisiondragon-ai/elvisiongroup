@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff, Sparkles, User, ArrowLeft, MessageCircle } from "lucide-react";
-import { Turnstile } from '@marsidev/react-turnstile';
 import { Link, useNavigate } from 'react-router-dom';
 
 export function Signup() {
@@ -16,11 +15,6 @@ export function Signup() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Check for required environment variables
-  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
-  if (!turnstileSiteKey) {
-    console.error('Missing VITE_TURNSTILE_SITE_KEY environment variable');
-  }
 
   // Signup form state
   const [signupData, setSignupData] = useState({
@@ -30,73 +24,12 @@ export function Signup() {
     displayName: ''
   });
 
-  // Captcha token state
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [tokenTimestamp, setTokenTimestamp] = useState<number | null>(null);
   const [currentView, setCurrentView] = useState<'signup' | 'success'>('signup');
-  
-  // Ref for Turnstile widget
-  const signupTurnstileRef = useRef<any>(null);
 
-  // Enhanced CAPTCHA error handling
-  const handleCaptchaSuccess = (token: string) => {
-    setCaptchaToken(token);
-    setTokenTimestamp(Date.now());
-  };
-
-  const handleCaptchaError = (error?: any) => {
-    console.error('CAPTCHA error:', error);
-    setCaptchaToken(null);
-    setTokenTimestamp(null);
-    
-    toast({
-      title: "CAPTCHA Error",
-      description: "Please try the CAPTCHA again. If this persists, refresh the page.",
-      variant: "destructive",
-    });
-  };
-
-  const handleCaptchaExpire = () => {
-    setCaptchaToken(null);
-    setTokenTimestamp(null);
-  };
-
-  const resetCaptcha = () => {
-    if (signupTurnstileRef?.current) {
-      signupTurnstileRef.current.reset();
-    }
-  };
-
-  const checkTokenFreshness = () => {
-    if (captchaToken && tokenTimestamp && Date.now() - tokenTimestamp > 300000) { // 5 minutes
-      setCaptchaToken(null);
-      setTokenTimestamp(null);
-      toast({
-        title: "CAPTCHA Expired",
-        description: "Please complete the CAPTCHA again.",
-        variant: "destructive",
-      });
-      return false;
-    }
-    return true;
-  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!captchaToken) {
-      toast({
-        title: "Error",
-        description: "Please complete the captcha verification",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!checkTokenFreshness()) {
-      resetCaptcha();
-      return;
-    }
 
     if (signupData.password !== signupData.confirmPassword) {
       toast({
@@ -123,7 +56,6 @@ export function Signup() {
         email: signupData.email,
         password: signupData.password,
         options: {
-          captchaToken,
           data: {
             display_name: signupData.displayName
           }
@@ -131,20 +63,6 @@ export function Signup() {
       });
 
       if (error) {
-        // Specific handling for CAPTCHA verification failed
-        if (error.message.toLowerCase().includes('captcha') || 
-            error.message.toLowerCase().includes('verification failed') ||
-            error.message.toLowerCase().includes('invalid captcha')) {
-          setCaptchaToken(null);
-          setTokenTimestamp(null);
-          resetCaptcha();
-          toast({
-            title: "CAPTCHA Verification Failed",
-            description: "Please complete the CAPTCHA again.",
-            variant: "destructive",
-          });
-          return;
-        }
 
         toast({
           title: "Signup Error",
@@ -351,27 +269,11 @@ export function Signup() {
             </div>
           </div>
 
-          {/* Captcha */}
-          <div className="flex justify-center">
-            <Turnstile
-              ref={signupTurnstileRef}
-              siteKey={turnstileSiteKey}
-              onSuccess={handleCaptchaSuccess}
-              onExpire={handleCaptchaExpire}
-              onError={handleCaptchaError}
-              options={{
-                action: 'signup',
-                theme: 'light',
-                size: 'normal',
-                retry: 'auto'
-              }}
-            />
-          </div>
 
           <Button 
             type="submit" 
             className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary transition-all duration-200 transform hover:scale-105 active:scale-95"
-            disabled={isLoading || !captchaToken}
+            disabled={isLoading}
           >
             {isLoading ? (
               <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />

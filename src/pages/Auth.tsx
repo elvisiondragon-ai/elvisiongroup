@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff, Sparkles, Zap, Phone, User, MessageCircle } from "lucide-react";
-import { Turnstile } from '@marsidev/react-turnstile';
 import type { User } from '@supabase/supabase-js';
 
 interface AuthProps {
@@ -20,11 +19,6 @@ export function Auth({ onLogin }: AuthProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
 
-  // Check for required environment variables
-  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
-  if (!turnstileSiteKey) {
-    console.error('Missing VITE_TURNSTILE_SITE_KEY environment variable');
-  }
 
   // Login form state
   const [loginData, setLoginData] = useState({
@@ -45,14 +39,6 @@ export function Auth({ onLogin }: AuthProps) {
     email: ''
   });
 
-  // Captcha token state
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [tokenTimestamp, setTokenTimestamp] = useState<number | null>(null);
-  
-  // Refs for Turnstile widgets
-  const loginTurnstileRef = useRef<any>(null);
-  const signupTurnstileRef = useRef<any>(null);
-  const forgotPasswordTurnstileRef = useRef<any>(null);
 
   // Track current view
   const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent' | 'signup-success'>('auth');
@@ -61,48 +47,6 @@ export function Auth({ onLogin }: AuthProps) {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [isTabClicked, setIsTabClicked] = useState(false);
 
-  // Enhanced CAPTCHA error handling
-  const handleCaptchaSuccess = (token: string) => {
-    setCaptchaToken(token);
-    setTokenTimestamp(Date.now());
-  };
-
-  const handleCaptchaError = (error?: any) => {
-    console.error('CAPTCHA error:', error);
-    setCaptchaToken(null);
-    setTokenTimestamp(null);
-    
-    toast({
-      title: "CAPTCHA Error",
-      description: "Please try the CAPTCHA again. If this persists, refresh the page.",
-      variant: "destructive",
-    });
-  };
-
-  const handleCaptchaExpire = () => {
-    setCaptchaToken(null);
-    setTokenTimestamp(null);
-  };
-
-  const resetCaptcha = (ref: any) => {
-    if (ref?.current) {
-      ref.current.reset();
-    }
-  };
-
-  const checkTokenFreshness = () => {
-    if (captchaToken && tokenTimestamp && Date.now() - tokenTimestamp > 300000) { // 5 minutes
-      setCaptchaToken(null);
-      setTokenTimestamp(null);
-      toast({
-        title: "CAPTCHA Expired",
-        description: "Please complete the CAPTCHA again.",
-        variant: "destructive",
-      });
-      return false;
-    }
-    return true;
-  };
 
 
   // Check if user is already logged in
@@ -300,14 +244,6 @@ export function Auth({ onLogin }: AuthProps) {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!captchaToken) {
-      toast({
-        title: "Captcha Required",
-        description: "Please complete the captcha verification.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setIsLoading(true);
 
@@ -316,8 +252,7 @@ export function Auth({ onLogin }: AuthProps) {
       const { error } = await supabase.auth.resetPasswordForEmail(
         forgotPasswordData.email,
         {
-          redirectTo: `${window.location.origin}/reset-password`,
-          captchaToken: captchaToken
+          redirectTo: `${window.location.origin}/reset-password`
         }
       );
 
@@ -344,19 +279,7 @@ export function Auth({ onLogin }: AuthProps) {
   const enhancedHandleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!captchaToken) {
-      toast({
-        title: "Captcha Required",
-        description: "Please complete the captcha verification.",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    if (!checkTokenFreshness()) {
-      resetCaptcha(loginTurnstileRef);
-      return;
-    }
 
     setIsLoading(true);
 
@@ -374,26 +297,9 @@ export function Auth({ onLogin }: AuthProps) {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
-        options: {
-          captchaToken: captchaToken
-        }
       });
 
       if (error) {
-        // Specific handling for CAPTCHA verification failed
-        if (error.message.toLowerCase().includes('captcha') || 
-            error.message.toLowerCase().includes('verification failed') ||
-            error.message.toLowerCase().includes('invalid captcha')) {
-          setCaptchaToken(null);
-          setTokenTimestamp(null);
-          resetCaptcha(loginTurnstileRef);
-          toast({
-            title: "CAPTCHA Verification Failed",
-            description: "Please complete the CAPTCHA again.",
-            variant: "destructive",
-          });
-          return;
-        }
         throw error;
       }
 
@@ -438,19 +344,7 @@ export function Auth({ onLogin }: AuthProps) {
       return;
     }
 
-    if (!captchaToken) {
-      toast({
-        title: "Captcha Required",
-        description: "Please complete the captcha verification.",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    if (!checkTokenFreshness()) {
-      resetCaptcha(signupTurnstileRef);
-      return;
-    }
 
     // Very lenient password validation - minimum 1 character
     if (signupData.password.length < 1) {
@@ -475,7 +369,6 @@ export function Auth({ onLogin }: AuthProps) {
         password: signupData.password,
         options: {
           emailRedirectTo: redirectUrl,
-          captchaToken,
           // Skip email confirmation for easier registration
           data: {
             email_confirm: true
@@ -590,27 +483,11 @@ export function Auth({ onLogin }: AuthProps) {
                 </div>
               </div>
 
-              {/* Turnstile CAPTCHA */}
-              <div className="flex justify-center">
-                <Turnstile
-                  ref={forgotPasswordTurnstileRef}
-                  siteKey={turnstileSiteKey}
-                  onSuccess={handleCaptchaSuccess}
-                  onError={handleCaptchaError}
-                  onExpire={handleCaptchaExpire}
-                  options={{
-                    action: 'forgot-password',
-                    theme: 'light',
-                    size: 'normal',
-                    retry: 'auto'
-                  }}
-                />
-              </div>
 
               <Button
                 type="submit"
                 className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
-                disabled={isLoading || !captchaToken}
+                disabled={isLoading}
               >
                 {isLoading ? "Mengirim..." : "Kirim Reset Email"}
               </Button>
@@ -826,27 +703,11 @@ export function Auth({ onLogin }: AuthProps) {
                   </div>
                 </div>
 
-                {/* Turnstile CAPTCHA */}
-                <div className="flex justify-center">
-                  <Turnstile
-                    ref={loginTurnstileRef}
-                    siteKey={turnstileSiteKey}
-                    onSuccess={handleCaptchaSuccess}
-                    onError={handleCaptchaError}
-                    onExpire={handleCaptchaExpire}
-                    options={{
-                      action: 'login',
-                      theme: 'light',
-                      size: 'normal',
-                      retry: 'auto'
-                    }}
-                  />
-                </div>
 
                 <Button
                   type="submit"
                   className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-medium h-11 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
-                  disabled={isLoading || !captchaToken}
+                  disabled={isLoading}
                 >
                   <span className="flex items-center justify-center gap-2">
                     {isLoading ? "Masuk..." : "Masuk"}
@@ -992,27 +853,11 @@ export function Auth({ onLogin }: AuthProps) {
                   </div>
                 </div>
 
-                {/* Turnstile CAPTCHA */}
-                <div className="flex justify-center">
-                  <Turnstile
-                    ref={signupTurnstileRef}
-                    siteKey={turnstileSiteKey}
-                    onSuccess={handleCaptchaSuccess}
-                    onError={handleCaptchaError}
-                    onExpire={handleCaptchaExpire}
-                    options={{
-                      action: 'signup',
-                      theme: 'light',
-                      size: 'normal',
-                      retry: 'auto'
-                    }}
-                  />
-                </div>
 
                 <Button
                   type="submit"
                   className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium h-11 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
-                  disabled={isLoading || !captchaToken}
+                  disabled={isLoading}
                 >
                   <span className="flex items-center justify-center gap-2">
                     {isLoading ? "Membuat Akun..." : "Buat Akun"}

@@ -85,9 +85,6 @@ const AppContent = () => {
       // Reset blocker so notification can show for new updates  
       localStorage.removeItem('force-refresh-completed')
 
-      // Option 2 - Instant Deploy no notif : 🔴OFF (jika mau on -> Option 1 harus di Off kan pakai //)
-      // updateServiceWorker(true)
-      // setNeedRefresh(false)
     }
   })
 

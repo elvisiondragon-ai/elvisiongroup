@@ -214,6 +214,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    // Display last logout reason if available
+    const lastLogoutReason = localStorage.getItem('last-logout-reason');
+    if (lastLogoutReason) {
+      console.log(`📋 Previous logout: ${lastLogoutReason}`);
+    }
+    
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       // If no session, try to recover from deployment backup
@@ -264,6 +270,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log(`🔵🔵🔵 Auth State Change: ${event}`, { userId: session?.user?.id, hasSession: !!session });
+      
+      // Track logout reason that survives refresh
+      if (event === 'SIGNED_OUT') {
+        const now = new Date().toISOString();
+        const logoutReason = session ? '🔑 User manually clicked sign out' : '☠️ Token expired/disconnected';
+        const logEntry = `${now} - 🔑 ☠️ Reason Signed out: ${logoutReason}`;
+        
+        // Store in localStorage to survive refresh
+        localStorage.setItem('last-logout-reason', logEntry);
+        console.log(logEntry);
+      }
       
       // Backup session on every auth change for deployment recovery
       if (session && event !== 'SIGNED_OUT') {
