@@ -65,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [channelStatus, setChannelStatus] = useState<string>('CLOSED');
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const currentTokenRef = useRef<string | null>(null);
+  const isConnectingRef = useRef<boolean>(false);
   
   // Chat messages state
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
@@ -92,17 +93,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       retryTimeoutRef.current = null;
     }
     
-    // 2. Teardown old channel
+    // 2. Synchronized channel teardown with stale ref guard
     if (chatChannelRef.current) {
-      console.log('☠️ Chat realtime status Unsubscribe');
-      try {
-        await chatChannelRef.current.unsubscribe();
-      } catch (e) {
-        console.log('⚠️ Unsubscribe failed, continuing...');
-      }
-      supabase.removeChannel(chatChannelRef.current);
+      console.log('💝 Chat realtime status: Starting synchronized unsubscribe');
+      
+      // 💙 Capture channel reference before nullifying to prevent stale refs
+      const channelToCleanup = chatChannelRef.current;
       chatChannelRef.current = null;
       setChatChannel(null);
+      
+      // 🩵 Serialize unsubscribe operation
+      try {
+        await channelToCleanup.unsubscribe();
+        console.log('🔥 Chat realtime status: Unsubscribe completed successfully');
+      } catch (e) {
+        console.error('❄️ WebSocket unsubscribe failed:', e);
+      }
+      
+      // ☀️ Always remove channel regardless of unsubscribe result
+      try {
+        supabase.removeChannel(channelToCleanup);
+        console.log('💚 Chat realtime status: Channel removed successfully');
+      } catch (e) {
+        console.error('♥️ WebSocket removeChannel failed:', e);
+      }
     }
     
     if (!session?.user) {
@@ -114,13 +128,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('🔑 WebSocket Auth token updated');
     supabase.realtime.setAuth(session.access_token);
     
-    // 4. Wait for auth propagation
-    console.log('⏳ WebSocket Auth propagation...');
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // 4. Wait for auth propagation (increased to 500ms)
+    console.log('💔 WebSocket Auth propagation: Waiting 500ms...');
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    // 5. Ensure WebSocket connected
-    console.log('⚡️ WebSocket Sukses konek');
-    supabase.realtime.connect();
+    // 5. Ensure WebSocket connected with connection guard
+    if (!isConnectingRef.current) {
+      console.log('🩸 WebSocket: Initiating guarded connection');
+      isConnectingRef.current = true;
+      supabase.realtime.connect();
+      
+      // Reset connecting flag after a delay
+      setTimeout(() => {
+        isConnectingRef.current = false;
+        console.log('🧲 WebSocket: Connection guard reset');
+      }, 2000);
+    } else {
+      console.log('🔥 WebSocket: Skipping connection - already connecting');
+    }
     
     // 6. Create new channel
     console.log('🔧 Channel recreated with new auth');
@@ -185,14 +210,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setChatChannel(channel);
         setLoading(false);
       } else if (status === 'TIMED_OUT' || status === 'CLOSED') {
-        console.log('⚠️ WebSocket Scheduling reconnect...');
+        console.log('🩵 WebSocket Scheduling reconnect after timeout/close...');
         // Retry with backoff
         if (!retryTimeoutRef.current) {
           retryTimeoutRef.current = setTimeout(() => {
             retryTimeoutRef.current = null;
-            console.log('🚀 WebSocket Attempting reconnect...');
-            rebuildChatChannel(session, 'retry after timeout').catch(() => {});
+            console.log('❄️ WebSocket Attempting reconnect after timeout...');
+            rebuildChatChannel(session, 'retry after timeout').catch((error) => {
+              console.error('💝 WebSocket retry rebuild failed:', error);
+            });
           }, 3000);
+        }
+      } else if (status === 'CHANNEL_ERROR' || status === 'CONNECTION_ERROR' || status === 'FAILED') {
+        console.error('🔥 WebSocket connection failed with status:', status);
+        // Retry failed connections with longer delay
+        if (!retryTimeoutRef.current) {
+          retryTimeoutRef.current = setTimeout(() => {
+            retryTimeoutRef.current = null;
+            console.log('☀️ WebSocket Attempting reconnect after failure...');
+            rebuildChatChannel(session, 'retry after failure').catch((error) => {
+              console.error('💚 WebSocket failure rebuild failed:', error);
+            });
+          }, 5000);
         }
       }
     });
@@ -222,7 +261,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     // Use unified flow for all channel management
-    rebuildChatChannel(session, 'auth state change').catch(() => {});
+    rebuildChatChannel(session, 'auth state change').catch((error) => {
+      console.error('💙 WebSocket auth state rebuild failed:', error);
+    });
   };
 
   useEffect(() => {

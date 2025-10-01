@@ -135,6 +135,7 @@ export function VerseAudioCard({
       });
       audio.addEventListener('ended', async () => {
         console.log('🎵 Audio ended for verse:', verse.title, 'ID:', verse.id);
+        console.log('🔄 Starting verse completion process...');
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
         setAudioDuration(null);
@@ -168,7 +169,11 @@ export function VerseAudioCard({
         // Award XP AFTER counter increment (XP can be blocked by daily limit)
         const xpAmount = 10; // All verses now give +10 XP
         console.log('🏆 Awarding XP:', xpAmount, 'for verse:', verse.title);
-        awardXP('verse_completion', xpAmount, `Completed ${verse.title}`);
+        awardXP('verse_completion', xpAmount, `Completed ${verse.title}`, {
+          verse_title: verse.title,
+          verse_id: verse.id
+        });
+
       });
 
       audio.addEventListener('error', (error) => {
@@ -184,6 +189,45 @@ export function VerseAudioCard({
       await audio.play();
       setCurrentPlayingVerse(verse.id);
       setCurrentVerseAudio(audio);
+
+      // Insert into verse_notif table for real-time notifications (on play button click)
+      const insertVerseNotification = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Use auth display name, fallback to profiles table
+          let displayName = 'Someone';
+          
+          // Try auth metadata first
+          if (user.user_metadata?.display_name) {
+            displayName = user.user_metadata.display_name;
+          } else {
+            // Fallback to profiles table
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('display_name')
+              .eq('user_id', user.id)
+              .single();
+            displayName = profile?.display_name || 'Someone';
+          }
+          
+          // Insert notification
+          const { error } = await supabase
+            .from('verse_notif')
+            .insert({
+              user_id: user.id,
+              display_name: displayName,
+              verse_title: verse.title,
+              verse_id: verse.id
+            });
+          
+          if (error) {
+            console.error('❌ Error inserting verse notification:', error);
+          } else {
+            console.log('✅ Verse notification inserted on play:', verse.title);
+          }
+        }
+      };
+      await insertVerseNotification();
       
       
       // Show sacred notification after 3 seconds delay
