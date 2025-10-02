@@ -42,6 +42,33 @@ SCHEMA
 
 ------------------------------------------------------------------------
 
+-- CHAT_MASSAGES TABLE
+SELECT
+      column_name,
+      data_type,
+      is_nullable,
+      column_default
+  FROM information_schema.columns
+  WHERE table_schema = 'public'
+  AND table_name = 'chat_messages'
+  ORDER BY ordinal_position;
+  
+| column_name       | data_type                | is_nullable | column_default    |
+| ----------------- | ------------------------ | ----------- | ----------------- |
+| id                | uuid                     | NO          | gen_random_uuid() |
+| user_id           | uuid                     | NO          | null              |
+| user_name         | text                     | NO          | null              |
+| user_level        | integer                  | NO          | 1                 |
+| message           | text                     | NO          | null              |
+| created_at        | timestamp with time zone | NO          | now()             |
+| channel_id        | text                     | YES         | 'community'::text |
+| subscription_type | text                     | YES         | null              |
+| is_pro            | boolean                  | YES         | false             |
+| streak_days       | integer                  | YES         | 0                 |
+
+------------------------------------------------------------------------
+
+
 -- Check schema for pro_subscriptions table
 SELECT 
     column_name,

@@ -71,9 +71,9 @@ const AppContent = () => {
     ];
 
     const showRandomActivity = () => {
-      // Create synchronized seed based on current 1-minute slot in Jakarta time (TESTING)
+      // Create synchronized seed based on current 5-minute slot in Jakarta time (TESTING)
       const jakartaTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
-      const currentSlot = Math.floor(jakartaTime.getTime() / (1 * 60 * 1000)); // 1-minute slots (TESTING)
+      const currentSlot = Math.floor(jakartaTime.getTime() / (5 * 60 * 1000)); // 5-minute slots (TESTING)
       
       // Use seed to ensure all users see same name and verse at same time
       const userIndex = currentSlot % userList.length;
@@ -95,23 +95,23 @@ const AppContent = () => {
       });
     };
 
-    // GLOBAL notification every 1 minute (TESTING) - UTC+7 JAKARTA TIME
+    // GLOBAL notification every 5 minutes (TESTING) - UTC+7 JAKARTA TIME
     const scheduleGlobalNotification = () => {
       const now = new Date();
       // Convert to Jakarta time (UTC+7)
       const jakartaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
       const nextMinute = new Date(jakartaTime);
       
-      // Calculate next 1-minute mark based on Jakarta time (TESTING)
+      // Calculate next 5-minute mark based on Jakarta time (TESTING)
       const currentMinutes = jakartaTime.getMinutes();
       const currentSeconds = jakartaTime.getSeconds();
-      const nextMinuteMark = currentMinutes + 1;
+      const nextFiveMinuteMark = Math.ceil((currentMinutes + 1) / 5) * 5;
       
-      nextMinute.setMinutes(nextMinuteMark, 0, 0); // Set to next 1-minute mark
+      nextMinute.setMinutes(nextFiveMinuteMark, 0, 0); // Set to next 5-minute mark
       
-      // If we're already at the next minute, go to the one after
+      // If we're already at the next 5-minute mark, go to the one after
       if (nextMinute <= jakartaTime) {
-        nextMinute.setMinutes(nextMinuteMark + 1, 0, 0);
+        nextMinute.setMinutes(nextFiveMinuteMark + 5, 0, 0);
       }
       
       // Calculate time difference back to local time for setTimeout
