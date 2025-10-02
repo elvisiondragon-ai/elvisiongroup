@@ -312,7 +312,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     
     if (session.user) {
-      checkProStatus(session.user.id);
+      // Force refresh Pro status for new login (clear cache first)
+      localStorage.removeItem('unified_pro_status_cache');
+      setProStatusCache(null);
+      checkProStatus(session.user.id, true);
     }
   };
 
@@ -549,11 +552,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setChatChannel(null);
     }
     
-    // Clear state
+    // Clear state and Pro cache
     setMessages([]);
     setProStatus(null);
     setProStatusCache(null);
     setChannelStatus('CLOSED');
+    
+    // Clear Pro status cache from localStorage
+    localStorage.removeItem('unified_pro_status_cache');
   };
 
   const checkProStatus = async (userId: string, force: boolean = false) => {

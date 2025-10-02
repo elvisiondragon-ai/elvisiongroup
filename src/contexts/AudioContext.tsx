@@ -5,6 +5,7 @@ import { AudioProtection } from '@/utils/audioProtection';
 
 interface AudioContextType {
   createProtectedAudio: (audioPath: string, onLoadingChange?: (loading: boolean) => void) => Promise<HTMLAudioElement>;
+  createStreamingAudio: (audioPath: string) => HTMLAudioElement;
   clearCache: () => Promise<void>;
   getCacheStats: () => Promise<{ cached: number; totalSize: string }>;
   isCached: (audioPath: string) => Promise<boolean>;
@@ -244,8 +245,43 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
   }, [audioCache]);
 
+  // Create streaming audio (no caching, instant play)
+  const createStreamingAudio = useCallback((audioPath: string): HTMLAudioElement => {
+    console.log('🎵 Creating streaming audio (no cache):', audioPath);
+    
+    // Get the URL (check if it's already a full URL)
+    const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
+    const audio = new Audio(audioUrl);
+
+    // Apply comprehensive protections
+    audio.setAttribute('preload', 'metadata'); // Load metadata for instant play
+    audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
+    audio.setAttribute('disablepictureinpicture', 'true');
+    audio.crossOrigin = 'anonymous';
+    audio.addEventListener('contextmenu', (e) => e.preventDefault());
+    audio.addEventListener('dragstart', (e) => e.preventDefault());
+    audio.addEventListener('drag', (e) => e.preventDefault());
+
+    // Override src property
+    Object.defineProperty(audio, 'src', {
+      value: audioUrl,
+      writable: false,
+      enumerable: false,
+      configurable: false
+    });
+
+    Object.defineProperty(audio, 'currentSrc', {
+      get: () => 'protected://audio-stream',
+      enumerable: false,
+      configurable: false
+    });
+
+    return audio;
+  }, []);
+
   const value = {
     createProtectedAudio,
+    createStreamingAudio,
     clearCache,
     getCacheStats,
     isCached

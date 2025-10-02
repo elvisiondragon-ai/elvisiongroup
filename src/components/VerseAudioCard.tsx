@@ -1,4 +1,4 @@
-import { Lock, Music, Crown, Zap, SkipBack, SkipForward, X, FileText } from 'lucide-react';
+import { Lock, Music, Crown, Zap, SkipBack, SkipForward, X, FileText, Download, Check } from 'lucide-react';
 import { useProtectedAudio } from '@/contexts/AudioContext';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useState, useEffect } from 'react';
@@ -41,7 +41,7 @@ export function VerseAudioCard({
   onNavigate,
   onVerse4Usage
 }: VerseAudioCardProps) {
-  const { createProtectedAudio } = useProtectedAudio();
+  const { createProtectedAudio, createStreamingAudio, isCached } = useProtectedAudio();
   const { awardXP } = useXPSystem();
   const { toast } = useToast();
   
@@ -50,9 +50,22 @@ export function VerseAudioCard({
   const [currentTime, setCurrentTime] = useState(0);
   const [showDownloadNotif, setShowDownloadNotif] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloaded, setIsDownloaded] = useState(false);
   
   // Check if this verse is currently playing
   const isPlaying = currentPlayingVerse === verse.id;
+
+  // Check cache status on mount
+  useEffect(() => {
+    const checkCacheStatus = async () => {
+      if (verse.audioPath) {
+        const cached = await isCached(verse.audioPath);
+        setIsDownloaded(cached);
+      }
+    };
+    checkCacheStatus();
+  }, [verse.audioPath, isCached]);
 
   // Check if audio is actually playing when component mounts/updates
   useEffect(() => {
@@ -109,21 +122,20 @@ export function VerseAudioCard({
       }
     }
 
-    // Check if first time download
-    const cacheKey = `verse_${verse.id}_cached`;
-    const isCached = localStorage.getItem(cacheKey);
-    
-    if (!isCached) {
-      setShowDownloadNotif(true);
-    }
-
-    // Create new protected audio with caching
+    // Create new audio (use cached if available, stream if not)
     try {
-      const audio = await createProtectedAudio(verse.audioPath);
+      let audio: HTMLAudioElement;
       
-      // Mark as cached and hide notification
-      localStorage.setItem(cacheKey, 'true');
-      setShowDownloadNotif(false);
+      // Check if cached first for instant decision
+      const cached = await isCached(verse.audioPath);
+      
+      if (cached) {
+        console.log('🎵 Using cached audio for instant play');
+        audio = await createProtectedAudio(verse.audioPath);
+      } else {
+        console.log('🎵 Using streaming audio for instant play');
+        audio = createStreamingAudio(verse.audioPath);
+      }
       
       // Add event listeners  
       audio.addEventListener('loadedmetadata', () => {
@@ -262,6 +274,43 @@ export function VerseAudioCard({
 
   const progress = audioDuration ? (currentTime / audioDuration) * 100 : 0;
 
+  // Handle download button click
+  const handleDownloadClick = async () => {
+    if (!verse.unlocked || !verse.audioPath || isDownloading || isDownloaded) return;
+    
+    setIsDownloading(true);
+    
+    // Show downloading info toast
+    toast({
+      title: "Sedang Download Audio... 📥",
+      description: "Setelah download Audio Tidak akan memakai kuota internet",
+      duration: 5000,
+      className: "bg-blue-100 border-blue-400 text-blue-800"
+    });
+    
+    try {
+      // Force download and cache
+      await createProtectedAudio(verse.audioPath);
+      setIsDownloaded(true);
+      
+      toast({
+        title: "Download Selesai! 🎉",
+        duration: 3000,
+        className: "bg-green-100 border-green-400 text-green-800"
+      });
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "Download Gagal",
+        description: "Coba lagi nanti",
+        duration: 3000,
+        className: "bg-red-100 border-red-400 text-red-800"
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="relative group cursor-pointer" data-verse-title={verse.title}>
       {verse.unlocked && verse.artwork ? (
@@ -279,14 +328,6 @@ export function VerseAudioCard({
             <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-accent/20"></div>
           </div>
           
-          {/* Most Wanted indicator for Verse 8 */}
-          {verse.id === 8 && (
-            <div className="absolute -top-1 -right-1 flex items-center">
-              <div className="bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg">
-                MOST WANTED
-              </div>
-            </div>
-          )}
 
           {/* Play Button Overlay */}
           <div 
@@ -318,6 +359,34 @@ export function VerseAudioCard({
               )}
             </div>
           </div>
+          
+          {/* Download Button - Only show if not downloaded */}
+          {canPlay && !isDownloaded && (
+            <div className="absolute -top-6 -right-[14px] flex items-center gap-2">
+              <div className="text-[10px] text-white/90 font-medium bg-black/70 px-1.5 py-0.5 rounded backdrop-blur-sm">
+                Download Verses
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownloadClick();
+                }}
+                disabled={isDownloading}
+                className={`w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform transition-all duration-300 ${
+                  isDownloading 
+                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 cursor-not-allowed animate-pulse'
+                    : 'bg-gradient-to-r from-gray-800 via-gray-900 to-black hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 hover:scale-110 active:scale-95 hover:shadow-2xl hover:shadow-gray-500/50'
+                }`}
+                title={isDownloading ? 'Mendownload...' : 'Download untuk offline'}
+              >
+                {isDownloading ? (
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4 text-white" />
+                )}
+              </button>
+            </div>
+          )}
           
           {/* Audio Controls - Show when playing */}
           {isPlaying && audioDuration && (
@@ -374,14 +443,6 @@ export function VerseAudioCard({
             </div>
           </div>
           
-          {/* Most Wanted indicator for Verse 8 - also show when locked */}
-          {verse.id === 8 && (
-            <div className="absolute -top-1 -right-1 flex items-center">
-              <div className="bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg">
-                MOST WANTED
-              </div>
-            </div>
-          )}
           
           {!verse.unlocked && (
             <>

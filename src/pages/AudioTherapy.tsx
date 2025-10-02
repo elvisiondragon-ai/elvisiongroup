@@ -459,6 +459,15 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           </div>
         </div>
         
+        {/* Download Recommendation Card */}
+        <div className="bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-600/20 border border-blue-500/30 rounded-xl p-3 mb-4">
+          <div className="text-center">
+            <p className="text-sm font-bold bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+              Download Verses jika Sering Mendengarkan
+            </p>
+          </div>
+        </div>
+        
         {/* Single Tutorial Button for All Songs */}
         <div className="flex justify-center mt-6">
           <Button
