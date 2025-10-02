@@ -235,12 +235,10 @@ const AppContent = () => {
       // Instant update without user interaction
       updateServiceWorker(true)
       
-      // iOS fallback: Force reload if service worker doesn't trigger refresh
-      if (isIOS) {
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      }
+      // Force reload for all platforms to ensure instant update
+      setTimeout(() => {
+        window.location.reload();
+      }, isIOS ? 500 : 200);
 
 
     }
