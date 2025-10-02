@@ -1,5 +1,7 @@
 // Service Worker for background audio support + audio caching
-const CACHE_NAME = 'audio-therapy-v2';
+import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
+
+const CACHE_NAME = 'audio-therapy-v3';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -16,8 +18,13 @@ const audioFilesToCache = [
   'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse5%20-%20Virtality%20Vortex.MP3'
 ];
 
+// Precache files from Vite PWA
+precacheAndRoute(self.__WB_MANIFEST || []);
+cleanupOutdatedCaches();
+
 // Install event - cache app files + audio files
 self.addEventListener('install', (event) => {
+  console.log('🔧 SW Installing - Audio + PWA Cache Setup');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('Caching app files and audio files...');
@@ -30,9 +37,19 @@ self.addEventListener('install', (event) => {
           )
         );
       });
+    }).then(() => {
+      // Enable skipWaiting to activate new SW immediately when update is triggered
+      return self.skipWaiting();
     })
   );
-  // self.skipWaiting(); // DISABLED - wait for user action to update
+});
+
+// Activate event - take control immediately
+self.addEventListener('activate', (event) => {
+  console.log('🚀 SW Activated - Taking control');
+  event.waitUntil(
+    self.clients.claim()
+  );
 });
 
 // Fetch event with special handling for audio files
