@@ -86,15 +86,6 @@ const AppContent = () => {
       // Extract verse title from activity
       const verseTitle = randomActivity.replace('Sedang Mendengarkan ', '');
 
-      // Log notification details to check for duplicates
-      console.log('🔔 NOTIFICATION DEBUG:', {
-        currentSlot,
-        userIndex,
-        activityIndex,
-        displayName,
-        verseTitle,
-        combination: `${displayName} - ${verseTitle}`
-      });
 
       toast({
         title: `${displayName} Sedang Mendengarkan 🎧`,
@@ -126,7 +117,6 @@ const AppContent = () => {
       // Calculate time difference back to local time for setTimeout
       const timeUntilNext = nextMinute - jakartaTime;
       
-      console.log('⏰ Next notification in:', Math.round(timeUntilNext / 1000), 'seconds (TESTING)');
       
       notificationTimeoutRef.current = setTimeout(() => {
         showRandomActivity();
