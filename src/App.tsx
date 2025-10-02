@@ -186,7 +186,7 @@ const AppContent = () => {
     onRegisterError(error) {
       console.log('SW registration error', error)
     },
-    onNeedRefresh() {
+    async onNeedRefresh() {
       console.log('🔄 Update available - latest version ready')
       
       // iOS-specific: Backup auth IMMEDIATELY when update is detected
@@ -207,7 +207,7 @@ const AppContent = () => {
         });
         
         // Also backup current session from Supabase
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        await supabase.auth.getSession().then(({ data: { session } }) => {
           if (session) {
             authBackup['_session_backup'] = JSON.stringify(session);
           }
@@ -232,15 +232,25 @@ const AppContent = () => {
       // Set flag to show toast after refresh
       localStorage.setItem('mini-update-success', 'true')
       
-      // Instant update without user interaction
-      updateServiceWorker(true)
+      try {
+        // Wait for service worker to update and activate
+        await updateServiceWorker(true);
+        
+        // Wait for new service worker to be ready
+        if ('serviceWorker' in navigator) {
+          await navigator.serviceWorker.ready;
+          console.log('✅ Service worker updated and ready');
+        }
+        
+        // Additional wait to ensure SW is fully activated
+        await new Promise(resolve => setTimeout(resolve, isIOS ? 800 : 300));
+        
+      } catch (error) {
+        console.error('❌ Service worker update failed:', error);
+      }
       
-      // Force reload for all platforms to ensure instant update
-      setTimeout(() => {
-        window.location.reload();
-      }, isIOS ? 500 : 200);
-
-
+      // Force reload after SW is properly updated
+      window.location.reload();
     }
   })
 
