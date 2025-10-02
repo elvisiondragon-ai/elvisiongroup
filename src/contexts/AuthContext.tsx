@@ -414,17 +414,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // iOS: Try automatic deployment backup
+        // iOS: Try automatic deployment backup with audio cache
         const iosNeedsRecovery = localStorage.getItem('ios-needs-recovery');
         if (iosNeedsRecovery === 'true') {
           const iosBackup = sessionStorage.getItem('ios-deploy-backup');
           if (iosBackup) {
             try {
-              const authData = JSON.parse(iosBackup);
-              if (authData._session_backup) {
-                const backupSession = JSON.parse(authData._session_backup);
+              const fullData = JSON.parse(iosBackup);
+              
+              // Restore ALL data (auth + audio cache)
+              Object.keys(fullData).forEach(key => {
+                if (key !== '_session_backup' && fullData[key]) {
+                  localStorage.setItem(key, fullData[key]);
+                }
+              });
+              
+              // Restore session if available
+              if (fullData._session_backup) {
+                const backupSession = JSON.parse(fullData._session_backup);
                 await supabase.auth.setSession(backupSession);
-                console.log('📱 iOS recovered from auto-deployment logout');
+                console.log('📱 iOS recovered from auto-deployment (auth + audio cache secured)');
                 sessionStorage.removeItem('ios-deploy-backup');
                 localStorage.removeItem('ios-needs-recovery');
                 return;
@@ -432,6 +441,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } catch (e) {
               console.warn('iOS recovery failed:', e);
               localStorage.removeItem('ios-needs-recovery');
+            }
+          }
+        }
+
+        // Non-iOS: Try deployment backup with audio cache  
+        const needsRecovery = localStorage.getItem('needs-recovery');
+        if (needsRecovery === 'true') {
+          const deployBackup = sessionStorage.getItem('deploy-backup');
+          if (deployBackup) {
+            try {
+              const fullData = JSON.parse(deployBackup);
+              
+              // Restore ALL data (auth + audio cache)
+              Object.keys(fullData).forEach(key => {
+                if (key !== '_session_backup' && fullData[key]) {
+                  localStorage.setItem(key, fullData[key]);
+                }
+              });
+              
+              // Restore session if available
+              if (fullData._session_backup) {
+                const backupSession = JSON.parse(fullData._session_backup);
+                await supabase.auth.setSession(backupSession);
+                console.log('🔒 Deployment recovery completed (auth + audio cache secured)');
+                sessionStorage.removeItem('deploy-backup');
+                localStorage.removeItem('needs-recovery');
+                return;
+              }
+            } catch (e) {
+              console.warn('Deployment recovery failed:', e);
+              localStorage.removeItem('needs-recovery');
             }
           }
         }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { ProUpgradeNotification } from "@/components/ProUpgradeNotification";
+import { ProUpgradeNotification } from "@/components/InvitePro";
 import { Home } from "./Home";
 import { Chat } from "./Chat";
 import { Leaderboard } from "./Leaderboard";

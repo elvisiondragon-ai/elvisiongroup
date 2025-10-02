@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { usePro } from '@/hooks/usePro';
 import { useAuth } from '@/contexts/AuthContext';
+import { FreeUserNotificationModal } from '@/components/FreeUserNotificationModal';
 
 interface NotificationTracker {
   lastShownDate: string | null;
@@ -214,4 +215,23 @@ export const useFreeUserNotifications = () => {
     handleModalNavigate,
     handleModalClose
   };
+};
+
+// Component that handles both the hook logic and modal rendering
+export const FreeUserNotifications = () => {
+  const {
+    showModal,
+    currentReason,
+    handleModalNavigate,
+    handleModalClose
+  } = useFreeUserNotifications();
+
+  return (
+    <FreeUserNotificationModal
+      isVisible={showModal}
+      onClose={handleModalClose}
+      onNavigate={handleModalNavigate}
+      reason={currentReason}
+    />
+  );
 };

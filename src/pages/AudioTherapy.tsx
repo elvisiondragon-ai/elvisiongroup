@@ -13,7 +13,7 @@ import { useMeditative } from "@/contexts/MeditativeContext";
 import { VerseAudioCard } from "@/components/VerseAudioCard";
 import { useProtectedAudio } from "@/contexts/AudioContext"; // //Nevertouch Audio-cache
 import { SacredFocusNotification } from "@/components/SacredFocusNotification";
-import { ProUpgradeModal } from "@/components/ProUpgradeModal";
+import { InvitePro } from "@/components/InvitePro";
 // Removed slow UserProfileContext - now using fast auth
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/contexts/UserProfileContext';
@@ -841,7 +841,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       />
 
       {/* Pro Upgrade Modal */}
-      <ProUpgradeModal
+      <InvitePro
         isVisible={showProUpgrade}
         onClose={() => setShowProUpgrade(false)}
         onNavigateToPayment={navigateToPayment}
