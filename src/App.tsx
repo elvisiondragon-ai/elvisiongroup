@@ -186,7 +186,7 @@ const AppContent = () => {
     onRegisterError(error) {
       console.log('SW registration error', error)
     },
-    onNeedRefresh() {
+    async onNeedRefresh() {
       console.log('🔄 Update available - latest version ready')
       
       // iOS-specific: Backup auth IMMEDIATELY when update is detected
@@ -207,7 +207,7 @@ const AppContent = () => {
         });
         
         // Also backup current session from Supabase
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        await supabase.auth.getSession().then(({ data: { session } }) => {
           if (session) {
             authBackup['_session_backup'] = JSON.stringify(session);
           }
@@ -232,52 +232,25 @@ const AppContent = () => {
       // Set flag to show toast after refresh
       localStorage.setItem('mini-update-success', 'true')
       
-      // Clear only app caches, preserve audio caches
-      if ('caches' in window) {
-        caches.keys().then(cacheNames => {
-          const appCaches = cacheNames.filter(name => 
-            name.includes('audio-therapy') || 
-            name.includes('app-') || 
-            name.includes('workbox') ||
-            name.includes('runtime') ||
-            !name.includes('audio-files') // Clear everything except audio-files
-          );
-          
-          console.log('🗑️ Clearing app caches only:', appCaches);
-          console.log('💾 Preserving caches:', cacheNames.filter(name => !appCaches.includes(name)));
-          
-          return Promise.all(
-            appCaches.map(cacheName => {
-              console.log('🗑️ Deleting cache:', cacheName);
-              return caches.delete(cacheName);
-            })
-          );
-        }).then(() => {
-          console.log('✅ App caches cleared, audio preserved');
-          // Now update service worker
-          updateServiceWorker(true);
-          
-          // Force reload after selective cache clear
-          setTimeout(() => {
-            window.location.reload();
-          }, isIOS ? 500 : 300);
-        }).catch(error => {
-          console.error('❌ Selective cache clear failed:', error);
-          // Fallback: force update anyway
-          updateServiceWorker(true);
-          setTimeout(() => {
-            window.location.reload();
-          }, isIOS ? 500 : 200);
-        });
-      } else {
-        // No cache API, proceed normally
-        updateServiceWorker(true);
-        setTimeout(() => {
-          window.location.reload();
-        }, isIOS ? 500 : 200);
+      try {
+        // Wait for service worker to update and activate
+        await updateServiceWorker(true);
+        
+        // Wait for new service worker to be ready
+        if ('serviceWorker' in navigator) {
+          await navigator.serviceWorker.ready;
+          console.log('✅ Service worker updated and ready');
+        }
+        
+        // Additional wait to ensure SW is fully activated
+        await new Promise(resolve => setTimeout(resolve, isIOS ? 800 : 300));
+        
+      } catch (error) {
+        console.error('❌ Service worker update failed:', error);
       }
-
-
+      
+      // Force reload after SW is properly updated
+      window.location.reload();
     }
   })
 
