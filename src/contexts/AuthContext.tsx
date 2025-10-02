@@ -267,7 +267,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         retryCountRef.current = 0; // Reset on successful connection
         chatChannelRef.current = channel;
-        setChatChannel(channel);
         setLoading(false);
       } else if (status === 'TIMED_OUT' || status === 'CLOSED') {
         console.log('🩵 WebSocket Scheduling reconnect after timeout/close...');
