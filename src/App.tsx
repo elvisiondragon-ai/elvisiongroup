@@ -232,13 +232,50 @@ const AppContent = () => {
       // Set flag to show toast after refresh
       localStorage.setItem('mini-update-success', 'true')
       
-      // Instant update without user interaction
-      updateServiceWorker(true)
-      
-      // Force reload for all platforms to ensure instant update
-      setTimeout(() => {
-        window.location.reload();
-      }, isIOS ? 500 : 200);
+      // Clear only app caches, preserve audio caches
+      if ('caches' in window) {
+        caches.keys().then(cacheNames => {
+          const appCaches = cacheNames.filter(name => 
+            name.includes('audio-therapy') || 
+            name.includes('app-') || 
+            name.includes('workbox') ||
+            name.includes('runtime') ||
+            !name.includes('audio-files') // Clear everything except audio-files
+          );
+          
+          console.log('🗑️ Clearing app caches only:', appCaches);
+          console.log('💾 Preserving caches:', cacheNames.filter(name => !appCaches.includes(name)));
+          
+          return Promise.all(
+            appCaches.map(cacheName => {
+              console.log('🗑️ Deleting cache:', cacheName);
+              return caches.delete(cacheName);
+            })
+          );
+        }).then(() => {
+          console.log('✅ App caches cleared, audio preserved');
+          // Now update service worker
+          updateServiceWorker(true);
+          
+          // Force reload after selective cache clear
+          setTimeout(() => {
+            window.location.reload();
+          }, isIOS ? 500 : 300);
+        }).catch(error => {
+          console.error('❌ Selective cache clear failed:', error);
+          // Fallback: force update anyway
+          updateServiceWorker(true);
+          setTimeout(() => {
+            window.location.reload();
+          }, isIOS ? 500 : 200);
+        });
+      } else {
+        // No cache API, proceed normally
+        updateServiceWorker(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, isIOS ? 500 : 200);
+      }
 
 
     }
