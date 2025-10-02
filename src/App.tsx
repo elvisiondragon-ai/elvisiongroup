@@ -229,15 +229,17 @@ const AppContent = () => {
       localStorage.removeItem('force-refresh-completed')
       localStorage.removeItem('update-timestamp')
       
-      // Instant update without user interaction
-      updateServiceWorker(true)
-      
-      // Show mini success notification
+      // Show mini success notification first
       toast({
         title: "Mini Update Selesai 🔥",
         duration: 3000,
         className: "bg-yellow-100 border-yellow-400 text-yellow-800"
       });
+      
+      // Delay the service worker update to let toast show on iOS
+      setTimeout(() => {
+        updateServiceWorker(true)
+      }, 3000);
 
 
     }
