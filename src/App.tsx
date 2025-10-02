@@ -229,17 +229,11 @@ const AppContent = () => {
       localStorage.removeItem('force-refresh-completed')
       localStorage.removeItem('update-timestamp')
       
-      // Show mini success notification first
-      toast({
-        title: "Mini Update Selesai 🔥",
-        duration: 3000,
-        className: "bg-yellow-100 border-yellow-400 text-yellow-800"
-      });
+      // Set flag to show toast after refresh
+      localStorage.setItem('mini-update-success', 'true')
       
-      // Delay the service worker update to let toast show on iOS
-      setTimeout(() => {
-        updateServiceWorker(true)
-      }, 3000);
+      // Instant update without user interaction
+      updateServiceWorker(true)
 
 
     }
@@ -473,6 +467,19 @@ const AppContent = () => {
       };
       
       showProNotification();
+    }
+  }, [toast]);
+
+  // Mini Update success notification after refresh (like Pro status pattern)
+  useEffect(() => {
+    const miniUpdateSuccess = localStorage.getItem('mini-update-success');
+    if (miniUpdateSuccess === 'true') {
+      localStorage.removeItem('mini-update-success');
+      toast({
+        title: "Mini Update Selesai 🔥",
+        duration: 3000,
+        className: "bg-yellow-100 border-yellow-400 text-yellow-800"
+      });
     }
   }, [toast]);
 
