@@ -278,7 +278,7 @@ export function Home({
 
   const tutorialFeature = {
     title: "Cara Menggunakan Ecosystem",
-    description: "",
+    description: "OKTOBER VISION",
     icon: Play,
     color: "text-blue-500",
     key: "tutorial"
