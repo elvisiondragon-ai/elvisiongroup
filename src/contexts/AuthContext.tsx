@@ -67,12 +67,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const currentTokenRef = useRef<string | null>(null);
   const isConnectingRef = useRef<boolean>(false);
   
+  // IDLE USER HANDLER - Page visibility tracking
+  const lastActiveTimeRef = useRef<number>(Date.now());
+  const wasIdleRef = useRef<boolean>(false);
+  const retryCountRef = useRef<number>(0);
+  const isIdleWakeReconnectRef = useRef<boolean>(false);
+  
   // Chat messages state
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   
   // OPTIMIZATION: Add caching to prevent excessive RPC calls
   const [proStatusCache, setProStatusCache] = useState<{data: any, timestamp: number} | null>(null);
   const [lastProCheck, setLastProCheck] = useState<number>(0);
+
+  // IDLE USER HANDLER - Detection function
+  const isIdleState = () => {
+    const now = Date.now();
+    const timeSinceLastActive = now - lastActiveTimeRef.current;
+    const isIdle = wasIdleRef.current || timeSinceLastActive > 600000; // 10 minutes (production)
+    
+    if (isIdle) {
+      console.log('[RT] Idle state detected:', { 
+        wasHidden: wasIdleRef.current, 
+        minutesInactive: Math.floor(timeSinceLastActive / 60000) 
+      });
+    }
+    
+    return isIdle;
+  };
+
+  // IDLE USER HANDLER - Retry delay function
+  const getRetryDelay = () => {
+    const isIdle = isIdleState();
+    
+    if (isIdle) {
+      console.log(`[RT] Using idle timeout: 8000ms`);
+      return 8000; // 8 seconds for idle scenarios
+    }
+    
+    console.log(`[RT] Using normal timeout: 500ms`);
+    return 500; // 500ms for normal scenarios
+  };
 
   // UNIFIED FLOW: Single function handles all channel management
   const rebuildChatChannel = async (session: Session | null, reason: string) => {
@@ -225,25 +260,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const wasRetrying = retryTimeoutRef.current !== null;
         console.log(wasRetrying ? '🚀⚡️ WebSocket connection recovered successfully!' : '💥 Chat realtime status Connected');
         
-        // Clear any pending retry timeouts
+        // Clear any pending retry timeouts and reset counter
         if (retryTimeoutRef.current) {
           clearTimeout(retryTimeoutRef.current);
           retryTimeoutRef.current = null;
         }
+        retryCountRef.current = 0; // Reset on successful connection
         chatChannelRef.current = channel;
         setChatChannel(channel);
         setLoading(false);
       } else if (status === 'TIMED_OUT' || status === 'CLOSED') {
         console.log('🩵 WebSocket Scheduling reconnect after timeout/close...');
-        // Retry with backoff
+        // Retry with idle-aware backoff
         if (!retryTimeoutRef.current) {
+          const delay = getRetryDelay();
+          console.log(`🩵 WebSocket retry in ${delay}ms after timeout/close`);
+          retryCountRef.current++;
+          
           retryTimeoutRef.current = setTimeout(() => {
             retryTimeoutRef.current = null;
             console.log('❄️ WebSocket Attempting reconnect after timeout...');
             rebuildChatChannel(session, 'retry after timeout').catch((error) => {
               console.error('💝 WebSocket retry rebuild failed:', error);
             });
-          }, 3000);
+          }, delay);
         }
       } else if (status === 'CHANNEL_ERROR' || status === 'CONNECTION_ERROR' || status === 'FAILED') {
         console.error('🔥 WebSocket connection failed with status:', status, {
@@ -254,15 +294,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           hasSession: !!session,
           userId: session?.user?.id
         });
-        // Retry failed connections with longer delay
+        // Retry failed connections with idle detection
         if (!retryTimeoutRef.current) {
+          const delay = getRetryDelay();
+          console.log(`🔥 WebSocket retry in ${delay}ms after CHANNEL_ERROR`);
+          retryCountRef.current++;
+          
           retryTimeoutRef.current = setTimeout(() => {
             retryTimeoutRef.current = null;
             console.log('☀️ WebSocket Attempting reconnect after failure...');
             rebuildChatChannel(session, 'retry after failure').catch((error) => {
               console.error('💚 WebSocket failure rebuild failed:', error);
             });
-          }, 5000);
+          }, delay);
         }
       }
     });
@@ -303,6 +347,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (lastLogoutReason) {
       console.log(`📋 Previous logout: ${lastLogoutReason}`);
     }
+
+    // IDLE USER HANDLER - Page visibility tracking
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden;
+      
+      if (isVisible) {
+        console.log('[RT] Page became visible - checking for idle-wake reconnection');
+        lastActiveTimeRef.current = Date.now();
+        
+        // Mark for genuine idle-wake reconnection if page was hidden
+        if (wasIdleRef.current) {
+          console.log('❇️❇️ USER BACK FROM IDLE');
+          console.log('[RT] Genuine idle-wake scenario detected - flagging for long delay');
+          isIdleWakeReconnectRef.current = true;
+        }
+        
+        wasIdleRef.current = false;
+      } else {
+        console.log('☠️☠️ USER IDLE');
+        console.log('[RT] Page hidden - marking as potentially idle');
+        wasIdleRef.current = true;
+      }
+    };
+
+    // Track user activity to detect idle periods
+    const updateActiveTime = () => {
+      const now = Date.now();
+      const timeSinceLastActive = now - lastActiveTimeRef.current;
+      
+      // Check if user was idle and is now active
+      if (timeSinceLastActive > 600000) { // 600000 = 10 minutes (production)
+        console.log('⚠️⚠️ IDLE USER BACK updateActiveTime');
+        console.log('[RT] User active after 10+ minute idle');
+      }
+      
+      lastActiveTimeRef.current = now;
+      wasIdleRef.current = false;
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('click', updateActiveTime);
+    document.addEventListener('keydown', updateActiveTime);
+    document.addEventListener('scroll', updateActiveTime);
     
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -424,7 +511,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       updateAuthState(session);
     });
 
-    return () => subscription.unsubscribe();
+    // IDLE USER HANDLER - Cleanup event listeners
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('click', updateActiveTime);
+      document.removeEventListener('keydown', updateActiveTime);
+      document.removeEventListener('scroll', updateActiveTime);
+    };
   }, []);
 
   // Cleanup function for proper logout

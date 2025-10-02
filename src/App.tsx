@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,8 +32,11 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const [updateClicked, setUpdateClicked] = useState(false);
   const [toastId, setToastId] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const { user, loading } = useAuth();
+  
+  // Cleanup ref for notification timeout
+  const notificationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Random User Activity Notification System
   useEffect(() => {
@@ -68,9 +71,9 @@ const AppContent = () => {
     ];
 
     const showRandomActivity = () => {
-      // Create synchronized seed based on current 10-minute slot in Jakarta time
+      // Create synchronized seed based on current 1-minute slot in Jakarta time (TESTING)
       const jakartaTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
-      const currentSlot = Math.floor(jakartaTime.getTime() / (10 * 60 * 1000)); // 10-minute slots
+      const currentSlot = Math.floor(jakartaTime.getTime() / (1 * 60 * 1000)); // 1-minute slots (TESTING)
       
       // Use seed to ensure all users see same name and verse at same time
       const userIndex = currentSlot % userList.length;
@@ -83,38 +86,49 @@ const AppContent = () => {
       // Extract verse title from activity
       const verseTitle = randomActivity.replace('Sedang Mendengarkan ', '');
 
+      // Log notification details to check for duplicates
+      console.log('🔔 NOTIFICATION DEBUG:', {
+        currentSlot,
+        userIndex,
+        activityIndex,
+        displayName,
+        verseTitle,
+        combination: `${displayName} - ${verseTitle}`
+      });
+
       toast({
         title: `${displayName} Sedang Mendengarkan 🎧`,
         description: `${verseTitle} 🔥`,
-        duration: 4000,
+        duration: 6000, // Show for 6 seconds
         className: "p-3 pr-4 space-x-3 [&>div>*:first-child]:text-sm [&>div>*:last-child]:text-sm",
       });
     };
 
-    // GLOBAL notification every 10 minutes (:00, :10, :20, :30, :40, :50) - UTC+7 JAKARTA TIME
+    // GLOBAL notification every 1 minute (TESTING) - UTC+7 JAKARTA TIME
     const scheduleGlobalNotification = () => {
       const now = new Date();
       // Convert to Jakarta time (UTC+7)
       const jakartaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
-      const nextTenMinutes = new Date(jakartaTime);
+      const nextMinute = new Date(jakartaTime);
       
-      // Calculate next 10-minute mark based on Jakarta time
+      // Calculate next 1-minute mark based on Jakarta time (TESTING)
       const currentMinutes = jakartaTime.getMinutes();
-      const nextMinuteMark = Math.ceil(currentMinutes / 10) * 10;
+      const currentSeconds = jakartaTime.getSeconds();
+      const nextMinuteMark = currentMinutes + 1;
       
-      nextTenMinutes.setMinutes(nextMinuteMark, 0, 0); // Set to next 10-minute mark
+      nextMinute.setMinutes(nextMinuteMark, 0, 0); // Set to next 1-minute mark
       
-      // If we're already at a 10-minute mark, go to next one
-      if (nextTenMinutes <= jakartaTime) {
-        nextTenMinutes.setMinutes(nextMinuteMark + 10, 0, 0);
+      // If we're already at the next minute, go to the one after
+      if (nextMinute <= jakartaTime) {
+        nextMinute.setMinutes(nextMinuteMark + 1, 0, 0);
       }
       
       // Calculate time difference back to local time for setTimeout
-      const timeUntilNext = nextTenMinutes - jakartaTime;
+      const timeUntilNext = nextMinute - jakartaTime;
       
-      console.log('⏰ Next notification in:', Math.round(timeUntilNext / 1000 / 60), 'minutes');
+      console.log('⏰ Next notification in:', Math.round(timeUntilNext / 1000), 'seconds (TESTING)');
       
-      setTimeout(() => {
+      notificationTimeoutRef.current = setTimeout(() => {
         showRandomActivity();
         scheduleGlobalNotification(); // Schedule next one
       }, timeUntilNext);
@@ -123,7 +137,11 @@ const AppContent = () => {
     scheduleGlobalNotification();
 
     return () => {
-      // No cleanup needed as we use single setTimeout chain
+      // Cleanup notification timeout
+      if (notificationTimeoutRef.current) {
+        clearTimeout(notificationTimeoutRef.current);
+        notificationTimeoutRef.current = null;
+      }
     };
   }, [user]);
 
@@ -146,7 +164,7 @@ const AppContent = () => {
         toast({
           title: `${display_name} Sedang Mendengarkan 🎧`,
           description: `${verse_title} 🔥`,
-          duration: 4000,
+          duration: 6000, // Show for 6 seconds
           className: "p-3 pr-4 space-x-3 [&>div>*:first-child]:text-sm [&>div>*:last-child]:text-sm",
         });
       }
