@@ -50,12 +50,7 @@ export const useUpdateToast = () => {
       }
     }
 
-    // Check if there's a pending update on every refresh
-    const pendingUpdate = localStorage.getItem('pending-update-available');
-    if (pendingUpdate === 'true') {
-      console.log('🔄 Pending update detected on refresh - showing toast');
-      showUpdateToast();
-    }
+    // DON'T show toast on manual refresh - only when onNeedRefresh triggers it
   }, [toast]);
 
   // iOS detection
@@ -71,8 +66,7 @@ export const useUpdateToast = () => {
           onClick={async () => {
             console.log('🔵 User clicked update button');
             
-            // Clear pending update flag
-            localStorage.removeItem('pending-update-available');
+            // User clicked update button
             
             // Try to refresh session one more time before update
             if (user) {
@@ -132,18 +126,8 @@ export const useUpdateToast = () => {
       duration: 0, // Don't auto-dismiss
     };
 
-    // Show toast with iOS-specific retry mechanism
-    const toastInstance = toast(toastConfig);
-    
-    // iOS-specific: Re-show toast if it doesn't appear within 2 seconds
-    if (isIOS) {
-      setTimeout(() => {
-        console.log('iOS: Re-showing toast to ensure visibility');
-        toast(toastConfig);
-      }, 2000);
-    }
-    
-    return toastInstance;
+    // Show toast (iOS gets single toast, no rapid showing)
+    return toast(toastConfig);
   };
 
   // PWA Update Logic
@@ -238,10 +222,7 @@ export const useUpdateToast = () => {
         console.log('✅ Auth + Audio cache secured for deployment');
       });
       
-      // Mark update as pending - will show toast on every refresh until user clicks
-      localStorage.setItem('pending-update-available', 'true');
-      
-      // Show initial update toast
+      // Show update toast immediately when onNeedRefresh triggers
       showUpdateToast();
     }
   });
