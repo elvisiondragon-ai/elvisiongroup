@@ -1,10 +1,12 @@
 import { useToast } from "@/hooks/use-toast";
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useRef } from "react";
 
 export const useUpdateToast = () => {
   const { toast } = useToast();
+  const { refreshSession, user } = useAuth();
   const persistentToastInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Check for success flag after refresh + show pending updates + SW recovery success
@@ -18,17 +20,34 @@ export const useUpdateToast = () => {
       });
     }
 
+
     // Show success message if coming back from SW update/recovery
     const swUpdated = localStorage.getItem('sw-update-success');
     if (swUpdated === 'true') {
       localStorage.removeItem('sw-update-success');
-      setTimeout(() => {
-        console.log('✅ SW Update completed successfully');
-        toast({
-          title: "Success Update",
-          duration: 2000,
-        });
-      }, 1000);
+      
+      // Check if there was a session warning during update
+      const sessionWarning = localStorage.getItem('update-session-warning');
+      if (sessionWarning === 'true') {
+        localStorage.removeItem('update-session-warning');
+        
+        setTimeout(() => {
+          console.log('⚠️ SW Update completed with session warning');
+          toast({
+            title: "Update Complete",
+            description: "Please check if you're still logged in",
+            duration: 4000,
+          });
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          console.log('✅ SW Update completed successfully');
+          toast({
+            title: "Success Update",
+            duration: 2000,
+          });
+        }, 1000);
+      }
     }
 
     // Check if there's a pending update on every refresh
@@ -46,7 +65,7 @@ export const useUpdateToast = () => {
   const showUpdateToast = () => {
     const toastConfig = {
       title: "🔵 UPDATE TERSEDIA", 
-      description: isIOS ? "Tap untuk Update" : "Double Click Disini",
+      description: isIOS ? "IOS Device" : "Android",
       action: (
         <button 
           onClick={async () => {
@@ -54,6 +73,28 @@ export const useUpdateToast = () => {
             
             // Clear pending update flag
             localStorage.removeItem('pending-update-available');
+            
+            // Try to refresh session one more time before update
+            if (user) {
+              console.log('🔄 Final session refresh before update');
+              const refreshResult = await refreshSession();
+              
+              if (!refreshResult.success) {
+                console.warn('⚠️ Final session refresh failed:', refreshResult.error);
+                
+                // Show warning but continue with update
+                toast({
+                  title: "Session Warning",
+                  description: "Session refresh failed. You may need to login again after update.",
+                  duration: 3000,
+                });
+                
+                // Mark for potential logout after update
+                localStorage.setItem('update-session-warning', 'true');
+              } else {
+                console.log('✅ Final session refresh successful');
+              }
+            }
             
             // Set flag for success toast after refresh
             localStorage.setItem('update-success-flag', 'true');
@@ -65,8 +106,16 @@ export const useUpdateToast = () => {
               window.location.reload();
             } catch (error) {
               console.error('❌ Update failed:', error);
+              
+              // Show error toast but still try to reload
+              toast({
+                title: "Update Error",
+                description: "Service worker update failed, forcing reload anyway",
+                duration: 2000,
+              });
+              
               // Still reload to get the update
-              window.location.reload();
+              setTimeout(() => window.location.reload(), 2000);
             }
           }}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
@@ -77,7 +126,7 @@ export const useUpdateToast = () => {
             minWidth: '44px'
           } : {}}
         >
-          Update Sekarang
+          Double Click Disini
         </button>
       ),
       duration: 0, // Don't auto-dismiss
@@ -104,12 +153,35 @@ export const useUpdateToast = () => {
   } = useRegisterSW({
     onRegistered(r) {
       console.log('✅ SW Registered successfully:', r);
+      
+      // Check for updates immediately after registration
+      if (r) {
+        console.log('🔍 Checking for updates immediately after registration');
+        r.update();
+        
+        // Set up periodic update checks every 60 seconds
+        setInterval(() => {
+          console.log('🔍 Periodic update check');
+          r.update();
+        }, 60000);
+      }
     },
     onRegisterError(error) {
       console.error('❌ SW registration error:', error);
     },
     async onNeedRefresh() {
       console.log('🔄 Update available - latest version ready')
+      
+      // Try to refresh session via AuthContext before backup
+      if (user) {
+        console.log('🔒 Refreshing session before deployment backup');
+        const refreshResult = await refreshSession();
+        
+        if (!refreshResult.success) {
+          console.warn('⚠️ Session refresh failed before update:', refreshResult.error);
+          // Continue with backup even if refresh fails
+        }
+      }
       
       // CRITICAL: Backup auth AND audio cache for ALL platforms during updates
       console.log('🔒 Deployment detected - securing auth and audio cache')

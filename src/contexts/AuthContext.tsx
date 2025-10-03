@@ -37,6 +37,7 @@ interface AuthContextType {
   broadcastMessage: (message: ChatMessageData) => void;
   broadcastDelete: (messageId: string) => void;
   cleanupSupabase: () => Promise<void>;
+  refreshSession: () => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -53,6 +54,7 @@ const AuthContext = createContext<AuthContextType>({
   broadcastMessage: () => {},
   broadcastDelete: () => {},
   cleanupSupabase: async () => {},
+  refreshSession: async () => ({ success: false, error: 'Context not initialized' }),
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -94,6 +96,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     return isIdle;
+  };
+
+  // UPDATE CHECKER - Function to check for PWA updates
+  const checkForPWAUpdates = () => {
+    console.log('🔍 AuthContext: Checking for PWA updates');
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.getRegistration().then((registration) => {
+        if (registration) {
+          registration.update();
+        }
+      });
+    }
   };
 
   // IDLE USER HANDLER - Retry delay function
@@ -358,6 +372,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('[RT] Page became visible - checking for idle-wake reconnection');
         lastActiveTimeRef.current = Date.now();
         
+        // Check for PWA updates when page becomes visible
+        checkForPWAUpdates();
+        
         // Mark for genuine idle-wake reconnection if page was hidden
         if (wasIdleRef.current) {
           console.log('❇️❇️ USER BACK FROM IDLE');
@@ -382,6 +399,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (timeSinceLastActive > 600000) { // 600000 = 10 minutes (production)
         console.log('⚠️⚠️ IDLE USER BACK updateActiveTime');
         console.log('[RT] User active after 10+ minute idle');
+        
+        // Check for PWA updates when user returns from long idle
+        checkForPWAUpdates();
       }
       
       lastActiveTimeRef.current = now;
@@ -694,6 +714,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Dedicated refresh session method for update scenarios
+  const refreshSession = async (): Promise<{ success: boolean; error?: string }> => {
+    console.log('🔄 AuthContext refreshSession called for update workflow');
+    
+    try {
+      // First try to refresh the current session
+      const { data: refreshedSession, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshedSession?.session && !refreshError) {
+        console.log('✅ AuthContext session refresh successful');
+        
+        // Update state directly without triggering channel rebuild
+        setUser(refreshedSession.session.user);
+        setUserId(refreshedSession.session.user.id);
+        currentTokenRef.current = refreshedSession.session.access_token;
+        
+        // Update realtime auth token
+        supabase.realtime.setAuth(refreshedSession.session.access_token);
+        
+        return { success: true };
+      } else {
+        console.log('⚠️ AuthContext refresh failed, trying getSession fallback');
+        
+        // Fallback: Try getSession to recover existing session
+        const { data: { session: fallbackSession }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (fallbackSession && !sessionError) {
+          console.log('✅ AuthContext session recovered via getSession');
+          
+          // Update state directly
+          setUser(fallbackSession.user);
+          setUserId(fallbackSession.user.id);
+          currentTokenRef.current = fallbackSession.access_token;
+          supabase.realtime.setAuth(fallbackSession.access_token);
+          
+          return { success: true };
+        } else {
+          const errorMsg = refreshError?.message || sessionError?.message || 'Session refresh failed';
+          console.error('❌ AuthContext all refresh attempts failed:', errorMsg);
+          return { success: false, error: errorMsg };
+        }
+      }
+    } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : 'Unknown refresh error';
+      console.error('❌ AuthContext refresh exception:', errorMsg);
+      return { success: false, error: errorMsg };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -710,6 +779,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         broadcastMessage,
         broadcastDelete,
         cleanupSupabase,
+        refreshSession,
       }}
     >
       {children}
