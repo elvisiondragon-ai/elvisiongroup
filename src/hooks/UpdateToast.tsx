@@ -29,11 +29,11 @@ export const useUpdateToast = () => {
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-  // Function to show update toast
+  // Function to show update toast with iOS-specific handling
   const showUpdateToast = () => {
-    toast({
+    const toastConfig = {
       title: "🔵 UPDATE TERSEDIA", 
-      description: "Double Click Disini",
+      description: isIOS ? "Tap untuk Update" : "Double Click Disini",
       action: (
         <button 
           onClick={async () => {
@@ -56,13 +56,32 @@ export const useUpdateToast = () => {
               window.location.reload();
             }
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
+          // iOS-specific touch handling
+          style={isIOS ? { 
+            WebkitTapHighlightColor: 'transparent',
+            minHeight: '44px', // iOS recommended touch target
+            minWidth: '44px'
+          } : {}}
         >
           Update Sekarang
         </button>
       ),
       duration: 0, // Don't auto-dismiss
-    });
+    };
+
+    // Show toast with iOS-specific retry mechanism
+    const toastInstance = toast(toastConfig);
+    
+    // iOS-specific: Re-show toast if it doesn't appear within 2 seconds
+    if (isIOS) {
+      setTimeout(() => {
+        console.log('iOS: Re-showing toast to ensure visibility');
+        toast(toastConfig);
+      }, 2000);
+    }
+    
+    return toastInstance;
   };
 
   // PWA Update Logic

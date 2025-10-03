@@ -10,6 +10,10 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  optimizeDeps: {
+    exclude: ['workbox-window'],
+    include: ['@supabase/supabase-js', '@tanstack/react-query', 'react', 'react-dom']
+  },
   plugins: [
     react(),
     mode === 'development' &&
@@ -54,5 +58,17 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          supabase: ['@supabase/supabase-js'],
+          ui: ['@radix-ui/react-toast', '@radix-ui/react-dialog']
+        }
+      }
+    },
+    sourcemap: mode === 'development'
   },
 }));

@@ -1,5 +1,6 @@
 // Service Worker for background audio support + audio caching
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
+// Import Workbox via importScripts for service worker compatibility
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-sw.js');
 
 const CACHE_NAME = 'audio-therapy-v3';
 const urlsToCache = [
@@ -18,9 +19,12 @@ const audioFilesToCache = [
   'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse5%20-%20Virtality%20Vortex.MP3'
 ];
 
-// Precache files from Vite PWA
-precacheAndRoute(self.__WB_MANIFEST || []);
-cleanupOutdatedCaches();
+// Initialize Workbox and precache files from Vite PWA
+if (workbox) {
+  const { precacheAndRoute, cleanupOutdatedCaches } = workbox;
+  precacheAndRoute(self.__WB_MANIFEST || []);
+  cleanupOutdatedCaches();
+}
 
 // Install event - cache app files + audio files
 self.addEventListener('install', (event) => {
@@ -76,14 +80,25 @@ self.addEventListener('fetch', (event) => {
             });
           }
           return response;
+        }).catch((error) => {
+          console.log('Audio fetch failed, app continues:', error);
+          // Return a valid response to prevent blocking
+          return new Response('', { status: 204, statusText: 'Audio unavailable' });
         });
       })
     );
   } else {
-    // Regular cache strategy for other files
+    // Regular cache strategy for other files with error handling
     event.respondWith(
       caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).catch((error) => {
+          console.log('Regular fetch failed, continuing:', error);
+          // Don't block the app - let it handle the error gracefully
+          throw error;
+        });
       })
     );
   }

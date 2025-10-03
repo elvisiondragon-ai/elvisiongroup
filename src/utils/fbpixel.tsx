@@ -91,70 +91,118 @@ export const getFbcFbpTrackingParams = (): { fbc?: string; fbp?: string } => {
   return { fbc: enhanced.fbc, fbp: enhanced.fbp };
 };
 
-// 🚀 Pixel Initializer - Initialize Facebook Pixel with enhanced logging
+// 🚀 Pixel Initializer - Initialize Facebook Pixel with enhanced logging and error handling
 export const initFacebookPixelWithLogging = (pixelId: string): void => {
   if (typeof window === 'undefined' || window.fbq) return;
 
   // console.log('🚀 Pixel Initializer - Starting Facebook Pixel setup');
   
-  (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-    if (f.fbq) return; n = f.fbq = function() { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
-    if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
-    t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-  })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-  
-  window.fbq('init', pixelId);
-  // console.log('🚀 Pixel Initializer - Facebook Pixel ready with ID:', pixelId);
+  try {
+    (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
+      if (f.fbq) return; 
+      n = f.fbq = function() { 
+        try {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        } catch (error) {
+          console.log('FB Pixel method call failed, continuing:', error);
+        }
+      };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
+      t = b.createElement(e); t.async = !0; t.src = v; 
+      
+      // Add error handler for script load failure
+      t.onerror = function() {
+        console.log('Facebook Pixel script failed to load - app continues normally');
+        // Create a dummy fbq function to prevent errors
+        window.fbq = function() {
+          console.log('FB Pixel unavailable, tracking skipped');
+        };
+      };
+      
+      s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    
+    // Wrap init call in try-catch
+    setTimeout(() => {
+      try {
+        window.fbq('init', pixelId);
+        // console.log('🚀 Pixel Initializer - Facebook Pixel ready with ID:', pixelId);
+      } catch (error) {
+        console.log('FB Pixel init failed, continuing:', error);
+      }
+    }, 100);
+  } catch (error) {
+    console.log('FB Pixel initialization failed, app continues:', error);
+    // Create fallback function to prevent future errors
+    window.fbq = function() {
+      console.log('FB Pixel unavailable, tracking skipped');
+    };
+  }
 };
 
 // ⭐ View Content Tracker - Track ViewContent events with enhanced data
 export const trackViewContentEvent = (eventData: any = {}, email?: string, firstName?: string): void => {
   if (typeof window === 'undefined' || !window.fbq) return;
   
-  const trackingParams = getEnhancedTrackingParams(email, firstName);
-  
-  // console.log('⭐ View Content Tracker - Tracking ViewContent event');
-  window.fbq('track', 'ViewContent', eventData, trackingParams);
+  try {
+    const trackingParams = getEnhancedTrackingParams(email, firstName);
+    // console.log('⭐ View Content Tracker - Tracking ViewContent event');
+    window.fbq('track', 'ViewContent', eventData, trackingParams);
+  } catch (error) {
+    console.log('FB Pixel ViewContent tracking failed, continuing:', error);
+  }
 };
 
 // 📄 Page View Tracker - Track PageView events with enhanced data
 export const trackPageViewEvent = (eventData: any = {}, email?: string, firstName?: string): void => {
   if (typeof window === 'undefined' || !window.fbq) return;
   
-  const trackingParams = getEnhancedTrackingParams(email, firstName);
-  
-  // console.log('📄 Page View Tracker - Tracking PageView event');
-  window.fbq('track', 'PageView', eventData, trackingParams);
+  try {
+    const trackingParams = getEnhancedTrackingParams(email, firstName);
+    // console.log('📄 Page View Tracker - Tracking PageView event');
+    window.fbq('track', 'PageView', eventData, trackingParams);
+  } catch (error) {
+    console.log('FB Pixel PageView tracking failed, continuing:', error);
+  }
 };
 
 // 🛒 Add to Cart Tracker - Track AddToCart events with enhanced data
 export const trackAddToCartEvent = (eventData: any = {}, email?: string, firstName?: string): void => {
   if (typeof window === 'undefined' || !window.fbq) return;
   
-  const trackingParams = getEnhancedTrackingParams(email, firstName);
-  
-  // console.log('🛒 Add to Cart Tracker - Tracking AddToCart event');
-  window.fbq('track', 'AddToCart', eventData, trackingParams);
+  try {
+    const trackingParams = getEnhancedTrackingParams(email, firstName);
+    // console.log('🛒 Add to Cart Tracker - Tracking AddToCart event');
+    window.fbq('track', 'AddToCart', eventData, trackingParams);
+  } catch (error) {
+    console.log('FB Pixel AddToCart tracking failed, continuing:', error);
+  }
 };
 
 // 💰 Purchase Tracker - Track Purchase events with enhanced data
 export const trackPurchaseEvent = (eventData: any = {}, email?: string, firstName?: string): void => {
   if (typeof window === 'undefined' || !window.fbq) return;
   
-  const trackingParams = getEnhancedTrackingParams(email, firstName);
-  
-  // console.log('💰 Purchase Tracker - Tracking Purchase event');
-  // console.log('💰 Purchase Data:', eventData);
-  window.fbq('track', 'Purchase', eventData, trackingParams);
+  try {
+    const trackingParams = getEnhancedTrackingParams(email, firstName);
+    // console.log('💰 Purchase Tracker - Tracking Purchase event');
+    // console.log('💰 Purchase Data:', eventData);
+    window.fbq('track', 'Purchase', eventData, trackingParams);
+  } catch (error) {
+    console.log('FB Pixel Purchase tracking failed, continuing:', error);
+  }
 };
 
 // 🎯 Generic Event Tracker - Track any custom events with FBC/FBP
 export const trackGenericPixelEvent = (eventName: string, eventData: any = {}, customData: any = {}): void => {
   if (typeof window === 'undefined' || !window.fbq) return;
   
-  const trackingParams = getFbcFbpTrackingParams();
-  const enhancedCustomData = { ...customData, ...trackingParams };
-  
-  // console.log(`🎯 Generic Event Tracker - Tracking ${eventName} event`);
-  window.fbq('track', eventName, eventData, enhancedCustomData);
+  try {
+    const trackingParams = getFbcFbpTrackingParams();
+    const enhancedCustomData = { ...customData, ...trackingParams };
+    // console.log(`🎯 Generic Event Tracker - Tracking ${eventName} event`);
+    window.fbq('track', eventName, eventData, enhancedCustomData);
+  } catch (error) {
+    console.log(`FB Pixel ${eventName} tracking failed, continuing:`, error);
+  }
 };

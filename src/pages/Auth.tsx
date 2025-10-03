@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, Eye, EyeOff, Sparkles, Zap, Phone, User, MessageCircle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Sparkles, Zap, Phone, User as UserIcon, MessageCircle } from "lucide-react";
 import type { User } from '@supabase/supabase-js';
 
 interface AuthProps {
@@ -764,7 +764,7 @@ export function Auth({ onLogin }: AuthProps) {
                     Display Name
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <UserIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="signup-displayname"
                       type="text"

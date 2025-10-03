@@ -31,6 +31,28 @@ const AppContent = () => {
   // Initialize update system
   useUpdateToast();
 
+  // Global error handler to prevent blocking failures
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.log('Unhandled promise rejection caught (app continues):', event.reason);
+      // Prevent the error from blocking the app
+      event.preventDefault();
+    };
+
+    const handleError = (event: ErrorEvent) => {
+      console.log('Global error caught (app continues):', event.error);
+      // Don't prevent default for non-blocking errors
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.addEventListener('error', handleError);
+
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
   return (
     <AppLoader>
       <AudioProvider>
