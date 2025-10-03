@@ -44,44 +44,33 @@ const AppContent = () => {
       // Don't prevent default for non-blocking errors
     };
 
-    // Listen for cache clear messages from service worker
+    // Listen for RECOVERY messages from simplified service worker
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'CACHE_CLEARED' && event.data.action === 'refresh') {
-        console.log('🔄 Cache cleared by SW - Force refresh to prevent white/black screen');
-        // Small delay to ensure SW is ready, then force refresh
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
-      }
-      
-      // NUCLEAR CACHE CLEAR - Force logout and complete refresh
-      if (event.data && event.data.type === 'NUCLEAR_CACHE_CLEAR' && event.data.action === 'nuke_and_logout') {
-        console.log('💥 NUCLEAR CACHE CLEAR - Force logout and complete refresh', event.data.version);
+      // RECOVERY MODE - Simple clear and reload
+      if (event.data && event.data.type === 'RECOVERY_MODE' && event.data.action === 'clear_and_reload') {
+        console.log('🚑 RECOVERY MODE ACTIVATED:', event.data.version);
         
-        // NUKE ALL STORAGE
+        // Clear all storage immediately
         try {
           localStorage.clear();
           sessionStorage.clear();
-          console.log('💥 NUKE: Cleared localStorage and sessionStorage');
+          console.log('🚑 Recovery: Cleared storage');
         } catch (e) {
-          console.log('Storage clear failed:', e);
+          console.log('🚑 Recovery: Storage clear failed, continuing');
         }
         
-        // Clear IndexedDB (Supabase auth)
-        if (window.indexedDB) {
-          try {
+        // Clear auth DB
+        try {
+          if (window.indexedDB) {
             indexedDB.deleteDatabase('supabase-auth-token');
-            console.log('💥 NUKE: Cleared IndexedDB auth');
-          } catch (e) {
-            console.log('IndexedDB clear failed:', e);
           }
+        } catch (e) {
+          console.log('🚑 Recovery: IndexedDB clear failed, continuing');
         }
         
-        // NUCLEAR REFRESH with cache bypass
-        setTimeout(() => {
-          console.log('💥 NUKE: Force reload with cache bypass');
-          window.location.href = window.location.href + '?nuke=' + Date.now();
-        }, 200);
+        // Force reload with cache bypass - no delay needed
+        console.log('🚑 Recovery: Force reloading');
+        window.location.href = window.location.origin + '?recovery=' + Date.now();
       }
     };
 

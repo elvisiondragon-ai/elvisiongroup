@@ -22,56 +22,73 @@
     <meta name="twitter:image" content="/favicon.png" />
     
     <script>
-      // NUCLEAR SERVICE WORKER REGISTRATION
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          // Force unregister all old service workers first
-          navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
-              console.log('💥 NUKE: Unregistering old SW');
-              registration.unregister();
-            }
-            
-            // Register new nuclear SW
-            navigator.serviceWorker.register('/sw.js', { 
-              updateViaCache: 'none',
-              scope: '/'
-            })
-            .then((registration) => {
-              console.log('💥 SW registered v5-NUKE-3oktober: ', registration);
-              
-              // Force immediate update check
-              registration.update();
-              
-              // Listen for new service worker
-              registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                if (newWorker) {
-                  newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                      console.log('💥 NUKE: New SW ready - will nuke everything');
-                    }
-                  });
-                }
-              });
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
-            });
-          });
-        });
-      }
+      // SIMPLE RECOVERY SERVICE WORKER - NO RACE CONDITIONS
       
-      // Emergency nuke button for immediate clear
-      window.nukeCache = function() {
-        console.log('💥 EMERGENCY NUKE ACTIVATED');
+      // Immediate black screen detection and recovery
+      let isBlackScreen = false;
+      const checkForBlackScreen = () => {
+        const root = document.getElementById('root');
+        if (!root || !root.children.length) {
+          isBlackScreen = true;
+          console.log('🚑 BLACK SCREEN DETECTED - Starting recovery');
+          return true;
+        }
+        return false;
+      };
+      
+      // Check for black screen every 2 seconds
+      const blackScreenChecker = setInterval(() => {
+        if (checkForBlackScreen()) {
+          console.log('🚑 Auto-recovery: Black screen detected');
+          window.recoveryMode();
+          clearInterval(blackScreenChecker);
+        }
+      }, 2000);
+      
+      // Stop checking after 10 seconds if app loads
+      setTimeout(() => {
+        if (!isBlackScreen) {
+          clearInterval(blackScreenChecker);
+        }
+      }, 10000);
+      
+      // Recovery function
+      window.recoveryMode = function() {
+        console.log('🚑 RECOVERY MODE ACTIVATED');
         localStorage.clear();
         sessionStorage.clear();
         if (window.indexedDB) {
           indexedDB.deleteDatabase('supabase-auth-token');
         }
-        window.location.href = window.location.origin + '?emergency_nuke=' + Date.now();
+        
+        // Unregister all service workers
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+              registration.unregister();
+            }
+            window.location.href = window.location.origin + '?recovery_manual=' + Date.now();
+          });
+        } else {
+          window.location.href = window.location.origin + '?recovery_manual=' + Date.now();
+        }
       };
+      
+      // Simple SW registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js', { 
+            updateViaCache: 'none'
+          })
+          .then((registration) => {
+            console.log('🚑 Recovery SW registered:', registration);
+            registration.update();
+          })
+          .catch((error) => {
+            console.log('🚑 SW registration failed, continuing without SW:', error);
+          });
+        });
+      }
     </script>
   </head>
 
