@@ -112,14 +112,20 @@ export const initFacebookPixelWithLogging = (pixelId: string): void => {
       
       // Add error handler for script load failure
       t.onerror = function() {
-        console.log('Facebook Pixel script failed to load - app continues normally');
+        // Silent fail - no console logs
         // Create a dummy fbq function to prevent errors
         window.fbq = function() {
-          console.log('FB Pixel unavailable, tracking skipped');
+          // Silent - no tracking logs
         };
       };
       
-      s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+      s = b.getElementsByTagName(e)[0]; 
+      // Wrap insertion in try-catch to handle blocked requests silently
+      try {
+        s.parentNode.insertBefore(t, s);
+      } catch (e) {
+        // Silent fail if blocked by client/ad blocker
+      }
     })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
     
     // Wrap init call in try-catch

@@ -48,11 +48,20 @@ self.addEventListener('activate', (event) => {
 
 // Simple fetch handler - no caching, just pass through
 self.addEventListener('fetch', (event) => {
-  // Don't cache anything, just fetch normally
+  const url = event.request.url;
+  
+  // Don't intercept external domains - let them fail naturally
+  if (url.includes('facebook.net') || 
+      url.includes('google-analytics.com') || 
+      url.includes('googletagmanager.com')) {
+    return; // Let browser handle directly, no SW intervention
+  }
+  
+  // Only handle same-origin requests
   event.respondWith(
     fetch(event.request).catch((error) => {
-      console.log('🚑 Fetch failed, letting it fail naturally:', error);
-      throw error;
+      // Silent fail for same-origin services
+      return new Response('', { status: 204, statusText: 'Service unavailable' });
     })
   );
 });
