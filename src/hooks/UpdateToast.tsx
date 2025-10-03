@@ -8,6 +8,7 @@ export const useUpdateToast = () => {
   const { toast } = useToast();
   const { refreshSession, user } = useAuth();
   const persistentToastInterval = useRef<NodeJS.Timeout | null>(null);
+  const toastShownRef = useRef<boolean>(false);
 
   // Check for success flag after refresh + show pending updates + SW recovery success
   useEffect(() => {
@@ -58,6 +59,12 @@ export const useUpdateToast = () => {
 
   // Function to show update toast with iOS-specific handling
   const showUpdateToast = () => {
+    // Prevent duplicate toasts
+    if (toastShownRef.current) {
+      console.log('🚫 Toast already shown, preventing duplicate');
+      return;
+    }
+    toastShownRef.current = true;
     const toastConfig = {
       title: "🐢 Initiate Update...", 
       description: isIOS ? "IOS Device" : "Android",
@@ -95,43 +102,6 @@ export const useUpdateToast = () => {
             
             try {
               console.log('🔄 Starting service worker update...');
-              
-              // Clear all service worker caches before update
-              if ('serviceWorker' in navigator) {
-                const cacheNames = await caches.keys();
-                console.log('🗑️ Clearing', cacheNames.length, 'SW caches');
-                await Promise.all(cacheNames.map(name => caches.delete(name)));
-                console.log('✅ All SW caches cleared');
-              }
-              
-              // Clear localStorage except critical data
-              const criticalKeys = Object.keys(localStorage).filter(key => 
-                key.startsWith('sb-') || 
-                key.includes('auth') || 
-                key.includes('session') ||
-                key.includes('supabase') ||
-                key.includes('token') ||
-                key.includes('audio') ||
-                key.includes('cache') ||
-                key.match(/^supabase\.auth\./) ||
-                key === 'update-success-flag' ||
-                key === 'sw-update-success' ||
-                key === 'update-session-warning'
-              );
-              
-              const backupData: Record<string, string> = {};
-              criticalKeys.forEach(key => {
-                const value = localStorage.getItem(key);
-                if (value) backupData[key] = value;
-              });
-              
-              localStorage.clear();
-              console.log('🗑️ localStorage cleared, restoring', Object.keys(backupData).length, 'critical items');
-              
-              Object.entries(backupData).forEach(([key, value]) => {
-                localStorage.setItem(key, value);
-              });
-              
               await updateServiceWorker(true);
               console.log('✅ Service worker updated, reloading...');
               window.location.reload();
@@ -149,7 +119,7 @@ export const useUpdateToast = () => {
               setTimeout(() => window.location.reload(), 2000);
             }
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation"
+          className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 hover:from-purple-900 hover:via-slate-800 hover:to-purple-900 text-amber-100 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation shadow-2xl ring-1 ring-white/10"
           // iOS-specific touch handling
           style={isIOS ? { 
             WebkitTapHighlightColor: 'transparent',
@@ -163,23 +133,8 @@ export const useUpdateToast = () => {
       duration: 0, // Don't auto-dismiss
     };
 
-    // Show toast with iOS reliability handler
+    // Show toast 
     const toastInstance = toast(toastConfig);
-    
-    // iOS fix: Check if first toast is visible, if not show second one
-    if (isIOS) {
-      setTimeout(() => {
-        const toastElements = document.querySelectorAll('[data-sonner-toast]');
-        
-        if (toastElements.length > 0) {
-          console.log('🍎 iOS: First toast is visible, stopping');
-          return; // Stop - toast is visible
-        }
-        
-        console.log('🍎 iOS: First toast not visible, showing second');
-        toast(toastConfig);
-      }, 1000);
-    }
     
     return toastInstance;
   };
@@ -209,6 +164,50 @@ export const useUpdateToast = () => {
     },
     async onNeedRefresh() {
       console.log('🔄 Update available - latest version ready')
+      
+      // IMMEDIATE: Clear all service worker caches FIRST (before white screen can occur)
+      try {
+        if ('serviceWorker' in navigator) {
+          const cacheNames = await caches.keys();
+          console.log('🗑️ PRE-DEPLOYMENT: Clearing', cacheNames.length, 'SW caches to prevent white screen');
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+          console.log('✅ All SW caches cleared - white screen prevented');
+        }
+      } catch (error) {
+        console.error('❌ Failed to clear SW caches:', error);
+      }
+      
+      // Clear localStorage except critical data (prevent stale data issues)
+      try {
+        const criticalKeys = Object.keys(localStorage).filter(key => 
+          key.startsWith('sb-') || 
+          key.includes('auth') || 
+          key.includes('session') ||
+          key.includes('supabase') ||
+          key.includes('token') ||
+          key.includes('audio') ||
+          key.includes('cache') ||
+          key.match(/^supabase\.auth\./) ||
+          key === 'update-success-flag' ||
+          key === 'sw-update-success' ||
+          key === 'update-session-warning'
+        );
+        
+        const backupData: Record<string, string> = {};
+        criticalKeys.forEach(key => {
+          const value = localStorage.getItem(key);
+          if (value) backupData[key] = value;
+        });
+        
+        localStorage.clear();
+        console.log('🗑️ PRE-DEPLOYMENT: localStorage cleared, restoring', Object.keys(backupData).length, 'critical items');
+        
+        Object.entries(backupData).forEach(([key, value]) => {
+          localStorage.setItem(key, value);
+        });
+      } catch (error) {
+        console.error('❌ Failed to clear localStorage:', error);
+      }
       
       // Try to refresh session via AuthContext before backup
       if (user) {
