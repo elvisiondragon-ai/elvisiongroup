@@ -22,6 +22,7 @@ import { AudioProvider } from "@/contexts/AudioContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
@@ -45,31 +46,51 @@ const AppContent = () => {
     };
 
     // Listen for RECOVERY messages from simplified service worker
-    const handleMessage = (event: MessageEvent) => {
-      // RECOVERY MODE - Simple clear and reload
+    const handleMessage = async (event: MessageEvent) => {
+      // RECOVERY MODE - Smart session refresh instead of logout
       if (event.data && event.data.type === 'RECOVERY_MODE' && event.data.action === 'clear_and_reload') {
         console.log('🚑 RECOVERY MODE ACTIVATED:', event.data.version);
         
-        // Clear all storage immediately
+        // Try to refresh session instead of clearing auth
         try {
-          localStorage.clear();
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            // User is logged in - refresh their session
+            console.log('🚑 Recovery: Refreshing user session');
+            await supabase.auth.refreshSession();
+            console.log('🚑 Recovery: Session refreshed successfully');
+          } else {
+            console.log('🚑 Recovery: No active session to refresh');
+          }
+        } catch (e) {
+          console.log('🚑 Recovery: Session refresh failed, continuing without auth clear');
+        }
+        
+        // Clear only non-auth storage
+        try {
+          // Keep auth-related keys, clear everything else
+          const authKeys = Object.keys(localStorage).filter(key => 
+            key.includes('supabase') || 
+            key.includes('auth') || 
+            key.includes('session')
+          );
+          
+          // Clear non-auth localStorage
+          Object.keys(localStorage).forEach(key => {
+            if (!authKeys.includes(key)) {
+              localStorage.removeItem(key);
+            }
+          });
+          
+          // Clear sessionStorage (usually non-critical)
           sessionStorage.clear();
-          console.log('🚑 Recovery: Cleared storage');
+          console.log('🚑 Recovery: Cleared non-auth storage, preserved session');
         } catch (e) {
           console.log('🚑 Recovery: Storage clear failed, continuing');
         }
         
-        // Clear auth DB
-        try {
-          if (window.indexedDB) {
-            indexedDB.deleteDatabase('supabase-auth-token');
-          }
-        } catch (e) {
-          console.log('🚑 Recovery: IndexedDB clear failed, continuing');
-        }
-        
-        // Force reload with cache bypass - no delay needed
-        console.log('🚑 Recovery: Force reloading');
+        // Force reload with cache bypass - users stay logged in
+        console.log('🚑 Recovery: Force reloading with preserved session');
         window.location.href = window.location.origin + '?recovery=' + Date.now();
       }
     };
