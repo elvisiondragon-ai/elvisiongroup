@@ -126,8 +126,34 @@ export const useUpdateToast = () => {
       duration: 0, // Don't auto-dismiss
     };
 
-    // Show toast (iOS gets single toast, no rapid showing)
-    return toast(toastConfig);
+    // Show toast with iOS reliability handler
+    const toastInstance = toast(toastConfig);
+    
+    // iOS fix: Check 5 times if toast is visible, stop when found
+    if (isIOS) {
+      let checkCount = 0;
+      const checkToastVisibility = () => {
+        checkCount++;
+        const toastElements = document.querySelectorAll('[data-sonner-toast]');
+        
+        if (toastElements.length > 0) {
+          console.log(`🍎 iOS: Toast visible on check ${checkCount}`);
+          return; // Stop checking - toast is visible
+        }
+        
+        if (checkCount < 5) {
+          console.log(`🍎 iOS: Toast not visible, attempt ${checkCount}/5`);
+          toast(toastConfig);
+          setTimeout(checkToastVisibility, 1000);
+        } else {
+          console.log('🍎 iOS: Gave up after 5 attempts');
+        }
+      };
+      
+      setTimeout(checkToastVisibility, 1000);
+    }
+    
+    return toastInstance;
   };
 
   // PWA Update Logic
