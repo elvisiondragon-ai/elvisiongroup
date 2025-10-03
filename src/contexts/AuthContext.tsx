@@ -299,7 +299,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }, delay);
         }
       } else if (status === 'CHANNEL_ERROR' || status === 'CONNECTION_ERROR' || status === 'FAILED') {
-        // WebSocket error silenced - normal reconnection behavior
+        console.log('🔥🐢☀️ WebSocket Transition:', status);
         // Retry failed connections with idle detection
         if (!retryTimeoutRef.current) {
           const delay = getRetryDelay();
