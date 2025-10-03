@@ -15,7 +15,7 @@ export const useUpdateToast = () => {
     if (updateSuccess === 'true') {
       localStorage.removeItem('update-success-flag');
       toast({
-        title: "Update Berhasil",
+        title: "Updated ☀️",
         duration: 3000,
       });
     }
@@ -59,7 +59,7 @@ export const useUpdateToast = () => {
   // Function to show update toast with iOS-specific handling
   const showUpdateToast = () => {
     const toastConfig = {
-      title: "🔵 UPDATE TERSEDIA", 
+      title: "🐢 Initiate Update...", 
       description: isIOS ? "IOS Device" : "Android",
       action: (
         <button 
@@ -95,6 +95,43 @@ export const useUpdateToast = () => {
             
             try {
               console.log('🔄 Starting service worker update...');
+              
+              // Clear all service worker caches before update
+              if ('serviceWorker' in navigator) {
+                const cacheNames = await caches.keys();
+                console.log('🗑️ Clearing', cacheNames.length, 'SW caches');
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+                console.log('✅ All SW caches cleared');
+              }
+              
+              // Clear localStorage except critical data
+              const criticalKeys = Object.keys(localStorage).filter(key => 
+                key.startsWith('sb-') || 
+                key.includes('auth') || 
+                key.includes('session') ||
+                key.includes('supabase') ||
+                key.includes('token') ||
+                key.includes('audio') ||
+                key.includes('cache') ||
+                key.match(/^supabase\.auth\./) ||
+                key === 'update-success-flag' ||
+                key === 'sw-update-success' ||
+                key === 'update-session-warning'
+              );
+              
+              const backupData: Record<string, string> = {};
+              criticalKeys.forEach(key => {
+                const value = localStorage.getItem(key);
+                if (value) backupData[key] = value;
+              });
+              
+              localStorage.clear();
+              console.log('🗑️ localStorage cleared, restoring', Object.keys(backupData).length, 'critical items');
+              
+              Object.entries(backupData).forEach(([key, value]) => {
+                localStorage.setItem(key, value);
+              });
+              
               await updateServiceWorker(true);
               console.log('✅ Service worker updated, reloading...');
               window.location.reload();
