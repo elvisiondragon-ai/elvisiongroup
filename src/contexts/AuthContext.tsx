@@ -200,7 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('🔧 Channel recreated with new auth');
     const channel = supabase.channel('chat-community', {
       config: {
-        broadcast: { self: true },
+        broadcast: { self: false },
         presence: { key: 'chat' }
       }
     });
@@ -261,6 +261,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             });
           }
         }
+      }
+    );
+
+    // Add DELETE listener for real-time deletion
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: 'channel_id=eq.community'
+      },
+      (payload) => {
+        console.log('🗑️ Realtime delete received:', payload.old);
+        const deletedMessage = payload.old as { id: string };
+        setMessages(current => current.filter(msg => msg.id !== deletedMessage.id));
       }
     );
     

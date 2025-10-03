@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -37,12 +37,19 @@ export function Chat({ onNavigate }: ChatProps) {
   const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  
+  // iOS detection
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // PWA detection - check if app is installed to home screen
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                (window.navigator as any).standalone === true;
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
   const { user, userProfile, handleButtonTimeout } = useUserProfile();
   const { userId, chatChannel, isPro, proStatus, messages, setMessages, addMessage, removeMessage, broadcastMessage, broadcastDelete } = useAuth();
   const { i18n, t } = useTranslation();
   const sendButtonRef = useRef<HTMLButtonElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Independent pro badge cache for Chat.tsx optimistic UI
   const [chatProBadgeCache, setChatProBadgeCache] = useState(() => {
@@ -71,6 +78,42 @@ export function Chat({ onNavigate }: ChatProps) {
   });
 
   if (!userId) return null;
+
+  // Prevent body scroll on iOS, only allow chat messages to scroll
+  useEffect(() => {
+    if (isIOS) {
+      // Disable body scroll
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.height = '100%';
+      
+      return () => {
+        // Cleanup on unmount
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+      };
+    }
+  }, [isIOS]);
+
+  // Scroll to bottom function for both platforms
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      // For column-reverse, scroll to bottom
+      container.scrollTop = container.scrollHeight;
+    }
+  };
+
+  // Auto-scroll to bottom when messages load or change
+  useEffect(() => {
+    if (messages.length > 0) {
+      // Small delay to ensure DOM is updated
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [messages.length]);
 
   // Invalidate user cache when pro status changes
   const invalidateUserCache = (userId: string) => {
@@ -340,15 +383,15 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [toast]);
 
-  // 2-second timeout mechanism for chat loading
+  // 1000ms timeout mechanism for chat loading
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
       if (isLoading) {
-        console.log('Chat loading timeout triggered (2000ms), forcing refresh...');
+        console.log('Chat loading timeout triggered (1000ms), forcing refresh...');
         localStorage.setItem('refresh-redirect-to-chat', 'true');
         window.location.reload();
       }
-    }, 2000);
+    }, 1000);
 
     return () => clearTimeout(loadingTimeout);
   }, [isLoading]);
@@ -746,16 +789,43 @@ export function Chat({ onNavigate }: ChatProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col h-screen pb-20 items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-sm text-muted-foreground">Loading chat...</p>
+        <img 
+          src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/elvisionlogo.png" 
+          alt="Loading" 
+          className="w-20 h-20 mb-4 opacity-50"
+          loading="eager"
+          style={{ 
+            imageRendering: 'auto',
+            cacheControl: 'public, max-age=31536000' // Cache for 1 year
+          }}
+          onLoad={(e) => {
+            // Cache the image in browser cache
+            const img = e.target as HTMLImageElement;
+            if (img.complete) {
+              console.log('🖼️ Loading image cached successfully');
+            }
+          }}
+        />
+        <p className="text-sm bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent font-semibold">Tunggu Sebentar...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen pb-20">
+    <div className="flex flex-col h-screen">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-card border-b border-border p-4">
+      <div 
+        className="sticky top-0 z-50 bg-card border-b border-border p-4"
+        style={{
+          touchAction: isIOS ? 'none' : 'auto'
+        }}
+        onTouchMove={(e) => {
+          // iOS handler - prevent scroll on header
+          if (isIOS) {
+            e.preventDefault();
+          }
+        }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
@@ -800,17 +870,38 @@ export function Chat({ onNavigate }: ChatProps) {
       {/* Messages */}
       {/* IOS HANDLER (VITAL) - Enables immediate touch scrolling without requiring click first */}
         <div 
-          className="flex-1 overflow-y-auto" 
+          ref={messagesContainerRef}
+          className="overflow-y-auto" 
           style={{ 
             display: 'flex', 
             flexDirection: 'column-reverse', 
             WebkitOverflowScrolling: 'touch',
-            position: 'relative',
-            touchAction: 'pan-y'
+            position: 'absolute',
+            top: '88px', // Below header
+            bottom: isIOS ? (isPWA ? '155px' : '235px') : '150px', // Above input bar
+            left: '0',
+            right: '0',
+            touchAction: isIOS ? 'pan-y' : 'auto',
+            paddingBottom: '0px'
           }} 
           onTouchStart={(e) => {
-            // Prevent body scroll on iOS
-            e.stopPropagation();
+            // iOS handler - only allow vertical scroll for chat messages
+            if (isIOS) {
+              e.stopPropagation();
+            }
+          }}
+          onTouchMove={(e) => {
+            // iOS handler - prevent horizontal scroll, only allow vertical
+            if (isIOS) {
+              const touch = e.touches[0];
+              const deltaX = Math.abs(touch.clientX - (touch.target as any).startX || 0);
+              const deltaY = Math.abs(touch.clientY - (touch.target as any).startY || 0);
+              
+              // If more horizontal movement than vertical, prevent scroll
+              if (deltaX > deltaY) {
+                e.preventDefault();
+              }
+            }
           }}
         >
         <div className="divide-y divide-border" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
@@ -838,7 +929,18 @@ export function Chat({ onNavigate }: ChatProps) {
       </div>
 
       {/* Message Input */}
-      <div className="sticky bottom-16 bg-background border-t border-border p-4 z-50">
+      <div 
+        className="fixed bottom-20 left-0 right-0 bg-background border-t border-border p-4 z-50"
+        style={{
+          touchAction: isIOS ? 'none' : 'auto'
+        }}
+        onTouchMove={(e) => {
+          // iOS handler - prevent scroll on input bar
+          if (isIOS) {
+            e.preventDefault();
+          }
+        }}
+      >
         <div className="flex gap-2">
           <Input
             value={message}

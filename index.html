@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <!-- iOS-specific meta tags for better compatibility -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -44,7 +44,8 @@
         return false;
       };
       
-      // Check for black screen every 2 seconds
+      // TEMP DISABLE: Check for black screen every 2 seconds
+      /*
       const blackScreenChecker = setInterval(() => {
         if (checkForBlackScreen()) {
           console.log('🚑 Auto-recovery: Black screen detected');
@@ -52,11 +53,12 @@
           clearInterval(blackScreenChecker);
         }
       }, 2000);
+      */
       
       // Stop checking after 10 seconds if app loads
       setTimeout(() => {
         if (!isBlackScreen) {
-          clearInterval(blackScreenChecker);
+          // blackScreenChecker disabled - no need to clear
         }
       }, 10000);
       
@@ -81,6 +83,12 @@
           window.location.href = window.location.origin + '?recovery_manual=' + Date.now();
         }
       };
+      
+      // Clean up recovery URL parameter
+      if (window.location.search.includes('recovery_manual')) {
+        console.log('🧹 Cleaning up recovery URL');
+        window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
+      }
       
       // Service worker registration for development (production uses Vite PWA auto-registration)
       if ('serviceWorker' in navigator && location.hostname === 'localhost') {

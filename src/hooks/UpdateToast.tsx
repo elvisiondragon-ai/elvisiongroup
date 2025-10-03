@@ -59,25 +59,22 @@ export const useUpdateToast = () => {
 
   // Function to show update toast with iOS-specific handling
   const showUpdateToast = () => {
-    // Check if user already clicked update button (survives refresh)
-    if (localStorage.getItem('user-clicked-update')) {
-      console.log('🚫 User already clicked update, not showing toast until next refresh');
-      return;
-    }
-    
     // Allow latest toast - dismiss any existing and show new one
     console.log('🔄 Showing latest update toast');
-    toastShownRef.current = true;
     const toastConfig = {
-      title: "🐢 Initiate Update...", 
+      title: "🐢 Initiate Update October", 
       description: isIOS ? "IOS Device" : "Android",
       action: (
         <button 
-          onClick={async () => {
+          onClick={async (e) => {
             console.log('🔵 User clicked update button');
             
-            // Set flag to prevent showing toast again until next refresh
-            localStorage.setItem('user-clicked-update', 'true');
+            // Disable button for Android to prevent multiple clicks
+            if (!isIOS) {
+              const button = e.target as HTMLButtonElement;
+              button.disabled = true;
+              console.log('🤖 Android: Update button disabled');
+            }
             
             // User clicked update button
             
@@ -110,19 +107,20 @@ export const useUpdateToast = () => {
               console.log('🔄 Starting service worker update...');
               await updateServiceWorker(true);
               console.log('✅ Service worker updated, reloading...');
-              window.location.reload();
+              
+              // Reload only for iOS
+              if (isIOS) {
+                window.location.reload();
+              }
             } catch (error) {
               console.error('❌ Update failed:', error);
               
-              // Show error toast but still try to reload
-              toast({
-                title: "Update Error",
-                description: "Service worker update failed, forcing reload anyway",
-                duration: 2000,
-              });
-              
-              // Still reload to get the update
-              setTimeout(() => window.location.reload(), 2000);
+              // Still reload to get the update - iOS only
+              if (isIOS) {
+                setTimeout(() => {
+                  window.location.reload();
+                }, 2000);
+              }
             }
           }}
           className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 hover:from-purple-900 hover:via-slate-800 hover:to-purple-900 text-amber-100 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation shadow-2xl ring-1 ring-white/10"
@@ -158,15 +156,7 @@ export const useUpdateToast = () => {
         console.log('🔍 Checking for updates immediately after registration');
         r.update();
         
-        // Set up periodic update checks every 60 seconds
-        setInterval(() => {
-          console.log('🔍 Periodic update check');
-          r.update().then(() => {
-            console.log('🔍 Update check completed - no new version found');
-          }).catch((error) => {
-            console.error('❌ Update check failed:', error);
-          });
-        }, 60000);
+        // Periodic update checks disabled to reduce console spam
       }
     },
     onRegisterError(error) {
@@ -175,9 +165,6 @@ export const useUpdateToast = () => {
     async onNeedRefresh() {
       console.log('🔄 Update available - latest version ready')
       
-      // Clear the user clicked flag for new deployment
-      localStorage.removeItem('user-clicked-update');
-      console.log('🔄 New deployment detected - resetting user click flag');
       
       // IMMEDIATE: Clear all service worker caches FIRST (before white screen can occur)
       try {
@@ -289,8 +276,22 @@ export const useUpdateToast = () => {
         console.log('✅ Auth + Audio cache secured for deployment');
       });
       
-      // Show update toast immediately when onNeedRefresh triggers
-      showUpdateToast();
+      // Only show toast if SW is ready (check if registration is active)
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        // Android cleanref - prevent showing update toast multiple times
+        if (!isIOS && toastShownRef.current) {
+          console.log('🤖 Android cleanref: Update toast already shown, skipping');
+          return;
+        }
+        
+        showUpdateToast();
+        
+        // Set cleanref flag for Android only
+        if (!isIOS) {
+          toastShownRef.current = true;
+          console.log('🤖 Android cleanref: Update toast shown, flag set to prevent duplicates');
+        }
+      }
     }
   });
 

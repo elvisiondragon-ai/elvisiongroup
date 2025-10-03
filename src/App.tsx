@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { ArifTestimonial } from "./pages/ArifTestimonial";
+import { OldMember } from "./pages/OldMember";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -111,6 +112,10 @@ const AppContent = () => {
                 <Route 
                   path="/testi/arif" 
                   element={<ArifTestimonial />}
+                />
+                <Route 
+                  path="/oldmember" 
+                  element={<OldMember />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
