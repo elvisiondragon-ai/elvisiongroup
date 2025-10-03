@@ -2,8 +2,8 @@
 // Import Workbox via importScripts for service worker compatibility
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-sw.js');
 
-const CACHE_NAME = 'audio-therapy-v4-3oktober';
-const AUDIO_CACHE_NAME = 'audio-therapy-audio-v1';
+const CACHE_NAME = 'audio-therapy-v5-NUKE-3oktober';
+const AUDIO_CACHE_NAME = 'audio-therapy-audio-v2-NUKE';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -27,49 +27,45 @@ if (workbox) {
   cleanupOutdatedCaches();
 }
 
-// Install event - cache app files + audio files separately
+// Install event - NUCLEAR CACHE SETUP
 self.addEventListener('install', (event) => {
-  console.log('🔧 SW Installing - Audio + PWA Cache Setup v4-3oktober');
+  console.log('💥 SW Installing - NUCLEAR CACHE CLEAR v5-NUKE-3oktober');
   event.waitUntil(
     Promise.all([
       // Cache app files in main cache
       caches.open(CACHE_NAME).then((cache) => {
-        console.log('Caching app files...');
+        console.log('💥 NUKE: Caching app files...');
         return cache.addAll(urlsToCache);
       }),
-      // Cache audio files in separate audio cache
+      // Force re-cache ALL audio files (nuclear approach)
       caches.open(AUDIO_CACHE_NAME).then((audioCache) => {
-        console.log('Checking audio cache...');
-        // Only cache audio if not already cached
+        console.log('💥 NUKE: Force re-caching ALL audio files...');
         return Promise.all(
           audioFilesToCache.map(url => 
-            audioCache.match(url).then(cached => {
-              if (!cached) {
-                return audioCache.add(url).catch(err => console.log(`Failed to cache ${url}:`, err));
-              }
-            })
+            audioCache.add(url).catch(err => console.log(`Failed to cache ${url}:`, err))
           )
         );
       })
     ]).then(() => {
       // Enable skipWaiting to activate new SW immediately when update is triggered
+      console.log('💥 NUKE: Force activating new SW');
       return self.skipWaiting();
     })
   );
 });
 
-// Activate event - clear old caches but preserve audio
+// Activate event - NUCLEAR CACHE CLEAR + FORCE LOGOUT
 self.addEventListener('activate', (event) => {
-  console.log('🚀 SW Activated - Taking control v4-3oktober');
+  console.log('💥 SW Activated - NUCLEAR CACHE CLEAR v5-NUKE-3oktober');
   event.waitUntil(
     Promise.all([
-      // Clear all old caches except audio
+      // NUCLEAR: Delete ALL caches (including old audio)
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            // Keep audio cache and current cache, delete everything else
+            // Keep only current caches, nuke everything else
             if (cacheName !== CACHE_NAME && cacheName !== AUDIO_CACHE_NAME) {
-              console.log('🗑️ Deleting old cache:', cacheName);
+              console.log('💥 NUKE: Deleting cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
@@ -77,13 +73,14 @@ self.addEventListener('activate', (event) => {
       }),
       // Take control of all clients
       self.clients.claim().then(() => {
-        // Force refresh all clients to clear white/black screen
+        // NUCLEAR: Force complete refresh + logout
         return self.clients.matchAll().then((clients) => {
           clients.forEach((client) => {
-            console.log('🔄 Forcing client refresh for cache clear');
+            console.log('💥 NUKE: Forcing complete refresh + logout');
             client.postMessage({
-              type: 'CACHE_CLEARED',
-              action: 'refresh'
+              type: 'NUCLEAR_CACHE_CLEAR',
+              action: 'nuke_and_logout',
+              version: 'v5-NUKE-3oktober'
             });
           });
         });

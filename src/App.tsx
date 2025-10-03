@@ -53,6 +53,36 @@ const AppContent = () => {
           window.location.reload();
         }, 100);
       }
+      
+      // NUCLEAR CACHE CLEAR - Force logout and complete refresh
+      if (event.data && event.data.type === 'NUCLEAR_CACHE_CLEAR' && event.data.action === 'nuke_and_logout') {
+        console.log('💥 NUCLEAR CACHE CLEAR - Force logout and complete refresh', event.data.version);
+        
+        // NUKE ALL STORAGE
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+          console.log('💥 NUKE: Cleared localStorage and sessionStorage');
+        } catch (e) {
+          console.log('Storage clear failed:', e);
+        }
+        
+        // Clear IndexedDB (Supabase auth)
+        if (window.indexedDB) {
+          try {
+            indexedDB.deleteDatabase('supabase-auth-token');
+            console.log('💥 NUKE: Cleared IndexedDB auth');
+          } catch (e) {
+            console.log('IndexedDB clear failed:', e);
+          }
+        }
+        
+        // NUCLEAR REFRESH with cache bypass
+        setTimeout(() => {
+          console.log('💥 NUKE: Force reload with cache bypass');
+          window.location.href = window.location.href + '?nuke=' + Date.now();
+        }, 200);
+      }
     };
 
     window.addEventListener('unhandledrejection', handleUnhandledRejection);

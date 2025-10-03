@@ -22,24 +22,34 @@
     <meta name="twitter:image" content="/favicon.png" />
     
     <script>
-      // Register service worker for background audio support + cache management
+      // NUCLEAR SERVICE WORKER REGISTRATION
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+          // Force unregister all old service workers first
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+              console.log('💥 NUKE: Unregistering old SW');
+              registration.unregister();
+            }
+            
+            // Register new nuclear SW
+            navigator.serviceWorker.register('/sw.js', { 
+              updateViaCache: 'none',
+              scope: '/'
+            })
             .then((registration) => {
-              console.log('SW registered v4-3oktober: ', registration);
+              console.log('💥 SW registered v5-NUKE-3oktober: ', registration);
               
-              // Check for updates immediately and periodically
+              // Force immediate update check
               registration.update();
               
-              // Listen for new service worker waiting
+              // Listen for new service worker
               registration.addEventListener('updatefound', () => {
                 const newWorker = registration.installing;
                 if (newWorker) {
                   newWorker.addEventListener('statechange', () => {
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                      console.log('🔄 New SW ready - will clear cache and refresh');
-                      // New SW is waiting, it will handle cache clearing
+                      console.log('💥 NUKE: New SW ready - will nuke everything');
                     }
                   });
                 }
@@ -48,8 +58,20 @@
             .catch((registrationError) => {
               console.log('SW registration failed: ', registrationError);
             });
+          });
         });
       }
+      
+      // Emergency nuke button for immediate clear
+      window.nukeCache = function() {
+        console.log('💥 EMERGENCY NUKE ACTIVATED');
+        localStorage.clear();
+        sessionStorage.clear();
+        if (window.indexedDB) {
+          indexedDB.deleteDatabase('supabase-auth-token');
+        }
+        window.location.href = window.location.origin + '?emergency_nuke=' + Date.now();
+      };
     </script>
   </head>
 
