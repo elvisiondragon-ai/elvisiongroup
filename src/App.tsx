@@ -32,6 +32,16 @@ const AppContent = () => {
   // Initialize update system (handles all update toasts)
   useUpdateToast();
 
+  // Clean up recovery URL parameter
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('recovery')) {
+      console.log('🧹 Cleaning recovery parameter from URL');
+      url.searchParams.delete('recovery');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
   // Global error handler to prevent blocking failures + service worker cache clear handler
   useEffect(() => {
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
