@@ -59,11 +59,14 @@ export const useUpdateToast = () => {
 
   // Function to show update toast with iOS-specific handling
   const showUpdateToast = () => {
-    // Prevent duplicate toasts
-    if (toastShownRef.current) {
-      console.log('🚫 Toast already shown, preventing duplicate');
+    // Check if user already clicked update button (survives refresh)
+    if (localStorage.getItem('user-clicked-update')) {
+      console.log('🚫 User already clicked update, not showing toast until next refresh');
       return;
     }
+    
+    // Allow latest toast - dismiss any existing and show new one
+    console.log('🔄 Showing latest update toast');
     toastShownRef.current = true;
     const toastConfig = {
       title: "🐢 Initiate Update...", 
@@ -72,6 +75,9 @@ export const useUpdateToast = () => {
         <button 
           onClick={async () => {
             console.log('🔵 User clicked update button');
+            
+            // Set flag to prevent showing toast again until next refresh
+            localStorage.setItem('user-clicked-update', 'true');
             
             // User clicked update button
             
@@ -155,7 +161,11 @@ export const useUpdateToast = () => {
         // Set up periodic update checks every 60 seconds
         setInterval(() => {
           console.log('🔍 Periodic update check');
-          r.update();
+          r.update().then(() => {
+            console.log('🔍 Update check completed - no new version found');
+          }).catch((error) => {
+            console.error('❌ Update check failed:', error);
+          });
         }, 60000);
       }
     },
@@ -164,6 +174,10 @@ export const useUpdateToast = () => {
     },
     async onNeedRefresh() {
       console.log('🔄 Update available - latest version ready')
+      
+      // Clear the user clicked flag for new deployment
+      localStorage.removeItem('user-clicked-update');
+      console.log('🔄 New deployment detected - resetting user click flag');
       
       // IMMEDIATE: Clear all service worker caches FIRST (before white screen can occur)
       try {
