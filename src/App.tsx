@@ -31,7 +31,7 @@ const AppContent = () => {
   // Initialize update system
   useUpdateToast();
 
-  // Global error handler to prevent blocking failures
+  // Global error handler to prevent blocking failures + service worker cache clear handler
   useEffect(() => {
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       console.log('Unhandled promise rejection caught (app continues):', event.reason);
@@ -44,12 +44,25 @@ const AppContent = () => {
       // Don't prevent default for non-blocking errors
     };
 
+    // Listen for cache clear messages from service worker
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'CACHE_CLEARED' && event.data.action === 'refresh') {
+        console.log('🔄 Cache cleared by SW - Force refresh to prevent white/black screen');
+        // Small delay to ensure SW is ready, then force refresh
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
+    };
+
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
     window.addEventListener('error', handleError);
+    navigator.serviceWorker?.addEventListener('message', handleMessage);
 
     return () => {
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       window.removeEventListener('error', handleError);
+      navigator.serviceWorker?.removeEventListener('message', handleMessage);
     };
   }, []);
 

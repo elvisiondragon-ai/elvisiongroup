@@ -22,12 +22,28 @@
     <meta name="twitter:image" content="/favicon.png" />
     
     <script>
-      // Register service worker for background audio support
+      // Register service worker for background audio support + cache management
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
+          navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
             .then((registration) => {
-              console.log('SW registered: ', registration);
+              console.log('SW registered v4-3oktober: ', registration);
+              
+              // Check for updates immediately and periodically
+              registration.update();
+              
+              // Listen for new service worker waiting
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (newWorker) {
+                  newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      console.log('🔄 New SW ready - will clear cache and refresh');
+                      // New SW is waiting, it will handle cache clearing
+                    }
+                  });
+                }
+              });
             })
             .catch((registrationError) => {
               console.log('SW registration failed: ', registrationError);
