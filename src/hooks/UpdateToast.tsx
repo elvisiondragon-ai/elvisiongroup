@@ -7,7 +7,7 @@ export const useUpdateToast = () => {
   const { toast } = useToast();
   const persistentToastInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Check for success flag after refresh + show pending updates
+  // Check for success flag after refresh + show pending updates + SW recovery success
   useEffect(() => {
     const updateSuccess = localStorage.getItem('update-success-flag');
     if (updateSuccess === 'true') {
@@ -16,6 +16,19 @@ export const useUpdateToast = () => {
         title: "Update Berhasil",
         duration: 3000,
       });
+    }
+
+    // Show success message if coming back from SW update/recovery
+    const swUpdated = localStorage.getItem('sw-update-success');
+    if (swUpdated === 'true') {
+      localStorage.removeItem('sw-update-success');
+      setTimeout(() => {
+        console.log('✅ SW Update completed successfully');
+        toast({
+          title: "Success Update",
+          duration: 2000,
+        });
+      }, 1000);
     }
 
     // Check if there's a pending update on every refresh

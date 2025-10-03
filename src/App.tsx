@@ -29,7 +29,7 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const { user } = useAuth();
   
-  // Initialize update system
+  // Initialize update system (handles all update toasts)
   useUpdateToast();
 
   // Global error handler to prevent blocking failures + service worker cache clear handler
@@ -88,6 +88,9 @@ const AppContent = () => {
         } catch (e) {
           console.log('🚑 Recovery: Storage clear failed, continuing');
         }
+        
+        // Set success flag before reload
+        localStorage.setItem('sw-update-success', 'true');
         
         // Force reload with cache bypass - users stay logged in
         console.log('🚑 Recovery: Force reloading with preserved session');

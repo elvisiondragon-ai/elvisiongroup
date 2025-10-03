@@ -11,7 +11,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('🚑 Recovery SW Activated - Clearing everything');
+  console.log('Here I Come...');
   
   event.waitUntil(
     Promise.resolve().then(() => {
