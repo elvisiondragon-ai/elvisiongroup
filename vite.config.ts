@@ -22,8 +22,10 @@ export default defineConfig(({ mode }) => ({
       registerType: 'prompt',
       strategies: 'generateSW',
       devOptions: {
-        enabled: false
+        enabled: false,
+        type: 'module'
       },
+      disable: mode === 'development',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf,eot}'],
         skipWaiting: false,

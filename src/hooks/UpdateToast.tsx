@@ -129,28 +129,19 @@ export const useUpdateToast = () => {
     // Show toast with iOS reliability handler
     const toastInstance = toast(toastConfig);
     
-    // iOS fix: Check 5 times if toast is visible, stop when found
+    // iOS fix: Check if first toast is visible, if not show second one
     if (isIOS) {
-      let checkCount = 0;
-      const checkToastVisibility = () => {
-        checkCount++;
+      setTimeout(() => {
         const toastElements = document.querySelectorAll('[data-sonner-toast]');
         
         if (toastElements.length > 0) {
-          console.log(`🍎 iOS: Toast visible on check ${checkCount}`);
-          return; // Stop checking - toast is visible
+          console.log('🍎 iOS: First toast is visible, stopping');
+          return; // Stop - toast is visible
         }
         
-        if (checkCount < 5) {
-          console.log(`🍎 iOS: Toast not visible, attempt ${checkCount}/5`);
-          toast(toastConfig);
-          setTimeout(checkToastVisibility, 1000);
-        } else {
-          console.log('🍎 iOS: Gave up after 5 attempts');
-        }
-      };
-      
-      setTimeout(checkToastVisibility, 1000);
+        console.log('🍎 iOS: First toast not visible, showing second');
+        toast(toastConfig);
+      }, 1000);
     }
     
     return toastInstance;

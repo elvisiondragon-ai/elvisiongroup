@@ -36,22 +36,21 @@ export const VerseToast = () => {
       'Sedang Mendengarkan Verse 3 - Syukur Meditation',
       'Sedang Mendengarkan Verse 4 - Prosperity Stream',
       'Sedang Mendengarkan Verse 5 - Vitality Vortex',
-      'Sedang Mendengarkan Verse 8 - Love Magnet',
-      'Sedang Mendengarkan Guided to Inner Silence',
-      'Sedang Mendengarkan eL Vision Delta Breathing'
+      'Sedang Mendengarkan Verse 8 - Love Magnet'
     ];
 
     const showRandomActivity = () => {
-      // Create synchronized seed based on current 5-minute slot in Jakarta time
+      // Keep 5-minute slot for user synchronization
       const jakartaTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
       const currentSlot = Math.floor(jakartaTime.getTime() / (5 * 60 * 1000)); // 5-minute slots
       
-      // Use seed to ensure all users see same name and verse at same time
+      // Use seed to ensure all users see same name at same time
       const userIndex = currentSlot % userList.length;
-      const activityIndex = currentSlot % activities.length;
+      // Random verse selection from ALL verses
+      const randomVerseIndex = Math.floor(Math.random() * activities.length);
       
       const randomUser = userList[userIndex];
-      const randomActivity = activities[activityIndex];
+      const randomActivity = activities[randomVerseIndex];
       const displayName = randomUser;
       
       // Extract verse title from activity

@@ -136,10 +136,14 @@ export function Profile({ onNavigate }: ProfileProps) {
       if (error) {
         console.error('Logout error:', error);
         toast({
-          title: "Error",
-          description: error.message,
+          title: "Logout Error - Refreshing",
+          description: "Refreshing page to complete logout...",
           variant: "destructive",
         });
+        // Refresh instead of redirect to auth
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
         return;
       }
       
@@ -148,20 +152,24 @@ export function Profile({ onNavigate }: ProfileProps) {
         description: "Anda berhasil keluar dari akun.",
       });
       
-      // Event listener will handle redirect, but backup timeout
+      // Event listener will handle redirect, but backup refresh
       setTimeout(() => {
         if (window.location.pathname !== '/auth') {
-          window.location.href = '/auth';
+          window.location.reload();
         }
       }, 2000);
       
     } catch (error: any) {
       console.error('Unexpected logout error:', error);
       toast({
-        title: "Logout Gagal",
-        description: error.message || "Terjadi kesalahan saat logout.",
+        title: "Logout Error - Refreshing",
+        description: "Refreshing page to complete logout...",
         variant: "destructive",
       });
+      // Refresh instead of staying on page with error
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
   };
 

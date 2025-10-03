@@ -214,28 +214,113 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         table: 'chat_messages',
         filter: 'channel_id=eq.community'
       },
-      (payload) => {
+      async (payload) => {
         console.log('💖 Realtime message received:', payload.new);
         const newMessage = payload.new as ChatMessageData;
         if (newMessage.user_id !== session?.user?.id) {
-          setMessages(current => {
-            const exists = current.some(msg => msg.id === newMessage.id);
-            if (exists) return current;
-            return [...current, newMessage];
-          });
+          // Fetch fresh badge data for the message sender
+          try {
+            const { data: userProfiles } = await supabase
+              .from('profiles')
+              .select('user_id, display_name, streak_days, level, is_admin, avatar_url')
+              .eq('user_id', newMessage.user_id)
+              .single();
+
+            const { data: subscriptions } = await supabase
+              .rpc('get_public_pro_status', { user_ids: [newMessage.user_id] });
+
+            const subscriptionData = subscriptions?.[0];
+            const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
+            
+            // Enrich message with fresh badge data
+            const enrichedMessage: ChatMessageData = {
+              ...newMessage,
+              user_name: userProfiles?.display_name || newMessage.user_name,
+              user_level: userProfiles?.level || newMessage.user_level || 1,
+              is_pro: subscriptionData?.is_pro || false,
+              is_admin: newMessage.user_id === knownAdminId || userProfiles?.is_admin || false,
+              streak_days: userProfiles?.streak_days || 0,
+              subscription_type: subscriptionData?.subscription_type || null,
+              avatar_url: userProfiles?.avatar_url || undefined
+            };
+
+            console.log('🎯 Real-time message enriched with fresh badge data:', enrichedMessage);
+
+            setMessages(current => {
+              const exists = current.some(msg => msg.id === enrichedMessage.id);
+              if (exists) return current;
+              return [...current, enrichedMessage];
+            });
+          } catch (error) {
+            console.error('❌ Failed to fetch badge data for real-time message:', error);
+            // Fallback: add message without enriched data
+            setMessages(current => {
+              const exists = current.some(msg => msg.id === newMessage.id);
+              if (exists) return current;
+              return [...current, newMessage];
+            });
+          }
         }
       }
     );
     
     // Add broadcast listeners for chat
-    channel.on('broadcast', { event: 'message_added' }, (payload) => {
+    channel.on('broadcast', { event: 'message_added' }, async (payload) => {
       const newMessage = payload.payload as ChatMessageData;
       if (newMessage.user_id !== session?.user?.id) {
-        setMessages(current => {
-          const exists = current.some(msg => msg.id === newMessage.id);
-          if (exists) return current;
-          return [...current, newMessage];
-        });
+        // Check if message already has enriched data (from optimistic UI)
+        if (newMessage.is_pro !== undefined && newMessage.subscription_type !== undefined) {
+          // Message already enriched, use as-is
+          console.log('📢 Broadcast message already enriched:', newMessage);
+          setMessages(current => {
+            const exists = current.some(msg => msg.id === newMessage.id);
+            if (exists) return current;
+            return [...current, newMessage];
+          });
+        } else {
+          // Fetch fresh badge data for the message sender
+          try {
+            const { data: userProfiles } = await supabase
+              .from('profiles')
+              .select('user_id, display_name, streak_days, level, is_admin, avatar_url')
+              .eq('user_id', newMessage.user_id)
+              .single();
+
+            const { data: subscriptions } = await supabase
+              .rpc('get_public_pro_status', { user_ids: [newMessage.user_id] });
+
+            const subscriptionData = subscriptions?.[0];
+            const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
+            
+            // Enrich message with fresh badge data
+            const enrichedMessage: ChatMessageData = {
+              ...newMessage,
+              user_name: userProfiles?.display_name || newMessage.user_name,
+              user_level: userProfiles?.level || newMessage.user_level || 1,
+              is_pro: subscriptionData?.is_pro || false,
+              is_admin: newMessage.user_id === knownAdminId || userProfiles?.is_admin || false,
+              streak_days: userProfiles?.streak_days || 0,
+              subscription_type: subscriptionData?.subscription_type || null,
+              avatar_url: userProfiles?.avatar_url || undefined
+            };
+
+            console.log('📢🎯 Broadcast message enriched with fresh badge data:', enrichedMessage);
+
+            setMessages(current => {
+              const exists = current.some(msg => msg.id === enrichedMessage.id);
+              if (exists) return current;
+              return [...current, enrichedMessage];
+            });
+          } catch (error) {
+            console.error('❌ Failed to fetch badge data for broadcast message:', error);
+            // Fallback: add message without enriched data
+            setMessages(current => {
+              const exists = current.some(msg => msg.id === newMessage.id);
+              if (exists) return current;
+              return [...current, newMessage];
+            });
+          }
+        }
       }
     });
     

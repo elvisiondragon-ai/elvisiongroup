@@ -32,13 +32,14 @@ const AppContent = () => {
   // Initialize update system (handles all update toasts)
   useUpdateToast();
 
-  // Clean up recovery URL parameter
+  // Redirect recovery URLs to clean URLs
   useEffect(() => {
     const url = new URL(window.location.href);
-    if (url.searchParams.has('recovery')) {
-      console.log('🧹 Cleaning recovery parameter from URL');
-      url.searchParams.delete('recovery');
-      window.history.replaceState({}, '', url.toString());
+    if (url.searchParams.has('recovery') || url.searchParams.has('recovery_manual')) {
+      console.log('🔄 Redirecting recovery URL to clean URL');
+      // Redirect to clean URL without recovery parameters
+      const cleanUrl = `${url.protocol}//${url.host}/`;
+      window.location.href = cleanUrl;
     }
   }, []);
 
