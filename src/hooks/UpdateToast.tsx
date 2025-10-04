@@ -3,6 +3,7 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useRef } from "react";
+import { iOSCacheCleaner } from "@/utils/iOSCacheCleaner";
 
 export const useUpdateToast = () => {
   const { toast } = useToast();
@@ -166,16 +167,37 @@ export const useUpdateToast = () => {
       console.log('🔄 Update available - latest version ready')
       
       
-      // IMMEDIATE: Clear all service worker caches FIRST (before white screen can occur)
+      // COMPREHENSIVE: iOS Cache Clearing + SW Cache Clearing
       try {
+        console.log('🧹 Starting comprehensive cache clearing (iOS + SW)');
+        
+        // Use iOS cache cleaner for comprehensive clearing
+        const cleanResult = await iOSCacheCleaner.clearAllCaches();
+        
+        if (cleanResult.success) {
+          console.log('✅ Comprehensive cache clearing completed:', cleanResult.clearedCaches);
+        } else {
+          console.warn('⚠️ Cache clearing completed with errors:', cleanResult.errors);
+        }
+        
+        // Additional SW cache clearing (your existing logic as backup)
         if ('serviceWorker' in navigator) {
           const cacheNames = await caches.keys();
-          console.log('🗑️ PRE-DEPLOYMENT: Clearing', cacheNames.length, 'SW caches to prevent white screen');
           await Promise.all(cacheNames.map(name => caches.delete(name)));
-          console.log('✅ All SW caches cleared - white screen prevented');
+          console.log('✅ Additional SW cache clearing completed');
         }
       } catch (error) {
-        console.error('❌ Failed to clear SW caches:', error);
+        console.error('❌ Comprehensive cache clearing failed, falling back to basic SW clearing:', error);
+        
+        // Fallback to basic SW clearing
+        try {
+          if ('serviceWorker' in navigator) {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(name => caches.delete(name)));
+          }
+        } catch (fallbackError) {
+          console.error('❌ Fallback SW clearing also failed:', fallbackError);
+        }
       }
       
       // Clear localStorage except critical data (prevent stale data issues)

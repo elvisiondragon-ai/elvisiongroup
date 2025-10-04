@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff, Sparkles, Zap, Phone, User as UserIcon, MessageCircle } from "lucide-react";
 import type { User } from '@supabase/supabase-js';
+import { iOSCacheCleaner } from "@/utils/iOSCacheCleaner";
 
 interface AuthProps {
   onLogin: (user: User) => void;
@@ -46,12 +47,16 @@ export function Auth({ onLogin }: AuthProps) {
   // Track active tab and click states
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [isTabClicked, setIsTabClicked] = useState(false);
+  const [showTroubleshoot, setShowTroubleshoot] = useState(false);
 
 
 
-  // Check if user is already logged in
+  // Check if user is already logged in + iOS cache verification
   useEffect(() => {
     const checkUser = async () => {
+      // iOS cache verification and cleanup
+      await iOSCacheCleaner.verifyCleanState();
+      
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         onLogin(session.user);
@@ -274,15 +279,14 @@ export function Auth({ onLogin }: AuthProps) {
   const enhancedHandleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-
-
     setIsLoading(true);
 
     try {
+      // iOS-specific: Clear form cache before login attempt
+      await iOSCacheCleaner.quickLoginCacheClear();
+      
       // Clean up any existing auth state
       cleanupAuthState();
-
-      // Keep existing session if available - removed signOut to avoid conflicts
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
@@ -290,7 +294,42 @@ export function Auth({ onLogin }: AuthProps) {
       });
 
       if (error) {
-        throw error;
+        // iOS-specific: If login fails, try comprehensive cache clear and retry ONCE
+        if (error.message.includes('Invalid') || error.message.includes('incorrect')) {
+          console.log('🚨 iOS Login failed - attempting cache clear and retry');
+          
+          const shouldRetry = await iOSCacheCleaner.clearAllCaches();
+          if (shouldRetry.success && shouldRetry.isIOS) {
+            toast({
+              title: "Clearing Cache",
+              description: "Retrying login with fresh cache...",
+              duration: 2000,
+            });
+            
+            // Wait a moment for cache clearing to complete
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Retry login once
+            const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
+              email: loginData.email,
+              password: loginData.password,
+            });
+            
+            if (retryError) {
+              throw retryError;
+            }
+            
+            if (retryData.user) {
+              console.log('✅ iOS Login retry successful after cache clear');
+              // Continue to success handling below
+              Object.assign(data, retryData);
+            }
+          } else {
+            throw error;
+          }
+        } else {
+          throw error;
+        }
       }
 
       if (data.user) {
@@ -311,11 +350,20 @@ export function Auth({ onLogin }: AuthProps) {
         window.location.reload();
       }
     } catch (error: any) {
+      console.error('Login error:', error);
+      
       toast({
         title: "Login Gagal",
         description: error.message || "Terjadi kesalahan saat login.",
         variant: "destructive",
       });
+      
+      // iOS-specific: Clear form cache after failed login to prevent stuck state
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        setTimeout(() => {
+          iOSCacheCleaner.quickLoginCacheClear();
+        }, 500);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -754,15 +802,48 @@ export function Auth({ onLogin }: AuthProps) {
                 </Button>
               </form>
 
-              {/* Forgot Password Link */}
+              {/* Forgot Password & Troubleshoot Links */}
               <div className="text-center">
-                <Button
+                <button
                   onClick={() => setCurrentView('forgot-password')}
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-foreground text-sm transition-all duration-200 transform hover:scale-105 active:scale-95"
+                  className="text-sm bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent font-medium hover:from-orange-300 hover:to-yellow-300 transition-all duration-200 cursor-pointer"
                 >
                   Lupa Password?
-                </Button>
+                </button>
+                <span className="mx-2 text-muted-foreground">•</span>
+                <button
+                  onClick={() => setShowTroubleshoot(!showTroubleshoot)}
+                  className="text-sm bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent font-medium hover:from-orange-300 hover:to-yellow-300 transition-all duration-200 cursor-pointer"
+                >
+                  Login Bermasalah?
+                </button>
+                
+                {/* Troubleshoot Options */}
+                {showTroubleshoot && (
+                  <div className="mt-3 p-3 bg-muted/30 rounded-lg border border-border/50 space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      Tidak bisa mengetik email atau login bermasalah?
+                    </p>
+                    <button
+                      onClick={async () => {
+                        toast({
+                          title: "Clearing Cache",
+                          description: "Membersihkan cache untuk memperbaiki login...",
+                          duration: 2000,
+                        });
+                        
+                        await iOSCacheCleaner.forceCleanReload();
+                        // Will reload automatically
+                      }}
+                      className="w-full text-sm font-medium py-3 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
+                    >
+                      🧹 Clear Cache & Reload
+                    </button>
+                    <p className="text-xs text-muted-foreground/70">
+                      Ini akan membersihkan cache dan memuat ulang halaman
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="relative">
@@ -940,6 +1021,7 @@ export function Auth({ onLogin }: AuthProps) {
             </TabsContent>
           </Tabs>
         </Card>
+
 
         {/* WhatsApp Customer Service Button */}
         <div className="text-center mt-6">
