@@ -29,6 +29,42 @@
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="/favicon.png" />
     
+    <style>
+      /* Initial loading styles to prevent white flash */
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0F0F23;
+        color: white;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      
+      #root {
+        min-height: 100vh;
+        background: #0F0F23;
+      }
+      
+      /* Loading spinner for initial load */
+      .initial-loader {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+      
+      .initial-loader img {
+        width: 150px;
+        height: 150px;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+    </style>
+    
     <script>
       // SIMPLE RECOVERY SERVICE WORKER - NO RACE CONDITIONS
       
@@ -109,7 +145,13 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Initial loading indicator -->
+      <div class="initial-loader">
+        <img src="/favicon.png" alt="Loading..." />
+        <div style="margin-top: 20px; font-size: 18px; background: linear-gradient(to right, #fb923c, #facc15); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 600; text-shadow: 0 0 15px rgba(251, 146, 60, 0.4);">Initiate The App 🚀</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

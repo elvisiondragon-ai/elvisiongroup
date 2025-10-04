@@ -434,7 +434,17 @@ export function Auth({ onLogin }: AuthProps) {
   // Forgot Password View
   if (currentView === 'forgot-password') {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div 
+        className="min-h-screen bg-background flex items-center justify-center p-4"
+        style={{
+          minHeight: '100vh',
+          background: '#0F0F23',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }}
+      >
         <div className="w-full max-w-md">
           {/* Logo/Brand Section */}
           <div className="text-center mb-8">
@@ -501,7 +511,17 @@ export function Auth({ onLogin }: AuthProps) {
   // Reset Email Sent View
   if (currentView === 'signup-success') {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div 
+        className="min-h-screen bg-background flex items-center justify-center p-4"
+        style={{
+          minHeight: '100vh',
+          background: '#0F0F23',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }}
+      >
         <Card className="w-full max-w-md p-8 space-y-6 bg-gradient-secondary border-border">
           <div className="text-center space-y-4">
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto glow-primary">
@@ -537,7 +557,17 @@ export function Auth({ onLogin }: AuthProps) {
 
   if (currentView === 'reset-sent') {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div 
+        className="min-h-screen bg-background flex items-center justify-center p-4"
+        style={{
+          minHeight: '100vh',
+          background: '#0F0F23',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }}
+      >
         <div className="w-full max-w-md">
           {/* Logo/Brand Section */}
           <div className="text-center mb-8">
@@ -582,8 +612,24 @@ export function Auth({ onLogin }: AuthProps) {
 
   // Main Auth View
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div 
+      className="min-h-screen bg-background flex items-center justify-center p-4"
+      style={{
+        minHeight: '100vh',
+        background: '#0F0F23',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem'
+      }}
+    >
+      <div 
+        className="w-full max-w-md"
+        style={{
+          width: '100%',
+          maxWidth: '28rem'
+        }}
+      >
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">

@@ -28,7 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   
   // Initialize update system (handles all update toasts)
   useUpdateToast();
@@ -83,7 +83,7 @@ const AppContent = () => {
               <Routes>
                 <Route 
                   path="/" 
-                  element={user ? <Index /> : <Auth />} 
+                  element={loading ? null : (user ? <Index /> : <Auth />)} 
                 />
                 <Route 
                   path="/auth" 
@@ -91,11 +91,11 @@ const AppContent = () => {
                 />
                 <Route 
                   path="/signup" 
-                  element={user ? <Index /> : <Signup />} 
+                  element={loading ? null : (user ? <Index /> : <Signup />)} 
                 />
                 <Route 
                   path="/tutorial" 
-                  element={user ? <TutorialVideo /> : <Auth />} 
+                  element={loading ? null : (user ? <TutorialVideo /> : <Auth />)} 
                 />
                 <Route
                   path="/reset-password"
