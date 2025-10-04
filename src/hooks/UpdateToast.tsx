@@ -125,12 +125,6 @@ export const useUpdateToast = () => {
             }
           }}
           className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 hover:from-purple-900 hover:via-slate-800 hover:to-purple-900 text-amber-100 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation shadow-2xl ring-1 ring-white/10"
-          // iOS-specific touch handling
-          style={isIOS ? { 
-            WebkitTapHighlightColor: 'transparent',
-            minHeight: '44px', // iOS recommended touch target
-            minWidth: '44px'
-          } : {}}
         >
           Double Click Disini
         </button>
@@ -313,9 +307,12 @@ export const useUpdateToast = () => {
           toastShownRef.current = true;
           console.log('🤖 Android cleanref: Update toast shown, flag set to prevent duplicates');
         }
+      } else {
+        console.log('⚠️ Service Worker not ready, skipping toast');
       }
     }
   });
+
 
   return {
     needRefresh,

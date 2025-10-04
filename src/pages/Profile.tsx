@@ -140,9 +140,9 @@ export function Profile({ onNavigate }: ProfileProps) {
           description: "Refreshing page to complete logout...",
           variant: "destructive",
         });
-        // Refresh instead of redirect to auth
+        // REDIRECT TO REAL LOGOUT PAGE
         setTimeout(() => {
-          window.location.reload();
+          window.location.replace('/auth');
         }, 1000);
         return;
       }
@@ -795,7 +795,9 @@ export function Profile({ onNavigate }: ProfileProps) {
           <Button
             variant="destructive"
             onClick={handleLogout}
+            onTouchEnd={(e) => { e.preventDefault(); handleLogout(); }}
             className="w-full transition-all duration-200 transform hover:scale-105 active:scale-95"
+            style={{ touchAction: 'manipulation' }}
           >
             <LogOut className="w-4 h-4 mr-2" />
             Logout

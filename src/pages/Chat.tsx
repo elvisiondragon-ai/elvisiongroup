@@ -878,11 +878,15 @@ export function Chat({ onNavigate }: ChatProps) {
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
             top: '88px', // Below header
-            bottom: isIOS ? (isPWA ? '155px' : '235px') : '150px', // Above input bar
+            bottom: isIOS ? (isPWA ? '155px' : '235px') : '200px', // Above input bar
             left: '0',
             right: '0',
             touchAction: isIOS ? 'pan-y' : 'auto',
-            paddingBottom: '0px'
+            paddingBottom: '0px',
+            overscrollBehavior: 'none',
+            overscrollBehaviorY: 'none',
+            overflow: 'hidden auto',
+            WebkitOverflowScrolling: 'touch'
           }} 
           onTouchStart={(e) => {
             // iOS handler - only allow vertical scroll for chat messages
@@ -930,8 +934,9 @@ export function Chat({ onNavigate }: ChatProps) {
 
       {/* Message Input */}
       <div 
-        className="fixed bottom-20 left-0 right-0 bg-background border-t border-border p-4 z-50"
+        className="fixed bottom-20 left-0 right-0 bg-background border-t border-border z-50"
         style={{
+          padding: '16px',
           touchAction: isIOS ? 'none' : 'auto'
         }}
         onTouchMove={(e) => {
