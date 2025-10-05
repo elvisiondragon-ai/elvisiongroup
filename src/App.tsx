@@ -24,6 +24,7 @@ import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";
 import { supabase } from "@/integrations/supabase/client";
+import { setupDebugTools } from "@/utils/debugTools";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,11 @@ const AppContent = () => {
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       window.removeEventListener('error', handleError);
     };
+  }, []);
+
+  // Initialize debug tools for browser console
+  useEffect(() => {
+    setupDebugTools();
   }, []);
 
   return (

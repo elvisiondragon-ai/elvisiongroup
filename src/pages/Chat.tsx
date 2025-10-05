@@ -165,14 +165,6 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [user, userProfile, isPro, proStatus]);
 
-  // Load initial messages when channel is ready
-  useEffect(() => {
-    if (chatChannel) {
-      console.log('🔵 Chat realtime status: SUBSCRIBED - Loading initial messages');
-      loadMessages();
-    }
-  }, [chatChannel]);
-
   // Smart user data cache with TTL (24 hours)
   const getUserDataFromCache = (userId: string) => {
     const cached = localStorage.getItem(`user-data-${userId}`);
@@ -386,6 +378,36 @@ export function Chat({ onNavigate }: ChatProps) {
       setIsLoading(false);
     }
   }, [toast]);
+
+  // Load initial messages when channel is ready
+  useEffect(() => {
+    if (chatChannel) {
+      console.log('🔵 Chat realtime status: SUBSCRIBED - Loading initial messages');
+      loadMessages();
+    }
+  }, [chatChannel, loadMessages]);
+
+  // PWA IDLE HANDLER - Listen for idle-wake events and reload messages
+  useEffect(() => {
+    const handlePWAIdleWake = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('📱 PWA IDLE WAKE: Received reload-messages event', customEvent.detail);
+
+      // Reload messages silently when PWA comes back from idle
+      loadMessages(false);
+
+      // Also scroll to bottom to show latest messages
+      setTimeout(() => {
+        scrollToBottom();
+      }, 300);
+    };
+
+    window.addEventListener('pwa-reload-messages', handlePWAIdleWake);
+
+    return () => {
+      window.removeEventListener('pwa-reload-messages', handlePWAIdleWake);
+    };
+  }, [loadMessages]);
 
   // 1000ms timeout mechanism for chat loading
   useEffect(() => {
@@ -890,8 +912,7 @@ export function Chat({ onNavigate }: ChatProps) {
             overscrollBehavior: 'none',
             overscrollBehaviorY: 'none',
             overflowY: 'auto',
-            overflowX: 'hidden',
-            WebkitOverflowScrolling: 'touch'
+            overflowX: 'hidden'
           }} 
           onTouchStart={(e) => {
             // iOS handler - only allow vertical scroll for chat messages

@@ -64,9 +64,8 @@ export const useUpdateToast = () => {
     console.log('🔄 Showing latest update toast');
     const toastConfig = {
       title: "🐢 Otomatis Update Initiate",
-      description: isIOS ? "IOS Device" : "Android",
       duration: 3000, // 3 seconds for both iOS and Android
-      className: "p-3 pr-4 space-x-3 [&>div>*:first-child]:text-sm [&>div>*:last-child]:text-sm",
+      className: "p-3 pr-4 space-x-3 [&>div>*:first-child]:text-sm",
     };
 
     // Show toast

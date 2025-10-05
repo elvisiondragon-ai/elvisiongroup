@@ -461,21 +461,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // IDLE USER HANDLER - Page visibility tracking
     const handleVisibilityChange = () => {
       const isVisible = !document.hidden;
-      
+
       if (isVisible) {
         console.log('[RT] Page became visible - checking for idle-wake reconnection');
         lastActiveTimeRef.current = Date.now();
-        
+
         // Check for PWA updates when page becomes visible
         checkForPWAUpdates();
-        
+
         // Mark for genuine idle-wake reconnection if page was hidden
         if (wasIdleRef.current) {
           console.log('❇️❇️ USER BACK FROM IDLE');
           console.log('[RT] Genuine idle-wake scenario detected - flagging for long delay');
           isIdleWakeReconnectRef.current = true;
+
+          // PWA & BROWSER FIX: Dispatch custom event to reload messages for all platforms
+          const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                        (window.navigator as any).standalone === true;
+
+          console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event`);
+          window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
+            detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
+          }));
         }
-        
+
         wasIdleRef.current = false;
       } else {
         console.log('☠️☠️ USER IDLE');
@@ -488,16 +497,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const updateActiveTime = () => {
       const now = Date.now();
       const timeSinceLastActive = now - lastActiveTimeRef.current;
-      
+
       // Check if user was idle and is now active
       if (timeSinceLastActive > 600000) { // 600000 = 10 minutes (production)
         console.log('⚠️⚠️ IDLE USER BACK updateActiveTime');
         console.log('[RT] User active after 10+ minute idle');
-        
+
         // Check for PWA updates when user returns from long idle
         checkForPWAUpdates();
+
+        // PWA & BROWSER FIX: Dispatch custom event to reload messages for all platforms
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                      (window.navigator as any).standalone === true;
+
+        console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (activity-based)`);
+        window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
+          detail: { reason: 'activity-wake', timestamp: now, isPWA }
+        }));
       }
-      
+
       lastActiveTimeRef.current = now;
       wasIdleRef.current = false;
     };
