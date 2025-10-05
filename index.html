@@ -85,23 +85,32 @@
         return false;
       };
       
-      // TEMP DISABLE: Check for black screen every 2 seconds
-      /*
-      const blackScreenChecker = setInterval(() => {
-        if (checkForBlackScreen()) {
-          console.log('🚑 Auto-recovery: Black screen detected');
-          window.recoveryMode();
-          clearInterval(blackScreenChecker);
-        }
-      }, 2000);
-      */
+      // Recovery checker - only starts when SW update is needed
+      let blackScreenChecker = null;
       
-      // Stop checking after 10 seconds if app loads
-      setTimeout(() => {
-        if (!isBlackScreen) {
-          // blackScreenChecker disabled - no need to clear
-        }
-      }, 10000);
+      // Function to start recovery monitoring (called when onNeedRefresh triggers)
+      window.startUpdateRecovery = function() {
+        if (blackScreenChecker) return; // Already monitoring
+        
+        console.log('🛡️ Starting update recovery monitoring...');
+        blackScreenChecker = setInterval(() => {
+          if (checkForBlackScreen()) {
+            console.log('🚑 Auto-recovery: Black screen detected during SW update');
+            window.recoveryMode();
+            clearInterval(blackScreenChecker);
+            blackScreenChecker = null;
+          }
+        }, 3000);
+        
+        // Stop monitoring after 30 seconds (enough time for update process)
+        setTimeout(() => {
+          if (blackScreenChecker) {
+            clearInterval(blackScreenChecker);
+            blackScreenChecker = null;
+            console.log('✅ Update recovery monitoring stopped - update completed');
+          }
+        }, 30000);
+      };
       
       // Recovery function
       window.recoveryMode = function() {
@@ -118,10 +127,10 @@
             for(let registration of registrations) {
               registration.unregister();
             }
-            window.location.href = window.location.origin + '?recovery_manual=' + Date.now();
+            window.location.href = window.location.origin;
           });
         } else {
-          window.location.href = window.location.origin + '?recovery_manual=' + Date.now();
+          window.location.href = window.location.origin;
         }
       };
       

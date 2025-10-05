@@ -11,6 +11,9 @@ export const useUpdateToast = () => {
   const persistentToastInterval = useRef<NodeJS.Timeout | null>(null);
   const toastShownRef = useRef<boolean>(false);
 
+  // iOS detection
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
   // Check for success flag after refresh + show pending updates + SW recovery success
   useEffect(() => {
     const updateSuccess = localStorage.getItem('update-success-flag');
@@ -27,12 +30,12 @@ export const useUpdateToast = () => {
     const swUpdated = localStorage.getItem('sw-update-success');
     if (swUpdated === 'true') {
       localStorage.removeItem('sw-update-success');
-      
+
       // Check if there was a session warning during update
       const sessionWarning = localStorage.getItem('update-session-warning');
       if (sessionWarning === 'true') {
         localStorage.removeItem('update-session-warning');
-        
+
         setTimeout(() => {
           console.log('⚠️ SW Update completed with session warning');
           toast({
@@ -55,88 +58,30 @@ export const useUpdateToast = () => {
     // DON'T show toast on manual refresh - only when onNeedRefresh triggers it
   }, [toast]);
 
-  // iOS detection
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
   // Function to show update toast with iOS-specific handling
   const showUpdateToast = () => {
     // Allow latest toast - dismiss any existing and show new one
     console.log('🔄 Showing latest update toast');
     const toastConfig = {
-      title: "🐢 Initiate Update October", 
+      title: "🐢 Otomatis Update Initiate",
       description: isIOS ? "IOS Device" : "Android",
-      action: (
-        <button 
-          onClick={async (e) => {
-            console.log('🔵 User clicked update button');
-            
-            // Disable button for Android to prevent multiple clicks
-            if (!isIOS) {
-              const button = e.target as HTMLButtonElement;
-              button.disabled = true;
-              console.log('🤖 Android: Update button disabled');
-            }
-            
-            // User clicked update button
-            
-            // Try to refresh session one more time before update
-            if (user) {
-              console.log('🔄 Final session refresh before update');
-              const refreshResult = await refreshSession();
-              
-              if (!refreshResult.success) {
-                console.warn('⚠️ Final session refresh failed:', refreshResult.error);
-                
-                // Show warning but continue with update
-                toast({
-                  title: "Session Warning",
-                  description: "Session refresh failed. You may need to login again after update.",
-                  duration: 3000,
-                });
-                
-                // Mark for potential logout after update
-                localStorage.setItem('update-session-warning', 'true');
-              } else {
-                console.log('✅ Final session refresh successful');
-              }
-            }
-            
-            // Set flag for success toast after refresh
-            localStorage.setItem('update-success-flag', 'true');
-            
-            try {
-              console.log('🔄 Starting service worker update...');
-              await updateServiceWorker(true);
-              console.log('✅ Service worker updated, reloading...');
-              
-              // Reload only for iOS
-              if (isIOS) {
-                window.location.reload();
-              }
-            } catch (error) {
-              console.error('❌ Update failed:', error);
-              
-              // Still reload to get the update - iOS only
-              if (isIOS) {
-                setTimeout(() => {
-                  window.location.reload();
-                }, 2000);
-              }
-            }
-          }}
-          className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 hover:from-purple-900 hover:via-slate-800 hover:to-purple-900 text-amber-100 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 touch-manipulation shadow-2xl ring-1 ring-white/10"
-        >
-          Double Click Disini
-        </button>
-      ),
-      duration: 0, // Don't auto-dismiss
+      duration: 3000, // 3 seconds for both iOS and Android
+      className: "p-3 pr-4 space-x-3 [&>div>*:first-child]:text-sm [&>div>*:last-child]:text-sm",
     };
 
-    // Show toast 
+    // Show toast
     const toastInstance = toast(toastConfig);
-    
+
     return toastInstance;
   };
+
+  // Expose to window for console testing
+  useEffect(() => {
+    (window as any).testUpdateToast = showUpdateToast;
+    return () => {
+      delete (window as any).testUpdateToast;
+    };
+  }, []);
 
   // PWA Update Logic
   const {
@@ -160,6 +105,10 @@ export const useUpdateToast = () => {
     async onNeedRefresh() {
       console.log('🔄 Update available - latest version ready')
       
+      // Start recovery monitoring for potential black screen during update
+      if (typeof window.startUpdateRecovery === 'function') {
+        window.startUpdateRecovery();
+      }
       
       // COMPREHENSIVE: iOS Cache Clearing + SW Cache Clearing
       try {
@@ -294,19 +243,16 @@ export const useUpdateToast = () => {
       
       // Only show toast if SW is ready (check if registration is active)
       if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        // Android cleanref - prevent showing update toast multiple times
-        if (!isIOS && toastShownRef.current) {
-          console.log('🤖 Android cleanref: Update toast already shown, skipping');
+        // Prevent showing update toast multiple times
+        if (toastShownRef.current) {
+          console.log('🔄 Update toast already shown, skipping');
           return;
         }
-        
+
+        // Show immediately
         showUpdateToast();
-        
-        // Set cleanref flag for Android only
-        if (!isIOS) {
-          toastShownRef.current = true;
-          console.log('🤖 Android cleanref: Update toast shown, flag set to prevent duplicates');
-        }
+        toastShownRef.current = true;
+        console.log('✅ Update toast shown, flag set to prevent duplicates');
       } else {
         console.log('⚠️ Service Worker not ready, skipping toast');
       }

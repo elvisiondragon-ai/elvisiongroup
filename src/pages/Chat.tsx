@@ -40,8 +40,12 @@ export function Chat({ onNavigate }: ChatProps) {
   
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // Android detection
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  // Desktop detection
+  const isDesktop = !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
   // PWA detection - check if app is installed to home screen
-  const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                 (window.navigator as any).standalone === true;
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
@@ -87,7 +91,7 @@ export function Chat({ onNavigate }: ChatProps) {
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
       document.body.style.height = '100%';
-      
+
       return () => {
         // Cleanup on unmount
         document.body.style.overflow = '';
@@ -869,23 +873,24 @@ export function Chat({ onNavigate }: ChatProps) {
 
       {/* Messages */}
       {/* IOS HANDLER (VITAL) - Enables immediate touch scrolling without requiring click first */}
-        <div 
+        <div
           ref={messagesContainerRef}
-          className="overflow-y-auto" 
-          style={{ 
-            display: 'flex', 
-            flexDirection: 'column-reverse', 
+          className="overflow-y-auto"
+          style={{
+            display: 'flex',
+            flexDirection: 'column-reverse',
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
             top: '88px', // Below header
-            bottom: isIOS ? (isPWA ? '155px' : '235px') : '200px', // Above input bar
+            bottom: isIOS ? (isPWA ? '155px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
             left: '0',
             right: '0',
             touchAction: isIOS ? 'pan-y' : 'auto',
             paddingBottom: '0px',
             overscrollBehavior: 'none',
             overscrollBehaviorY: 'none',
-            overflow: 'hidden auto',
+            overflowY: 'auto',
+            overflowX: 'hidden',
             WebkitOverflowScrolling: 'touch'
           }} 
           onTouchStart={(e) => {
