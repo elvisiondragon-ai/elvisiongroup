@@ -99,8 +99,8 @@ export default defineConfig(({ mode }) => ({
         name: 'eL Vision Group',
         short_name: 'eL Vision',
         description: 'Spiritual growth and meditation app',
-        theme_color: '#0F0F23',
-        background_color: '#0F0F23',
+        theme_color: '#0A0A0F',
+        background_color: '#0A0A0F',
         display: 'standalone',
         icons: [
           {
