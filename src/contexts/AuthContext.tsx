@@ -84,15 +84,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // IDLE USER HANDLER - Detection function
   const isIdleState = () => {
-    const now = Date.now();
-    const timeSinceLastActive = now - lastActiveTimeRef.current;
-    const isIdle = wasIdleRef.current || timeSinceLastActive > 600000; // 10 minutes (production)
+    const isIdle = wasIdleRef.current;
     
     if (isIdle) {
-      console.log('[RT] Idle state detected:', { 
-        wasHidden: wasIdleRef.current, 
-        minutesInactive: Math.floor(timeSinceLastActive / 60000) 
-      });
+      console.log('[RT] Idle state detected: page was hidden');
     }
     
     return isIdle;
@@ -110,17 +105,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // IDLE USER HANDLER - Retry delay function
+  // IDLE USER HANDLER - Retry delay function with exponential backoff
   const getRetryDelay = () => {
-    const isIdle = isIdleState();
-    
-    if (isIdle) {
-      console.log(`[RT] Using idle timeout: 8000ms`);
-      return 8000; // 8 seconds for idle scenarios
-    }
-    
-    console.log(`[RT] Using normal timeout: 500ms`);
-    return 500; // 500ms for normal scenarios
+    const retryCount = retryCountRef.current;
+
+    // Exponential backoff: 2s, 4s, 8s, 16s, then capped at 30s
+    const delay = Math.min(1000 * Math.pow(2, retryCount + 1), 30000);
+
+    console.log(`[RT] Retry attempt #${retryCount + 1}. Using backoff delay: ${delay}ms`);
+    return delay;
   };
 
   // UNIFIED FLOW: Single function handles all channel management
