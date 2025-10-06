@@ -454,15 +454,15 @@ export function Chat({ onNavigate }: ChatProps) {
     };
   }, [loadMessages]);
 
-  // 1000ms timeout mechanism for chat loading
+  // 10000ms timeout mechanism for chat loading
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
       if (isLoading) {
-        console.log('Chat loading timeout triggered (1000ms), forcing refresh...');
+        console.log('Chat loading timeout triggered (10000ms), forcing refresh...');
         localStorage.setItem('refresh-redirect-to-chat', 'true');
         window.location.reload();
       }
-    }, 1000);
+    }, 10000);
 
     return () => clearTimeout(loadingTimeout);
   }, [isLoading]);
@@ -954,8 +954,8 @@ export function Chat({ onNavigate }: ChatProps) {
             right: '0',
             touchAction: isIOS ? 'pan-y' : 'auto',
             paddingBottom: '0px',
-            overscrollBehavior: 'none',
-            overscrollBehaviorY: 'none',
+            overscrollBehavior: isAndroid ? 'contain' : 'none',
+            overscrollBehaviorY: isAndroid ? 'contain' : 'none',
             overflowY: 'auto',
             overflowX: 'hidden'
           }} 

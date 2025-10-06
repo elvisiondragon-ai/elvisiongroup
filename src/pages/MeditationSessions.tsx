@@ -36,7 +36,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.7);
-  const [liveCount, setLiveCount] = useState(3876);
+  const [audienceCount, setAudienceCount] = useState(0);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [sessionData, setSessionData] = useState<any>(null);
   const [audioError, setAudioError] = useState<string | null>(null);
@@ -48,7 +48,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
     if (needsCacheClearing) {
       const oldCacheKeys = [
         'user-profile-cache',
-        'user_profile_cache', 
+        'user_profile_cache',
         'unified_pro_status_cache',
         'meditation-user-cache'
       ];
@@ -65,12 +65,9 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
     // No need to fetch user - AuthContext provides userId
   }, []);
 
-  // Simulate live audience count updates
+  // Set audience counter to a fixed value
   useEffect(() => {
-    const interval = setInterval(() => {
-      setLiveCount(prev => prev + Math.floor(Math.random() * 3) - 1);
-    }, 5000);
-    return () => clearInterval(interval);
+    setAudienceCount(4528);
   }, []);
 
   // Audio event handlers
@@ -108,9 +105,9 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
         console.error('Error fetching session data:', error);
         // Fallback to hardcoded data if database fetch fails
         setSessionData({
-          title: 'Monday Live Session 736',
+          title: 'Monday Live Session 737',
           description: 'Join our weekly guided meditation session with thousands of practitioners worldwide.',
-          file_url: 'live01.MP3'
+          file_url: 'live02.MP3'
         });
         return;
       }
@@ -258,8 +255,25 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
 
   const progressPercentage = duration ? (currentTime / duration) * 100 : 0;
 
+  useEffect(() => {
+    // Apply a class to the body to hide the scrollbar when this component is mounted
+    document.body.classList.add('no-scrollbar');
+    return () => {
+      document.body.classList.remove('no-scrollbar');
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background pb-20">
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+      `}</style>
       {/* Header */}
       <div className="p-6 pb-4">
         <div className="flex items-center justify-between mb-6">
@@ -307,19 +321,14 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
               </div>
 
               <h2 className="text-3xl font-bold font-orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">
-                {sessionData?.title || 'Monday Live Session 736'}
+                {sessionData?.title || 'Monday Live Session 737'}
               </h2>
 
               <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground mb-4">
                 <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
                   <Users className="w-4 h-4 text-primary" />
-                  <span>Total Audience Terakhir: <span className="text-primary font-semibold">3,877</span></span>
+                  <span>Total Audience: <span className="text-primary font-semibold">{audienceCount.toLocaleString()}</span></span>
                 </div>
-                {/* I HIDE THIS FOR NOW */}
-                {/* <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                  <Users className="w-4 h-4 text-primary" />
-                  <span>Live Audience: <span className="text-primary font-semibold">{liveCount.toLocaleString()}</span></span>
-                </div> */}
                 <div className="flex items-center gap-2 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">
                   <Heart className="w-4 h-4 text-red-400 animate-pulse" />
                   <span className="text-red-300 font-semibold">Active Listen</span>
@@ -386,43 +395,10 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                 </div>
               </div>
 
-              {/* Progress Bar */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-                  <span className="font-mono">{formatTime(currentTime)}</span>
-                  <span className="text-primary font-semibold">Monday Live Session</span>
-                  <span className="font-mono">{formatTime(duration)}</span>
-                </div>
-                <div className="relative">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={progressPercentage}
-                    onChange={handleSeek}
-                    className="w-full h-3 bg-muted/50 rounded-lg appearance-none cursor-pointer slider backdrop-blur-sm"
-                    style={{
-                      background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${progressPercentage}%, hsl(var(--muted)) ${progressPercentage}%, hsl(var(--muted)) 100%)`
-                    }}
-                  />
-                </div>
-              </div>
+
 
               {/* Control Buttons */}
               <div className="flex items-center justify-center gap-8 mb-8">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="w-14 h-14 rounded-full hover:bg-primary/10 border border-primary/20 transition-all duration-300"
-                  onClick={() => {
-                    if (audioRef.current) {
-                      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 15);
-                    }
-                  }}
-                >
-                  <span className="text-sm font-semibold text-primary">-15s</span>
-                </Button>
-
                 <Button
                   size="icon"
                   onClick={togglePlayPause}
@@ -435,19 +411,6 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                   ) : (
                     <Play className="w-10 h-10 ml-1" />
                   )}
-                </Button>
-
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="w-14 h-14 rounded-full hover:bg-primary/10 border border-primary/20 transition-all duration-300"
-                  onClick={() => {
-                    if (audioRef.current) {
-                      audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 15);
-                    }
-                  }}
-                >
-                  <span className="text-sm font-semibold text-primary">+15s</span>
                 </Button>
               </div>
 
@@ -469,6 +432,8 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                 </div>
                 <span className="text-sm text-muted-foreground font-mono w-10">{Math.round(volume * 100)}%</span>
               </div>
+
+
 
               {/* Error Display */}
               {audioError && (
@@ -519,7 +484,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                   <div className="absolute inset-0 w-3 h-3 rounded-full bg-primary animate-ping"></div>
                 </div>
                 <div>
-                  <div className="font-semibold text-primary">{sessionData?.title || 'Monday Live Session 736'}</div>
+                  <div className="font-semibold text-primary">{sessionData?.title || 'Monday Live Session 737'}</div>
                   <div className="text-sm text-muted-foreground">21.45 WIB • Live Now</div>
                 </div>
               </div>
@@ -532,7 +497,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
               <div className="flex items-center gap-4">
                 <Clock className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <div className="text-muted-foreground">Next Session 737</div>
+                  <div className="text-muted-foreground">Next Session 738</div>
                   <div className="text-sm text-muted-foreground">Monday, Next Week • 21.45 WIB</div>
                 </div>
               </div>
@@ -587,6 +552,41 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
         <div className="absolute top-4/6 right-1/4 w-2 h-2 bg-accent/30 rounded-full animate-pulse delay-1500"></div>
       </div>
 
+      <style jsx global>{`
+        html {
+          scrollbar-width: none; /* Firefox */
+        }
+        html::-webkit-scrollbar {
+          display: none; /* Safari and Chrome */
+        }
+      `}</style>
+      <style jsx>{`
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
+          cursor: pointer;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+      `}</style>
       <style jsx>{`
         .slider::-webkit-slider-thumb {
           appearance: none;

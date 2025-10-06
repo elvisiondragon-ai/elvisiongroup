@@ -468,6 +468,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('[RT] Genuine idle-wake scenario detected - flagging for long delay');
           isIdleWakeReconnectRef.current = true;
 
+          // iOS PWA FIX: Refresh session on wake to prevent auth issues
+          console.log('🔄 Refreshing session on idle wake...');
+          refreshSession().then(({ success }) => {
+            console.log(`[RT] Session refresh on wake ${success ? 'successful' : 'failed'}`);
+          });
+
           // PWA & BROWSER FIX: Dispatch custom event to reload messages for all platforms
           const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                         (window.navigator as any).standalone === true;
