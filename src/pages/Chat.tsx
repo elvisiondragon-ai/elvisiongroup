@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -31,6 +31,41 @@ interface ChatProps {
   onNavigate: (tab: string) => void;
 }
 
+// Memoized message list to prevent re-renders on every keystroke
+const MessageList = memo(({ messages, language, userId, onDelete }: {
+  messages: ChatMessageData[];
+  language: string;
+  userId: string | null;
+  onDelete: (id: string) => void;
+}) => {
+  return (
+    <div className="divide-y divide-border" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
+      {messages.slice().reverse().map((msg) => (
+        <ChatMessage
+          key={msg.id}
+          id={msg.id}
+          user={{
+            id: msg.user_id,
+            name: msg.user_name,
+            level: msg.user_level,
+            isPro: msg.is_pro || false,
+            isAdmin: msg.is_admin || false,
+            streak_days: msg.streak_days || 0,
+            subscriptionType: msg.subscription_type || undefined,
+            avatar: msg.avatar_url || ""
+          }}
+          message={language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
+          timestamp={new Date(msg.created_at)}
+          currentUserId={userId}
+          onDelete={onDelete}
+        />
+      ))}
+    </div>
+  );
+});
+
+MessageList.displayName = 'MessageList';
+
 export function Chat({ onNavigate }: ChatProps) {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -52,6 +87,16 @@ export function Chat({ onNavigate }: ChatProps) {
   const { user, userProfile, handleButtonTimeout } = useUserProfile();
   const { userId, chatChannel, isPro, proStatus, messages, setMessages, addMessage, removeMessage, broadcastMessage, broadcastDelete } = useAuth();
   const { i18n, t } = useTranslation();
+
+  useEffect(() => {
+    if (proStatus) {
+      console.log('🔵 Subscribe From Chat tab - pro_status_changes channel');
+      return () => {
+        console.log('🟣 Unsubscribe From Chat tab - pro_status_changes channel');
+      };
+    }
+  }, [proStatus]);
+
   const sendButtonRef = useRef<HTMLButtonElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -771,15 +816,15 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   };
 
-  const handleDeleteMessage = async (messageId: string) => {
+  const handleDeleteMessage = useCallback(async (messageId: string) => {
     removeMessage(messageId);
-    
+
     if (messageId.startsWith('temp-')) {
       return;
     }
-    
+
     if (!userId) return;
-    
+
     try {
       const { error } = await supabase
         .from('chat_messages')
@@ -802,7 +847,7 @@ export function Chat({ onNavigate }: ChatProps) {
         addMessage(messageToRestore);
       }
     }
-  };
+  }, [removeMessage, userId, messages, addMessage, broadcastDelete]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -934,42 +979,19 @@ export function Chat({ onNavigate }: ChatProps) {
             }
           }}
         >
-        <div className="divide-y divide-border" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
-            {messages.slice().reverse().map((msg) => (
-              <ChatMessage
-                key={msg.id}
-                id={msg.id}
-                user={{
-                  id: msg.user_id,
-                  name: msg.user_name,
-                  level: msg.user_level,
-                  isPro: msg.is_pro || false,
-                  isAdmin: msg.is_admin || false,
-                  streak_days: msg.streak_days || 0, // Now using real streak_days from profiles
-                  subscriptionType: msg.subscription_type || undefined,
-                  avatar: msg.avatar_url || ""
-                }}
-                message={i18n.language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
-                timestamp={new Date(msg.created_at)}
-                currentUserId={user?.id}
-                onDelete={handleDeleteMessage}
-              />
-            ))}
-          </div>
+        <MessageList
+          messages={messages}
+          language={i18n.language}
+          userId={user?.id || null}
+          onDelete={handleDeleteMessage}
+        />
       </div>
 
-      {/* Message Input */}
-      <div 
+      {/* Message Input - Optimized for mobile performance */}
+      <div
         className="fixed bottom-20 left-0 right-0 bg-background border-t border-border z-50"
         style={{
-          padding: '16px',
-          touchAction: isIOS ? 'none' : 'auto'
-        }}
-        onTouchMove={(e) => {
-          // iOS handler - prevent scroll on input bar
-          if (isIOS) {
-            e.preventDefault();
-          }
+          padding: '16px'
         }}
       >
         <div className="flex gap-2">
@@ -988,7 +1010,7 @@ export function Chat({ onNavigate }: ChatProps) {
               handleSendMessage();
             }}
             disabled={!message.trim()}
-            className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-4 transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5 disabled:scale-100 disabled:translate-y-0"
+            className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-4 disabled:opacity-50"
           >
             <Send className="w-4 h-4" />
           </Button>

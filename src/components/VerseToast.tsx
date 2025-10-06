@@ -27,7 +27,27 @@ export const VerseToast = () => {
       'ir. andi', 'Joni Setiawan', 'Dr. Wulan Sari', 'Sinta Dewi', 'rudihartono', 'mayasusanti',
       'rudiciputra', 'bayu', 'Agus Wibowo', 'rinaanggraeni', 'rizkianugerah', 'rinadarmawan',
       'rina', 'Lina Rahayu', 'bayuwibowo', 'dewiratna', 'bayutegarino', 'andi', 'Doni Setiawan',
-      'citradewi', 'bagusindra', 'citranirmala'
+      'citradewi', 'bagusindra', 'citranirmala',
+      'arianaputra', 'deviputri', 'farhanperkasa', 'gitalestari', 'haryosaputra', 'irfansyah',
+      'jajangpermana', 'kinasari', 'lukmanadi', 'miftahulhaq', 'nabilahakim', 'opanpermata',
+      'putriwidya', 'qoriimani', 'rizkyaditama', 'salsabilla', 'tariqzaman', 'umarmukti',
+      'vinaardianti', 'wildansyah', 'bima aditya', 'cinta rahayu', 'dafa setiawan', 'elang pratama',
+      'fira handayani', 'gama wijaya', 'hana permata', 'indra kusuma', 'junaedi saputra', 'kania lestari',
+      'lutfi anggara', 'maya dini', 'nanda putri', 'ozi ramadhan', 'pasha nugroho', 'qila salsabila',
+      'rama darmawan', 'sakti budiman', 'tio mahendra', 'umi kalsum', 'Arya Wijaya', 'Bella Permata',
+      'Cakra Santoso', 'Dinda Maharani', 'Evan Perkasa', 'Fani Rahmawati', 'Gibran Maulana',
+      'Hilda Kurnia', 'Iqbal Firdaus', 'Jelita Sari', 'kiki pancoran', 'lala cengkareng', 'miko tollroad',
+      'nisa warungkopi', 'ojan bajuri', 'pipit transjakarta', 'qiqi kampungmelayu', 'rere senopati',
+      'sasa manggarmas', 'tata ciledug', 'uut pondoklabu', 'vina karetan', 'wawan gerbangtol',
+      'xena monas', 'yaya cibinong', 'zizi depokbaru', 'adit jembatanmerah', 'beta stasiunbogor',
+      'coki cawangtimur', 'dodi simpanglima', 'Dr. Fira Adhani', 'Prof. Arka Wijayanto', 'drg. Vania Kirana',
+      'S.Kom. Gibran Fauzan', 'M.T. Talitha Prameswari', 'S.E. Daffa Lesmana', 'Ir. Elvira Damayanti',
+      'A.Md.Keb. Shabira Larasati', 'S.Psi. Rayhan Firdaus', 'M.Kom. Keisha Putriana', 'S.ST. Alvaro Sentosa',
+      'Dr. Zavier Budiyanto', 'Prof. Callista Wening', 'drg. Raisa Sulistyo', 'S.H. Fadilah Winata',
+      'M.M. Kenzie Ardhana', 'Ir. Bianca Laraswati', 'S.Farm. Nadhira Fajrin', 'Dr. Rafi Gunarsa',
+      'Prof. Anya Praditha', 'S.IP. Dzaki Fauzi', 'M.Pd. Laras Sekar', 'A.Md.T. Fathan Adriansyah',
+      'S.Sos. Amira Kinasih', 'Dr. Ezra Wicaksono', 'Prof. Salma Dewanti', 'drg. Nasya Pratista',
+      'S.Kom. Arsenio Kusnadi', 'M.T. Clarissa Hartadi', 'S.E. Valen Suryadi'
     ];
 
     const activities = [
