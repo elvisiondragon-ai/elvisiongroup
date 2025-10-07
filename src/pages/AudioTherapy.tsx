@@ -657,6 +657,57 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
             </div>
           </div>
         </Card>
+        <Card className="relative overflow-hidden border transition-all duration-300 hover:scale-[1.01] bg-gradient-to-br from-teal-500/5 via-background to-cyan-500/5 border-teal-400/30 shadow-lg shadow-teal-400/10">
+            <div className="absolute inset-0 opacity-5">
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-teal-500 via-transparent to-cyan-500"></div>
+                <div className="absolute top-2 right-2 w-8 h-8 border border-teal-400/20 rounded-full"></div>
+                <div className="absolute bottom-2 left-2 w-4 h-4 border border-cyan-400/20 rounded-full"></div>
+            </div>
+            <div className="relative z-10 text-center space-y-4 p-4">
+                <div className="space-y-1">
+                    <div className="flex items-center justify-center gap-2">
+                        <h3 className="text-base font-semibold font-orbitron bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                            Audio Khusus Therapy Tumor Pak Arif
+                        </h3>
+                        <span className="px-1.5 py-0.5 text-xs font-medium rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                            PRIVATE
+                        </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground/80 font-medium">
+                        Terapi khusus untuk penyembuhan tumor.
+                    </p>
+                    <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-teal-400 to-transparent mx-auto"></div>
+                </div>
+                <div className="flex justify-center">
+                    <div className="transform scale-75">
+                        <VerseAudioCard
+                            verse={{
+                                id: 13,
+                                title: "Audio Khusus Therapy Tumor Pak Arif",
+                                subtitle: "Terapi khusus untuk penyembuhan tumor.",
+                                unlocked: userId === "4ae1cbdb-6b1a-43e2-9f85-475f61fa1c9e" || userId === "3da83afb-aa8c-4c55-b3b0-8aa64000205f",
+                                requiredLevel: 1,
+                                artwork: verse10Artwork,
+                                audioPath: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/arifelvision.MP3',
+                                language: 'id',
+                                isFree: false,
+                                proOnly: false,
+                                isPrivate: true,
+                            }}
+                            onWarning={handleWarning}
+                            currentPlayingVerse={currentPlayingVerse}
+                            setCurrentPlayingVerse={setCurrentPlayingVerse}
+                            currentVerseAudio={currentVerseAudio}
+                            setCurrentVerseAudio={setCurrentVerseAudio}
+                            onShowSacredNotification={(verseName) => {
+                                setCurrentVerseName(verseName);
+                                setShowSacredNotification(true);
+                            }}
+                        />
+                    </div>
+                </div>
+            </div>
+        </Card>
       </div>
 
       {/* Main Verses */}

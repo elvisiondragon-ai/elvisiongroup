@@ -468,10 +468,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('[RT] Genuine idle-wake scenario detected - flagging for long delay');
           isIdleWakeReconnectRef.current = true;
 
-          // iOS PWA FIX: Refresh session on wake to prevent auth issues
-          console.log('🔄 Refreshing session on idle wake...');
-          refreshSession().then(({ success }) => {
-            console.log(`[RT] Session refresh on wake ${success ? 'successful' : 'failed'}`);
+          // iOS PWA FIX: Rebuild channel on wake to ensure connection
+          console.log('🔄 Rebuilding channel on idle wake...');
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+              rebuildChatChannel(session, 'idle-wake').catch((error) => {
+                console.error('🚨 Idle wake channel rebuild failed:', error);
+              });
+            } else {
+              console.log('[RT] No session found on idle wake, cannot rebuild channel.');
+            }
           });
 
           // PWA & BROWSER FIX: Dispatch custom event to reload messages for all platforms
