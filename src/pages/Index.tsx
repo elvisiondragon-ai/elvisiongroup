@@ -3,6 +3,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { ProUpgradeNotification } from "@/components/InvitePro";
 import { Home } from "./Home";
 import { Chat } from "./Chat";
+import { Chat2 } from "./Chat2";
 import { Leaderboard } from "./Leaderboard";
 import { Profile } from "./Profile";
 import { useToast } from "@/hooks/use-toast";
@@ -151,6 +152,8 @@ const Index = () => {
         return <Home onNavigate={setActiveTab} />;
       case "chat":
         return <Chat onNavigate={setActiveTab} />;
+      case "chat2":
+        return <Chat2 onNavigate={setActiveTab} />;
       case "leaderboard":
         return <Leaderboard />;
       case "profile":

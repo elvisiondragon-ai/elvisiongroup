@@ -248,10 +248,10 @@ export const useUpdateToast = () => {
           return;
         }
 
-        // Show immediately
-        showUpdateToast();
+        // Toast removed per user request - no longer shows on update
+        // showUpdateToast();
         toastShownRef.current = true;
-        console.log('✅ Update toast shown, flag set to prevent duplicates');
+        console.log('✅ Update initiated silently (toast removed)');
       } else {
         console.log('⚠️ Service Worker not ready, skipping toast');
       }

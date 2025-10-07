@@ -459,7 +459,6 @@ export function Home({
       }}>
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
           <div className="absolute top-4 right-4">
-            <LanguageSwitcher />
           </div>
           <div className="relative h-full flex items-end p-6">
             <div className="flex items-center gap-4">

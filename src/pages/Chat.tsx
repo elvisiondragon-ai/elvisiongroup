@@ -885,8 +885,8 @@ export function Chat({ onNavigate }: ChatProps) {
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
-      <div 
-        className="sticky top-0 z-50 bg-card border-b border-border p-4"
+      <div
+        className="sticky top-0 z-50 bg-card border-b border-border p-2"
         style={{
           touchAction: isIOS ? 'none' : 'auto'
         }}
@@ -899,19 +899,6 @@ export function Chat({ onNavigate }: ChatProps) {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-              <Users className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="font-semibold font-orbitron text-foreground">
-                Komunitas eL Vision Group
-              </h1>
-               <p className="text-sm text-muted-foreground">
-                21.482 anggota 
-               </p>
-              <p className="text-xs text-muted-foreground">
-              </p>
-            </div>
           </div>
           
           <div className="flex items-center gap-2">
@@ -948,8 +935,8 @@ export function Chat({ onNavigate }: ChatProps) {
             flexDirection: 'column-reverse',
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
-            top: '88px', // Below header
-            bottom: isIOS ? (isPWA ? '155px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
+            top: '40px', // Below header
+            bottom: isIOS ? (isPWA ? '155px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '50px' : '200px', // Above input bar
             left: '0',
             right: '0',
             touchAction: isIOS ? 'pan-y' : 'auto',
