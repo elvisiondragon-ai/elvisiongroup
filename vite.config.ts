@@ -101,7 +101,7 @@ export default defineConfig(({ mode }) => ({
         description: 'Spiritual growth and meditation app',
         theme_color: '#000000',
         background_color: '#0A0A0F',
-        display: 'fullscreen',
+        display: 'standalone',
         icons: [
           {
             src: 'pwa-192x192.png',

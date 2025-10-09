@@ -714,6 +714,8 @@ export function Profile({ onNavigate }: ProfileProps) {
           Hubungi Customer Support
         </Button>
 
+        {/* Chat2 Button - Hidden */}
+        {false && (
         <Button
           variant="outline"
           className="w-full transition-all duration-200 hover:scale-105 active:scale-95 transform bg-gradient-to-r from-orange-900/20 via-yellow-900/20 to-orange-900/20 hover:from-orange-900/30 hover:via-yellow-900/30 hover:to-orange-900/30 border-orange-400/30 hover:border-yellow-400/50"
@@ -722,6 +724,7 @@ export function Profile({ onNavigate }: ProfileProps) {
           <MessageCircle className="w-4 h-4 mr-2" />
           Chat2
         </Button>
+        )}
 
         <Button
           variant="outline"
