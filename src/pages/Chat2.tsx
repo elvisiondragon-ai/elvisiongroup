@@ -626,6 +626,7 @@ export function Chat2({ onNavigate }: Chat2Props) {
           bottom: '160px',
           left: 0,
           right: 0,
+          paddingTop: (isIOS && isPWA) ? 'env(safe-area-inset-top)' : '0px',
           WebkitOverflowScrolling: 'touch',
           touchAction: isIOS ? 'pan-y' : 'auto',
           overscrollBehavior: 'none',
