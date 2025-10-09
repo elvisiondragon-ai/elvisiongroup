@@ -56,6 +56,12 @@ export function Home({
   
   // Use AuthContext as primary source, fallback to UserProfileContext
   const user = authUser || contextUser;
+
+  // iOS detection
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // PWA fullscreen detection
+  const isPWAFullscreen = window.matchMedia('(display-mode: fullscreen)').matches;
+
   const [onlineCount, setOnlineCount] = useState(4500); // Base count of 4500
   const { calculateXPProgress } = useXPSystem();
   const { proStatus } = usePro();
@@ -451,7 +457,7 @@ export function Home({
     }
   ];
 
-  return <div className="pb-20">
+  return <div className="min-h-screen bg-background pb-20" style={isIOS && isPWAFullscreen ? { paddingTop: 'env(safe-area-inset-top)' } : {}}>
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="h-64 bg-cover bg-center bg-no-repeat" style={{

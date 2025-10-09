@@ -35,8 +35,8 @@ const MessageList = memo(({ messages, userId, onDelete }: {
   onDelete: (id: string) => void;
 }) => {
   return (
-    <div className="divide-y divide-border" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
-      {messages.slice().reverse().map((msg) => (
+    <div className="divide-y divide-border">
+      {messages.map((msg) => (
         <ChatMessage
           key={msg.id}
           id={msg.id}
@@ -67,6 +67,9 @@ export function Chat2({ onNavigate }: Chat2Props) {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
+  // iOS detection
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
   const { toast } = useToast();
   const { user, userProfile } = useUserProfile();
   const { userId, chatChannel, isPro, proStatus, messages, setMessages, addMessage, removeMessage, broadcastMessage, broadcastDelete } = useAuth();
@@ -82,7 +85,28 @@ export function Chat2({ onNavigate }: Chat2Props) {
     }
   }, [proStatus]);
 
-  // Independent pro badge cache for Chat.tsx optimistic UI
+  if (!userId) return null;
+
+  // Prevent body scroll on iOS, only allow chat messages to scroll
+  useEffect(() => {
+    if (isIOS) {
+      // Disable body scroll
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.height = '100%';
+
+      return () => {
+        // Cleanup on unmount
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+      };
+    }
+  }, [isIOS]);
+
+  // Independent pro badge cache for Chat2.tsx optimistic UI
   const [chatProBadgeCache, setChatProBadgeCache] = useState(() => {
     const saved = localStorage.getItem('chat-pro-badge-cache');
     return saved ? JSON.parse(saved) : {
@@ -97,7 +121,7 @@ export function Chat2({ onNavigate }: Chat2Props) {
     };
   });
 
-  // User badge cache for optimistic UI consistency (existing)
+  // User badge cache for optimistic UI consistency
   const [userBadgeCache, setUserBadgeCache] = useState({
     is_pro: false,
     is_admin: false,
@@ -107,8 +131,6 @@ export function Chat2({ onNavigate }: Chat2Props) {
     user_level: 1,
     avatar_url: ''
   });
-
-  if (!userId) return null;
 
   // Scroll to bottom function for both platforms
   const scrollToBottom = () => {
@@ -577,48 +599,58 @@ export function Chat2({ onNavigate }: Chat2Props) {
   // Show loading state during initial load
   if (isLoading) {
     return (
-      <div className="flex flex-col h-screen pb-20 items-center justify-center">
-        <img
-          src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/elvisionlogo.png"
-          alt="Loading"
-          className="w-20 h-20 mb-4 opacity-50"
-          loading="eager"
-        />
-        <p className="text-sm bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent font-semibold">Tunggu Sebentar...</p>
+      <div className="h-screen pb-20" style={{ display: 'grid', placeItems: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <img
+            src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/elvisionlogo.png"
+            alt="Loading"
+            className="w-20 h-20 mb-4 opacity-50"
+            loading="eager"
+            style={{ margin: '0 auto' }}
+          />
+          <p className="text-sm bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent font-semibold">Tunggu Sebentar...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      {/* HEADER - Fixed 40px */}
-      <div
-        className="bg-card border-b border-border flex items-center justify-between px-4"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '40px',
-          zIndex: 50
-        }}
-      >
-        <h1 className="text-lg font-semibold bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
-          
-        </h1>
-      </div>
-
-      {/* CHAT COMPONENT - Fixed position between header and input */}
+    <div className="min-h-screen bg-background">
+      {/* CHAT MESSAGES */}
       <div
         ref={messagesContainerRef}
-        className="overflow-y-auto bg-background p-4"
+        className="overflow-y-auto pb-4"
         style={{
-          position: 'fixed',
-          top: '40px',
+          position: 'absolute',
+          top: 0,
           bottom: '160px',
           left: 0,
           right: 0,
           WebkitOverflowScrolling: 'touch',
+          touchAction: isIOS ? 'pan-y' : 'auto',
+          overscrollBehavior: 'none',
+          overscrollBehaviorY: 'none',
+          overflowY: 'auto',
+          overflowX: 'hidden'
+        }}
+        onTouchStart={(e) => {
+          // iOS handler - only allow vertical scroll for chat messages
+          if (isIOS) {
+            e.stopPropagation();
+          }
+        }}
+        onTouchMove={(e) => {
+          // iOS handler - prevent horizontal scroll, only allow vertical
+          if (isIOS) {
+            const touch = e.touches[0];
+            const deltaX = Math.abs(touch.clientX - (touch.target as any).startX || 0);
+            const deltaY = Math.abs(touch.clientY - (touch.target as any).startY || 0);
+
+            // If more horizontal movement than vertical, prevent scroll
+            if (deltaX > deltaY) {
+              e.preventDefault();
+            }
+          }
         }}
       >
         <MessageList
@@ -628,19 +660,9 @@ export function Chat2({ onNavigate }: Chat2Props) {
         />
       </div>
 
-      {/* INPUT BAR - Fixed position above bottom menu */}
-      <div
-        className="bg-background border-t border-border p-4"
-        style={{
-          position: 'fixed',
-          bottom: '80px',
-          left: 0,
-          right: 0,
-          height: '80px',
-          zIndex: 40
-        }}
-      >
-        <div className="flex gap-2">
+      {/* INPUT BAR */}
+      <div className="fixed bottom-20 left-0 right-0 bg-background border-t border-border p-4 z-50">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem' }}>
           <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}

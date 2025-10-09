@@ -900,7 +900,7 @@ export function Chat({ onNavigate }: ChatProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
           </div>
-          
+
           <div className="flex items-center gap-2">
             {/* Manual Refresh Button */}
             <Button
@@ -920,7 +920,7 @@ export function Chat({ onNavigate }: ChatProps) {
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
-            
+
           </div>
         </div>
       </div>
@@ -945,7 +945,7 @@ export function Chat({ onNavigate }: ChatProps) {
             overscrollBehaviorY: isAndroid ? 'contain' : 'none',
             overflowY: 'auto',
             overflowX: 'hidden'
-          }} 
+          }}
           onTouchStart={(e) => {
             // iOS handler - only allow vertical scroll for chat messages
             if (isIOS) {
@@ -958,7 +958,7 @@ export function Chat({ onNavigate }: ChatProps) {
               const touch = e.touches[0];
               const deltaX = Math.abs(touch.clientX - (touch.target as any).startX || 0);
               const deltaY = Math.abs(touch.clientY - (touch.target as any).startY || 0);
-              
+
               // If more horizontal movement than vertical, prevent scroll
               if (deltaX > deltaY) {
                 e.preventDefault();
