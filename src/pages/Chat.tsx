@@ -884,47 +884,6 @@ export function Chat({ onNavigate }: ChatProps) {
 
   return (
     <div className="flex flex-col h-screen">
-      {/* Header */}
-      <div
-        className="sticky top-0 z-50 bg-card border-b border-border p-2"
-        style={{
-          touchAction: isIOS ? 'none' : 'auto'
-        }}
-        onTouchMove={(e) => {
-          // iOS handler - prevent scroll on header
-          if (isIOS) {
-            e.preventDefault();
-          }
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Manual Refresh Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setIsRefreshing(true);
-                // Set flag to return to chat after refresh
-                localStorage.setItem('refresh-redirect-to-chat', 'true');
-                // Smooth refresh with longer delay for better UX
-                setTimeout(() => {
-                  window.location.reload();
-                }, 800); // Increased delay for smoother experience
-              }}
-              disabled={isRefreshing}
-              className="gap-2"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-
-          </div>
-        </div>
-      </div>
-
       {/* Messages */}
       {/* IOS HANDLER (VITAL) - Enables immediate touch scrolling without requiring click first */}
         <div
@@ -935,14 +894,14 @@ export function Chat({ onNavigate }: ChatProps) {
             flexDirection: 'column-reverse',
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
-            top: '40px', // Below header
-            bottom: isIOS ? (isPWA ? '155px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '50px' : '200px', // Above input bar
+            top: '0', // From top
+            bottom: isIOS ? (isPWA ? '155px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '40px' : '200px', // Above input bar
             left: '0',
             right: '0',
             touchAction: isIOS ? 'pan-y' : 'auto',
             paddingBottom: '0px',
-            overscrollBehavior: isAndroid ? 'contain' : 'none',
-            overscrollBehaviorY: isAndroid ? 'contain' : 'none',
+            overscrollBehavior: isAndroid ? 'auto' : 'none',
+            overscrollBehaviorY: isAndroid ? 'auto' : 'none',
             overflowY: 'auto',
             overflowX: 'hidden'
           }}

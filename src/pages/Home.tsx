@@ -457,7 +457,7 @@ export function Home({
     }
   ];
 
-  return <div className="min-h-screen bg-background pb-20" style={isIOS && isPWAFullscreen ? { paddingTop: 'env(safe-area-inset-top)' } : {}}>
+  return <div className="min-h-screen bg-background pb-20">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="h-64 bg-cover bg-center bg-no-repeat" style={{
