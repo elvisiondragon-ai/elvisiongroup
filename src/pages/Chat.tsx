@@ -895,10 +895,10 @@ export function Chat({ onNavigate }: ChatProps) {
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
             top: '0', // From top
-            bottom: isIOS ? (isPWA ? '190px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '180px' : '200px', // Above input bar
+            bottom: isIOS ? (isPWA ? '190px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '0px' : '200px', // Above input bar
             left: '0',
             right: '0',
-            paddingTop: ((isIOS || isAndroid) && isPWA) ? 'env(safe-area-inset-top)' : '0px',
+            paddingTop: (isIOS && isPWA) ? 'env(safe-area-inset-top)' : '0px',
             touchAction: isIOS ? 'pan-y' : 'auto',
             paddingBottom: '0px',
             overscrollBehavior: 'none',

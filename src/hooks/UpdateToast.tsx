@@ -55,6 +55,18 @@ export const useUpdateToast = () => {
       }
     }
 
+    // RefreshButton Toast - Check Update button from Profile (iOS PWA)
+    const wasUpdated = localStorage.getItem('app-updated-flag');
+    if (wasUpdated === 'true') {
+      localStorage.removeItem('app-updated-flag');
+      setTimeout(() => {
+        toast({
+          title: "✓ Anda di versi terbaru",
+          description: "App berhasil diperbarui",
+        });
+      }, 1000);
+    }
+
     // DON'T show toast on manual refresh - only when onNeedRefresh triggers it
   }, [toast]);
 

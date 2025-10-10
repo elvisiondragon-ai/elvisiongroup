@@ -31,10 +31,10 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { user, loading } = useAuth();
-  
+
   // Initialize real-time notifications
   useRealTimeNotifications(user);
-  
+
   // Initialize update system (handles all update toasts)
   useUpdateToast();
 

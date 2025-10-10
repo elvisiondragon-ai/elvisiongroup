@@ -101,15 +101,13 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { userId } = useAuth();
   const { user } = useUserProfile();
 
-  // Tab-level pro status logging
+  // Tab-level pro status logging - ONLY ON MOUNT
   useEffect(() => {
-    if (proStatus) {
-      console.log('🔵 Subscribe From AudioTherapy tab - pro_status_changes channel');
-      return () => {
-        console.log('🟣 Unsubscribe From AudioTherapy tab - pro_status_changes channel');
-      };
-    }
-  }, [proStatus]);
+    console.log('🔵 Subscribe From AudioTherapy tab - pro_status_changes channel');
+    return () => {
+      console.log('🟣 Unsubscribe From AudioTherapy tab - pro_status_changes channel');
+    };
+  }, []); // 🛡️ FIX: Empty deps = run once on mount/unmount only
 
   // Local audio state (better for XP tracking) - USER-INITIATED downloads only //Nevertouch Audio-cache
   const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
@@ -151,8 +149,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         });
         
         setIsAdmin(userId === "3da83afb-aa8c-4c55-b3b0-8aa64000205f"); // Use actual admin ID
-        
-        const verse4Count = await fetchVerse4Count(userId);
+
+        // 🛡️ FIX: fetchUserProfile already fetches verse4_used, no need for separate call
         await fetchUserProfile(userId);
       }
       
@@ -167,11 +165,13 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     console.log('🎵 verse4Used state changed to:', verse4Used);
   }, [verse4Used]);
 
+  // 🛡️ FIX: Only refetch when pro status changes, not on initial load
   useEffect(() => {
-    if (userId && !loading) {
+    if (userId && !loading && proStatus) {
+      console.log('🔄 Pro status changed, refetching profile');
       fetchUserProfile(userId);
     }
-  }, [proStatus.isPro, userId, loading]);
+  }, [proStatus.isPro]); // Only track isPro, not userId or loading
 
 
   const fetchUserProfile = async (userId: string) => {

@@ -40,6 +40,7 @@ import {
   Droplets,
   Activity,
   Globe,
+  RefreshCw,
 } from "lucide-react";
 import { GiCrownCoin, GiBatMask, GiCrown, GiFootsteps } from "react-icons/gi";
 import { Leaf } from "lucide-react";
@@ -76,9 +77,17 @@ export function Profile({ onNavigate }: ProfileProps) {
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  
+
+  // Detect PWA mode (iOS and Android) - includes fullscreen mode
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
+  const isAndroidStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  const isAndroidFullscreen = window.matchMedia('(display-mode: fullscreen)').matches;
+  const isAndroidMinimalUI = window.matchMedia('(display-mode: minimal-ui)').matches;
+  const isPWA = (isIOS && isIOSStandalone) || isAndroidStandalone || isAndroidFullscreen || isAndroidMinimalUI;
+
   // INSTANT AUTH STATE - for immediate logout button response
-  
+
   const { proStatus } = usePro();
   const { toast } = useToast();
 
@@ -175,7 +184,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
   const handleDeleteAccount = async () => {
     if (!userId) return;
-    
+
     try {
       // Delete all user data first
       const { error: profileError } = await supabase
@@ -216,6 +225,46 @@ export function Profile({ onNavigate }: ProfileProps) {
         description: "Failed to delete account. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    toast({
+      title: "Refreshing...",
+      description: "Clearing cache & updating app",
+    });
+
+    try {
+      // Unregister all service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+          console.log('Service worker unregistered');
+        }
+      }
+
+      // Clear all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+        console.log('All caches cleared');
+      }
+
+      // Set flag to show success toast after reload
+      localStorage.setItem('app-updated-flag', 'true');
+
+      // Force hard reload to get newest service worker
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (error) {
+      console.error('Error during refresh:', error);
+      // Fallback to normal reload
+      window.location.reload();
     }
   };
 
@@ -692,7 +741,19 @@ export function Profile({ onNavigate }: ProfileProps) {
         <h2 className="text-lg font-semibold font-orbitron text-foreground mb-4">
           Pengaturan
         </h2>
-        
+
+        {isPWA && (
+          <Button
+            variant="outline"
+            className="w-full transition-all duration-200 hover:scale-105 active:scale-95 transform"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Check Update
+          </Button>
+        )}
+
         <Button
           variant="outline"
           className="w-full transition-all duration-200 hover:scale-105 active:scale-95 transform"

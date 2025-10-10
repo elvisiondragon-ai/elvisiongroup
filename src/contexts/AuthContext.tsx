@@ -68,12 +68,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const currentTokenRef = useRef<string | null>(null);
   const isConnectingRef = useRef<boolean>(false);
+  const isRebuildingRef = useRef<boolean>(false);
   
   // IDLE USER HANDLER - Page visibility tracking
   const lastActiveTimeRef = useRef<number>(Date.now());
   const wasIdleRef = useRef<boolean>(false);
   const retryCountRef = useRef<number>(0);
   const isIdleWakeReconnectRef = useRef<boolean>(false);
+  const isIdleWakeRecoveryRef = useRef<boolean>(false);
   
   // Chat messages state
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
@@ -105,28 +107,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // IDLE USER HANDLER - Retry delay function with exponential backoff
+  // IDLE USER HANDLER - Retry delay function with exponential backoff + jitter
   const getRetryDelay = () => {
     const retryCount = retryCountRef.current;
 
-    // Exponential backoff: 2s, 4s, 8s, 16s, then capped at 30s
-    const delay = Math.min(1000 * Math.pow(2, retryCount + 1), 30000);
+    // 🚀 OPTIMIZED: Start 500ms, exponential backoff, full jitter, cap 8s
+    // Progression: ~0-500ms, ~0-1000ms, ~0-2000ms, ~0-4000ms, ~0-8000ms
+    const baseDelay = Math.min(500 * Math.pow(2, retryCount), 8000);
 
-    console.log(`[RT] Retry attempt #${retryCount + 1}. Using backoff delay: ${delay}ms`);
+    // Full jitter: randomize between 0 and baseDelay to spread retries
+    const delay = Math.floor(baseDelay * Math.random());
+
+    console.log(`[RT] Retry attempt #${retryCount + 1}. Jittered backoff: ${delay}ms (max: ${baseDelay}ms)`);
     return delay;
   };
 
   // UNIFIED FLOW: Single function handles all channel management
   const rebuildChatChannel = async (session: Session | null, reason: string) => {
     const newToken = session?.access_token || null;
-    
+
     // Only prevent rebuilds for duplicate auth state changes with same token
     if (reason === 'auth state change' && currentTokenRef.current === newToken && newToken !== null) {
-      console.log('⏭️ Skipping channel rebuild - same token');
+      console.log('❌⚠️ Skipping channel rebuild - same token');
       return;
     }
-    
+
+    // 🛡️ GUARD: Prevent duplicate concurrent rebuilds
+    if (isRebuildingRef.current) {
+      console.log('⏭️ Skipping channel rebuild - already rebuilding');
+      return;
+    }
+
     console.log(`🔧 Rebuilding chat channel - Reason: ${reason} | Token changed: ${currentTokenRef.current !== newToken}`);
+    isRebuildingRef.current = true;
     currentTokenRef.current = newToken;
     
     // 1. Clear existing timers
@@ -138,20 +151,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 2. Synchronized channel teardown with stale ref guard
     if (chatChannelRef.current) {
       console.log('💝 Chat realtime status: Starting synchronized unsubscribe');
-      
+
       // 💙 Capture channel reference before nullifying to prevent stale refs
       const channelToCleanup = chatChannelRef.current;
       chatChannelRef.current = null;
       setChatChannel(null);
-      
-      // 🩵 Serialize unsubscribe operation
-      try {
-        await channelToCleanup.unsubscribe();
-        console.log('🔥 Chat realtime status: Unsubscribe completed successfully');
-      } catch (e) {
-        console.error('❄️ WebSocket unsubscribe failed:', e);
+
+      // 🛡️ GUARD: Check channel state before operations
+      const channelState = (channelToCleanup as any).state;
+      console.log(`🔍 Channel state before cleanup: ${channelState}`);
+
+      // 🩵 Serialize unsubscribe operation only if channel is active
+      if (channelState === 'joined' || channelState === 'joining') {
+        try {
+          await channelToCleanup.unsubscribe();
+          console.log('🔥 Chat realtime status: Unsubscribe completed successfully');
+        } catch (e) {
+          console.error('❄️ WebSocket unsubscribe failed:', e);
+        }
+      } else {
+        console.log(`⭐️⭐️ Skipping unsubscribe - channel state: ${channelState}`);
       }
-      
+
       // ☀️ Always remove channel regardless of unsubscribe result
       try {
         supabase.removeChannel(channelToCleanup);
@@ -163,6 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (!session?.user) {
       setLoading(false);
+      isRebuildingRef.current = false; // Reset flag
       return;
     }
     
@@ -362,12 +384,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 8. Subscribe with unified error handling
     channel.subscribe((status) => {
       setChannelStatus(status);
-      
+
       if (status === 'SUBSCRIBED') {
         // Check if this was a recovery from failure
         const wasRetrying = retryTimeoutRef.current !== null;
-        console.log(wasRetrying ? '🚀⚡️ WebSocket connection recovered successfully!' : '💥 Chat realtime status Connected');
-        
+        console.log(wasRetrying ? '🚀⚡️ WebSocket connection recovered successfully!' : '✈️✈️ CHAT RT SUKSES Connected');
+        console.log(`✅ Channel rebuild completed successfully - Reason: ${reason}`);
+
         // Clear any pending retry timeouts and reset counter
         if (retryTimeoutRef.current) {
           clearTimeout(retryTimeoutRef.current);
@@ -375,15 +398,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         retryCountRef.current = 0; // Reset on successful connection
         chatChannelRef.current = channel;
+        setChatChannel(channel); // Ensure state is updated
         setLoading(false);
+        isRebuildingRef.current = false; // ✅ Reset rebuilding flag on success
       } else if (status === 'TIMED_OUT' || status === 'CLOSED') {
         console.log('🩵 WebSocket Scheduling reconnect after timeout/close...');
+        isRebuildingRef.current = false; // ⚠️ Reset flag to allow retry
         // Retry with idle-aware backoff
         if (!retryTimeoutRef.current) {
           const delay = getRetryDelay();
           console.log(`🩵 WebSocket retry in ${delay}ms after timeout/close`);
           retryCountRef.current++;
-          
+
           retryTimeoutRef.current = setTimeout(() => {
             retryTimeoutRef.current = null;
             console.log('❄️ WebSocket Attempting reconnect after timeout...');
@@ -394,12 +420,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } else if (status === 'CHANNEL_ERROR' || status === 'CONNECTION_ERROR' || status === 'FAILED') {
         console.log('🔥🐢☀️ WebSocket Transition:', status);
+        isRebuildingRef.current = false; // ⚠️ Reset flag to allow retry
         // Retry failed connections with idle detection
         if (!retryTimeoutRef.current) {
           const delay = getRetryDelay();
           console.log(`🔥 WebSocket retry in ${delay}ms after CHANNEL_ERROR`);
           retryCountRef.current++;
-          
+
           retryTimeoutRef.current = setTimeout(() => {
             retryTimeoutRef.current = null;
             console.log('☀️ WebSocket Attempting reconnect after failure...');
@@ -467,6 +494,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('❇️❇️ USER BACK FROM IDLE');
           console.log('[RT] Genuine idle-wake scenario detected - flagging for long delay');
           isIdleWakeReconnectRef.current = true;
+          isIdleWakeRecoveryRef.current = true; // 🛡️ RACE CONDITION FIX: Prevent duplicate rebuilds
 
           // PWA & BROWSER FIX: Dispatch custom event to reload messages for all platforms
           const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
@@ -497,16 +525,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
                     detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
                   }));
+
+                  // 🛡️ RACE CONDITION FIX: Reset flag for fast path too
+                  isIdleWakeRecoveryRef.current = false;
+                  console.log('✅ Idle-wake recovery flag reset (fast path)');
+
                   return; // Done! No rebuild needed
                 } else {
                   console.log('⚠️ Token expiring soon, will refresh');
+                  // Token expiring, fall through to SLOW PATH by triggering rebuild
+                  // This will be handled by the else block below
                 }
               }
             });
-          }
-
-          // SLOW PATH: Channel not subscribed or token expiry suspected
-          console.log('🔄 Channel not SUBSCRIBED or token needs refresh, rebuilding...');
+          } else {
+            // SLOW PATH: Channel not subscribed or token expiry suspected
+            console.log('‼️⛔️⛔️ Channel not SUBSCRIBED or token needs refresh, rebuilding...');
           supabase.auth.getSession().then(async ({ data: { session } }) => {
             if (session) {
               // Check if token is already expired before attempting refresh
@@ -523,17 +557,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const sessionToUse = refreshedSession?.session || session;
 
                 console.log('🔐 Auth refreshed before idle-wake channel rebuild');
-                rebuildChatChannel(sessionToUse, 'idle-wake').catch((error) => {
+                await rebuildChatChannel(sessionToUse, 'idle-wake').catch((error) => {
                   console.error('🚨 Idle wake channel rebuild failed:', error);
                   // Force refresh to recover
                   localStorage.setItem('refresh-redirect-to-chat', 'true');
                   window.location.reload();
+                }).finally(() => {
+                  // 🛡️ RACE CONDITION FIX: Reset flag after idle-wake rebuild completes
+                  isIdleWakeRecoveryRef.current = false;
+                  console.log('✅ Idle-wake recovery flag reset');
                 });
+
+                // ✅ Dispatch AFTER rebuild initiated
+                console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (slow path)`);
+                window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
+                  detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
+                }));
               } catch (error) {
-                console.error('❌ Auth refresh failed, forcing page reload:', error);
-                // Force refresh to recover
-                localStorage.setItem('refresh-redirect-to-chat', 'true');
-                window.location.reload();
+                console.error('❌ Auth refresh failed:', error);
+
+                // 🛡️ FALLBACK: Try getSession before giving up
+                const { data: { session: fallbackSession }, error: sessionError } = await supabase.auth.getSession();
+
+                if (fallbackSession && !sessionError) {
+                  console.log('✅ Session recovered via getSession fallback');
+                  await rebuildChatChannel(fallbackSession, 'idle-wake-fallback').catch((error) => {
+                    console.error('🚨 Fallback session rebuild failed:', error);
+                    localStorage.setItem('refresh-redirect-to-chat', 'true');
+                    window.location.reload();
+                  }).finally(() => {
+                    isIdleWakeRecoveryRef.current = false;
+                    console.log('✅ Idle-wake recovery flag reset (fallback)');
+                  });
+
+                  // Dispatch reload event
+                  console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (fallback path)`);
+                  window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
+                    detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
+                  }));
+                } else {
+                  // Both refresh and getSession failed - force reload as last resort
+                  console.error('❌ All session recovery attempts failed, forcing page reload');
+                  localStorage.setItem('refresh-redirect-to-chat', 'true');
+                  window.location.reload();
+                }
               }
             } else {
               console.log('[RT] No session found on idle wake, attempting recovery...');
@@ -541,11 +608,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               const { data: refreshData } = await supabase.auth.refreshSession();
               if (refreshData?.session) {
                 console.log('✅ Session recovered on idle wake');
-                rebuildChatChannel(refreshData.session, 'idle-wake-recovered').catch((error) => {
+                await rebuildChatChannel(refreshData.session, 'idle-wake-recovered').catch((error) => {
                   console.error('🚨 Recovered session rebuild failed:', error);
                   localStorage.setItem('refresh-redirect-to-chat', 'true');
                   window.location.reload();
+                }).finally(() => {
+                  // 🛡️ RACE CONDITION FIX: Reset flag after recovery rebuild completes
+                  isIdleWakeRecoveryRef.current = false;
+                  console.log('✅ Idle-wake recovery flag reset');
                 });
+
+                // ✅ Dispatch AFTER rebuild initiated
+                console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (recovery path)`);
+                window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
+                  detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
+                }));
               } else {
                 // No session available - redirect to login
                 console.log('❌ No session available, setting expired flag');
@@ -554,11 +631,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }
             }
           });
-
-          console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event`);
-          window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
-            detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
-          }));
+          }
         }
 
         wasIdleRef.current = false;
@@ -586,7 +659,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                       (window.navigator as any).standalone === true;
 
-        console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (activity-based)`);
+        console.log(`⭕️⭕️ ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (activity-based)`);
         window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
           detail: { reason: 'activity-wake', timestamp: now, isPWA }
         }));
@@ -691,7 +764,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`🔵🔵🔵 Auth State Change: ${event}`, { userId: session?.user?.id, hasSession: !!session });
-      
+
+      // 🛡️ RACE CONDITION FIX: Skip TOKEN_REFRESHED during idle-wake recovery
+      if (event === 'TOKEN_REFRESHED' && isIdleWakeRecoveryRef.current) {
+        console.log('⏭️ Skipping rebuild - TOKEN_REFRESHED during idle-wake recovery');
+        return;
+      }
+
       // IDLE USER HANDLER - Prevent unwanted signouts
       if (event === 'SIGNED_OUT') {
         const now = new Date().toISOString();
