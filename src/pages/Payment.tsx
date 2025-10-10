@@ -98,7 +98,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [subscriptionPlans, setSubscriptionPlans] = useState([
     {
       id: '1_month',
-      name: 'Berlangganan 1 Bulan', 
+      name: 'Berlangganan 1 Bulan',
       description: 'Berlangganan bulanan dengan akses penuh',
       price: 100000,
       currency: 'IDR',
@@ -117,28 +117,6 @@ export function Payment({ onNavigate }: PaymentProps) {
       paymentMethod: 'BCA Virtual Account',
       duration: '365 hari',
       durationDays: 365
-    },
-    {
-      id: '1_day',
-      name: 'Berlangganan 1 Hari',
-      description: 'Berlangganan harian dengan akses penuh',
-      price: 4000,
-      currency: 'IDR',
-      paymentMethodCode: 'BCAVA', 
-      paymentMethod: 'BCA Virtual Account',
-      duration: '1 hari',
-      durationDays: 1
-    },
-    {
-      id: '1_week',
-      name: 'Berlangganan 1 Minggu',
-      description: 'Berlangganan mingguan dengan akses penuh', 
-      price: 30000,
-      currency: 'IDR',
-      paymentMethodCode: 'BCAVA',
-      paymentMethod: 'BCA Virtual Account',
-      duration: '7 hari',
-      durationDays: 7
     }
   ]);
 

@@ -471,22 +471,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // PWA & BROWSER FIX: Dispatch custom event to reload messages for all platforms
           const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                         (window.navigator as any).standalone === true;
-          
-          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-          // iOS PWA FIX: Rebuild channel on wake to ensure connection
-          if (isIOS && isPWA) {
-            console.log('🔄 Rebuilding channel on idle wake for iOS PWA...');
-            supabase.auth.getSession().then(({ data: { session } }) => {
-              if (session) {
+          // ALL PLATFORMS FIX: Rebuild channel on wake to ensure connection
+          console.log('🔄 Rebuilding channel on idle wake for all platforms...');
+          supabase.auth.getSession().then(async ({ data: { session } }) => {
+            if (session) {
+              // Optionally refresh session to avoid JWT expiry
+              try {
+                const { data: refreshedSession } = await supabase.auth.refreshSession();
+                const sessionToUse = refreshedSession?.session || session;
+
+                console.log('🔐 Auth refreshed before idle-wake channel rebuild');
+                rebuildChatChannel(sessionToUse, 'idle-wake').catch((error) => {
+                  console.error('🚨 Idle wake channel rebuild failed:', error);
+                  // Force refresh to recover
+                  localStorage.setItem('refresh-redirect-to-chat', 'true');
+                  window.location.reload();
+                });
+              } catch (error) {
+                console.warn('⚠️ Auth refresh failed, using existing session:', error);
                 rebuildChatChannel(session, 'idle-wake').catch((error) => {
                   console.error('🚨 Idle wake channel rebuild failed:', error);
+                  // Force refresh to recover
+                  localStorage.setItem('refresh-redirect-to-chat', 'true');
+                  window.location.reload();
+                });
+              }
+            } else {
+              console.log('[RT] No session found on idle wake, attempting recovery...');
+              // Try to refresh session first
+              const { data: refreshData } = await supabase.auth.refreshSession();
+              if (refreshData?.session) {
+                console.log('✅ Session recovered on idle wake');
+                rebuildChatChannel(refreshData.session, 'idle-wake-recovered').catch((error) => {
+                  console.error('🚨 Recovered session rebuild failed:', error);
+                  localStorage.setItem('refresh-redirect-to-chat', 'true');
+                  window.location.reload();
                 });
               } else {
-                console.log('[RT] No session found on idle wake, cannot rebuild channel.');
+                // No session available - redirect to login
+                console.log('❌ No session available, setting expired flag');
+                localStorage.setItem('session-expired', 'true');
+                window.location.href = '/';
               }
-            });
-          }
+            }
+          });
 
           console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event`);
           window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
