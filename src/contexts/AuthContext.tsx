@@ -472,11 +472,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                         (window.navigator as any).standalone === true;
 
-          // ALL PLATFORMS FIX: Rebuild channel on wake to ensure connection
-          console.log('🔄 Rebuilding channel on idle wake for all platforms...');
+          // OPTIMIZATION: Check channel state first before expensive refresh
+          console.log(`🔍 Current channel status: ${channelStatus}`);
+
+          if (channelStatus === 'SUBSCRIBED') {
+            // FAST PATH: Channel still connected, just sync existing token
+            console.log('✅ Channel still SUBSCRIBED, using existing token (no API call)');
+
+            supabase.auth.getSession().then(async ({ data: { session } }) => {
+              if (session) {
+                // Check token expiry (5 min buffer)
+                const tokenExpiresAt = session.expires_at || 0;
+                const timeUntilExpiry = (tokenExpiresAt * 1000) - Date.now();
+                const hasValidToken = timeUntilExpiry > 300000; // 5 minutes buffer
+
+                if (hasValidToken) {
+                  console.log(`✅ Token valid for ${Math.floor(timeUntilExpiry / 60000)} more minutes, syncing with realtime`);
+
+                  // Just sync existing token - NO API CALL!
+                  supabase.realtime.setAuth(session.access_token);
+
+                  // Dispatch reload event for messages
+                  console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (fast path)`);
+                  window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
+                    detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
+                  }));
+                  return; // Done! No rebuild needed
+                } else {
+                  console.log('⚠️ Token expiring soon, will refresh');
+                }
+              }
+            });
+          }
+
+          // SLOW PATH: Channel not subscribed or token expiry suspected
+          console.log('🔄 Channel not SUBSCRIBED or token needs refresh, rebuilding...');
           supabase.auth.getSession().then(async ({ data: { session } }) => {
             if (session) {
-              // Optionally refresh session to avoid JWT expiry
+              // Check if token is already expired before attempting refresh
+              const tokenExpiresAt = session.expires_at || 0;
+              const isExpired = (tokenExpiresAt * 1000) < Date.now();
+
+              if (isExpired) {
+                console.log('⚠️ Token already expired, must refresh');
+              }
+
+              // Refresh session to get new token
               try {
                 const { data: refreshedSession } = await supabase.auth.refreshSession();
                 const sessionToUse = refreshedSession?.session || session;
@@ -489,13 +530,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   window.location.reload();
                 });
               } catch (error) {
-                console.warn('⚠️ Auth refresh failed, using existing session:', error);
-                rebuildChatChannel(session, 'idle-wake').catch((error) => {
-                  console.error('🚨 Idle wake channel rebuild failed:', error);
-                  // Force refresh to recover
-                  localStorage.setItem('refresh-redirect-to-chat', 'true');
-                  window.location.reload();
-                });
+                console.error('❌ Auth refresh failed, forcing page reload:', error);
+                // Force refresh to recover
+                localStorage.setItem('refresh-redirect-to-chat', 'true');
+                window.location.reload();
               }
             } else {
               console.log('[RT] No session found on idle wake, attempting recovery...');
