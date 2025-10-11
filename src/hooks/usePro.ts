@@ -73,9 +73,9 @@ export function usePro() {
           verseAccess: statusData.verse_access,
           proBadge: statusData.pro_badge,
         };
-        
+
         setProStatus({ ...proStatusData, loading: false });
-        
+
         // Cache the result
         localStorage.setItem(CACHE_KEY, JSON.stringify({
           data: proStatusData,

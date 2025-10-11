@@ -94,7 +94,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [userStats, setUserStats] = useState<any>(null);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [verse4Used, setVerse4Used] = useState(0);
-  const [showVerse4Limit, setShowVerse4Limit] = useState(false);
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
@@ -347,16 +346,13 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 4,
       title: "Verse 4 - Prosperity Stream",
       subtitle: "Frekuensi afirmasi menarik kekayaan dengan rasa yang dimiliki orang orang sukses",
-      unlocked: proStatus.isPro || verse4Used < 3,
+      unlocked: proStatus.isPro, // Pro only
       requiredLevel: 5,
       artwork: verse4Artwork,
       audioPath: 'Verse 4 - Prosperity Stream Vol. 1.MP3',
       language: 'id',
-      isFree: verse4Used < 3,
-      proOnly: false,
-      hasUsageLimit: true,
-      usageCount: verse4Used,
-      usageLimit: 3
+      isFree: false,
+      proOnly: true
     },
     {
       id: 5,
@@ -767,52 +763,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                   <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto"></div>
                 </div>
 
-                {/* Free Token Counter for Verse 4 */}
-                {verse.id === 4 && !proStatus.isPro && (
-                  <div className="flex justify-center mb-4">
-                    <div className="relative">
-                      {/* Beautiful background with multiple layers */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/30 via-orange-500/40 to-amber-500/30 rounded-xl blur-sm"></div>
-                      <div className="absolute inset-0 bg-gradient-to-br from-gold-400/20 via-yellow-600/30 to-orange-600/20 rounded-xl"></div>
-                      
-                      {/* Main container */}
-                      <div className="relative bg-gradient-to-r from-yellow-900/40 via-amber-900/50 to-orange-900/40 backdrop-blur-sm border-2 border-gradient-to-r border-yellow-400/40 rounded-xl px-6 py-3 shadow-2xl">
-                        {/* Sparkle effects */}
-                        <div className="absolute top-1 left-3 w-1 h-1 bg-yellow-300 rounded-full animate-pulse"></div>
-                        <div className="absolute top-2 right-4 w-1.5 h-1.5 bg-amber-300 rounded-full animate-pulse delay-300"></div>
-                        <div className="absolute bottom-1 left-6 w-1 h-1 bg-orange-300 rounded-full animate-pulse delay-700"></div>
-                        
-                        {/* Content */}
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            <Gem className="w-5 h-5 text-yellow-300 animate-pulse" />
-                            <span className="text-yellow-100 font-semibold text-sm">
-                              Free Token
-                            </span>
-                          </div>
-                          
-                          {/* Counter with beautiful styling */}
-                          <div className="bg-gradient-to-r from-yellow-600/50 to-amber-600/50 rounded-full px-3 py-1 border border-yellow-400/50">
-                            <span className="text-yellow-200 font-bold text-sm">
-                              {verse4Used}/3
-                            </span>
-                          </div>
-                          
-                          {verse4Used >= 3 && (
-                            <div className="flex items-center gap-1">
-                              <Crown className="w-4 h-4 text-yellow-400" />
-                              <span className="text-xs text-yellow-300 font-medium">Upgrade Pro</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Bottom glow effect */}
-                        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-yellow-400/60 to-transparent rounded-full blur-sm"></div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Artwork or Lock */}
                 <div className="flex justify-center">
                   {/* @ts-ignore - Lovable deployment compatibility */}
@@ -828,7 +778,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                       setShowSacredNotification(true);
                     }}
                     onNavigate={onNavigate}
-                    onVerse4Usage={verse.id === 4 ? handleVerse4Usage : undefined}
                   />
                 </div>
 
@@ -899,80 +848,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         reason={upgradeReason}
         userStats={userStats}
       />
-
-      {/* Verse 4 Usage Limit Modal */}
-      {showVerse4Limit && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-lg max-w-md w-full border border-yellow-500/30">
-            <div className="flex items-center justify-between p-4 border-b border-yellow-500/30">
-              <h2 className="text-lg font-semibold text-yellow-400 flex items-center gap-2">
-                <Crown className="w-5 h-5" />
-                Token Gratis Habis
-              </h2>
-              <Button 
-                onClick={() => setShowVerse4Limit(false)}
-                className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95"
-                size="sm"
-              >
-                <X className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-            <div className="p-6">
-              <div className="text-center space-y-4">
-                <div className="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-500/30 rounded-lg p-4">
-                  <Gem className="w-12 h-12 text-yellow-400 mx-auto mb-2" />
-                  <h3 className="font-semibold text-yellow-300 mb-2">Verse 4 - Prosperity Stream</h3>
-                  <p className="text-yellow-200 text-sm">
-                    Anda telah menggunakan 3x akses gratis untuk Verse 4
-                  </p>
-                </div>
-                
-                <div className="space-y-3">
-                  <p className="text-foreground text-center">
-                    Upgrade ke <strong className="text-yellow-400">Pro</strong> untuk mendapatkan:
-                  </p>
-                  
-                  <div className="text-left space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Infinity className="w-4 h-4 text-green-400" />
-                      <span>Unlimited akses ke semua Verse</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-purple-400" />
-                      <span>10+ Verse eksklusif Pro</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-blue-400" />
-                      <span>Prioritas update terbaru</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 border-t border-yellow-500/30 space-y-2">
-              <Button
-                onClick={() => {
-                  setShowVerse4Limit(false);
-                  onNavigate("payment");
-                }}
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold"
-                size="lg"
-              >
-                <Crown className="w-4 h-4 mr-2" />
-                Upgrade Pro untuk Unlimited
-              </Button>
-              <Button
-                onClick={() => setShowVerse4Limit(false)}
-                variant="outline"
-                className="w-full border-gray-600"
-                size="sm"
-              >
-                Tutup
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Terms Modal for Verse 8 */}
       {showTermsModal && (
