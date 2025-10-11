@@ -8,10 +8,10 @@ interface BottomNavigationProps {
 
 export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationProps) {
   const navItems = [
-    { id: "home", label: "Beranda", icon: Home },
-    { id: "chat", label: "Komunitas", icon: MessageCircle },
-    { id: "leaderboard", label: "Hall of Energy", icon: Trophy },
-    { id: "profile", label: "Profil", icon: User },
+    { id: "home", label: "Home", icon: Home },
+    { id: "chat", label: "Chat", icon: MessageCircle },
+    { id: "leaderboard", label: "Leaderboard", icon: Trophy },
+    { id: "profile", label: "Profile", icon: User },
   ];
 
   return (
