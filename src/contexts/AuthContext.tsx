@@ -69,14 +69,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const currentTokenRef = useRef<string | null>(null);
   const isConnectingRef = useRef<boolean>(false);
   const isRebuildingRef = useRef<boolean>(false);
-  
+
   // IDLE USER HANDLER - Page visibility tracking
   const lastActiveTimeRef = useRef<number>(Date.now());
   const wasIdleRef = useRef<boolean>(false);
   const retryCountRef = useRef<number>(0);
   const isIdleWakeReconnectRef = useRef<boolean>(false);
   const isIdleWakeRecoveryRef = useRef<boolean>(false);
-  const isPWALongIdleRef = useRef<boolean>(false);
   
   // Chat messages state
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
@@ -96,29 +95,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return isIdle;
   };
 
-  // PWA SPECIFIC: Handle long idle with quick retry then reload (iOS & Android)
-  const handlePWALongIdle = (context: string) => {
-    const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
-                  (window.navigator as any).standalone === true;
-
-    if (isPWA) {
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-      const platform = isAndroid ? 'Android' : isIOS ? 'iOS' : 'PWA';
-
-      console.log(`📱 ${platform} PWA - Long idle detected (${context}), will try quick reconnects first`);
-
-      // Set flag to indicate PWA long idle recovery mode
-      isPWALongIdleRef.current = true;
-
-      // Reset retry count so it starts with first jitter (0-100ms)
-      retryCountRef.current = 0;
-
-      return true; // Indicates PWA mode activated
-    }
-
-    return false; // Not PWA
-  };
 
   // UPDATE CHECKER - Function to check for PWA updates
   const checkForPWAUpdates = () => {
@@ -136,16 +112,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const getRetryDelay = () => {
     const retryCount = retryCountRef.current;
 
-    // Platform-specific delays for PWA long idle
-    let delays = [100, 500, 1000, 4000, 8000]; // Default
-
-    if (isPWALongIdleRef.current) {
-      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-      // iOS PWA: Skip 1000ms, go straight to 4000ms for third retry
-      if (isIOS) {
-        delays = [100, 500, 4000, 8000]; // 0-100ms, 0-500ms, 0-4000ms
-      }
-    }
+    // TRUE EXPONENTIAL BACKOFF: 100ms base, doubles each retry
+    // Pattern: 100 -> 500 -> 1000 -> 2000 -> 4000 -> 8000 -> 16000
+    const delays = [100, 500, 1000, 2000, 4000, 8000, 16000];
 
     const baseDelay = delays[Math.min(retryCount, delays.length - 1)];
 
@@ -431,7 +400,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           retryTimeoutRef.current = null;
         }
         retryCountRef.current = 0; // Reset on successful connection
-        isPWALongIdleRef.current = false; // Reset PWA flag on success
         chatChannelRef.current = channel;
         setChatChannel(channel); // Ensure state is updated
         setLoading(false);
@@ -532,9 +500,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('[RT] Genuine idle-wake scenario detected - flagging for long delay');
           isIdleWakeReconnectRef.current = true;
           isIdleWakeRecoveryRef.current = true; // 🛡️ RACE CONDITION FIX: Prevent duplicate rebuilds
-
-          // PWA SPECIFIC: Set flag for quick retry then reload on failure (iOS & Android)
-          handlePWALongIdle('visibility-based');
 
           // PWA & BROWSER FIX: Dispatch custom event to reload messages for all platforms
           const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
@@ -694,9 +659,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Check for PWA updates when user returns from long idle
         checkForPWAUpdates();
-
-        // PWA SPECIFIC: Set flag for quick retry then reload on failure (iOS & Android)
-        handlePWALongIdle('activity-based');
 
         // PWA & BROWSER FIX: Dispatch custom event to reload messages for all platforms
         const isPWA = window.matchMedia('(display-mode: standalone)').matches ||

@@ -47,11 +47,16 @@ export const useUpdateToast = () => {
       }
     }
 
-    // RefreshButton - Check Update button from Profile (iOS PWA) - Silent (no toast)
+    // CheckUpdateButton Profile Manual - Show toast for manual update check
     const wasUpdated = localStorage.getItem('app-updated-flag');
     if (wasUpdated === 'true') {
       localStorage.removeItem('app-updated-flag');
-      console.log('✅ App updated to latest version (silent update)');
+      setTimeout(() => {
+        toast({
+          title: "✓ Anda di versi terbaru",
+          description: "App berhasil diperbarui",
+        });
+      }, 1000);
     }
 
     // Silent automatic updates - no toast notifications
