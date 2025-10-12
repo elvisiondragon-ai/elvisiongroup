@@ -7,7 +7,7 @@ import position2 from "@/assets/tutorial-position-2.jpg";
 import position3 from "@/assets/tutorial-position-3.jpg";
 import position4 from "@/assets/tutorial-position-4.jpg";
 
-export function TutorialVideo() {
+export function Headphone() {
   const navigate = useNavigate();
 
   const positions = [

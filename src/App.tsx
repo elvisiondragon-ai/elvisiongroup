@@ -14,7 +14,7 @@ import { Auth } from "./pages/Auth";
 import { Signup } from "./pages/Signup";
 import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
-import { TutorialVideo } from "./pages/TutorialVideo";
+import { Headphone } from "./pages/Headphone";
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
@@ -103,9 +103,9 @@ const AppContent = () => {
                   path="/signup" 
                   element={loading ? null : (user ? <Index /> : <Signup />)} 
                 />
-                <Route 
-                  path="/tutorial" 
-                  element={loading ? null : (user ? <TutorialVideo /> : <Auth />)} 
+                <Route
+                  path="/tutorial"
+                  element={loading ? null : (user ? <Headphone /> : <Auth />)}
                 />
                 <Route
                   path="/reset-password"

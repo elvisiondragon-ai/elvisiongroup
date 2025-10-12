@@ -474,7 +474,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           >
             <span className="flex items-center gap-2">
               <Music className="w-4 h-4" />
-              {t('audioTherapy.readTutorial')}
+              Tutorial
             </span>
           </Button>
         </div>

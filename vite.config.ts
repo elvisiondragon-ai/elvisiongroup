@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
       },
       disable: mode === 'development',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf,eot}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf,eot,pdf}'],
         skipWaiting: false,
         clientsClaim: false,
         runtimeCaching: [
@@ -138,6 +138,9 @@ export default defineConfig(({ mode }) => ({
           const ext = info?.[info.length - 1];
           if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext || '')) {
             return `assets/[name]-[hash][extname]`;
+          }
+          if (/pdf/i.test(ext || '')) {
+            return `assets/[name][extname]`;
           }
           return `assets/[name]-[hash].[ext]`;
         },

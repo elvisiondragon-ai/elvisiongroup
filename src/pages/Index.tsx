@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AudioTherapy } from "./AudioTherapy";
 import { SpiritualJournal } from "./SpiritualJournal";
 import { MeditationSessions } from "./MeditationSessions";
-import { TutorialVideo } from "./TutorialVideo";
+import { Headphone } from "./Headphone";
 import { IgnisQuest } from "./IgnisQuest";
 import { Payment } from "./Payment";
 import { JournalAnalytics } from "@/components/JournalAnalytics";
@@ -187,7 +187,7 @@ const Index = () => {
       case "meditation-sessions":
         return <MeditationSessions onNavigate={setActiveTab} />;
       case "tutorial":
-        return <TutorialVideo />;
+        return <Headphone />;
       case "ignis-quest":
         return <IgnisQuest onNavigate={setActiveTab} />;
       case "payment":

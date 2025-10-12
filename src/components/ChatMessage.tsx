@@ -38,19 +38,19 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
   };
 
   const handleDelete = async () => {
-    // Make message disappear from UI immediately with cool slide left animation
+    // Make message disappear from UI with slide left animation
     const messageElement = document.querySelector(`[data-message-id="${id}"]`);
     if (messageElement) {
       messageElement.style.opacity = '0';
       messageElement.style.transform = 'translateX(-100%)';
-      messageElement.style.transition = 'all 0.3s ease-out';
-      
+      messageElement.style.transition = 'all 0.5s ease-out'; // 500ms
+
       // Remove from DOM after animation
       setTimeout(() => {
         if (onDelete) {
           onDelete(id);
         }
-      }, 300);
+      }, 500); // 500ms
     } else {
       // Fallback if element not found
       if (onDelete) {

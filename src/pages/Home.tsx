@@ -21,6 +21,7 @@ import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
 import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity, Heart, Smile, Apple, Gem, HelpCircle, Crown, CircleUser, Sun, DollarSign } from "lucide-react";
 import { AdminBadge } from "@/components/AdminBadge";
+import { TutorialButton } from "@/components/TutorialButton";
 import { cn } from "@/lib/utils";
 import heroImage from "@/assets/hero-meditation.jpg";
 import faviconImage from "@/assets/favicon.png";
@@ -68,8 +69,6 @@ export function Home({
   const { preloadAudioFiles, getCacheStats } = useAudioCache();
   const { toast } = useToast();
   const [showTutorialModal, setShowTutorialModal] = useState(false);
-  const [showPlayButton, setShowPlayButton] = useState(true);
-  const [tutorialThumbnailGenerated, setTutorialThumbnailGenerated] = useState(false);
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<{url: string, type: 'video' | 'image', title: string} | null>(null);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -283,8 +282,8 @@ export function Home({
   }];
 
   const tutorialFeature = {
-    title: "Cara Menggunakan Ecosystem",
-    description: "OKTOBER 2025",
+    title: "Tutorial",
+    description: "",
     icon: Play,
     color: "text-blue-500",
     key: "tutorial"
@@ -1219,186 +1218,12 @@ export function Home({
           </div>
         </Card>
       </div>
-      
-      {/* Tutorial Video Modal */}
-      {showTutorialModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-xl font-semibold">Cara menggunakan Ecosystem</h2>
-              <Button 
-                onClick={() => {
-                  setShowTutorialModal(false);
-                  setShowPlayButton(true);
-                  setTutorialThumbnailGenerated(false);
-                }}
-                className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
-                size="sm"
-              >
-                <X className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-              {/* Visual Step-by-Step Guide */}
-              <div className="mb-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-lg p-4 space-y-4 border border-indigo-200/50 dark:border-indigo-800/50">
-                <h3 className="text-lg font-medium text-center text-indigo-800 dark:text-indigo-200 mb-4">Langkah-langkah Menggunakan Ecosystem</h3>
-                
-                <div className="grid grid-cols-1 gap-3">
-                  {/* Step 1: Verse of eL Vision */}
-                  <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-lg border border-yellow-200/50 dark:border-yellow-800/50">
-                    <div className="flex-shrink-0">
-                      <div className="p-2 rounded-full bg-gradient-to-r from-yellow-600 via-amber-500 to-yellow-400 shadow-lg shadow-yellow-500/30">
-                        <Sparkles className="w-5 h-5 text-white animate-pulse" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-yellow-800 dark:text-yellow-200">1. Dengar Verse of eL Vision</h4>
-                      <p className="text-lg text-yellow-700 dark:text-yellow-300">Mulai dengan mendengarkan audio frequency</p>
-                    </div>
-                    <div className="text-2xl">🎧</div>
-                  </div>
 
-                  {/* Arrow */}
-                  <div className="text-center text-gray-400">
-                    <div className="text-2xl">↓</div>
-                  </div>
-
-                  {/* Step 2: Jurnal Spiritual */}
-                  <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
-                    <div className="flex-shrink-0">
-                      <div className="p-2 rounded-full bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-400 shadow-xl shadow-amber-500/50 border-2 border-amber-300/30">
-                        <Scroll className="w-5 h-5 text-white drop-shadow-lg" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-amber-800 dark:text-amber-200">2. Tulis Jurnal Spiritual</h4>
-                      <p className="text-lg text-amber-700 dark:text-amber-300">Refleksikan perjalanan spiritual Anda → Lepaskan hal yang sedang kamu kejar agar mudah tercapai setelah dengar Audio</p>
-                    </div>
-                    <div className="text-2xl">📝</div>
-                  </div>
-
-                  {/* Arrow */}
-                  <div className="text-center text-gray-400">
-                    <div className="text-2xl">↓</div>
-                  </div>
-
-                  {/* Step 3: Elite Habit */}
-                  <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-lg border border-emerald-200/50 dark:border-emerald-800/50">
-                    <div className="flex-shrink-0">
-                      <div className="p-2 rounded-full bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-400 shadow-xl shadow-emerald-500/50 border-2 border-emerald-300/30">
-                        <Activity className="w-5 h-5 text-white drop-shadow-lg animate-pulse" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-emerald-800 dark:text-emerald-200">3. Lakukan Elite Habit</h4>
-                      <p className="text-lg text-emerald-700 dark:text-emerald-300">Olahraga dengan mindfulness melatih ketenangan dan mempercepat pencapaian</p>
-                    </div>
-                    <div className="text-2xl">💪</div>
-                  </div>
-
-                  {/* After 3 days notice */}
-                  <div className="text-center py-2">
-                    <div className="inline-block bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/50 dark:to-indigo-900/50 px-4 py-2 rounded-full border border-purple-200 dark:border-purple-700">
-                      <span className="text-lg font-medium text-purple-800 dark:text-purple-200">⏰ Setelah 3 hari rutin...</span>
-                    </div>
-                  </div>
-
-                  {/* Arrow */}
-                  <div className="text-center text-gray-400">
-                    <div className="text-2xl">↓</div>
-                  </div>
-
-                  {/* Step 4: Personal Analytics */}
-                  <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-lg border border-violet-200/50 dark:border-violet-800/50">
-                    <div className="flex-shrink-0">
-                      <div className="p-2 rounded-full bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 shadow-2xl shadow-violet-500/60 border-2 border-violet-400/40 animate-pulse">
-                        <BarChart3 className="w-5 h-5 text-white drop-shadow-2xl animate-pulse" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-violet-800 dark:text-violet-200">4. Click Personal Analytics</h4>
-                      <p className="text-lg text-violet-700 dark:text-violet-300">Dapatkan Powerful Insight dari Analytics tentang jati diri kamu dan solusinya</p>
-                    </div>
-                    <div className="text-2xl">🤯</div>
-                  </div>
-
-                  {/* Result */}
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 p-4 rounded-lg border-2 border-green-200 dark:border-green-800 text-center">
-                    <div className="text-2xl mb-2">✨</div>
-                    <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">Anda akan mendapat jawaban mencengangkan tentang diri Anda!</h4>
-                    <p className="text-lg text-green-700 dark:text-green-300 italic">
-                      *Personal Analytics semakin efektif jika semakin banyak total Verse, total Jurnal Spiritual, dan total Elite Habit
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Divider */}
-              <div className="border-t border-gray-200 dark:border-gray-700 mb-6"></div>
-              
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/50 dark:to-indigo-950/50 p-6 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
-                <div className="text-center">
-                  <h3 className="text-lg font-medium text-blue-800 dark:text-blue-200">Video Tutorial</h3>
-                  <p className="text-lg text-blue-600 dark:text-blue-300">Tonton video lengkap untuk panduan detail</p>
-                </div>
-              </div>
-              
-              {/* Arrow pointing down to video */}
-              <div className="text-center text-gray-400 mb-4">
-                <div className="text-4xl font-black">⬇</div>
-              </div>
-              
-              <div className="relative">
-                <video 
-                  className="w-full rounded-lg"
-                  controls={!showPlayButton}
-                  preload="metadata"
-                  crossOrigin="anonymous"
-                  onPlay={() => setShowPlayButton(false)}
-                  onCanPlay={(e) => {
-                    if (!tutorialThumbnailGenerated) {
-                      const video = e.target as HTMLVideoElement;
-                      video.currentTime = 0;
-                      setTutorialThumbnailGenerated(true);
-                    }
-                  }}
-                  onSeeked={(e) => {
-                    const video = e.target as HTMLVideoElement;
-                    if (tutorialThumbnailGenerated && video.currentTime >= 0) {
-                      video.pause();
-                    }
-                  }}
-                  onError={(e) => {
-                    console.error('Video error:', e);
-                    setShowPlayButton(true);
-                  }}
-                  style={{ aspectRatio: '9/16', maxHeight: '70vh' }}
-                >
-                  <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/reactmove.mp4" type="video/mp4" />
-                  Browser Anda tidak mendukung video HTML5.
-                </video>
-                
-                {/* Overlay Play Button */}
-                {showPlayButton && (
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer group"
-                    onClick={(e) => {
-                      const video = e.currentTarget.previousElementSibling as HTMLVideoElement;
-                      video.currentTime = 0; // Start from beginning
-                      video.play();
-                      setShowPlayButton(false);
-                    }}
-                  >
-                    <div className="bg-black/50 backdrop-blur-sm rounded-full p-6 group-hover:bg-black/70 transition-all duration-300">
-                      <Play className="w-16 h-16 text-white group-hover:scale-110 transition-transform duration-300" fill="currentColor" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Tutorial Modal Component */}
+      <TutorialButton
+        isOpen={showTutorialModal}
+        onClose={() => setShowTutorialModal(false)}
+      />
 
       {/* Pengalaman Anggota Modal */}
       {showMediaModal && (
