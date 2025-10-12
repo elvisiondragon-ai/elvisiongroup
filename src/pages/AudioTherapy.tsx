@@ -14,6 +14,7 @@ import { VerseAudioCard } from "@/components/VerseAudioCard";
 import { useProtectedAudio } from "@/contexts/AudioContext"; // //Nevertouch Audio-cache
 import { SacredFocusNotification } from "@/components/SacredFocusNotification";
 import { InvitePro } from "@/components/InvitePro";
+import { TutorialButton } from "@/components/TutorialButton";
 // Removed slow UserProfileContext - now using fast auth
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/contexts/UserProfileContext';
@@ -91,6 +92,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [currentVerseName, setCurrentVerseName] = useState<string>("");
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<string>("unlock");
+  const [showTutorialModal, setShowTutorialModal] = useState(false);
   const [userStats, setUserStats] = useState<any>(null);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [verse4Used, setVerse4Used] = useState(0);
@@ -468,9 +470,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         <div className="flex justify-center mt-6">
           <Button
             className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white font-semibold px-8 py-3 rounded-full shadow-lg shadow-primary/40 transform hover:scale-105 transition-all duration-300 border border-white/20"
-            onClick={() => {
-              onNavigate('tutorial');
-            }}
+            onClick={() => setShowTutorialModal(true)}
           >
             <span className="flex items-center gap-2">
               <Music className="w-4 h-4" />
@@ -847,6 +847,12 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         onNavigateToPayment={navigateToPayment}
         reason={upgradeReason}
         userStats={userStats}
+      />
+
+      {/* Tutorial Modal */}
+      <TutorialButton 
+        isOpen={showTutorialModal} 
+        onClose={() => setShowTutorialModal(false)} 
       />
 
       {/* Terms Modal for Verse 8 */}

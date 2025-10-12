@@ -9,20 +9,14 @@ interface TutorialButtonProps {
 
 export function TutorialButton({ isOpen, onClose }: TutorialButtonProps) {
   const [activeView, setActiveView] = useState<"menu" | "workflow" | "video" | "howtouse">("menu");
-  const [showPlayButton, setShowPlayButton] = useState(true);
-  const [tutorialThumbnailGenerated, setTutorialThumbnailGenerated] = useState(false);
 
   const handleClose = () => {
     onClose();
-    setShowPlayButton(true);
-    setTutorialThumbnailGenerated(false);
     setActiveView("menu");
   };
 
   const handleBack = () => {
     setActiveView("menu");
-    setShowPlayButton(true);
-    setTutorialThumbnailGenerated(false);
   };
 
   if (!isOpen) return null;
@@ -208,46 +202,14 @@ export function TutorialButton({ isOpen, onClose }: TutorialButtonProps) {
           {/* Video Content */}
           {activeView === "video" && (
             <div>
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/50 dark:to-indigo-950/50 p-6 rounded-lg border border-blue-200 dark:border-blue-800 mb-6">
-                <div className="text-center">
-                  <h3 className="text-lg font-medium text-blue-800 dark:text-blue-200">
-                    Video Tutorial
-                  </h3>
-                  <p className="text-lg text-blue-600 dark:text-blue-300">
-                    Tonton video lengkap untuk panduan detail
-                  </p>
-                </div>
-              </div>
 
-              {/* Arrow pointing down to video */}
-              <div className="text-center text-gray-400 mb-4">
-                <div className="text-4xl font-black">⬇</div>
-              </div>
 
               <div className="relative">
                 <video
                   className="w-full rounded-lg"
-                  controls={!showPlayButton}
+                  controls
                   preload="metadata"
                   crossOrigin="anonymous"
-                  onPlay={() => setShowPlayButton(false)}
-                  onCanPlay={(e) => {
-                    if (!tutorialThumbnailGenerated) {
-                      const video = e.target as HTMLVideoElement;
-                      video.currentTime = 0;
-                      setTutorialThumbnailGenerated(true);
-                    }
-                  }}
-                  onSeeked={(e) => {
-                    const video = e.target as HTMLVideoElement;
-                    if (tutorialThumbnailGenerated && video.currentTime >= 0) {
-                      video.pause();
-                    }
-                  }}
-                  onError={(e) => {
-                    console.error("Video error:", e);
-                    setShowPlayButton(true);
-                  }}
                   style={{ aspectRatio: "9/16", maxHeight: "70vh" }}
                 >
                   <source
@@ -256,26 +218,6 @@ export function TutorialButton({ isOpen, onClose }: TutorialButtonProps) {
                   />
                   Browser Anda tidak mendukung video HTML5.
                 </video>
-
-                {/* Overlay Play Button */}
-                {showPlayButton && (
-                  <div
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer group"
-                    onClick={(e) => {
-                      const video = e.currentTarget.previousElementSibling as HTMLVideoElement;
-                      video.currentTime = 0; // Start from beginning
-                      video.play();
-                      setShowPlayButton(false);
-                    }}
-                  >
-                    <div className="bg-black/50 backdrop-blur-sm rounded-full p-6 group-hover:bg-black/70 transition-all duration-300">
-                      <Play
-                        className="w-16 h-16 text-white group-hover:scale-110 transition-transform duration-300"
-                        fill="currentColor"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           )}

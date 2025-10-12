@@ -136,8 +136,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const getRetryDelay = () => {
     const retryCount = retryCountRef.current;
 
-    // 🚀 OPTIMIZED FULL JITTER: Progression: ~0-100ms, ~0-500ms, ~0-1000ms, ~0-4000ms, ~0-8000ms
-    const delays = [100, 500, 1000, 4000, 8000];
+    // Platform-specific delays for PWA long idle
+    let delays = [100, 500, 1000, 4000, 8000]; // Default
+
+    if (isPWALongIdleRef.current) {
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      // iOS PWA: Skip 1000ms, go straight to 4000ms for third retry
+      if (isIOS) {
+        delays = [100, 500, 4000, 8000]; // 0-100ms, 0-500ms, 0-4000ms
+      }
+    }
+
     const baseDelay = delays[Math.min(retryCount, delays.length - 1)];
 
     // Full jitter: randomize between 0 and baseDelay to spread retries
@@ -431,14 +440,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('🩵 WebSocket Scheduling reconnect after timeout/close...');
         isRebuildingRef.current = false; // ⚠️ Reset flag to allow retry
 
-        // PWA (iOS & Android): After 2 failed quick retries, force reload
-        if (isPWALongIdleRef.current && retryCountRef.current >= 2) {
-          console.log('📱 PWA - Quick retries failed (0-100ms, 0-500ms), forcing reload');
-          localStorage.setItem('refresh-redirect-to-chat', 'true');
-          window.location.reload();
-          return;
-        }
-
         // Retry with idle-aware backoff
         if (!retryTimeoutRef.current) {
           const delay = getRetryDelay();
@@ -456,14 +457,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (status === 'CHANNEL_ERROR' || status === 'CONNECTION_ERROR' || status === 'FAILED') {
         console.log('🔥🐢☀️ WebSocket Transition:', status);
         isRebuildingRef.current = false; // ⚠️ Reset flag to allow retry
-
-        // PWA (iOS & Android): After 2 failed quick retries, force reload
-        if (isPWALongIdleRef.current && retryCountRef.current >= 2) {
-          console.log('📱 PWA - Quick retries failed (0-100ms, 0-500ms), forcing reload');
-          localStorage.setItem('refresh-redirect-to-chat', 'true');
-          window.location.reload();
-          return;
-        }
 
         // Retry failed connections with idle detection
         if (!retryTimeoutRef.current) {

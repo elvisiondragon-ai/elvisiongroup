@@ -7,23 +7,37 @@ export const AppLoader = ({ children }: { children: React.ReactNode }) => {
     return (
       <div style={{
         minHeight: '100vh',
-        background: '#0F0F23',
+        background: '#0A0A0F',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        flexDirection: 'column'
       }}>
+        <img
+          src="/favicon.png"
+          alt="Loading..."
+          style={{
+            width: '150px',
+            height: '150px',
+            animation: 'pulse 2s infinite'
+          }}
+        />
         <div style={{
-          width: '32px',
-          height: '32px',
-          border: '2px solid #00D9FF',
-          borderTop: '2px solid transparent',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }}></div>
+          marginTop: '20px',
+          fontSize: '18px',
+          background: 'linear-gradient(to right, #fb923c, #facc15)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          fontWeight: '600',
+          textShadow: '0 0 15px rgba(251, 146, 60, 0.4)'
+        }}>
+          🚀 Initiate Ecosystem..
+        </div>
         <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
           }
         `}</style>
       </div>

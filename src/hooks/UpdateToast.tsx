@@ -18,30 +18,21 @@ export const useUpdateToast = () => {
 
   // Check for success flag after refresh + show pending updates + SW recovery success
   useEffect(() => {
-    // Android aggressive clearing success
+    // Android aggressive clearing success - Silent (no toast)
     const androidCleared = localStorage.getItem('android-sw-cleared');
     if (androidCleared === 'true') {
       localStorage.removeItem('android-sw-cleared');
-      setTimeout(() => {
-        toast({
-          title: "✅ Update Complete",
-          description: "Cache cleared, app refreshed",
-          duration: 3000,
-        });
-      }, 1000);
+      console.log('✅ Android cache cleared and app refreshed (silent update)');
     }
 
+    // Update success - Silent (no toast)
     const updateSuccess = localStorage.getItem('update-success-flag');
     if (updateSuccess === 'true') {
       localStorage.removeItem('update-success-flag');
-      toast({
-        title: "Updated ☀️",
-        duration: 3000,
-      });
+      console.log('✅ Update completed successfully (silent update)');
     }
 
-
-    // Show success message if coming back from SW update/recovery
+    // SW update/recovery success - Silent (no toast)
     const swUpdated = localStorage.getItem('sw-update-success');
     if (swUpdated === 'true') {
       localStorage.removeItem('sw-update-success');
@@ -50,39 +41,20 @@ export const useUpdateToast = () => {
       const sessionWarning = localStorage.getItem('update-session-warning');
       if (sessionWarning === 'true') {
         localStorage.removeItem('update-session-warning');
-
-        setTimeout(() => {
-          console.log('⚠️ SW Update completed with session warning');
-          toast({
-            title: "Update Complete",
-            description: "Please check if you're still logged in",
-            duration: 4000,
-          });
-        }, 1000);
+        console.log('⚠️ SW Update completed with session warning (silent update)');
       } else {
-        setTimeout(() => {
-          console.log('✅ SW Update completed successfully');
-          toast({
-            title: "Success Update",
-            duration: 2000,
-          });
-        }, 1000);
+        console.log('✅ SW Update completed successfully (silent update)');
       }
     }
 
-    // RefreshButton Toast - Check Update button from Profile (iOS PWA)
+    // RefreshButton - Check Update button from Profile (iOS PWA) - Silent (no toast)
     const wasUpdated = localStorage.getItem('app-updated-flag');
     if (wasUpdated === 'true') {
       localStorage.removeItem('app-updated-flag');
-      setTimeout(() => {
-        toast({
-          title: "✓ Anda di versi terbaru",
-          description: "App berhasil diperbarui",
-        });
-      }, 1000);
+      console.log('✅ App updated to latest version (silent update)');
     }
 
-    // DON'T show toast on manual refresh - only when onNeedRefresh triggers it
+    // Silent automatic updates - no toast notifications
   }, [toast]);
 
   // Function to show update toast with iOS-specific handling
