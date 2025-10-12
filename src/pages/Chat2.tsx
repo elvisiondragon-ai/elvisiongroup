@@ -69,6 +69,11 @@ export function Chat2({ onNavigate }: Chat2Props) {
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // Android detection
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  // PWA detection - check if app is installed to home screen
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                (window.navigator as any).standalone === true;
 
   const { toast } = useToast();
   const { user, userProfile } = useUserProfile();
@@ -623,7 +628,7 @@ export function Chat2({ onNavigate }: Chat2Props) {
         style={{
           position: 'absolute',
           top: 0,
-          bottom: '160px',
+          bottom: (isAndroid && isPWA) ? '150px' : '170px',
           left: 0,
           right: 0,
           paddingTop: (isIOS && isPWA) ? 'env(safe-area-inset-top)' : '0px',

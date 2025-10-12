@@ -107,24 +107,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // IDLE USER HANDLER - Retry delay function with jitter
+  // IDLE USER HANDLER - Retry delay function with exponential backoff + jitter
   const getRetryDelay = () => {
     const retryCount = retryCountRef.current;
 
-    // 🚀 OPTIMIZED: Progression 0-100ms, 0-500ms, 0-2000ms (capped)
-    let maxDelay;
-    if (retryCount === 0) {
-      maxDelay = 100;
-    } else if (retryCount === 1) {
-      maxDelay = 500;
-    } else {
-      maxDelay = 2000;
-    }
+    // 🚀 OPTIMIZED FULL JITTER: Progression: ~0-100ms, ~0-500ms, ~0-1000ms, ~0-4000ms, ~0-8000ms
+    const delays = [100, 500, 1000, 4000, 8000];
+    const baseDelay = delays[Math.min(retryCount, delays.length - 1)];
 
-    // Full jitter: randomize between 0 and maxDelay to spread retries
-    const delay = Math.floor(maxDelay * Math.random());
+    // Full jitter: randomize between 0 and baseDelay to spread retries
+    const delay = Math.floor(baseDelay * Math.random());
 
-    console.log(`[RT] Retry attempt #${retryCount + 1}. Jittered backoff: ${delay}ms (max: ${maxDelay}ms)`);
+    console.log(`[RT] Retry attempt #${retryCount + 1}. Jittered backoff: ${delay}ms (max: ${baseDelay}ms)`);
     return delay;
   };
 
