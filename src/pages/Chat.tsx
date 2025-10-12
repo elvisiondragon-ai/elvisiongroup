@@ -7,10 +7,8 @@ import { ChatMessage } from "@/components/ChatMessage";
 import { Send, Users, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useXPSystem } from "@/hooks/useXPSystem";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTranslation } from "react-i18next";
 
 interface ChatMessageData {
   id: string;
@@ -21,7 +19,6 @@ interface ChatMessageData {
   is_admin?: boolean;
   message: string;
   created_at: string;
-  translatedMessage?: string;
   streak_days?: number;
   subscription_type?: string | null;
   avatar_url?: string;
@@ -32,15 +29,14 @@ interface ChatProps {
 }
 
 // Memoized message list to prevent re-renders on every keystroke
-const MessageList = memo(({ messages, language, userId, onDelete }: {
+const MessageList = memo(({ messages, userId, onDelete }: {
   messages: ChatMessageData[];
-  language: string;
   userId: string | null;
   onDelete: (id: string) => void;
 }) => {
   return (
-    <div className="divide-y divide-border" style={{ display: 'flex', flexDirection: 'column-reverse' }}>
-      {messages.slice().reverse().map((msg) => (
+    <div className="divide-y divide-border">
+      {messages.map((msg) => (
         <ChatMessage
           key={msg.id}
           id={msg.id}
@@ -54,7 +50,7 @@ const MessageList = memo(({ messages, language, userId, onDelete }: {
             subscriptionType: msg.subscription_type || undefined,
             avatar: msg.avatar_url || ""
           }}
-          message={language === 'en' && msg.translatedMessage ? msg.translatedMessage : msg.message}
+          message={msg.message}
           timestamp={new Date(msg.created_at)}
           currentUserId={userId}
           onDelete={onDelete}
@@ -69,7 +65,6 @@ MessageList.displayName = 'MessageList';
 export function Chat({ onNavigate }: ChatProps) {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [showTranslated, setShowTranslated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   
@@ -83,10 +78,8 @@ export function Chat({ onNavigate }: ChatProps) {
   const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                 (window.navigator as any).standalone === true;
   const { toast } = useToast();
-  const { awardXP } = useXPSystem();
-  const { user, userProfile, handleButtonTimeout } = useUserProfile();
+  const { user, userProfile } = useUserProfile();
   const { userId, chatChannel, isPro, proStatus, messages, setMessages, addMessage, removeMessage, broadcastMessage, broadcastDelete } = useAuth();
-  const { i18n, t } = useTranslation();
 
   useEffect(() => {
     if (proStatus) {
@@ -501,156 +494,23 @@ export function Chat({ onNavigate }: ChatProps) {
   // Enhanced input validation function
   const validateMessage = (input: string): string | null => {
     const trimmed = input.trim();
-    
+
     // Length validation
     if (trimmed.length === 0) return "Message cannot be empty";
     if (trimmed.length > 500) return "Message must be 500 characters or less";
-    
+
     // Basic sanitization - remove potentially harmful characters
     const sanitized = trimmed
       .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remove script tags
       .replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/javascript:/gi, '') // Remove javascript: URLs
       .replace(/on\w+\s*=/gi, ''); // Remove event handlers
-    
+
     // Check for excessive repetition (spam detection)
     const repeated = /(.)\1{10,}/.test(sanitized);
     if (repeated) return "Message contains excessive repeated characters";
-    
+
     return null;
-  };
-
-  // Auto-translate when language changes to English
-  useEffect(() => {
-    if (i18n.language === 'en' && messages.length > 0) {
-      translateAllMessages();
-    } else if (i18n.language === 'id') {
-      // Show original messages when switching back to Indonesian
-      setShowTranslated(false);
-    }
-  }, [i18n.language, messages.length]);
-
-  // Translate a single message
-  const translateSingleMessage = async (msg: ChatMessageData): Promise<ChatMessageData> => {
-    try {
-      const translatedText = await translateText(msg.message);
-      return { ...msg, translatedMessage: translatedText };
-    } catch (error) {
-      console.error('Translation error for single message:', error);
-      return msg;
-    }
-  };
-
-  const translateAllMessages = async () => {
-    
-    
-    try {
-      const messagesToTranslate = messages.filter(msg => !msg.translatedMessage);
-      
-      for (const msg of messagesToTranslate) {
-        const translatedText = await translateText(msg.message);
-        
-        // Update the message with translation
-        setMessages(current => 
-          current.map(m => 
-            m.id === msg.id 
-              ? { ...m, translatedMessage: translatedText }
-              : m
-          )
-        );
-      }
-      
-      setShowTranslated(true);
-    } catch (error) {
-      console.error('Translation error:', error);
-      toast({
-        title: "Translation Error",
-        description: "Failed to translate some messages",
-        variant: "destructive"
-      });
-    } finally {
-    }
-  };
-
-  const translateMessages = async () => {
-    await translateAllMessages();
-    toast({
-      title: "Translation Complete",
-      description: "All messages have been translated to English",
-    });
-  };
-
-  const changeLanguage = async (lang: string) => {
-    i18n.changeLanguage(lang);
-    localStorage.setItem('preferred_language', lang);
-    
-    if (lang === 'en') {
-      await translateAllMessages();
-      toast({
-        title: "Language Changed",
-        description: "All messages translated to English",
-      });
-    } else {
-      setShowTranslated(false);
-      toast({
-        title: "Bahasa Diubah", 
-        description: "Semua pesan ditampilkan dalam bahasa asli",
-      });
-    }
-  };
-
-  // Mock translation function - in real app, use Google Translate API or similar
-  const translateText = async (text: string): Promise<string> => {
-    // Simple mock translations for demo purposes
-    const translations: { [key: string]: string } = {
-      'asik banget apknya': 'this app is really cool',
-      'bener lebih mudah denger audionya ada historynya lagi': 'true, it\'s easier to listen to the audio and it has history too',
-      'iya jadi betah diam di aplikasi': 'yes, I feel comfortable staying in the app',
-      'wah iya nih ada sistem game juga': 'wow yes, there\'s also a game system',
-      'bener mas anto, seru ngejar poinnya hehe': 'true mas anto, it\'s fun chasing the points hehe',
-      'Peringkatku naik terus nih, jadi semangat': 'My rank keeps rising, it makes me motivated',
-      'fitur history itu yg paling ngebantu aku sih': 'the history feature is what helps me the most',
-      'setuju, ga perlu cari ulang audio yg kemarin didengerin': 'agreed, no need to search again for yesterday\'s audio',
-      'Tampilannya juga bersih, ga ribet, enak diliat': 'The interface is also clean, not complicated, nice to look at',
-      'baru download kemarin, langsung sukaa': 'just downloaded yesterday, immediately loved it',
-      'selamat datang mba dewi, dijamin nagih wkwk': 'welcome mba dewi, guaranteed addictive lol',
-      'notifikasinya juga ga ganggu, pas banget timingnya': 'the notifications don\'t bother either, perfect timing',
-      'Betul, ngingetin pas ada konten baru aja': 'Right, reminds only when there\'s new content',
-      'eh ada yg udah dapet badge \'Master\' belum?': 'hey, has anyone got the \'Master\' badge yet?',
-      'aku baru dapet yg \'Expert\', susah bgt yg master': 'I just got the \'Expert\' one, master is so hard',
-      'Master harus selesain 100 audio tanpa skip kalo gasalah': 'Master requires completing 100 audios without skipping if I\'m not wrong',
-      'wih mantap, kejar ah': 'wow great, let\'s chase it',
-      'Suka bgt sama playlistnya, bisa bikin sendiri': 'Love the playlists so much, can create our own',
-      'iyaa, aku kelompokin per topik jadi gampang belajarnya': 'yes, I group them by topic so it\'s easy to learn',
-      'Adminnya juga responsif, kemarin aku lapor bug cepet ditanggepin': 'The admin is also responsive, yesterday I reported a bug and it was quickly handled',
-      'dua jempol buat developernya': 'two thumbs up for the developer',
-      'Kualitas audionya jernih, pake headset makin mantap': 'The audio quality is clear, using headphones makes it even better',
-      'bener, ga pecah suaranya': 'true, the sound doesn\'t break',
-      'aku malah suka dengerin sambil masak, jadi ga bosen': 'I even like to listen while cooking, so I don\'t get bored',
-      'ide bagus tuh mba sari, patut dicoba': 'that\'s a good idea mba sari, worth trying',
-      'Gamenya itu loh, simpel tapi bikin penasaran': 'The game is like that, simple but makes you curious',
-      'bener, ga sadar udah main setengah jam sendiri': 'true, didn\'t realize I\'ve been playing for half an hour alone',
-      'Poinnya bisa dituker ga sih?': 'Can the points be exchanged?',
-      'Belum bisa kak Indah, tapi ditunggu aja updatenya ya :)': 'Not yet kak Indah, but just wait for the update :)',
-      'wih adminnya muncul': 'wow the admin appeared',
-      'siap min, ditunggu fitur barunya': 'ready min, waiting for the new features',
-      'Semoga ada fitur dark mode ya min kedepannya': 'Hope there will be a dark mode feature in the future min',
-      'setuju bgt, biar hemat batre juga': 'totally agree, to save battery too',
-      'Apk ini ringan banget, ga bikin hp lemot': 'This app is very light, doesn\'t make the phone slow',
-      'iya di hp kentangku juga lancar jaya': 'yes on my potato phone it also runs smoothly',
-      'Gokil, ini aplikasi yg kucari selama ini': 'Crazy, this is the app I\'ve been looking for all this time',
-      'Rekomen ke temen2 kantor, pada suka semua': 'Recommended to office friends, everyone likes it',
-      'Komunitasnya juga asik, jadi nambah temen': 'The community is also fun, makes new friends',
-      'bener kang, pada ramah semua disini': 'true kang, everyone is friendly here',
-      'pokoknya aplot konten baru terus ya min, jangan kasih kendor': 'anyway keep uploading new content min, don\'t slack off',
-      'setiap hari pasti buka aplikasi ini, udah jadi kebiasaan': 'definitely open this app every day, it\'s become a habit',
-      'sama, pagi2 dengerin audio disini bikin semangat kerja': 'same, listening to audio here in the morning makes me motivated to work',
-      'mantap komunitas ini makin rame ya, semangat terus semua!': 'great this community is getting livelier, keep it up everyone!',
-      'Halo semua! Baru aja naik level 3 nih, seneng banget!': 'Hello everyone! Just reached level 3, so happy!'
-    };
-    
-    // Return translation if exists, otherwise return original text
-    return translations[text.toLowerCase()] || text;
   };
 
   const handleSendMessage = async () => {
@@ -928,7 +788,6 @@ export function Chat({ onNavigate }: ChatProps) {
         >
         <MessageList
           messages={messages}
-          language={i18n.language}
           userId={user?.id || null}
           onDelete={handleDeleteMessage}
         />

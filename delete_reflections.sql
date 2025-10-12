@@ -1,0 +1,1 @@
+DELETE FROM reflections WHERE user_email = 'srcindocs@gmail.com';
