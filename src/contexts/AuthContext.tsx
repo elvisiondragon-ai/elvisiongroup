@@ -505,138 +505,142 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                         (window.navigator as any).standalone === true;
 
-          // OPTIMIZATION: Check channel state first before expensive refresh
-          console.log(`🔍 Current channel status: ${channelStatus}`);
+          // OPTIMIZATION: Add a 1-second delay to allow network to stabilize after wake
+          console.log('[RT] Delaying recovery for 1s to allow network to stabilize.');
+          setTimeout(() => {
+            // OPTIMIZATION: Check channel state first before expensive refresh
+            console.log(`🔍 Current channel status: ${channelStatus}`);
 
-          if (channelStatus === 'SUBSCRIBED') {
-            // FAST PATH: Channel still connected, just sync existing token
-            console.log('✅ Channel still SUBSCRIBED, using existing token (no API call)');
+            if (channelStatus === 'SUBSCRIBED') {
+              // FAST PATH: Channel still connected, just sync existing token
+              console.log('✅ Channel still SUBSCRIBED, using existing token (no API call)');
 
+              supabase.auth.getSession().then(async ({ data: { session } }) => {
+                if (session) {
+                  // Check token expiry (5 min buffer)
+                  const tokenExpiresAt = session.expires_at || 0;
+                  const timeUntilExpiry = (tokenExpiresAt * 1000) - Date.now();
+                  const hasValidToken = timeUntilExpiry > 300000; // 5 minutes buffer
+
+                  if (hasValidToken) {
+                    console.log(`✅ Token valid for ${Math.floor(timeUntilExpiry / 60000)} more minutes, syncing with realtime`);
+
+                    // Just sync existing token - NO API CALL!
+                    supabase.realtime.setAuth(session.access_token);
+
+                    // Dispatch reload event for messages
+                    console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (fast path)`);
+                    window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
+                      detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
+                    }));
+
+                    // 🛡️ RACE CONDITION FIX: Reset flag for fast path too
+                    isIdleWakeRecoveryRef.current = false;
+                    console.log('✅ Idle-wake recovery flag reset (fast path)');
+
+                    return; // Done! No rebuild needed
+                  } else {
+                    console.log('⚠️ Token expiring soon, will refresh');
+                    // Token expiring, fall through to SLOW PATH by triggering rebuild
+                    // This will be handled by the else block below
+                  }
+                }
+              });
+            } else {
+              // SLOW PATH: Channel not subscribed or token expiry suspected
+              console.log('‼️⛔️⛔️ Channel not SUBSCRIBED or token needs refresh, rebuilding...');
             supabase.auth.getSession().then(async ({ data: { session } }) => {
               if (session) {
-                // Check token expiry (5 min buffer)
+                // Check if token is already expired before attempting refresh
                 const tokenExpiresAt = session.expires_at || 0;
-                const timeUntilExpiry = (tokenExpiresAt * 1000) - Date.now();
-                const hasValidToken = timeUntilExpiry > 300000; // 5 minutes buffer
+                const isExpired = (tokenExpiresAt * 1000) < Date.now();
 
-                if (hasValidToken) {
-                  console.log(`✅ Token valid for ${Math.floor(timeUntilExpiry / 60000)} more minutes, syncing with realtime`);
-
-                  // Just sync existing token - NO API CALL!
-                  supabase.realtime.setAuth(session.access_token);
-
-                  // Dispatch reload event for messages
-                  console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (fast path)`);
-                  window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
-                    detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
-                  }));
-
-                  // 🛡️ RACE CONDITION FIX: Reset flag for fast path too
-                  isIdleWakeRecoveryRef.current = false;
-                  console.log('✅ Idle-wake recovery flag reset (fast path)');
-
-                  return; // Done! No rebuild needed
-                } else {
-                  console.log('⚠️ Token expiring soon, will refresh');
-                  // Token expiring, fall through to SLOW PATH by triggering rebuild
-                  // This will be handled by the else block below
+                if (isExpired) {
+                  console.log('⚠️ Token already expired, must refresh');
                 }
-              }
-            });
-          } else {
-            // SLOW PATH: Channel not subscribed or token expiry suspected
-            console.log('‼️⛔️⛔️ Channel not SUBSCRIBED or token needs refresh, rebuilding...');
-          supabase.auth.getSession().then(async ({ data: { session } }) => {
-            if (session) {
-              // Check if token is already expired before attempting refresh
-              const tokenExpiresAt = session.expires_at || 0;
-              const isExpired = (tokenExpiresAt * 1000) < Date.now();
 
-              if (isExpired) {
-                console.log('⚠️ Token already expired, must refresh');
-              }
+                // Refresh session to get new token
+                try {
+                  const { data: refreshedSession } = await supabase.auth.refreshSession();
+                  const sessionToUse = refreshedSession?.session || session;
 
-              // Refresh session to get new token
-              try {
-                const { data: refreshedSession } = await supabase.auth.refreshSession();
-                const sessionToUse = refreshedSession?.session || session;
-
-                console.log('🔐 Auth refreshed before idle-wake channel rebuild');
-                await rebuildChatChannel(sessionToUse, 'idle-wake').catch((error) => {
-                  console.error('🚨 Idle wake channel rebuild failed:', error);
-                  // Force refresh to recover
-                  localStorage.setItem('refresh-redirect-to-chat', 'true');
-                  window.location.reload();
-                }).finally(() => {
-                  // 🛡️ RACE CONDITION FIX: Reset flag after idle-wake rebuild completes
-                  isIdleWakeRecoveryRef.current = false;
-                  console.log('✅ Idle-wake recovery flag reset');
-                });
-
-                // ✅ Dispatch AFTER rebuild initiated
-                console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (slow path)`);
-                window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
-                  detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
-                }));
-              } catch (error) {
-                console.error('❌ Auth refresh failed:', error);
-
-                // 🛡️ FALLBACK: Try getSession before giving up
-                const { data: { session: fallbackSession }, error: sessionError } = await supabase.auth.getSession();
-
-                if (fallbackSession && !sessionError) {
-                  console.log('✅ Session recovered via getSession fallback');
-                  await rebuildChatChannel(fallbackSession, 'idle-wake-fallback').catch((error) => {
-                    console.error('🚨 Fallback session rebuild failed:', error);
+                  console.log('🔐 Auth refreshed before idle-wake channel rebuild');
+                  await rebuildChatChannel(sessionToUse, 'idle-wake').catch((error) => {
+                    console.error('🚨 Idle wake channel rebuild failed:', error);
+                    // Force refresh to recover
                     localStorage.setItem('refresh-redirect-to-chat', 'true');
                     window.location.reload();
                   }).finally(() => {
+                    // 🛡️ RACE CONDITION FIX: Reset flag after idle-wake rebuild completes
                     isIdleWakeRecoveryRef.current = false;
-                    console.log('✅ Idle-wake recovery flag reset (fallback)');
+                    console.log('✅ Idle-wake recovery flag reset');
                   });
 
-                  // Dispatch reload event
-                  console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (fallback path)`);
+                  // ✅ Dispatch AFTER rebuild initiated
+                  console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (slow path)`);
+                  window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
+                    detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
+                  }));
+                } catch (error) {
+                  console.error('❌ Auth refresh failed:', error);
+
+                  // 🛡️ FALLBACK: Try getSession before giving up
+                  const { data: { session: fallbackSession }, error: sessionError } = await supabase.auth.getSession();
+
+                  if (fallbackSession && !sessionError) {
+                    console.log('✅ Session recovered via getSession fallback');
+                    await rebuildChatChannel(fallbackSession, 'idle-wake-fallback').catch((error) => {
+                      console.error('🚨 Fallback session rebuild failed:', error);
+                      localStorage.setItem('refresh-redirect-to-chat', 'true');
+                      window.location.reload();
+                    }).finally(() => {
+                      isIdleWakeRecoveryRef.current = false;
+                      console.log('✅ Idle-wake recovery flag reset (fallback)');
+                    });
+
+                    // Dispatch reload event
+                    console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (fallback path)`);
+                    window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
+                      detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
+                    }));
+                  } else {
+                    // Both refresh and getSession failed - redirect to login
+                    console.error('❌ All session recovery attempts failed, redirecting to login.');
+                    localStorage.setItem('session-expired', 'true');
+                    window.location.href = '/';
+                  }
+                }
+              } else {
+                console.log('[RT] No session found on idle wake, attempting recovery...');
+                // Try to refresh session first
+                const { data: refreshData } = await supabase.auth.refreshSession();
+                if (refreshData?.session) {
+                  console.log('✅ Session recovered on idle wake');
+                  await rebuildChatChannel(refreshData.session, 'idle-wake-recovered').catch((error) => {
+                    console.error('🚨 Recovered session rebuild failed:', error);
+                    localStorage.setItem('refresh-redirect-to-chat', 'true');
+                    window.location.reload();
+                  }).finally(() => {
+                    // 🛡️ RACE CONDITION FIX: Reset flag after recovery rebuild completes
+                    isIdleWakeRecoveryRef.current = false;
+                    console.log('✅ Idle-wake recovery flag reset');
+                  });
+
+                  // ✅ Dispatch AFTER rebuild initiated
+                  console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (recovery path)`);
                   window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
                     detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
                   }));
                 } else {
-                  // Both refresh and getSession failed - force reload as last resort
-                  console.error('❌ All session recovery attempts failed, forcing page reload');
-                  localStorage.setItem('refresh-redirect-to-chat', 'true');
-                  window.location.reload();
+                  // No session available - redirect to login
+                  console.log('❌ No session available, setting expired flag');
+                  localStorage.setItem('session-expired', 'true');
+                  window.location.href = '/';
                 }
               }
-            } else {
-              console.log('[RT] No session found on idle wake, attempting recovery...');
-              // Try to refresh session first
-              const { data: refreshData } = await supabase.auth.refreshSession();
-              if (refreshData?.session) {
-                console.log('✅ Session recovered on idle wake');
-                await rebuildChatChannel(refreshData.session, 'idle-wake-recovered').catch((error) => {
-                  console.error('🚨 Recovered session rebuild failed:', error);
-                  localStorage.setItem('refresh-redirect-to-chat', 'true');
-                  window.location.reload();
-                }).finally(() => {
-                  // 🛡️ RACE CONDITION FIX: Reset flag after recovery rebuild completes
-                  isIdleWakeRecoveryRef.current = false;
-                  console.log('✅ Idle-wake recovery flag reset');
-                });
-
-                // ✅ Dispatch AFTER rebuild initiated
-                console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (recovery path)`);
-                window.dispatchEvent(new CustomEvent('pwa-reload-messages', {
-                  detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
-                }));
-              } else {
-                // No session available - redirect to login
-                console.log('❌ No session available, setting expired flag');
-                localStorage.setItem('session-expired', 'true');
-                window.location.href = '/';
-              }
+            });
             }
-          });
-          }
+          }, 1000); // 1-second delay
         }
 
         wasIdleRef.current = false;
