@@ -755,7 +755,7 @@ export function Chat({ onNavigate }: ChatProps) {
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
             top: '0', // From top
-            bottom: isIOS ? (isPWA ? '190px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '0px' : '200px', // Above input bar
+            bottom: isIOS ? (isPWA ? '200px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
             left: '0',
             right: '0',
             paddingTop: (isIOS && isPWA) ? 'env(safe-area-inset-top)' : '0px',
