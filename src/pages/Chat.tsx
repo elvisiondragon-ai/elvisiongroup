@@ -758,7 +758,7 @@ export function Chat({ onNavigate }: ChatProps) {
             bottom: isIOS ? (isPWA ? '200px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
             left: '0',
             right: '0',
-            paddingTop: (isIOS && isPWA) ? 'env(safe-area-inset-top)' : '0px',
+            paddingTop: ((isIOS || isAndroid) && isPWA) ? 'env(safe-area-inset-top)' : '0px',
             touchAction: isIOS ? 'pan-y' : 'auto',
             paddingBottom: '0px',
             overscrollBehavior: 'none',
