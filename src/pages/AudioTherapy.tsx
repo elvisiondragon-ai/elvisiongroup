@@ -110,9 +110,8 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     };
   }, []); // 🛡️ FIX: Empty deps = run once on mount/unmount only
 
-  // Local audio state (better for XP tracking) - USER-INITIATED downloads only //Nevertouch Audio-cache
-  const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
-  const [currentVerseAudio, setCurrentVerseAudio] = useState<HTMLAudioElement | null>(null);
+  // Use global audio state from AudioContext to persist across tab changes
+  const { currentPlayingVerse, currentVerseAudio, setCurrentPlayingVerse, setCurrentVerseAudio } = useProtectedAudio();
 
   // Separate function to fetch just verse4_used
   const fetchVerse4Count = async (userId: string) => {

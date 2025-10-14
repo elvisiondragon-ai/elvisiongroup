@@ -9,6 +9,10 @@ interface AudioContextType {
   clearCache: () => Promise<void>;
   getCacheStats: () => Promise<{ cached: number; totalSize: string }>;
   isCached: (audioPath: string) => Promise<boolean>;
+  currentPlayingVerse: number | null;
+  currentVerseAudio: HTMLAudioElement | null;
+  setCurrentPlayingVerse: (id: number | null) => void;
+  setCurrentVerseAudio: (audio: HTMLAudioElement | null) => void;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -16,6 +20,10 @@ const AudioContext = createContext<AudioContextType | undefined>(undefined);
 export function AudioProvider({ children }: { children: React.ReactNode }) {
   // In-memory cache for audio blobs
   const [audioCache] = useState(new Map<string, string>());
+
+  // Global audio playback state
+  const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
+  const [currentVerseAudio, setCurrentVerseAudio] = useState<HTMLAudioElement | null>(null);
 
   // Initialize audio protection on mount
   React.useEffect(() => {
@@ -284,7 +292,11 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     createStreamingAudio,
     clearCache,
     getCacheStats,
-    isCached
+    isCached,
+    currentPlayingVerse,
+    currentVerseAudio,
+    setCurrentPlayingVerse,
+    setCurrentVerseAudio
   };
 
   return (
