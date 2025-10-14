@@ -132,56 +132,77 @@ export function Profile({ onNavigate }: ProfileProps) {
   }, [userProfile, user, userId]);
 
 
-  const handleLogout = async () => {
-    try {
-      // Set manual logout flag immediately to prevent IDLE USER HANDLER
-      localStorage.setItem('manual-logout-flag', 'true');
-      
-      // Clean up Supabase connections before signOut
-      await cleanupSupabase();
-      
-      const { error } = await supabase.auth.signOut({ scope: 'local' });
-      
-      if (error) {
-        console.error('Logout error:', error);
+    const handleLogout = async () => {
+      try {
+        // Set manual logout flag immediately to prevent IDLE USER HANDLER
+        localStorage.setItem('manual-logout-flag', 'true');
+  
+        // PWA-specific handling for iOS logout
+        if (isIOS && isIOSStandalone) {
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+              await registration.unregister();
+              console.log('Service worker unregistered for iOS PWA logout');
+            }
+          }
+          // Clear caches for PWA to ensure clean state
+          if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+            console.log('All caches cleared for iOS PWA logout');
+          }
+        }
+        
+        // Clean up Supabase connections before signOut
+        await cleanupSupabase();
+        
+        const { error } = await supabase.auth.signOut({ scope: 'local' });
+        
+        if (error) {
+          console.error('Logout error:', error);
+          toast({
+            title: "Logout Error - Refreshing",
+            description: "Refreshing page to complete logout...",
+            variant: "destructive",
+          });
+          // REDIRECT TO REAL LOGOUT PAGE
+          setTimeout(() => {
+            window.location.replace('/auth');
+          }, 1000);
+          return;
+        }
+        
+        toast({
+          title: "Berhasil Logout",
+          description: "Anda berhasil keluar dari akun.",
+        });
+        
+        // For iOS PWA, redirect immediately. For others, use existing logic.
+        if (isIOS && isIOSStandalone) {
+          window.location.replace('/auth');
+        } else {
+          // Event listener will handle redirect, but backup refresh
+          setTimeout(() => {
+            if (window.location.pathname !== '/auth') {
+              window.location.reload();
+            }
+          }, 2000);
+        }
+        
+      } catch (error: any) {
+        console.error('Unexpected logout error:', error);
         toast({
           title: "Logout Error - Refreshing",
           description: "Refreshing page to complete logout...",
           variant: "destructive",
         });
-        // REDIRECT TO REAL LOGOUT PAGE
+        // Refresh instead of staying on page with error
         setTimeout(() => {
-          window.location.replace('/auth');
-        }, 1000);
-        return;
-      }
-      
-      toast({
-        title: "Berhasil Logout",
-        description: "Anda berhasil keluar dari akun.",
-      });
-      
-      // Event listener will handle redirect, but backup refresh
-      setTimeout(() => {
-        if (window.location.pathname !== '/auth') {
           window.location.reload();
-        }
-      }, 2000);
-      
-    } catch (error: any) {
-      console.error('Unexpected logout error:', error);
-      toast({
-        title: "Logout Error - Refreshing",
-        description: "Refreshing page to complete logout...",
-        variant: "destructive",
-      });
-      // Refresh instead of staying on page with error
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
-  };
-
+        }, 1000);
+      }
+    };
   const handleDeleteAccount = async () => {
     if (!userId) return;
 
