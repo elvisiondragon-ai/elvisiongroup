@@ -940,7 +940,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProStatus(status);
       console.log('✅ AuthContext pro status updated and cached:', status);
     } catch (error) {
-      console.error('❌ AuthContext pro check failed:', error);
+      if (!navigator.onLine) {
+        console.log('IDLEUSER_PROFAIL: Pro status check skipped, user is offline.');
+      } else {
+        console.error('❌ AuthContext pro check failed:', error);
+      }
       const fallbackStatus = {
         isPro: false,
         subscriptionType: null,

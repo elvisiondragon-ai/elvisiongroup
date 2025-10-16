@@ -488,8 +488,8 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                   <div className="text-sm text-muted-foreground">21.45 WIB • Live Now</div>
                 </div>
               </div>
-              <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold px-4 py-2 rounded-full text-sm animate-pulse shadow-lg">
-                LIVE NOW
+              <div className="text-muted-foreground bg-muted/50 px-3 py-1 rounded-full text-sm">
+                Live
               </div>
             </div>
 
