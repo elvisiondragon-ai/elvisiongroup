@@ -4,6 +4,7 @@ project_id = "nlrgdhpmsittuwiiindq"
 enabled = true
 port = 54321
 schemas = ["public", "graphql_public"]
+cors_allowed_origins = ["https://app.elvisiongroup.com", "https://8fda2b20-72ff-449c-bd0b-71d9a561716d.lovableproject.com", "http://localhost:*", "http://127.0.0.1:*", "capacitor://localhost", "ionic://localhost"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
