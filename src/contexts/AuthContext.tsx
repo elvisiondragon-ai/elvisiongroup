@@ -216,12 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // 6. Create new channel with full realtime capabilities  
     console.log('🔧 Channel recreated with new auth');
-    const channel = supabase.channel('chat-community', {
-      config: {
-        broadcast: { self: false },
-        presence: { key: 'chat' }
-      }
-    });
+    const channel = supabase.channel('chat-community');
     
     // 7. Add event listeners for chat messages (with error handling)
     channel.on(
@@ -411,13 +406,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('🐢🐢 1 sec delay before notif');
         // 1 second delay: ensures listener is ready + nice UX timing
         setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('verse_notification', { 
-            detail: payload.new 
+          window.dispatchEvent(new CustomEvent('verse_notification', {
+            detail: payload.new
           }));
         }, 1000);
       }
     );
-    
+
     // 8. Subscribe with unified error handling
     channel.subscribe((status) => {
       setChannelStatus(status);
