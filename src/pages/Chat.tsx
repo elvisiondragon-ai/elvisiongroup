@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ChatMessage } from "@/components/ChatMessage";
-import { Send, Users, RefreshCw } from "lucide-react";
+import { Send, Users, RefreshCw, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { GoldReportList } from "./GoldReportList";
 
 interface ChatMessageData {
   id: string;
@@ -22,6 +23,7 @@ interface ChatMessageData {
   streak_days?: number;
   subscription_type?: string | null;
   avatar_url?: string;
+  is_gold_reported?: boolean;
 }
 
 interface ChatProps {
@@ -29,10 +31,12 @@ interface ChatProps {
 }
 
 // Memoized message list to prevent re-renders on every keystroke
-const MessageList = memo(({ messages, userId, onDelete }: {
+const MessageList = memo(({ messages, userId, userIsAdmin, onDelete, onGoldReportToggle }: {
   messages: ChatMessageData[];
   userId: string | null;
+  userIsAdmin: boolean;
   onDelete: (id: string) => void;
+  onGoldReportToggle: (messageId: string, isGoldReported: boolean) => void;
 }) => {
   return (
     <div className="divide-y divide-border">
@@ -53,7 +57,10 @@ const MessageList = memo(({ messages, userId, onDelete }: {
           message={msg.message}
           timestamp={new Date(msg.created_at)}
           currentUserId={userId}
+          currentUserIsAdmin={userIsAdmin}
+          isGoldReported={msg.is_gold_reported}
           onDelete={onDelete}
+          onGoldReportToggle={onGoldReportToggle}
         />
       ))}
     </div>
@@ -67,6 +74,8 @@ export function Chat({ onNavigate }: ChatProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [showGoldReportsOnly, setShowGoldReportsOnly] = useState(false);
+  const [goldReportCount, setGoldReportCount] = useState(0);
   
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -157,6 +166,7 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [messages.length]);
 
+
   // Invalidate user cache when pro status changes
   const invalidateUserCache = (userId: string) => {
     localStorage.removeItem(`user-data-${userId}`);
@@ -239,6 +249,11 @@ export function Chat({ onNavigate }: ChatProps) {
         .select('*')
         .eq('channel_id', 'community')
         .order('created_at', { ascending: true });
+
+      // Get gold reports
+      const { data: goldReports } = await supabase
+        .from('gold_reports')
+        .select('message_id');
         
       if (error || !chatMessages) {
         console.error('Error loading messages:', error);
@@ -371,18 +386,21 @@ export function Chat({ onNavigate }: ChatProps) {
         ];
         setMessages(mockMessages);
       } else {
+        // Create a Set of gold reported message IDs
+        const goldReportedIds = new Set(goldReports?.map(gr => gr.message_id) || []);
+
         // Process messages with real profile data
         const processedMessages = chatMessages?.map(msg => {
           const userProfile = profilesMap.get(msg.user_id);
           const realStreakDays = userProfile?.streak_days || 0;
-          
-          // For consistency, give minimum 7 days to users without profile data  
+
+          // For consistency, give minimum 7 days to users without profile data
           const displayStreakDays = userProfile ? realStreakDays : (realStreakDays === 0 ? 7 : realStreakDays);
-          
-          
+
+
           // Get subscription data from unified RPC
           const subscriptionData = subscriptionMap.get(msg.user_id);
-          
+
           return {
             ...msg,
             is_admin: adminUsers.has(msg.user_id) || userProfile?.is_admin || false,
@@ -393,12 +411,16 @@ export function Chat({ onNavigate }: ChatProps) {
             is_pro: subscriptionData?.is_pro || false,
             subscription_type: subscriptionData?.subscription_type || null,
             user_name: userProfile?.display_name || msg.user_name,
-            avatar_url: userProfile?.avatar_url || undefined
+            avatar_url: userProfile?.avatar_url || undefined,
+            is_gold_reported: goldReportedIds.has(msg.id)
           };
         }) || [];
-        
+
+        // Update gold report count
+        setGoldReportCount(goldReportedIds.size);
+
         setMessages(processedMessages);
-        
+
       }
       
       setLastUpdate(new Date());
@@ -709,12 +731,40 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [removeMessage, userId, messages, addMessage, broadcastDelete]);
 
+  const handleGoldReportToggle = useCallback((messageId: string, isGoldReported: boolean) => {
+    // Update the message in the list
+    setMessages(current => current.map(msg =>
+      msg.id === messageId ? { ...msg, is_gold_reported: isGoldReported } : msg
+    ));
+
+    // Update count
+    setGoldReportCount(current => isGoldReported ? current + 1 : current - 1);
+  }, []);
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
+
+  // Check if current user is admin
+  const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
+  const currentUserIsAdmin = user?.id === knownAdminId || userProfile?.is_admin || false;
+
+  // Show Gold Report List if in that mode
+  if (showGoldReportsOnly) {
+    return (
+      <GoldReportList
+        onBack={() => setShowGoldReportsOnly(false)}
+        currentUserIsAdmin={currentUserIsAdmin}
+        messages={messages}
+        userId={user?.id || null}
+        onDelete={handleDeleteMessage}
+        onGoldReportToggle={handleGoldReportToggle}
+      />
+    );
+  }
 
   // Show loading state during initial load
   if (isLoading) {
@@ -744,6 +794,26 @@ export function Chat({ onNavigate }: ChatProps) {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+      {/* Gold Report List Toggle Button - Visible to All Users */}
+      {goldReportCount > 0 && (
+        <div
+          className="fixed top-0 left-0 right-0 bg-background border-b border-border z-50 px-4 py-3"
+          style={{
+            paddingTop: ((isIOS || isAndroid) && isPWA) ? 'calc(env(safe-area-inset-top) + 12px)' : '12px'
+          }}
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowGoldReportsOnly(true)}
+            className="w-full h-10 bg-gradient-to-r from-amber-400/60 via-yellow-400/60 to-amber-500/60 hover:from-amber-500/60 hover:via-yellow-500/60 hover:to-amber-600/60 text-white font-medium shadow-lg shadow-amber-500/20 transition-all duration-150"
+          >
+            <Rocket className="h-4 w-4 mr-2" />
+            Gold Report List
+          </Button>
+        </div>
+      )}
+
       {/* Messages */}
       {/* IOS HANDLER (VITAL) - Enables immediate touch scrolling without requiring click first */}
         <div
@@ -754,7 +824,7 @@ export function Chat({ onNavigate }: ChatProps) {
             flexDirection: 'column-reverse',
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
-            top: '0', // From top
+            top: goldReportCount > 0 ? '60px' : '0', // From top (with space for gold report button if any gold reports exist)
             bottom: isIOS ? (isPWA ? '200px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
             left: '0',
             right: '0',
@@ -789,7 +859,9 @@ export function Chat({ onNavigate }: ChatProps) {
         <MessageList
           messages={messages}
           userId={user?.id || null}
+          userIsAdmin={currentUserIsAdmin}
           onDelete={handleDeleteMessage}
+          onGoldReportToggle={handleGoldReportToggle}
         />
       </div>
 

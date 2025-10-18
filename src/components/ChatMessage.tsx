@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { GoldReport } from "./GoldReport";
 // Updated spiritual icons for streak tiers
 import { GiTrophy, GiFire, GiHorseHead, GiSailboat, GiMoon, GiMeditation } from "react-icons/gi";
 
@@ -23,10 +24,13 @@ interface ChatMessageProps {
   message: string;
   timestamp: Date;
   currentUserId?: string;
+  currentUserIsAdmin?: boolean;
+  isGoldReported?: boolean;
   onDelete?: (messageId: string) => void;
+  onGoldReportToggle?: (messageId: string, isGoldReported: boolean) => void;
 }
 
-export function ChatMessage({ id, user, message, timestamp, currentUserId, onDelete }: ChatMessageProps) {
+export function ChatMessage({ id, user, message, timestamp, currentUserId, currentUserIsAdmin, isGoldReported, onDelete, onGoldReportToggle }: ChatMessageProps) {
   const { toast } = useToast();
   const getInitials = (name: string) => {
     return name
@@ -62,7 +66,15 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
   const canDelete = currentUserId === user.id;
 
   return (
-    <div data-message-id={id} className="flex gap-3 p-4 hover:bg-card/50 transition-colors">
+    <div
+      data-message-id={id}
+      className={cn(
+        "flex gap-3 p-4 transition-colors",
+        isGoldReported
+          ? "bg-gradient-to-r from-amber-400/60 via-yellow-400/60 to-amber-500/60 shadow-lg shadow-amber-500/20"
+          : "hover:bg-card/50"
+      )}
+    >
       <Avatar 
         className="w-10 h-10 border border-border" 
         onContextMenu={(e) => e.preventDefault()}
@@ -149,24 +161,43 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, onDel
             )}
           </div>
           
-          {canDelete && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDelete}
-              className="h-7 w-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {currentUserIsAdmin && (
+              <GoldReport
+                messageId={id}
+                isAdmin={currentUserIsAdmin}
+                onToggle={(isGoldReported) => {
+                  if (onGoldReportToggle) {
+                    onGoldReportToggle(id, isGoldReported);
+                  }
+                }}
+              />
+            )}
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDelete}
+                className="h-7 w-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
         </div>
         
-        <p className="text-muted-foreground leading-relaxed">{message}</p>
+        <p className={cn(
+          "leading-relaxed",
+          isGoldReported ? "text-white font-medium" : "text-muted-foreground"
+        )}>{message}</p>
         
-        <span className="text-xs text-muted-foreground">
-          {timestamp.toLocaleTimeString("id-ID", { 
-            hour: "2-digit", 
-            minute: "2-digit" 
+        <span className={cn(
+          "text-xs",
+          isGoldReported ? "text-white/90" : "text-muted-foreground"
+        )}>
+          {timestamp.toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit"
           })}
         </span>
       </div>

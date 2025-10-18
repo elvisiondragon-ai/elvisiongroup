@@ -80,13 +80,38 @@ export const setupDebugTools = () => {
       const hoursUntilExpiry = Math.floor(timeUntilExpiry / (1000 * 60 * 60));
       const minutesUntilExpiry = Math.floor((timeUntilExpiry % (1000 * 60 * 60)) / (1000 * 60));
 
+      // Helper to decode JWT
+      const parseJwt = (token) => {
+        try {
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          return JSON.parse(jsonPayload);
+        } catch (e) {
+          return null;
+        }
+      };
+
+      const decodedToken = parseJwt(session.access_token);
+      let accessTokenExpiresIn = 'N/A';
+      if (decodedToken && decodedToken.exp) {
+        const exp = decodedToken.exp * 1000;
+        const tokenTimeUntilExpiry = exp - now.getTime();
+        const tokenMinutes = Math.floor(tokenTimeUntilExpiry / (1000 * 60));
+        const tokenSeconds = Math.floor((tokenTimeUntilExpiry % (1000 * 60)) / 1000);
+        accessTokenExpiresIn = `${tokenMinutes}m ${tokenSeconds}s`;
+      }
+
       const result = {
         valid: true,
         userId: session.user.id,
         displayName: displayName,
-        expiresAt: expiryTime.toISOString(),
-        timeRemaining: `${hoursUntilExpiry}h ${minutesUntilExpiry}m`,
-        isExpired: timeUntilExpiry <= 0,
+        sessionExpiresAt: expiryTime.toISOString(),
+        sessionTimeRemaining: `${hoursUntilExpiry}h ${minutesUntilExpiry}m`,
+        isSessionExpired: timeUntilExpiry <= 0,
+        accessTokenExpiresIn: accessTokenExpiresIn,
         accessToken: session.access_token.substring(0, 20) + '...',
         refreshToken: session.refresh_token ? session.refresh_token.substring(0, 20) + '...' : 'N/A'
       };
