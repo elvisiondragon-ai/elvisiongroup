@@ -2,43 +2,27 @@ import { Button } from "@/components/ui/button";
 import { Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
 
 interface GoldReportProps {
   messageId: string;
   isAdmin: boolean;
+  isGoldReported?: boolean;
   onToggle?: (isGoldReported: boolean) => void;
 }
 
-export function GoldReport({ messageId, isAdmin, onToggle }: GoldReportProps) {
+export function GoldReport({ messageId, isAdmin, isGoldReported = false, onToggle }: GoldReportProps) {
   const { toast } = useToast();
-  const [isGoldReported, setIsGoldReported] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Check if message is already gold reported
-  useEffect(() => {
-    const checkGoldReport = async () => {
-      const { data, error } = await supabase
-        .from('gold_reports')
-        .select('id')
-        .eq('message_id', messageId)
-        .single();
-
-      if (data) {
-        setIsGoldReported(true);
-      }
-    };
-
-    checkGoldReport();
-  }, [messageId]);
 
   const handleToggleGoldReport = async () => {
     if (!isAdmin) return;
 
-    setIsLoading(true);
+    const previousState = isGoldReported;
+
+    // Optimistic update - instant UI change
+    if (onToggle) onToggle(!isGoldReported);
 
     try {
-      if (isGoldReported) {
+      if (previousState) {
         // Remove gold report
         const { error } = await supabase
           .from('gold_reports')
@@ -46,9 +30,6 @@ export function GoldReport({ messageId, isAdmin, onToggle }: GoldReportProps) {
           .eq('message_id', messageId);
 
         if (error) throw error;
-
-        setIsGoldReported(false);
-        if (onToggle) onToggle(false);
 
         toast({
           title: "Gold Report Removed",
@@ -70,9 +51,6 @@ export function GoldReport({ messageId, isAdmin, onToggle }: GoldReportProps) {
 
         if (error) throw error;
 
-        setIsGoldReported(true);
-        if (onToggle) onToggle(true);
-
         toast({
           title: "Gold Report Added",
           description: "Message pinned successfully",
@@ -81,13 +59,15 @@ export function GoldReport({ messageId, isAdmin, onToggle }: GoldReportProps) {
       }
     } catch (error) {
       console.error('Error toggling gold report:', error);
+
+      // Revert optimistic update on error
+      if (onToggle) onToggle(previousState);
+
       toast({
         title: "Error",
         description: "Failed to toggle gold report",
         variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -98,7 +78,6 @@ export function GoldReport({ messageId, isAdmin, onToggle }: GoldReportProps) {
       variant="ghost"
       size="sm"
       onClick={handleToggleGoldReport}
-      disabled={isLoading}
       className={`h-7 w-7 p-0 rounded-full shadow-lg transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5 ${
         isGoldReported
           ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:via-yellow-600 hover:to-amber-600 text-white shadow-yellow-500/50'

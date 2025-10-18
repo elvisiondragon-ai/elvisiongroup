@@ -254,7 +254,7 @@ export function Chat({ onNavigate }: ChatProps) {
       const { data: goldReports } = await supabase
         .from('gold_reports')
         .select('message_id');
-        
+
       if (error || !chatMessages) {
         console.error('Error loading messages:', error);
         setIsLoading(false);
@@ -652,12 +652,21 @@ export function Chat({ onNavigate }: ChatProps) {
       } else {
         console.log('Message sent successfully');
         // Replace optimistic message with real one
-        setMessages(current => current.map(msg => 
-          msg.id === tempId ? { ...optimisticMessage, id: data.id } : msg
-        ));
+        setMessages(current => {
+          const messageExists = current.find(msg => msg.id === tempId);
+          if (messageExists) {
+            // Replace temp message with real database message
+            return current.map(msg =>
+              msg.id === tempId ? { ...optimisticMessage, id: data.id, created_at: data.created_at } : msg
+            );
+          } else {
+            // If temp message was somehow removed, add the real message
+            return [...current, { ...optimisticMessage, id: data.id, created_at: data.created_at }];
+          }
+        });
 
         // Broadcast new message to all users using AuthContext
-        broadcastMessage({ ...optimisticMessage, id: data.id });
+        broadcastMessage({ ...optimisticMessage, id: data.id, created_at: data.created_at });
 
         toast({
           title: "Message Sent 🚀",
@@ -708,11 +717,19 @@ export function Chat({ onNavigate }: ChatProps) {
     if (!userId) return;
 
     try {
-      const { error } = await supabase
+      const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
+      const isAdmin = user?.id === knownAdminId || userProfile?.is_admin || false;
+
+      let deleteQuery = supabase
         .from('chat_messages')
         .delete()
-        .eq('id', messageId)
-        .eq('user_id', userId);
+        .eq('id', messageId);
+
+      if (!isAdmin) {
+        deleteQuery = deleteQuery.eq('user_id', userId);
+      }
+
+      const { error } = await deleteQuery;
 
       if (error) {
         const messageToRestore = messages.find(msg => msg.id === messageId);
@@ -720,7 +737,6 @@ export function Chat({ onNavigate }: ChatProps) {
           addMessage(messageToRestore);
         }
       } else {
-        // Broadcast delete to all users using AuthContext
         broadcastDelete(messageId);
       }
     } catch (err) {
@@ -729,7 +745,7 @@ export function Chat({ onNavigate }: ChatProps) {
         addMessage(messageToRestore);
       }
     }
-  }, [removeMessage, userId, messages, addMessage, broadcastDelete]);
+  }, [removeMessage, userId, messages, addMessage, broadcastDelete, user, userProfile]);
 
   const handleGoldReportToggle = useCallback((messageId: string, isGoldReported: boolean) => {
     // Update the message in the list
@@ -795,24 +811,22 @@ export function Chat({ onNavigate }: ChatProps) {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       {/* Gold Report List Toggle Button - Visible to All Users */}
-      {goldReportCount > 0 && (
-        <div
-          className="fixed top-0 left-0 right-0 bg-background border-b border-border z-50 px-4 py-3"
-          style={{
-            paddingTop: ((isIOS || isAndroid) && isPWA) ? 'calc(env(safe-area-inset-top) + 12px)' : '12px'
-          }}
+      <div
+        className="fixed top-0 left-0 right-0 bg-background border-b border-border z-50 px-4 py-3"
+        style={{
+          paddingTop: ((isIOS || isAndroid) && isPWA) ? 'calc(env(safe-area-inset-top) + 12px)' : '12px'
+        }}
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowGoldReportsOnly(true)}
+          className="w-full h-10 bg-gradient-to-r from-amber-400/60 via-yellow-400/60 to-amber-500/60 hover:from-amber-500/60 hover:via-yellow-500/60 hover:to-amber-600/60 text-white font-medium shadow-lg shadow-amber-500/20 transition-all duration-150"
         >
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowGoldReportsOnly(true)}
-            className="w-full h-10 bg-gradient-to-r from-amber-400/60 via-yellow-400/60 to-amber-500/60 hover:from-amber-500/60 hover:via-yellow-500/60 hover:to-amber-600/60 text-white font-medium shadow-lg shadow-amber-500/20 transition-all duration-150"
-          >
-            <Rocket className="h-4 w-4 mr-2" />
-            Gold Report List
-          </Button>
-        </div>
-      )}
+          <Rocket className="h-4 w-4 mr-2" />
+          Gold Report
+        </Button>
+      </div>
 
       {/* Messages */}
       {/* IOS HANDLER (VITAL) - Enables immediate touch scrolling without requiring click first */}
@@ -824,7 +838,7 @@ export function Chat({ onNavigate }: ChatProps) {
             flexDirection: 'column-reverse',
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
-            top: goldReportCount > 0 ? '60px' : '0', // From top (with space for gold report button if any gold reports exist)
+            top: '60px', // From top (with space for gold report button)
             bottom: isIOS ? (isPWA ? '200px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
             left: '0',
             right: '0',

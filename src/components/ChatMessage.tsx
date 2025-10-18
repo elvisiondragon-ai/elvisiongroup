@@ -63,7 +63,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, curre
     }
   };
 
-  const canDelete = currentUserId === user.id;
+  const canDelete = currentUserIsAdmin || currentUserId === user.id;
 
   return (
     <div
@@ -166,6 +166,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, curre
               <GoldReport
                 messageId={id}
                 isAdmin={currentUserIsAdmin}
+                isGoldReported={isGoldReported}
                 onToggle={(isGoldReported) => {
                   if (onGoldReportToggle) {
                     onGoldReportToggle(id, isGoldReported);

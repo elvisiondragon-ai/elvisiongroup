@@ -297,6 +297,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setMessages(current => current.filter(msg => msg.id !== deletedMessage.id));
       }
     );
+
+    // Add INSERT listener for gold_reports
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'gold_reports'
+      },
+      (payload) => {
+        console.log('⭐ Gold report added:', payload.new);
+        const goldReport = payload.new as { message_id: string };
+        setMessages(current => current.map(msg =>
+          msg.id === goldReport.message_id ? { ...msg, is_gold_reported: true } : msg
+        ));
+      }
+    );
+
+    // Add DELETE listener for gold_reports
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'gold_reports'
+      },
+      (payload) => {
+        console.log('⭐ Gold report removed:', payload.old);
+        const goldReport = payload.old as { message_id: string };
+        setMessages(current => current.map(msg =>
+          msg.id === goldReport.message_id ? { ...msg, is_gold_reported: false } : msg
+        ));
+      }
+    );
     
     // Add broadcast listeners for chat
     channel.on('broadcast', { event: 'message_added' }, async (payload) => {

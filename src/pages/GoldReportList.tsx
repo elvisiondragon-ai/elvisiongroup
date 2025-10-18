@@ -37,29 +37,40 @@ const MessageList = memo(({ messages, userId, userIsAdmin, onDelete, onGoldRepor
   onGoldReportToggle: (messageId: string, isGoldReported: boolean) => void;
 }) => {
   return (
-    <div className="divide-y divide-border">
+    <div className="space-y-3 p-2">
       {messages.map((msg) => (
-        <ChatMessage
+        <div
           key={msg.id}
-          id={msg.id}
-          user={{
-            id: msg.user_id,
-            name: msg.user_name,
-            level: msg.user_level,
-            isPro: msg.is_pro || false,
-            isAdmin: msg.is_admin || false,
-            streak_days: msg.streak_days || 0,
-            subscriptionType: msg.subscription_type || undefined,
-            avatar: msg.avatar_url || ""
+          className="relative rounded-2xl border border-white/20 shadow-2xl backdrop-blur-md bg-white/10 overflow-hidden"
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)'
           }}
-          message={msg.message}
-          timestamp={new Date(msg.created_at)}
-          currentUserId={userId}
-          currentUserIsAdmin={userIsAdmin}
-          isGoldReported={msg.is_gold_reported}
-          onDelete={onDelete}
-          onGoldReportToggle={onGoldReportToggle}
-        />
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 pointer-events-none"></div>
+          <ChatMessage
+            id={msg.id}
+            user={{
+              id: msg.user_id,
+              name: msg.user_name,
+              level: msg.user_level,
+              isPro: msg.is_pro || false,
+              isAdmin: msg.is_admin || false,
+              streak_days: msg.streak_days || 0,
+              subscriptionType: msg.subscription_type || undefined,
+              avatar: msg.avatar_url || ""
+            }}
+            message={msg.message}
+            timestamp={new Date(msg.created_at)}
+            currentUserId={userId}
+            currentUserIsAdmin={userIsAdmin}
+            isGoldReported={msg.is_gold_reported}
+            onDelete={onDelete}
+            onGoldReportToggle={onGoldReportToggle}
+          />
+        </div>
       ))}
     </div>
   );
@@ -128,7 +139,7 @@ export function GoldReportList({ onBack, currentUserIsAdmin, messages, userId, o
           WebkitOverflowScrolling: 'touch',
           position: 'absolute',
           top: '60px',
-          bottom: isIOS ? (isPWA ? '110px' : '180px') : isDesktop ? '50px' : (isAndroid && isPWA) ? '112px' : '120px', // Fullscreen - device-specific spacing
+          bottom: isIOS ? (isPWA ? '110px' : '150px') : isDesktop ? '60px' : (isAndroid && isPWA) ? '75px' : '120px', // Fullscreen - device-specific spacing
           left: '0',
           right: '0',
           paddingTop: ((isIOS || isAndroid) && isPWA) ? 'env(safe-area-inset-top)' : '0px',
