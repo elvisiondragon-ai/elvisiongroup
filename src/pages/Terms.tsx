@@ -18,7 +18,7 @@ export function Terms() {
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
               Terms of Service
             </h1>
             <p className="text-muted-foreground">eL Vision Group</p>

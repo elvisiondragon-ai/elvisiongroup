@@ -97,7 +97,7 @@ export function ResetPassword() {
                 className="w-24 h-24 object-contain"
               />
             </div>
-            <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
               eL Vision Group
             </h1>
             <p className="text-muted-foreground mt-2">
@@ -143,7 +143,7 @@ export function ResetPassword() {
               className="w-24 h-24 object-contain"
             />
           </div>
-          <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
             eL Vision Group
           </h1>
           <p className="text-muted-foreground mt-2">

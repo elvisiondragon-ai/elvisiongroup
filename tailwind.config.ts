@@ -19,7 +19,6 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				orbitron: ['Orbitron', 'monospace'],
 				exo: ['Exo 2', 'sans-serif'],
 			},
 			colors: {

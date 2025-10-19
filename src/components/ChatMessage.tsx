@@ -103,7 +103,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, curre
             pointerEvents: 'none'
           }}
         />
-        <AvatarFallback className="bg-muted text-muted-foreground font-orbitron">
+        <AvatarFallback className="bg-muted text-muted-foreground font-exo">
           {getInitials(user.name)}
         </AvatarFallback>
       </Avatar>

@@ -38,13 +38,13 @@ export function LeaderboardCard({ user }: LeaderboardCardProps) {
   return (
     <Card className="p-3 sm:p-4 bg-gradient-secondary border-border hover:border-primary transition-all duration-300">
       <div className="flex items-center gap-2 sm:gap-4">
-        <div className={`text-lg sm:text-2xl font-bold font-orbitron flex-shrink-0 ${getRankStyle()}`}>
+        <div className={`text-lg sm:text-2xl font-bold font-exo flex-shrink-0 ${getRankStyle()}`}>
           #{user.rank}
         </div>
         
         <Avatar className="w-10 h-10 sm:w-12 sm:h-12 border border-border flex-shrink-0">
           <AvatarImage src={user.avatar} />
-          <AvatarFallback className="bg-muted text-muted-foreground font-orbitron">
+          <AvatarFallback className="bg-muted text-muted-foreground font-exo">
             {getInitials(user.name)}
           </AvatarFallback>
         </Avatar>

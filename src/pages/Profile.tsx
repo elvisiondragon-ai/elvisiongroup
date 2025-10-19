@@ -172,24 +172,26 @@ export function Profile({ onNavigate }: ProfileProps) {
           }, 1000);
           return;
         }
-        
+
         toast({
           title: "Berhasil Logout",
           description: "Anda berhasil keluar dari akun.",
         });
-        
+
         // For iOS PWA, redirect immediately. For others, use existing logic.
         if (isIOS && isIOSStandalone) {
-          window.location.replace('/auth');
+          setTimeout(() => {
+            window.location.replace('/auth');
+          }, 1000);
         } else {
           // Event listener will handle redirect, but backup refresh
           setTimeout(() => {
             if (window.location.pathname !== '/auth') {
               window.location.reload();
             }
-          }, 2000);
+          }, 1000);
         }
-        
+
       } catch (error: any) {
         console.error('Unexpected logout error:', error);
         toast({
@@ -536,14 +538,14 @@ export function Profile({ onNavigate }: ProfileProps) {
       <div className="p-6 text-center">
         <Avatar className="w-24 h-24 mx-auto mb-4 border-2 border-primary glow-primary">
           <AvatarImage src={profile.avatar_url} />
-          <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xl font-orbitron">
+          <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xl font-exo">
             {displayName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         
         <div className="flex items-center justify-center gap-2 mb-2">
           <h1 className={cn(
-            "text-2xl font-bold font-orbitron transition-all duration-300",
+            "text-2xl font-bold font-exo transition-all duration-300",
             isAdmin 
               ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-4 py-2 rounded-lg shadow-2xl shadow-red-500/25"
               : "text-foreground"
@@ -623,7 +625,7 @@ export function Profile({ onNavigate }: ProfileProps) {
                   style={stat.iconStyle}
                 />
               </div>
-              <div className="font-bold font-orbitron text-foreground text-lg">
+              <div className="font-bold font-exo text-foreground text-lg">
                 {stat.value}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -636,7 +638,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
       {/* Achievements */}
       <div className="px-6 mb-6">
-        <h2 className="text-lg font-semibold font-orbitron text-foreground mb-4">
+        <h2 className="text-lg font-semibold font-exo text-foreground mb-4">
           Pencapaian
         </h2>
         
@@ -750,7 +752,7 @@ export function Profile({ onNavigate }: ProfileProps) {
 
       {/* Settings */}
       <div className="px-6 space-y-3">
-        <h2 className="text-lg font-semibold font-orbitron text-foreground mb-4">
+        <h2 className="text-lg font-semibold font-exo text-foreground mb-4">
           Pengaturan
         </h2>
 

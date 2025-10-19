@@ -182,7 +182,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
       <div className="space-y-4">
         {/* Track Info */}
         <div className="text-center">
-          <h3 className="text-lg font-semibold font-orbitron text-foreground">
+          <h3 className="text-lg font-semibold font-exo text-foreground">
             {title}
           </h3>
           {description && (

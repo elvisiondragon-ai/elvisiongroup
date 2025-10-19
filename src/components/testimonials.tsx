@@ -137,7 +137,7 @@ const videoMap: Record<string, { url: string; title: string }> = {
 export function Testimonials({ onVideoClick }: TestimonialsProps) {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold font-orbitron text-center">
+      <h2 className="text-xl font-semibold font-exo text-center">
         Testimonials
       </h2>
 

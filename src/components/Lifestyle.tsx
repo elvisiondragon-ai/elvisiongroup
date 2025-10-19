@@ -11,7 +11,7 @@ export const Lifestyle = ({ onNavigate }: LifestyleProps) => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="p-6">
-        <h1 className="text-4xl font-bold font-orbitron bg-gradient-to-r from-purple-400 to-violet-600 bg-clip-text text-transparent mb-6">
+        <h1 className="text-4xl font-bold font-exo bg-gradient-to-r from-purple-400 to-violet-600 bg-clip-text text-transparent mb-6">
           Lifestyle
         </h1>
         
@@ -24,7 +24,7 @@ export const Lifestyle = ({ onNavigate }: LifestyleProps) => {
                   <Gem className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-3xl font-orbitron text-purple-800">
+                  <CardTitle className="text-3xl font-exo text-purple-800">
                     Jewelry
                   </CardTitle>
                   <CardDescription className="text-lg text-purple-600">
@@ -140,7 +140,7 @@ export const Lifestyle = ({ onNavigate }: LifestyleProps) => {
                   <Sparkles className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-3xl font-orbitron text-white">
+                  <CardTitle className="text-3xl font-exo text-white">
                     Fragrance
                   </CardTitle>
                   <CardDescription className="text-lg text-white">

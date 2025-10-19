@@ -121,7 +121,7 @@ export function Signup() {
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto glow-primary">
               <Sparkles className="w-8 h-8 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
               Selamat Akun Dibuat! 🎉
             </h1>
             <p className="text-muted-foreground text-center">
@@ -181,7 +181,7 @@ export function Signup() {
           <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto glow-primary">
             <Sparkles className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
             Join eL Vision Group
           </h1>
           <p className="text-muted-foreground">

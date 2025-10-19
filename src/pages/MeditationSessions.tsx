@@ -287,7 +287,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
                 Sesi Meditasi
               </h1>
               <p className="text-sm text-muted-foreground">Weekly Live Sessions</p>
@@ -320,7 +320,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                 </div>
               </div>
 
-              <h2 className="text-3xl font-bold font-orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">
+              <h2 className="text-3xl font-bold font-exo bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">
                 {sessionData?.title || 'Monday Live Session 737'}
               </h2>
 
@@ -473,7 +473,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
       {/* Weekly Schedule */}
       <div className="px-6 mb-8">
         <Card className="p-6 bg-gradient-to-br from-primary/5 via-background to-accent/5 border border-primary/20 shadow-lg">
-          <h3 className="text-lg font-semibold font-orbitron mb-6 text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h3 className="text-lg font-semibold font-exo mb-6 text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Weekly Schedule
           </h3>
           <div className="space-y-4">
@@ -515,7 +515,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Headphones className="w-6 h-6 text-blue-400" />
-              <h3 className="font-semibold text-blue-300 font-orbitron">Meditation Guidelines</h3>
+              <h3 className="font-semibold text-blue-300 font-exo">Meditation Guidelines</h3>
               <Eye className="w-6 h-6 text-purple-400" />
             </div>
             <div className="text-sm text-muted-foreground space-y-3 leading-relaxed">

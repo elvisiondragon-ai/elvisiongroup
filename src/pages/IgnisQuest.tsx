@@ -24,7 +24,7 @@ export function IgnisQuest({ onNavigate }: IgnisQuestProps) {
             <div className="p-2 rounded-full bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400 shadow-lg shadow-orange-500/50">
               <Flame className="w-5 h-5 text-white animate-pulse" />
             </div>
-            <h1 className="text-xl font-semibold font-orbitron text-white">Ignis Quest</h1>
+            <h1 className="text-xl font-semibold font-exo text-white">Ignis Quest</h1>
           </div>
         </div>
       </div>
@@ -36,7 +36,7 @@ export function IgnisQuest({ onNavigate }: IgnisQuestProps) {
             <Flame className="w-16 h-16 text-white" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold font-orbitron bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent mb-3">
+            <h2 className="text-3xl font-bold font-exo bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent mb-3">
               🔥 Ignis Quest 🔥
             </h2>
             <p className="text-xl font-semibold text-orange-600 mb-4">
@@ -52,7 +52,7 @@ export function IgnisQuest({ onNavigate }: IgnisQuestProps) {
 
         {/* Description */}
         <Card className="p-6 bg-gradient-to-br from-orange-900/10 via-red-900/5 to-yellow-900/10 border-orange-500/20 shadow-lg shadow-orange-500/10">
-          <h3 className="text-lg font-semibold font-orbitron bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent mb-3">
+          <h3 className="text-lg font-semibold font-exo bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent mb-3">
             🔥 Tentang Ignis Quest 🔥
           </h3>
           <p className="text-muted-foreground leading-relaxed">
@@ -65,7 +65,7 @@ export function IgnisQuest({ onNavigate }: IgnisQuestProps) {
 
         {/* Three Phases */}
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold font-orbitron text-center bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
+          <h3 className="text-xl font-semibold font-exo text-center bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
             🔥 Tiga Fase Ignis Quest 🔥
           </h3>
           
@@ -145,7 +145,7 @@ export function IgnisQuest({ onNavigate }: IgnisQuestProps) {
         {/* Call to Action */}
         <Card className="p-6 bg-gradient-to-br from-red-900/20 via-orange-900/15 to-yellow-900/20 border-orange-500/30 shadow-2xl shadow-orange-500/20">
           <div className="text-center space-y-4">
-            <h3 className="text-lg font-semibold font-orbitron bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
+            <h3 className="text-lg font-semibold font-exo bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
               🔥 Siap Memulai Perjalanan Ignis Quest? 🔥
             </h3>
             <p className="text-muted-foreground">

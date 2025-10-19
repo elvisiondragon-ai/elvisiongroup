@@ -23,8 +23,8 @@ export function Leaderboard() {
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center glow-primary">
           <Trophy className="w-8 h-8 text-primary-foreground" />
         </div>
-        <h1 className="text-2xl font-bold font-orbitron text-foreground mb-2">
-          Hall of Energy
+        <h1 className="text-2xl font-bold font-exo text-foreground mb-2">
+          Leaderboard
         </h1>
         <p className="text-muted-foreground">
           Para soul leaders dengan vibrasi tertinggi
@@ -36,19 +36,19 @@ export function Leaderboard() {
         <div className="grid grid-cols-3 gap-4">
           <Card className="p-4 text-center bg-gradient-secondary border-border">
             <Crown className="w-6 h-6 mx-auto mb-2 text-gold" />
-            <div className="text-lg font-bold font-orbitron text-gold">120</div>
+            <div className="text-lg font-bold font-exo text-gold">120</div>
             <div className="text-xs text-muted-foreground">Masters</div>
           </Card>
           
           <Card className="p-4 text-center bg-gradient-secondary border-border">
             <Star className="w-6 h-6 mx-auto mb-2 text-gold" />
-            <div className="text-lg font-bold font-orbitron text-gold">10.927</div>
+            <div className="text-lg font-bold font-exo text-gold">10.927</div>
             <div className="text-xs text-muted-foreground">Pro Members</div>
           </Card>
           
           <Card className="p-4 text-center bg-gradient-secondary border-border">
             <Trophy className="w-6 h-6 mx-auto mb-2 text-accent" />
-            <div className="text-lg font-bold font-orbitron text-accent">18.719</div>
+            <div className="text-lg font-bold font-exo text-accent">18.719</div>
             <div className="text-xs text-muted-foreground">Active Souls</div>
           </Card>
         </div>
@@ -56,7 +56,7 @@ export function Leaderboard() {
 
       {/* Leaderboard List */}
       <div className="px-6 space-y-3">
-        <h2 className="text-lg font-semibold font-orbitron text-foreground mb-4">
+        <h2 className="text-lg font-semibold font-exo text-foreground mb-4">
           Top Spiritual Warriors
         </h2>
         
@@ -65,18 +65,15 @@ export function Leaderboard() {
         ))}
       </div>
 
-      {/* Your Rank */}
+      {/* Motivation */}
       <div className="p-6">
         <Card className="p-4 bg-gradient-accent border-accent">
           <div className="text-center">
-            <h3 className="font-semibold font-orbitron text-white mb-2">
-              🔵 Peringkat Anda 🔵
+            <h3 className="font-semibold font-exo text-white mb-2">
+              🔥 Leaderboard 🔥
             </h3>
-            <div className="text-2xl font-bold font-orbitron text-white mb-1">
-              #Tidak ditemukan
-            </div>
             <p className="text-sm text-white">
-              Peringkat anda berdasarkan Konsistensi menggunakan ecosystem, Karena konsistensi adalah kunci keberhasilan
+              Terus kejar Streak days dengan aktif setiap hari agar masuk peringkat. Konsistensi adalah kunci keberhasilan!
             </p>
           </div>
         </Card>

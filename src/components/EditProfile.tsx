@@ -135,7 +135,7 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold font-orbitron text-foreground">
+        <h1 className="text-2xl font-bold font-exo text-foreground">
           Edit Profil
         </h1>
         <Button
@@ -153,7 +153,7 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
         <div className="text-center space-y-4">
           <Avatar className="w-24 h-24 mx-auto border-2 border-primary glow-primary">
             <AvatarImage src={avatarUrl} />
-            <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xl font-orbitron">
+            <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xl font-exo">
               {displayName.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>

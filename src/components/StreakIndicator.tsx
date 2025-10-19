@@ -63,7 +63,7 @@ export function StreakIndicator({ streakDays, className, size = 'md' }: StreakIn
           isIgnisHorsemen && "animate-bounce",
           streakDays >= 7 && streakDays < 300 && "animate-pulse"
         )} />
-        <span className={cn("font-medium font-orbitron", currentSize.text)}>
+        <span className={cn("font-medium font-exo", currentSize.text)}>
           {streakDays}
         </span>
       </div>

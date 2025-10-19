@@ -506,7 +506,7 @@ export function Home({
               <StreakIndicator streakDays={effectiveProfile?.streak_days || 0} size="sm" />
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold font-orbitron text-primary">
+              <div className="text-2xl font-bold font-exo text-primary">
                 {effectiveProfile?.experience_points || 0} XP
               </div>
               <div className="text-xs text-muted-foreground">
@@ -554,7 +554,7 @@ export function Home({
 
       {/* Tutorial Section for All New Users */}
       <div className="px-6 space-y-4">
-        <h2 className="text-xl font-semibold font-orbitron">CARA MENGGUNAKAN</h2>
+        <h2 className="text-xl font-semibold font-exo">CARA MENGGUNAKAN</h2>
         
         
         <div className="grid grid-cols-1 gap-4">
@@ -596,7 +596,7 @@ export function Home({
 
       {/* Quick Actions */}
       <div className="px-6 space-y-4">
-        <h2 className="text-xl font-semibold font-orbitron">FITUR UTAMA</h2>
+        <h2 className="text-xl font-semibold font-exo">FITUR UTAMA</h2>
         
         <div className="grid grid-cols-2 gap-4">
           {fiturUtamaFeatures.map((feature, index) => {
@@ -796,7 +796,7 @@ export function Home({
         </div>
 
         {/* Advance User Section */}
-        <h2 className="text-xl font-semibold font-orbitron">ADVANCE USER</h2>
+        <h2 className="text-xl font-semibold font-exo">ADVANCE USER</h2>
         
         <div className="grid grid-cols-2 gap-4">
           {advanceUserFeatures.map((feature, index) => {
@@ -884,7 +884,7 @@ export function Home({
         </div>
 
         {/* Education Blog Section */}
-        <h2 className="text-xl font-semibold font-orbitron">EDUCATION BLOG</h2>
+        <h2 className="text-xl font-semibold font-exo">EDUCATION BLOG</h2>
         
         <div className="grid grid-cols-2 gap-4">
           {educationFeatures.map((feature, index) => {
@@ -1126,7 +1126,7 @@ export function Home({
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-lg font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent font-orbitron">
+              <h3 className="text-lg font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent font-exo">
                 ⚡ Dapatkan EXP Sebanyak Mungkin! ⚡
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -1175,7 +1175,7 @@ export function Home({
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent font-orbitron">
+              <h3 className="text-xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent font-exo">
                 👑 AFFILIATE OF THE MONTH 👑
               </h3>
               <div className="flex items-center justify-center gap-2">
@@ -1200,7 +1200,7 @@ export function Home({
       {/* Community Preview */}
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold font-orbitron">Active Community</h2>
+          <h2 className="text-xl font-semibold font-exo">Active Community</h2>
           <Button variant="ghost" size="sm" onClick={() => onNavigate("chat")} className="text-primary hover:text-primary/80">
             View All
           </Button>
@@ -1230,7 +1230,7 @@ export function Home({
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-xl font-semibold font-orbitron">Pengalaman Anggota</h2>
+              <h2 className="text-xl font-semibold font-exo">Pengalaman Anggota</h2>
               <Button 
                 onClick={() => setShowMediaModal(false)}
                 className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
@@ -1406,7 +1406,7 @@ export function Home({
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-xl font-semibold font-orbitron">{individualVideo.title}</h2>
+              <h2 className="text-xl font-semibold font-exo">{individualVideo.title}</h2>
               <Button
                 onClick={() => {
                   setShowIndividualVideoModal(false);
@@ -1504,7 +1504,7 @@ export function Home({
             <div className="flex items-center justify-between p-4 border-b border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
               <div className="flex items-center gap-3">
                 <Crown className="w-6 h-6 text-amber-400 animate-pulse" />
-                <h2 className="text-xl font-semibold font-orbitron bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+                <h2 className="text-xl font-semibold font-exo bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
                   Affiliate of The Month
                 </h2>
               </div>
@@ -1530,7 +1530,7 @@ export function Home({
                 </div>
                 
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent font-orbitron">
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent font-exo">
                     🎉 SELAMAT! 🎉
                   </h1>
                   <h2 className="text-2xl font-bold text-amber-400">

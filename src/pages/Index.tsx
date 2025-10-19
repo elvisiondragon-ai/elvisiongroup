@@ -166,7 +166,7 @@ const Index = () => {
         return (
           <div className="min-h-screen bg-background pb-20">
             <div className="p-6">
-              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+              <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Personal Analytics Algoritm
               </h1>
               <JournalAnalytics onUpgradeClick={() => setActiveTab("payment")} />
@@ -177,7 +177,7 @@ const Index = () => {
         return (
           <div className="min-h-screen bg-background pb-20">
             <div className="p-6">
-              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+              <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Elite Habit
               </h1>
               <EliteHabit />
@@ -196,7 +196,7 @@ const Index = () => {
         return (
           <div className="min-h-screen bg-background pb-20">
             <div className="p-6">
-              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+              <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Peredaran Darah Optimal
               </h1>
               <BloodCirculation onNavigate={setActiveTab} />
@@ -208,7 +208,7 @@ const Index = () => {
         return (
           <div className="min-h-screen bg-background pb-20">
             <div className="p-6">
-              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+              <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Keuangan & Meditasi
               </h1>
               <Finance onNavigate={setActiveTab} />
@@ -220,7 +220,7 @@ const Index = () => {
         return (
           <div className="min-h-screen bg-background pb-20">
             <div className="p-6">
-              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+              <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Kecantikan Fisik Sejati
               </h1>
               <KecantikanFisik onNavigate={setActiveTab} />
@@ -232,7 +232,7 @@ const Index = () => {
         return (
           <div className="min-h-screen bg-background pb-20">
             <div className="p-6">
-              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+              <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 True Diet: Diet Sejati
               </h1>
               <TrueDiet onNavigate={setActiveTab} />
@@ -247,7 +247,7 @@ const Index = () => {
         return (
           <div className="min-h-screen bg-background pb-20">
             <div className="p-6">
-              <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent mb-6">
+              <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Pasangan & Ketenangan Diri
               </h1>
               <Pasangan onNavigate={setActiveTab} />

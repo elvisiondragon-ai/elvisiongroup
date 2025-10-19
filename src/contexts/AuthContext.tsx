@@ -108,6 +108,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // IDLE USER HANDLER - Max retry limit before refresh
+  const MAX_RETRIES = 10; // After 10 retries, refresh instead of continuing
+
   // IDLE USER HANDLER - Retry delay function with exponential backoff + jitter
   const getRetryDelay = () => {
     const retryCount = retryCountRef.current;
@@ -437,6 +440,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('🩵 WebSocket Scheduling reconnect after timeout/close...');
         isRebuildingRef.current = false; // ⚠️ Reset flag to allow retry
 
+        // Check if max retries exceeded - refresh instead of logout
+        if (retryCountRef.current >= MAX_RETRIES) {
+          console.log('🔄 Max retries exceeded, refreshing page to recover connection...');
+          localStorage.setItem('connection-recovery-refresh', 'true');
+          window.location.reload();
+          return;
+        }
+
         // Retry with idle-aware backoff
         if (!retryTimeoutRef.current) {
           const delay = getRetryDelay();
@@ -454,6 +465,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (status === 'CHANNEL_ERROR' || status === 'CONNECTION_ERROR' || status === 'FAILED') {
         console.log('🔥🐢☀️ WebSocket Transition:', status);
         isRebuildingRef.current = false; // ⚠️ Reset flag to allow retry
+
+        // Check if max retries exceeded - refresh instead of logout
+        if (retryCountRef.current >= MAX_RETRIES) {
+          console.log('🔄 Max retries exceeded, refreshing page to recover connection...');
+          localStorage.setItem('connection-recovery-refresh', 'true');
+          window.location.reload();
+          return;
+        }
 
         // Retry failed connections with idle detection
         if (!retryTimeoutRef.current) {
@@ -510,6 +529,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const lastLogoutReason = localStorage.getItem('last-logout-reason');
     if (lastLogoutReason) {
       console.log(`📋 Previous logout: ${lastLogoutReason}`);
+    }
+
+    // Display connection recovery refresh if available
+    const connectionRecovery = localStorage.getItem('connection-recovery-refresh');
+    if (connectionRecovery) {
+      console.log('🔄 Page refreshed due to max retries - attempting fresh connection...');
+      localStorage.removeItem('connection-recovery-refresh');
     }
 
     // IDLE USER HANDLER - Page visibility tracking

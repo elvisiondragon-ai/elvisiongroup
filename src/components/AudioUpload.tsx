@@ -168,7 +168,7 @@ export function AudioUpload({ onUploadComplete }: AudioUploadProps) {
       <div className="space-y-4">
         <div className="text-center">
           <Music className="h-8 w-8 mx-auto text-primary mb-2" />
-          <h3 className="text-lg font-semibold font-orbitron text-foreground">
+          <h3 className="text-lg font-semibold font-exo text-foreground">
             Upload Audio Track
           </h3>
           <p className="text-sm text-muted-foreground">

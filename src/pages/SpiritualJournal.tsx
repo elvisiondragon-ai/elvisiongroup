@@ -216,7 +216,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
             Jurnal Spiritual
           </h1>
         </div>

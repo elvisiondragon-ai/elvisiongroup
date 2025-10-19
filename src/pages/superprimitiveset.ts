@@ -153,7 +153,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
       <div className="space-y-4">
         {/* Track Info */}
         <div className="text-center">
-          <h3 className="text-lg font-semibold font-orbitron text-foreground">
+          <h3 className="text-lg font-semibold font-exo text-foreground">
             {title}
           </h3>
           {description && (
@@ -410,7 +410,7 @@ export function AudioUpload({ onUploadComplete }: AudioUploadProps) {
       <div className="space-y-4">
         <div className="text-center">
           <Music className="h-8 w-8 mx-auto text-primary mb-2" />
-          <h3 className="text-lg font-semibold font-orbitron text-foreground">
+          <h3 className="text-lg font-semibold font-exo text-foreground">
             Upload Audio Track
           </h3>
           <p className="text-sm text-muted-foreground">
@@ -1372,7 +1372,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="text-2xl font-bold font-orbitron bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
               Verses of eL Vision
             </h1>
           </div>
@@ -1401,7 +1401,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       {/* Short Verses - Reflection */}
       <div className="px-6 space-y-4">
         <div className="text-center space-y-1">
-          <h2 className="text-lg font-semibold font-orbitron bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+          <h2 className="text-lg font-semibold font-exo bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
             Short Verses - Reflection
           </h2>
           <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent mx-auto"></div>
@@ -1419,7 +1419,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
             {/* Compact Title */}
             <div className="space-y-1">
               <div className="flex items-center justify-center gap-2">
-                <h3 className="text-lg font-semibold font-orbitron bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+                <h3 className="text-lg font-semibold font-exo bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
                   Guided to Inner Silence
                 </h3>
                 <span className="px-1.5 py-0.5 text-xs font-medium rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
@@ -1466,7 +1466,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       {/* Main Verses */}
       <div className="px-6 space-y-8">
         <div className="text-center space-y-2 pt-8">
-          <h2 className="text-xl font-bold font-orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h2 className="text-xl font-bold font-exo bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Main Verses
           </h2>
           <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto"></div>
@@ -1490,7 +1490,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                 {/* Title */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-center gap-2">
-                    <h3 className="text-2xl font-bold font-orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                    <h3 className="text-2xl font-bold font-exo bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                       {verse.title}
                     </h3>
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -1535,7 +1535,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       {/* Audio Tracks Section - Show only first 2 tracks */}
       {audioTracks.length > 0 && (
         <div className="px-6 space-y-4">
-          <h2 className="text-xl font-semibold font-orbitron text-foreground">
+          <h2 className="text-xl font-semibold font-exo text-foreground">
             {t('audioTherapy.availableTracks')}
           </h2>
           {audioTracks.slice(0, 2).map((track) => (
