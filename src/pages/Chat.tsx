@@ -76,7 +76,10 @@ export function Chat({ onNavigate }: ChatProps) {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [showGoldReportsOnly, setShowGoldReportsOnly] = useState(false);
   const [goldReportCount, setGoldReportCount] = useState(0);
-  const [messageLimit, setMessageLimit] = useState(10);
+  const [messageLimit, setMessageLimit] = useState(() => {
+    const cached = localStorage.getItem('chat-message-limit');
+    return cached ? parseInt(cached, 10) : 10;
+  });
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -99,6 +102,13 @@ export function Chat({ onNavigate }: ChatProps) {
       };
     }
   }, [proStatus]);
+
+  // Save messageLimit to localStorage only when it's 10 (initial state)
+  useEffect(() => {
+    if (messageLimit === 10) {
+      localStorage.setItem('chat-message-limit', messageLimit.toString());
+    }
+  }, [messageLimit]);
 
   const sendButtonRef = useRef<HTMLButtonElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);

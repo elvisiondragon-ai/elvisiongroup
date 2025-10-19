@@ -149,18 +149,12 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
         .select('user_id, display_name, streak_days, level, is_admin, avatar_url')
         .in('user_id', userIds);
 
-      // Fetch subscriptions
-      const { data: subscriptions } = await supabase
-        .rpc('get_user_subscriptions', { user_ids: userIds });
-
       // Map user data
       const profileMap = new Map(userProfiles?.map(p => [p.user_id, p]) || []);
-      const subscriptionMap = new Map(subscriptions?.map(s => [s.user_id, s]) || []);
 
       // Process messages
       const processedMessages = chatMessages.map(msg => {
         const userProfile = profileMap.get(msg.user_id);
-        const subscriptionData = subscriptionMap.get(msg.user_id);
 
         return {
           id: msg.id,
@@ -169,10 +163,10 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
           created_at: msg.created_at,
           user_name: userProfile?.display_name || msg.user_name,
           user_level: userProfile?.level || 1,
-          is_pro: subscriptionData?.is_pro || false,
+          is_pro: false,
           is_admin: userProfile?.is_admin || false,
           streak_days: userProfile?.streak_days || 0,
-          subscription_type: subscriptionData?.subscription_type || null,
+          subscription_type: null,
           avatar_url: userProfile?.avatar_url || undefined,
           is_gold_reported: true
         };

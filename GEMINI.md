@@ -19,3 +19,12 @@
 - **Strictly On-Task:** Never perform any action or make any change that was not explicitly requested.
 - **No Proactive Refactoring:** Do not "clean up" or refactor code adjacent to the area of a change unless it is a necessary part of the assigned task.
 - **One Job at a Time:** Focus exclusively on completing the current, assigned task before moving on to another.
+
+## 4. Report Folder after job is DONE
+- Always create file.md at folder report after job is done
+- Name file must relevant with core issue like slowchat999.md meaning chat slow because 999 limit
+- Give specific Issue and suffer from that problem, how you discover the core issue, the step you have triar and error until finally discover true solution, write the detail code problematic vs solution
+
+### 5. Schema SQL - Migration procedure
+- IF you need to know specific data on supabase write the code on assist_code, user will do it on SQL editor
+- After get the most update supabase schema, data flow, you MUST create migration file on folder supabase/migrations just to reminder to other dev the most update progress

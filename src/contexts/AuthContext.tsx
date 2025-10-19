@@ -77,12 +77,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isIdleWakeReconnectRef = useRef<boolean>(false);
   const isIdleWakeRecoveryRef = useRef<boolean>(false);
   
-  // Chat messages state
-  const [messages, setMessages] = useState<ChatMessageData[]>([]);
+  // Chat messages state with localStorage cache
+  const [messages, setMessages] = useState<ChatMessageData[]>(() => {
+    const cached = localStorage.getItem('chat-messages-cache');
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {
+        console.error('Failed to parse cached messages:', e);
+        return [];
+      }
+    }
+    return [];
+  });
   
   // OPTIMIZATION: Add caching to prevent excessive RPC calls
   const [proStatusCache, setProStatusCache] = useState<{data: any, timestamp: number} | null>(null);
   const [lastProCheck, setLastProCheck] = useState<number>(0);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('chat-messages-cache', JSON.stringify(messages));
+    }
+  }, [messages]);
 
   // IDLE USER HANDLER - Detection function
   const isIdleState = () => {
