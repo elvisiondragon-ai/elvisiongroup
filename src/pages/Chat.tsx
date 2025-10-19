@@ -76,7 +76,8 @@ export function Chat({ onNavigate }: ChatProps) {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [showGoldReportsOnly, setShowGoldReportsOnly] = useState(false);
   const [goldReportCount, setGoldReportCount] = useState(0);
-  
+  const [messageLimit, setMessageLimit] = useState(10);
+
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   // Android detection
@@ -243,12 +244,23 @@ export function Chat({ onNavigate }: ChatProps) {
     }
     
     try {
-      // Get chat messages first
-      let { data: chatMessages, error } = await supabase
+      // Get chat messages
+      let query = supabase
         .from('chat_messages')
         .select('*')
         .eq('channel_id', 'community')
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false });
+
+      if (messageLimit > 0) {
+        query = query.limit(messageLimit);
+      }
+
+      let { data: chatMessages, error } = await query;
+
+      // Reverse to show oldest first
+      if (chatMessages) {
+        chatMessages = chatMessages.reverse();
+      }
 
       // Get gold reports
       const { data: goldReports } = await supabase
@@ -437,13 +449,23 @@ export function Chat({ onNavigate }: ChatProps) {
       }
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, messageLimit]);
 
   // Load initial messages when channel is ready
   useEffect(() => {
     if (chatChannel) {
       console.log('🔵 Chat realtime status: SUBSCRIBED - Loading initial messages');
       loadMessages();
+
+      // After 1 second, load 100 messages
+      const timer = setTimeout(() => {
+        if (messageLimit === 10) {
+          console.log('⏰ 1 second passed - Loading 100 messages');
+          setMessageLimit(100);
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
     }
   }, [chatChannel, loadMessages]);
 
@@ -774,7 +796,6 @@ export function Chat({ onNavigate }: ChatProps) {
       <GoldReportList
         onBack={() => setShowGoldReportsOnly(false)}
         currentUserIsAdmin={currentUserIsAdmin}
-        messages={messages}
         userId={user?.id || null}
         onDelete={handleDeleteMessage}
         onGoldReportToggle={handleGoldReportToggle}
@@ -782,31 +803,6 @@ export function Chat({ onNavigate }: ChatProps) {
     );
   }
 
-  // Show loading state during initial load
-  if (isLoading) {
-    return (
-      <div className="flex flex-col h-screen pb-20 items-center justify-center">
-        <img 
-          src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/elvisionlogo.png" 
-          alt="Loading" 
-          className="w-20 h-20 mb-4 opacity-50"
-          loading="eager"
-          style={{ 
-            imageRendering: 'auto',
-            cacheControl: 'public, max-age=31536000' // Cache for 1 year
-          }}
-          onLoad={(e) => {
-            // Cache the image in browser cache
-            const img = e.target as HTMLImageElement;
-            if (img.complete) {
-              console.log('🖼️ Loading image cached successfully');
-            }
-          }}
-        />
-        <p className="text-sm bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent font-semibold">Tunggu Sebentar...</p>
-      </div>
-    );
-  }
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
@@ -871,12 +867,24 @@ export function Chat({ onNavigate }: ChatProps) {
           }}
         >
         <MessageList
-          messages={messages}
+          messages={messageLimit < 999999 ? messages.slice(-messageLimit) : messages}
           userId={user?.id || null}
           userIsAdmin={currentUserIsAdmin}
           onDelete={handleDeleteMessage}
           onGoldReportToggle={handleGoldReportToggle}
         />
+        {messageLimit < 999999 && (
+          <div className="p-4 text-center">
+            <span
+              onClick={() => {
+                setMessageLimit(999999);
+              }}
+              className="inline-block px-3 py-1.5 text-sm text-white font-medium bg-gray-800 hover:bg-gray-700 rounded-full cursor-pointer shadow-md transition-all duration-150"
+            >
+              Load more massage...
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Message Input - Optimized for mobile performance */}

@@ -1,8 +1,9 @@
 // @ts-nocheck
-import { useEffect, useRef, memo, useMemo } from "react";
+import { useEffect, useRef, memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ChatMessageData {
   id: string;
@@ -22,7 +23,6 @@ interface ChatMessageData {
 interface GoldReportListProps {
   onBack: () => void;
   currentUserIsAdmin: boolean;
-  messages: ChatMessageData[];
   userId: string | null;
   onDelete: (messageId: string) => void;
   onGoldReportToggle: (messageId: string, isGoldReported: boolean) => void;
@@ -78,8 +78,15 @@ const MessageList = memo(({ messages, userId, userIsAdmin, onDelete, onGoldRepor
 
 MessageList.displayName = 'MessageList';
 
-export function GoldReportList({ onBack, currentUserIsAdmin, messages, userId, onDelete, onGoldReportToggle }: GoldReportListProps) {
+export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, onGoldReportToggle }: GoldReportListProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [goldReportedMessages, setGoldReportedMessages] = useState<ChatMessageData[]>(() => {
+    // Load from cache instantly
+    const cached = localStorage.getItem('gold-reports-cache');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [displayLimit, setDisplayLimit] = useState(100);
+  const [totalCount, setTotalCount] = useState(0);
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -91,11 +98,6 @@ export function GoldReportList({ onBack, currentUserIsAdmin, messages, userId, o
   const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                 (window.navigator as any).standalone === true;
 
-  // Filter only gold reported messages
-  const goldReportedMessages = useMemo(() => {
-    return messages.filter(msg => msg.is_gold_reported);
-  }, [messages]);
-
   // Scroll to bottom function
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
@@ -103,6 +105,109 @@ export function GoldReportList({ onBack, currentUserIsAdmin, messages, userId, o
       container.scrollTop = container.scrollHeight;
     }
   };
+
+  // Fetch gold reported messages from database
+  useEffect(() => {
+    const fetchGoldReports = async () => {
+      // Get gold reports with message data
+      const { data: goldReports, error } = await supabase
+        .from('gold_reports')
+        .select('message_id');
+
+      if (error || !goldReports) {
+        console.error('Error loading gold reports:', error);
+        return;
+      }
+
+      setTotalCount(goldReports.length);
+
+      const messageIds = goldReports.map(gr => gr.message_id);
+
+      if (messageIds.length === 0) {
+        setGoldReportedMessages([]);
+        return;
+      }
+
+      // Fetch messages for these IDs
+      const { data: chatMessages, error: messagesError } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .in('id', messageIds)
+        .order('created_at', { ascending: true });
+
+      if (messagesError || !chatMessages) {
+        console.error('Error loading messages:', messagesError);
+        return;
+      }
+
+      // Get unique user IDs
+      const userIds = [...new Set(chatMessages.map(msg => msg.user_id))];
+
+      // Fetch user profiles
+      const { data: userProfiles } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, streak_days, level, is_admin, avatar_url')
+        .in('user_id', userIds);
+
+      // Fetch subscriptions
+      const { data: subscriptions } = await supabase
+        .rpc('get_user_subscriptions', { user_ids: userIds });
+
+      // Map user data
+      const profileMap = new Map(userProfiles?.map(p => [p.user_id, p]) || []);
+      const subscriptionMap = new Map(subscriptions?.map(s => [s.user_id, s]) || []);
+
+      // Process messages
+      const processedMessages = chatMessages.map(msg => {
+        const userProfile = profileMap.get(msg.user_id);
+        const subscriptionData = subscriptionMap.get(msg.user_id);
+
+        return {
+          id: msg.id,
+          user_id: msg.user_id,
+          message: msg.message,
+          created_at: msg.created_at,
+          user_name: userProfile?.display_name || msg.user_name,
+          user_level: userProfile?.level || 1,
+          is_pro: subscriptionData?.is_pro || false,
+          is_admin: userProfile?.is_admin || false,
+          streak_days: userProfile?.streak_days || 0,
+          subscription_type: subscriptionData?.subscription_type || null,
+          avatar_url: userProfile?.avatar_url || undefined,
+          is_gold_reported: true
+        };
+      });
+
+      // Update state and cache
+      setGoldReportedMessages(processedMessages);
+      localStorage.setItem('gold-reports-cache', JSON.stringify(processedMessages));
+      setTimeout(scrollToBottom, 100);
+    };
+
+    // Fetch fresh data in background (cache already displayed)
+    fetchGoldReports();
+
+    // Listen for realtime changes to gold_reports
+    const channel = supabase
+      .channel('gold-reports-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'gold_reports'
+        },
+        () => {
+          console.log('🔄 Gold reports changed - refreshing...');
+          fetchGoldReports();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Auto-scroll when component mounts
   useEffect(() => {
@@ -172,13 +277,25 @@ export function GoldReportList({ onBack, currentUserIsAdmin, messages, userId, o
             No gold reports yet
           </div>
         ) : (
-          <MessageList
-            messages={goldReportedMessages}
-            userId={userId}
-            userIsAdmin={currentUserIsAdmin}
-            onDelete={onDelete}
-            onGoldReportToggle={onGoldReportToggle}
-          />
+          <>
+            <MessageList
+              messages={goldReportedMessages.slice(0, displayLimit)}
+              userId={userId}
+              userIsAdmin={currentUserIsAdmin}
+              onDelete={onDelete}
+              onGoldReportToggle={onGoldReportToggle}
+            />
+            {displayLimit < goldReportedMessages.length && (
+              <div className="p-4 text-center">
+                <span
+                  onClick={() => setDisplayLimit(goldReportedMessages.length)}
+                  className="inline-block px-3 py-1.5 text-xs text-white font-medium bg-gray-800 hover:bg-gray-700 rounded-full cursor-pointer shadow-md transition-all duration-150"
+                >
+                  Load More Gold Report...
+                </span>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
