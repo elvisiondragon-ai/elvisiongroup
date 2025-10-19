@@ -76,7 +76,6 @@ export function Home({
   const [individualVideo, setIndividualVideo] = useState<{url: string, title: string} | null>(null);
   const [showImageGalleryModal, setShowImageGalleryModal] = useState(false);
   const [cachedMediaUrls, setCachedMediaUrls] = useState<Map<string, string>>(new Map());
-  const [showAffiliateModal, setShowAffiliateModal] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const testimonialsRef = useRef<HTMLDivElement>(null);
 
@@ -1155,68 +1154,6 @@ export function Home({
             </div>
           </div>
         </Card>
-
-        {/* Affiliate of The Month Section */}
-        <Card 
-          className="p-6 bg-gradient-to-br from-amber-500/10 via-yellow-500/10 to-orange-500/10 hover:from-amber-500/20 hover:via-yellow-500/15 hover:to-orange-500/20 border-amber-500/30 hover:border-yellow-400/50 cursor-pointer transition-all duration-300 relative overflow-hidden group"
-          onClick={() => setShowAffiliateModal(true)}
-        >
-          {/* Background glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-600/5 via-yellow-600/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          
-          <div className="relative z-10 text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-600 via-yellow-500 to-orange-600 rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300 animate-pulse"></div>
-                <div className="relative p-4 rounded-full bg-gradient-to-r from-amber-600 via-yellow-500 to-orange-600 shadow-2xl shadow-amber-500/30 group-hover:shadow-amber-500/50 group-hover:scale-110 transition-all duration-300">
-                  <Crown className="w-8 h-8 text-white animate-pulse" />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent font-exo">
-                👑 AFFILIATE OF THE MONTH 👑
-              </h3>
-              <div className="flex items-center justify-center gap-2">
-                <span className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-full shadow-lg">
-                  September 2025
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Selamat kepada Top Tier Affiliate bulan ini!
-              </p>
-              <div className="text-lg font-semibold text-amber-400">
-                Klik untuk melihat pencapaian luar biasa
-              </div>
-            </div>
-          </div>
-
-          {/* Corner accent */}
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-amber-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
-        </Card>
-      </div>
-
-      {/* Community Preview */}
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold font-exo">Active Community</h2>
-          <Button variant="ghost" size="sm" onClick={() => onNavigate("chat")} className="text-primary hover:text-primary/80">
-            View All
-          </Button>
-        </div>
-        
-        <Card className="p-4 bg-gradient-secondary border-border">
-          <div className="text-center">
-            
-            <p className="text-sm text-muted-foreground mb-4">
-              Members online now
-            </p>
-            <Button onClick={() => onNavigate("chat")} className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium">
-              Join Chat
-            </Button>
-          </div>
-        </Card>
       </div>
 
       {/* Tutorial Modal Component */}
@@ -1492,110 +1429,6 @@ export function Home({
               <p className="text-white/60 text-xs mt-1">
                 Scroll ke bawah untuk melihat semua testimoni
               </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Affiliate of The Month Congratulations Modal */}
-      {showAffiliateModal && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
-              <div className="flex items-center gap-3">
-                <Crown className="w-6 h-6 text-amber-400 animate-pulse" />
-                <h2 className="text-xl font-semibold font-exo bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
-                  Affiliate of The Month
-                </h2>
-              </div>
-              <Button 
-                onClick={() => setShowAffiliateModal(false)}
-                className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95 active:translate-y-0.5"
-                size="sm"
-              >
-                <X className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-            
-            <div className="p-6 space-y-6 mb-20">
-              {/* Congratulations Header */}
-              <div className="text-center space-y-4">
-                <div className="flex justify-center">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-amber-600 via-yellow-500 to-orange-600 rounded-full blur-xl opacity-40 animate-pulse"></div>
-                    <div className="relative p-6 rounded-full bg-gradient-to-r from-amber-600 via-yellow-500 to-orange-600 shadow-2xl">
-                      <Crown className="w-12 h-12 text-white animate-pulse" />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent font-exo">
-                    🎉 SELAMAT! 🎉
-                  </h1>
-                  <h2 className="text-2xl font-bold text-amber-400">
-                    AGUS WAHYUDI
-                  </h2>
-                  <p className="text-lg text-muted-foreground">
-                    Top Tier Affiliate Bulan September 2025
-                  </p>
-                </div>
-              </div>
-
-              {/* Achievement Text */}
-              <div className="relative bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-4 rounded-lg border border-amber-500/20">
-                <div className="text-center space-y-3">
-                  <p className="text-sm font-medium text-amber-400">
-                    Bukti Pencapaian Luar Biasa - Transfer 20 September 2025
-                  </p>
-                  <p className="text-lg font-bold text-green-400">
-                    Mendapat Bonus Tambahan<br />Rp 5.000.000
-                  </p>
-                </div>
-              </div>
-
-              {/* Achievement Photo */}
-              <div className="relative bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-lg border border-emerald-500/20">
-                <img
-                  src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/agusaff3.png"
-                  alt="Bukti Transfer Agus Wahyudi - 20 September 2025"
-                  className="w-full h-auto rounded-lg"
-                  style={{ aspectRatio: '1/1', objectFit: 'contain' }}
-                />
-              </div>
-
-              {/* Motivational Message */}
-              <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 p-4 rounded-lg border border-emerald-500/20">
-                <div className="text-center space-y-3">
-                  <h3 className="text-lg font-semibold text-emerald-400">
-                    💎 Inspirasi untuk Affiliate Lainnya 💎
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Pencapaian AGUS WAHYUDI membuktikan bahwa dedikasi dan kerja keras dalam program affiliate eL Vision Group 
-                    memberikan hasil yang nyata. Terima kasih telah menjadi bagian dari keluarga besar kami!
-                  </p>
-                  <p className="text-sm font-medium text-emerald-400">
-                    Mari terus semangat dan capai pencapaian yang lebih luar biasa lagi! 🚀
-                  </p>
-                </div>
-              </div>
-
-              {/* Call to Action */}
-              <div className="text-center space-y-4">
-                <p className="text-xs text-muted-foreground">
-                  Ingin menjadi Affiliate of The Month selanjutnya? 
-                  <br />
-                  Bergabunglah dengan program affiliate kami dan raih kesuksesan bersama!
-                </p>
-                
-                <Button 
-                  onClick={() => setShowAffiliateModal(false)}
-                  className="w-full bg-gradient-to-r from-amber-600 via-yellow-500 to-orange-600 hover:from-amber-700 hover:via-yellow-600 hover:to-orange-700 text-white font-semibold py-3 rounded-lg shadow-lg transition-all duration-300"
-                >
-                  <Crown className="w-4 h-4 mr-2" />
-                  Tutup & Mulai Perjalanan Saya
-                </Button>
-              </div>
             </div>
           </div>
         </div>

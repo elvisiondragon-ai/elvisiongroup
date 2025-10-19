@@ -80,10 +80,64 @@ MessageList.displayName = 'MessageList';
 
 export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, onGoldReportToggle }: GoldReportListProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Cache version and TTL
+  const CACHE_VERSION = 1;
+  const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
   const [goldReportedMessages, setGoldReportedMessages] = useState<ChatMessageData[]>(() => {
-    // Load from cache instantly
+    // Load from cache with validation
     const cached = localStorage.getItem('gold-reports-cache');
-    return cached ? JSON.parse(cached) : [];
+    if (cached) {
+      try {
+        const parsedCache = JSON.parse(cached);
+
+        // Validate cache structure
+        if (!parsedCache || typeof parsedCache !== 'object') {
+          console.warn('⚠️ Invalid gold reports cache structure, clearing...');
+          localStorage.removeItem('gold-reports-cache');
+          return [];
+        }
+
+        const { version, timestamp, data } = parsedCache;
+
+        // If old format (no version), migrate to new format
+        if (!version && Array.isArray(parsedCache)) {
+          console.log('📦 Migrating old gold reports cache format...');
+          return parsedCache;
+        }
+
+        // Check cache version
+        if (version !== CACHE_VERSION) {
+          console.warn('⚠️ Gold reports cache version mismatch, clearing...');
+          localStorage.removeItem('gold-reports-cache');
+          return [];
+        }
+
+        // Check cache age (TTL)
+        if (timestamp && Date.now() - timestamp > CACHE_TTL) {
+          console.warn('⚠️ Gold reports cache expired (>24h), clearing...');
+          localStorage.removeItem('gold-reports-cache');
+          return [];
+        }
+
+        // Validate data is array
+        if (!Array.isArray(data)) {
+          console.warn('⚠️ Invalid gold reports cache data format, clearing...');
+          localStorage.removeItem('gold-reports-cache');
+          return [];
+        }
+
+        console.log('✅ Loaded valid gold reports cache:', data.length, 'messages');
+        return data;
+      } catch (e) {
+        console.error('❌ Failed to parse cached gold reports:', e);
+        console.log('🧹 Clearing corrupted gold reports cache...');
+        localStorage.removeItem('gold-reports-cache');
+        return [];
+      }
+    }
+    return [];
   });
   const [displayLimit, setDisplayLimit] = useState(100);
   const [totalCount, setTotalCount] = useState(0);
@@ -124,7 +178,8 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
       const messageIds = goldReports.map(gr => gr.message_id);
 
       if (messageIds.length === 0) {
-        setGoldReportedMessages([]);
+        // Don't clear cache, just update count
+        setTotalCount(0);
         return;
       }
 
@@ -172,14 +227,34 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
         };
       });
 
-      // Update state and cache
+      // Update state and cache with version and timestamp
       setGoldReportedMessages(processedMessages);
-      localStorage.setItem('gold-reports-cache', JSON.stringify(processedMessages));
+      try {
+        const cacheData = {
+          version: CACHE_VERSION,
+          timestamp: Date.now(),
+          data: processedMessages
+        };
+        localStorage.setItem('gold-reports-cache', JSON.stringify(cacheData));
+      } catch (e) {
+        console.error('❌ Failed to save gold reports cache:', e);
+        if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+          console.warn('💾 localStorage quota exceeded, clearing gold reports cache...');
+          localStorage.removeItem('gold-reports-cache');
+        }
+      }
       setTimeout(scrollToBottom, 100);
     };
 
-    // Fetch fresh data in background (cache already displayed)
-    fetchGoldReports();
+    // Check if cache exists - only fetch if empty
+    const hasCachedData = goldReportedMessages.length > 0;
+
+    if (!hasCachedData) {
+      console.log('📦 No cache - fetching gold reports from database');
+      fetchGoldReports();
+    } else {
+      console.log('⚡ Using cached gold reports - skipping initial fetch');
+    }
 
     // Listen for realtime changes to gold_reports
     const channel = supabase
@@ -217,15 +292,13 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
           paddingTop: ((isIOS || isAndroid) && isPWA) ? 'calc(env(safe-area-inset-top) + 12px)' : '12px'
         }}
       >
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
           onClick={onBack}
-          className="w-full h-10 bg-gradient-to-r from-amber-400/60 via-yellow-400/60 to-amber-500/60 hover:from-amber-500/60 hover:via-yellow-500/60 hover:to-amber-600/60 text-black font-medium shadow-lg shadow-amber-500/20 transition-all duration-150 flex items-center justify-center gap-2"
+          className="w-full h-10 rounded-md bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-medium shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Chat
-        </Button>
+        </button>
       </div>
 
       {/* Messages */}

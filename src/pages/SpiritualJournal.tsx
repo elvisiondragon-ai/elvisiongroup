@@ -349,13 +349,13 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
             <h3 className="text-lg font-semibold text-white mt-6 mx-6" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}>
               Pertanyaan Hari Ini
             </h3>
-            
+
             <div className="p-4 rounded-lg bg-indigo-800/50 border border-indigo-400/50 shadow-inner">
               <p className="text-indigo-100 leading-relaxed" style={{fontSize: '17px'}}>
                 "{currentQuestion}"
               </p>
             </div>
-            
+
             <div className="space-y-3">
               <Textarea
                 value={reflection}

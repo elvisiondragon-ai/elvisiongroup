@@ -77,28 +77,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isIdleWakeReconnectRef = useRef<boolean>(false);
   const isIdleWakeRecoveryRef = useRef<boolean>(false);
   
-  // Chat messages state with localStorage cache
+  // Cache version - increment when data structure changes
+  const CACHE_VERSION = 1;
+  const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+  // Chat messages state with localStorage cache and validation
   const [messages, setMessages] = useState<ChatMessageData[]>(() => {
     const cached = localStorage.getItem('chat-messages-cache');
     if (cached) {
       try {
-        return JSON.parse(cached);
+        const parsedCache = JSON.parse(cached);
+
+        // Validate cache structure
+        if (!parsedCache || typeof parsedCache !== 'object') {
+          console.warn('⚠️ Invalid cache structure, clearing...');
+          localStorage.removeItem('chat-messages-cache');
+          return [];
+        }
+
+        // Check if cache has version and timestamp
+        const { version, timestamp, data } = parsedCache;
+
+        // If old format (no version), migrate to new format
+        if (!version && Array.isArray(parsedCache)) {
+          console.log('📦 Migrating old cache format...');
+          return parsedCache; // Use old data but will be saved in new format
+        }
+
+        // Check cache version
+        if (version !== CACHE_VERSION) {
+          console.warn('⚠️ Cache version mismatch, clearing old cache...');
+          localStorage.removeItem('chat-messages-cache');
+          return [];
+        }
+
+        // Check cache age (TTL)
+        if (timestamp && Date.now() - timestamp > CACHE_TTL) {
+          console.warn('⚠️ Cache expired (>24h), clearing stale cache...');
+          localStorage.removeItem('chat-messages-cache');
+          return [];
+        }
+
+        // Validate data is array
+        if (!Array.isArray(data)) {
+          console.warn('⚠️ Invalid cache data format, clearing...');
+          localStorage.removeItem('chat-messages-cache');
+          return [];
+        }
+
+        console.log('✅ Loaded valid cache:', data.length, 'messages');
+        return data;
       } catch (e) {
-        console.error('Failed to parse cached messages:', e);
+        console.error('❌ Failed to parse cached messages:', e);
+        console.log('🧹 Clearing corrupted cache...');
+        localStorage.removeItem('chat-messages-cache');
         return [];
       }
     }
     return [];
   });
-  
+
   // OPTIMIZATION: Add caching to prevent excessive RPC calls
   const [proStatusCache, setProStatusCache] = useState<{data: any, timestamp: number} | null>(null);
   const [lastProCheck, setLastProCheck] = useState<number>(0);
 
-  // Save messages to localStorage whenever they change
+  // Save messages to localStorage whenever they change (with version and timestamp)
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem('chat-messages-cache', JSON.stringify(messages));
+      try {
+        const cacheData = {
+          version: CACHE_VERSION,
+          timestamp: Date.now(),
+          data: messages
+        };
+        localStorage.setItem('chat-messages-cache', JSON.stringify(cacheData));
+      } catch (e) {
+        console.error('❌ Failed to save cache:', e);
+        // If localStorage is full, clear old cache
+        if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+          console.warn('💾 localStorage quota exceeded, clearing cache...');
+          localStorage.removeItem('chat-messages-cache');
+        }
+      }
     }
   }, [messages]);
 

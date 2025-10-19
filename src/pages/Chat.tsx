@@ -112,6 +112,7 @@ export function Chat({ onNavigate }: ChatProps) {
 
   const sendButtonRef = useRef<HTMLButtonElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const isDeleteActionRef = useRef<boolean>(false);
 
   // Independent pro badge cache for Chat.tsx optimistic UI
   const [chatProBadgeCache, setChatProBadgeCache] = useState(() => {
@@ -169,9 +170,15 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   };
 
-  // Auto-scroll to bottom when messages load or change
+  // Auto-scroll to bottom when messages load or change (except delete)
   useEffect(() => {
     if (messages.length > 0) {
+      // Skip auto-scroll if last action was delete
+      if (isDeleteActionRef.current) {
+        console.log('🚫 Skipping auto-scroll after delete');
+        isDeleteActionRef.current = false; // Reset flag
+        return;
+      }
       // Small delay to ensure DOM is updated
       setTimeout(scrollToBottom, 100);
     }
@@ -465,7 +472,18 @@ export function Chat({ onNavigate }: ChatProps) {
   useEffect(() => {
     if (chatChannel) {
       console.log('🔵 Chat realtime status: SUBSCRIBED - Loading initial messages');
-      loadMessages();
+
+      // Wrap in try-catch to prevent black screen on errors
+      try {
+        loadMessages();
+      } catch (error) {
+        console.error('❌ Critical error loading messages:', error);
+        console.log('🧹 Clearing cache and retrying...');
+        localStorage.removeItem('chat-messages-cache');
+        localStorage.removeItem('chat-message-limit');
+        // Reload page to recover
+        setTimeout(() => window.location.reload(), 1000);
+      }
 
       // After 1 second, load 100 messages
       const timer = setTimeout(() => {
@@ -740,6 +758,9 @@ export function Chat({ onNavigate }: ChatProps) {
   };
 
   const handleDeleteMessage = useCallback(async (messageId: string) => {
+    // Set flag to prevent auto-scroll after delete
+    isDeleteActionRef.current = true;
+
     removeMessage(messageId);
 
     if (messageId.startsWith('temp-')) {
@@ -823,15 +844,13 @@ export function Chat({ onNavigate }: ChatProps) {
           paddingTop: ((isIOS || isAndroid) && isPWA) ? 'calc(env(safe-area-inset-top) + 12px)' : '12px'
         }}
       >
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
           onClick={() => setShowGoldReportsOnly(true)}
-          className="w-full h-10 bg-gradient-to-r from-amber-400/60 via-yellow-400/60 to-amber-500/60 hover:from-amber-500/60 hover:via-yellow-500/60 hover:to-amber-600/60 text-white font-medium shadow-lg shadow-amber-500/20 transition-all duration-150"
+          className="w-full h-10 rounded-md bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-medium shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
         >
-          <Rocket className="h-4 w-4 mr-2" />
+          <Rocket className="h-4 w-4" />
           Gold Report
-        </Button>
+        </button>
       </div>
 
       {/* Messages */}
