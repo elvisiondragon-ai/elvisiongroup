@@ -1,9 +1,10 @@
 // @ts-nocheck
-import { useEffect, useRef, memo, useState } from "react";
+import { useEffect, useRef, memo, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ChatMessageData {
   id: string;
@@ -80,13 +81,14 @@ MessageList.displayName = 'MessageList';
 
 export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, onGoldReportToggle }: GoldReportListProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const { chatChannel } = useAuth();
 
   // Cache version and TTL
   const CACHE_VERSION = 1;
   const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
+  // State for gold reported messages with cache (identical to chat.tsx)
   const [goldReportedMessages, setGoldReportedMessages] = useState<ChatMessageData[]>(() => {
-    // Load from cache with validation
     const cached = localStorage.getItem('gold-reports-cache');
     if (cached) {
       try {
@@ -139,8 +141,40 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
     }
     return [];
   });
-  const [displayLimit, setDisplayLimit] = useState(100);
-  const [totalCount, setTotalCount] = useState(0);
+
+  // Message limit pattern: start at 10, expand to 100 after 1 second
+  const [messageLimit, setMessageLimit] = useState(() => {
+    const cached = localStorage.getItem('gold-report-limit');
+    return cached ? parseInt(cached, 10) : 10;
+  });
+
+  // Save messageLimit to localStorage only when it's 10 (initial state)
+  useEffect(() => {
+    if (messageLimit === 10) {
+      localStorage.setItem('gold-report-limit', messageLimit.toString());
+    }
+  }, [messageLimit]);
+
+  // Save gold reported messages to localStorage whenever they change (identical to chat.tsx)
+  useEffect(() => {
+    if (goldReportedMessages.length > 0) {
+      try {
+        const cacheData = {
+          version: CACHE_VERSION,
+          timestamp: Date.now(),
+          data: goldReportedMessages
+        };
+        localStorage.setItem('gold-reports-cache', JSON.stringify(cacheData));
+      } catch (e) {
+        console.error('❌ Failed to save gold reports cache:', e);
+        // If localStorage is full, clear old cache
+        if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+          console.warn('💾 localStorage quota exceeded, clearing gold reports cache...');
+          localStorage.removeItem('gold-reports-cache');
+        }
+      }
+    }
+  }, [goldReportedMessages]);
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -152,18 +186,33 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
   const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                 (window.navigator as any).standalone === true;
 
-  // Scroll to bottom function
-  const scrollToBottom = () => {
-    if (messagesContainerRef.current) {
-      const container = messagesContainerRef.current;
-      container.scrollTop = container.scrollHeight;
+  // Smart user data cache (same as chat.tsx)
+  const getUserDataFromCache = (userId: string) => {
+    const cached = localStorage.getItem(`user-data-${userId}`);
+    if (!cached) return null;
+
+    const { data, timestamp } = JSON.parse(cached);
+    const TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+    if (Date.now() - timestamp > TTL) {
+      localStorage.removeItem(`user-data-${userId}`);
+      return null;
     }
+
+    return data;
   };
 
-  // Fetch gold reported messages from database
-  useEffect(() => {
-    const fetchGoldReports = async () => {
-      // Get gold reports with message data
+  const cacheUserData = (userId: string, data: any) => {
+    localStorage.setItem(`user-data-${userId}`, JSON.stringify({
+      data,
+      timestamp: Date.now()
+    }));
+  };
+
+  // Fetch gold reports directly from database
+  const loadGoldReports = useCallback(async () => {
+    try {
+      // Get gold reports
       const { data: goldReports, error } = await supabase
         .from('gold_reports')
         .select('message_id');
@@ -173,22 +222,24 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
         return;
       }
 
-      setTotalCount(goldReports.length);
-
       const messageIds = goldReports.map(gr => gr.message_id);
 
       if (messageIds.length === 0) {
-        // Don't clear cache, just update count
-        setTotalCount(0);
+        setGoldReportedMessages([]);
         return;
       }
 
       // Fetch messages for these IDs
-      const { data: chatMessages, error: messagesError } = await supabase
+      let { data: chatMessages, error: messagesError } = await supabase
         .from('chat_messages')
         .select('*')
         .in('id', messageIds)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false });
+
+      // Reverse to show oldest first (identical to chat.tsx)
+      if (chatMessages) {
+        chatMessages = chatMessages.reverse();
+      }
 
       if (messagesError || !chatMessages) {
         console.error('Error loading messages:', messagesError);
@@ -198,90 +249,155 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
       // Get unique user IDs
       const userIds = [...new Set(chatMessages.map(msg => msg.user_id))];
 
-      // Fetch user profiles
-      const { data: userProfiles } = await supabase
-        .from('profiles')
-        .select('user_id, display_name, streak_days, level, is_admin, avatar_url')
-        .in('user_id', userIds);
+      // Check cache for existing user data
+      const cachedProfiles = new Map();
+      const cachedSubscriptions = new Map();
+      const uncachedUserIds = [];
 
-      // Map user data
-      const profileMap = new Map(userProfiles?.map(p => [p.user_id, p]) || []);
+      userIds.forEach(userId => {
+        const cached = getUserDataFromCache(userId);
+        if (cached) {
+          cachedProfiles.set(userId, cached.profile);
+          if (cached.subscription) {
+            cachedSubscriptions.set(userId, cached.subscription);
+          }
+        } else {
+          uncachedUserIds.push(userId);
+        }
+      });
 
-      // Process messages
+      console.log(`💾 Gold Report Cache hit: ${userIds.length - uncachedUserIds.length}/${userIds.length} users`);
+
+      // Only fetch data for uncached users
+      if (uncachedUserIds.length > 0) {
+        const { data: userProfiles } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, streak_days, level, is_admin, avatar_url')
+          .in('user_id', uncachedUserIds);
+
+        const { data: subscriptions } = await supabase
+          .rpc('get_public_pro_status', { user_ids: uncachedUserIds });
+
+        if (userProfiles) {
+          userProfiles.forEach(profile => {
+            const subscription = subscriptions?.find(sub => sub.user_id === profile.user_id);
+            cacheUserData(profile.user_id, {
+              profile,
+              subscription: subscription ? {
+                is_pro: subscription.is_pro,
+                subscription_type: subscription.subscription_type
+              } : null
+            });
+            cachedProfiles.set(profile.user_id, profile);
+            if (subscription?.is_pro) {
+              cachedSubscriptions.set(profile.user_id, {
+                is_pro: true,
+                subscription_type: subscription.subscription_type
+              });
+            }
+          });
+        }
+      }
+
+      // Process messages with cached + fresh data
+      const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
       const processedMessages = chatMessages.map(msg => {
-        const userProfile = profileMap.get(msg.user_id);
+        const userProfile = cachedProfiles.get(msg.user_id);
+        const subscriptionData = cachedSubscriptions.get(msg.user_id);
 
         return {
-          id: msg.id,
-          user_id: msg.user_id,
-          message: msg.message,
-          created_at: msg.created_at,
+          ...msg,
           user_name: userProfile?.display_name || msg.user_name,
-          user_level: userProfile?.level || 1,
-          is_pro: false,
-          is_admin: userProfile?.is_admin || false,
+          user_level: userProfile?.level || msg.user_level || 1,
+          is_pro: subscriptionData?.is_pro || false,
+          is_admin: msg.user_id === knownAdminId || userProfile?.is_admin || false,
           streak_days: userProfile?.streak_days || 0,
-          subscription_type: null,
+          subscription_type: subscriptionData?.subscription_type || null,
           avatar_url: userProfile?.avatar_url || undefined,
           is_gold_reported: true
         };
       });
 
-      // Update state and cache with version and timestamp
       setGoldReportedMessages(processedMessages);
+    } catch (error) {
+      console.error('Error loading gold reports:', error);
+    }
+  }, []);
+
+  // Load initial gold reports when chatChannel is ready (identical to chat.tsx pattern)
+  useEffect(() => {
+    if (chatChannel) {
+      console.log('🔵 Gold Report realtime status: SUBSCRIBED - Loading gold reports');
+
       try {
-        const cacheData = {
-          version: CACHE_VERSION,
-          timestamp: Date.now(),
-          data: processedMessages
-        };
-        localStorage.setItem('gold-reports-cache', JSON.stringify(cacheData));
-      } catch (e) {
-        console.error('❌ Failed to save gold reports cache:', e);
-        if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-          console.warn('💾 localStorage quota exceeded, clearing gold reports cache...');
-          localStorage.removeItem('gold-reports-cache');
-        }
+        loadGoldReports();
+      } catch (error) {
+        console.error('❌ Critical error loading gold reports:', error);
+        console.log('🧹 Clearing cache and retrying...');
+        localStorage.removeItem('gold-reports-cache');
+        localStorage.removeItem('gold-report-limit');
       }
-      setTimeout(scrollToBottom, 100);
+    }
+  }, [chatChannel, loadGoldReports]);
+
+  // Listen to broadcast events from AuthContext for instant updates
+  useEffect(() => {
+    if (!chatChannel) return;
+
+    // Use isMounted flag to prevent updates after unmount
+    let isMounted = true;
+
+    const handleGoldReportAdded = (event: any) => {
+      if (!isMounted) return;
+      console.log('📢⭐ GoldReportList received: gold_report_added', event.payload.message_id);
+      loadGoldReports(); // Reload to show new gold report
     };
 
-    // Check if cache exists - only fetch if empty
-    const hasCachedData = goldReportedMessages.length > 0;
+    const handleGoldReportRemoved = (event: any) => {
+      if (!isMounted) return;
+      console.log('📢⭐ GoldReportList received: gold_report_removed', event.payload.message_id);
+      // Remove from local state instantly
+      setGoldReportedMessages(current =>
+        current.filter(msg => msg.id !== event.payload.message_id)
+      );
+    };
 
-    if (!hasCachedData) {
-      console.log('📦 No cache - fetching gold reports from database');
-      fetchGoldReports();
-    } else {
-      console.log('⚡ Using cached gold reports - skipping initial fetch');
-    }
-
-    // Listen for realtime changes to gold_reports
-    const channel = supabase
-      .channel('gold-reports-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'gold_reports'
-        },
-        () => {
-          console.log('🔄 Gold reports changed - refreshing...');
-          fetchGoldReports();
-        }
-      )
-      .subscribe();
+    // Listen to broadcast events (channel already subscribed by AuthContext)
+    chatChannel.on('broadcast', { event: 'gold_report_added' }, handleGoldReportAdded);
+    chatChannel.on('broadcast', { event: 'gold_report_removed' }, handleGoldReportRemoved);
 
     return () => {
-      supabase.removeChannel(channel);
+      // Set flag to prevent updates after unmount (channel managed by AuthContext)
+      isMounted = false;
     };
-  }, []);
+  }, [chatChannel, loadGoldReports]);
 
-  // Auto-scroll when component mounts
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      container.scrollTop = container.scrollHeight;
+    }
+  };
+
+  // Auto-scroll when gold reported messages change
   useEffect(() => {
-    setTimeout(scrollToBottom, 100);
-  }, []);
+    if (goldReportedMessages.length > 0) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [goldReportedMessages.length]);
+
+  // After 1 second, expand to 100 messages (identical to chat.tsx pattern)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (messageLimit === 10) {
+        console.log('⏰ 1 second passed - Expanding gold report limit to 100');
+        setMessageLimit(100);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [messageLimit]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
@@ -346,19 +462,21 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
         ) : (
           <>
             <MessageList
-              messages={goldReportedMessages.slice(0, displayLimit)}
+              messages={messageLimit < 999999 ? goldReportedMessages.slice(-messageLimit) : goldReportedMessages}
               userId={userId}
               userIsAdmin={currentUserIsAdmin}
               onDelete={onDelete}
               onGoldReportToggle={onGoldReportToggle}
             />
-            {displayLimit < goldReportedMessages.length && (
+            {messageLimit < goldReportedMessages.length && (
               <div className="p-4 text-center">
                 <span
-                  onClick={() => setDisplayLimit(goldReportedMessages.length)}
-                  className="inline-block px-3 py-1.5 text-xs text-white font-medium bg-gray-800 hover:bg-gray-700 rounded-full cursor-pointer shadow-md transition-all duration-150"
+                  onClick={() => {
+                    setMessageLimit(999999);
+                  }}
+                  className="inline-block px-3 py-1.5 text-sm text-white font-medium bg-gray-800 hover:bg-gray-700 rounded-full cursor-pointer shadow-md transition-all duration-150"
                 >
-                  Load More Gold Report...
+                  Load more gold reports...
                 </span>
               </div>
             )}

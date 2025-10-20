@@ -36,6 +36,8 @@ interface AuthContextType {
   removeMessage: (messageId: string) => void;
   broadcastMessage: (message: ChatMessageData) => void;
   broadcastDelete: (messageId: string) => void;
+  broadcastGoldReportAdded: (messageId: string) => void;
+  broadcastGoldReportRemoved: (messageId: string) => void;
   cleanupSupabase: () => Promise<void>;
   refreshSession: () => Promise<{ success: boolean; error?: string }>;
 }
@@ -53,6 +55,8 @@ const AuthContext = createContext<AuthContextType>({
   removeMessage: () => {},
   broadcastMessage: () => {},
   broadcastDelete: () => {},
+  broadcastGoldReportAdded: () => {},
+  broadcastGoldReportRemoved: () => {},
   cleanupSupabase: async () => {},
   refreshSession: async () => ({ success: false, error: 'Context not initialized' }),
 });
@@ -407,6 +411,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ));
       }
     );
+
+    // Add broadcast listeners for gold report toggles (instant sync)
+    channel.on('broadcast', { event: 'gold_report_added' }, (payload) => {
+      console.log('📢⭐ Broadcast: Gold report added', payload.payload.message_id);
+      const { message_id } = payload.payload;
+      setMessages(current => current.map(msg =>
+        msg.id === message_id ? { ...msg, is_gold_reported: true } : msg
+      ));
+    });
+
+    channel.on('broadcast', { event: 'gold_report_removed' }, (payload) => {
+      console.log('📢⭐ Broadcast: Gold report removed', payload.payload.message_id);
+      const { message_id } = payload.payload;
+      setMessages(current => current.map(msg =>
+        msg.id === message_id ? { ...msg, is_gold_reported: false } : msg
+      ));
+    });
     
     // Add broadcast listeners for chat
     channel.on('broadcast', { event: 'message_added' }, async (payload) => {
@@ -1127,6 +1148,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const broadcastGoldReportAdded = (messageId: string) => {
+    if (chatChannel) {
+      chatChannel.send({
+        type: 'broadcast',
+        event: 'gold_report_added',
+        payload: { message_id: messageId }
+      });
+      console.log('⭐ Gold report added broadcasted:', messageId);
+    }
+  };
+
+  const broadcastGoldReportRemoved = (messageId: string) => {
+    if (chatChannel) {
+      chatChannel.send({
+        type: 'broadcast',
+        event: 'gold_report_removed',
+        payload: { message_id: messageId }
+      });
+      console.log('⭐ Gold report removed broadcasted:', messageId);
+    }
+  };
+
   // Dedicated refresh session method for update scenarios
   const refreshSession = async (): Promise<{ success: boolean; error?: string }> => {
     console.log('🔄 AuthContext refreshSession called for update workflow');
@@ -1191,6 +1234,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         removeMessage,
         broadcastMessage,
         broadcastDelete,
+        broadcastGoldReportAdded,
+        broadcastGoldReportRemoved,
         cleanupSupabase,
         refreshSession,
       }}

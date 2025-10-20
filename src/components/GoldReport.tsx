@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface GoldReportProps {
   messageId: string;
@@ -12,6 +13,7 @@ interface GoldReportProps {
 
 export function GoldReport({ messageId, isAdmin, isGoldReported = false, onToggle }: GoldReportProps) {
   const { toast } = useToast();
+  const { broadcastGoldReportAdded, broadcastGoldReportRemoved } = useAuth();
 
   const handleToggleGoldReport = async () => {
     if (!isAdmin) return;
@@ -30,6 +32,9 @@ export function GoldReport({ messageId, isAdmin, isGoldReported = false, onToggl
           .eq('message_id', messageId);
 
         if (error) throw error;
+
+        // Broadcast removal for instant sync across all clients
+        broadcastGoldReportRemoved(messageId);
 
         toast({
           title: "Gold Report Removed",
@@ -50,6 +55,9 @@ export function GoldReport({ messageId, isAdmin, isGoldReported = false, onToggl
           });
 
         if (error) throw error;
+
+        // Broadcast addition for instant sync across all clients
+        broadcastGoldReportAdded(messageId);
 
         toast({
           title: "Gold Report Added",
