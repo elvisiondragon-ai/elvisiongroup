@@ -181,7 +181,7 @@ export function Profile({ onNavigate }: ProfileProps) {
         // For iOS PWA, redirect immediately. For others, use existing logic.
         if (isIOS && isIOSStandalone) {
           setTimeout(() => {
-            window.location.replace('/auth');
+            window.location.reload();
           }, 1000);
         } else {
           // Event listener will handle redirect, but backup refresh
