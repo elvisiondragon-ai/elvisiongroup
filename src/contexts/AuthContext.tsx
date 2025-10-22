@@ -712,6 +712,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 if (isExpired) {
                   console.log('⚠️ Token already expired, must refresh');
                 }
+                console.log('🔍 SLOW PATH: Session before refresh:', session);
+                console.log('🔍 SLOW PATH: Refresh token before refresh:', session.refresh_token);
 
                 // Refresh session to get new token
                 try {
@@ -928,10 +930,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`🔵🔵🔵 Auth State Change: ${event}`, { userId: session?.user?.id, hasSession: !!session });
 
-      // 🛡️ RACE CONDITION FIX: Skip TOKEN_REFRESHED during idle-wake recovery
-      if (event === 'TOKEN_REFRESHED' && isIdleWakeRecoveryRef.current) {
-        console.log('⏭️ Skipping rebuild - TOKEN_REFRESHED during idle-wake recovery');
-        return;
+      // IDLE WAKE FIX: Always apply the new token on TOKEN_REFRESHED
+      if (event === 'TOKEN_REFRESHED' && session) {
+        console.log('✅ Applying new token to realtime after refresh');
+        supabase.realtime.setAuth(session.access_token);
+        
+        // Only update user state, don't rebuild the entire channel
+        setUser(session.user);
+        setUserId(session.user.id);
+        currentTokenRef.current = session.access_token;
+        
+        // If in idle wake recovery, we can stop here
+        if (isIdleWakeRecoveryRef.current) {
+          console.log('✅ Token refreshed during idle-wake recovery, no rebuild needed.');
+          return;
+        }
       }
 
       // IDLE USER HANDLER - Prevent unwanted signouts
@@ -1173,6 +1186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Dedicated refresh session method for update scenarios
   const refreshSession = async (): Promise<{ success: boolean; error?: string }> => {
     console.log('🔄 AuthContext refreshSession called for update workflow');
+    console.log('🔍 Attempting to refresh session with current refresh token:', (await supabase.auth.getSession()).data.session?.refresh_token);
     
     try {
       // First try to refresh the current session
