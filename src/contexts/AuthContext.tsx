@@ -301,7 +301,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // 6. Create new channel with full realtime capabilities  
     console.log('🔧 Channel recreated with new auth');
-    const channel = supabase.channel('chat-community');
+    const channel = supabase.channel('chat-community', {
+      config: {
+        broadcast: {
+          self: true
+        }
+      }
+    });
     
     // 7. Add event listeners for chat messages (with error handling)
     channel.on(
