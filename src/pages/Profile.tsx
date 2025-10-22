@@ -756,7 +756,6 @@ export function Profile({ onNavigate }: ProfileProps) {
           Pengaturan
         </h2>
 
-        {isPWA && (
           <Button
             variant="outline"
             className="w-full transition-all duration-200 hover:scale-105 active:scale-95 transform"
@@ -766,7 +765,6 @@ export function Profile({ onNavigate }: ProfileProps) {
             <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             Check Update
           </Button>
-        )}
 
         <Button
           variant="outline"

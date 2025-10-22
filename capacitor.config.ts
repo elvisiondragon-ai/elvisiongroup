@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.8fda2b2072ff449cbd0b71d9a561716d',
+  appId: 'app.elvisiongroup.com',
   appName: 'eL Vision Group',
   webDir: 'dist',
   server: {
