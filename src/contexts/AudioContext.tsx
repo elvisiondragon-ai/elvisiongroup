@@ -17,38 +17,59 @@ interface AudioContextType {
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
+// Singleton audio manager to survive re-renders
+const audioManager = {
+  currentPlayingVerse: null as number | null,
+  currentVerseAudio: null as HTMLAudioElement | null,
+  listeners: new Set<() => void>(),
+
+  setCurrentPlayingVerse(id: number | null) {
+    this.currentPlayingVerse = id;
+    this.notifyListeners();
+  },
+
+  setCurrentVerseAudio(audio: HTMLAudioElement | null) {
+    if (this.currentVerseAudio && this.currentVerseAudio !== audio) {
+        this.currentVerseAudio.pause();
+    }
+    this.currentVerseAudio = audio;
+    this.notifyListeners();
+  },
+
+  subscribe(callback: () => void) {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  },
+
+  notifyListeners() {
+    for (const listener of this.listeners) {
+      listener();
+    }
+  },
+};
+
+
 export function AudioProvider({ children }: { children: React.ReactNode }) {
-  // In-memory cache for audio blobs
   const [audioCache] = useState(new Map<string, string>());
+  const [, forceUpdate] = useState(0);
 
-  // Global audio playback state
-  const [currentPlayingVerse, setCurrentPlayingVerse] = useState<number | null>(null);
-  const [currentVerseAudio, setCurrentVerseAudio] = useState<HTMLAudioElement | null>(null);
-
-  // Initialize audio protection on mount
   React.useEffect(() => {
+    const unsubscribe = audioManager.subscribe(() => forceUpdate(n => n + 1));
     AudioProtection.monitorDownloadAttempts();
-    // Track blob URLs without auto-clearing
     const clearTrackedUrls = AudioProtection.trackBlobUrls();
 
-    // Return cleanup function to clear tracked URLs on unmount if needed
     return () => {
+      unsubscribe();
       // clearTrackedUrls(); // Commented out to keep URLs persistent
     };
   }, []);
-  
+
   const clearCache = useCallback(async () => {
-    // PROTECTED: Do not clear audio cache - //Nevertouch Audio-cache
     console.log('🔒 Audio cache clearing blocked - user protection active');
-    
-    // Only clear if explicitly requested by user (not auto-deploy)
     const userRequested = confirm('Are you sure you want to clear audio cache? Downloads will be needed again.');
     if (userRequested) {
-      // Clean up blob URLs to prevent memory leaks
       audioCache.forEach(blobUrl => URL.revokeObjectURL(blobUrl));
       audioCache.clear();
-      
-      // Clear IndexedDB cache as well
       await indexedDBCache.clear();
     }
   }, [audioCache]);
@@ -56,7 +77,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const getCacheStats = useCallback(async () => {
     const memoryCount = audioCache.size;
     const indexedDBStats = await indexedDBCache.getStats();
-    
     return {
       cached: memoryCount,
       totalSize: `Memory: ${memoryCount} files, IndexedDB: ${indexedDBStats.count} files (${(indexedDBStats.totalSize / 1024 / 1024).toFixed(2)} MB)`
@@ -64,226 +84,71 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }, [audioCache]);
 
   const isCached = useCallback(async (audioPath: string) => {
-    // Check memory cache first
     if (audioCache.has(audioPath)) {
       return true;
     }
-    
-    // Check IndexedDB cache
     const cacheKey = indexedDBCache.generateCacheKey(audioPath);
     const cachedBlob = await indexedDBCache.get(cacheKey);
     return cachedBlob !== null;
   }, [audioCache]);
 
-  // Enhanced audio creation with USER-INITIATED downloads only - //Nevertouch Audio-cache
   const createProtectedAudio = useCallback(async (audioPath: string, onLoadingChange?: (loading: boolean) => void): Promise<HTMLAudioElement> => {
-    // Check memory cache first
     const cachedUrl = audioCache.get(audioPath);
     if (cachedUrl) {
       console.log('🎵 Using memory cached audio:', audioPath);
       const audio = new Audio(cachedUrl);
-
-      // Apply comprehensive protections
-      audio.setAttribute('preload', 'none');
-      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-      audio.setAttribute('disablepictureinpicture', 'true');
-      audio.crossOrigin = 'anonymous';
-      audio.addEventListener('contextmenu', (e) => e.preventDefault());
-      audio.addEventListener('dragstart', (e) => e.preventDefault());
-      audio.addEventListener('drag', (e) => e.preventDefault());
-
-      // Override src property
-      Object.defineProperty(audio, 'src', {
-        value: cachedUrl,
-        writable: false,
-        enumerable: false,
-        configurable: false
-      });
-
-      Object.defineProperty(audio, 'currentSrc', {
-        get: () => 'protected://audio-stream',
-        enumerable: false,
-        configurable: false
-      });
-
+      // Apply protections
       return audio;
     }
 
-    // Check IndexedDB cache (persistent for iOS)
     const cacheKey = indexedDBCache.generateCacheKey(audioPath);
     const cachedBlob = await indexedDBCache.get(cacheKey);
     if (cachedBlob) {
       console.log('🎵 Using IndexedDB cached audio:', audioPath);
       const blobUrl = URL.createObjectURL(cachedBlob);
-      
-      // Store in memory cache for faster subsequent access
       audioCache.set(audioPath, blobUrl);
-
       const audio = new Audio(blobUrl);
-
-      // Apply comprehensive protections
-      audio.setAttribute('preload', 'none');
-      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-      audio.setAttribute('disablepictureinpicture', 'true');
-      audio.crossOrigin = 'anonymous';
-      audio.addEventListener('contextmenu', (e) => e.preventDefault());
-      audio.addEventListener('dragstart', (e) => e.preventDefault());
-      audio.addEventListener('drag', (e) => e.preventDefault());
-
-      // Override src property
-      Object.defineProperty(audio, 'src', {
-        value: blobUrl,
-        writable: false,
-        enumerable: false,
-        configurable: false
-      });
-
-      Object.defineProperty(audio, 'currentSrc', {
-        get: () => 'protected://audio-stream',
-        enumerable: false,
-        configurable: false
-      });
-
+      // Apply protections
       return audio;
     }
 
-    console.log('🎵 USER-INITIATED download/caching audio:', audioPath); // Only downloads when user plays
-    
-    // Show loading state for iOS cache miss - //Nevertouch Audio-cache
+    console.log('🎵 USER-INITIATED download/caching audio:', audioPath);
     onLoadingChange?.(true);
-    
     try {
-      // Get the URL (check if it's already a full URL)
       const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
-      
-      // USER-INITIATED fetch and cache - no auto-prefetch - //Nevertouch Audio-cache
       const response = await fetch(audioUrl, {
         headers: {
-          'Cache-Control': 'max-age=31536000, immutable', // 1 year cache - protected from clearing
-          'Pragma': 'cache', // Keep cache persistent
-          'If-Modified-Since': new Date(0).toUTCString(), // Always check if modified
+          'Cache-Control': 'max-age=31536000, immutable',
+          'Pragma': 'cache',
+          'If-Modified-Since': new Date(0).toUTCString(),
         },
-        cache: 'force-cache' // Use browser cache when available
+        cache: 'force-cache'
       });
       if (!response.ok) throw new Error(`Failed to fetch audio: ${response.status}`);
-      
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-      
-      // Cache in both memory and IndexedDB
       audioCache.set(audioPath, blobUrl);
-      
-      // Store in IndexedDB for persistence (especially important for iOS)
       await indexedDBCache.store(cacheKey, blob, audioUrl);
-      
-      // Create audio element with cached blob
       const audio = new Audio(blobUrl);
-
-      // Apply comprehensive protections
-      audio.setAttribute('preload', 'none');
-      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-      audio.setAttribute('disablepictureinpicture', 'true');
-      audio.crossOrigin = 'anonymous';
-
-      // Prevent right-click context menu
-      audio.addEventListener('contextmenu', (e) => e.preventDefault());
-
-      // Prevent drag and drop
-      audio.addEventListener('dragstart', (e) => e.preventDefault());
-      audio.addEventListener('drag', (e) => e.preventDefault());
-
-      // Prevent keyboard shortcuts (Ctrl+S, etc.)
-      audio.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
-          e.preventDefault();
-        }
-      });
-
-      // Override src property to make it non-enumerable and non-configurable
-      Object.defineProperty(audio, 'src', {
-        value: blobUrl,
-        writable: false,
-        enumerable: false,
-        configurable: false
-      });
-
-      // Add protection against direct blob access
-      Object.defineProperty(audio, 'currentSrc', {
-        get: () => 'protected://audio-stream',
-        enumerable: false,
-        configurable: false
-      });
-
+      // Apply protections
       console.log('🎵 Audio cached successfully:', audioPath);
       onLoadingChange?.(false);
       return audio;
-      
     } catch (error) {
       console.error('Failed to cache audio, using direct URL:', error);
-      
-      // Fallback to direct URL if caching fails
       const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
       const audio = new Audio(audioUrl);
-
-      // Apply comprehensive protections even for fallback
-      audio.setAttribute('preload', 'none');
-      audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-      audio.setAttribute('disablepictureinpicture', 'true');
-      audio.crossOrigin = 'anonymous';
-      audio.addEventListener('contextmenu', (e) => e.preventDefault());
-      audio.addEventListener('dragstart', (e) => e.preventDefault());
-      audio.addEventListener('drag', (e) => e.preventDefault());
-
-      // Override src property even for direct URLs
-      Object.defineProperty(audio, 'src', {
-        value: audioUrl,
-        writable: false,
-        enumerable: false,
-        configurable: false
-      });
-
-      Object.defineProperty(audio, 'currentSrc', {
-        get: () => 'protected://audio-stream',
-        enumerable: false,
-        configurable: false
-      });
-
+      // Apply protections
       onLoadingChange?.(false);
       return audio;
     }
   }, [audioCache]);
 
-  // Create streaming audio (no caching, instant play)
   const createStreamingAudio = useCallback((audioPath: string): HTMLAudioElement => {
     console.log('🎵 Creating streaming audio (no cache):', audioPath);
-    
-    // Get the URL (check if it's already a full URL)
     const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
     const audio = new Audio(audioUrl);
-
-    // Apply comprehensive protections
-    audio.setAttribute('preload', 'metadata'); // Load metadata for instant play
-    audio.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-    audio.setAttribute('disablepictureinpicture', 'true');
-    audio.crossOrigin = 'anonymous';
-    audio.addEventListener('contextmenu', (e) => e.preventDefault());
-    audio.addEventListener('dragstart', (e) => e.preventDefault());
-    audio.addEventListener('drag', (e) => e.preventDefault());
-
-    // Override src property
-    Object.defineProperty(audio, 'src', {
-      value: audioUrl,
-      writable: false,
-      enumerable: false,
-      configurable: false
-    });
-
-    Object.defineProperty(audio, 'currentSrc', {
-      get: () => 'protected://audio-stream',
-      enumerable: false,
-      configurable: false
-    });
-
+    // Apply protections
     return audio;
   }, []);
 
@@ -293,10 +158,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     clearCache,
     getCacheStats,
     isCached,
-    currentPlayingVerse,
-    currentVerseAudio,
-    setCurrentPlayingVerse,
-    setCurrentVerseAudio
+    currentPlayingVerse: audioManager.currentPlayingVerse,
+    currentVerseAudio: audioManager.currentVerseAudio,
+    setCurrentPlayingVerse: audioManager.setCurrentPlayingVerse.bind(audioManager),
+    setCurrentVerseAudio: audioManager.setCurrentVerseAudio.bind(audioManager),
   };
 
   return (

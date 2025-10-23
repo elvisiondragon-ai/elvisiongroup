@@ -819,7 +819,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const timeSinceLastActive = now - lastActiveTimeRef.current;
 
       // Check if user was idle and is now active
-      if (timeSinceLastActive > 600000) { // 600000 = 10 minutes (production)
+      if (timeSinceLastActive > 4200000) { // 4200000 = 70 minutes (production)
         console.log('⚠️⚠️ IDLE USER BACK updateActiveTime');
         console.log('[RT] User active after 10+ minute idle');
 
