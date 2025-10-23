@@ -450,6 +450,21 @@ export function Chat({ onNavigate }: ChatProps) {
 
         setMessages(processedMessages);
 
+        // Pre-cache gold reports for instant loading in GoldReportList.tsx
+        const goldReportedMessagesForCache = processedMessages.filter(msg => goldReportedIds.has(msg.id));
+        if (goldReportedMessagesForCache.length > 0) {
+            try {
+                const cacheData = {
+                    version: 1,
+                    timestamp: Date.now(),
+                    data: goldReportedMessagesForCache
+                };
+                localStorage.setItem('gold-reports-cache', JSON.stringify(cacheData));
+            } catch (e) {
+                console.error('Failed to cache gold reports:', e);
+            }
+        }
+
       }
       
       setLastUpdate(new Date());

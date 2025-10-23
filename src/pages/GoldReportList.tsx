@@ -251,16 +251,12 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
 
       // Check cache for existing user data
       const cachedProfiles = new Map();
-      const cachedSubscriptions = new Map();
       const uncachedUserIds = [];
 
       userIds.forEach(userId => {
         const cached = getUserDataFromCache(userId);
-        if (cached) {
+        if (cached && cached.profile) { // Check for profile existence
           cachedProfiles.set(userId, cached.profile);
-          if (cached.subscription) {
-            cachedSubscriptions.set(userId, cached.subscription);
-          }
         } else {
           uncachedUserIds.push(userId);
         }
@@ -275,26 +271,11 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
           .select('user_id, display_name, streak_days, level, is_admin, avatar_url')
           .in('user_id', uncachedUserIds);
 
-        const { data: subscriptions } = await supabase
-          .rpc('get_public_pro_status', { user_ids: uncachedUserIds });
-
         if (userProfiles) {
           userProfiles.forEach(profile => {
-            const subscription = subscriptions?.find(sub => sub.user_id === profile.user_id);
-            cacheUserData(profile.user_id, {
-              profile,
-              subscription: subscription ? {
-                is_pro: subscription.is_pro,
-                subscription_type: subscription.subscription_type
-              } : null
-            });
+            // Cache profile data without subscription info
+            cacheUserData(profile.user_id, { profile });
             cachedProfiles.set(profile.user_id, profile);
-            if (subscription?.is_pro) {
-              cachedSubscriptions.set(profile.user_id, {
-                is_pro: true,
-                subscription_type: subscription.subscription_type
-              });
-            }
           });
         }
       }
@@ -303,16 +284,15 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
       const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
       const processedMessages = chatMessages.map(msg => {
         const userProfile = cachedProfiles.get(msg.user_id);
-        const subscriptionData = cachedSubscriptions.get(msg.user_id);
 
         return {
           ...msg,
           user_name: userProfile?.display_name || msg.user_name,
           user_level: userProfile?.level || msg.user_level || 1,
-          is_pro: subscriptionData?.is_pro || false,
+          is_pro: false, // Pro status not needed for gold reports
           is_admin: msg.user_id === knownAdminId || userProfile?.is_admin || false,
           streak_days: userProfile?.streak_days || 0,
-          subscription_type: subscriptionData?.subscription_type || null,
+          subscription_type: null,
           avatar_url: userProfile?.avatar_url || undefined,
           is_gold_reported: true
         };
