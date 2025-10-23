@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { ArrowLeft, Play, Pause, Volume2, Users, Radio, Heart, Star, Sparkles, Headphones, Clock, Crown, Eye, Loader2 } from "lucide-react";
+
+import { ArrowLeft, Play, Pause, Volume2, Users, Radio, Heart, Star, Sparkles, Headphones, Clock, Crown, Eye, Loader2, Download } from "lucide-react";
 // Removed slow UserProfileContext - now using fast auth
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/contexts/UserProfileContext';
@@ -20,7 +20,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   const { t } = useTranslation();
   const { userId } = useAuth();
   const { user } = useUserProfile();
-  const { createProtectedAudio } = useProtectedAudio();
+  const { createProtectedAudio, createStreamingAudio, isCached } = useProtectedAudio();
   const { toast } = useToast();
 
   // Log entry on component mount
@@ -38,9 +38,17 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   const [volume, setVolume] = useState(0.7);
   const [audienceCount, setAudienceCount] = useState(0);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
-  const [sessionData, setSessionData] = useState<any>(null);
   const [audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloaded, setIsDownloaded] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+
+  const sessionData = {
+    title: 'Meditasi Audio',
+    description: 'Audio untuk meditasi dan relaksasi.',
+    file_url: 'live02.MP3'
+  };
 
   useEffect(() => {
     // Only clear old profile cache ONCE if it still exists
@@ -90,78 +98,50 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
     };
   }, []);
 
-  // Fetch meditation session data from database
-  const fetchSessionData = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('audio_tracks')
-        .select('*')
-        .eq('category', 'meditation_session')
-        .eq('is_public', true)
-        .limit(1)
-        .maybeSingle();
 
-      if (error || !data) {
-        console.error('Error fetching session data:', error);
-        // Fallback to hardcoded data if database fetch fails
-        setSessionData({
-          title: 'Monday Live Session 737',
-          description: 'Join our weekly guided meditation session with thousands of practitioners worldwide.',
-          file_url: 'live02.MP3'
-        });
-        return;
+
+  useEffect(() => {
+    const checkCacheStatus = async () => {
+      if (sessionData?.file_url) {
+        const cached = await isCached(sessionData.file_url);
+        setIsDownloaded(cached);
       }
+    };
+    checkCacheStatus();
+  }, [sessionData?.file_url, isCached]);
 
-      setSessionData(data);
+  const handleDownloadClick = async () => {
+    if (!sessionData?.file_url || isDownloading || isDownloaded) return;
+    
+    setIsDownloading(true);
+    setDownloadProgress(0);
+    
+    toast({
+      title: "Sedang Download Audio... 📥",
+      description: "Setelah download Audio Tidak akan memakai kuota internet",
+      duration: 5000,
+    });
+    
+    try {
+      await createProtectedAudio(sessionData.file_url, undefined, setDownloadProgress);
+      setIsDownloaded(true);
+      
+      toast({
+        title: "Download Selesai! 🎉",
+        duration: 3000,
+      });
     } catch (error) {
-      console.error('Error:', error);
-      setAudioError('Failed to load session data');
+      console.error('Download failed:', error);
+      toast({
+        title: "Download Gagal",
+        description: "Coba lagi nanti",
+        duration: 3000,
+        variant: "destructive"
+      });
+    } finally {
+      setIsDownloading(false);
     }
   };
-
-  // Fetch session data on mount
-  useEffect(() => {
-    fetchSessionData();
-  }, []);
-
-  // Additional anti-download protection
-  useEffect(() => {
-    // Disable developer tools shortcuts
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-      if (e.key === 'F12' ||
-          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-          (e.ctrlKey && e.key === 'u')) {
-        e.preventDefault();
-        return false;
-      }
-    };
-
-    // Prevent right-click context menu
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      return false;
-    };
-
-    // Prevent text selection on audio elements
-    const handleSelectStart = (e: Event) => {
-      const target = e.target as Element;
-      if (target.tagName === 'AUDIO') {
-        e.preventDefault();
-        return false;
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('contextmenu', handleContextMenu);
-    document.addEventListener('selectstart', handleSelectStart);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('contextmenu', handleContextMenu);
-      document.removeEventListener('selectstart', handleSelectStart);
-    };
-  }, []);
 
   const togglePlayPause = async () => {
     if (!userId) {
@@ -178,10 +158,8 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
       return;
     }
 
-    const currentAudio = audioRef.current;
-
-    if (isPlaying && currentAudio) {
-      currentAudio.pause();
+    if (isPlaying && audioRef.current) {
+      audioRef.current.pause();
       setIsPlaying(false);
       return;
     }
@@ -190,40 +168,43 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
       setIsLoadingAudio(true);
       setAudioError(null);
 
-      // Create protected audio using the same system as VerseAudioCard
-      const protectedAudio = await createProtectedAudio(sessionData.file_url, setIsLoadingAudio);
+      let audio: HTMLAudioElement;
+      const cached = await isCached(sessionData.file_url);
+      
+      if (cached) {
+        console.log('🎵 Using cached audio for instant play');
+        audio = await createProtectedAudio(sessionData.file_url);
+      } else {
+        console.log('🎵 Using streaming audio for instant play');
+        audio = createStreamingAudio(sessionData.file_url);
+      }
 
-      // Set up event listeners
-      protectedAudio.addEventListener('loadedmetadata', () => {
-        setDuration(protectedAudio.duration);
+      audio.addEventListener('loadedmetadata', () => {
+        setDuration(audio.duration);
+        setIsLoadingAudio(false);
       });
 
-      protectedAudio.addEventListener('timeupdate', () => {
-        setCurrentTime(protectedAudio.currentTime);
+      audio.addEventListener('timeupdate', () => {
+        setCurrentTime(audio.currentTime);
       });
 
-      protectedAudio.addEventListener('ended', () => {
+      audio.addEventListener('ended', () => {
         setIsPlaying(false);
       });
 
-      protectedAudio.addEventListener('error', () => {
+      audio.addEventListener('error', () => {
         setAudioError('Failed to play audio');
         setIsLoadingAudio(false);
       });
 
-      // Set volume
-      protectedAudio.volume = volume;
+      audio.volume = volume;
+      await audio.play();
 
-      // Play the protected audio
-      await protectedAudio.play();
-
-      // Update refs and state
-      audioRef.current = protectedAudio;
+      audioRef.current = audio;
       setIsPlaying(true);
-      setIsLoadingAudio(false);
 
     } catch (error) {
-      console.error('Error playing protected audio:', error);
+      console.error('Error playing audio:', error);
       setAudioError('Failed to load or play audio');
       setIsLoadingAudio(false);
       setIsPlaying(false);
@@ -293,7 +274,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
               <p className="text-sm text-muted-foreground">Weekly Live Sessions</p>
             </div>
           </div>
-          <LanguageSwitcher />
+
         </div>
       </div>
 
@@ -344,61 +325,55 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
             <div className="max-w-md mx-auto">
               {/* Audio element is created programmatically via protected audio system */}
 
-              {/* Album Art */}
-              <div className="relative mb-8">
-                <div className="w-56 h-56 mx-auto rounded-3xl overflow-hidden shadow-2xl shadow-primary/40 relative group border-4 border-primary/20">
-                  {/* Rotating background effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/20 to-primary/20 animate-spin" style={{ animationDuration: '20s' }}></div>
-
-                  <img
-                    src={faviconImage}
-                    alt="Meditation Session"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 relative z-10"
-                    style={{
-                      filter: 'contrast(1.2) brightness(1.1)',
-                      background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)'
-                    }}
-                  />
-
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-20"></div>
-
-                  {/* Session info overlay */}
-                  <div className="absolute bottom-4 left-4 right-4 text-white text-center z-30">
-                    <div className="text-xs opacity-90 font-medium">eL Vision Group</div>
-                    <div className="font-bold text-sm">Live Meditation Session</div>
-                    <div className="text-xs opacity-80 mt-1">Weekly Community Gathering</div>
-                  </div>
-
-                  {/* Floating play button */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-40">
-                    <Button
-                      size="icon"
-                      onClick={togglePlayPause}
-                      className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-2 border-white/50 shadow-2xl shadow-black/50 transition-all duration-300 hover:scale-110"
-                    >
-                      {isLoadingAudio ? (
-                        <Loader2 className="w-10 h-10 text-white animate-spin" />
-                      ) : isPlaying ? (
-                        <Pause className="w-10 h-10 text-white" />
-                      ) : (
-                        <Play className="w-10 h-10 text-white ml-1" />
-                      )}
-                    </Button>
-                  </div>
-
-                  {/* Live indicator */}
-                  <div className="absolute top-4 right-4 flex items-center gap-2 bg-red-500/90 backdrop-blur-sm rounded-full px-3 py-1 z-30">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    <span className="text-white text-xs font-semibold">LIVE</span>
-                  </div>
-                </div>
-              </div>
+              {/* Album Art Removed */}
 
 
 
               {/* Control Buttons */}
-              <div className="flex items-center justify-center gap-8 mb-8">
+              <div className="flex items-center justify-center gap-2 mb-8 flex-col">
+                {sessionData?.file_url && !isDownloaded && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownloadClick();
+                    }}
+                    disabled={isDownloading}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform transition-all duration-300 ${
+                      isDownloading 
+                        ? 'bg-gradient-to-r from-gray-600 to-gray-700 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-gray-800 via-gray-900 to-black hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 hover:scale-110 active:scale-95 hover:shadow-2xl hover:shadow-gray-500/50'
+                    }`}
+                    title={isDownloading ? 'Mendownload...' : 'Download untuk offline'}
+                  >
+                    {isDownloading ? (
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <svg className="w-full h-full" viewBox="0 0 36 36">
+                          <path
+                            className="text-gray-400"
+                            d="M18 2.0845
+                              a 15.9155 15.9155 0 0 1 0 31.831
+                              a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="text-white"
+                            strokeDasharray={`${downloadProgress}, 100`}
+                            d="M18 2.0845
+                              a 15.9155 15.9155 0 0 1 0 31.831
+                              a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <span className="absolute text-white text-xs font-bold">{downloadProgress}%</span>
+                      </div>
+                    ) : (
+                      <Download className="w-5 h-5 text-white" />
+                    )}
+                  </button>
+                )}
                 <Button
                   size="icon"
                   onClick={togglePlayPause}
@@ -442,15 +417,7 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
                 </div>
               )}
 
-              {/* Loading Display */}
-              {isLoadingAudio && (
-                <div className="mt-4 p-3 bg-primary/10 border border-primary/30 rounded-lg text-center">
-                  <p className="text-primary text-sm flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    🚀Download Live on Progress
-                  </p>
-                </div>
-              )}
+              {/* Loading Display Removed */}
             </div>
 
             {/* Session Benefits */}
@@ -552,42 +519,14 @@ export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
         <div className="absolute top-4/6 right-1/4 w-2 h-2 bg-accent/30 rounded-full animate-pulse delay-1500"></div>
       </div>
 
-      <style jsx global>{`
-        html {
-          scrollbar-width: none; /* Firefox */
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
         }
-        html::-webkit-scrollbar {
-          display: none; /* Safari and Chrome */
+        .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
         }
-      `}</style>
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
-          cursor: pointer;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-          transition: all 0.3s ease;
-        }
-
-        .slider::-webkit-slider-thumb:hover {
-          transform: scale(1.2);
-          box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-        }
-
-        .slider::-moz-range-thumb {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
-          cursor: pointer;
-          border: none;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-      `}</style>
-      <style jsx>{`
         .slider::-webkit-slider-thumb {
           appearance: none;
           width: 20px;

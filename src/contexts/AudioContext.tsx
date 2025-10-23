@@ -4,7 +4,7 @@ import { indexedDBCache } from '@/utils/indexedDBCache';
 import { AudioProtection } from '@/utils/audioProtection';
 
 interface AudioContextType {
-  createProtectedAudio: (audioPath: string, onLoadingChange?: (loading: boolean) => void) => Promise<HTMLAudioElement>;
+  createProtectedAudio: (audioPath: string, onLoadingChange?: (loading: boolean) => void, onProgress?: (progress: number) => void) => Promise<HTMLAudioElement>;
   createStreamingAudio: (audioPath: string) => HTMLAudioElement;
   clearCache: () => Promise<void>;
   getCacheStats: () => Promise<{ cached: number; totalSize: string }>;
@@ -92,7 +92,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     return cachedBlob !== null;
   }, [audioCache]);
 
-  const createProtectedAudio = useCallback(async (audioPath: string, onLoadingChange?: (loading: boolean) => void): Promise<HTMLAudioElement> => {
+  const createProtectedAudio = useCallback(async (audioPath: string, onLoadingChange?: (loading: boolean) => void, onProgress?: (progress: number) => void): Promise<HTMLAudioElement> => {
     const cachedUrl = audioCache.get(audioPath);
     if (cachedUrl) {
       console.log('🎵 Using memory cached audio:', audioPath);
@@ -114,6 +114,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
     console.log('🎵 USER-INITIATED download/caching audio:', audioPath);
     onLoadingChange?.(true);
+    onProgress?.(0);
     try {
       const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
       const response = await fetch(audioUrl, {
@@ -125,7 +126,47 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         cache: 'force-cache'
       });
       if (!response.ok) throw new Error(`Failed to fetch audio: ${response.status}`);
-      const blob = await response.blob();
+      
+      const contentLength = response.headers.get('content-length');
+      if (!contentLength) {
+        console.error('Content-Length header not found');
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        audioCache.set(audioPath, blobUrl);
+        await indexedDBCache.store(cacheKey, blob, audioUrl);
+        const audio = new Audio(blobUrl);
+        onLoadingChange?.(false);
+        onProgress?.(100);
+        return audio;
+      }
+
+      const total = parseInt(contentLength, 10);
+      let loaded = 0;
+
+      const reader = response.body!.getReader();
+      const stream = new ReadableStream({
+        start(controller) {
+          function push() {
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                controller.close();
+                return;
+              }
+              loaded += value.length;
+              if (onProgress) {
+                const progress = Math.round((loaded / total) * 100);
+                onProgress(progress);
+              }
+              controller.enqueue(value);
+              push();
+            });
+          }
+          push();
+        }
+      });
+
+      const newResponse = new Response(stream);
+      const blob = await newResponse.blob();
       const blobUrl = URL.createObjectURL(blob);
       audioCache.set(audioPath, blobUrl);
       await indexedDBCache.store(cacheKey, blob, audioUrl);
@@ -133,6 +174,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       // Apply protections
       console.log('🎵 Audio cached successfully:', audioPath);
       onLoadingChange?.(false);
+      onProgress?.(100);
       return audio;
     } catch (error) {
       console.error('Failed to cache audio, using direct URL:', error);

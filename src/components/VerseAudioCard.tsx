@@ -52,6 +52,7 @@ export function VerseAudioCard({
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDownloaded, setIsDownloaded] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
   
   // Check if this verse is currently playing
   const isPlaying = currentPlayingVerse === verse.id;
@@ -279,6 +280,7 @@ export function VerseAudioCard({
     if (!verse.unlocked || !verse.audioPath || isDownloading || isDownloaded) return;
     
     setIsDownloading(true);
+    setDownloadProgress(0);
     
     // Show downloading info toast
     toast({
@@ -290,7 +292,7 @@ export function VerseAudioCard({
     
     try {
       // Force download and cache
-      await createProtectedAudio(verse.audioPath);
+      await createProtectedAudio(verse.audioPath, undefined, setDownloadProgress);
       setIsDownloaded(true);
       
       toast({
@@ -374,13 +376,35 @@ export function VerseAudioCard({
                 disabled={isDownloading}
                 className={`w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform transition-all duration-300 ${
                   isDownloading 
-                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 cursor-not-allowed animate-pulse'
+                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 cursor-not-allowed'
                     : 'bg-gradient-to-r from-gray-800 via-gray-900 to-black hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 hover:scale-110 active:scale-95 hover:shadow-2xl hover:shadow-gray-500/50'
                 }`}
                 title={isDownloading ? 'Mendownload...' : 'Download untuk offline'}
               >
                 {isDownloading ? (
-                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <svg className="w-full h-full" viewBox="0 0 36 36">
+                      <path
+                        className="text-gray-400"
+                        d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="text-white"
+                        strokeDasharray={`${downloadProgress}, 100`}
+                        d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute text-white text-xs font-bold">{downloadProgress}%</span>
+                  </div>
                 ) : (
                   <Download className="w-4 h-4 text-white" />
                 )}
