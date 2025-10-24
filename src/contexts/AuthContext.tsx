@@ -348,12 +348,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               avatar_url: userProfiles?.avatar_url || undefined
             };
 
-            console.log('🎯 Real-time message enriched with fresh badge data:', enrichedMessage);
-
             setMessages(current => {
               const exists = current.some(msg => msg.id === enrichedMessage.id);
               if (exists) return current;
-              return [...current, enrichedMessage];
+              const updatedMessages = [...current, enrichedMessage];
+              updatedMessages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+              return updatedMessages;
             });
           } catch (error) {
             console.error('❌ Failed to fetch badge data for real-time message:', error);

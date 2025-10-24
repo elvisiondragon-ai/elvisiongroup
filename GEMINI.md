@@ -19,6 +19,7 @@
 - **Strictly On-Task:** Never perform any action or make any change that was not explicitly requested.
 - **No Proactive Refactoring:** Do not "clean up" or refactor code adjacent to the area of a change unless it is a necessary part of the assigned task.
 - **One Job at a Time:** Focus exclusively on completing the current, assigned task before moving on to another.
+- **Highly Prohibited:** Never edit files outside of the immediate context. Stick to the absolute minimal, single-file solution. Editing files outside the core task is strictly forbidden.
 
 ## 4. Report Folder after job is DONE
 - Always create file.md at folder report after job is done
