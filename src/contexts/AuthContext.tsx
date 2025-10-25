@@ -807,6 +807,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         wasIdleRef.current = false;
       } else {
+        // Don't mark as idle if audio is playing in the background
+        if ((window as any).isAudioPlaying) {
+          return;
+        }
         console.log('☠️☠️ USER IDLE');
         console.log('[RT] Page hidden - marking as potentially idle');
         wasIdleRef.current = true;
@@ -815,11 +819,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Track user activity to detect idle periods
     const updateActiveTime = () => {
+      // If audio is playing, treat as constant activity and do nothing else.
+      if ((window as any).isAudioPlaying) {
+        lastActiveTimeRef.current = Date.now();
+        return;
+      }
+      
       const now = Date.now();
       const timeSinceLastActive = now - lastActiveTimeRef.current;
 
       // Check if user was idle and is now active
-      if (timeSinceLastActive > 4200000) { // 4200000 = 70 minutes (production)
+      if (timeSinceLastActive > 18000000) { // 18000000 = 300 minutes (production)
         console.log('⚠️⚠️ IDLE USER BACK updateActiveTime');
         console.log('[RT] User active after 10+ minute idle');
 

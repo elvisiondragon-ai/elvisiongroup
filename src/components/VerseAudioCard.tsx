@@ -82,13 +82,14 @@ export function VerseAudioCard({
 
   const handlePlayClick = async () => {
     if (!verse.unlocked || !verse.audioPath) return;
-    
-    // If this verse is currently playing, stop it (pause - don't increment counter)
+
+    // If this verse is currently playing, stop it
     if (isPlaying && currentVerseAudio) {
       currentVerseAudio.pause();
       setCurrentPlayingVerse(null);
       setCurrentVerseAudio(null);
-      
+      (window as any).isAudioPlaying = false;
+
       // Notify globally that audio stopped playing
       window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { 
         detail: null 
@@ -108,6 +109,7 @@ export function VerseAudioCard({
     if (currentVerseAudio) {
       currentVerseAudio.pause();
       setCurrentVerseAudio(null);
+      (window as any).isAudioPlaying = false;
       
       // Notify globally that audio stopped playing
       window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { 
@@ -123,20 +125,10 @@ export function VerseAudioCard({
       }
     }
 
-    // Create new audio (use cached if available, stream if not)
+    // Always use the protected/blob method for reliability
     try {
-      let audio: HTMLAudioElement;
-      
-      // Check if cached first for instant decision
-      const cached = await isCached(verse.audioPath);
-      
-      if (cached) {
-        console.log('🎵 Using cached audio for instant play');
-        audio = await createProtectedAudio(verse.audioPath);
-      } else {
-        console.log('🎵 Using streaming audio for instant play');
-        audio = createStreamingAudio(verse.audioPath);
-      }
+      console.log('🎵 Using protected audio (blob/cache) for reliability.');
+      const audio = await createProtectedAudio(verse.audioPath);
       
       // Add event listeners  
       audio.addEventListener('loadedmetadata', () => {
@@ -146,20 +138,20 @@ export function VerseAudioCard({
       audio.addEventListener('timeupdate', () => {
         setCurrentTime(audio.currentTime);
       });
+
       audio.addEventListener('ended', async () => {
         console.log('🎵 Audio ended for verse:', verse.title, 'ID:', verse.id);
+        (window as any).isAudioPlaying = false;
         console.log('🔄 Starting verse completion process...');
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
         setAudioDuration(null);
         setCurrentTime(0);
         
-        
         // Update total_verses counter FIRST in profiles
         const updateTotalVerses = async () => {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
-            // Get current count first, then increment
             const { data: profile } = await supabase
               .from('profiles')
               .select('total_verses')
@@ -179,42 +171,38 @@ export function VerseAudioCard({
         };
         await updateTotalVerses();
 
-        // Award XP AFTER counter increment (XP can be blocked by daily limit)
-        const xpAmount = 10; // All verses now give +10 XP
+        // Award XP AFTER counter increment
+        const xpAmount = 10;
         console.log('🏆 Awarding XP:', xpAmount, 'for verse:', verse.title);
         awardXP('verse_completion', xpAmount, `Completed ${verse.title}`, {
           verse_title: verse.title,
           verse_id: verse.id
         });
-
       });
 
       audio.addEventListener('error', (error) => {
         console.error('Error playing audio:', error);
+        (window as any).isAudioPlaying = false;
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
         setAudioDuration(null);
         setCurrentTime(0);
-        
       });
 
       // Play audio first
       await audio.play();
+      (window as any).isAudioPlaying = true;
       setCurrentPlayingVerse(verse.id);
       setCurrentVerseAudio(audio);
 
-      // Insert into verse_notif table for real-time notifications (on play button click)
+      // Insert into verse_notif table for real-time notifications
       const insertVerseNotification = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // Use auth display name, fallback to profiles table
           let displayName = 'Someone';
-          
-          // Try auth metadata first
           if (user.user_metadata?.display_name) {
             displayName = user.user_metadata.display_name;
           } else {
-            // Fallback to profiles table
             const { data: profile } = await supabase
               .from('profiles')
               .select('display_name')
@@ -223,7 +211,6 @@ export function VerseAudioCard({
             displayName = profile?.display_name || 'Someone';
           }
           
-          // Insert notification
           const { error } = await supabase
             .from('verse_notif')
             .insert({
@@ -242,7 +229,6 @@ export function VerseAudioCard({
       };
       await insertVerseNotification();
       
-      
       // Show sacred notification after 3 seconds delay
       if (onShowSacredNotification) {
         setTimeout(() => {
@@ -252,6 +238,7 @@ export function VerseAudioCard({
       
     } catch (error) {
       console.error('Error playing audio:', error);
+      (window as any).isAudioPlaying = false;
       setCurrentPlayingVerse(null);
       setCurrentVerseAudio(null);
     }
