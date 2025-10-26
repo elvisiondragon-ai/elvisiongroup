@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { ChatMessage } from "@/components/ChatMessage";
 import { Send, Users, RefreshCw, Rocket } from "lucide-react";
@@ -889,7 +890,7 @@ export function Chat({ onNavigate }: ChatProps) {
             flexDirection: 'column-reverse',
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
-            top: '104px', // From top (with space for gold report button)
+            top: '84px', // From top (with space for gold report button)
             bottom: isIOS ? (isPWA ? '200px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
             left: '0',
             right: '0',
@@ -950,12 +951,12 @@ export function Chat({ onNavigate }: ChatProps) {
         }}
       >
         <div className="flex gap-2">
-          <Input
+          <Textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Bagikan energi positif Anda..."
-            className="cyber-input"
+            className="cyber-input text-lg h-24"
             maxLength={500}
           />
           <Button
