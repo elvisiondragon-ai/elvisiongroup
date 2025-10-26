@@ -383,18 +383,18 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       {/* Header with Back Button */}
       <div
-        className="fixed top-0 left-0 right-0 bg-background border-b border-border z-50 px-4 py-3"
-        style={{
-          paddingTop: ((isIOS || isAndroid) && isPWA) ? 'calc(env(safe-area-inset-top) + 12px)' : '12px'
-        }}
+        className="fixed left-0 right-0 bg-background border-b border-border z-50"
+        style={{ top: 'env(safe-area-inset-top, 20px)' }}
       >
-        <button
-          onClick={onBack}
-          className="w-full h-10 rounded-md bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-medium shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Chat
-        </button>
+        <div className="px-4 py-3">
+          <button
+            onClick={onBack}
+            className="w-full h-10 rounded-md bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-medium shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Chat
+          </button>
+        </div>
       </div>
 
       {/* Messages */}
@@ -406,7 +406,7 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
           flexDirection: 'column-reverse',
           WebkitOverflowScrolling: 'touch',
           position: 'absolute',
-          top: '60px',
+          top: 'calc(env(safe-area-inset-top, 20px) + 64px)',
           bottom: isIOS ? (isPWA ? '110px' : '150px') : isDesktop ? '60px' : (isAndroid && isPWA) ? '75px' : '120px', // Fullscreen - device-specific spacing
           left: '0',
           right: '0',
