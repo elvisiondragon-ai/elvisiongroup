@@ -889,7 +889,7 @@ export function Chat({ onNavigate }: ChatProps) {
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
             top: '84px', // From top (with space for gold report button)
-            bottom: isIOS ? (isPWA ? '200px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
+            bottom: isIOS ? (isPWA ? '240px' : '280px') : isDesktop ? '190px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
             left: '0',
             right: '0',
             paddingTop: ((isIOS || isAndroid) && isPWA) ? 'env(safe-area-inset-top)' : '0px',
