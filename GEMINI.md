@@ -21,10 +21,6 @@
 - **One Job at a Time:** Focus exclusively on completing the current, assigned task before moving on to another.
 - **Highly Prohibited:** Never edit files outside of the immediate context. Stick to the absolute minimal, single-file solution. Editing files outside the core task is strictly forbidden.
 
-## 4. Report Folder after job is DONE
-- Always create file.md at folder report after job is done
-- Name file must relevant with core issue like slowchat999.md meaning chat slow because 999 limit
-- Give specific Issue and suffer from that problem, how you discover the core issue, the step you have triar and error until finally discover true solution, write the detail code problematic vs solution
 
 ### 5. Schema SQL - Migration procedure
 - IF you need to know specific data on supabase write the code on assist_code, user will do it on SQL editor

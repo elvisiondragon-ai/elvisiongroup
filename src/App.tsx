@@ -20,6 +20,7 @@ import { Terms } from "./pages/Terms";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { ArifTestimonial } from "./pages/ArifTestimonial";
 import { OldMember } from "./pages/OldMember";
+import { DeleteAccount } from "./pages/DeleteAccount";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -123,6 +124,10 @@ const AppContent = () => {
                 <Route 
                   path="/oldmember" 
                   element={<OldMember />}
+                />
+                <Route
+                  path="/delete"
+                  element={<DeleteAccount />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

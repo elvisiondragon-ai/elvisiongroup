@@ -864,6 +864,15 @@ export function Profile({ onNavigate }: ProfileProps) {
         </div>
 
 
+        <Button
+          variant="destructive"
+          className="w-full transition-all duration-200 hover:scale-105 active:scale-95 transform"
+          onClick={() => window.location.href = '/delete'}
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Hapus Akun
+        </Button>
+
         <div className="p-6">
           <Button
             variant="destructive"
