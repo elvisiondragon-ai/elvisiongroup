@@ -91,6 +91,8 @@ export function Chat({ onNavigate }: ChatProps) {
   // PWA detection - check if app is installed to home screen
   const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                 (window.navigator as any).standalone === true;
+  // Capacitor native app detection
+  const isCapacitor = (window as any).Capacitor?.isNativePlatform();
   const { toast } = useToast();
   const { user, userProfile } = useUserProfile();
   const { userId, chatChannel, isPro, proStatus, messages, setMessages, addMessage, removeMessage, broadcastMessage, broadcastDelete } = useAuth();
@@ -880,7 +882,7 @@ export function Chat({ onNavigate }: ChatProps) {
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
             top: 'calc(env(safe-area-inset-top, 20px) + 64px)', // From top (with space for gold report button)
-            bottom: isIOS ? (isPWA ? '240px' : '280px') : isDesktop ? '190px' : (isAndroid && isPWA) ? '200px' : '250px', // Above input bar
+            bottom: isIOS ? (isPWA ? '240px' : '280px') : isDesktop ? '190px' : isAndroid ? (isCapacitor ? '200px' : (isPWA ? '200px' : '250px')) : '250px', // Above input bar
             left: '0',
             right: '0',
             paddingTop: ((isIOS || isAndroid) && isPWA) ? 'env(safe-area-inset-top)' : '0px',

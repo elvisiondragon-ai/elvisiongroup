@@ -185,6 +185,8 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
   // PWA detection
   const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
                 (window.navigator as any).standalone === true;
+  // Capacitor native app detection
+  const isCapacitor = (window as any).Capacitor?.isNativePlatform();
 
   // Smart user data cache (same as chat.tsx)
   const getUserDataFromCache = (userId: string) => {
@@ -407,7 +409,7 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
           WebkitOverflowScrolling: 'touch',
           position: 'absolute',
           top: 'calc(env(safe-area-inset-top, 20px) + 64px)',
-          bottom: isIOS ? (isPWA ? '110px' : '150px') : isDesktop ? '60px' : (isAndroid && isPWA) ? '75px' : '120px', // Fullscreen - device-specific spacing
+          bottom: isIOS ? (isPWA ? '110px' : '150px') : isDesktop ? '60px' : isAndroid ? (isCapacitor ? '65px' : (isPWA ? '75px' : '120px')) : '120px', // Fullscreen - device-specific spacing
           left: '0',
           right: '0',
           paddingTop: ((isIOS || isAndroid) && isPWA) ? 'env(safe-area-inset-top)' : '0px',
