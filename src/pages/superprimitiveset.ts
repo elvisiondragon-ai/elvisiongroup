@@ -1435,7 +1435,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
             {/* Smaller Audio Player */}
             <div className="flex justify-center">
               <div className="transform scale-75">
-                {/* @ts-ignore - Lovable deployment compatibility */}
                 <VerseAudioCard
                   verse={{
                     id: 100,
@@ -1511,7 +1510,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
 
                 {/* Artwork or Lock */}
                 <div className="flex justify-center">
-                  {/* @ts-ignore - Lovable deployment compatibility */}
                   <VerseAudioCard
                     verse={verse}
                     onWarning={handleWarning}

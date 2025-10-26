@@ -43,7 +43,7 @@ export const useRealTimeNotifications = (user: User | null) => {
 
     // OPTIMIZATION: Use single global channel instead of per-user channels
     // This reduces from 128 individual channels to 1 shared channel
-    // @ts-ignore - Lovable deployment compatibility
+
     const channel = supabase
       .channel('global-notifications')
       .on(
@@ -63,7 +63,7 @@ export const useRealTimeNotifications = (user: User | null) => {
     // Cleanup subscription on unmount
     return () => {
       console.log('🔔 Cleaning up global real-time notifications subscription');
-      // @ts-ignore - Lovable deployment compatibility
+
       supabase.removeChannel(channel);
     };
   }, [user?.id, handleNotification]);

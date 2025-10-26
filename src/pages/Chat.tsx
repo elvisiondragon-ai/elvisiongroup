@@ -852,20 +852,31 @@ export function Chat({ onNavigate }: ChatProps) {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '20px',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 100
+      }} />
       {/* Gold Report List Toggle Button - Visible to All Users */}
       <div
-        className="fixed top-0 left-0 right-0 bg-background border-b border-border z-50 px-4 py-3"
+        className="fixed top-5 left-0 right-0 z-50 border-b border-border bg-black"
         style={{
-          paddingTop: ((isIOS || isAndroid) && isPWA) ? 'calc(env(safe-area-inset-top) + 12px)' : '12px'
+          paddingTop: ((isIOS || isAndroid) && isPWA) ? 'env(safe-area-inset-top)' : '0px',
         }}
       >
-        <button
-          onClick={() => setShowGoldReportsOnly(true)}
-          className="w-full h-10 rounded-md bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-medium shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
-        >
-          <Rocket className="h-4 w-4" />
-          Gold Report
-        </button>
+        <div className="px-4 py-3">
+          <button
+            onClick={() => setShowGoldReportsOnly(true)}
+            className="w-full h-10 rounded-md bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-medium shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+          >
+            <Rocket className="h-4 w-4" />
+            Gold Report
+          </button>
+        </div>
       </div>
 
       {/* Messages */}
@@ -878,7 +889,7 @@ export function Chat({ onNavigate }: ChatProps) {
             flexDirection: 'column-reverse',
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
-            top: '60px', // From top (with space for gold report button)
+            top: '104px', // From top (with space for gold report button)
             bottom: isIOS ? (isPWA ? '200px' : '235px') : isDesktop ? '140px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
             left: '0',
             right: '0',

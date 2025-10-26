@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'eL Vision Group',
   webDir: 'dist',
   server: {
-    url: 'https://8fda2b20-72ff-449c-bd0b-71d9a561716d.lovableproject.com?forceHideBadge=true',
+    url: 'https://app.elvisiongroup.com',
     cleartext: true
   },
   plugins: {
