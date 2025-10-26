@@ -853,19 +853,10 @@ export function Chat({ onNavigate }: ChatProps) {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '20px',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        zIndex: 100
-      }} />
       {/* Gold Report List Toggle Button - Visible to All Users */}
       <div
-        className="fixed top-5 left-0 right-0 z-50 border-b border-border bg-black"
-        style={{}}
+        className="fixed left-0 right-0 z-50 border-b border-border bg-black"
+        style={{ top: 'env(safe-area-inset-top)' }}
       >
         <div className="px-4 py-3">
           <button
@@ -888,7 +879,7 @@ export function Chat({ onNavigate }: ChatProps) {
             flexDirection: 'column-reverse',
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
-            top: '84px', // From top (with space for gold report button)
+            top: 'calc(env(safe-area-inset-top) + 64px)', // From top (with space for gold report button)
             bottom: isIOS ? (isPWA ? '240px' : '280px') : isDesktop ? '190px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
             left: '0',
             right: '0',
