@@ -856,7 +856,7 @@ export function Chat({ onNavigate }: ChatProps) {
       {/* Gold Report List Toggle Button - Visible to All Users */}
       <div
         className="fixed left-0 right-0 z-50 border-b border-border bg-black"
-        style={{ top: 'env(safe-area-inset-top)' }}
+        style={{ top: 'env(safe-area-inset-top, 20px)' }}
       >
         <div className="px-4 py-3">
           <button
@@ -879,8 +879,8 @@ export function Chat({ onNavigate }: ChatProps) {
             flexDirection: 'column-reverse',
             WebkitOverflowScrolling: 'touch',
             position: 'absolute',
-            top: 'calc(env(safe-area-inset-top) + 64px)', // From top (with space for gold report button)
-            bottom: isIOS ? (isPWA ? '240px' : '280px') : isDesktop ? '190px' : (isAndroid && isPWA) ? '140px' : '200px', // Above input bar
+            top: 'calc(env(safe-area-inset-top, 20px) + 64px)', // From top (with space for gold report button)
+            bottom: isIOS ? (isPWA ? '240px' : '280px') : isDesktop ? '190px' : (isAndroid && isPWA) ? '140px' : '250px', // Above input bar
             left: '0',
             right: '0',
             paddingTop: ((isIOS || isAndroid) && isPWA) ? 'env(safe-area-inset-top)' : '0px',
