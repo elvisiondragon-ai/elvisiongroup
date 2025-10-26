@@ -865,9 +865,7 @@ export function Chat({ onNavigate }: ChatProps) {
       {/* Gold Report List Toggle Button - Visible to All Users */}
       <div
         className="fixed top-5 left-0 right-0 z-50 border-b border-border bg-black"
-        style={{
-          paddingTop: ((isIOS || isAndroid) && isPWA) ? 'env(safe-area-inset-top)' : '0px',
-        }}
+        style={{}}
       >
         <div className="px-4 py-3">
           <button

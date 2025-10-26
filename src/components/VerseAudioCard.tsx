@@ -125,10 +125,17 @@ export function VerseAudioCard({
       }
     }
 
-    // Always use the protected/blob method for reliability
     try {
-      console.log('🎵 Using protected audio (blob/cache) for reliability.');
-      const audio = await createProtectedAudio(verse.audioPath);
+      const cached = await isCached(verse.audioPath);
+      let audio: HTMLAudioElement;
+
+      if (cached) {
+        console.log('🎵 Using cached audio for instant play');
+        audio = await createProtectedAudio(verse.audioPath);
+      } else {
+        console.log('🎵 Using streaming audio for instant play');
+        audio = createStreamingAudio(verse.audioPath);
+      }
       
       // Add event listeners  
       audio.addEventListener('loadedmetadata', () => {
