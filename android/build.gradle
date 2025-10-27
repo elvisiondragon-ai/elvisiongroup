@@ -22,13 +22,10 @@ allprojects {
         google()
         mavenCentral()
     }
-    afterEvaluate { project ->
-        if (project.hasProperty('android')) {
-            project.android.compileOptions {
-                sourceCompatibility = org.gradle.api.JavaVersion.VERSION_17
-                targetCompatibility = org.gradle.api.JavaVersion.VERSION_17
-            }
-        }
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += [
+            '--release', '17'
+        ]
     }
 }
 
