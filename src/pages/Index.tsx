@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { ProUpgradeNotification } from "@/components/InvitePro";
 import { Home } from "./Home";
 import { Chat } from "./Chat";
 import { Leaderboard } from "./Leaderboard";
@@ -258,7 +257,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <ProUpgradeNotification onUpgradeClick={() => setActiveTab("payment")} />
+      
       <main className="relative">
         {renderContent()}
       </main>

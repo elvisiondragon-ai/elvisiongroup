@@ -12,8 +12,6 @@ import { usePro } from "@/hooks/usePro";
 import { useMeditative } from "@/contexts/MeditativeContext";
 import { VerseAudioCard } from "@/components/VerseAudioCard";
 import { useProtectedAudio } from "@/contexts/AudioContext"; // //Nevertouch Audio-cache
-import { SacredFocusNotification } from "@/components/SacredFocusNotification";
-import { InvitePro } from "@/components/InvitePro";
 import { TutorialButton } from "@/components/TutorialButton";
 // Removed slow UserProfileContext - now using fast auth
 import { useAuth } from '@/contexts/AuthContext';
@@ -828,22 +826,6 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Sacred Focus Notification */}
-      <SacredFocusNotification
-        isVisible={showSacredNotification}
-        onClose={() => setShowSacredNotification(false)}
-        verseName={currentVerseName}
-      />
-
-      {/* Pro Upgrade Modal */}
-      <InvitePro
-        isVisible={showProUpgrade}
-        onClose={() => setShowProUpgrade(false)}
-        onNavigateToPayment={navigateToPayment}
-        reason={upgradeReason}
-        userStats={userStats}
-      />
 
       {/* Tutorial Modal */}
       <TutorialButton 

@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useUpdateToast } from "@/hooks/UpdateToast";
 import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
 import { VerseToast } from "@/components/VerseToast";
-import { FreeUserNotifications } from "@/hooks/useFreeUserNotifications";
 import { ProStatusNotifications } from "@/components/ProStatusToast";
 import { AppLoader } from "@/components/AppLoader";
 import { Auth } from "./pages/Auth";
@@ -83,7 +82,6 @@ const AppContent = () => {
         <MeditativeProvider>
           <UserProfileProvider>
             <VerseToast />
-            <FreeUserNotifications />
             <ProStatusNotifications />
             <Toaster />
             <Sonner />

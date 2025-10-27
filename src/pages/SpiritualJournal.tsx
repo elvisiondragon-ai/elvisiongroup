@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ArrowLeft, Save, Trash2, BookOpen, ChevronDown } from "lucide-react";
-import { InvitePro } from "@/components/InvitePro";
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -499,21 +498,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         </div>
       </div>
 
-      {/* Pro Upgrade Modal */}
-      <InvitePro
-        isVisible={showProUpgrade}
-        onClose={() => setShowProUpgrade(false)}
-        onNavigateToPayment={() => {
-          setShowProUpgrade(false);
-          onNavigate("payment");
-        }}
-        reason="journal"
-        userStats={{
-          totalMeditations: reflections.length * 2,
-          daysActive: reflections.length,
-          currentStreak: Math.min(7, reflections.length)
-        }}
-      />
+
 
     </div>
   );
