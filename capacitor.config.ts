@@ -21,6 +21,9 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
     }
+  },
+  android: {
+    icon: "assets/icon.png"
   }
 };
 

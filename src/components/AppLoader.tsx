@@ -14,7 +14,7 @@ export const AppLoader = ({ children }: { children: React.ReactNode }) => {
         flexDirection: 'column'
       }}>
         <img
-          src="/favicon.png"
+          src="/loader.png"
           alt="Loading..."
           style={{
             width: '150px',

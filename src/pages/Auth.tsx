@@ -681,12 +681,11 @@ export function Auth({ onLogin }: AuthProps) {
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <img 
-              src="/favicon.png" 
-              alt="eL Vision Group Logo" 
-              className="w-24 h-24 object-contain"
-            />
-          </div>
+                          <img 
+                            src="/hometop.png" 
+                            alt="eL Vision Group Logo" 
+                            className="w-24 h-24 object-contain"
+                          />          </div>
           <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
             eL Vision Group
           </h1>
