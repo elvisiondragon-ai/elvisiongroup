@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff, Sparkles, Zap, Phone, User as UserIcon, MessageCircle } from "lucide-react";
 import type { User } from '@supabase/supabase-js';
+import { Capacitor } from '@capacitor/core';
 import { iOSCacheCleaner } from "@/utils/iOSCacheCleaner";
 
 interface AuthProps {
@@ -48,8 +49,13 @@ export function Auth({ onLogin }: AuthProps) {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [isTabClicked, setIsTabClicked] = useState(false);
   const [showTroubleshoot, setShowTroubleshoot] = useState(false);
+  const [showApkButton, setShowApkButton] = useState(true);
 
-
+  useEffect(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = Capacitor.getPlatform() === 'android';
+    setShowApkButton(!isIOS && !isAndroid);
+  }, []);
 
   // Check if user is already logged in + iOS cache verification
   useEffect(() => {
@@ -800,6 +806,15 @@ export function Auth({ onLogin }: AuthProps) {
                   </span>
                 </Button>
               </form>
+
+              {showApkButton && (
+                <Button
+                  onClick={() => window.open('/elvisionv2.apk', '_blank')}
+                  className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-medium h-9 py-1 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+                >
+                  Download APK
+                </Button>
+              )}
 
               {/* Forgot Password & Troubleshoot Links */}
               <div className="text-center">
