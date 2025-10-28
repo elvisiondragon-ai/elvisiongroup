@@ -181,8 +181,7 @@ export function EliteHabit() {
       // Auto-show reports after submitting
       setShowReports(true);
       
-      // Update total display immediately
-      setTotalEliteHabits(prev => prev + 1);
+
       
       // Reload data after UI update
       setTimeout(() => loadHabitData(), 0);
@@ -372,17 +371,7 @@ export function EliteHabit() {
         </Accordion>
       </Card>
 
-      {/* Stats */}
-      <Card className="p-4">
-        <div className="text-center">
-          <div className="text-3xl font-bold text-emerald-400 mb-1">
-            {allEntries.length}
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Total Elite Habits
-          </div>
-        </div>
-      </Card>
+
 
       {/* Today's entries removed - all entries now show in main report below */}
       {false && todayEntries.length > 0 && (

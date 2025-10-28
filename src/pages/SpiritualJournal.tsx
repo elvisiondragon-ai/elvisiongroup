@@ -148,8 +148,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       setReflection("");
       setIsSaving(false);
       
-      // Update total display immediately
-      setTotalReflections(prev => prev + 1);
+
       
       // Load reflections after UI update
       setTimeout(() => loadReflections(userId), 0);
@@ -330,17 +329,7 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
           </div>
         </Card>
 
-        {/* Stats */}
-        <Card className="p-4">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-indigo-400 mb-1">
-              {reflections.length}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Total Reflections
-            </div>
-          </div>
-        </Card>
+
 
         {/* Daily Reflection Section */}
         <Card className="bg-gradient-to-br from-indigo-600/20 via-purple-500/15 to-pink-600/20 border-2 border-indigo-400/40 shadow-xl backdrop-blur-sm">

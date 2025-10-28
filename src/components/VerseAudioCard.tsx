@@ -169,7 +169,7 @@ export function VerseAudioCard({
             const { error } = await supabase
               .from('profiles')
               .update({ 
-                total_verses: currentCount + 1,
+
                 updated_at: new Date().toISOString()
               })
               .eq('user_id', user.id);
