@@ -504,23 +504,7 @@ export function Home({
               </div>
               <StreakIndicator streakDays={effectiveProfile?.streak_days || 0} size="sm" />
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold font-exo text-primary">
-                {effectiveProfile?.experience_points || 0} XP
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {xpProgress.xpForNextLevel - xpProgress.currentLevelXP} XP to next level
-              </div>
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Level {effectiveProfile?.level || 1} Progress</span>
-              <span>{Math.round(xpProgress.progress)}%</span>
-            </div>
-            <Progress value={xpProgress.progress} className="h-2" />
-          </div>
         </Card>
       </div>
 
