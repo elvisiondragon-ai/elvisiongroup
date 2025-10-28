@@ -688,7 +688,7 @@ export function Auth({ onLogin }: AuthProps) {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
                           <img 
-                            src="/hometop.png" 
+                            src="/favicon.png" 
                             alt="eL Vision Group Logo" 
                             className="w-24 h-24 object-contain"
                           />          </div>

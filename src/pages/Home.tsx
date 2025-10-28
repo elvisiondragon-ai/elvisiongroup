@@ -466,7 +466,7 @@ export function Home({
           </div>
           <div className="relative h-full flex items-end p-6">
             <div className="flex items-center gap-4">
-              <img src="/hometop.png" alt="eL Vision Group Logo" className="w-16 h-16 object-contain" />
+              <img src="/favicon.png" alt="eL Vision Group Logo" className="w-16 h-16 object-contain" />
               <div>
                 <h1 className="text-3xl font-bold font-serif text-foreground mb-2">
                   Ecosystem
