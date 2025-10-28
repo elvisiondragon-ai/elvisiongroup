@@ -604,6 +604,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // REALTIME PRO STATUS: Subscribe to pro status changes
+  useEffect(() => {
+    if (user?.id) {
+      const proStatusChannel = supabase.channel(`pro_status_changes:${user.id}`);
+
+      proStatusChannel
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'pro_subscriptions',
+          filter: `user_id=eq.${user.id}`
+        }, (payload) => {
+          console.log('👑 Realtime Pro Status Change Detected:', payload);
+          // Force a refresh of pro status
+          checkProStatus(user.id, true);
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log(`[RT] Subscribed to pro status changes for user: ${user.id}`);
+          }
+        });
+
+      return () => {
+        supabase.removeChannel(proStatusChannel);
+      };
+    }
+  }, [user?.id]);
+
   const updateAuthState = (session: Session | null) => {
     setUser(session?.user ?? null);
     setUserId(session?.user?.id ?? null);
