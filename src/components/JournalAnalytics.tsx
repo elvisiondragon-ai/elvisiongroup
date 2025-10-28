@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { TrendingUp, BookOpen, Target, Sparkles, Brain, Crown, Lock, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { usePro } from '@/hooks/usePro';
-import { useUserProfile } from '@/contexts/UserProfileContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { RenataAnalysisModal } from '@/components/RenataAnalysisModal';
 import { useToast } from '@/hooks/use-toast';
 
@@ -28,7 +28,7 @@ interface AnalyticsData {
 
 export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
   const { proStatus } = usePro();
-  const { userProfile, user } = useUserProfile();
+  const { userProfile, user } = useAuth();
   const { toast } = useToast();
 
   // Tab-level pro status logging

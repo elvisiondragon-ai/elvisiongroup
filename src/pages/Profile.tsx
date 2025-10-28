@@ -16,7 +16,7 @@ import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { usePro } from "@/hooks/usePro";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useUserProfile } from "@/contexts/UserProfileContext";
+
 import { useAuth } from '@/contexts/AuthContext';
 import { StreakIndicator } from "@/components/StreakIndicator";
 // Updated spiritual icons for streak tiers
@@ -63,12 +63,7 @@ interface UserProfile {
 }
 
 export function Profile({ onNavigate }: ProfileProps) {
-  const { userProfile, user: contextUser, loading } = useUserProfile();
-  const { userId, user: authUser, cleanupSupabase } = useAuth();
-  
-  // Use AuthContext as primary source, fallback to UserProfileContext
-  const user = authUser || contextUser;
-  const [cachedProfile, setCachedProfile] = useState<UserProfile | null>(null);
+  const { user, userId, userProfile, loading, cleanupSupabase } = useAuth();
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -100,36 +95,6 @@ export function Profile({ onNavigate }: ProfileProps) {
       };
     }
   }, [proStatus]);
-
-
-  // Enhanced cache management with user auth data
-  useEffect(() => {
-    const loadCache = () => {
-      const cached = localStorage.getItem('profile-metadata');
-      if (cached) {
-        try {
-          const data = JSON.parse(cached);
-          setCachedProfile(data.profile);
-        } catch {
-          localStorage.removeItem('profile-metadata');
-        }
-      }
-    };
-    loadCache();
-  }, []);
-
-  // Update cache when profile changes (event-based)
-  useEffect(() => {
-    if (userProfile && (user || userId)) {
-      const cacheData = {
-        profile: userProfile,
-        timestamp: Date.now(),
-        userId: userId || user?.id
-      };
-      localStorage.setItem('profile-metadata', JSON.stringify(cacheData));
-      setCachedProfile(userProfile);
-    }
-  }, [userProfile, user, userId]);
 
 
     const handleLogout = async () => {
@@ -350,8 +315,7 @@ export function Profile({ onNavigate }: ProfileProps) {
     );
   }
 
-  // Use cached profile for instant display, fallback to userProfile or safe default
-  const profile = cachedProfile || userProfile || {
+  const profile = userProfile || {
     display_name: user?.email?.split('@')[0] || "User", // Use email username if available
     level: 1,
     experience_points: 0,

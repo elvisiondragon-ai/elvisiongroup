@@ -21,7 +21,7 @@ import { ArifTestimonial } from "./pages/ArifTestimonial";
 import { OldMember } from "./pages/OldMember";
 import { DeleteAccount } from "./pages/DeleteAccount";
 import { AudioProvider } from "@/contexts/AudioContext";
-import { UserProfileProvider } from "@/contexts/UserProfileContext";
+
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -80,7 +80,7 @@ const AppContent = () => {
     <AppLoader>
       <AudioProvider>
         <MeditativeProvider>
-          <UserProfileProvider>
+
             <VerseToast />
             <ProStatusNotifications />
             <Toaster />
@@ -131,7 +131,7 @@ const AppContent = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-          </UserProfileProvider>
+
         </MeditativeProvider>
       </AudioProvider>
     </AppLoader>

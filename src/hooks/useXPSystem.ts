@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface XPSystemHook {
   awardXP: (activityType: string, xpAmount: number, reason?: string, metadata?: any, showNotification?: boolean) => Promise<void>;
@@ -11,6 +12,7 @@ interface XPSystemHook {
 export function useXPSystem(): XPSystemHook {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { refreshUserProfile } = useAuth();
 
   const awardXP = useCallback(async (
     activityType: string,
@@ -36,49 +38,46 @@ export function useXPSystem(): XPSystemHook {
 
       if (error) throw error;
 
+      // Manually refresh profile to ensure UI is up-to-date
+      await refreshUserProfile();
+
       // Show success toast with level up information
       const result = data as any;
       
-      // Check if daily limit was reached
-      if (!result.success && result.reason === 'daily_limit_reached') {
-        // Show toast that counters still work even when XP limit reached
-        if (showNotification) {
-          let toastTitle = "🎵 Verse Terselesaikan";
-          let toastDescription = "Total Verses +1";
-          
-          if (activityType === 'elite_habit_completion') {
+      // Only show notifications if showNotification is true
+      if (showNotification) {
+        // Check if daily limit was reached (either fully or partially)
+        if (result.limit_reached) {
+          let toastTitle = "";
+          let toastDescription = "";
+
+          if (activityType === 'verse_completion') {
+            toastTitle = "🎵 Verse Terselesaikan";
+            toastDescription = "Total Verses +1";
+          } else if (activityType === 'elite_habit_completion') {
             toastTitle = "🏋️ Elite Habit Tersimpan";
             toastDescription = "Total Elite Habit +1";
           } else if (activityType === 'journal_completion') {
             toastTitle = "✨ Renungan Tersimpan";
             toastDescription = "Total Journal +1";
+          } else {
+            // Fallback for other activity types if limit reached
+            toastTitle = `🎯 Daily Limit Reached`;
+            toastDescription = `You've earned 30/30 XP today! Come back tomorrow for more XP.`;
           }
           
           toast({
             title: toastTitle,
             description: toastDescription,
+            variant: "default", // Keep default variant for limit reached
           });
-        }
-        return; // Still return early but only for notifications
-      }
-      
-      // Only show notifications if showNotification is true
-      if (showNotification) {
-        // Check for level up
-        if (result?.level_up) {
+        } else if (result?.level_up) {
           toast({
             title: `🎉 SELAMAT ANDA MASUK KE LEVEL SELANJUTNYA!`,
             description: `Sekarang Level ${result.new_level}! +${result.xp_awarded} XP earned! ${result.achievement_earned ? '⚡ Achievement baru terbuka!' : ''}`,
           });
-        } else if (result.show_notification && result.limit_reached) {
-          // Only show daily limit notification when limit is hit for the first time
-          toast({
-            title: `+${result.xp_awarded} XP Earned! 🎯 Daily Limit Reached`,
-            description: `You've earned 30/30 XP today! Come back tomorrow for more XP.`,
-            variant: "default",
-          });
         } else if (result.success) {
-          // Regular success message
+          // Regular success message (if limit not reached and no level up)
           toast({
             title: `+${result.xp_awarded} XP Earned!`,
             description: reason || `${activityType} completed`,

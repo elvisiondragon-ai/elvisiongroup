@@ -8,7 +8,6 @@ import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown, Edit, 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { handleFbcCookieManager, trackPageViewEvent, trackAddToCartEvent, trackPurchaseEvent, initFacebookPixelWithLogging } from '@/utils/fbpixel';
 
@@ -17,8 +16,7 @@ interface PaymentProps {
 }
 
 export function Payment({ onNavigate }: PaymentProps) {
-  const { user, userProfile, loading: userDataLoading } = useUserProfile();
-  const { userId } = useAuth();
+  const { user, userId, userProfile, loading: userDataLoading } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState('1_month');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('QRIS');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -27,8 +25,7 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   
-  // Cache profile for fast payment processing
-  const [cachedProfile, setCachedProfile] = useState<any>(null);
+
 
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
   const [showQrisModal, setShowQrisModal] = useState(false);
@@ -247,11 +244,9 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [showPaymentInstructions, paymentData?.tripay_reference]);
 
 
-  // Cache session and profile data in memory for fast payment processing
+  // Set form fields from profile data
   useEffect(() => {
     if (user?.id && userProfile) {
-      setCachedProfile(userProfile);
-      
       setEmail(user.email || '');
       
       if (userProfile.display_name && !fullName) {
@@ -274,8 +269,7 @@ export function Payment({ onNavigate }: PaymentProps) {
       return;
     }
     
-    // Use cached data for fast payment processing
-    const profile = cachedProfile || userProfile;
+    const profile = userProfile;
     
     // Use form data if profile data not available
     const finalPhoneNumber = profile?.phone_number?.trim() || phoneNumber.trim();
@@ -816,8 +810,7 @@ export function Payment({ onNavigate }: PaymentProps) {
       <div className="fixed bottom-20 left-6 right-6">
         <Button 
           onClick={() => {
-            // Use final data that will actually be sent to payment
-            const profile = cachedProfile || userProfile;
+            const profile = userProfile;
             const finalPhoneNumber = profile?.phone_number?.trim() || phoneNumber.trim();
             const finalDisplayName = profile?.display_name?.trim() || fullName.trim();
             

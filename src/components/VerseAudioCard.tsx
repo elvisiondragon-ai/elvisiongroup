@@ -155,29 +155,6 @@ export function VerseAudioCard({
         setAudioDuration(null);
         setCurrentTime(0);
         
-        // Update total_verses counter FIRST in profiles
-        const updateTotalVerses = async () => {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('total_verses')
-              .eq('user_id', user.id)
-              .single();
-              
-            const currentCount = profile?.total_verses || 0;
-            const { error } = await supabase
-              .from('profiles')
-              .update({ 
-
-                updated_at: new Date().toISOString()
-              })
-              .eq('user_id', user.id);
-            if (error) console.error('Error updating total_verses:', error);
-          }
-        };
-        await updateTotalVerses();
-
         // Award XP AFTER counter increment
         const xpAmount = 10;
         console.log('🏆 Awarding XP:', xpAmount, 'for verse:', verse.title);

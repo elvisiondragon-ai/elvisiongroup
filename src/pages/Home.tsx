@@ -13,7 +13,7 @@ import { Finance } from "@/components/Finance";
 import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
-import { useUserProfile } from "@/contexts/UserProfileContext";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { useAudioCache } from "@/hooks/useAudioCache";
 import { useToast } from "@/hooks/use-toast";
@@ -52,11 +52,7 @@ export function Home({
   onNavigate
 }: HomeProps) {
   const { t } = useTranslation();
-  const { userProfile, user: contextUser } = useUserProfile();
-  const { userId, user: authUser } = useAuth();
-  
-  // Use AuthContext as primary source, fallback to UserProfileContext
-  const user = authUser || contextUser;
+  const { user, userId, userProfile } = useAuth();
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -79,27 +75,7 @@ export function Home({
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const testimonialsRef = useRef<HTMLDivElement>(null);
 
-  // Cache for user profile data to prevent "User" fallback
-  const [cachedUserProfile, setCachedUserProfile] = useState(() => {
-    const cached = localStorage.getItem('home-user-profile-cache');
-    return cached ? JSON.parse(cached) : null;
-  });
 
-  // Update cache when userProfile changes
-  useEffect(() => {
-    if (userProfile && (user || userId)) {
-      const cacheData = {
-        display_name: userProfile.display_name,
-        level: userProfile.level,
-        experience_points: userProfile.experience_points,
-        streak_days: userProfile.streak_days,
-        timestamp: Date.now(),
-        userId: userId || user?.id
-      };
-      localStorage.setItem('home-user-profile-cache', JSON.stringify(cacheData));
-      setCachedUserProfile(cacheData);
-    }
-  }, [userProfile, user, userId]);
 
   // Audio files will be cached only when user plays them
 
@@ -176,9 +152,8 @@ export function Home({
     };
   }, []);
 
-  // Use cached profile data for instant display, with better fallback
-  const effectiveProfile = userProfile || cachedUserProfile;
-  const displayName = effectiveProfile?.display_name || user?.email?.split('@')[0] || "User";
+  const effectiveProfile = userProfile;
+  const displayName = effectiveProfile?.display_name || "User";
   const isAdmin = user?.id === '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
 
   // Calculate XP progress using the XP system with effective profile
@@ -499,10 +474,9 @@ export function Home({
                     {displayName}
                   </h3>
                   {isAdmin && <AdminBadge size="sm" />}
-                  {!isAdmin && <TierBadge level={effectiveProfile?.level || 1} isPro={proStatus.isPro} achievements={effectiveProfile?.achievements || []} subscriptionType={proStatus.subscriptionType} />}
                 </div>
               </div>
-              <StreakIndicator streakDays={effectiveProfile?.streak_days || 0} size="sm" />
+
             </div>
             </div>
         </Card>

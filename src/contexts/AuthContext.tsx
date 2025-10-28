@@ -17,9 +17,25 @@ interface ChatMessageData {
   subscription_type?: string | null;
 }
 
+interface UserProfile {
+  user_id: string;
+  display_name: string | null;
+  level: number;
+  experience_points: number;
+  streak_days: number;
+  total_verses: number;
+  total_journal: number;
+  total_elite_habit: number;
+  achievements: string[];
+  created_at: string;
+  avatar_url?: string;
+  is_admin?: boolean;
+}
+
 interface AuthContextType {
   user: User | null;
   userId: string | null;
+  userProfile: UserProfile | null;
   loading: boolean;
   chatChannel: RealtimeChannel | null;
   isPro: boolean;
@@ -40,11 +56,13 @@ interface AuthContextType {
   broadcastGoldReportRemoved: (messageId: string) => void;
   cleanupSupabase: () => Promise<void>;
   refreshSession: () => Promise<{ success: boolean; error?: string }>;
+  refreshUserProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   userId: null,
+  userProfile: null,
   loading: true,
   chatChannel: null,
   isPro: false,
@@ -59,11 +77,24 @@ const AuthContext = createContext<AuthContextType>({
   broadcastGoldReportRemoved: () => {},
   cleanupSupabase: async () => {},
   refreshSession: async () => ({ success: false, error: 'Context not initialized' }),
+  refreshUserProfile: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
+    const cached = localStorage.getItem('user-profile-cache');
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch {
+        localStorage.removeItem('user-profile-cache');
+        return null;
+      }
+    }
+    return null;
+  });
   const [loading, setLoading] = useState(true);
   const [chatChannel, setChatChannel] = useState<RealtimeChannel | null>(null);
   const [proStatus, setProStatus] = useState<any>(null);
@@ -73,6 +104,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const currentTokenRef = useRef<string | null>(null);
   const isConnectingRef = useRef<boolean>(false);
   const isRebuildingRef = useRef<boolean>(false);
+
+  const refreshUserProfile = async () => {
+    if (!user?.id) return;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+              if (error) {
+                console.error('Error manually refreshing profile:', error);
+              } else if (data) {
+                console.log('✅ Profile manually refreshed. total_journal:', data.total_journal);
+                setUserProfile(data as UserProfile);
+                localStorage.setItem('user-profile-cache', JSON.stringify(data));      }
+    } catch (e) {
+      console.error('Error in refreshUserProfile:', e);
+    }
+  };
 
   // IDLE USER HANDLER - Page visibility tracking
   const lastActiveTimeRef = useRef<number>(Date.now());
@@ -1277,11 +1328,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // REALTIME PROFILE: Subscribe to profile changes
+  useEffect(() => {
+    if (user?.id) {
+      const fetchUserProfile = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          if (error) {
+            console.error('Error fetching initial profile:', error);
+          } else if (data) {
+            setUserProfile(data as UserProfile);
+            localStorage.setItem('user-profile-cache', JSON.stringify(data));
+          }
+        } catch (e) {
+          console.error('Catastrophic error fetching profile:', e)
+        }
+      };
+
+      fetchUserProfile();
+
+      const profileChannel = supabase
+        .channel(`profile_changes:${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            console.log('✅ Real-time profile update received. total_journal:', payload.new.total_journal);
+            const newProfile = payload.new as UserProfile;
+            setUserProfile(newProfile);
+            localStorage.setItem('user-profile-cache', JSON.stringify(newProfile));
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(profileChannel);
+      };
+    }
+  }, [user?.id]);
+
   return (
     <AuthContext.Provider
       value={{
         user,
         userId,
+        userProfile,
         loading,
         chatChannel,
         isPro: proStatus?.isPro || false,
@@ -1296,6 +1397,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         broadcastGoldReportRemoved,
         cleanupSupabase,
         refreshSession,
+        refreshUserProfile,
       }}
     >
       {children}

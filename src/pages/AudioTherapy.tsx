@@ -15,7 +15,6 @@ import { useProtectedAudio } from "@/contexts/AudioContext"; // //Nevertouch Aud
 import { TutorialButton } from "@/components/TutorialButton";
 // Removed slow UserProfileContext - now using fast auth
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserProfile } from '@/contexts/UserProfileContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,7 +79,6 @@ function MeditationCounter() {
 
 export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const { t, i18n } = useTranslation();
-  const [userLevel, setUserLevel] = useState(1);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -91,14 +89,13 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<string>("unlock");
   const [showTutorialModal, setShowTutorialModal] = useState(false);
-  const [userStats, setUserStats] = useState<any>(null);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [verse4Used, setVerse4Used] = useState(0);
   const { awardXP } = useXPSystem();
   const { proStatus } = usePro();
   const { setMeditativeActive } = useMeditative();
-  const { userId } = useAuth();
-  const { user } = useUserProfile();
+  const { userId, user, userProfile, refreshUserProfile } = useAuth();
+
+  const daysActive = user?.created_at ? Math.floor((new Date().getTime() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
   // Tab-level pro status logging - ONLY ON MOUNT
   useEffect(() => {
@@ -139,80 +136,26 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
   useEffect(() => {
     const initializeData = async () => {
       setLoading(true);
-      
       if (userId) {
         console.log('%c🌹 Entering AudioTherapy page:', 'color: green; font-weight: bold;', {
-          user_id: userId, // AUTH ID
-          email: user?.email || 'loading...' // AUTH email
+          user_id: userId,
+          email: user?.email || 'loading...'
         });
-        
-        setIsAdmin(userId === "3da83afb-aa8c-4c55-b3b0-8aa64000205f"); // Use actual admin ID
-
-        // 🛡️ FIX: fetchUserProfile already fetches verse4_used, no need for separate call
-        await fetchUserProfile(userId);
+        setIsAdmin(userId === "3da83afb-aa8c-4c55-b3b0-8aa64000205f");
       }
-      
       setLoading(false);
     };
-    
     initializeData();
-  }, [userId]);
+  }, [userId, user?.email]);
 
-  // Debug effect to track verse4Used changes
-  useEffect(() => {
-    console.log('🎵 verse4Used state changed to:', verse4Used);
-  }, [verse4Used]);
-
-  // 🛡️ FIX: Only refetch when pro status changes, not on initial load
+  // Refetch profile when pro status changes to ensure data is fresh
   useEffect(() => {
     if (userId && !loading && proStatus) {
-      console.log('🔄 Pro status changed, refetching profile');
-      fetchUserProfile(userId);
+      console.log('🔄 Pro status changed, refreshing profile');
+      refreshUserProfile();
     }
   }, [proStatus.isPro]); // Only track isPro, not userId or loading
 
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      console.log('🔍 Fetching profile for user:', userId);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('level, total_verses, streak_days, verse4_used')
-        .eq('user_id', userId)
-        .single();
-
-      console.log('📄 Raw DB response:', { data, error });
-
-      if (error) {
-        console.error('❌ Error fetching user profile:', error);
-        return;
-      }
-
-      if (data) {
-        console.log('🎵 Setting verse4Used from DB value:', data.verse4_used);
-        setUserLevel(data.level || 1);
-        setVerse4Used(data.verse4_used || 0);
-        
-        // Force a small delay to ensure state is set
-        setTimeout(() => {
-          console.log('🔍 Current verse4Used state after setting:', verse4Used);
-        }, 100);
-        
-        setUserStats({
-          totalMeditations: data.total_verses || 0, // Using total_verses as meditation count
-          daysActive: Math.floor((new Date().getTime() - new Date(userId).getTime()) / (1000 * 60 * 60 * 24)),
-          currentStreak: data.streak_days || 0 // Using streak_days
-        });
-        
-        console.log('✅ Profile fetch completed successfully');
-      }
-    } catch (error) {
-      console.error('💥 Error fetching user profile:', error);
-      // Set defaults on error
-      setUserLevel(1);
-      setVerse4Used(0);
-    }
-  };
 
 
   const handleUploadComplete = () => {
@@ -249,26 +192,15 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
     if (proStatus.isPro) return true; // Pro users have unlimited access
 
     try {
-      if (!userId) return false;
+      if (!userId || !userProfile) return false;
 
-      console.log('🎵 Current verse4Used before increment:', verse4Used);
-      
-      // First get current usage from DB to ensure consistency
-      const { data: profile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('verse4_used')
-        .eq('user_id', userId)
-        .single();
-
-      if (fetchError) {
-        console.error('❌ Error fetching current verse4_used:', fetchError);
+      const currentUsage = userProfile.verse4_used || 0;
+      if (currentUsage >= 3) {
+        setShowVerse4Limit(true);
         return false;
       }
 
-      const currentUsage = profile?.verse4_used || 0;
       const newCount = currentUsage + 1;
-      
-      console.log('🎵 Incrementing from DB value:', { currentUsage, newCount });
 
       const { error } = await supabase
         .from('profiles')
@@ -280,19 +212,10 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
         return false;
       }
 
-      console.log('✅ Successfully updated verse4_used to:', newCount);
-      setVerse4Used(newCount);
-      
-      // Force refresh data to ensure UI sync
-      setTimeout(async () => {
-        if (userId) {
-          console.log('🔄 Force refreshing verse4 data after completion');
-          await fetchUserProfile(userId);
-        }
-      }, 500);
+      // Manually trigger profile refresh to get the new count
+      await refreshUserProfile();
       
       if (newCount >= 3) {
-        // Show upgrade message after completing 3rd use
         setTimeout(() => {
           setShowVerse4Limit(true);
         }, 2000);
@@ -389,7 +312,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       id: 8,
       title: "Verse 8 - Love Magnet",
       subtitle: "Menarik cinta dan kasih sayang dari orang-orang di sekitar",
-      unlocked: proStatus.isPro && userLevel >= 1,
+      unlocked: proStatus.isPro && (userProfile?.level || 1) >= 1,
       requiredLevel: 9,
       artwork: verse8Artwork,
       audioPath: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%208%20-%20Love%20Magnet.MP3",
@@ -490,7 +413,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       </div>
 
       {/* Personalized Stats for Conversion */}
-      {!proStatus.isPro && userStats && (
+      {!proStatus.isPro && userProfile && (
         <div className="px-6 mb-6">
           <Card className="p-4 bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border border-indigo-500/30">
             <div className="text-center space-y-3">
@@ -501,15 +424,15 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
 
               <div className="grid grid-cols-3 gap-3">
                 <div className="text-center p-3 bg-indigo-800/30 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-400">{userStats.totalMeditations || 0}</div>
+                  <div className="text-2xl font-bold text-yellow-400">{userProfile.total_verses || 0}</div>
                   <div className="text-xs text-indigo-300">Meditasi</div>
                 </div>
                 <div className="text-center p-3 bg-indigo-800/30 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-400">{userStats.daysActive || 0}</div>
+                  <div className="text-2xl font-bold text-yellow-400">{daysActive}</div>
                   <div className="text-xs text-indigo-300">Hari Aktif</div>
                 </div>
                 <div className="text-center p-3 bg-indigo-800/30 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-400">{userStats.currentStreak || 0}</div>
+                  <div className="text-2xl font-bold text-yellow-400">{userProfile.streak_days || 0}</div>
                   <div className="text-xs text-indigo-300">Streak</div>
                 </div>
               </div>
@@ -626,7 +549,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     id: 12,
                     title: "eL Vision Delta Breathing",
                     subtitle: "Tehnik Pernafasan Delta untuk Mengantuk cepat",
-                    unlocked: proStatus.isPro || userLevel >= 4,
+                    unlocked: proStatus.isPro || (userProfile?.level || 1) >= 4,
                     requiredLevel: 4,
                     artwork: verse7Artwork,
                     audioPath: 'Short Verse - eL Vision Delta Breathing.MP3',

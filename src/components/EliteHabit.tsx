@@ -7,7 +7,6 @@ import { Plus, Minus, Check, Activity, ChevronLeft, ChevronRight, Calendar, Tras
 import { supabase } from '@/integrations/supabase/client';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useToast } from '@/hooks/use-toast';
-import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface EliteHabitEntry {
@@ -37,13 +36,11 @@ const EXERCISE_OPTIONS = [
 export function EliteHabit() {
   const { awardXP } = useXPSystem();
   const { toast } = useToast();
-  const { user, userProfile, handleAuthError } = useUserProfile();
-  const { userId } = useAuth();
+  const { user, userId, userProfile, refreshUserProfile } = useAuth();
   const [selectedExercise, setSelectedExercise] = useState('');
   const [duration, setDuration] = useState(5);
   const [notes, setNotes] = useState('');
   const [todayEntries, setTodayEntries] = useState<EliteHabitEntry[]>([]);
-  const [totalEliteHabits, setTotalEliteHabits] = useState(0);
   const [loading, setLoading] = useState(false);
   const [allEntries, setAllEntries] = useState<EliteHabitEntry[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -86,20 +83,6 @@ export function EliteHabit() {
         setAllEntries(allData);
       }
 
-      // Use cached total from userProfile context or fetch if not available
-      if (userProfile?.total_elite_habit !== undefined) {
-        setTotalEliteHabits(userProfile.total_elite_habit);
-      } else {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('total_elite_habit')
-          .eq('user_id', userId)
-          .single();
-          
-        if (profileData) {
-          setTotalEliteHabits(profileData.total_elite_habit || 0);
-        }
-      }
     } catch (error) {
       console.error('Error loading habit data:', error);
     }
@@ -168,7 +151,15 @@ export function EliteHabit() {
         saved_data: data
       });
 
-      // Database triggers handle counter increment automatically - no manual update needed
+      // Optimistically update local state
+      const newHabit = data[0] as EliteHabitEntry;
+      setAllEntries(prev => [newHabit, ...prev]);
+      if (new Date(newHabit.date).toDateString() === today) {
+        setTodayEntries(prev => [newHabit, ...prev]);
+      }
+
+      // Manually trigger profile refresh
+      await refreshUserProfile();
 
       // Award XP AFTER counter increment (XP can be blocked by daily limit)
       awardXP('elite_habit_completion', 10, 'Completed elite habit exercise');
@@ -180,11 +171,6 @@ export function EliteHabit() {
 
       // Auto-show reports after submitting
       setShowReports(true);
-      
-
-      
-      // Reload data after UI update
-      setTimeout(() => loadHabitData(), 0);
 
     } catch (error) {
       console.error('Elite habit error:', error);
@@ -220,8 +206,8 @@ export function EliteHabit() {
         variant: "default"
       });
 
-      // Update total display immediately
-      setTotalEliteHabits(prev => Math.max(0, prev - 1));
+      // Manually trigger profile refresh
+      await refreshUserProfile();
 
       // Update local state instead of DB reload
       setAllEntries(prev => prev.filter(h => h.id !== habitId));

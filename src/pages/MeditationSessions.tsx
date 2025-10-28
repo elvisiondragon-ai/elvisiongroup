@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, Play, Pause, Volume2, Users, Radio, Heart, Star, Sparkles, Headphones, Clock, Crown, Eye, Loader2, Download } from "lucide-react";
 // Removed slow UserProfileContext - now using fast auth
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useProtectedAudio } from "@/contexts/AudioContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -18,8 +17,7 @@ interface MeditationSessionsProps {
 
 export function MeditationSessions({ onNavigate }: MeditationSessionsProps) {
   const { t } = useTranslation();
-  const { userId } = useAuth();
-  const { user } = useUserProfile();
+  const { userId, user } = useAuth();
   const { createProtectedAudio, createStreamingAudio, isCached } = useProtectedAudio();
   const { toast } = useToast();
 

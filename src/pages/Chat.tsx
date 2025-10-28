@@ -8,7 +8,7 @@ import { ChatMessage } from "@/components/ChatMessage";
 import { Send, Users, RefreshCw, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useUserProfile } from "@/contexts/UserProfileContext";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { GoldReportList } from "./GoldReportList";
 
@@ -94,8 +94,7 @@ export function Chat({ onNavigate }: ChatProps) {
   // Capacitor native app detection
   const isCapacitor = (window as any).Capacitor?.isNativePlatform();
   const { toast } = useToast();
-  const { user, userProfile } = useUserProfile();
-  const { userId, chatChannel, isPro, proStatus, messages, setMessages, addMessage, removeMessage, broadcastMessage, broadcastDelete } = useAuth();
+  const { user, userId, userProfile, chatChannel, isPro, proStatus, messages, setMessages, addMessage, removeMessage, broadcastMessage, broadcastDelete } = useAuth();
 
   useEffect(() => {
     if (proStatus) {

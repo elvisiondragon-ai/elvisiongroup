@@ -298,12 +298,12 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
           table: 'profiles',
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
-          // THROTTLE refreshProfile calls to prevent spam
-          clearTimeout(throttleTimeout);
-          throttleTimeout = setTimeout(() => {
-            refreshProfile();
-          }, 2000); // 2 second throttle
+        (payload) => {
+          // INSTANT UPDATE: Directly update state and cache from the payload
+          console.log('✅ Real-time profile update received:', payload.new);
+          const newProfile = payload.new as UserProfile;
+          setUserProfile(newProfile);
+          localStorage.setItem('user-profile-cache', JSON.stringify(newProfile));
         }
       )
       .subscribe();

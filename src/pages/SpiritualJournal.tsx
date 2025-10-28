@@ -7,7 +7,6 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useXPSystem } from '@/hooks/useXPSystem';
-import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface SpiritualJournalProps {
@@ -25,11 +24,9 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [showProUpgrade, setShowProUpgrade] = useState(false);
   const [isLoadingReflections, setIsLoadingReflections] = useState(true);
-  const [totalReflections, setTotalReflections] = useState(0);
   const { toast } = useToast();
   const { awardXP } = useXPSystem();
-  const { user, userProfile } = useUserProfile();
-  const { userId } = useAuth();
+  const { user, userId, userProfile, refreshUserProfile } = useAuth();
   const saveButtonRef = useRef<HTMLButtonElement>(null);
 
   const currentQuestion = "Apa yang paling ingin kamu lepaskan hari ini, agar hatimu bisa ringan kembali?";
@@ -68,21 +65,6 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       setReflections(data || []);
     }
 
-    // Load total reflections from profile or use cached value
-    if (userProfile?.total_journal !== undefined) {
-      setTotalReflections(userProfile.total_journal);
-    } else {
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('total_journal')
-        .eq('user_id', userId)
-        .single();
-        
-      if (profileData) {
-        setTotalReflections(profileData.total_journal || 0);
-      }
-    }
-    
     setIsLoadingReflections(false);
   };
 
@@ -132,26 +114,16 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
       });
       setIsSaving(false);
     } else {
-      console.log('%c✅ Reflection saved successfully:', 'color: green; font-weight: bold;', data);
-      console.log('%c📝 Reflection query result - what was written:', 'color: green; font-weight: bold;', {
-        user_id: userId,
-        user_email: user?.email || '',
-        reflection: reflection.trim(),
-        saved_data: data
-      });
+      const newReflection = data[0] as Reflection;
+      setReflections(prev => [newReflection, ...prev]);
 
-      // Database triggers handle counter increment automatically - no manual update needed
+      console.log('%c✅ Reflection saved successfully:', 'color: green; font-weight: bold;', newReflection);
 
       // Award XP AFTER counter increment (XP can be blocked by daily limit)
       awardXP('journal_completion', 1, 'Completed spiritual journal reflection');
 
       setReflection("");
       setIsSaving(false);
-      
-
-      
-      // Load reflections after UI update
-      setTimeout(() => loadReflections(userId), 0);
     }
   };
 
@@ -186,8 +158,8 @@ export function SpiritualJournal({ onNavigate }: SpiritualJournalProps) {
         variant: "default"
       });
 
-      // Update total display immediately
-      setTotalReflections(prev => Math.max(0, prev - 1));
+      // Manually trigger profile refresh to update total_journal count
+      await refreshUserProfile();
 
       // Update local state instead of DB reload
       setReflections(prev => prev.filter(r => r.id !== reflectionId));
