@@ -101,30 +101,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
       audio.pause();
       setIsPlaying(false);
     } else {
-      // Check if audio needs to be re-cached (iOS cache cleared)
-      const needsRecaching = !(await isCached(src)) && audio.src && !audio.src.startsWith('blob:');
-      
-      if (needsRecaching) {
-        try {
-          // Re-create audio with loading feedback
-          const newAudio = await createProtectedAudio(src, setIsLoadingAudio);
-          
-          // Replace the audio element source
-          if (audioRef.current) {
-            audioRef.current.src = newAudio.src;
-            audioRef.current.load();
-          }
-          
-          // Show notification for re-download
-          toast({
-            title: "Re-downloading audio",
-            description: "Cache was cleared, downloading again...",
-            variant: "default",
-          });
-        } catch (error) {
-          console.error('Failed to re-cache audio:', error);
-        }
-      }
+
       
       audio.play().then(() => setIsPlaying(true)).catch((error) => {
         toast({
