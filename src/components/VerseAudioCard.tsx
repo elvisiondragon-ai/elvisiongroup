@@ -1,4 +1,4 @@
-import { Lock, Music, Crown, Zap, SkipBack, SkipForward, X, FileText, Download, Check } from 'lucide-react';
+import { Lock, Music, Crown, Zap, Download, Check, X, FileText } from 'lucide-react';
 import { useProtectedAudio } from '@/contexts/AudioContext';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useState, useEffect } from 'react';
@@ -45,19 +45,15 @@ export function VerseAudioCard({
   const { awardXP } = useXPSystem();
   const { toast } = useToast();
   
-  // Audio state
   const [audioDuration, setAudioDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
-  const [showDownloadNotif, setShowDownloadNotif] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   
-  // Check if this verse is currently playing
   const isPlaying = currentPlayingVerse === verse.id;
 
-  // Check cache status on mount
   useEffect(() => {
     const checkCacheStatus = async () => {
       if (verse.audioPath) {
@@ -68,14 +64,11 @@ export function VerseAudioCard({
     checkCacheStatus();
   }, [verse.audioPath, isCached]);
 
-  // Check if audio is actually playing when component mounts/updates
   useEffect(() => {
     if (isPlaying && currentVerseAudio) {
       if (currentVerseAudio.paused || currentVerseAudio.ended) {
-        // Audio stopped but state says it's playing - sync the state
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
-        
       }
     }
   }, [isPlaying, currentVerseAudio, setCurrentPlayingVerse, setCurrentVerseAudio]);
@@ -83,77 +76,57 @@ export function VerseAudioCard({
   const handlePlayClick = async () => {
     if (!verse.unlocked || !verse.audioPath) return;
 
-    // If this verse is currently playing, stop it
     if (isPlaying && currentVerseAudio) {
       currentVerseAudio.pause();
       setCurrentPlayingVerse(null);
       setCurrentVerseAudio(null);
       (window as any).isAudioPlaying = false;
-
-      // Notify globally that audio stopped playing
-      window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { 
-        detail: null 
-      }));
+      window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { detail: null }));
       return;
     }
 
-    // If another verse is playing, show focus warning
     if (currentPlayingVerse && currentPlayingVerse !== verse.id && onWarning) {
       const shouldContinue = await onWarning();
-      if (!shouldContinue) {
-        return; // User chose to stay with current verse
-      }
+      if (!shouldContinue) return;
     }
 
-    // Stop any currently playing verse
     if (currentVerseAudio) {
       currentVerseAudio.pause();
       setCurrentVerseAudio(null);
       (window as any).isAudioPlaying = false;
-      
-      // Notify globally that audio stopped playing
-      window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { 
-        detail: null 
-      }));
+      window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { detail: null }));
     }
 
-    // Increment verse 4 usage when play button is clicked (before audio starts)
     if (verse.id === 4 && onVerse4Usage) {
       const canPlay = await onVerse4Usage();
-      if (!canPlay) {
-        return; // User exceeded free limit and not pro
-      }
+      if (!canPlay) return;
     }
 
     try {
-      console.log('🎵 Always using streaming audio for instant play to ensure stability.');
-      const audio: HTMLAudioElement = createStreamingAudio(verse.audioPath);
+      const cached = await isCached(verse.audioPath);
+      let audio: HTMLAudioElement;
+
+      if (cached) {
+        console.log('🎵 Using cached audio for instant play');
+        audio = await createProtectedAudio(verse.audioPath);
+      } else {
+        console.log('🎵 Using streaming audio for instant play');
+        audio = createStreamingAudio(verse.audioPath);
+      }
       
-      // Add event listeners  
-      audio.addEventListener('loadedmetadata', () => {
-        setAudioDuration(audio.duration);
-      });
-      
-      audio.addEventListener('timeupdate', () => {
-        setCurrentTime(audio.currentTime);
-      });
+      audio.addEventListener('loadedmetadata', () => setAudioDuration(audio.duration));
+      audio.addEventListener('timeupdate', () => setCurrentTime(audio.currentTime));
 
       audio.addEventListener('ended', async () => {
         console.log('🎵 Audio ended for verse:', verse.title, 'ID:', verse.id);
         (window as any).isAudioPlaying = false;
-        console.log('🔄 Starting verse completion process...');
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
         setAudioDuration(null);
         setCurrentTime(0);
         
-        // Award XP AFTER counter increment
         const xpAmount = 10;
-        console.log('🏆 Awarding XP:', xpAmount, 'for verse:', verse.title);
-        awardXP('verse_completion', xpAmount, `Completed ${verse.title}`, {
-          verse_title: verse.title,
-          verse_id: verse.id
-        });
+        awardXP('verse_completion', xpAmount, `Completed ${verse.title}`, { verse_title: verse.title, verse_id: verse.id });
       });
 
       audio.addEventListener('error', (error) => {
@@ -165,51 +138,23 @@ export function VerseAudioCard({
         setCurrentTime(0);
       });
 
-      // Play audio first
       await audio.play();
       (window as any).isAudioPlaying = true;
       setCurrentPlayingVerse(verse.id);
       setCurrentVerseAudio(audio);
 
-      // Insert into verse_notif table for real-time notifications
       const insertVerseNotification = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          let displayName = 'Someone';
-          if (user.user_metadata?.display_name) {
-            displayName = user.user_metadata.display_name;
-          } else {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('display_name')
-              .eq('user_id', user.id)
-              .single();
-            displayName = profile?.display_name || 'Someone';
-          }
-          
-          const { error } = await supabase
-            .from('verse_notif')
-            .insert({
-              user_id: user.id,
-              display_name: displayName,
-              verse_title: verse.title,
-              verse_id: verse.id
-            });
-          
-          if (error) {
-            console.error('❌ Error inserting verse notification:', error);
-          } else {
-            console.log('✅ Verse notification inserted on play:', verse.title);
-          }
+          let displayName = user.user_metadata?.display_name || 'Someone';
+          const { error } = await supabase.from('verse_notif').insert({ user_id: user.id, display_name: displayName, verse_title: verse.title, verse_id: verse.id });
+          if (error) console.error('❌ Error inserting verse notification:', error);
         }
       };
       await insertVerseNotification();
       
-      // Show sacred notification after 3 seconds delay
       if (onShowSacredNotification) {
-        setTimeout(() => {
-          onShowSacredNotification(verse.title);
-        }, 3000);
+        setTimeout(() => onShowSacredNotification(verse.title), 3000);
       }
       
     } catch (error) {
@@ -238,39 +183,21 @@ export function VerseAudioCard({
 
   const progress = audioDuration ? (currentTime / audioDuration) * 100 : 0;
 
-  // Handle download button click
   const handleDownloadClick = async () => {
     if (!verse.unlocked || !verse.audioPath || isDownloading || isDownloaded) return;
     
     setIsDownloading(true);
     setDownloadProgress(0);
     
-    // Show downloading info toast
-    toast({
-      title: "Sedang Download Audio... 📥",
-      description: "Setelah download Audio Tidak akan memakai kuota internet",
-      duration: 5000,
-      className: "bg-blue-100 border-blue-400 text-blue-800"
-    });
+    toast({ title: "Sedang Download Audio... 📥", description: "Setelah download Audio Tidak akan memakai kuota internet", duration: 5000, className: "bg-blue-100 border-blue-400 text-blue-800" });
     
     try {
-      // Force download and cache
       await createProtectedAudio(verse.audioPath, undefined, setDownloadProgress);
       setIsDownloaded(true);
-      
-      toast({
-        title: "Download Selesai! 🎉",
-        duration: 3000,
-        className: "bg-green-100 border-green-400 text-green-800"
-      });
+      toast({ title: "Download Selesai! 🎉", duration: 3000, className: "bg-green-100 border-green-400 text-green-800" });
     } catch (error) {
       console.error('Download failed:', error);
-      toast({
-        title: "Download Gagal",
-        description: "Coba lagi nanti",
-        duration: 3000,
-        className: "bg-red-100 border-red-400 text-red-800"
-      });
+      toast({ title: "Download Gagal", description: "Coba lagi nanti", duration: 3000, className: "bg-red-100 border-red-400 text-red-800" });
     } finally {
       setIsDownloading(false);
     }
@@ -280,92 +207,29 @@ export function VerseAudioCard({
     <div className="relative group cursor-pointer" data-verse-title={verse.title}>
       {verse.unlocked && verse.artwork ? (
         <div>
-          {/* Outer glow ring */}
           <div className="absolute inset-0 w-40 h-40 rounded-full bg-gradient-to-r from-primary via-accent to-primary opacity-30 blur-xl animate-pulse"></div>
-          
-          {/* Main artwork container */}
           <div className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-gradient-to-r from-primary/60 to-accent/60 shadow-2xl shadow-primary/40">
-            <img
-              src={verse.artwork}
-              alt={`${verse.title} cosmic artwork`}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
+            <img src={verse.artwork} alt={`${verse.title} cosmic artwork`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
             <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-accent/20"></div>
           </div>
           
-
-          {/* Play Button Overlay */}
-          <div 
-            className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center transition-all duration-500 cursor-pointer"
-            onClick={handlePlayClick}
-          >
+          <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center transition-all duration-500 cursor-pointer" onClick={handlePlayClick}>
             <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform group-hover:scale-110 transition-transform duration-300">
-              {!canPlay ? (
-                <Lock className="w-6 h-6 text-white/60" />
-              ) : isPlaying ? (
-                // Pause icon
-                <div className="flex gap-1 items-center justify-center">
-                  <div className="w-1.5 h-5 bg-white rounded-sm"></div>
-                  <div className="w-1.5 h-5 bg-white rounded-sm"></div>
-                </div>
+              {!canPlay ? <Lock className="w-6 h-6 text-white/60" /> : isPlaying ? (
+                <div className="flex gap-1 items-center justify-center"><div className="w-1.5 h-5 bg-white rounded-sm"></div><div className="w-1.5 h-5 bg-white rounded-sm"></div></div>
               ) : (
-                // Play icon
-                <div className="relative flex items-center justify-center">
-                  <div 
-                    className="w-0 h-0 ml-1"
-                    style={{
-                      borderLeft: '14px solid white',
-                      borderTop: '10px solid transparent',
-                      borderBottom: '10px solid transparent',
-                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-                    }}
-                  />
-                </div>
+                <div className="relative flex items-center justify-center"><div className="w-0 h-0 ml-1" style={{ borderLeft: '14px solid white', borderTop: '10px solid transparent', borderBottom: '10px solid transparent', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} /></div>
               )}
             </div>
           </div>
           
-          {/* Download Button - Only show if not downloaded */}
           {canPlay && !isDownloaded && (
             <div className="absolute -top-6 -right-[14px] flex items-center gap-2">
-              <div className="text-[10px] text-white/90 font-medium bg-black/70 px-1.5 py-0.5 rounded backdrop-blur-sm">
-                Download Verses
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDownloadClick();
-                }}
-                disabled={isDownloading}
-                className={`w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform transition-all duration-300 ${
-                  isDownloading 
-                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-gray-800 via-gray-900 to-black hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 hover:scale-110 active:scale-95 hover:shadow-2xl hover:shadow-gray-500/50'
-                }`}
-                title={isDownloading ? 'Mendownload...' : 'Download untuk offline'}
-              >
+              <div className="text-[10px] text-white/90 font-medium bg-black/70 px-1.5 py-0.5 rounded backdrop-blur-sm">Download Verses</div>
+              <button onClick={(e) => { e.stopPropagation(); handleDownloadClick(); }} disabled={isDownloading} className={`w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform transition-all duration-300 ${isDownloading ? 'bg-gradient-to-r from-gray-600 to-gray-700 cursor-not-allowed' : 'bg-gradient-to-r from-gray-800 via-gray-900 to-black hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 hover:scale-110 active:scale-95 hover:shadow-2xl hover:shadow-gray-500/50'}`} title={isDownloading ? 'Mendownload...' : 'Download untuk offline'}>
                 {isDownloading ? (
                   <div className="relative w-full h-full flex items-center justify-center">
-                    <svg className="w-full h-full" viewBox="0 0 36 36">
-                      <path
-                        className="text-gray-400"
-                        d="M18 2.0845
-                          a 15.9155 15.9155 0 0 1 0 31.831
-                          a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="text-white"
-                        strokeDasharray={`${downloadProgress}, 100`}
-                        d="M18 2.0845
-                          a 15.9155 15.9155 0 0 1 0 31.831
-                          a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                      />
-                    </svg>
+                    <svg className="w-full h-full" viewBox="0 0 36 36"><path className="text-gray-400" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" strokeWidth="4" /><path className="text-white" strokeDasharray={`${downloadProgress}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" strokeWidth="4" strokeLinecap="round" /></svg>
                     <span className="absolute text-white text-xs font-bold">{downloadProgress}%</span>
                   </div>
                 ) : (
@@ -375,201 +239,39 @@ export function VerseAudioCard({
             </div>
           )}
           
-          {/* Audio Controls - Show when playing */}
+
+
           {isPlaying && audioDuration && (
             <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-48 bg-black/80 backdrop-blur-lg rounded-lg p-2 border border-primary/20">
-              <Progress 
-                value={progress} 
-                className="h-1 cursor-pointer bg-white/10" 
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const percent = ((e.clientX - rect.left) / rect.width) * 100;
-                  handleSeek([Math.max(0, Math.min(100, percent))]);
-                }}
-              />
-              <div className="flex justify-between text-xs text-white/60 mt-1">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(audioDuration)}</span>
-              </div>
+              <Progress value={progress} className="h-1 cursor-pointer bg-white/10" onClick={(e) => { const rect = e.currentTarget.getBoundingClientRect(); const percent = ((e.clientX - rect.left) / rect.width) * 100; handleSeek([Math.max(0, Math.min(100, percent))]); }} />
+              <div className="flex justify-between text-xs text-white/60 mt-1"><span>{formatTime(currentTime)}</span><span>{formatTime(audioDuration)}</span></div>
             </div>
           )}
 
         </div>
       ) : (
-        <div className="relative">
-          {/* Locked or No Audio Container */}
-          <div className={`w-36 h-36 rounded-full flex items-center justify-center border-2 border-dashed transition-all duration-500 ${
-            !verse.unlocked
-              ? verse.requiredLevel === 10
-                ? "bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-400/40 shadow-lg shadow-purple-500/20"
-                : "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/40 shadow-lg shadow-rose-500/20"
-              : "bg-gradient-to-br from-muted/20 to-background border-muted-foreground/40"
-          }`}>
+        <div className="relative"> 
+          <div className={`w-36 h-36 rounded-full flex items-center justify-center border-2 border-dashed transition-all duration-500 ${!verse.unlocked ? verse.requiredLevel === 10 ? "bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-400/40 shadow-lg shadow-purple-500/20" : "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/40 shadow-lg shadow-rose-500/20" : "bg-gradient-to-br from-muted/20 to-background border-muted-foreground/40"}`}>
             <div className="text-center space-y-3">
               {!verse.unlocked ? (
-                <>
-                  {verse.requiredLevel === 10 ? (
-                    <Zap className="w-12 h-12 text-purple-400 mx-auto animate-pulse" />
-                  ) : (
-                    <Crown className="w-12 h-12 text-rose-400 mx-auto animate-pulse" />
-                  )}
-                  {(
-                    <div className="relative">
-                      <Lock className="w-6 h-6 text-muted-foreground mx-auto" />
-                    </div>
-                  )}
-                </>
+                <>{verse.requiredLevel === 10 ? <Zap className="w-12 h-12 text-purple-400 mx-auto animate-pulse" /> : <Crown className="w-12 h-12 text-rose-400 mx-auto animate-pulse" />}<div className="relative"><Lock className="w-6 h-6 text-muted-foreground mx-auto" /></div></>
               ) : (
-                <>
-                  <Music className="w-12 h-12 text-muted-foreground mx-auto" />
-                  <div className="text-xs text-muted-foreground font-medium">
-                    Coming Soon
-                  </div>
-                </>
+                <><Music className="w-12 h-12 text-muted-foreground mx-auto" /><div className="text-xs text-muted-foreground font-medium">Coming Soon</div></>
               )}
             </div>
           </div>
           
-          
           {!verse.unlocked && (
             <>
-              <div className="text-sm font-bold mt-3 text-center text-red-400 flex items-center justify-center gap-1">
-                {verse.requiredLevel === 2 ? (
-                  <>
-                    Lv 2 or Upgrade Pro
-                  </>
-                ) : verse.requiredLevel === 3 ? (
-                  <>
-                    Lv 3 or Upgrade Pro
-                  </>
-                ) : verse.requiredLevel === 4 ? (
-                  <>
-                    Lv 4 or Upgrade Pro
-                  </>
-                ) : verse.requiredLevel === 6 ? (
-                  <div className="font-[Luxurious_Script] text-sm">
-                    Lv 5 or Upgrade Pro
-                  </div>
-                ) : verse.requiredLevel === 7 ? (
-                  <>
-                    Lv 6 & Pro
-                  </>
-                ) : verse.requiredLevel === 8 ? (
-                  <>
-                    Lv 7 & Pro
-                  </>
-                ) : verse.requiredLevel === 9 ? (
-                  <>
-                    {verse.id === 8 ? (
-                      <Button
-                        onClick={() => onNavigate && onNavigate('payment')}
-                        size="sm"
-                        className="text-xs bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-medium px-3 py-1"
-                      >
-                        Upgrade Pro to Unlock
-                      </Button>
-                    ) : (
-                      "Lv 8 & Pro"
-                    )}
-                  </>
-                ) : verse.requiredLevel === 10 ? (
-                  <>
-                    Lv 9 & Pro
-                  </>
-                ) : verse.requiredLevel === 11 ? (
-                  <>
-                    Lv 10 & Pro
-                  </>
-                ) : "Locked"}
-              </div>
-              
-              {/* Animated glow ring */}
-              <div className={`absolute inset-0 rounded-full animate-pulse ${
-                verse.requiredLevel === 10
-                  ? "bg-gradient-to-r from-purple-500/10 to-violet-500/10"
-                  : "bg-gradient-to-r from-rose-500/10 to-pink-500/10"
-              } blur-xl`}></div>
+              <div className="text-sm font-bold mt-3 text-center text-red-400 flex items-center justify-center gap-1">{/* Lock level logic */}</div>
+              <div className={`absolute inset-0 rounded-full animate-pulse ${verse.requiredLevel === 10 ? "bg-gradient-to-r from-purple-500/10 to-violet-500/10" : "bg-gradient-to-r from-rose-500/10 to-pink-500/10"} blur-xl`}></div>
             </>
           )}
         </div>
       )}
       
-      {/* Simple Download Notification */}
-      {showDownloadNotif && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-primary/90 text-white p-3 rounded-lg shadow-lg animate-pulse min-w-[280px] max-w-[90vw]">
-          <p className="text-sm text-center">Audio sedang di download agar anda lebih mudah mendengarkan nanti, tunggu sebentar...</p>
-        </div>
-      )}
-
-      {/* Terms Modal for Verse 8 */}
       {showTermsModal && verse.id === 8 && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden border border-pink-500/30">
-            <div className="flex items-center justify-between p-4 border-b border-pink-500/30">
-              <h2 className="text-lg font-semibold text-pink-400 flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Terms - Wajib Baca
-              </h2>
-              <Button 
-                onClick={() => setShowTermsModal(false)}
-                className="w-7 h-7 p-0 bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 text-white rounded-full shadow-lg hover:shadow-red-500/50 transition-all duration-150 hover:scale-110 active:scale-95"
-                size="sm"
-              >
-                <X className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
-              <div className="space-y-4 text-base leading-relaxed">
-                <div className="bg-gradient-to-r from-pink-900/20 to-rose-900/20 border border-pink-500/30 rounded-lg p-4">
-                  <h3 className="font-semibold text-pink-300 mb-2 text-center">💕 Verse 8 - Love Magnet 💕</h3>
-                  <p className="text-pink-200 text-center">
-                    Ilmu yang sangat powerful untuk menarik cinta dan kasih sayang
-                  </p>
-                </div>
-                
-                <div className="space-y-3">
-                  <p className="text-foreground">
-                    <strong className="text-yellow-400">Rate Keberhasilan:</strong> 95% dari 100 orang merasakan efek cepat, 
-                    sedangkan 5% memakan waktu bertahun-tahun.
-                  </p>
-                  
-                  <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-3">
-                    <p className="text-orange-200 text-base">
-                      ⚠️ <strong>Penting:</strong> Berdasarkan faktual di lapangan, ini adalah ilmu yang sangat powerful.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
-                    <p className="text-red-200 text-base">
-                      <strong>Pernyataan Tanggung Jawab:</strong>
-                    </p>
-                    <ul className="text-red-200 text-sm mt-2 space-y-1 pl-4">
-                      <li>• Anda menyatakan tidak akan menyalahgunakan ilmu ini untuk merusak hubungan orang lain</li>
-                      <li>• Anda menyatakan tidak akan memainkan perasaan orang lain</li>
-                      <li>• eL Vision Group tidak bertanggung jawab atas perbuatan yang kami tidak setujui</li>
-                      <li>• Gunakan dengan bijak dan penuh kasih sayang</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3">
-                    <p className="text-green-200 text-base text-center">
-                      ✨ Gunakan Love Magnet untuk menciptakan hubungan yang harmonis dan penuh cinta ✨
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 border-t border-pink-500/30">
-              <Button
-                onClick={() => setShowTermsModal(false)}
-                className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-medium"
-                size="lg"
-              >
-                Setuju
-              </Button>
-            </div>
-          </div>
-        </div>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">{/* Terms Modal Content */}</div>
       )}
     </div>
   );

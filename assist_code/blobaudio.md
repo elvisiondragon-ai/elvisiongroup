@@ -1,3 +1,12 @@
+# Backup of Audio Protection and Caching Logic
+
+This file contains the complex audio protection and caching logic that was removed to simplify the audio playback system and fix stability issues.
+
+## `audioProtection.ts`
+
+This utility was designed to obfuscate and protect the audio blob URLs from being easily downloaded or accessed by users. It includes methods for URL masking, blob obfuscation, and overriding browser APIs like `fetch`.
+
+```typescript
 // Advanced Audio Protection Utilities
 
 export class AudioProtection {
@@ -134,3 +143,104 @@ export class AudioProtection {
     };
   }
 }
+```
+
+## `createProtectedAudio` function from `AudioContext.tsx`
+
+This function contained the logic for downloading audio, caching it in IndexedDB, and playing it from the cache. The download progress monitoring was complex and lacked proper error handling, leading to corrupted files being saved.
+
+```typescript
+  const createProtectedAudio = useCallback(async (audioPath: string, onLoadingChange?: (loading: boolean) => void, onProgress?: (progress: number) => void): Promise<HTMLAudioElement> => {
+    const cachedUrl = audioCache.get(audioPath);
+    if (cachedUrl) {
+      console.log('🎵 Using memory cached audio:', audioPath);
+      const audio = new Audio(cachedUrl);
+      // Apply protections
+      return audio;
+    }
+
+    const cacheKey = indexedDBCache.generateCacheKey(audioPath);
+    const cachedBlob = await indexedDBCache.get(cacheKey);
+    if (cachedBlob) {
+      console.log('🎵 Using IndexedDB cached audio:', audioPath);
+      const blobUrl = URL.createObjectURL(cachedBlob);
+      audioCache.set(audioPath, blobUrl);
+      const audio = new Audio(blobUrl);
+      // Apply protections
+      return audio;
+    }
+
+    console.log('🎵 USER-INITIATED download/caching audio:', audioPath);
+    onLoadingChange?.(true);
+    onProgress?.(0);
+    try {
+      const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
+      const response = await fetch(audioUrl, {
+        headers: {
+          'Cache-Control': 'max-age=31536000, immutable',
+          'Pragma': 'cache',
+          'If-Modified-Since': new Date(0).toUTCString(),
+        },
+        cache: 'force-cache'
+      });
+      if (!response.ok) throw new Error(`Failed to fetch audio: ${response.status}`);
+      
+      const contentLength = response.headers.get('content-length');
+      if (!contentLength) {
+        console.error('Content-Length header not found');
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        audioCache.set(audioPath, blobUrl);
+        await indexedDBCache.store(cacheKey, blob, audioUrl);
+        const audio = new Audio(blobUrl);
+        onLoadingChange?.(false);
+        onProgress?.(100);
+        return audio;
+      }
+
+      const total = parseInt(contentLength, 10);
+      let loaded = 0;
+
+      const reader = response.body!.getReader();
+      const stream = new ReadableStream({
+        start(controller) {
+          function push() {
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                controller.close();
+                return;
+              }
+              loaded += value.length;
+              if (onProgress) {
+                const progress = Math.round((loaded / total) * 100);
+                onProgress(progress);
+              }
+              controller.enqueue(value);
+              push();
+            });
+          }
+          push();
+        }
+      });
+
+      const newResponse = a new Response(stream);
+      const blob = await newResponse.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      audioCache.set(audioPath, blobUrl);
+      await indexedDBCache.store(cacheKey, blob, audioUrl);
+      const audio = new Audio(blobUrl);
+      // Apply protections
+      console.log('🎵 Audio cached successfully:', audioPath);
+      onLoadingChange?.(false);
+      onProgress?.(100);
+      return audio;
+    } catch (error) {
+      console.error('Failed to cache audio, using direct URL:', error);
+      const audioUrl = audioPath.startsWith('http') ? audioPath : getAudioUrl(audioPath);
+      const audio = new Audio(audioUrl);
+      // Apply protections
+      onLoadingChange?.(false);
+      return audio;
+    }
+  }, [audioCache]);
+```

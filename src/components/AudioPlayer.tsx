@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioSession } from "@/hooks/useAudioSession";
-import { useProtectedAudio } from "@/contexts/AudioContext";
+import { useAudio } from "@/contexts/AudioContext";
 
 interface AudioPlayerProps {
   title: string;
@@ -23,7 +23,7 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
   const { initializeSession, updateMetadata, updatePlaybackState } = useAudioSession();
-  const { createProtectedAudio, isCached } = useProtectedAudio();
+  // REMOVED: useProtectedAudio and its functions
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -101,8 +101,6 @@ export function AudioPlayer({ title, src, description, autoPlay = false }: Audio
       audio.pause();
       setIsPlaying(false);
     } else {
-
-      
       audio.play().then(() => setIsPlaying(true)).catch((error) => {
         toast({
           title: "Playback Error",
