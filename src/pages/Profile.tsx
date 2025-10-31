@@ -759,7 +759,7 @@ export function Profile({ onNavigate }: ProfileProps) {
             setShowLoadingOverlay(true);
             // Show loading for 1 second before opening
             setTimeout(() => {
-              window.open('https://elvisiongroup.com', '_blank');
+              window.open('https://display.elvisiongroup.com', '_blank');
               setShowLoadingOverlay(false);
             }, 1000);
           }}
