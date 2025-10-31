@@ -233,13 +233,15 @@ export function Profile({ onNavigate }: ProfileProps) {
         }
       }
 
-      // Clear all caches
+      // Clear all caches except for the audio cache
       if ('caches' in window) {
         const cacheNames = await caches.keys();
         await Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
+          cacheNames
+            .filter(cacheName => !cacheName.includes('audio'))
+            .map(cacheName => caches.delete(cacheName))
         );
-        console.log('All caches cleared');
+        console.log('All non-audio caches cleared');
       }
 
       // Set flag to show success toast after reload

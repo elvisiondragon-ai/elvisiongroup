@@ -114,14 +114,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
       const contentLength = response.headers.get('content-length');
       if (!contentLength) {
-        console.warn('Content-Length header not found. Downloading without progress...');
-        const blob = await response.blob();
-        await indexedDBCache.store(cacheKey, blob, audioUrl);
-        const blobUrl = URL.createObjectURL(blob);
-        audioCache.set(audioPath, blobUrl);
-        onLoadingChange?.(false);
-        onProgress?.(100);
-        return new Audio(blobUrl);
+        throw new Error('Content-Length header not found. Cannot cache audio.');
       }
 
       const total = parseInt(contentLength, 10);
