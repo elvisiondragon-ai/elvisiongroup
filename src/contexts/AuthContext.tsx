@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
@@ -104,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const currentTokenRef = useRef<string | null>(null);
   const isConnectingRef = useRef<boolean>(false);
   const isRebuildingRef = useRef<boolean>(false);
+  const lastLoginUpdateRef = useRef<string | null>(null);
 
   const refreshUserProfile = async () => {
     if (!user?.id) return;
@@ -708,6 +709,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const updateLastLoginDate = useCallback(async (session: Session) => {
+    const userId = session?.user?.id;
+    const accessToken = session?.access_token;
+
+    if (!userId || !accessToken) {
+      return;
+    }
+
+    if (lastLoginUpdateRef.current === accessToken) {
+      return;
+    }
+
+    const jakartaDate = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date());
+
+    try {
+      const { error } = await supabase.rpc('update_profile_last_login', {
+        p_user_id: userId,
+        p_last_login_date: jakartaDate
+      });
+
+      if (error) {
+        console.warn('RPC update_profile_last_login failed, attempting direct update fallback:', error);
+        const { error: fallbackError } = await supabase
+          .from('profiles')
+          .update({ last_login_date: jakartaDate })
+          .eq('user_id', userId);
+
+        if (fallbackError) {
+          throw fallbackError;
+        }
+      }
+
+      lastLoginUpdateRef.current = accessToken;
+      console.log(`🕒 last_login_date updated to ${jakartaDate} (Asia/Jakarta) for user ${userId}`);
+    } catch (error) {
+      lastLoginUpdateRef.current = null;
+      console.error('❌ Failed to update last_login_date:', error);
+    }
+  }, []);
+
   useEffect(() => {
     // Display last logout reason if available
     const lastLogoutReason = localStorage.getItem('last-logout-reason');
@@ -1019,6 +1065,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       updateAuthState(session);
+
+      if (session) {
+        updateLastLoginDate(session).catch((error) => {
+          console.error('❌ Failed to update last_login_date during initial session check:', error);
+        });
+      }
     });
 
     // Auth listener
@@ -1044,6 +1096,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // IDLE USER HANDLER - Prevent unwanted signouts
       if (event === 'SIGNED_OUT') {
+        lastLoginUpdateRef.current = null;
         const now = new Date().toISOString();
         const logoutReason = session ? '🔑 User manually clicked sign out' : '☠️ Token expired/disconnected';
         
@@ -1107,8 +1160,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (event === 'SIGNED_OUT') {
         sessionStorage.removeItem('last-valid-session');
       }
-      
+
       updateAuthState(session);
+
+      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        updateLastLoginDate(session).catch((error) => {
+          console.error('❌ Failed to update last_login_date during auth state change:', error);
+        });
+      }
     });
 
     // IDLE USER HANDLER - Cleanup event listeners
