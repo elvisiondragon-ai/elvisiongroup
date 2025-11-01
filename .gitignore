@@ -26,3 +26,7 @@ dist-ssr
 # Supabase Edge Functions - DO NOT COMMIT
 supabase/functions/
 .env.supabase
+
+# Environment variables
+.env
+.env.production
