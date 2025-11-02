@@ -48,7 +48,9 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
         .from('profile-pictures')
         .getPublicUrl(fileName);
 
-      setAvatarUrl(data.publicUrl);
+      // Add a timestamp to the URL to bust the cache
+      const newAvatarUrl = `${data.publicUrl}?t=${new Date().getTime()}`;
+      setAvatarUrl(newAvatarUrl);
       
       toast({
         title: "Success",

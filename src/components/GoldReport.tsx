@@ -9,9 +9,10 @@ interface GoldReportProps {
   isAdmin: boolean;
   isGoldReported?: boolean;
   onToggle?: (isGoldReported: boolean) => void;
+  messageContent: string;
 }
 
-export function GoldReport({ messageId, isAdmin, isGoldReported = false, onToggle }: GoldReportProps) {
+export function GoldReport({ messageId, isAdmin, isGoldReported = false, onToggle, messageContent }: GoldReportProps) {
   const { toast } = useToast();
   const { broadcastGoldReportAdded, broadcastGoldReportRemoved } = useAuth();
 
@@ -51,7 +52,8 @@ export function GoldReport({ messageId, isAdmin, isGoldReported = false, onToggl
           .from('gold_reports')
           .insert({
             message_id: messageId,
-            reported_by: user.id
+            reported_by: user.id,
+            message_content: messageContent
           });
 
         if (error) throw error;

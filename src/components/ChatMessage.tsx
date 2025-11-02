@@ -167,6 +167,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, curre
                 messageId={id}
                 isAdmin={currentUserIsAdmin}
                 isGoldReported={isGoldReported}
+                messageContent={message}
                 onToggle={(isGoldReported) => {
                   if (onGoldReportToggle) {
                     onGoldReportToggle(id, isGoldReported);
