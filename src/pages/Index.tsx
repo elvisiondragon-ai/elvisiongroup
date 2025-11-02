@@ -21,6 +21,7 @@ import { Lifestyle } from "@/components/Lifestyle";
 import { Pasangan } from "@/components/Pasangan";
 import { supabase } from "@/integrations/supabase/client";
 import { useMeditative } from "@/contexts/MeditativeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +39,7 @@ const Index = () => {
   const [pendingTab, setPendingTab] = useState<string | null>(null);
   const { isMeditativeActive } = useMeditative();
   const { toast } = useToast();
+  const { trackPageView } = useAuth();
 
 
   const handleTabChange = (newTab: string) => {
@@ -142,7 +144,8 @@ const Index = () => {
   // Global scroll-to-top functionality for all section navigation
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [activeTab]);
+    trackPageView(activeTab);
+  }, [activeTab, trackPageView]);
 
   const renderContent = () => {
     switch (activeTab) {

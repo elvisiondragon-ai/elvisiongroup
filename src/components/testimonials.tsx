@@ -88,6 +88,8 @@ const testimonials = [
 
 interface TestimonialsProps {
   onVideoClick: (videoIndex: number, videoUrl: string, videoTitle: string) => void;
+  mediaAudit: { handleOpenOrPlay: (params: any) => void; } | null;
+  user: any;
 }
 
 // Map testimonial names to their video URLs
@@ -134,7 +136,7 @@ const videoMap: Record<string, { url: string; title: string }> = {
   }
 };
 
-export function Testimonials({ onVideoClick }: TestimonialsProps) {
+export function Testimonials({ onVideoClick, mediaAudit, user }: TestimonialsProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold font-exo text-center">
@@ -149,6 +151,12 @@ export function Testimonials({ onVideoClick }: TestimonialsProps) {
             onClick={() => {
               if (testimonial.type === "video" && videoMap[testimonial.name]) {
                 const video = videoMap[testimonial.name];
+                if (mediaAudit && user) {
+                  mediaAudit.handleOpenOrPlay({
+                    object_name: video.url.substring(video.url.lastIndexOf('/') + 1),
+                    user_email: user.email
+                  });
+                }
                 onVideoClick(testimonial.videoIndex || 0, video.url, video.title);
               }
             }}

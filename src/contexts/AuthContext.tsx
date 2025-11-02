@@ -3,6 +3,36 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
+// A log audio to fill table general_action // Call this once at app init
+function setupMediaAudit(supabase) {
+  // Helper to insert into general_action
+  async function logRead({ object_name, user_email = null }) {
+    const user = (await supabase.auth.getUser()).data.user
+    const user_id = user?.id ?? null
+
+    const { error } = await supabase
+      .from('general_action')
+      .insert([{
+        user_id,
+        user_email,
+        action: object_name
+      }])
+
+    if (error) console.warn('general_action insert failed:', error)
+    else console.log('✅ general_action logged successfully', { action: object_name, user_id });
+  }
+
+  // Generic handler for media/image clicks/plays
+  async function handleOpenOrPlay({ object_name, user_email }) {
+    console.log('▶️ handleOpenOrPlay called with:', { object_name });
+    // Log the action
+    await logRead({ object_name, user_email })
+  }
+
+  // Public API you can call from your UI events
+  return { handleOpenOrPlay }
+}
+
 interface ChatMessageData {
   id: string;
   user_id: string;
@@ -57,6 +87,8 @@ interface AuthContextType {
   cleanupSupabase: () => Promise<void>;
   refreshSession: () => Promise<{ success: boolean; error?: string }>;
   refreshUserProfile: () => Promise<void>;
+  mediaAudit: { handleOpenOrPlay: (params: any) => void; } | null;
+  trackPageView: (page: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -78,6 +110,8 @@ const AuthContext = createContext<AuthContextType>({
   cleanupSupabase: async () => {},
   refreshSession: async () => ({ success: false, error: 'Context not initialized' }),
   refreshUserProfile: async () => {},
+  mediaAudit: null,
+  trackPageView: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -105,6 +139,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isConnectingRef = useRef<boolean>(false);
   const isRebuildingRef = useRef<boolean>(false);
   const lastLoginUpdateRef = useRef<string | null>(null);
+  const [mediaAudit, setMediaAudit] = useState<any>(null);
+
+  const trackPageView = useCallback((page: string) => {
+    const trackedPages = [
+      'blood-circulation',
+      'pasangan',
+      'lifestyle',
+      'true-diet',
+      'finance',
+      'physical-beauty',
+      'gold-report-list',
+      'payment',
+      'chat',
+      'spiritual-journal',
+      'elite-habit',
+      'audio-therapy',
+      'leaderboard',
+    ];
+    console.log('Tracked Pages:', trackedPages);
+
+    if (trackedPages.includes(page) && mediaAudit && user) {
+      mediaAudit.handleOpenOrPlay({
+        object_name: `page ${page}`,
+        user_email: user.email,
+      });
+    }
+  }, [mediaAudit, user]);
 
   const refreshUserProfile = async () => {
     if (!user?.id) return;
@@ -1171,6 +1232,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // IDLE USER HANDLER - Cleanup event listeners
+    const audit = setupMediaAudit(supabase);
+    setMediaAudit(audit);
+    console.log('✅ Media audit initialized:', audit);
     return () => {
       subscription.unsubscribe();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -1457,6 +1521,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         cleanupSupabase,
         refreshSession,
         refreshUserProfile,
+        mediaAudit,
+        trackPageView,
       }}
     >
       {children}

@@ -52,7 +52,7 @@ export function Home({
   onNavigate
 }: HomeProps) {
   const { t } = useTranslation();
-  const { user, userId, userProfile } = useAuth();
+  const { user, userId, userProfile, mediaAudit } = useAuth();
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -775,25 +775,31 @@ export function Home({
               : 'hover:border-primary/50 cursor-pointer'
           }`} 
           onClick={() => {
-            if (actuallyLocked) {
-              if (isMeditationLocked) {
-                onNavigate("payment"); // Navigate to payment/upgrade page for Pro features
-                return;
-              }
-              if (isIgnisLocked) {
-                // Show fire notification for Ignis Quest level requirement
-                toast({
-                  title: "🔥 Ignis Quest",
-                  description: "🔥 Ignis For lv 8 User ++, Jalani Proses anda terlebih dahulu",
-                  duration: 4000
-                });
-                return;
-              }
-              return; // Do nothing if locked
-            }
-            console.log("Feature clicked:", feature.key);
-            onNavigate(feature.key);
-          }}>
+                    if (mediaAudit && user) {
+                      mediaAudit.handleOpenOrPlay({
+                        object_name: feature.title,
+                        user_email: user.email
+                      });
+                    }
+                    if (actuallyLocked) {
+                      if (isMeditationLocked) {
+                        onNavigate("payment"); // Navigate to payment/upgrade page for Pro features
+                        return;
+                      }
+                      if (isIgnisLocked) {
+                        // Show fire notification for Ignis Quest level requirement
+                        toast({
+                          title: "🔥 Ignis Quest",
+                          description: "🔥 Ignis For lv 8 User ++, Jalani Proses anda terlebih dahulu",
+                          duration: 4000
+                        });
+                        return;
+                      }
+                      return; // Do nothing if locked
+                    }
+                    console.log("Feature clicked:", feature.key);
+                    onNavigate(feature.key);
+                  }}>
                 {feature.isNew}
                 
                 <div className="flex flex-col items-center text-center space-y-3">
@@ -1035,6 +1041,12 @@ export function Home({
         <Card
           className="p-6 border-border transition-all duration-300 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 hover:from-emerald-500/20 hover:via-teal-500/10 hover:to-cyan-500/20 border-emerald-500/20 hover:border-emerald-400/40 cursor-pointer col-span-2 relative overflow-hidden group"
           onClick={() => {
+            if (mediaAudit && user) {
+              mediaAudit.handleOpenOrPlay({
+                object_name: 'User Testimonials Gallery Viewed',
+                user_email: user.email
+              });
+            }
             setShowImageGalleryModal(true);
           }}
         >
@@ -1070,6 +1082,8 @@ export function Home({
               setIndividualVideo({ url: videoUrl, title: videoTitle });
               setShowIndividualVideoModal(true);
             }}
+            mediaAudit={mediaAudit}
+            user={user}
           />
         </div>
 

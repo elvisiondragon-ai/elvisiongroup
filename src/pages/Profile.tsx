@@ -63,7 +63,7 @@ interface UserProfile {
 }
 
 export function Profile({ onNavigate }: ProfileProps) {
-  const { user, userId, userProfile, loading, cleanupSupabase } = useAuth();
+  const { user, userId, userProfile, loading, cleanupSupabase, mediaAudit } = useAuth();
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -757,15 +757,20 @@ export function Profile({ onNavigate }: ProfileProps) {
           variant="outline"
           className="w-full relative overflow-hidden group bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 hover:from-slate-800 hover:via-blue-800 hover:to-indigo-800 text-white border-none shadow-2xl hover:shadow-blue-900/25 transition-all duration-200 transform hover:scale-105 active:scale-95"
           onClick={() => {
-            setLoadingMessage('Loading Tujuan Kami...');
-            setShowLoadingOverlay(true);
-            // Show loading for 1 second before opening
-            setTimeout(() => {
-              window.open('https://display.elvisiongroup.com', '_blank');
-              setShowLoadingOverlay(false);
-            }, 1000);
-          }}
-        >
+                if (mediaAudit && user) {
+                  mediaAudit.handleOpenOrPlay({
+                    object_name: 'Tujuan Kami',
+                    user_email: user.email
+                  });
+                }
+                setLoadingMessage('Loading Tujuan Kami...');
+                setShowLoadingOverlay(true);
+                // Show loading for 1 second before opening
+                setTimeout(() => {
+                  window.open('https://display.elvisiongroup.com', '_blank');
+                  setShowLoadingOverlay(false);
+                }, 1000);
+              }}        >
           <div className="absolute inset-0 bg-gradient-to-r from-slate-800/30 via-blue-800/30 to-indigo-800/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative flex items-center justify-center">
             <Target className="w-4 h-4 mr-2 text-white group-hover:text-white transition-colors duration-300" />

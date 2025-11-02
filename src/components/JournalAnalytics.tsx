@@ -28,7 +28,7 @@ interface AnalyticsData {
 
 export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
   const { proStatus } = usePro();
-  const { userProfile, user } = useAuth();
+  const { userProfile, user, mediaAudit } = useAuth();
   const { toast } = useToast();
 
   // Tab-level pro status logging
@@ -452,6 +452,12 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
 
           <Button
             onClick={() => {
+              if (mediaAudit && user) {
+                mediaAudit.handleOpenOrPlay({
+                  object_name: 'Renata Analytics',
+                  user_email: user.email
+                });
+              }
               console.log('%c🧠 Analytics button clicked:', 'color: green; font-weight: bold;', {
                 email: user?.email || 'unknown',
                 id: user?.id || 'unknown'
