@@ -1,7 +1,7 @@
 import { TierBadge } from "./TierBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Sparkle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -89,7 +89,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, curre
         }}
       >
         <AvatarImage 
-          src={user.avatar} 
+          src={`${user.avatar}?v=202511032018`} 
           onContextMenu={(e) => e.preventDefault()} 
           onTouchStart={(e) => e.preventDefault()}
           onTouchEnd={(e) => e.preventDefault()}
@@ -112,19 +112,28 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, curre
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={cn(
-                "font-semibold transition-all duration-300",
-                user.isAdmin 
-                  ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 rounded-lg shadow-2xl shadow-red-500/25 hover:from-red-700 hover:via-red-800 hover:to-red-900"
-                  : "text-foreground"
-              )}>
-                {user.name}
-              </span>
-              <TierBadge level={user.level} isPro={user.isPro} isAdmin={user.isAdmin} achievements={[]} subscriptionType={user.subscriptionType} showProBadge={true} />
-            </div>
+                                          <span className={cn(
+                                            "font-semibold transition-all duration-300",
+                                            user.isAdmin && user.id !== '9dd6879a-ec87-4bd9-ad21-1eb6b16c7c95'
+                                              ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 rounded-lg shadow-2xl shadow-red-500/25 hover:from-red-700 hover:via-red-800 hover:to-red-900"
+                                              : "text-foreground"
+                                          )}>
+                                            {user.name}
+                                          </span>
+                                          {user.id === '9dd6879a-ec87-4bd9-ad21-1eb6b16c7c95' ? (
+                                            <span
+                                              className="inline-flex items-center rounded-full font-semibold transition-all text-white relative overflow-hidden bg-gradient-to-r from-purple-700 via-amber-700 to-gray-700 border-2 border-white/30 shadow-2xl shadow-amber-500/25 px-2 py-1 text-xs gap-1"
+                                            >
+                                              <Sparkle className="w-3 h-3" />
+                                              <span>FOUNDER</span>
+                                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                                            </span>
+                                        ) : (
+                                          <TierBadge level={user.level} isPro={user.isPro} isAdmin={user.isAdmin} achievements={[]} subscriptionType={user.subscriptionType} showProBadge={true} />
+                                        )}            </div>
             
             {/* Streak badges - Under username - Multiple Tiers - Hidden for Admin */}
-            {!user.isAdmin && user.streak_days >= 7 && (
+            {!user.isAdmin && user.id !== '9dd6879a-ec87-4bd9-ad21-1eb6b16c7c95' && user.streak_days >= 7 && (
               <div className="flex items-center gap-1" style={{ minHeight: '24px' }}>
                 {user.streak_days >= 500 ? (
                   <div className="streak-badge streak-ignis shadow-sm">

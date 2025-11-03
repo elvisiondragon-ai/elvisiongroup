@@ -39,7 +39,7 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
       // --- Compression Step ---
       console.log(`Original file size: ${file.size / 1024 / 1024} MB`);
       const options = {
-        maxSizeMB: 0.025, // 25KB
+        maxSizeMB: 0.020, // 20KB
         maxWidthOrHeight: 800,
         useWebWorker: true,
       };

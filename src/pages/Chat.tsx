@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useCallback, useRef, useMemo, memo } from "react";
+import { App } from '@capacitor/app';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -95,14 +96,6 @@ export function Chat({ onNavigate }: ChatProps) {
   const isCapacitor = (window as any).Capacitor?.isNativePlatform();
   const { toast } = useToast();
   const { user, userId, userProfile, chatChannel, isPro, proStatus, messages, setMessages, addMessage, removeMessage, broadcastMessage, broadcastDelete } = useAuth();
-
-  // Helper to add cache-busting query param to a URL
-  const addCacheBust = (url: string | null | undefined): string | undefined => {
-    if (!url) return undefined;
-    // Check if URL already has query params
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}t=${new Date().getTime()}`;
-  };
 
   useEffect(() => {
     if (proStatus) {
@@ -450,7 +443,7 @@ export function Chat({ onNavigate }: ChatProps) {
             is_pro: subscriptionData?.is_pro || false,
             subscription_type: subscriptionData?.subscription_type || null,
             user_name: userProfile?.display_name || msg.user_name,
-            avatar_url: addCacheBust(userProfile?.avatar_url),
+            avatar_url: userProfile?.avatar_url,
             is_gold_reported: goldReportedIds.has(msg.id)
           };
         }) || [];
@@ -543,6 +536,25 @@ export function Chat({ onNavigate }: ChatProps) {
       window.removeEventListener('pwa-reload-messages', handlePWAIdleWake);
     };
   }, [loadMessages]);
+
+  // APK IDLE HANDLER - Listen for app resume events and reload messages
+  useEffect(() => {
+    if (isCapacitor) {
+      const listener = App.addListener('appStateChange', ({ isActive }) => {
+        if (isActive) {
+          console.log('📱 APK RESUME: App became active, reloading messages');
+          loadMessages(false);
+          setTimeout(() => {
+            scrollToBottom();
+          }, 300);
+        }
+      });
+
+      return () => {
+        listener.remove();
+      };
+    }
+  }, [isCapacitor, loadMessages]);
 
   // 10000ms timeout mechanism for chat loading
   useEffect(() => {
@@ -695,7 +707,7 @@ export function Chat({ onNavigate }: ChatProps) {
       created_at: new Date().toISOString(),
       streak_days: userData.streak_days,
       subscription_type: userData.subscription_type,
-      avatar_url: addCacheBust(userData.avatar_url)
+      avatar_url: userData.avatar_url
     };
 
     addMessage(optimisticMessage);
