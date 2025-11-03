@@ -237,7 +237,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: true, // Free access
       requiredLevel: 2,
       artwork: verseArtwork,
-      audioPath: 'Verse1 - The Space Hill.MP3',
+      audioPath: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse1%20-%20The%20Space%20Hill.MP3',
       language: 'en',
       isFree: true
     },
@@ -248,7 +248,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: true, // Free access
       requiredLevel: 1,
       artwork: verse2Artwork,
-      audioPath: 'Verse2 - Lucid Beach.MP3',
+      audioPath: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse2%20-%20Lucid%20Beach.MP3',
       language: 'id',
       isFree: true
     },
@@ -259,7 +259,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: proStatus.isPro, // Pro only
       requiredLevel: 3,
       artwork: verse3Artwork,
-      audioPath: 'Verse 3 - Syukur.MP3',
+      audioPath: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%203%20-%20Syukur.MP3',
       language: 'id',
       isFree: false,
       proOnly: true
@@ -271,7 +271,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: proStatus.isPro, // Pro only
       requiredLevel: 5,
       artwork: verse4Artwork,
-      audioPath: 'Verse 4 - Prosperity Stream Vol. 1.MP3',
+      audioPath: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse%204%20-%20Prosperity%20Stream%20Vol.%201.MP3',
       language: 'id',
       isFree: false,
       proOnly: true
@@ -283,7 +283,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
       unlocked: proStatus.isPro, // Pro only
       requiredLevel: 6,
       artwork: verse5Artwork,
-      audioPath: 'Verse5 - Virtality Vortex.MP3',
+      audioPath: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Verse5%20-%20Virtality%20Vortex.MP3',
       language: 'id',
       isFree: false,
       proOnly: true
@@ -498,7 +498,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     unlocked: true,
                     requiredLevel: 1,
                     artwork: shortVerse1Artwork, // Using dedicated short verse artwork
-                    audioPath: 'Jurnalsyukur1.MP3',
+                    audioPath: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Jurnalsyukur1.MP3',
                     language: 'id'
                   }}
                   onWarning={handleWarning}
@@ -552,7 +552,7 @@ export function AudioTherapy({ onNavigate }: AudioTherapyProps) {
                     unlocked: proStatus.isPro || (userProfile?.level || 1) >= 4,
                     requiredLevel: 4,
                     artwork: verse7Artwork,
-                    audioPath: 'Short Verse - eL Vision Delta Breathing.MP3',
+                    audioPath: 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio-files/Short%20Verse%20-%20eL%20Vision%20Delta%20Breathing.MP3',
                     language: 'id',
                     isFree: false,
                     proOnly: true
