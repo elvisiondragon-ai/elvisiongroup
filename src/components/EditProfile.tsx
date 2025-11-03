@@ -51,26 +51,12 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
       // Important: Use the compressedFile, but give it the original file's name
       formData.append('file', compressedFile, file.name);
 
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error: invokeError } = await supabase.functions.invoke('save-avatar', {
+        body: formData,
+      });
 
-      if (!session) {
-        throw new Error("User not authenticated");
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/save-avatar`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: formData,
-        });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to upload avatar.');
+      if (invokeError) {
+        throw new Error(invokeError.message || 'Failed to upload avatar via invoke.');
       }
 
       if (data && data.url) {
