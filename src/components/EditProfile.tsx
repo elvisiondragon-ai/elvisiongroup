@@ -39,7 +39,7 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
       // --- Compression Step ---
       console.log(`Original file size: ${file.size / 1024 / 1024} MB`);
       const options = {
-        maxSizeMB: 0.1, // 100KB
+        maxSizeMB: 0.025, // 25KB
         maxWidthOrHeight: 800,
         useWebWorker: true,
       };
@@ -87,6 +87,19 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
 
       const { data: { user: authUser }, error: authErr } = await supabase.auth.getUser()
       if (authErr || !authUser) throw new Error('Not authenticated')
+
+      // --- Handle Email Change in Supabase Auth ---
+      if (email && email.toLowerCase() !== authUser.email) {
+        const { error: updateUserError } = await supabase.auth.updateUser({ email: email.toLowerCase() });
+        if (updateUserError) throw updateUserError;
+        console.log('DEBUG: Email change toast should appear now.');
+        toast({
+          title: 'Confirm your new email',
+          description: 'A confirmation link has been sent to your new email address.',
+        });
+        onSave(); // Close the edit modal
+        return; // Stop execution here if email changed, to prevent other toasts and allow user to confirm email
+      }
 
       // --- XP Award Logic for First Avatar ---
       let experienceGained = 0;
@@ -226,7 +239,7 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
             }}
             placeholder="Enter your email address"
             className="bg-background border-border focus:border-primary"
-            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}"
+            pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
           />
         </div>
 
