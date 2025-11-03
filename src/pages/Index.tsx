@@ -117,6 +117,13 @@ const Index = () => {
       return;
     }
     
+    // Handle auto-redirect to profile for avatar upload incentive
+    if (localStorage.getItem('auto-edit-profile') === 'true') {
+      localStorage.removeItem('auto-edit-profile');
+      setActiveTab('profile');
+      return;
+    }
+    
     // Check if we just refreshed from signup and show welcome toast
     if (localStorage.getItem('post-signup-welcome') === 'true') {
       setTimeout(() => {

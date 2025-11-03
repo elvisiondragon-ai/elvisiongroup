@@ -64,6 +64,38 @@ export function Home({
   const { proStatus } = usePro();
   const { preloadAudioFiles, getCacheStats } = useAudioCache();
   const { toast } = useToast();
+
+  // Toast for first avatar upload (shows on every login if no avatar)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (userProfile && !userProfile.avatar_url) {
+        console.log('--- Avatar Toast Debug ---');
+        console.log('Is userProfile available?', !!userProfile);
+        console.log('userProfile.avatar_url is:', userProfile.avatar_url);
+        console.log('Condition (!userProfile.avatar_url) evaluates to:', !userProfile.avatar_url);
+
+        console.log('avatar toast deployed'); // Final confirmation log
+        toast({
+          title: "Dapatkan +200 EXP!",
+          description: "Upload avatar pertamamu untuk mendapatkan bonus.",
+          duration: 15000, // 15 seconds
+          action: (
+            <Button
+              size="sm"
+                            onClick={() => {
+                              localStorage.setItem('auto-edit-profile', 'true'); // Set flag for Profile.tsx
+                              onNavigate('profile'); // Navigate to the profile tab
+                            }}
+            >
+              Edit Profil
+            </Button>
+          ),
+        });
+      }
+    }, 5000); // 5-second delay
+
+    return () => clearTimeout(timer); // Cleanup timer on unmount
+  }, [userProfile, toast]);
   const [showTutorialModal, setShowTutorialModal] = useState(false);
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<{url: string, type: 'video' | 'image', title: string} | null>(null);

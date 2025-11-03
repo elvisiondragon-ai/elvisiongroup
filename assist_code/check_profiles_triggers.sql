@@ -1,11 +1,11 @@
-
 SELECT
-    tgname AS trigger_name,
-    relname AS table_name,
-    pg_get_triggerdef(t.oid) AS trigger_definition
+    event_object_table AS table_name,
+    trigger_name,
+    event_manipulation AS event,
+    action_statement AS definition,
+    action_timing AS timing
 FROM
-    pg_trigger t
-JOIN
-    pg_class c ON t.tgrelid = c.oid
+    information_schema.triggers
 WHERE
-    c.relname = 'profiles' AND t.tgisinternal = FALSE;
+    event_object_schema = 'public'
+    AND event_object_table = 'profiles';

@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Save, X, User, Phone } from "lucide-react";
 
+import imageCompression from 'browser-image-compression';
+
 interface EditProfileProps {
   user: any;
   userProfile: any;
@@ -33,24 +35,50 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
       }
 
       const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/avatar.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('profile-pictures')
-        .upload(fileName, file, { upsert: true });
+      // --- Compression Step ---
+      console.log(`Original file size: ${file.size / 1024 / 1024} MB`);
+      const options = {
+        maxSizeMB: 0.1, // 100KB
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      console.log(`Compressed file size: ${compressedFile.size / 1024} KB`);
+      // --- End Compression ---
 
-      if (uploadError) {
-        throw uploadError;
+      const formData = new FormData();
+      // Important: Use the compressedFile, but give it the original file's name
+      formData.append('file', compressedFile, file.name);
+
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error("User not authenticated");
       }
 
-      const { data } = supabase.storage
-        .from('profile-pictures')
-        .getPublicUrl(fileName);
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/save-avatar`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: formData,
+        });
 
-      // Add a timestamp to the URL to bust the cache
-      const newAvatarUrl = `${data.publicUrl}?t=${new Date().getTime()}`;
-      setAvatarUrl(newAvatarUrl);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload avatar.');
+      }
+
+      if (data && data.url) {
+        const newAvatarUrl = `${data.url}?t=${new Date().getTime()}`;
+        setAvatarUrl(newAvatarUrl);
+      } else {
+        throw new Error("Edge Function did not return a valid URL.");
+      }
       
       toast({
         title: "Success",
@@ -69,69 +97,61 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
 
   const handleSave = async () => {
     try {
-      console.log('🔄 Starting save...');
-      setSaving(true);
+      setSaving(true)
 
-      // Validate phone number format before saving
-      if (phoneNumber && !/^08[0-9]{8,13}$/.test(phoneNumber)) {
-        console.log('❌ Phone validation failed');
-        toast({
-          title: "Error",
-          description: "Phone number must start with 08 and be 10-15 digits total (08xxxxxxxxxx)",
-          variant: "destructive",
-        });
-        setSaving(false);
-        return;
+      const { data: { user: authUser }, error: authErr } = await supabase.auth.getUser()
+      if (authErr || !authUser) throw new Error('Not authenticated')
+
+      // --- XP Award Logic for First Avatar ---
+      let experienceGained = 0;
+      const isFirstAvatar = !userProfile?.avatar_url && avatarUrl;
+      if (isFirstAvatar) {
+        experienceGained = 200;
+      }
+      const currentExperience = userProfile?.experience_points || 0;
+      const newExperience = currentExperience + experienceGained;
+      // --- End XP Logic ---
+
+      const profileData: any = {
+        user_id: authUser.id,                 // must match RLS
+        display_name: displayName ?? undefined,
+        avatar_url: avatarUrl ?? undefined,   // final URL/path only
+        user_email: email ?? undefined,
+        phone_number: phoneNumber ?? undefined,
+        updated_at: new Date().toISOString(),
       }
 
-      console.log('✅ Phone validation passed');
-
-      // Skip auth update, just update profile
-      console.log('🔄 Updating profile...');
-      
-      // Update or insert profile data
-      const profileData = {
-        user_id: user?.id,
-        display_name: displayName,
-        avatar_url: avatarUrl,
-        user_email: email,
-        phone_number: phoneNumber,
-        updated_at: new Date().toISOString()
-      };
-
-      console.log('📝 Profile data:', profileData);
+      // Only include experience_points in the update if it has changed
+      if (isFirstAvatar) {
+        profileData.experience_points = newExperience;
+      }
 
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert(profileData, {
-          onConflict: 'user_id'
-        });
+        .upsert(profileData, { onConflict: 'user_id' })
 
-      if (profileError) {
-        console.error('❌ Profile error:', profileError);
-        throw profileError;
+      if (profileError) throw profileError
+
+      // Show XP bonus toast if awarded
+      if (isFirstAvatar) {
+        toast({ 
+          title: '✨ Bonus EXP! ✨',
+          description: `Kamu mendapatkan +${experienceGained} EXP untuk upload avatar pertamamu!`,
+        })
       }
 
-      console.log('✅ Profile updated successfully');
-
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
-
-      onSave();
+      toast({ title: 'Success', description: 'Profile updated successfully' })
+      onSave()
     } catch (error: any) {
-      console.error('💥 Save error:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to update profile",
-        variant: "destructive",
-      });
+        title: 'Error',
+        description: error.message || 'Failed to update profile',
+        variant: 'destructive',
+      })
     } finally {
-      console.log('🏁 Save completed, setting saving to false');
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -170,7 +190,7 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
               >
                 <span>
                   <Upload className="w-4 h-4 mr-2" />
-                  {uploading ? 'Uploading...' : 'Change Picture'}
+                  {uploading ? 'Uploading avatar...' : 'Change Picture'}
                 </span>
               </Button>
             </Label>
@@ -259,7 +279,7 @@ export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfile
       <div className="flex gap-3">
         <Button
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || uploading}
           className="flex-1 bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary transition-all duration-200 transform hover:scale-105 active:scale-95"
         >
           <Save className="w-4 h-4 mr-2" />

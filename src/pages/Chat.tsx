@@ -96,6 +96,14 @@ export function Chat({ onNavigate }: ChatProps) {
   const { toast } = useToast();
   const { user, userId, userProfile, chatChannel, isPro, proStatus, messages, setMessages, addMessage, removeMessage, broadcastMessage, broadcastDelete } = useAuth();
 
+  // Helper to add cache-busting query param to a URL
+  const addCacheBust = (url: string | null | undefined): string | undefined => {
+    if (!url) return undefined;
+    // Check if URL already has query params
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}t=${new Date().getTime()}`;
+  };
+
   useEffect(() => {
     if (proStatus) {
       console.log('🔵 Subscribe From Chat tab - pro_status_changes channel');
@@ -442,7 +450,7 @@ export function Chat({ onNavigate }: ChatProps) {
             is_pro: subscriptionData?.is_pro || false,
             subscription_type: subscriptionData?.subscription_type || null,
             user_name: userProfile?.display_name || msg.user_name,
-            avatar_url: userProfile?.avatar_url || undefined,
+            avatar_url: addCacheBust(userProfile?.avatar_url),
             is_gold_reported: goldReportedIds.has(msg.id)
           };
         }) || [];
@@ -687,7 +695,7 @@ export function Chat({ onNavigate }: ChatProps) {
       created_at: new Date().toISOString(),
       streak_days: userData.streak_days,
       subscription_type: userData.subscription_type,
-      avatar_url: userData.avatar_url
+      avatar_url: addCacheBust(userData.avatar_url)
     };
 
     addMessage(optimisticMessage);
