@@ -64,23 +64,22 @@ export function VerseAudioCard({
     checkCacheStatus();
   }, [verse.audioPath, isCached]);
 
-  useEffect(() => {
-    if (isPlaying && currentVerseAudio) {
-      if (currentVerseAudio.paused || currentVerseAudio.ended) {
-        setCurrentPlayingVerse(null);
-        setCurrentVerseAudio(null);
-      }
-    }
-  }, [isPlaying, currentVerseAudio, setCurrentPlayingVerse, setCurrentVerseAudio]);
-
   const handlePlayClick = async () => {
     if (!verse.unlocked || !verse.audioPath) return;
 
     if (isPlaying && currentVerseAudio) {
+      if (currentVerseAudio.paused && !currentVerseAudio.ended) {
+        console.log('🎵 Resuming paused audio for verse:', verse.title, 'ID:', verse.id);
+        try {
+          await currentVerseAudio.play();
+        } catch (resumeError) {
+          console.error('Error resuming audio:', resumeError);
+        }
+        return;
+      }
       currentVerseAudio.pause();
       setCurrentPlayingVerse(null);
       setCurrentVerseAudio(null);
-      (window as any).isAudioPlaying = false;
       window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { detail: null }));
       return;
     }
@@ -93,7 +92,6 @@ export function VerseAudioCard({
     if (currentVerseAudio) {
       currentVerseAudio.pause();
       setCurrentVerseAudio(null);
-      (window as any).isAudioPlaying = false;
       window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { detail: null }));
     }
 
@@ -113,13 +111,44 @@ export function VerseAudioCard({
         console.log('🎵 Using streaming audio for instant play');
         audio = createStreamingAudio(verse.audioPath);
       }
-      
-      audio.addEventListener('loadedmetadata', () => setAudioDuration(audio.duration));
-      audio.addEventListener('timeupdate', () => setCurrentTime(audio.currentTime));
 
-      audio.addEventListener('ended', async () => {
+      const updatePlaybackFlags = (playing: boolean, reason: string) => {
+        const currentTimeSnapshot = audio.currentTime;
+        (window as any).isAudioPlaying = playing;
+        if ('mediaSession' in navigator && navigator.mediaSession) {
+          try {
+            navigator.mediaSession.playbackState = playing ? 'playing' : 'paused';
+          } catch (mediaSessionError) {
+            console.debug('MediaSession playbackState update failed:', mediaSessionError);
+          }
+        }
+        window.dispatchEvent(new CustomEvent('audio-playback-state-change', {
+          detail: {
+            verseId: verse.id,
+            playing,
+            reason,
+            currentTime: currentTimeSnapshot
+          }
+        }));
+        console.log('[AudioDebug] playback state change', {
+          verseId: verse.id,
+          playing,
+          reason,
+          hidden: document.hidden,
+          currentTime: currentTimeSnapshot
+        });
+      };
+
+      const handleMetadata = () => setAudioDuration(audio.duration);
+      const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+      const handlePlay = () => updatePlaybackFlags(true, 'play-event');
+      const handlePause = () => {
+        updatePlaybackFlags(false, audio.ended ? 'pause-after-ended' : 'pause-event');
+      };
+
+      const handleEnded = async () => {
         console.log('🎵 Audio ended for verse:', verse.title, 'ID:', verse.id);
-        (window as any).isAudioPlaying = false;
+        updatePlaybackFlags(false, 'ended-event');
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
         setAudioDuration(null);
@@ -127,19 +156,25 @@ export function VerseAudioCard({
         
         const xpAmount = 10;
         awardXP('verse_completion', xpAmount, `Completed ${verse.title}`, { verse_title: verse.title, verse_id: verse.id });
-      });
+      };
 
-      audio.addEventListener('error', (error) => {
+      const handleError = (error: any) => {
         console.error('Error playing audio:', error);
-        (window as any).isAudioPlaying = false;
+        updatePlaybackFlags(false, 'error-event');
         setCurrentPlayingVerse(null);
         setCurrentVerseAudio(null);
         setAudioDuration(null);
         setCurrentTime(0);
-      });
+      };
+
+      audio.addEventListener('loadedmetadata', handleMetadata);
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('pause', handlePause);
+      audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('error', handleError);
 
       await audio.play();
-      (window as any).isAudioPlaying = true;
       setCurrentPlayingVerse(verse.id);
       setCurrentVerseAudio(audio);
 

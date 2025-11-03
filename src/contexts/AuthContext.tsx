@@ -152,6 +152,74 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isRebuildingRef = useRef<boolean>(false);
   const lastLoginUpdateRef = useRef<string | null>(null);
   const [mediaAudit, setMediaAudit] = useState<any>(null);
+  const pendingReloadRef = useRef<{ reason: string; listener: () => void; timeoutId: number | null } | null>(null);
+
+  const isAudioActive = useCallback(() => {
+    if (typeof window === 'undefined') return false;
+    const windowFlag = (window as any).isAudioPlaying === true;
+    const mediaSessionState = typeof navigator !== 'undefined' && 'mediaSession' in navigator
+      ? navigator.mediaSession?.playbackState
+      : undefined;
+    return windowFlag || mediaSessionState === 'playing';
+  }, []);
+
+  const clearPendingReload = useCallback(() => {
+    if (typeof window === 'undefined') {
+      pendingReloadRef.current = null;
+      return;
+    }
+    const pending = pendingReloadRef.current;
+    if (pending) {
+      window.removeEventListener('audio-playback-state-change', pending.listener);
+      if (pending.timeoutId !== null) {
+        clearTimeout(pending.timeoutId);
+      }
+      pendingReloadRef.current = null;
+      console.log('[Reload] Cleared pending reload listener');
+    }
+  }, []);
+
+  const requestReload = useCallback((reason: string) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (!isAudioActive()) {
+      console.log(`[Reload] Executing immediate reload (${reason})`);
+      clearPendingReload();
+      window.location.reload();
+      return;
+    }
+
+    if (pendingReloadRef.current) {
+      console.log(`[Reload] Reload already pending (${pendingReloadRef.current.reason}), keeping defer. New request reason: ${reason}`);
+      return;
+    }
+
+    console.log(`[Reload] Deferred reload due to active audio (${reason})`);
+
+    const listener = () => {
+      if (!isAudioActive()) {
+        console.log(`[Reload] Audio stopped, executing deferred reload (${reason})`);
+        clearPendingReload();
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('audio-playback-state-change', listener);
+
+    const timeoutId = window.setTimeout(() => {
+      if (isAudioActive()) {
+        console.log(`[Reload] Timeout reached but audio still active (${reason}); keeping defer in place`);
+        return;
+      }
+      console.log(`[Reload] Timeout reached, executing deferred reload (${reason})`);
+      clearPendingReload();
+      window.location.reload();
+    }, 120000); // 2 minute safety timeout
+
+    pendingReloadRef.current = { reason, listener, timeoutId };
+  }, [clearPendingReload, isAudioActive]);
 
   const trackPageView = useCallback((page: string) => {
     const trackedPages = [
@@ -674,7 +742,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (retryCountRef.current >= MAX_RETRIES) {
           console.log('🔄 Max retries exceeded, refreshing page to recover connection...');
           localStorage.setItem('connection-recovery-refresh', 'true');
-          window.location.reload();
+          requestReload('max-retries-timeout');
           return;
         }
 
@@ -700,7 +768,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (retryCountRef.current >= MAX_RETRIES) {
           console.log('🔄 Max retries exceeded, refreshing page to recover connection...');
           localStorage.setItem('connection-recovery-refresh', 'true');
-          window.location.reload();
+          requestReload('max-retries-channel-error');
           return;
         }
 
@@ -844,6 +912,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // IDLE USER HANDLER - Page visibility tracking
     const handleVisibilityChange = () => {
       const isVisible = !document.hidden;
+      const mediaSessionState = typeof navigator !== 'undefined' && 'mediaSession' in navigator
+        ? navigator.mediaSession?.playbackState
+        : undefined;
+      const audioFlag = typeof window !== 'undefined' ? (window as any).isAudioPlaying : undefined;
+
+      console.log('[IdleDebug] visibility change', {
+        hidden: document.hidden,
+        isAudioPlaying: audioFlag,
+        mediaSessionState
+      });
 
       if (isVisible) {
         console.log('[RT] Page became visible - checking for idle-wake reconnection');
@@ -929,7 +1007,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     console.error('🚨 Idle wake channel rebuild failed:', error);
                     // Force refresh to recover
                     localStorage.setItem('refresh-redirect-to-chat', 'true');
-                    window.location.reload();
+                    requestReload('idle-wake-refresh-failed');
                   }).finally(() => {
                     // 🛡️ RACE CONDITION FIX: Reset flag after idle-wake rebuild completes
                     isIdleWakeRecoveryRef.current = false;
@@ -952,7 +1030,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     await rebuildChatChannel(fallbackSession, 'idle-wake-fallback').catch((error) => {
                       console.error('🚨 Fallback session rebuild failed:', error);
                       localStorage.setItem('refresh-redirect-to-chat', 'true');
-                      window.location.reload();
+                      requestReload('idle-wake-fallback-refresh-failed');
                     }).finally(() => {
                       isIdleWakeRecoveryRef.current = false;
                       console.log('✅ Idle-wake recovery flag reset (fallback)');
@@ -979,7 +1057,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   await rebuildChatChannel(refreshData.session, 'idle-wake-recovered').catch((error) => {
                     console.error('🚨 Recovered session rebuild failed:', error);
                     localStorage.setItem('refresh-redirect-to-chat', 'true');
-                    window.location.reload();
+                    requestReload('idle-wake-recovery-refresh-failed');
                   }).finally(() => {
                     // 🛡️ RACE CONDITION FIX: Reset flag after recovery rebuild completes
                     isIdleWakeRecoveryRef.current = false;
@@ -1005,6 +1083,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         wasIdleRef.current = false;
       } else {
+        if (isAudioActive()) {
+          console.log('[IdleDebug] Page hidden but audio active - skipping idle mark');
+          return;
+        }
         // Don't mark as idle if audio is playing in the background
         if ((window as any).isAudioPlaying) {
           return;
@@ -1255,6 +1337,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       document.removeEventListener('scroll', updateActiveTime);
     };
   }, []);
+
+  useEffect(() => {
+    return () => {
+      clearPendingReload();
+    };
+  }, [clearPendingReload]);
 
   // Cleanup function for proper logout
   const cleanupSupabase = async () => {
