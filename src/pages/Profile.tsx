@@ -143,19 +143,12 @@ export function Profile({ onNavigate }: ProfileProps) {
           description: "Anda berhasil keluar dari akun.",
         });
 
-        // For iOS PWA, redirect immediately. For others, use existing logic.
-        if (isIOS && isIOSStandalone) {
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else {
-          // Event listener will handle redirect, but backup refresh
-          setTimeout(() => {
-            if (window.location.pathname !== '/auth') {
-              window.location.reload();
-            }
-          }, 1000);
-        }
+        // Reload the page to clear client-side state, then redirect to /auth
+        setTimeout(() => {
+          window.location.reload();
+          // This line might not be reached if reload is immediate, but included for explicitness.
+          window.location.replace('/auth');
+        }, 1000);
 
       } catch (error: any) {
         console.error('Unexpected logout error:', error);

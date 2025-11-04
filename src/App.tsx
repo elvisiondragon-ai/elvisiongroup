@@ -44,7 +44,7 @@ const AppContent = () => {
     if (url.searchParams.has('recovery') || url.searchParams.has('recovery_manual')) {
       console.log('🔄 Redirecting recovery URL to clean URL');
       // Redirect to clean URL without recovery parameters
-      const cleanUrl = `${url.protocol}//${url.host}/`;
+      const cleanUrl = `${url.protocol}//${url.host}/auth`;
       window.location.href = cleanUrl;
     }
   }, []);
@@ -92,15 +92,15 @@ const AppContent = () => {
               <Routes>
                 <Route 
                   path="/" 
-                  element={loading ? null : (user ? <Index /> : <Auth />)} 
+                  element={loading ? null : (user ? <Index /> : <Navigate to="/auth" replace />)} 
                 />
                 <Route 
                   path="/auth" 
-                  element={<Navigate to="/" replace />} 
+                  element={loading ? null : (user ? <Navigate to="/" replace /> : <Auth />)} 
                 />
                 <Route 
                   path="/signup" 
-                  element={loading ? null : (user ? <Index /> : <Signup />)} 
+                  element={loading ? null : (user ? <Navigate to="/" replace /> : <Signup />)} 
                 />
 
                 <Route
