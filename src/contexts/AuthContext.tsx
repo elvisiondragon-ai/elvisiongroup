@@ -153,6 +153,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const lastLoginUpdateRef = useRef<string | null>(null);
   const [mediaAudit, setMediaAudit] = useState<any>(null);
   const pendingReloadRef = useRef<{ reason: string; listener: () => void; timeoutId: number | null } | null>(null);
+  const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pageHiddenAtRef = useRef<number | null>(null);
+  const idleWakeRetryRef = useRef<number>(0);
+  const idleWakeRetryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isAudioActive = useCallback(() => {
     if (typeof window === 'undefined') return false;
@@ -385,6 +389,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // IDLE USER HANDLER - Max retry limit before refresh
   const MAX_RETRIES = 10; // After 10 retries, refresh instead of continuing
+  const IDLE_MINIMUM_HIDDEN_MS = 2 * 60 * 1000; // Require 2 minutes hidden before idle recovery kicks in
+  const IDLE_WAKE_MAX_RETRIES = 3;
+  const IDLE_WAKE_RETRY_DELAY_MS = 4000;
 
   // IDLE USER HANDLER - Retry delay function with exponential backoff + jitter
   const getRetryDelay = () => {
@@ -924,6 +931,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (isVisible) {
+        if (idleTimeoutRef.current) {
+          clearTimeout(idleTimeoutRef.current);
+          idleTimeoutRef.current = null;
+        }
+        if (idleWakeRetryTimeoutRef.current) {
+          clearTimeout(idleWakeRetryTimeoutRef.current);
+          idleWakeRetryTimeoutRef.current = null;
+        }
+        pageHiddenAtRef.current = null;
+
         console.log('[RT] Page became visible - checking for idle-wake reconnection');
         lastActiveTimeRef.current = Date.now();
 
@@ -932,6 +949,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Mark for genuine idle-wake reconnection if page was hidden
         if (wasIdleRef.current) {
+          idleWakeRetryRef.current = 0;
           console.log('❇️❇️ USER BACK FROM IDLE');
           console.log('[RT] Genuine idle-wake scenario detected - flagging for long delay');
           isIdleWakeReconnectRef.current = true;
@@ -972,6 +990,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                     // 🛡️ RACE CONDITION FIX: Reset flag for fast path too
                     isIdleWakeRecoveryRef.current = false;
+                    idleWakeRetryRef.current = 0;
                     console.log('✅ Idle-wake recovery flag reset (fast path)');
 
                     return; // Done! No rebuild needed
@@ -1003,16 +1022,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   const sessionToUse = refreshedSession?.session || session;
 
                   console.log('🔐 Auth refreshed before idle-wake channel rebuild');
-                  await rebuildChatChannel(sessionToUse, 'idle-wake').catch((error) => {
+                  let rebuildSucceeded = false;
+                  try {
+                    await rebuildChatChannel(sessionToUse, 'idle-wake');
+                    rebuildSucceeded = true;
+                  } catch (error) {
                     console.error('🚨 Idle wake channel rebuild failed:', error);
                     // Force refresh to recover
                     localStorage.setItem('refresh-redirect-to-chat', 'true');
-                    requestReload('idle-wake-refresh-failed');
-                  }).finally(() => {
+                    scheduleIdleWakeRetry('idle-wake-refresh-failed');
+                  } finally {
                     // 🛡️ RACE CONDITION FIX: Reset flag after idle-wake rebuild completes
                     isIdleWakeRecoveryRef.current = false;
                     console.log('✅ Idle-wake recovery flag reset');
-                  });
+                  }
+
+                  if (!rebuildSucceeded) {
+                    return;
+                  }
 
                   // ✅ Dispatch AFTER rebuild initiated
                   console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (slow path)`);
@@ -1027,14 +1054,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                   if (fallbackSession && !sessionError) {
                     console.log('✅ Session recovered via getSession fallback');
-                    await rebuildChatChannel(fallbackSession, 'idle-wake-fallback').catch((error) => {
+                    let fallbackRebuildSucceeded = false;
+                    try {
+                      await rebuildChatChannel(fallbackSession, 'idle-wake-fallback');
+                      fallbackRebuildSucceeded = true;
+                    } catch (error) {
                       console.error('🚨 Fallback session rebuild failed:', error);
                       localStorage.setItem('refresh-redirect-to-chat', 'true');
-                      requestReload('idle-wake-fallback-refresh-failed');
-                    }).finally(() => {
+                      scheduleIdleWakeRetry('idle-wake-fallback-refresh-failed');
+                    } finally {
                       isIdleWakeRecoveryRef.current = false;
                       console.log('✅ Idle-wake recovery flag reset (fallback)');
-                    });
+                    }
+
+                    if (!fallbackRebuildSucceeded) {
+                      return;
+                    }
 
                     // Dispatch reload event
                     console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (fallback path)`);
@@ -1054,15 +1089,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const { data: refreshData } = await supabase.auth.refreshSession();
                 if (refreshData?.session) {
                   console.log('✅ Session recovered on idle wake');
-                  await rebuildChatChannel(refreshData.session, 'idle-wake-recovered').catch((error) => {
+                  let recoveryRebuildSucceeded = false;
+                  try {
+                    await rebuildChatChannel(refreshData.session, 'idle-wake-recovered');
+                    recoveryRebuildSucceeded = true;
+                  } catch (error) {
                     console.error('🚨 Recovered session rebuild failed:', error);
                     localStorage.setItem('refresh-redirect-to-chat', 'true');
-                    requestReload('idle-wake-recovery-refresh-failed');
-                  }).finally(() => {
+                    scheduleIdleWakeRetry('idle-wake-recovery-refresh-failed');
+                  } finally {
                     // 🛡️ RACE CONDITION FIX: Reset flag after recovery rebuild completes
                     isIdleWakeRecoveryRef.current = false;
                     console.log('✅ Idle-wake recovery flag reset');
-                  });
+                  }
+
+                  if (!recoveryRebuildSucceeded) {
+                    return;
+                  }
 
                   // ✅ Dispatch AFTER rebuild initiated
                   console.log(`📱 ${isPWA ? 'PWA' : 'BROWSER'} IDLE HANDLER: Dispatching reload-messages event (recovery path)`);
@@ -1083,6 +1126,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         wasIdleRef.current = false;
       } else {
+        if (idleWakeRetryTimeoutRef.current) {
+          clearTimeout(idleWakeRetryTimeoutRef.current);
+          idleWakeRetryTimeoutRef.current = null;
+        }
+        if (idleTimeoutRef.current) {
+          clearTimeout(idleTimeoutRef.current);
+        }
         if (isAudioActive()) {
           console.log('[IdleDebug] Page hidden but audio active - skipping idle mark');
           return;
@@ -1091,10 +1141,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if ((window as any).isAudioPlaying) {
           return;
         }
-        console.log('☠️☠️ USER IDLE');
-        console.log('[RT] Page hidden - marking as potentially idle');
-        wasIdleRef.current = true;
+        pageHiddenAtRef.current = Date.now();
+        idleWakeRetryRef.current = 0;
+
+        console.log(`☁️ Page hidden - waiting ${IDLE_MINIMUM_HIDDEN_MS / 1000}s before marking idle`);
+        idleTimeoutRef.current = setTimeout(() => {
+          if (!document.hidden) {
+            return;
+          }
+          if (isAudioActive()) {
+            console.log('[IdleDebug] Idle timer fired but audio resumed - skipping idle mark');
+            return;
+          }
+
+          console.log('☠️☠️ USER IDLE');
+          console.log('[RT] Page hidden - marking as potentially idle');
+          wasIdleRef.current = true;
+        }, IDLE_MINIMUM_HIDDEN_MS);
       }
+    };
+
+    const scheduleIdleWakeRetry = (reason: string) => {
+      if (document.hidden) {
+        console.log(`[IdleWake] Document hidden again, skipping retry for ${reason}`);
+        return;
+      }
+
+      if (idleWakeRetryRef.current >= IDLE_WAKE_MAX_RETRIES) {
+        console.warn(`[IdleWake] Retry limit reached (${reason}), triggering reload`);
+        requestReload(reason);
+        return;
+      }
+
+      const attempt = idleWakeRetryRef.current + 1;
+      const delay = IDLE_WAKE_RETRY_DELAY_MS * attempt;
+
+      idleWakeRetryRef.current = attempt;
+
+      if (idleWakeRetryTimeoutRef.current) {
+        clearTimeout(idleWakeRetryTimeoutRef.current);
+      }
+
+      console.log(`[IdleWake] Scheduling retry #${attempt} in ${delay}ms (${reason})`);
+      idleWakeRetryTimeoutRef.current = setTimeout(() => {
+        idleWakeRetryTimeoutRef.current = null;
+
+        if (document.hidden) {
+          console.log('[IdleWake] Page hidden during retry timer - aborting attempt');
+          idleWakeRetryRef.current = 0;
+          return;
+        }
+
+        if (navigator.onLine === false) {
+          console.log('[IdleWake] Still offline when retry timer fired, rescheduling');
+          idleWakeRetryRef.current = Math.max(0, idleWakeRetryRef.current - 1);
+          scheduleIdleWakeRetry(reason);
+          return;
+        }
+
+        wasIdleRef.current = true;
+        handleVisibilityChange();
+      }, delay);
     };
 
     // Track user activity to detect idle periods
@@ -1335,6 +1442,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       document.removeEventListener('click', updateActiveTime);
       document.removeEventListener('keydown', updateActiveTime);
       document.removeEventListener('scroll', updateActiveTime);
+      if (idleTimeoutRef.current) {
+        clearTimeout(idleTimeoutRef.current);
+        idleTimeoutRef.current = null;
+      }
+      if (idleWakeRetryTimeoutRef.current) {
+        clearTimeout(idleWakeRetryTimeoutRef.current);
+        idleWakeRetryTimeoutRef.current = null;
+      }
     };
   }, []);
 
