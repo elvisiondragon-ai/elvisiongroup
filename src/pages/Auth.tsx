@@ -292,10 +292,9 @@ export function Auth({ onLogin }: AuthProps) {
       await iOSCacheCleaner.quickLoginCacheClear();
       
       // Clean up any existing auth state
-      cleanupAuthState();
-
+      const trimmedEmail = loginData.email.trim();
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginData.email,
+        email: trimmedEmail,
         password: loginData.password,
       });
 
@@ -408,8 +407,9 @@ export function Auth({ onLogin }: AuthProps) {
 
       const redirectUrl = `${window.location.origin}/`;
 
+      const trimmedEmail = signupData.email.trim();
       const { data, error } = await supabase.auth.signUp({
-        email: signupData.email,
+        email: trimmedEmail,
         password: signupData.password,
         options: {
           emailRedirectTo: redirectUrl,
