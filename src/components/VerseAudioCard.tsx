@@ -1,7 +1,7 @@
 import { Lock, Music, Crown, Zap, Download, Check, X, FileText } from 'lucide-react';
 import { useProtectedAudio } from '@/contexts/AudioContext';
 import { useXPSystem } from '@/hooks/useXPSystem';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,6 +53,77 @@ export function VerseAudioCard({
   const [downloadProgress, setDownloadProgress] = useState(0);
   
   const isPlaying = currentPlayingVerse === verse.id;
+  const attachedAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Ensure timer UI stays in sync after tab/page switches by
+  // re-attaching to the global audio element when relevant.
+  useEffect(() => {
+    const audio = currentVerseAudio;
+    const isThisVerse = currentPlayingVerse === verse.id || currentPlayingVerse === -verse.id;
+
+    // Cleanup helper
+    const detach = () => {
+      const prev = attachedAudioRef.current;
+      if (!prev) return;
+      prev.removeEventListener('loadedmetadata', onLoadedMetadata);
+      prev.removeEventListener('timeupdate', onTimeUpdate);
+      prev.removeEventListener('ended', onEnded);
+      prev.removeEventListener('pause', onPause);
+      prev.removeEventListener('play', onPlay);
+      attachedAudioRef.current = null;
+    };
+
+    // Event handlers defined once for stable cleanup
+    function onLoadedMetadata(this: HTMLAudioElement) {
+      setAudioDuration(this.duration || 0);
+    }
+    function onTimeUpdate(this: HTMLAudioElement) {
+      setCurrentTime(this.currentTime || 0);
+    }
+    function onEnded() {
+      // Keep last known time at 0 and duration cleared after end
+      setCurrentTime(0);
+      setAudioDuration(null);
+    }
+    function onPause(this: HTMLAudioElement) {
+      // Preserve last paused time for UI consistency
+      setCurrentTime(this.currentTime || 0);
+    }
+    function onPlay(this: HTMLAudioElement) {
+      // Refresh duration/time on resume
+      if (!isNaN(this.duration)) setAudioDuration(this.duration);
+      setCurrentTime(this.currentTime || 0);
+    }
+
+    // If no audio or not this verse, detach and bail
+    if (!audio || !isThisVerse) {
+      detach();
+      return;
+    }
+
+    // Attach if not already
+    if (attachedAudioRef.current !== audio) {
+      detach();
+      // Initialize snapshot immediately
+      if (!isNaN(audio.duration)) setAudioDuration(audio.duration);
+      setCurrentTime(audio.currentTime || 0);
+
+      audio.addEventListener('loadedmetadata', onLoadedMetadata);
+      audio.addEventListener('timeupdate', onTimeUpdate);
+      audio.addEventListener('ended', onEnded);
+      audio.addEventListener('pause', onPause);
+      audio.addEventListener('play', onPlay);
+      attachedAudioRef.current = audio;
+    } else {
+      // Ensure state is in sync even if already attached
+      if (!isNaN(audio.duration)) setAudioDuration(audio.duration);
+      setCurrentTime(audio.currentTime || 0);
+    }
+
+    return () => {
+      detach();
+    };
+  }, [currentVerseAudio, currentPlayingVerse, verse.id]);
 
   useEffect(() => {
     const checkCacheStatus = async () => {

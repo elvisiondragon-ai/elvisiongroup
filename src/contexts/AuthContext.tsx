@@ -152,10 +152,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isRebuildingRef = useRef<boolean>(false);
   const lastLoginUpdateRef = useRef<string | null>(null);
   const [mediaAudit, setMediaAudit] = useState<any>(null);
-  const pendingReloadRef = useRef<{ reason: string; listener: () => void; timeoutId: number | null } | null>(null);
   const pendingAudioRecoveryRef = useRef<{ reason: string; listener: () => void; timeoutId: number | null } | null>(null);
   const appStateRecoveryInProgressRef = useRef<boolean>(false);
   const foregroundRecoveryRef = useRef<(reason: string) => Promise<void> | void>((_reason) => undefined);
+  const networkRecoveryRef = useRef<{ reason: string; listener: () => void; intervalId: number | null } | null>(null);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pageHiddenAtRef = useRef<number | null>(null);
   const idleWakeRetryRef = useRef<number>(0);
@@ -168,22 +168,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ? navigator.mediaSession?.playbackState
       : undefined;
     return windowFlag || mediaSessionState === 'playing';
-  }, []);
-
-  const clearPendingReload = useCallback(() => {
-    if (typeof window === 'undefined') {
-      pendingReloadRef.current = null;
-      return;
-    }
-    const pending = pendingReloadRef.current;
-    if (pending) {
-      window.removeEventListener('audio-playback-state-change', pending.listener);
-      if (pending.timeoutId !== null) {
-        clearTimeout(pending.timeoutId);
-      }
-      pendingReloadRef.current = null;
-      console.log('[Reload] Cleared pending reload listener');
-    }
   }, []);
 
   const clearPendingAudioRecovery = useCallback(() => {
@@ -202,48 +186,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[AppState] Cleared pending audio recovery listener');
     }
   }, []);
-
-  const requestReload = useCallback((reason: string) => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    if (!isAudioActive()) {
-      console.log(`[Reload] Executing immediate reload (${reason})`);
-      clearPendingReload();
-      window.location.reload();
-      return;
-    }
-
-    if (pendingReloadRef.current) {
-      console.log(`[Reload] Reload already pending (${pendingReloadRef.current.reason}), keeping defer. New request reason: ${reason}`);
-      return;
-    }
-
-    console.log(`[Reload] Deferred reload due to active audio (${reason})`);
-
-    const listener = () => {
-      if (!isAudioActive()) {
-        console.log(`[Reload] Audio stopped, executing deferred reload (${reason})`);
-        clearPendingReload();
-        window.location.reload();
-      }
-    };
-
-    window.addEventListener('audio-playback-state-change', listener);
-
-    const timeoutId = window.setTimeout(() => {
-      if (isAudioActive()) {
-        console.log(`[Reload] Timeout reached but audio still active (${reason}); keeping defer in place`);
-        return;
-      }
-      console.log(`[Reload] Timeout reached, executing deferred reload (${reason})`);
-      clearPendingReload();
-      window.location.reload();
-    }, 120000); // 2 minute safety timeout
-
-    pendingReloadRef.current = { reason, listener, timeoutId };
-  }, [clearPendingReload, isAudioActive]);
 
   const runWhenAudioInactive = useCallback((reason: string, task: () => Promise<void> | void) => {
     const executeTask = () => {
@@ -294,6 +236,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     pendingAudioRecoveryRef.current = { reason, listener, timeoutId };
   }, [clearPendingAudioRecovery, isAudioActive]);
+
+  const clearNetworkRecovery = useCallback(() => {
+    if (typeof window === 'undefined') {
+      networkRecoveryRef.current = null;
+      return;
+    }
+
+    const pending = networkRecoveryRef.current;
+    if (pending) {
+      window.removeEventListener('online', pending.listener);
+      if (pending.intervalId !== null) {
+        clearInterval(pending.intervalId);
+      }
+      networkRecoveryRef.current = null;
+      console.log('[Network] Cleared pending connectivity listener');
+    }
+  }, []);
+
+  const waitForNetwork = useCallback((reason: string, attempt: () => void) => {
+    if (typeof window === 'undefined') {
+      attempt();
+      return;
+    }
+
+    if (navigator.onLine !== false) {
+      attempt();
+      return;
+    }
+
+    if (networkRecoveryRef.current) {
+      console.log(`[Network] Already waiting for connectivity (${networkRecoveryRef.current.reason})`);
+      return;
+    }
+
+    const resume = () => {
+      console.log(`[Network] Connectivity restored; retrying (${reason})`);
+      clearNetworkRecovery();
+      attempt();
+    };
+
+    const listener = () => resume();
+    const intervalId = window.setInterval(() => {
+      if (navigator.onLine !== false) {
+        resume();
+      }
+    }, 5000);
+
+    window.addEventListener('online', listener);
+    networkRecoveryRef.current = { reason, listener, intervalId };
+    console.log(`[Network] Offline detected; waiting to retry (${reason})`);
+  }, [clearNetworkRecovery]);
+
+  useEffect(() => {
+    return () => {
+      clearNetworkRecovery();
+    };
+  }, [clearNetworkRecovery]);
 
   const trackPageView = useCallback((page: string) => {
     const trackedPages = [
@@ -457,14 +456,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // IDLE USER HANDLER - Max retry limit before refresh
-  const MAX_RETRIES = 10; // After 10 retries, refresh instead of continuing
+  // IDLE USER HANDLER - Retry configuration
   const IDLE_MINIMUM_HIDDEN_MS = 2 * 60 * 1000; // Require 2 minutes hidden before idle recovery kicks in
-  const IDLE_WAKE_MAX_RETRIES = 3;
   const IDLE_WAKE_RETRY_DELAY_MS = 4000;
 
   // IDLE USER HANDLER - Retry delay function with exponential backoff + jitter
-  const getRetryDelay = () => {
+  function getRetryDelay() {
     const retryCount = retryCountRef.current;
 
     // TRUE EXPONENTIAL BACKOFF: 100ms base, doubles each retry
@@ -478,7 +475,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     console.log(`[RT] Retry attempt #${retryCount + 1}. Jittered backoff: ${delay}ms (max: ${baseDelay}ms)`);
     return delay;
-  };
+  }
 
   // UNIFIED FLOW: Single function handles all channel management
   const rebuildChatChannel = async (session: Session | null, reason: string) => {
@@ -806,6 +803,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           clearTimeout(retryTimeoutRef.current);
           retryTimeoutRef.current = null;
         }
+        clearNetworkRecovery();
         retryCountRef.current = 0; // Reset on successful connection
         chatChannelRef.current = channel;
         setChatChannel(channel); // Ensure state is updated
@@ -814,55 +812,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (status === 'TIMED_OUT' || status === 'CLOSED') {
         console.log('🩵 WebSocket Scheduling reconnect after timeout/close...');
         isRebuildingRef.current = false; // ⚠️ Reset flag to allow retry
-
-        // Check if max retries exceeded - refresh instead of logout
-        if (retryCountRef.current >= MAX_RETRIES) {
-          console.log('🔄 Max retries exceeded, refreshing page to recover connection...');
-          localStorage.setItem('connection-recovery-refresh', 'true');
-          requestReload('max-retries-timeout');
-          return;
-        }
-
-        // Retry with idle-aware backoff
-        if (!retryTimeoutRef.current) {
-          const delay = getRetryDelay();
-          console.log(`🩵 WebSocket retry in ${delay}ms after timeout/close`);
-          retryCountRef.current++;
-
-          retryTimeoutRef.current = setTimeout(() => {
-            retryTimeoutRef.current = null;
-            console.log('❄️ WebSocket Attempting reconnect after timeout...');
-            rebuildChatChannel(session, 'retry after timeout').catch((error) => {
-              console.error('💝 WebSocket retry rebuild failed:', error);
-            });
-          }, delay);
-        }
+        scheduleRealtimeRetry(session, 'retry after timeout');
       } else if (status === 'CHANNEL_ERROR' || status === 'CONNECTION_ERROR' || status === 'FAILED') {
         console.log('🔥🐢☀️ WebSocket Transition:', status);
         isRebuildingRef.current = false; // ⚠️ Reset flag to allow retry
-
-        // Check if max retries exceeded - refresh instead of logout
-        if (retryCountRef.current >= MAX_RETRIES) {
-          console.log('🔄 Max retries exceeded, refreshing page to recover connection...');
-          localStorage.setItem('connection-recovery-refresh', 'true');
-          requestReload('max-retries-channel-error');
-          return;
-        }
-
-        // Retry failed connections with idle detection
-        if (!retryTimeoutRef.current) {
-          const delay = getRetryDelay();
-          console.log(`🔥 WebSocket retry in ${delay}ms after CHANNEL_ERROR`);
-          retryCountRef.current++;
-
-          retryTimeoutRef.current = setTimeout(() => {
-            retryTimeoutRef.current = null;
-            console.log('☀️ WebSocket Attempting reconnect after failure...');
-            rebuildChatChannel(session, 'retry after failure').catch((error) => {
-              console.error('💚 WebSocket failure rebuild failed:', error);
-            });
-          }, delay);
-        }
+        scheduleRealtimeRetry(session, 'retry after failure');
       }
     });
     
@@ -873,6 +827,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       checkProStatus(session.user.id, true);
     }
   };
+
+  const scheduleRealtimeRetry = useCallback((session: Session | null, reason: string) => {
+    if (retryTimeoutRef.current || networkRecoveryRef.current) {
+      console.log(`[Realtime] Retry already scheduled (${reason})`);
+      return;
+    }
+
+    const attemptReconnect = () => {
+      retryTimeoutRef.current = null;
+
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        waitForNetwork(reason, attemptReconnect);
+        return;
+      }
+
+      console.log(`[Realtime] Attempting reconnect (${reason})`);
+      rebuildChatChannel(session, reason).catch((error) => {
+        console.error(`[Realtime] Reconnect attempt failed (${reason}):`, error);
+      });
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      waitForNetwork(reason, () => {
+        retryCountRef.current++;
+        attemptReconnect();
+      });
+      return;
+    }
+
+    const delay = getRetryDelay();
+    console.log(`[Realtime] Retry in ${delay}ms (${reason})`);
+    retryCountRef.current++;
+
+    retryTimeoutRef.current = setTimeout(() => {
+      retryTimeoutRef.current = null;
+      attemptReconnect();
+    }, delay);
+  }, [getRetryDelay, rebuildChatChannel, waitForNetwork]);
 
   // REALTIME PRO STATUS: Subscribe to pro status changes
   useEffect(() => {
@@ -1237,12 +1229,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      if (idleWakeRetryRef.current >= IDLE_WAKE_MAX_RETRIES) {
-        console.warn(`[IdleWake] Retry limit reached (${reason}), triggering reload`);
-        requestReload(reason);
-        return;
-      }
-
       const attempt = idleWakeRetryRef.current + 1;
       const delay = IDLE_WAKE_RETRY_DELAY_MS * attempt;
 
@@ -1523,18 +1509,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  useEffect(() => {
-    return () => {
-      clearPendingReload();
-    };
-  }, [clearPendingReload]);
-
   // Cleanup function for proper logout
   const cleanupSupabase = async () => {
     console.log('🧹 Cleaning up Supabase connections');
     
     // Set manual logout flag to prevent IDLE USER HANDLER interference
     localStorage.setItem('manual-logout-flag', 'true');
+
+    clearNetworkRecovery();
+    clearPendingAudioRecovery();
     
     // Clear token reference
     currentTokenRef.current = null;
