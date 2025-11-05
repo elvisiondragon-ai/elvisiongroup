@@ -525,16 +525,16 @@ export function Auth({ onLogin }: AuthProps) {
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="forgot-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={forgotPasswordData.email}
-                    onChange={(e) => setForgotPasswordData(prev => ({ ...prev, email: e.target.value }))}
-                    className="pl-10 cyber-input"
-                    required
-                  />
-                </div>
+                                                          <Input
+                                                            id="forgot-email"
+                                                            type="email"
+                                                            placeholder="your@email.com"
+                                                            value={forgotPasswordData.email}
+                                                            onChange={(e) => setForgotPasswordData(prev => ({ ...prev, email: e.target.value }))}
+                                                            onBlur={() => setForgotPasswordData(prev => ({ ...prev, email: prev.email.trim() }))}
+                                                            className="pl-10 cyber-input"
+                                                            required
+                                                          />                </div>
               </div>
 
 
@@ -762,6 +762,7 @@ export function Auth({ onLogin }: AuthProps) {
                       placeholder="email@contoh.com"
                       value={loginData.email}
                       onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
+                      onBlur={() => setLoginData(prev => ({ ...prev, email: prev.email.trim() }))}
                       className="pl-10 cyber-input"
                       autoComplete="email"
                     />
@@ -930,6 +931,7 @@ export function Auth({ onLogin }: AuthProps) {
                       placeholder="email@contoh.com"
                       value={signupData.email}
                       onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
+                      onBlur={() => setSignupData(prev => ({ ...prev, email: prev.email.trim() }))}
                       className="pl-10 cyber-input"
                     />
                   </div>

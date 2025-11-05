@@ -153,6 +153,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const lastLoginUpdateRef = useRef<string | null>(null);
   const [mediaAudit, setMediaAudit] = useState<any>(null);
   const pendingReloadRef = useRef<{ reason: string; listener: () => void; timeoutId: number | null } | null>(null);
+  const pendingAudioRecoveryRef = useRef<{ reason: string; listener: () => void; timeoutId: number | null } | null>(null);
+  const appStateRecoveryInProgressRef = useRef<boolean>(false);
+  const foregroundRecoveryRef = useRef<(reason: string) => Promise<void> | void>((_reason) => undefined);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pageHiddenAtRef = useRef<number | null>(null);
   const idleWakeRetryRef = useRef<number>(0);
@@ -180,6 +183,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       pendingReloadRef.current = null;
       console.log('[Reload] Cleared pending reload listener');
+    }
+  }, []);
+
+  const clearPendingAudioRecovery = useCallback(() => {
+    if (typeof window === 'undefined') {
+      pendingAudioRecoveryRef.current = null;
+      return;
+    }
+
+    const pending = pendingAudioRecoveryRef.current;
+    if (pending) {
+      window.removeEventListener('audio-playback-state-change', pending.listener);
+      if (pending.timeoutId !== null) {
+        clearTimeout(pending.timeoutId);
+      }
+      pendingAudioRecoveryRef.current = null;
+      console.log('[AppState] Cleared pending audio recovery listener');
     }
   }, []);
 
@@ -224,6 +244,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     pendingReloadRef.current = { reason, listener, timeoutId };
   }, [clearPendingReload, isAudioActive]);
+
+  const runWhenAudioInactive = useCallback((reason: string, task: () => Promise<void> | void) => {
+    const executeTask = () => {
+      Promise
+        .resolve(task())
+        .catch((error) => {
+          console.error(`[AppState] Foreground recovery task failed (${reason}):`, error);
+        });
+    };
+
+    if (typeof window === 'undefined') {
+      executeTask();
+      return;
+    }
+
+    if (!isAudioActive()) {
+      executeTask();
+      return;
+    }
+
+    console.log(`[AppState] Audio active, deferring recovery (${reason})`);
+
+    if (pendingAudioRecoveryRef.current) {
+      console.log(`[AppState] Recovery already pending (${pendingAudioRecoveryRef.current.reason})`);
+      return;
+    }
+
+    const listener = () => {
+      if (!isAudioActive()) {
+        console.log(`[AppState] Audio stopped, executing deferred recovery (${reason})`);
+        clearPendingAudioRecovery();
+        executeTask();
+      }
+    };
+
+    window.addEventListener('audio-playback-state-change', listener);
+
+    const timeoutId = window.setTimeout(() => {
+      if (isAudioActive()) {
+        console.log(`[AppState] Timeout reached but audio still active (${reason}); keeping recovery deferred`);
+        return;
+      }
+
+      console.log(`[AppState] Timeout reached, executing deferred recovery (${reason})`);
+      clearPendingAudioRecovery();
+      executeTask();
+    }, 120000);
+
+    pendingAudioRecoveryRef.current = { reason, listener, timeoutId };
+  }, [clearPendingAudioRecovery, isAudioActive]);
 
   const trackPageView = useCallback((page: string) => {
     const trackedPages = [
@@ -1617,7 +1687,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Dedicated refresh session method for update scenarios
-  const refreshSession = async (): Promise<{ success: boolean; error?: string }> => {
+  const refreshSession = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
     console.log('🔄 AuthContext refreshSession called for update workflow');
     console.log('🔍 Attempting to refresh session with current refresh token:', (await supabase.auth.getSession()).data.session?.refresh_token);
     
@@ -1664,7 +1734,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('❌ AuthContext refresh exception:', errorMsg);
       return { success: false, error: errorMsg };
     }
-  };
+  }, []);
+
+  const performAppForegroundRecovery = useCallback(async (reason: string) => {
+    if (appStateRecoveryInProgressRef.current) {
+      console.log(`[AppState] Foreground recovery already running (${reason})`);
+      return;
+    }
+
+    appStateRecoveryInProgressRef.current = true;
+    try {
+      console.log(`[AppState] Foreground recovery started (${reason})`);
+      const refreshResult = await refreshSession();
+      if (!refreshResult.success && refreshResult.error) {
+        console.warn(`[AppState] Session refresh failed (${reason}): ${refreshResult.error}`);
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await rebuildChatChannel(session, `app-state-${reason}`);
+      }
+    } catch (error) {
+      console.error(`[AppState] Foreground recovery error (${reason}):`, error);
+    } finally {
+      appStateRecoveryInProgressRef.current = false;
+    }
+  }, [refreshSession, rebuildChatChannel]);
+
+  useEffect(() => {
+    foregroundRecoveryRef.current = performAppForegroundRecovery;
+  }, [performAppForegroundRecovery]);
+
+  useEffect(() => {
+    let isMounted = true;
+    let appListener: { remove: () => Promise<void> } | null = null;
+
+    const setupCapacitorListener = async () => {
+      try {
+        const capacitorModule = await import('@capacitor/app');
+        if (!isMounted) {
+          return;
+        }
+
+        const CapacitorApp = capacitorModule.App;
+        if (!CapacitorApp?.addListener) {
+          console.log('[AppState] Capacitor App plugin unavailable, skipping native app state listener');
+          return;
+        }
+
+        appListener = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+          if (!isActive) {
+            return;
+          }
+
+          runWhenAudioInactive('app-foreground', () => foregroundRecoveryRef.current?.('foreground'));
+        });
+        console.log('[AppState] Registered Capacitor appStateChange listener');
+      } catch (error) {
+        console.log('[AppState] Unable to register Capacitor appStateChange listener');
+      }
+    };
+
+    setupCapacitorListener();
+
+    return () => {
+      isMounted = false;
+      if (appListener) {
+        appListener.remove();
+        appListener = null;
+      }
+      clearPendingAudioRecovery();
+    };
+  }, [runWhenAudioInactive, clearPendingAudioRecovery]);
 
   // REALTIME PROFILE: Subscribe to profile changes
   useEffect(() => {

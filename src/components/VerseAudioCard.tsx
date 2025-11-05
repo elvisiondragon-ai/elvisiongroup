@@ -67,20 +67,15 @@ export function VerseAudioCard({
   const handlePlayClick = async () => {
     if (!verse.unlocked || !verse.audioPath) return;
 
-    if (isPlaying && currentVerseAudio) {
-      if (currentVerseAudio.paused && !currentVerseAudio.ended) {
-        console.log('🎵 Resuming paused audio for verse:', verse.title, 'ID:', verse.id);
-        try {
-          await currentVerseAudio.play();
-        } catch (resumeError) {
-          console.error('Error resuming audio:', resumeError);
-        }
-        return;
-      }
+    if (currentPlayingVerse === verse.id && currentVerseAudio) { // Verse is playing
       currentVerseAudio.pause();
-      setCurrentPlayingVerse(null);
-      setCurrentVerseAudio(null);
-      window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { detail: null }));
+      setCurrentPlayingVerse(-verse.id); // Mark as paused
+      return;
+    }
+
+    if (currentPlayingVerse === -verse.id && currentVerseAudio) { // Verse is paused
+      await currentVerseAudio.play();
+      setCurrentPlayingVerse(verse.id); // Mark as playing
       return;
     }
 
@@ -276,7 +271,7 @@ export function VerseAudioCard({
           
 
 
-          {isPlaying && audioDuration && (
+          {audioDuration && (currentPlayingVerse === verse.id || currentPlayingVerse === -verse.id) && (
             <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-48 bg-black/80 backdrop-blur-lg rounded-lg p-2 border border-primary/20">
               <Progress value={progress} className="h-1 cursor-pointer bg-white/10" onClick={(e) => { const rect = e.currentTarget.getBoundingClientRect(); const percent = ((e.clientX - rect.left) / rect.width) * 100; handleSeek([Math.max(0, Math.min(100, percent))]); }} />
               <div className="flex justify-between text-xs text-white/60 mt-1"><span>{formatTime(currentTime)}</span><span>{formatTime(audioDuration)}</span></div>
