@@ -21,9 +21,6 @@ import { useToast } from '@/hooks/use-toast';
 // - The banner is shown once per user until they click the button.
 // - Deployments that clear localStorage will surface the banner again automatically.
 
-// Optional server-side version tag (kept for analytics / XP rewards)
-const BANNER_VERSION = import.meta.env.VITE_UPDATE_BANNER_VERSION || 'v002';
-
 // Download target
 const UPDATE_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/apk/elvisionv2.apk';
 
@@ -104,21 +101,21 @@ const UpdateBanner: React.FC = () => {
     // Open download
     window.open(UPDATE_URL, '_blank');
 
-    // Record click server-side (deduplicated by unique constraint)
+    // Record click server-side (analytics + XP tracking)
     if (user?.id) {
       const nowIso = new Date().toISOString();
+      const clickVersion = `click-${Date.now()}`;
       try {
         const { error } = await supabase
           .from('update_banner_clicks')
-          .insert({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
+          .insert({ user_id: user.id, banner_version: clickVersion, clicked_at: nowIso });
 
         if (error) {
-          // Unique violation: treat as success (already clicked elsewhere)
           if (String((error as any)?.code) !== '23505') {
             // Queue for retry when back online
             const raw = localStorage.getItem(OUTBOX_KEY);
             const items: OutboxItem[] = raw ? JSON.parse(raw) : [];
-            items.push({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
+            items.push({ user_id: user.id, banner_version: clickVersion, clicked_at: nowIso });
             localStorage.setItem(OUTBOX_KEY, JSON.stringify(items));
           }
         } else {
@@ -161,7 +158,7 @@ const UpdateBanner: React.FC = () => {
         // Network failure: queue for retry
         const raw = localStorage.getItem(OUTBOX_KEY);
         const items: OutboxItem[] = raw ? JSON.parse(raw) : [];
-        items.push({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
+        items.push({ user_id: user.id, banner_version: clickVersion, clicked_at: nowIso });
         localStorage.setItem(OUTBOX_KEY, JSON.stringify(items));
       }
     }
@@ -187,7 +184,7 @@ const UpdateBanner: React.FC = () => {
       justifyContent: 'center',
       alignItems: 'center'
     }}>
-      <span style={{ fontWeight: 'bold', marginRight: '10px' }}>Gold Event</span>
+      <span style={{ fontWeight: 'bold', marginRight: '10px' }}>Update</span>
       <a
         href={UPDATE_URL}
         onClick={handleDownloadClick}
