@@ -187,7 +187,7 @@ const UpdateBanner: React.FC = () => {
       justifyContent: 'center',
       alignItems: 'center'
     }}>
-      <span style={{ fontWeight: 'bold', marginRight: '10px' }}>Gold Report Event</span>
+      <span style={{ fontWeight: 'bold', marginRight: '10px' }}>Gold Event</span>
       <a
         href={UPDATE_URL}
         onClick={handleDownloadClick}
@@ -200,7 +200,7 @@ const UpdateBanner: React.FC = () => {
           fontWeight: 'bold',
         }}
       >
-        KLIK DISINI + Bonus 200EXP
+        KLIK DISINI + 200EXP
       </a>
     </div>
   );
