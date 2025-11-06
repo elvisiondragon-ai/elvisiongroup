@@ -20,10 +20,10 @@ import { useToast } from '@/hooks/use-toast';
 // VERSIONED BANNER RULES
 // - The banner is shown once per user per version.
 // - Re-deploying the same version keeps it hidden for users who already clicked.
-// - Bumping the version (e.g., v001 -> v002) shows the banner again to all users.
+// - Bumping the version (e.g., v001 -> v002-> v003 and so on) shows the banner again to all users.
 
-// Configure the current banner version via env; default to v001
-const BANNER_VERSION = import.meta.env.VITE_UPDATE_BANNER_VERSION || 'v001';
+// Configure the current banner version via env; default to v002
+const BANNER_VERSION = import.meta.env.VITE_UPDATE_BANNER_VERSION || 'v002';
 
 // Download target
 const UPDATE_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/apk/elvisionv2.apk';
