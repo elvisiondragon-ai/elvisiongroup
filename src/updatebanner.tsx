@@ -13,6 +13,8 @@ To HIDE the banner:
 */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -29,7 +31,8 @@ const BANNER_VERSION = import.meta.env.VITE_UPDATE_BANNER_VERSION || 'v002';
 const UPDATE_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/apk/elvisionv2.apk';
 
 // Local, per-user, per-version suppression key (offline-friendly)
-const localKey = (userId?: string | null) => `updateBannerClicked:${BANNER_VERSION}:${userId ?? 'anon'}`;
+const makeLocalKey = (version: string, userId?: string | null) =>
+  `updateBannerClicked:${version}:${userId ?? 'anon'}`;
 
 // Pending outbox for offline inserts
 const OUTBOX_KEY = 'updateBannerOutbox'; // JSON array of { user_id, banner_version, clicked_at }
@@ -41,6 +44,7 @@ const UpdateBanner: React.FC = () => {
   const { toast } = useToast();
   const [isVisible, setIsVisible] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [effectiveVersion, setEffectiveVersion] = useState<string | null>(null);
 
   // Flush any pending offline clicks once we have a user/session
   const flushOutbox = useCallback(async () => {
@@ -79,9 +83,47 @@ const UpdateBanner: React.FC = () => {
     flushOutbox();
   }, [flushOutbox]);
 
+  // Resolve banner version based on native build when available
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveVersion = async () => {
+      let resolvedVersion = BANNER_VERSION;
+
+      try {
+        if (Capacitor?.isNativePlatform?.()) {
+          const info = await App.getInfo();
+          if (info?.version) {
+            resolvedVersion = `apk-${info.version}`;
+          } else if (info?.build) {
+            resolvedVersion = `apk-build-${info.build}`;
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to resolve native app version, falling back to banner version:', error);
+      }
+
+      if (!cancelled) {
+        setEffectiveVersion(resolvedVersion);
+      }
+    };
+
+    resolveVersion();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Decide visibility: prefer server truth, fallback to local to avoid flicker
   useEffect(() => {
+    if (!effectiveVersion) {
+      return;
+    }
+
     const decide = async () => {
+      setChecking(true);
+
       // Not logged in: never show
       if (!user?.id) {
         setIsVisible(false);
@@ -90,7 +132,8 @@ const UpdateBanner: React.FC = () => {
       }
 
       // Optimistic local check (fast)
-      const localClicked = localStorage.getItem(localKey(user.id)) === 'true';
+      const key = makeLocalKey(effectiveVersion, user.id);
+      const localClicked = localStorage.getItem(key) === 'true';
       if (localClicked) {
         setIsVisible(false);
         setChecking(false);
@@ -102,7 +145,7 @@ const UpdateBanner: React.FC = () => {
           .from('update_banner_clicks')
           .select('user_id')
           .eq('user_id', user.id)
-          .eq('banner_version', BANNER_VERSION)
+          .eq('banner_version', effectiveVersion)
           .maybeSingle();
 
         if (error) {
@@ -112,7 +155,7 @@ const UpdateBanner: React.FC = () => {
           // Hide if record exists; show otherwise
           const alreadyClicked = !!data;
           setIsVisible(!alreadyClicked);
-          if (alreadyClicked) localStorage.setItem(localKey(user.id), 'true');
+          if (alreadyClicked) localStorage.setItem(key, 'true');
         }
       } catch {
         setIsVisible(!localClicked);
@@ -122,11 +165,15 @@ const UpdateBanner: React.FC = () => {
     };
 
     decide();
-  }, [user]);
+  }, [user, effectiveVersion]);
 
   const handleDownloadClick = async () => {
+    if (!effectiveVersion) {
+      return;
+    }
+
     // Immediately close banner and mark local suppression
-    if (user?.id) localStorage.setItem(localKey(user.id), 'true');
+    if (user?.id) localStorage.setItem(makeLocalKey(effectiveVersion, user.id), 'true');
     setIsVisible(false);
 
     // Open download
@@ -138,7 +185,7 @@ const UpdateBanner: React.FC = () => {
       try {
         const { error } = await supabase
           .from('update_banner_clicks')
-          .insert({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
+          .insert({ user_id: user.id, banner_version: effectiveVersion, clicked_at: nowIso });
 
         if (error) {
           // Unique violation: treat as success (already clicked elsewhere)
@@ -146,7 +193,7 @@ const UpdateBanner: React.FC = () => {
             // Queue for retry when back online
             const raw = localStorage.getItem(OUTBOX_KEY);
             const items: OutboxItem[] = raw ? JSON.parse(raw) : [];
-            items.push({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
+            items.push({ user_id: user.id, banner_version: effectiveVersion, clicked_at: nowIso });
             localStorage.setItem(OUTBOX_KEY, JSON.stringify(items));
           }
         } else {
@@ -189,13 +236,13 @@ const UpdateBanner: React.FC = () => {
         // Network failure: queue for retry
         const raw = localStorage.getItem(OUTBOX_KEY);
         const items: OutboxItem[] = raw ? JSON.parse(raw) : [];
-        items.push({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
+        items.push({ user_id: user.id, banner_version: effectiveVersion, clicked_at: nowIso });
         localStorage.setItem(OUTBOX_KEY, JSON.stringify(items));
       }
     }
   };
 
-  if (!isVisible || checking) {
+  if (!effectiveVersion || !isVisible || checking) {
     return null;
   }
 
