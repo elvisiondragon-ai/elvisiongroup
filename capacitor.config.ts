@@ -4,6 +4,10 @@ const config: CapacitorConfig = {
   appId: 'app.elvisiongroup.com',
   appName: 'eL Vision Group',
   webDir: 'dist',
+  server: {
+    hostname: 'app.elvisiongroup.com',
+    androidScheme: 'https'
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,

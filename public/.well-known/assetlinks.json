@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.elvisiongroup.com",
+    "sha256_cert_fingerprints": ["67:A2:73:41:4B:A7:69:3E:93:45:3F:31:00:FE:10:F7:79:AD:79:80:16:58:4B:3B:F8:36:18:74:3C:E2:F0:45"]
+  }
+}]

@@ -1,3 +1,17 @@
+/*
+How to use this component:
+This file is often used. 
+
+To UNHIDE the banner:
+1. Add the following import to src/App.tsx:
+   import UpdateBanner from "./updatebanner";
+2. Add the following component tag inside the AppLoader in src/App.tsx:
+   <UpdateBanner />
+
+To HIDE the banner:
+- Remove the import and the component tag from src/App.tsx.
+*/
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,7 +98,7 @@ const UpdateBanner: React.FC = () => {
       justifyContent: 'center',
       alignItems: 'center'
     }}>
-      <span style={{ fontWeight: 'bold', marginRight: '10px' }}>Perbaikan Audio mode offline</span>
+      <span style={{ fontWeight: 'bold', marginRight: '10px' }}>Perbaikan Lupa Password Instant</span>
       <a
         href={UPDATE_URL}
         onClick={handleDownloadClick}

@@ -21,6 +21,7 @@ import { ArifTestimonial } from "./pages/ArifTestimonial";
 import { OldMember } from "./pages/OldMember";
 import { DeleteAccount } from "./pages/DeleteAccount";
 import { AudioProvider } from "@/contexts/AudioContext";
+import UpdateBanner from "./updatebanner";
 
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -79,7 +80,7 @@ const AppContent = () => {
 
   return (
     <AppLoader>
-      
+      <UpdateBanner />
       <AudioProvider>
         <MeditativeProvider>
 
