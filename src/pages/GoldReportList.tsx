@@ -84,94 +84,115 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
   const { chatChannel } = useAuth();
 
   // Cache version and TTL
-  const CACHE_VERSION = 1;
-  const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+  const CACHE_VERSION = 2;
+  const CACHE_TTL = 365 * 24 * 60 * 60 * 1000; // 365 days
+  const PROFILE_CACHE_TTL = CACHE_TTL;
+  const FULL_CACHE_KEY = 'gold-reports-cache';
+  const PREVIEW_CACHE_KEY = 'gold-reports-cache-preview';
+  const LIMIT_CACHE_KEY = 'gold-report-limit';
+  const PROFILE_CACHE_PREFIX = 'gold-user-data-';
 
   // State for gold reported messages with cache (identical to chat.tsx)
   const [goldReportedMessages, setGoldReportedMessages] = useState<ChatMessageData[]>(() => {
-    const cached = localStorage.getItem('gold-reports-cache');
-    if (cached) {
+    const parseCache = (raw: string | null, { keyName }: { keyName: string }) => {
+      if (!raw) return null;
       try {
-        const parsedCache = JSON.parse(cached);
-
-        // Validate cache structure
-        if (!parsedCache || typeof parsedCache !== 'object') {
-          console.warn('⚠️ Invalid gold reports cache structure, clearing...');
-          localStorage.removeItem('gold-reports-cache');
-          return [];
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') {
+          console.warn(`⚠️ Invalid gold reports cache structure in ${keyName}, clearing...`);
+          localStorage.removeItem(keyName);
+          return null;
         }
 
-        const { version, timestamp, data } = parsedCache;
+        const { version, timestamp, data } = parsed;
 
-        // If old format (no version), migrate to new format
-        if (!version && Array.isArray(parsedCache)) {
-          console.log('📦 Migrating old gold reports cache format...');
-          return parsedCache;
-        }
-
-        // Check cache version
         if (version !== CACHE_VERSION) {
-          console.warn('⚠️ Gold reports cache version mismatch, clearing...');
-          localStorage.removeItem('gold-reports-cache');
-          return [];
+          console.warn(`⚠️ Gold reports cache version mismatch for ${keyName}, clearing...`);
+          localStorage.removeItem(keyName);
+          return null;
         }
 
-        // Check cache age (TTL)
-        if (timestamp && Date.now() - timestamp > CACHE_TTL) {
-          console.warn('⚠️ Gold reports cache expired (>24h), clearing...');
-          localStorage.removeItem('gold-reports-cache');
-          return [];
+        if (!timestamp || Date.now() - timestamp > CACHE_TTL) {
+          console.warn(`⚠️ Gold reports cache expired for ${keyName}, clearing...`);
+          localStorage.removeItem(keyName);
+          return null;
         }
 
-        // Validate data is array
         if (!Array.isArray(data)) {
-          console.warn('⚠️ Invalid gold reports cache data format, clearing...');
-          localStorage.removeItem('gold-reports-cache');
-          return [];
+          console.warn(`⚠️ Invalid gold reports cache data format in ${keyName}, clearing...`);
+          localStorage.removeItem(keyName);
+          return null;
         }
 
-        console.log('✅ Loaded valid gold reports cache:', data.length, 'messages');
-        return data;
-      } catch (e) {
-        console.error('❌ Failed to parse cached gold reports:', e);
-        console.log('🧹 Clearing corrupted gold reports cache...');
-        localStorage.removeItem('gold-reports-cache');
-        return [];
+        return data as ChatMessageData[];
+      } catch (error) {
+        console.error(`❌ Failed to parse cached gold reports from ${keyName}:`, error);
+        localStorage.removeItem(keyName);
+        return null;
       }
+    };
+
+    const preview = parseCache(localStorage.getItem(PREVIEW_CACHE_KEY), { keyName: PREVIEW_CACHE_KEY });
+    if (preview && preview.length > 0) {
+      console.log('✅ Loaded gold report preview cache:', preview.length, 'messages');
+      return preview;
     }
+
+    const fullCache = parseCache(localStorage.getItem(FULL_CACHE_KEY), { keyName: FULL_CACHE_KEY });
+    if (fullCache) {
+      console.log('✅ Loaded gold reports cache:', fullCache.length, 'messages');
+      return fullCache;
+    }
+
     return [];
   });
 
   // Message limit pattern: start at 10, expand to 100 after 1 second
   const [messageLimit, setMessageLimit] = useState(() => {
-    const cached = localStorage.getItem('gold-report-limit');
+    const cached = localStorage.getItem(LIMIT_CACHE_KEY);
     return cached ? parseInt(cached, 10) : 10;
   });
 
   // Save messageLimit to localStorage only when it's 10 (initial state)
   useEffect(() => {
     if (messageLimit === 10) {
-      localStorage.setItem('gold-report-limit', messageLimit.toString());
+      localStorage.setItem(LIMIT_CACHE_KEY, messageLimit.toString());
     }
   }, [messageLimit]);
 
   // Save gold reported messages to localStorage whenever they change (identical to chat.tsx)
   useEffect(() => {
-    if (goldReportedMessages.length > 0) {
-      try {
-        const cacheData = {
-          version: CACHE_VERSION,
-          timestamp: Date.now(),
-          data: goldReportedMessages
-        };
-        localStorage.setItem('gold-reports-cache', JSON.stringify(cacheData));
-      } catch (e) {
-        console.error('❌ Failed to save gold reports cache:', e);
-        // If localStorage is full, clear old cache
-        if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-          console.warn('💾 localStorage quota exceeded, clearing gold reports cache...');
-          localStorage.removeItem('gold-reports-cache');
-        }
+    const hasMessages = goldReportedMessages.length > 0;
+
+    if (!hasMessages) {
+      localStorage.removeItem(FULL_CACHE_KEY);
+      localStorage.removeItem(PREVIEW_CACHE_KEY);
+      return;
+    }
+
+    try {
+      const timestamp = Date.now();
+      const cacheData = {
+        version: CACHE_VERSION,
+        timestamp,
+        data: goldReportedMessages
+      };
+
+      localStorage.setItem(FULL_CACHE_KEY, JSON.stringify(cacheData));
+
+      const previewData = {
+        version: CACHE_VERSION,
+        timestamp,
+        data: goldReportedMessages.slice(-10)
+      };
+
+      localStorage.setItem(PREVIEW_CACHE_KEY, JSON.stringify(previewData));
+    } catch (e) {
+      console.error('❌ Failed to save gold reports cache:', e);
+      if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+        console.warn('💾 localStorage quota exceeded, clearing gold reports cache...');
+        localStorage.removeItem(FULL_CACHE_KEY);
+        localStorage.removeItem(PREVIEW_CACHE_KEY);
       }
     }
   }, [goldReportedMessages]);
@@ -190,22 +211,34 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
 
   // Smart user data cache (same as chat.tsx)
   const getUserDataFromCache = (userId: string) => {
-    const cached = localStorage.getItem(`user-data-${userId}`);
+    const cacheKey = `${PROFILE_CACHE_PREFIX}${userId}`;
+    const cached = localStorage.getItem(cacheKey);
     if (!cached) return null;
 
-    const { data, timestamp } = JSON.parse(cached);
-    const TTL = 24 * 60 * 60 * 1000; // 24 hours
+    try {
+      const { data, timestamp, version } = JSON.parse(cached);
 
-    if (Date.now() - timestamp > TTL) {
-      localStorage.removeItem(`user-data-${userId}`);
+      if (version !== CACHE_VERSION) {
+        localStorage.removeItem(cacheKey);
+        return null;
+      }
+
+      if (!timestamp || Date.now() - timestamp > PROFILE_CACHE_TTL) {
+        localStorage.removeItem(cacheKey);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Failed to parse user cache:', error);
+      localStorage.removeItem(cacheKey);
       return null;
     }
-
-    return data;
   };
 
   const cacheUserData = (userId: string, data: any) => {
-    localStorage.setItem(`user-data-${userId}`, JSON.stringify({
+    localStorage.setItem(`${PROFILE_CACHE_PREFIX}${userId}`, JSON.stringify({
+      version: CACHE_VERSION,
       data,
       timestamp: Date.now()
     }));
@@ -217,14 +250,22 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
       // Get gold reports
       const { data: goldReports, error } = await supabase
         .from('gold_reports')
-        .select('message_id');
+        .select('id, message_id, reported_by, created_at, message_content')
+        .order('created_at', { ascending: true });
 
-      if (error || !goldReports) {
+      if (error) {
         console.error('Error loading gold reports:', error);
         return;
       }
 
-      const messageIds = goldReports.map(gr => gr.message_id);
+      if (!goldReports || goldReports.length === 0) {
+        setGoldReportedMessages([]);
+        return;
+      }
+
+      const messageIds = goldReports
+        .map(gr => gr.message_id)
+        .filter((id: string | null) => Boolean(id)) as string[];
 
       if (messageIds.length === 0) {
         setGoldReportedMessages([]);
@@ -232,24 +273,31 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
       }
 
       // Fetch messages for these IDs
-      let { data: chatMessages, error: messagesError } = await supabase
+      const { data: chatMessages, error: messagesError } = await supabase
         .from('chat_messages')
-        .select('*')
-        .in('id', messageIds)
-        .order('created_at', { ascending: false });
+        .select('id, user_id, user_name, user_level, message, created_at')
+        .in('id', messageIds);
 
-      // Reverse to show oldest first (identical to chat.tsx)
-      if (chatMessages) {
-        chatMessages = chatMessages.reverse();
-      }
-
-      if (messagesError || !chatMessages) {
+      if (messagesError) {
         console.error('Error loading messages:', messagesError);
         return;
       }
 
+      const chatMessageMap = new Map<string, any>();
+      (chatMessages || []).forEach((msg) => {
+        if (msg?.id) {
+          chatMessageMap.set(msg.id, msg);
+        }
+      });
+
       // Get unique user IDs
-      const userIds = [...new Set(chatMessages.map(msg => msg.user_id))];
+      const userIds = [
+        ...new Set(
+          (chatMessages || [])
+            .map(msg => msg?.user_id)
+            .filter(Boolean)
+        )
+      ] as string[];
 
       // Check cache for existing user data
       const cachedProfiles = new Map();
@@ -284,21 +332,38 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
 
       // Process messages with cached + fresh data
       const knownAdminId = '3da83afb-aa8c-4c55-b3b0-8aa64000205f';
-      const processedMessages = chatMessages.map(msg => {
-        const userProfile = cachedProfiles.get(msg.user_id);
+      let missingMessages = 0;
+      const processedMessages = goldReports
+        .map(report => {
+          const chatMessage = chatMessageMap.get(report.message_id);
+          if (!chatMessage) {
+            missingMessages += 1;
+            return null;
+          }
 
-        return {
-          ...msg,
-          user_name: userProfile?.display_name || msg.user_name,
-          user_level: userProfile?.level || msg.user_level || 1,
-          is_pro: false, // Pro status not needed for gold reports
-          is_admin: msg.user_id === knownAdminId || userProfile?.is_admin || false,
-          streak_days: userProfile?.streak_days || 0,
-          subscription_type: null,
-          avatar_url: userProfile?.avatar_url || undefined,
-          is_gold_reported: true
-        };
-      });
+          const userProfile = cachedProfiles.get(chatMessage.user_id);
+          const resolvedMessage = chatMessage.message || report.message_content || '';
+          const resolvedCreatedAt = chatMessage.created_at || report.created_at;
+
+          return {
+            ...chatMessage,
+            message: resolvedMessage,
+            created_at: resolvedCreatedAt,
+            user_name: userProfile?.display_name || chatMessage.user_name,
+            user_level: userProfile?.level || chatMessage.user_level || 1,
+            is_pro: false, // Pro status not needed for gold reports
+            is_admin: chatMessage.user_id === knownAdminId || userProfile?.is_admin || false,
+            streak_days: userProfile?.streak_days || 0,
+            subscription_type: null,
+            avatar_url: userProfile?.avatar_url || undefined,
+            is_gold_reported: true
+          } as ChatMessageData;
+        })
+        .filter(Boolean) as ChatMessageData[];
+
+      if (missingMessages > 0) {
+        console.warn(`⚠️ ${missingMessages} gold report entries reference missing chat messages`);
+      }
 
       setGoldReportedMessages(processedMessages);
     } catch (error) {
@@ -316,8 +381,9 @@ export function GoldReportList({ onBack, currentUserIsAdmin, userId, onDelete, o
       } catch (error) {
         console.error('❌ Critical error loading gold reports:', error);
         console.log('🧹 Clearing cache and retrying...');
-        localStorage.removeItem('gold-reports-cache');
-        localStorage.removeItem('gold-report-limit');
+        localStorage.removeItem(FULL_CACHE_KEY);
+        localStorage.removeItem(PREVIEW_CACHE_KEY);
+        localStorage.removeItem(LIMIT_CACHE_KEY);
       }
     }
   }, [chatChannel, loadGoldReports]);
