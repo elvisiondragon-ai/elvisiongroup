@@ -235,25 +235,38 @@ export function Chat({ onNavigate }: ChatProps) {
   }, [user, userProfile, isPro, proStatus]);
 
   // Smart user data cache with TTL (24 hours)
+  const USER_PROFILE_CACHE_VERSION = '20241109';
   const getUserDataFromCache = (userId: string) => {
-    const cached = localStorage.getItem(`user-data-${userId}`);
+    const cacheKey = `user-data-${userId}`;
+    const cached = localStorage.getItem(cacheKey);
     if (!cached) return null;
-    
-    const { data, timestamp } = JSON.parse(cached);
-    const TTL = 24 * 60 * 60 * 1000; // 24 hours
-    
-    if (Date.now() - timestamp > TTL) {
-      localStorage.removeItem(`user-data-${userId}`);
+
+    try {
+      const { data, timestamp, version } = JSON.parse(cached);
+      const TTL = 6 * 60 * 60 * 1000; // 6 hours
+
+      if (version !== USER_PROFILE_CACHE_VERSION) {
+        localStorage.removeItem(cacheKey);
+        return null;
+      }
+
+      if (!timestamp || Date.now() - timestamp > TTL) {
+        localStorage.removeItem(cacheKey);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      localStorage.removeItem(cacheKey);
       return null;
     }
-    
-    return data;
   };
 
   const cacheUserData = (userId: string, data: any) => {
     localStorage.setItem(`user-data-${userId}`, JSON.stringify({
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      version: USER_PROFILE_CACHE_VERSION
     }));
   };
 
