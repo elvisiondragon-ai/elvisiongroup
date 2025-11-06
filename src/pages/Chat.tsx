@@ -837,15 +837,71 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [removeMessage, userId, messages, addMessage, broadcastDelete, user, userProfile]);
 
+  const adjustUserExperience = useCallback(async (targetUserId: string, delta: number) => {
+    if (!targetUserId || delta === 0) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('experience_points')
+        .eq('user_id', targetUserId)
+        .maybeSingle();
+
+      if (error || !data) {
+        console.error('Error fetching profile for XP update:', error);
+        return;
+      }
+
+      const currentXP = data.experience_points ?? 0;
+      const updatedXP = Math.max(0, currentXP + delta);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ experience_points: updatedXP })
+        .eq('user_id', targetUserId);
+
+      if (updateError) {
+        console.error('Error updating profile XP:', updateError);
+      }
+    } catch (xpError) {
+      console.error('Unexpected error adjusting user XP:', xpError);
+    }
+  }, []);
+
   const handleGoldReportToggle = useCallback((messageId: string, isGoldReported: boolean) => {
+    let affectedUserId: string | null = null;
+    let affectedUserName: string | null = null;
+
     // Update the message in the list
-    setMessages(current => current.map(msg =>
-      msg.id === messageId ? { ...msg, is_gold_reported: isGoldReported } : msg
-    ));
+    setMessages(current => current.map(msg => {
+      if (msg.id === messageId) {
+        affectedUserId = msg.user_id;
+        affectedUserName = msg.user_name;
+        return { ...msg, is_gold_reported: isGoldReported };
+      }
+      return msg;
+    }));
 
     // Update count
     setGoldReportCount(current => isGoldReported ? current + 1 : current - 1);
-  }, []);
+
+    if (affectedUserId) {
+      const xpDelta = isGoldReported ? 100 : -100;
+      adjustUserExperience(affectedUserId, xpDelta);
+
+      const isAdminUser = user?.id === '3da83afb-aa8c-4c55-b3b0-8aa64000205f' || !!userProfile?.is_admin;
+      if (isAdminUser && affectedUserName) {
+        setTimeout(() => {
+          toast({
+            title: isGoldReported
+              ? `EXP +100 diberikan ke "${affectedUserName}"`
+              : `EXP -100 dikurangi dari "${affectedUserName}"`,
+            duration: 2500
+          });
+        }, 2000);
+      }
+    }
+  }, [adjustUserExperience, toast, user?.id, userProfile?.is_admin]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
