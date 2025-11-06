@@ -13,26 +13,23 @@ To HIDE the banner:
 */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { App } from '@capacitor/app';
-import { Capacitor } from '@capacitor/core';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-// VERSIONED BANNER RULES
-// - The banner is shown once per user per version.
-// - Re-deploying the same version keeps it hidden for users who already clicked.
-// - Bumping the version (e.g., v001 -> v002-> v003 and so on) shows the banner again to all users.
+// BANNER RULES
+// - The banner is shown once per user until they click the button.
+// - Deployments that clear localStorage will surface the banner again automatically.
 
-// Configure the current banner version via env; default to v002
+// Optional server-side version tag (kept for analytics / XP rewards)
 const BANNER_VERSION = import.meta.env.VITE_UPDATE_BANNER_VERSION || 'v002';
 
 // Download target
 const UPDATE_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/apk/elvisionv2.apk';
 
-// Local, per-user, per-version suppression key (offline-friendly)
-const makeLocalKey = (version: string, userId?: string | null) =>
-  `updateBannerClicked:${version}:${userId ?? 'anon'}`;
+// Local, per-user dismissal key (cleared when SW purges cache)
+const dismissalKey = (userId?: string | null) =>
+  `updateBannerDismissed:${userId ?? 'anon'}`;
 
 // Pending outbox for offline inserts
 const OUTBOX_KEY = 'updateBannerOutbox'; // JSON array of { user_id, banner_version, clicked_at }
@@ -44,7 +41,6 @@ const UpdateBanner: React.FC = () => {
   const { toast } = useToast();
   const [isVisible, setIsVisible] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [effectiveVersion, setEffectiveVersion] = useState<string | null>(null);
 
   // Flush any pending offline clicks once we have a user/session
   const flushOutbox = useCallback(async () => {
@@ -83,97 +79,26 @@ const UpdateBanner: React.FC = () => {
     flushOutbox();
   }, [flushOutbox]);
 
-  // Resolve banner version based on native build when available
-  useEffect(() => {
-    let cancelled = false;
-
-    const resolveVersion = async () => {
-      let resolvedVersion = BANNER_VERSION;
-
-      try {
-        if (Capacitor?.isNativePlatform?.()) {
-          const info = await App.getInfo();
-          if (info?.version) {
-            resolvedVersion = `apk-${info.version}`;
-          } else if (info?.build) {
-            resolvedVersion = `apk-build-${info.build}`;
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to resolve native app version, falling back to banner version:', error);
-      }
-
-      if (!cancelled) {
-        setEffectiveVersion(resolvedVersion);
-      }
-    };
-
-    resolveVersion();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   // Decide visibility: prefer server truth, fallback to local to avoid flicker
   useEffect(() => {
-    if (!effectiveVersion) {
+    setChecking(true);
+
+    // Only show for authenticated users
+    if (!user?.id) {
+      setIsVisible(false);
+      setChecking(false);
       return;
     }
 
-    const decide = async () => {
-      setChecking(true);
-
-      // Not logged in: never show
-      if (!user?.id) {
-        setIsVisible(false);
-        setChecking(false);
-        return;
-      }
-
-      // Optimistic local check (fast)
-      const key = makeLocalKey(effectiveVersion, user.id);
-      const localClicked = localStorage.getItem(key) === 'true';
-      if (localClicked) {
-        setIsVisible(false);
-        setChecking(false);
-      }
-
-      // Server check (authoritative)
-      try {
-        const { data, error } = await supabase
-          .from('update_banner_clicks')
-          .select('user_id')
-          .eq('user_id', user.id)
-          .eq('banner_version', effectiveVersion)
-          .maybeSingle();
-
-        if (error) {
-          // On error, fall back to local
-          setIsVisible(!localClicked);
-        } else {
-          // Hide if record exists; show otherwise
-          const alreadyClicked = !!data;
-          setIsVisible(!alreadyClicked);
-          if (alreadyClicked) localStorage.setItem(key, 'true');
-        }
-      } catch {
-        setIsVisible(!localClicked);
-      } finally {
-        setChecking(false);
-      }
-    };
-
-    decide();
-  }, [user, effectiveVersion]);
+    const key = dismissalKey(user.id);
+    const dismissed = localStorage.getItem(key) === 'true';
+    setIsVisible(!dismissed);
+    setChecking(false);
+  }, [user]);
 
   const handleDownloadClick = async () => {
-    if (!effectiveVersion) {
-      return;
-    }
-
     // Immediately close banner and mark local suppression
-    if (user?.id) localStorage.setItem(makeLocalKey(effectiveVersion, user.id), 'true');
+    if (user?.id) localStorage.setItem(dismissalKey(user.id), 'true');
     setIsVisible(false);
 
     // Open download
@@ -185,7 +110,7 @@ const UpdateBanner: React.FC = () => {
       try {
         const { error } = await supabase
           .from('update_banner_clicks')
-          .insert({ user_id: user.id, banner_version: effectiveVersion, clicked_at: nowIso });
+          .insert({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
 
         if (error) {
           // Unique violation: treat as success (already clicked elsewhere)
@@ -193,7 +118,7 @@ const UpdateBanner: React.FC = () => {
             // Queue for retry when back online
             const raw = localStorage.getItem(OUTBOX_KEY);
             const items: OutboxItem[] = raw ? JSON.parse(raw) : [];
-            items.push({ user_id: user.id, banner_version: effectiveVersion, clicked_at: nowIso });
+            items.push({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
             localStorage.setItem(OUTBOX_KEY, JSON.stringify(items));
           }
         } else {
@@ -236,13 +161,13 @@ const UpdateBanner: React.FC = () => {
         // Network failure: queue for retry
         const raw = localStorage.getItem(OUTBOX_KEY);
         const items: OutboxItem[] = raw ? JSON.parse(raw) : [];
-        items.push({ user_id: user.id, banner_version: effectiveVersion, clicked_at: nowIso });
+        items.push({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
         localStorage.setItem(OUTBOX_KEY, JSON.stringify(items));
       }
     }
   };
 
-  if (!effectiveVersion || !isVisible || checking) {
+  if (!isVisible || checking) {
     return null;
   }
 
@@ -262,7 +187,7 @@ const UpdateBanner: React.FC = () => {
       justifyContent: 'center',
       alignItems: 'center'
     }}>
-      <span style={{ fontWeight: 'bold', marginRight: '10px' }}>Perbaikan Lupa Password Instant</span>
+      <span style={{ fontWeight: 'bold', marginRight: '10px' }}>Gold Report Event</span>
       <a
         href={UPDATE_URL}
         onClick={handleDownloadClick}
