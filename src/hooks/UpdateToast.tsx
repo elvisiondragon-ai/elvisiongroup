@@ -135,7 +135,12 @@ export const useUpdateToast = () => {
           // 3. Clear ALL localStorage (backup critical data first)
           const authBackup: Record<string, string> = {};
           Object.keys(localStorage).forEach(key => {
-            if (key.startsWith('sb-') || key.includes('auth') || key.includes('supabase')) {
+            if (
+              key.startsWith('sb-') ||
+              key.includes('auth') ||
+              key.includes('supabase') ||
+              key.startsWith('updateBannerDismissed:')
+            ) {
               const value = localStorage.getItem(key);
               if (value) authBackup[key] = value;
             }
@@ -211,6 +216,7 @@ export const useUpdateToast = () => {
           key.includes('token') ||
           key.includes('audio') ||
           key.includes('cache') ||
+          key.startsWith('updateBannerDismissed:') ||
           key.match(/^supabase\.auth\./) ||
           key === 'update-success-flag' ||
           key === 'sw-update-success' ||
