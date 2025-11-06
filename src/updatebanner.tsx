@@ -12,73 +12,190 @@ To HIDE the banner:
 - Remove the import and the component tag from src/App.tsx.
 */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+// VERSIONED BANNER RULES
+// - The banner is shown once per user per version.
+// - Re-deploying the same version keeps it hidden for users who already clicked.
+// - Bumping the version (e.g., v001 -> v002) shows the banner again to all users.
+
+// Configure the current banner version via env; default to v001
+const BANNER_VERSION = import.meta.env.VITE_UPDATE_BANNER_VERSION || 'v001';
+
+// Download target
 const UPDATE_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/apk/elvisionv2.apk';
-const LOCAL_STORAGE_KEY = 'hasClickedUpdateBannerElvisionV2';
+
+// Local, per-user, per-version suppression key (offline-friendly)
+const localKey = (userId?: string | null) => `updateBannerClicked:${BANNER_VERSION}:${userId ?? 'anon'}`;
+
+// Pending outbox for offline inserts
+const OUTBOX_KEY = 'updateBannerOutbox'; // JSON array of { user_id, banner_version, clicked_at }
+
+type OutboxItem = { user_id: string; banner_version: string; clicked_at: string };
 
 const UpdateBanner: React.FC = () => {
   const { user, userProfile } = useAuth();
   const { toast } = useToast();
   const [isVisible, setIsVisible] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  // Flush any pending offline clicks once we have a user/session
+  const flushOutbox = useCallback(async () => {
+    try {
+      const raw = localStorage.getItem(OUTBOX_KEY);
+      if (!raw) return;
+      const items: OutboxItem[] = JSON.parse(raw);
+      if (!Array.isArray(items) || items.length === 0) return;
+
+      const keep: OutboxItem[] = [];
+      for (const item of items) {
+        try {
+          const { error } = await supabase
+            .from('update_banner_clicks')
+            .insert({ user_id: item.user_id, banner_version: item.banner_version, clicked_at: item.clicked_at });
+          if (error) {
+            // Keep if transient error; drop on unique violation
+            if (String((error as any)?.code) === '23505') continue; // unique_violation
+            keep.push(item);
+          }
+        } catch {
+          keep.push(item);
+        }
+      }
+      if (keep.length > 0) {
+        localStorage.setItem(OUTBOX_KEY, JSON.stringify(keep));
+      } else {
+        localStorage.removeItem(OUTBOX_KEY);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   useEffect(() => {
-    const hasClicked = localStorage.getItem(LOCAL_STORAGE_KEY);
-    // Only show the banner if the user is logged in (user object exists)
-    // and they have not clicked the download link before.
-    //UPDATE BANNER ALWAYS HAVE UNIQUE CODE NOW IS V.2 IF YOU DEPLOY THIS CHANGE TO V.2.1
-    if (user && hasClicked !== 'true') {
-      setIsVisible(true);
-    } else {
-      // Hide banner if user is not logged in or has already clicked it
-      setIsVisible(false);
-    }
-  }, [user]); // Re-run this effect when the user's authentication state changes
+    flushOutbox();
+  }, [flushOutbox]);
 
-  const handleDownloadClick = async () => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, 'true');
-    setIsVisible(false);
-    window.open(UPDATE_URL, '_blank');
+  // Decide visibility: prefer server truth, fallback to local to avoid flicker
+  useEffect(() => {
+    const decide = async () => {
+      // Not logged in: never show
+      if (!user?.id) {
+        setIsVisible(false);
+        setChecking(false);
+        return;
+      }
 
-    if (user && userProfile) {
+      // Optimistic local check (fast)
+      const localClicked = localStorage.getItem(localKey(user.id)) === 'true';
+      if (localClicked) {
+        setIsVisible(false);
+        setChecking(false);
+      }
+
+      // Server check (authoritative)
       try {
-        const experienceGained = 200;
-        const currentExperience = userProfile.experience_points || 0;
-        const newExperience = currentExperience + experienceGained;
-
-        const { error } = await supabase
-          .from('profiles')
-          .update({ experience_points: newExperience })
-          .eq('user_id', user.id);
+        const { data, error } = await supabase
+          .from('update_banner_clicks')
+          .select('user_id')
+          .eq('user_id', user.id)
+          .eq('banner_version', BANNER_VERSION)
+          .maybeSingle();
 
         if (error) {
-          console.error('Error updating XP for banner click:', error);
-          toast({
-            title: "Error",
-            description: "Failed to award XP. Please try again.",
-            variant: "destructive",
-          });
+          // On error, fall back to local
+          setIsVisible(!localClicked);
         } else {
-          toast({
-            title: '✨ Bonus EXP! ✨',
-            description: `Kamu mendapatkan +${experienceGained} EXP untuk update aplikasi!`, 
-          });
+          // Hide if record exists; show otherwise
+          const alreadyClicked = !!data;
+          setIsVisible(!alreadyClicked);
+          if (alreadyClicked) localStorage.setItem(localKey(user.id), 'true');
         }
-      } catch (error) {
-        console.error('Unexpected error awarding XP for banner click:', error);
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred while awarding XP.",
-          variant: "destructive",
-        });
+      } catch {
+        setIsVisible(!localClicked);
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    decide();
+  }, [user]);
+
+  const handleDownloadClick = async () => {
+    // Immediately close banner and mark local suppression
+    if (user?.id) localStorage.setItem(localKey(user.id), 'true');
+    setIsVisible(false);
+
+    // Open download
+    window.open(UPDATE_URL, '_blank');
+
+    // Record click server-side (deduplicated by unique constraint)
+    if (user?.id) {
+      const nowIso = new Date().toISOString();
+      try {
+        const { error } = await supabase
+          .from('update_banner_clicks')
+          .insert({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
+
+        if (error) {
+          // Unique violation: treat as success (already clicked elsewhere)
+          if (String((error as any)?.code) !== '23505') {
+            // Queue for retry when back online
+            const raw = localStorage.getItem(OUTBOX_KEY);
+            const items: OutboxItem[] = raw ? JSON.parse(raw) : [];
+            items.push({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
+            localStorage.setItem(OUTBOX_KEY, JSON.stringify(items));
+          }
+        } else {
+          // Only award EXP on successful, unique insert
+          if (userProfile) {
+            try {
+              const experienceGained = 200;
+              const currentExperience = userProfile.experience_points || 0;
+              const newExperience = currentExperience + experienceGained;
+
+              const { error: xpError } = await supabase
+                .from('profiles')
+                .update({ experience_points: newExperience })
+                .eq('user_id', user.id);
+
+              if (xpError) {
+                console.error('Error updating XP for banner click:', xpError);
+                toast({
+                  title: 'Error',
+                  description: 'Failed to award XP. Please try again.',
+                  variant: 'destructive',
+                });
+              } else {
+                toast({
+                  title: '✨ Bonus EXP! ✨',
+                  description: `Kamu mendapatkan +${experienceGained} EXP untuk update aplikasi!`,
+                });
+              }
+            } catch (xpUnexpected) {
+              console.error('Unexpected error awarding XP for banner click:', xpUnexpected);
+              toast({
+                title: 'Error',
+                description: 'An unexpected error occurred while awarding XP.',
+                variant: 'destructive',
+              });
+            }
+          }
+        }
+      } catch (err) {
+        // Network failure: queue for retry
+        const raw = localStorage.getItem(OUTBOX_KEY);
+        const items: OutboxItem[] = raw ? JSON.parse(raw) : [];
+        items.push({ user_id: user.id, banner_version: BANNER_VERSION, clicked_at: nowIso });
+        localStorage.setItem(OUTBOX_KEY, JSON.stringify(items));
       }
     }
   };
 
-  if (!isVisible) {
+  if (!isVisible || checking) {
     return null;
   }
 
