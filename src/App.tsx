@@ -20,6 +20,7 @@ import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { ArifTestimonial } from "./pages/ArifTestimonial";
 import { OldMember } from "./pages/OldMember";
 import { DeleteAccount } from "./pages/DeleteAccount";
+import Kalibrasi from "./pages/Kalibrasi";
 import { AudioProvider } from "@/contexts/AudioContext";
 // import UpdateBanner from "./updatebanner";
 
@@ -129,6 +130,10 @@ const AppContent = () => {
                 <Route
                   path="/delete"
                   element={<DeleteAccount />}
+                />
+                <Route
+                  path="/kalibrasi"
+                  element={<Kalibrasi />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
