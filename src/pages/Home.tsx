@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useXPSystem } from "@/hooks/useXPSystem";
 import { usePro } from "@/hooks/usePro";
 
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAudioCache } from "@/hooks/useAudioCache";
 import { useToast } from "@/hooks/use-toast";
@@ -53,6 +54,7 @@ export function Home({
 }: HomeProps) {
   const { t } = useTranslation();
   const { user, userId, userProfile, mediaAudit } = useAuth();
+  const navigate = useNavigate();
 
   // iOS detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -493,24 +495,33 @@ export function Home({
       {/* User Stats */}
       <div className="p-6">
         <Card className="p-4 bg-gradient-secondary border-border">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <div className="mb-2">
-                <div className="flex items-center gap-2">
-                  <h3 className={cn(
-                    "font-semibold transition-all duration-300",
-                    isAdmin 
-                      ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 rounded-lg shadow-2xl shadow-red-500/25"
-                      : "text-foreground"
-                  )}>
-                    {displayName}
-                  </h3>
-                  {isAdmin && <AdminBadge size="sm" />}
+          {user ? (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="mb-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className={cn(
+                        "font-semibold transition-all duration-300",
+                        isAdmin 
+                          ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 rounded-lg shadow-2xl shadow-red-500/25"
+                          : "text-foreground"
+                      )}>
+                        {displayName}
+                      </h3>
+                      {isAdmin && <AdminBadge size="sm" />}
+                    </div>
+                  </div>
                 </div>
               </div>
-
+            </>
+          ) : (
+            <div className="text-center">
+              <p className="text-lg font-semibold mb-2">Welcome!</p>
+              <p className="text-sm text-muted-foreground mb-4">Log in to access all features and track your progress.</p>
+              <Button onClick={() => navigate('/auth')}>Login</Button>
             </div>
-            </div>
+          )}
         </Card>
       </div>
 

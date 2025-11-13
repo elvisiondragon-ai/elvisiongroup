@@ -62,8 +62,12 @@ interface UserProfile {
   avatar_url?: string;
 }
 
+import { useNavigate } from "react-router-dom";
+// ... other imports ...
+
 export function Profile({ onNavigate }: ProfileProps) {
   const { user, userId, userProfile, loading, cleanupSupabase, mediaAudit } = useAuth();
+  const navigate = useNavigate();
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -285,21 +289,7 @@ export function Profile({ onNavigate }: ProfileProps) {
     );
   }
 
-  // Enhanced error handling with fallback auth check
-  if (!user && !userId && !loading) {
-    // Try to get session from AuthContext before showing error
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center pb-20">
-        <div className="text-center">
-          <p className="text-destructive">Error loading profile</p>
-          <p className="text-sm text-muted-foreground mb-4">Please check your connection</p>
-          <Button onClick={() => window.location.reload()} className="mt-4">
-            Retry
-          </Button>
-        </div>
-      </div>
-    );
-  }
+
 
   // If we have userId from AuthContext but no user object yet, show loading
   if (userId && !user && !loading) {
@@ -728,7 +718,17 @@ export function Profile({ onNavigate }: ProfileProps) {
         <Button
           variant="outline"
           className="w-full transition-all duration-200 hover:scale-105 active:scale-95 transform"
-          onClick={() => setEditingProfile(true)}
+          onClick={() => {
+            if (user) {
+              setEditingProfile(true);
+            } else {
+              toast({
+                title: "Login Required",
+                description: "Please log in to edit your profile.",
+                variant: "destructive",
+              });
+            }
+          }}
         >
           <User className="w-4 h-4 mr-2" />
           Edit Profil
@@ -838,16 +838,27 @@ export function Profile({ onNavigate }: ProfileProps) {
         </Button>
 
         <div className="p-6">
-          <Button
-            variant="destructive"
-            onClick={handleLogout}
-            onTouchEnd={(e) => { e.preventDefault(); handleLogout(); }}
-            className="w-full transition-all duration-200 transform hover:scale-105 active:scale-95"
-            style={{ touchAction: 'manipulation' }}
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
+          {user ? (
+            <Button
+              variant="destructive"
+              onClick={handleLogout}
+              onTouchEnd={(e) => { e.preventDefault(); handleLogout(); }}
+              className="w-full transition-all duration-200 transform hover:scale-105 active:scale-95"
+              style={{ touchAction: 'manipulation' }}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              onClick={() => navigate('/auth')}
+              className="w-full transition-all duration-200 transform hover:scale-105 active:scale-95"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Login
+            </Button>
+          )}
         </div>
 
         {/* Delete Account Section - HIDDEN */}

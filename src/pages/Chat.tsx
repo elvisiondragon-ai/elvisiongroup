@@ -143,8 +143,6 @@ export function Chat({ onNavigate }: ChatProps) {
     avatar_url: ''
   });
 
-  if (!userId) return null;
-
   // Prevent body scroll on iOS, only allow chat messages to scroll
   useEffect(() => {
     if (isIOS) {
@@ -499,6 +497,11 @@ export function Chat({ onNavigate }: ChatProps) {
     }
   }, [toast, messageLimit]);
 
+  // FOR UNAUTHENTIC USER: Load initial messages on component mount for all users
+  useEffect(() => {
+    loadMessages();
+  }, [loadMessages]);
+
   // Load initial messages when channel is ready
   useEffect(() => {
     if (chatChannel) {
@@ -636,6 +639,14 @@ export function Chat({ onNavigate }: ChatProps) {
   };
 
   const handleSendMessage = async () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to send a message.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!userId) return;
 

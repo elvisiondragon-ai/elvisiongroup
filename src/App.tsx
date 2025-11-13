@@ -95,10 +95,9 @@ const AppContent = () => {
             }}>
               <Routes>
                 <Route 
-                  path="/" 
-                  element={loading ? null : (user ? <Index /> : <Navigate to="/auth" replace />)} 
-                />
-                <Route 
+                                    path="/"
+                                    element={loading ? null : <Index />}
+                                  />                <Route 
                   path="/auth" 
                   element={loading ? null : (user ? <Navigate to="/" replace /> : <Auth />)} 
                 />
