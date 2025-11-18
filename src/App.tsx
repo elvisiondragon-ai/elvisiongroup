@@ -21,6 +21,7 @@ import { ArifTestimonial } from "./pages/ArifTestimonial";
 import { OldMember } from "./pages/OldMember";
 import { DeleteAccount } from "./pages/DeleteAccount";
 import Kalibrasi from "./pages/Kalibrasi";
+import Formid from "./pages/Formid";
 import { AudioProvider } from "@/contexts/AudioContext";
 // import UpdateBanner from "./updatebanner";
 
@@ -133,6 +134,10 @@ const AppContent = () => {
                 <Route
                   path="/kalibrasi"
                   element={<Kalibrasi />}
+                />
+                <Route
+                  path="/formid"
+                  element={<Formid />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

@@ -380,8 +380,8 @@ export function Auth({ onLogin }: AuthProps) {
     // Allow any password without strict validation
     if (signupData.password !== signupData.confirmPassword) {
       toast({
-        title: "Password Tidak Cocok",
-        description: "Password dan konfirmasi password harus sama.",
+        title: "Password Not match",
+        description: "Password must identic.",
         variant: "destructive",
       });
       return;
@@ -392,8 +392,8 @@ export function Auth({ onLogin }: AuthProps) {
     // Very lenient password validation - minimum 1 character
     if (signupData.password.length < 1) {
       toast({
-        title: "Password Kosong",
-        description: "Masukkan password minimal 1 karakter.",
+        title: "Password empty",
+        description: "Insert password.",
         variant: "destructive",
       });
       return;
@@ -447,8 +447,8 @@ export function Auth({ onLogin }: AuthProps) {
 
           if (loginData.user) {
             toast({
-              title: "Berhasil Masuk!",
-              description: "Email sudah terdaftar, Anda berhasil masuk.",
+              title: "Login!",
+              description: "Welcome to eL Vision.",
             });
             onLogin(loginData.user);
             return;
@@ -476,8 +476,8 @@ export function Auth({ onLogin }: AuthProps) {
     } catch (error: any) {
       console.error('Signup error:', error);
       toast({
-        title: "Pendaftaran Gagal",
-        description: error.message || "Coba gunakan email dan password yang berbeda.",
+        title: "Signup Error",
+        description: error.message || "Try another email.",
         variant: "destructive",
       });
     } finally {
@@ -543,7 +543,7 @@ export function Auth({ onLogin }: AuthProps) {
                 className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11 transition-all duration-200 transform hover:scale-105 active:scale-95"
                 disabled={isLoading}
               >
-                {isLoading ? "Mengirim..." : "Kirim Reset Email"}
+                {isLoading ? "Sent..." : "Reset Email Sent"}
               </Button>
             </form>
 
@@ -585,7 +585,7 @@ export function Auth({ onLogin }: AuthProps) {
               Selamat Akun Dibuat! 🎉
             </h1>
             <p className="text-muted-foreground text-center">
-              Akun anda telah berhasil dibuat dan siap digunakan. Mulai perjalanan spiritual anda sekarang!
+              Acount Created!
             </p>
             <div className="space-y-3 pt-4">
               <Button 
@@ -593,14 +593,14 @@ export function Auth({ onLogin }: AuthProps) {
                 className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary transform hover:scale-105 active:scale-95 transition-all duration-200"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                MULAI PERJALANAN
+                Start Explore
               </Button>
               <Button 
                 variant="outline"
                 onClick={() => setCurrentView('auth')}
                 className="w-full"
               >
-                Kembali ke Login
+                Back to Login
               </Button>
             </div>
           </div>
@@ -636,7 +636,7 @@ export function Auth({ onLogin }: AuthProps) {
               eL Vision Group
             </h1>
             <p className="text-muted-foreground mt-2">
-              Email Reset Telah Dikirim
+              Email Reset Sent
             </p>
           </div>
 
@@ -644,11 +644,11 @@ export function Auth({ onLogin }: AuthProps) {
             <div className="mb-4">
               <Mail className="h-12 w-12 mx-auto text-primary mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                Cek Email Anda
+                Check Email 
               </h3>
               <p className="text-muted-foreground">
-                Kami telah mengirimkan link reset password ke email Anda. 
-                Silakan cek kotak masuk dan ikuti instruksi yang diberikan.
+                Reset Password sent 
+                Check Your Email
               </p>
             </div>
 
@@ -656,7 +656,7 @@ export function Auth({ onLogin }: AuthProps) {
               onClick={() => setCurrentView('auth')}
               className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
             >
-              Kembali ke Login
+              Back ke Login
             </Button>
           </Card>
         </div>
@@ -696,7 +696,7 @@ export function Auth({ onLogin }: AuthProps) {
             eL Vision Group
           </h1>
           <p className="text-muted-foreground mt-2">
-            Transformasi diri melalui teknologi spiritual
+            Self-transformation through spiritual technology
           </p>
         </div>
 
@@ -718,7 +718,7 @@ export function Auth({ onLogin }: AuthProps) {
                 <span className={`transition-transform duration-150 ${
                   isTabClicked && activeTab === 'login' ? 'scale-95' : 'scale-100'
                 }`}>
-                  Masuk
+                  Login
                 </span>
                 {activeTab === 'login' && (
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 animate-pulse rounded-md" />
@@ -759,7 +759,7 @@ export function Auth({ onLogin }: AuthProps) {
                     <Input
                       id="login-email"
                       type="text"
-                      placeholder="email@contoh.com"
+                      placeholder="email@example.com"
                       value={loginData.email}
                       onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
                       onBlur={() => setLoginData(prev => ({ ...prev, email: prev.email.trim() }))}
@@ -802,7 +802,7 @@ export function Auth({ onLogin }: AuthProps) {
                   disabled={isLoading}
                 >
                   <span className="flex items-center justify-center gap-2">
-                    {isLoading ? "Masuk..." : "Masuk"}
+                    {isLoading ? "Login..." : "Login"}
                     {!isLoading && <Zap className="h-4 w-4" />}
                   </span>
                 </Button>
@@ -823,27 +823,27 @@ export function Auth({ onLogin }: AuthProps) {
                   onClick={() => setCurrentView('forgot-password')}
                   className="text-sm bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent font-medium hover:from-orange-300 hover:to-yellow-300 transition-all duration-200 cursor-pointer"
                 >
-                  Lupa Password?
+                  Forgot Password?
                 </button>
                 <span className="mx-2 text-muted-foreground">•</span>
                 <button
                   onClick={() => setShowTroubleshoot(!showTroubleshoot)}
                   className="text-sm bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent font-medium hover:from-orange-300 hover:to-yellow-300 transition-all duration-200 cursor-pointer"
                 >
-                  Login Bermasalah?
+                  Login Problem?
                 </button>
                 
                 {/* Troubleshoot Options */}
                 {showTroubleshoot && (
                   <div className="mt-3 p-3 bg-muted/30 rounded-lg border border-border/50 space-y-2">
                     <p className="text-xs text-muted-foreground">
-                      Tidak bisa mengetik email atau login bermasalah?
+                      Login Problem?
                     </p>
                     <button
                       onClick={async () => {
                         toast({
                           title: "Clearing Cache",
-                          description: "Membersihkan cache untuk memperbaiki login...",
+                          description: "Clear all stale cache..",
                           duration: 2000,
                         });
                         
@@ -855,7 +855,7 @@ export function Auth({ onLogin }: AuthProps) {
                       🧹 Clear Cache & Reload
                     </button>
                     <p className="text-xs text-muted-foreground/70">
-                      Ini akan membersihkan cache dan memuat ulang halaman
+                      Refresh system
                     </p>
                   </div>
                 )}
@@ -866,7 +866,7 @@ export function Auth({ onLogin }: AuthProps) {
                   <span className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Atau lanjutkan dengan</span>
+                  <span className="bg-card px-2 text-muted-foreground">Or Login With..</span>
                 </div>
               </div>
 
@@ -928,7 +928,7 @@ export function Auth({ onLogin }: AuthProps) {
                     <Input
                       id="signup-email"
                       type="text"
-                      placeholder="email@contoh.com"
+                      placeholder="email@example.com"
                       value={signupData.email}
                       onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
                       onBlur={() => setSignupData(prev => ({ ...prev, email: prev.email.trim() }))}
@@ -997,7 +997,7 @@ export function Auth({ onLogin }: AuthProps) {
                   disabled={isLoading}
                 >
                   <span className="flex items-center justify-center gap-2">
-                    {isLoading ? "Membuat Akun..." : "Buat Akun"}
+                    {isLoading ? "Create account..." : "Sign Up"}
                     {!isLoading && <Sparkles className="h-4 w-4" />}
                   </span>
                 </Button>
@@ -1008,7 +1008,7 @@ export function Auth({ onLogin }: AuthProps) {
                   <span className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Atau lanjutkan dengan</span>
+                  <span className="bg-card px-2 text-muted-foreground">Login With Google</span>
                 </div>
               </div>
 
@@ -1044,13 +1044,13 @@ export function Auth({ onLogin }: AuthProps) {
           <Button
             variant="outline"
             onClick={() => {
-              const message = encodeURIComponent("Hi kak nanya tentang Ekosistem..");
+              const message = encodeURIComponent("Hi About Ekosistem..");
               window.open(`https://wa.me/62895325633487?text=${message}`, '_blank');
             }}
             className="w-full max-w-md bg-green-50 hover:bg-green-100 text-green-700 border-green-200 hover:border-green-300"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
-            Tanya Customer Service
+            Ask Customer Service
           </Button>
         </div>
 
