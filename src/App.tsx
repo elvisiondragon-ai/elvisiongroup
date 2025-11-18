@@ -23,7 +23,7 @@ import { DeleteAccount } from "./pages/DeleteAccount";
 import Kalibrasi from "./pages/Kalibrasi";
 import Formid from "./pages/Formid";
 import { AudioProvider } from "@/contexts/AudioContext";
-// import UpdateBanner from "./updatebanner";
+import UpdateBanner from "./updatebanner";
 
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -82,7 +82,7 @@ const AppContent = () => {
 
   return (
     <AppLoader>
-      {/* <UpdateBanner /> */}
+      <UpdateBanner />
       <AudioProvider>
         <MeditativeProvider>
 
