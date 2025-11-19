@@ -23,6 +23,7 @@ import { DeleteAccount } from "./pages/DeleteAccount";
 import Kalibrasi from "./pages/Kalibrasi";
 import Formid from "./pages/Formid";
 import FormAI from "./pages/FormAI";
+import Pricing from "./pages/Pricing";
 import { AudioProvider } from "@/contexts/AudioContext";
 import UpdateBanner from "./updatebanner";
 
@@ -83,7 +84,7 @@ const AppContent = () => {
 
   return (
     <AppLoader>
-      <UpdateBanner />
+      {/* <UpdateBanner /> */}
       <AudioProvider>
         <MeditativeProvider>
 
@@ -143,6 +144,10 @@ const AppContent = () => {
                 <Route
                   path="/formai"
                   element={<FormAI />}
+                />
+                <Route
+                  path="/pricing"
+                  element={<Pricing />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
