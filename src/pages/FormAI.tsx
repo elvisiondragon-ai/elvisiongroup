@@ -1,132 +1,104 @@
 import React, { useState } from 'react';
-import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonList, IonRadioGroup, IonListHeader, IonLabel, IonRadio, IonButton, IonItem } from '@ionic/react';
 
 const FormAI: React.FC = () => {
-  const [q1, setQ1] = useState<string | undefined>(undefined);
-  const [q2, setQ2] = useState<string | undefined>(undefined);
-  const [q3, setQ3] = useState<string | undefined>(undefined);
-  const [q4, setQ4] = useState<string | undefined>(undefined);
-  const [q5, setQ5] = useState<string | undefined>(undefined);
+  const [formData, setFormData] = useState({
+    q1: '',
+    q2: '',
+    q3: '',
+    q4: '',
+    q5: ''
+  });
+
+  const handleRadioChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = () => {
     // Here you would typically send the survey data to a backend
-    console.log({ q1, q2, q3, q4, q5 });
+    console.log('Survey Data:', formData);
     alert('Survey Submitted! Check console for data.');
   };
 
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>5-Question Smart Survey</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-padding">
-        <IonList>
-          <IonRadioGroup value={q1} onIonChange={e => setQ1(e.detail.value)}>
-            <IonListHeader>
-              <IonLabel>1. Apakah bisnis Anda sudah punya website yang aktif dan menghasilkan?</IonLabel>
-            </IonListHeader>
-            <IonItem>
-              <IonLabel>Sudah</IonLabel>
-              <IonRadio slot="start" value="Sudah" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Ada tapi tidak efektif</IonLabel>
-              <IonRadio slot="start" value="Ada tapi tidak efektif" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Belum</IonLabel>
-              <IonRadio slot="start" value="Belum" />
-            </IonItem>
-          </IonRadioGroup>
+    <div className="bg-background text-foreground font-exo p-4">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold text-primary mb-6 text-center">🎯 5-Question Smart Survey</h1>
+        
+        <div className="space-y-8">
+          {/* Question 1 */}
+          <div>
+            <h2 className="text-xl font-semibold text-card-foreground mb-4">1. Apakah bisnis Anda sudah punya website yang aktif dan menghasilkan?</h2>
+            <div className="space-y-3">
+              {['Sudah', 'Ada tapi tidak efektif', 'Belum'].map(option => (
+                <label key={option} className="flex items-center bg-card p-4 rounded-lg border border-border cursor-pointer hover:bg-muted">
+                  <input type="radio" name="q1" value={option} checked={formData.q1 === option} onChange={e => handleRadioChange('q1', e.target.value)} className="form-radio h-5 w-5 text-primary bg-card border-border focus:ring-primary" />
+                  <span className="ml-4 text-lg">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
-          <IonRadioGroup value={q2} onIonChange={e => setQ2(e.detail.value)}>
-            <IonListHeader>
-              <IonLabel>2. Apakah Anda membutuhkan sistem otomatis seperti auto-reply / AI untuk membantu chat dan operasional?</IonLabel>
-            </IonListHeader>
-            <IonItem>
-              <IonLabel>Sangat perlu</IonLabel>
-              <IonRadio slot="start" value="Sangat perlu" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Perlu</IonLabel>
-              <IonRadio slot="start" value="Perlu" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Tidak perlu</IonLabel>
-              <IonRadio slot="start" value="Tidak perlu" />
-            </IonItem>
-          </IonRadioGroup>
+          {/* Question 2 */}
+          <div>
+            <h2 className="text-xl font-semibold text-card-foreground mb-4">2. Apakah Anda membutuhkan sistem otomatis seperti auto-reply / AI untuk membantu chat dan operasional?</h2>
+            <div className="space-y-3">
+              {['Sangat perlu', 'Perlu', 'Tidak perlu'].map(option => (
+                <label key={option} className="flex items-center bg-card p-4 rounded-lg border border-border cursor-pointer hover:bg-muted">
+                  <input type="radio" name="q2" value={option} checked={formData.q2 === option} onChange={e => handleRadioChange('q2', e.target.value)} className="form-radio h-5 w-5 text-primary bg-card border-border focus:ring-primary" />
+                  <span className="ml-4 text-lg">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
-          <IonRadioGroup value={q3} onIonChange={e => setQ3(e.detail.value)}>
-            <IonListHeader>
-              <IonLabel>3. Apakah Anda memerlukan video profesional untuk iklan atau branding?</IonLabel>
-            </IonListHeader>
-            <IonItem>
-              <IonLabel>Ya</IonLabel>
-              <IonRadio slot="start" value="Ya" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Mungkin</IonLabel>
-              <IonRadio slot="start" value="Mungkin" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Tidak</IonLabel>
-              <IonRadio slot="start" value="Tidak" />
-            </IonItem>
-          </IonRadioGroup>
+          {/* Question 3 */}
+          <div>
+            <h2 className="text-xl font-semibold text-card-foreground mb-4">3. Apakah Anda memerlukan video profesional untuk iklan atau branding?</h2>
+            <div className="space-y-3">
+              {['Ya', 'Mungkin', 'Tidak'].map(option => (
+                <label key={option} className="flex items-center bg-card p-4 rounded-lg border border-border cursor-pointer hover:bg-muted">
+                  <input type="radio" name="q3" value={option} checked={formData.q3 === option} onChange={e => handleRadioChange('q3', e.target.value)} className="form-radio h-5 w-5 text-primary bg-card border-border focus:ring-primary" />
+                  <span className="ml-4 text-lg">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
-          <IonRadioGroup value={q4} onIonChange={e => setQ4(e.detail.value)}>
-            <IonListHeader>
-              <IonLabel>4. Prioritas utama Anda saat ini apa?</IonLabel>
-            </IonListHeader>
-            <IonItem>
-              <IonLabel>Website</IonLabel>
-              <IonRadio slot="start" value="Website" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Automasi/AI</IonLabel>
-              <IonRadio slot="start" value="Automasi/AI" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Video marketing</IonLabel>
-              <IonRadio slot="start" value="Video marketing" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Branding</IonLabel>
-              <IonRadio slot="start" value="Branding" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Kombinasi</IonLabel>
-              <IonRadio slot="start" value="Kombinasi" />
-            </IonItem>
-          </IonRadioGroup>
+          {/* Question 4 */}
+          <div>
+            <h2 className="text-xl font-semibold text-card-foreground mb-4">4. Prioritas utama Anda saat ini apa?</h2>
+            <div className="space-y-3">
+              {['Website', 'Automasi/AI', 'Video marketing', 'Branding', 'Kombinasi'].map(option => (
+                <label key={option} className="flex items-center bg-card p-4 rounded-lg border border-border cursor-pointer hover:bg-muted">
+                  <input type="radio" name="q4" value={option} checked={formData.q4 === option} onChange={e => handleRadioChange('q4', e.target.value)} className="form-radio h-5 w-5 text-primary bg-card border-border focus:ring-primary" />
+                  <span className="ml-4 text-lg">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
-          <IonRadioGroup value={q5} onIonChange={e => setQ5(e.detail.value)}>
-            <IonListHeader>
-              <IonLabel>5. Maukah anda mencoba DEMO Website dengan Chat otomatis AI sehingga bisa menghandle lebih dari ribuan pelanggan tanpa terganggu ?</IonLabel>
-            </IonListHeader>
-            <IonItem>
-              <IonLabel>Siap</IonLabel>
-              <IonRadio slot="start" value="Siap" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Siap setelah konsultasi</IonLabel>
-              <IonRadio slot="start" value="Siap setelah konsultasi" />
-            </IonItem>
-            <IonItem>
-              <IonLabel>Belum siap</IonLabel>
-              <IonRadio slot="start" value="Belum siap" />
-            </IonItem>
-          </IonRadioGroup>
+          {/* Question 5 */}
+          <div>
+            <h2 className="text-xl font-semibold text-card-foreground mb-4">5. Maukah anda mencoba DEMO Website dengan Chat otomatis AI sehingga bisa menghandle lebih dari ribuan pelanggan tanpa terganggu ?</h2>
+            <div className="space-y-3">
+              {['Siap', 'Siap setelah konsultasi', 'Belum siap'].map(option => (
+                <label key={option} className="flex items-center bg-card p-4 rounded-lg border border-border cursor-pointer hover:bg-muted">
+                  <input type="radio" name="q5" value={option} checked={formData.q5 === option} onChange={e => handleRadioChange('q5', e.target.value)} className="form-radio h-5 w-5 text-primary bg-card border-border focus:ring-primary" />
+                  <span className="ml-4 text-lg">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
 
-          <IonButton expand="block" onClick={handleSubmit} className="ion-margin-top">
-            Submit Survey
-          </IonButton>
-        </IonList>
-      </IonContent>
-    </IonPage>
+        <button
+          onClick={handleSubmit}
+          className="w-full mt-8 bg-primary text-primary-foreground font-bold py-4 px-6 rounded-lg hover:bg-primary-glow transition-all duration-300 glow-primary text-xl"
+        >
+          Submit Survey
+        </button>
+      </div>
+    </div>
   );
 };
 
