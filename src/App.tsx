@@ -22,6 +22,7 @@ import { OldMember } from "./pages/OldMember";
 import { DeleteAccount } from "./pages/DeleteAccount";
 import Kalibrasi from "./pages/Kalibrasi";
 import Formid from "./pages/Formid";
+import FormAI from "./pages/FormAI";
 import { AudioProvider } from "@/contexts/AudioContext";
 import UpdateBanner from "./updatebanner";
 
@@ -138,6 +139,10 @@ const AppContent = () => {
                 <Route
                   path="/formid"
                   element={<Formid />}
+                />
+                <Route
+                  path="/formai"
+                  element={<FormAI />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
