@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 // Load environment variables from .env file
 $env = parse_ini_file('.env');
 if (!$env) {
-    die('Error: Unable to load .env file');
+    sendResponse(['success' => false, 'error' => 'Error: Unable to load .env file'], 500);
 }
 
 $tripayApiKey = $env['TRIPAY_API_KEY'] ?? null;
@@ -34,7 +34,7 @@ $tripayMerchantCode = $env['TRIPAY_MERCHANT_CODE'] ?? null;
 
 // Validate that all required environment variables are set
 if (!$tripayApiKey || !$tripayPrivateKey || !$tripayMerchantCode) {
-    die('Error: Missing required environment variables in .env file');
+    sendResponse(['success' => false, 'error' => 'Error: Missing required environment variables in .env file'], 500);
 }
 
 // ====================================
@@ -52,26 +52,31 @@ function generateCallbackSignature($jsonString, $privateKey) {
 }
 
 // Get amount berdasarkan subscription type
-function getAmount($subscriptionType) {
+function getAmount($subscriptionType, $quantity = 1) {
+    logMessage('getAmount called with subscriptionType: ' . $subscriptionType . ' and quantity: ' . $quantity);
     $pricing = [
         '1_day' => 4000,
         '1_week' => 30000,
         '1_month' => 100000,
         '1_year' => 800000,
         // --- PERBAIKAN HARGA ---
-        // Harga disesuaikan dengan Payment.tsx
-        '10_credit' => 100000, // Sebelumnya 10000
-        '50_credit' => 450000, // Sebelumnya 45000
+        '10_credit' => 100000,
+        '50_credit' => 450000,
         // --- AKHIR PERBAIKAN ---
         // --- PERUBAHAN ---
-        '100_credit' => 1000000 // Diubah dari 0 menjadi 1.000.000
-        // --- AKHIR PERUBAHAN ---
+        '100_credit' => 1000000,
+        'drelf' => 600000 // Base price for drelf
     ];
+
+    if ($subscriptionType === 'drelf') {
+        return $pricing['drelf'] * $quantity;
+    }
+
     return isset($pricing[$subscriptionType]) ? $pricing[$subscriptionType] : null;
 }
 
 // Generate order items berdasarkan subscription
-function generateOrderItems($subscriptionType, $amount) {
+function generateOrderItems($subscriptionType, $amount, $quantity = 1) {
     $productNames = [
         '1_day' => 'Premium Subscription - 1 Day',
         '1_week' => 'Premium Subscription - 1 Week',
@@ -79,14 +84,19 @@ function generateOrderItems($subscriptionType, $amount) {
         '1_year' => 'Premium Subscription - 1 Year',
         '10_credit' => 'Photo Credit - 10 Credits',
         '50_credit' => 'Photo Credit - 50 Credits',
-        '100_credit' => 'Photo Credit - 100 Credits'
+        '100_credit' => 'Photo Credit - 100 Credits',
+        'drelf' => 'Drelf Product'
     ];
+
+    $itemQuantity = ($subscriptionType === 'drelf') ? $quantity : 1;
+    $pricePerItem = ($subscriptionType === 'drelf' && $quantity > 0) ? $amount / $quantity : $amount;
+
 
     return [[
         'sku' => strtoupper($subscriptionType),
         'name' => isset($productNames[$subscriptionType]) ? $productNames[$subscriptionType] : 'Premium Subscription',
-        'price' => $amount,
-        'quantity' => 1,
+        'price' => $pricePerItem,
+        'quantity' => $itemQuantity,
         'product_url' => 'https://elvisiongroup.com/premium',
         'image_url' => 'https://elvisiongroup.com/assets/premium-icon.jpg'
     ]];
@@ -173,39 +183,52 @@ if ($path === '/create-payment' && $requestMethod === 'POST') {
         logMessage('📦 Request body: ' . json_encode($input));
         
         // 1. VALIDASI INPUT dari Frontend
-        if (!$input || !isset($input['subscriptionType'], $input['paymentMethod'], $input['userName'], $input['userEmail'], $input['phoneNumber'])) {
-            sendResponse([
-                'success' => false,
-                'error' => 'Missing required fields: subscriptionType, paymentMethod, userName, userEmail, phoneNumber'
-            ], 400);
+        $baseRequiredFields = ['subscriptionType', 'paymentMethod', 'userName', 'userEmail', 'phoneNumber'];
+        foreach ($baseRequiredFields as $field) {
+            if (empty($input[$field])) {
+                sendResponse(['success' => false, 'error' => "Missing required field: {$field}"], 400);
+            }
         }
-        
+
         $subscriptionType = $input['subscriptionType'];
+        
+        // Conditional validation for 'drelf' product
+        if ($subscriptionType === 'drelf') {
+            if (empty($input['quantity']) || empty($input['amount']) || empty($input['merchant_ref'])) {
+                sendResponse(['success' => false, 'error' => 'Missing required fields for drelf: quantity, amount, merchant_ref'], 400);
+            }
+        }
+
         $paymentMethod = $input['paymentMethod'];
         $userName = $input['userName'];
         $userEmail = $input['userEmail'];
         $phoneNumber = $input['phoneNumber'];
-        $userId = $input['userId'] ?? null; // Assuming userId is passed for credit payments
+        $quantity = $input['quantity'] ?? 1; // Default to 1 if not provided (for non-drelf products)
+        $userId = $input['userId'] ?? null;
 
         logMessage('✅ Input validation passed');
 
-        // --- PERUBAHAN ---
-        // Seluruh blok 'if ($subscriptionType === '100_credit')' DIHAPUS
-        // agar 100_credit diproses sebagai pembayaran TriPay normal.
-        // --- AKHIR PERUBAHAN ---
-
         // 2. GENERATE DATA SISTEM
-        $amount = getAmount($subscriptionType);
+        $amount = 0;
+        // Jika produknya drelf, gunakan amount dari frontend. Jika tidak, hitung seperti biasa.
+        if ($subscriptionType === 'drelf') {
+            $amount = intval($input['amount']);
+            logMessage('✅ Using pre-calculated amount for drelf: ' . $amount);
+        } else {
+            $amount = getAmount($subscriptionType, $quantity);
+        }
+
         if (!$amount) {
             sendResponse([
                 'success' => false,
-                'error' => 'Invalid subscription type'
+                'error' => 'Invalid subscription type or amount'
             ], 400);
         }
         
         $merchantRef = 'EVG_' . (time() * 1000) . '_' . $subscriptionType;
         $expiredTime = intval(floor(time()) + (24 * 60 * 60)); // 24 jam
-        $orderItems = generateOrderItems($subscriptionType, $amount);
+        
+        $orderItems = generateOrderItems($subscriptionType, $amount, $quantity);
         
         logMessage('💰 Amount: ' . $amount);
         logMessage('📋 Merchant Ref: ' . $merchantRef);
@@ -216,6 +239,9 @@ if ($path === '/create-payment' && $requestMethod === 'POST') {
         logMessage('🔐 Signature generated: ' . $signature);
         
         // 4. PREPARE TRIPAY PAYLOAD
+        // Conditional callback URL based on product type
+        $callbackUrl = 'https://payment.elvisiongroup.com/urlcallback'; // Default for all products (VPS proxy)
+
         $tripayPayload = [
             'method' => $paymentMethod,
             'merchant_ref' => $merchantRef,
@@ -224,7 +250,8 @@ if ($path === '/create-payment' && $requestMethod === 'POST') {
             'customer_email' => $userEmail,
             'customer_phone' => $phoneNumber,
             'order_items' => $orderItems,
-            'callback_url' => 'https://payment.elvisiongroup.com/urlcallback',
+            // CRITICAL: Ensure all transactions point to the VPS first.
+            'callback_url' => $callbackUrl,
             'return_url' => 'https://payment.elvisiongroup.com/return',
             'expired_time' => $expiredTime,
             'signature' => $signature
@@ -406,17 +433,24 @@ if ($path === '/check-status' && $requestMethod === 'GET') {
 }
 
 // ====================================
-// ROUTES - TRIPAY CALLBACK (NO DATABASE WRITES) - IDENTICAL TO SERVER.JS
+// ROUTES - TRIPAY CALLBACK (NO DATABASE WRITES) - FIX FORWARDING SIGNATURE
 // ====================================
 
 if ($path === '/urlcallback' && $requestMethod === 'POST') {
     try {
-        logMessage('🎯 ===== TRIPAY CALLBACK RECEIVED =====');
-        logMessage('📦 Headers: ' . json_encode(getallheaders()));
-        logMessage('📦 Body: ' . json_encode($input));
+        logMessage('🎯 ===== TRIPAY CALLBACK RECEIVED (via VPS proxy) =====');
+        
+        // Get all headers for logging and checking signature
+        $allHeaders = getallheaders();
+        logMessage('📦 Headers (getallheaders): ' . json_encode($allHeaders));
         
         // 1. VALIDASI SIGNATURE TRIPAY
-        $receivedSignature = $_SERVER['HTTP_X_CALLBACK_SIGNATURE'] ?? '';
+        // CRITICAL FIX 1: Robustly check for the incoming signature header
+        $receivedSignature = $allHeaders['X-Callback-Signature'] 
+            ?? $allHeaders['x-callback-signature'] 
+            ?? $_SERVER['HTTP_X_CALLBACK_SIGNATURE'] 
+            ?? '';
+
         $jsonString = file_get_contents('php://input');
         $expectedSignature = generateCallbackSignature($jsonString, $tripayPrivateKey);
         
@@ -432,34 +466,19 @@ if ($path === '/urlcallback' && $requestMethod === 'POST') {
         }
         
         // 2. PROCESS CALLBACK BERDASARKAN STATUS
-        $status = $input['status'];
-        $reference = $input['reference'];
-        $merchantRef = $input['merchant_ref'];
-        $totalAmount = $input['total_amount'];
-        $paymentMethod = $input['payment_method'];
+        // Body is already loaded into $input at the top of the script
+        $status = $input['status'] ?? null;
+        $reference = $input['reference'] ?? null;
+        $merchantRef = $input['merchant_ref'] ?? null;
+        $totalAmount = $input['total_amount'] ?? null;
+        $paymentMethod = $input['payment_method'] ?? null;
         $paymentMethodCode = $input['payment_method_code'] ?? null;
         $paidAt = $input['paid_at'] ?? null;
         
-        logMessage('📋 Transaction Details:');
-        logMessage('🏷️  Status: ' . $status);
-        logMessage('📋 Reference (from TriPay): ' . $reference);
-        logMessage('🏪 Merchant Ref: ' . $merchantRef);
-        logMessage('💰 Amount: ' . $totalAmount);
-        logMessage('💳 Method: ' . $paymentMethod);
-        
         if ($status === 'PAID') {
             logMessage('🎉 ===== PAYMENT SUCCESSFUL =====');
-            logMessage('💰 Amount: Rp ' . number_format(intval($totalAmount), 0, ',', '.'));
-            logMessage('💳 Payment Method: ' . $paymentMethod);
-            logMessage('📅 Paid at: ' . ($paidAt ? date('Y-m-d H:i:s', $paidAt) : 'N/A'));
             
-            // 3. ✅ NO DATABASE OPERATIONS IN VPS - ONLY FORWARD TO EDGE FUNCTION
-            logMessage('💾 ===== DATABASE OPERATIONS =====');
-            logMessage('✅ Database operations delegated to Edge Functions');
-            logMessage('🎯 VPS handles only TriPay API integration');
-            logMessage('📋 Payment data available for Edge Function processing');
-            
-            // 4. TRIGGER SUPABASE EDGE FUNCTION FOR DATABASE OPERATIONS
+            // 3. TRIGGER SUPABASE EDGE FUNCTION FOR DATABASE OPERATIONS
             try {
                 logMessage('🚀 Triggering Supabase tripay-callback Edge Function...');
                 
@@ -476,17 +495,26 @@ if ($path === '/urlcallback' && $requestMethod === 'POST') {
                 
                 logMessage('📤 Edge Function payload: ' . json_encode($edgePayload));
                 
-                // ⚠️ UPDATE THIS URL TO YOUR ACTUAL SUPABASE PROJECT
+                // === FIX: FORWARD THE X-CALLBACK-SIGNATURE HEADER ===
+                $headersToForward = [
+                    'Content-Type: application/json',
+                    // This Authorization token must be the Service Role Key or a dedicated key for the Edge Function
+                    // NOTE: Use your actual Service Role Key here
+                    'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5scmdkaHBtc2l0dHV3aWlpbmRxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNTc4OTM2NCwiZXhwIjoyMDUxMzY1MzY0fQ.qYeOAFqiOHFqrjb7L6H8AJBrWhJHUGVPFevJVabGVFE',
+                    // CRITICAL FIX 2: Forward the required signature header!
+                    'X-Callback-Signature: ' . $receivedSignature 
+                ];
+                logMessage('✅ Forwarding Signature to Edge Function: ' . $receivedSignature);
+                // ====================================================
+
                 $curl = curl_init();
                 curl_setopt_array($curl, [
+                    // ⚠️ UPDATE THIS URL TO YOUR ACTUAL SUPABASE PROJECT
                     CURLOPT_URL => 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/tripay-callback',
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POST => true,
                     CURLOPT_POSTFIELDS => json_encode($edgePayload),
-                    CURLOPT_HTTPHEADER => [
-                        'Content-Type: application/json',
-                        'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5scmdkaHBtc2l0dHV3aWlpbmRxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNTc4OTM2NCwiZXhwIjoyMDUxMzY1MzY0fQ.qYeOAFqiOHFqrjb7L6H8AJBrWhJHUGVPFevJVabGVFE'
-                    ],
+                    CURLOPT_HTTPHEADER => $headersToForward, // Use the fixed headers
                     CURLOPT_TIMEOUT => 30
                 ]);
                 
@@ -504,19 +532,16 @@ if ($path === '/urlcallback' && $requestMethod === 'POST') {
                     logMessage('🚀 Edge Function response: ' . json_encode($edgeResult));
                 } catch (Exception $parseError) {
                     logMessage('❌ Edge Function JSON parse error: ' . $parseError->getMessage());
-                    logMessage('❌ Raw response was: ' . $responseText);
-                    logMessage('⚠️ Continuing anyway - callback acknowledged');
                 }
                 
                 if ($httpCode !== 200) {
-                    logMessage('❌ Edge Function failed but continuing...');
+                    logMessage('❌ Edge Function FAILED with status ' . $httpCode);
                 } else {
                     logMessage('✅ Edge Function processed successfully');
                 }
                 
             } catch (Exception $edgeError) {
-                logMessage('❌ Edge Function error: ' . $edgeError->getMessage());
-                logMessage('⚠️ Continuing anyway - callback acknowledged');
+                logMessage('❌ Edge Function connection error: ' . $edgeError->getMessage());
             }
             
             logMessage('🎉 ===== PAYMENT PROCESSING COMPLETE =====');
@@ -525,15 +550,15 @@ if ($path === '/urlcallback' && $requestMethod === 'POST') {
             logMessage('⚠️  Payment status: ' . $status . ' - No action needed');
         }
         
-        logMessage('✅ ===== CALLBACK PROCESSED SUCCESSFULLY =====');
+        logMessage('✅ ===== CALLBACK PROCESSED SUCCESSFULLY (Returning 200 to TriPay) =====');
+        // Always return 200 OK to TriPay if validation passed, regardless of Edge Function outcome (to stop retries)
         sendResponse(['success' => true, 'message' => 'Callback processed']);
         
     } catch (Exception $e) {
         logMessage('❌ ===== CALLBACK ERROR =====');
         logMessage('❌ Error: ' . $e->getMessage());
-        logMessage('❌ Stack: ' . $e->getTraceAsString());
-        logMessage('❌ ===== CALLBACK ERROR END =====');
         
+        // If there's a catastrophic error in PHP, return 500 to TriPay to signal a retry attempt is needed
         sendResponse(['success' => false, 'error' => 'Internal server error'], 500);
     }
 }
