@@ -24,12 +24,14 @@ export default function DrelfPaymentPage() {
   const userName = queryParams.get('userName') || '';
   const userEmail = queryParams.get('userEmail') || '';
   const phoneNumber = queryParams.get('phoneNumber') || '';
+  const address = queryParams.get('address') || ''; // New: Extract address from URL
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(initialPaymentMethod);
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
   const [showQrisModal, setShowQrisModal] = useState(false); // For QRIS video tutorial
+  const [userAddress, setUserAddress] = useState(address); // New: State for user address
 
   // Simulate available payment methods for display in elvisiongroup
   const paymentMethods = [
@@ -57,15 +59,25 @@ export default function DrelfPaymentPage() {
   };
 
   const handleCreatePayment = async () => {
+    // Input validation
+    if (!selectedPaymentMethod) {
+      toast({
+        title: "Error",
+        description: "Silakan pilih metode pembayaran.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!userName || !userEmail || !phoneNumber || !userAddress) { // Added userAddress to validation
+      toast({
+        title: "Data Tidak Lengkap",
+        description: "Mohon lengkapi nama lengkap, email, nomor telepon, dan alamat.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
-
-    // No authentication needed for this flow as per user's request for drelf
-    // We assume the tripay-create-payment function in elvisiongroup can handle non-authenticated requests
-    // Or, more likely, it will assume the elvisiongroup.com is an authenticated app.
-    // Given the context of the photo project, tripay-create-payment expected an access token.
-    // For now, we will assume this specific instance of tripay-create-payment does NOT require authentication,
-    // OR that elvisiongroup.com has its own anonymous auth mechanism.
-    // If not, a specific 'tripay-public-payment' function would be needed on elvisiongroup's Supabase.
 
     try {
       console.log('💳 Attempting payment creation for Drelf product:', productId);
@@ -76,6 +88,7 @@ export default function DrelfPaymentPage() {
           userName: userName,
           userEmail: userEmail,
           phoneNumber: phoneNumber,
+          address: userAddress, // Include address in the payload
           amount: price // Pass amount explicitly for elvisiongroup's backend to decide
         }
       });
@@ -408,6 +421,16 @@ export default function DrelfPaymentPage() {
             <Label>Nomor Telepon</Label>
             <Input value={phoneNumber} disabled className="bg-muted/50" />
           </div>
+          <div> {/* New: Address Input */}
+            <Label htmlFor="userAddress">Alamat Pengiriman</Label>
+            <Input
+              id="userAddress"
+              value={userAddress}
+              onChange={(e) => setUserAddress(e.target.value)}
+              placeholder="Masukkan alamat lengkap Anda"
+              required
+            />
+          </div>
         </Card>
 
         {/* Payment Method Selection */}
@@ -451,3 +474,4 @@ export default function DrelfPaymentPage() {
     </div>
   );
 }
+
