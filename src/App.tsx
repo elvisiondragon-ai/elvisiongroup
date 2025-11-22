@@ -24,6 +24,7 @@ import Kalibrasi from "./pages/Kalibrasi";
 import Formid from "./pages/Formid";
 import FormAI from "./pages/FormAI";
 import Pricing from "./pages/Pricing";
+import DrelfPaymentPage from "./pages/drelf"; // Import the new DrelfPaymentPage component
 import { AudioProvider } from "@/contexts/AudioContext";
 import UpdateBanner from "./updatebanner";
 
@@ -97,16 +98,16 @@ const AppContent = () => {
               v7_relativeSplatPath: true
             }}>
               <Routes>
-                <Route 
+                <Route
                                     path="/"
                                     element={loading ? null : <Index />}
-                                  />                <Route 
-                  path="/auth" 
-                  element={loading ? null : (user ? <Navigate to="/" replace /> : <Auth />)} 
+                                  />                <Route
+                  path="/auth"
+                  element={loading ? null : (user ? <Navigate to="/" replace /> : <Auth />)}
                 />
-                <Route 
-                  path="/signup" 
-                  element={loading ? null : (user ? <Navigate to="/" replace /> : <Signup />)} 
+                <Route
+                  path="/signup"
+                  element={loading ? null : (user ? <Navigate to="/" replace /> : <Signup />)}
                 />
 
                 <Route
@@ -121,12 +122,12 @@ const AppContent = () => {
                   path="/privacy-policy"
                   element={<PrivacyPolicy />}
                 />
-                <Route 
-                  path="/testi/arif" 
+                <Route
+                  path="/testi/arif"
                   element={<ArifTestimonial />}
                 />
-                <Route 
-                  path="/oldmember" 
+                <Route
+                  path="/oldmember"
                   element={<OldMember />}
                 />
                 <Route
@@ -148,6 +149,10 @@ const AppContent = () => {
                 <Route
                   path="/pricing"
                   element={<Pricing />}
+                />
+                <Route
+                  path="/drelf"
+                  element={<DrelfPaymentPage />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
