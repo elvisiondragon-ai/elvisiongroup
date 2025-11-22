@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/tripay-public-payment",
+      "destination": "https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/tripay-public-payment"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

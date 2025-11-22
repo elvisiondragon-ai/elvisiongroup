@@ -9,6 +9,13 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/tripay-public-payment': {
+        target: 'https://nlrgdhpmsittuwiiindq.supabase.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/tripay-public-payment/, '/functions/v1/tripay-public-payment'),
+      },
+    }
   },
   optimizeDeps: {
     exclude: ['workbox-window'],
