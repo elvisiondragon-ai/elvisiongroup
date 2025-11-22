@@ -5,12 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '@/components/ui/select'; // Import Select components
+import Adress from '@/components/adress';
+import drelfImage from '@/assets/drelf.png';
+import qrisBcaImage from '@/assets/qrisbca.jpeg';
 import { ArrowLeft, Copy, CreditCard, User, Mail, Phone, Home, Plus, Minus } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
+
+
 
 const WhatsAppButton = () => (
   <a
@@ -38,6 +44,11 @@ export default function DrelfPaymentPage() {
   const [userEmail, setUserEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [userAddress, setUserAddress] = useState('');
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [kota, setKota] = useState('');
+  const [kecamatan, setKecamatan] = useState('');
+  const [kodePos, setKodePos] = useState('');
+
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('QRIS');
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
@@ -48,6 +59,7 @@ export default function DrelfPaymentPage() {
   const totalAmount = price * quantity;
 
   const paymentMethods = [
+    { code: 'BCA_MANUAL', name: 'Manual Transfer BCA', description: '' },
     { code: 'QRIS', name: 'QRIS', description: 'Bayar ke Semua Bank, DANA, OVO, SHOPEEPAY' },
     { code: 'BCAVA', name: 'BCA Virtual Account', description: 'Transfer via BCA Virtual Account' },
     { code: 'PERMATAVA', name: 'Permata Virtual Account', description: 'Transfer via Permata Virtual Account' },
@@ -74,32 +86,59 @@ export default function DrelfPaymentPage() {
   };
 
   const handleCreatePayment = async () => {
-    if (!userName || !userEmail || !phoneNumber || !userAddress || !selectedPaymentMethod) {
+    if (!userName || !userEmail || !phoneNumber || !userAddress || !selectedProvince || !kota || !kecamatan || !kodePos || !selectedPaymentMethod) {
       toast({
         title: "Data Tidak Lengkap",
-        description: "Mohon lengkapi semua informasi: nama, email, telepon, dan alamat.",
+        description: "Mohon lengkapi semua informasi: nama, email, telepon, alamat, provinsi, kota, kecamatan, dan kode pos.",
         variant: "destructive",
       });
       return;
     }
 
+    const fullAddress = `${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}`;
+
     setLoading(true);
     try {
-      // As per new user instruction, send the client-calculated total amount directly.
       const { data, error } = await supabase.functions.invoke('tripay-public-payment', {
         body: {
-          subscriptionType: 'drelf', // Set subscriptionType to 'drelf'
+          subscriptionType: 'drelf',
           paymentMethod: selectedPaymentMethod,
           userName: userName,
           userEmail: userEmail,
           phoneNumber: phoneNumber,
-          address: userAddress,
-          amount: totalAmount, // Send the final calculated amount
-          quantity: quantity, // Add quantity to the request body
+          address: fullAddress,
+          province: selectedProvince,
+          kota: kota,
+          kecamatan: kecamatan,
+          kodePos: kodePos,
+          amount: totalAmount,
+          quantity: quantity,
         }
       });
 
-      if (error) throw error;
+      if (error || !data?.success) {
+        if (selectedPaymentMethod === 'BCA_MANUAL') {
+          setPaymentData({
+            paymentMethod: selectedPaymentMethod,
+            amount: totalAmount,
+            status: 'UNPAID',
+            tripay_reference: `MANUAL-${Date.now()}`, // Provide a dummy reference
+          });
+          setShowPaymentInstructions(true);
+          toast({
+            title: "Instruksi Pembayaran Manual",
+            description: "Silakan lanjutkan dengan transfer manual BCA.",
+          });
+          return;
+        } else {
+          toast({
+            title: "Error Membuat Pembayaran",
+            description: data?.error || error?.message || "Gagal membuat pembayaran. Silakan coba lagi.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
 
       if (data?.success) {
         setPaymentData(data);
@@ -108,20 +147,28 @@ export default function DrelfPaymentPage() {
           title: "Pembayaran Berhasil Dibuat",
           description: "Silakan selesaikan pembayaran.",
         });
+      }
+    } catch (error: any) {
+      console.error('Tripay payment error:', error);
+      if (selectedPaymentMethod === 'BCA_MANUAL') {
+        setPaymentData({
+          paymentMethod: selectedPaymentMethod,
+          amount: totalAmount,
+          status: 'UNPAID',
+          tripay_reference: `MANUAL-${Date.now()}`, // Provide a dummy reference
+        });
+        setShowPaymentInstructions(true);
+        toast({
+          title: "Instruksi Pembayaran Manual",
+          description: "Silakan lanjutkan dengan transfer manual BCA.",
+        });
       } else {
         toast({
-          title: "Error Membuat Pembayaran",
-          description: data?.error || "Gagal membuat pembayaran. Silakan coba lagi.",
+          title: "Error Kritis",
+          description: "Gagal memanggil fungsi pembayaran. Periksa konsol untuk detail.",
           variant: "destructive",
         });
       }
-    } catch (error) {
-      console.error('Tripay payment error:', error);
-      toast({
-        title: "Error Kritis",
-        description: "Gagal memanggil fungsi pembayaran. Periksa konsol untuk detail.",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -138,33 +185,22 @@ export default function DrelfPaymentPage() {
           if (payload.new?.status === 'PAID') {
             toast({
                 title: "🎉 Pembayaran Berhasil!",
-                description: "Terima kasih, pembayaran Anda telah kami terima. Silakan Refresh atau hubungi CS untuk konfirmasi.",
+                description: "Terima kasih, pembayaran Anda telah kami terima. Silakan hubungi CS untuk konfirmasi.",
                 duration: 0, // Don't auto-dismiss
-                action: (
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={() => {
-                        console.log('🔄 User clicked refresh after payment success');
-                        window.location.reload();
-                      }}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors w-full"
-                    >
-                      🔄 Refresh Halaman!
-                    </button>
-                    {(() => {
-                      const message = `Halo kak, saya sudah bayar untuk pesanan Drelf Collagen.\n\n` +
-                                      `Detail Pembayaran:\n` +
-                                      `- Nama: ${userName}\n` +
-                                      `- Email: ${userEmail}\n` +
-                                      `- Telepon: ${phoneNumber}\n` +
-                                      `- Alamat: ${userAddress}\n` +
-                                      `- Produk: ${productName} (${quantity} unit)\n` +
-                                      `- Total: ${formatCurrency(totalAmount)}\n` +
-                                      `- Metode: ${selectedPaymentMethod}\n` +
-                                      `- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}\n` +
-                                      `- Status: PAID\n` +
-                                      `${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}\n` : ''}` +
-                                      `${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}\n` : ''}` +
+                action: (() => {
+                      const message = `Halo kak, saya sudah bayar untuk pesanan Drelf Collagen.\\n\\n` +
+                                      `Detail Pembayaran:\\n` +
+                                      `- Nama: ${userName}\\n` +
+                                      `- Email: ${userEmail}\\n` +
+                                      `- Telepon: ${phoneNumber}\\n` +
+                                      `- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}\\n` +
+                                      `- Produk: ${productName} (${quantity} unit)\\n` +
+                                      `- Total: ${formatCurrency(totalAmount)}\\n` +
+                                      `- Metode: ${selectedPaymentMethod}\\n` +
+                                      `- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}\\n` +
+                                      `- Status: PAID\\n` +
+                                      `${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}\\n` : ''}` +
+                                      `${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}\\n` : ''}` +
                                       `Mohon konfirmasi pesanan saya. Terima kasih.`;
                       const encodedMessage = encodeURIComponent(message);
                       const whatsappHref = `https://wa.me/62895325633487?text=${encodedMessage}`;
@@ -176,11 +212,8 @@ export default function DrelfPaymentPage() {
                           </Button>
                         </a>
                       );
-                    })()}
-                  </div>
-                ),
+                    })(),
             });
-            setTimeout(() => navigate('/'), 5000); 
           }
         }
       ).subscribe();
@@ -188,7 +221,7 @@ export default function DrelfPaymentPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast, userName, userEmail, phoneNumber, userAddress, productName, quantity, totalAmount, selectedPaymentMethod]);
+  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast, userName, userEmail, phoneNumber, userAddress, selectedProvince, productName, quantity, totalAmount, selectedPaymentMethod]);
 
   if (showPaymentInstructions && paymentData) {
     return (
@@ -228,16 +261,76 @@ export default function DrelfPaymentPage() {
                           <div className="flex justify-between items-center">
                             <Label className="text-muted-foreground">Tripay Reference</Label>
                             <span className="font-medium">{paymentData.tripay_reference}</span>
-                          </div>              <div className="flex justify-between items-center">
-                <Label className="text-muted-foreground">Batas Pembayaran</Label>
-                <span className="font-medium">
-                  {new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
-                    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                  })}
-                </span>
-              </div>
+                          </div>              {paymentData.paymentMethod !== 'BCA_MANUAL' && (
+                <div className="flex justify-between items-center">
+                  <Label className="text-muted-foreground">Batas Pembayaran</Label>
+                  <span className="font-medium">
+                    {new Date(paymentData.expiredTime * 1000).toLocaleString('id-ID', {
+                      day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              )}
             </CardContent>
           </Card>
+
+          {paymentData.paymentMethod === 'BCA_MANUAL' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Transfer Manual BCA</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="text-muted-foreground">Nomor Rekening</Label>
+                  <div className="flex items-center justify-between bg-secondary p-3 rounded-md">
+                    <span className="font-mono text-lg">7751146578</span>
+                    <Button variant="ghost" size="icon" onClick={() => copyToClipboard('7751146578')}>
+                      <Copy className="w-5 h-5" />
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Atas Nama</Label>
+                  <div className="flex items-center justify-between bg-secondary p-3 rounded-md">
+                    <span className="font-medium">Delia Mutia</span>
+                    <Button variant="ghost" size="icon" onClick={() => copyToClipboard('Delia Mutia')}>
+                      <Copy className="w-5 h-5" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex justify-center">
+                  <img src={qrisBcaImage} alt="QRIS BCA" className="w-64 h-64 border rounded-lg" />
+                </div>
+                {paymentData.paymentMethod === 'BCA_MANUAL' && paymentData.status === 'UNPAID' && (
+                  <div className="my-12">
+                    <a
+                      href={`https://wa.me/62895325633487?text=${encodeURIComponent(`Halo kak, saya sudah melakukan transfer manual BCA untuk pesanan Drelf Collagen.<br/><br/>` +
+`Detail Pembayaran:<br/>` +
+`- Nama: ${userName}<br/>` +
+`- Email: ${userEmail}<br/>` +
+`- Telepon: ${phoneNumber}<br/>` +
+`- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}<br/>` +
+`- Produk: ${productName} (${quantity} unit)<br/>` +
+`- Total: ${formatCurrency(totalAmount)}<br/>` +
+`- Metode: Manual Transfer BCA<br/>` +
+`- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}<br/>` +
+`- Status: UNPAID (Menunggu Konfirmasi)<br/>` +
+`${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}<br/>` : ''}` +
+`${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}<br/>` : ''}` +
+`Mohon konfirmasi pesanan saya. Terima kasih.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full"
+                    >
+                      <Button className="w-full bg-green-500 hover:bg-green-600 text-white" size="lg">
+                        <FaWhatsapp className="mr-2" /> Hubungi CS jika sudah bayar
+                      </Button>
+                    </a>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {paymentData.payCode && (
             <Card>
@@ -285,7 +378,7 @@ export default function DrelfPaymentPage() {
                     <h3 className="font-semibold mb-2">{instructionGroup.title}</h3>
                     <ol className="list-decimal list-inside space-y-1">
                       {instructionGroup.steps.map((step: string, stepIndex: number) => (
-                        <li key={stepIndex} className="text-muted-foreground">{step}</li>
+                        <li key={stepIndex} className="text-muted-foreground"><span dangerouslySetInnerHTML={{ __html: step }} /></li>
                       ))}
                     </ol>
                   </div>
@@ -323,6 +416,9 @@ export default function DrelfPaymentPage() {
               <Label className="text-muted-foreground">Produk</Label>
               <span className="font-medium">{productName}</span>
             </div>
+            <div className="flex justify-center my-4">
+              <img src={drelfImage} alt="Drelf Product" className="w-48 h-48 object-contain" />
+            </div>
 
             <Separator/>
             
@@ -349,6 +445,10 @@ export default function DrelfPaymentPage() {
               <Label className="text-muted-foreground">Total Harga</Label>
               <span className="font-bold text-lg text-primary">{formatCurrency(totalAmount)}</span>
             </div>
+            <div className="flex justify-between items-center text-green-600 font-bold">
+              <Label className="text-green-600">Ongkos Kirim</Label>
+              <span>FREE ONGKIR</span>
+            </div>
           </CardContent>
         </Card>
 
@@ -368,10 +468,18 @@ export default function DrelfPaymentPage() {
               <Label htmlFor="phoneNumber"><Phone className="inline-block w-4 h-4 mr-2"/>Nomor Telepon</Label>
               <Input id="phoneNumber" type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="08123456789" required />
             </div>
-            <div>
-              <Label htmlFor="userAddress"><Home className="inline-block w-4 h-4 mr-2"/>Alamat Pengiriman</Label>
-              <Input id="userAddress" value={userAddress} onChange={(e) => setUserAddress(e.target.value)} placeholder="Jl. Pahlawan No. 123" required />
-            </div>
+            <Adress
+              selectedProvince={selectedProvince}
+              setSelectedProvince={setSelectedProvince}
+              userAddress={userAddress}
+              setUserAddress={setUserAddress}
+              kota={kota}
+              setKota={setKota}
+              kecamatan={kecamatan}
+              setKecamatan={setKecamatan}
+              kodePos={kodePos}
+              setKodePos={setKodePos}
+            />
           </CardContent>
         </Card>
 
