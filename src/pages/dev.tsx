@@ -32,11 +32,19 @@ export default function DevPaymentPage() {
   const { toast } = useToast();
   const whatsappLink = "https://wa.me/62895325633487";
 
-  const productId = 'dev_1.6m';
-  const productName = 'Dev';
-  const price = 1600000;
+  const baseProductName = 'Dev Service';
+  const variants = {
+    'UI Display': 1600000,
+    'Backend Integration': 3000000,
+    'Maintenance 6 Bulan': 10000000,
+  };
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantities, setQuantities] = useState({
+    'UI Display': 1,
+    'Backend Integration': 0,
+    'Maintenance 6 Bulan': 0,
+  });
+
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -46,9 +54,35 @@ export default function DevPaymentPage() {
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
 
-  const handleIncrement = () => setQuantity(prev => prev + 1);
-  const handleDecrement = () => setQuantity(prev => Math.max(1, prev - 1));
-  const totalAmount = price * quantity;
+  const handleQuantityChange = (variant, change) => {
+    setQuantities(prev => ({
+      ...prev,
+      [variant]: Math.max(0, prev[variant] + change)
+    }));
+  };
+
+  const totalAmount = Object.entries(quantities).reduce((acc, [variant, quantity]) => {
+    return acc + (variants[variant] * quantity);
+  }, 0);
+
+  const totalQuantity = Object.values(quantities).reduce((acc, quantity) => acc + quantity, 0);
+
+  const productName = Object.entries(quantities)
+    .filter(([, quantity]) => quantity > 0)
+    .map(([variant, quantity]) => `${baseProductName} - ${variant} (x${quantity})`)
+    .join(', ');
+
+  useEffect(() => {
+    if (totalAmount > 5000000) {
+      setSelectedPaymentMethod('BCA_MANUAL');
+      toast({
+        title: "Pemberitahuan",
+        description: "Diatas 5 Juta hanya manual Bca, atau silahkan hubungi CS",
+        variant: "destructive",
+      });
+    }
+  }, [totalAmount, toast]);
+
 
   const paymentMethods = [
     { code: 'BCA_MANUAL', name: 'Manual Transfer BCA', description: '' },
@@ -104,7 +138,7 @@ export default function DevPaymentPage() {
           kecamatan: null,
           kodePos: null,
           amount: totalAmount,
-          quantity: quantity,
+          quantity: totalQuantity,
           productName: productName,
         }
       });
@@ -378,7 +412,7 @@ export default function DevPaymentPage() {
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
               <Label className="text-muted-foreground">Produk</Label>
-              <span className="font-medium">{productName}</span>
+              <span className="font-medium">{baseProductName}</span>
             </div>
             <div className="flex justify-center my-4">
               <img src={devImage} alt="Dev Product" className="w-48 h-48 object-contain" />
@@ -386,17 +420,24 @@ export default function DevPaymentPage() {
 
             <Separator/>
             
-            <div className="flex justify-between items-center">
-              <Label htmlFor="quantity" className="text-muted-foreground">Kuantitas</Label>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleDecrement}>
-                    <Minus className="h-4 w-4" />
-                </Button>
-                <span className="font-bold text-lg w-10 text-center">{quantity}</span>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleIncrement}>
-                    <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+            <div className="space-y-4">
+              {Object.entries(variants).map(([variantName, variantPrice]) => (
+                <div key={variantName} className="flex justify-between items-center">
+                  <div>
+                    <Label htmlFor={`quantity-${variantName}`} className="text-muted-foreground">{variantName}</Label>
+                    <p className="text-xs text-muted-foreground">{formatCurrency(variantPrice)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(variantName, -1)}>
+                        <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="font-bold text-lg w-10 text-center">{quantities[variantName]}</span>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(variantName, 1)}>
+                        <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
 
             <Separator/>
@@ -435,11 +476,11 @@ export default function DevPaymentPage() {
         <Card>
             <CardHeader><CardTitle>3. Metode Pembayaran</CardTitle></CardHeader>
             <CardContent>
-            <RadioGroup value={selectedPaymentMethod} onValuechange={setSelectedPaymentMethod} className="space-y-3">
+            <RadioGroup value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod} className="space-y-3">
                 {paymentMethods.map((method) => (
                 <Label key={method.code} htmlFor={method.code} className={`flex flex-col p-4 rounded-lg border cursor-pointer transition-all ${selectedPaymentMethod === method.code ? 'border-primary shadow-lg' : 'border-border'}`}>
                     <div className="flex items-center space-x-3">
-                        <RadioGroupItem value={method.code} id={method.code} />
+                        <RadioGroupItem value={method.code} id={method.code} disabled={totalAmount > 5000000 && method.code !== 'BCA_MANUAL'} />
                         <div className="flex-1">
                             <span className="font-medium">{method.name}</span>
                             <p className="text-xs text-muted-foreground">{method.description}</p>

@@ -76,6 +76,18 @@ export default function JewelryPaymentPage() {
     .map(([variant, quantity]) => `${baseProductName} - ${variant} (x${quantity})`)
     .join(', ');
 
+  useEffect(() => {
+    if (totalAmount > 5000000) {
+      setSelectedPaymentMethod('BCA_MANUAL');
+      toast({
+        title: "Pemberitahuan",
+        description: "Diatas 5 Juta hanya manual Bca, atau silahkan hubungi CS",
+        variant: "destructive",
+      });
+    }
+  }, [totalAmount, toast]);
+
+
   const paymentMethods = [
     { code: 'BCA_MANUAL', name: 'Manual Transfer BCA', description: '' },
     { code: 'QRIS', name: 'QRIS', description: 'Bayar ke Semua Bank, DANA, OVO, SHOPEEPAY' },
@@ -509,7 +521,7 @@ export default function JewelryPaymentPage() {
                 {paymentMethods.map((method) => (
                 <Label key={method.code} htmlFor={method.code} className={`flex flex-col p-4 rounded-lg border cursor-pointer transition-all ${selectedPaymentMethod === method.code ? 'border-primary shadow-lg' : 'border-border'}`}>
                     <div className="flex items-center space-x-3">
-                        <RadioGroupItem value={method.code} id={method.code} />
+                        <RadioGroupItem value={method.code} id={method.code} disabled={totalAmount > 5000000 && method.code !== 'BCA_MANUAL'} />
                         <div className="flex-1">
                             <span className="font-medium">{method.name}</span>
                             <p className="text-xs text-muted-foreground">{method.description}</p>

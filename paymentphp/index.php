@@ -226,7 +226,7 @@ if ($path === '/create-payment' && $requestMethod === 'POST') {
             if (empty($input['quantity']) || empty($input['amount']) || empty($input['productName'])) {
                 sendResponse(['success' => false, 'error' => 'Missing required fields for physical product: quantity, amount, productName'], 400);
             }
-            $amount = intval($input['amount']);
+            $amount = $input['amount'];
             logMessage('✅ Using pre-calculated amount for physical product: ' . $amount);
         } else {
             $amount = getAmount($subscriptionType, $quantity);
