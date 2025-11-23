@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditProfile } from "@/components/EditProfile";
 import { NotificationSettings } from "@/components/NotificationSettings";
-import { ProUpgrade } from "@/components/ProUpgrade";
+import { Payment } from "@/pages/Payment";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 
 import { usePro } from "@/hooks/usePro";
@@ -839,16 +839,19 @@ export function Profile({ onNavigate }: ProfileProps) {
 
         <div className="p-6">
           {user ? (
-            <Button
-              variant="destructive"
-              onClick={handleLogout}
-              onTouchEnd={(e) => { e.preventDefault(); handleLogout(); }}
-              className="w-full transition-all duration-200 transform hover:scale-105 active:scale-95"
-              style={{ touchAction: 'manipulation' }}
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex items-center justify-center gap-4">
+              {proStatus.isPro && <ProBadge />}
+              <Button
+                variant="destructive"
+                onClick={handleLogout}
+                onTouchEnd={(e) => { e.preventDefault(); handleLogout(); }}
+                className="flex-grow transition-all duration-200 transform hover:scale-105 active:scale-95"
+                style={{ touchAction: 'manipulation' }}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           ) : (
             <Button
               variant="default"

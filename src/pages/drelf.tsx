@@ -15,7 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
-
+import { useAuth } from '@/contexts/AuthContext';
+import { usePro } from '@/hooks/usePro';
 
 
 const WhatsAppButton = () => (
@@ -33,7 +34,65 @@ const WhatsAppButton = () => (
 export default function DrelfPaymentPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signOut, cleanupSupabase } = useAuth();
+  const { proStatus } = usePro();
   const whatsappLink = "https://wa.me/62895325633487";
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
+
+  const handleLogout = async () => {
+    try {
+      localStorage.setItem('manual-logout-flag', 'true');
+      if (isIOS && isIOSStandalone) {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            await registration.unregister();
+            console.log('Service worker unregistered for iOS PWA logout');
+          }
+        }
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+          console.log('All caches cleared for iOS PWA logout');
+        }
+      }
+      await cleanupSupabase();
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error) {
+        console.error('Logout error:', error);
+        toast({
+          title: "Logout Error - Refreshing",
+          description: "Refreshing page to complete logout...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.replace('/auth');
+        }, 1000);
+        return;
+      }
+      toast({
+        title: "Berhasil Logout",
+        description: "Anda berhasil keluar dari akun.",
+      });
+      setTimeout(() => {
+        window.location.reload();
+        window.location.replace('/auth');
+      }, 1000);
+    } catch (error: any) {
+      console.error('Unexpected logout error:', error);
+      toast({
+        title: "Logout Error - Refreshing",
+        description: "Refreshing page to complete logout...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+  };
+
 
   const productId = 'drelf_collagen_1x_600k';
   const productName = 'Drelf Collagen';
@@ -54,9 +113,17 @@ export default function DrelfPaymentPage() {
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
 
+  useEffect(() => {
+    if (user) {
+      setUserName(user.user_metadata.full_name || '');
+      setUserEmail(user.email || '');
+    }
+  }, [user]);
+
+
   const handleIncrement = () => setQuantity(prev => prev + 1);
   const handleDecrement = () => setQuantity(prev => Math.max(1, prev - 1));
-  const totalAmount = price * quantity;
+  const totalAmount = proStatus.isPro ? Math.round(price * quantity * 0.7) : (price * quantity);
 
   useEffect(() => {
     if (totalAmount > 5000000) {
@@ -125,6 +192,7 @@ export default function DrelfPaymentPage() {
           amount: totalAmount,
           quantity: quantity,
           productName: productName,
+          userId: user?.id,
         }
       });
 
@@ -408,13 +476,20 @@ export default function DrelfPaymentPage() {
       <Toaster />
       <WhatsAppButton />
       <div className="p-6 pb-4">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
-            Checkout Drelf
-          </h1>
+        <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+                    <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
+                    Checkout Drelf
+                </h1>
+            </div>
+            {user ? (
+                <Button variant="outline" onClick={handleLogout}>Logout</Button>
+            ) : (
+                <Button variant="outline" onClick={() => navigate('/auth?redirect=/drelf')}>Login</Button>
+            )}
         </div>
       </div>
 
@@ -447,14 +522,29 @@ export default function DrelfPaymentPage() {
               </div>
             </div>
 
-            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 rounded-md text-center">
-                <p className="font-bold">Promo: Beli 3 Dikirim 4!</p>
+            <div className="text-center my-4">
+              <h3 className="text-lg font-semibold">Gabung Subscription dan dapatkan diskon 30% sepanjang tahun</h3>
+              <Button
+                onClick={() => navigate('/payment')}
+                className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black p-3 rounded-md text-center w-full h-auto mt-2"
+              >
+                <p className="font-bold whitespace-normal">
+                  {proStatus.isPro
+                    ? `Your Pro Plan until ${proStatus.expiresAt ? new Date(proStatus.expiresAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown'}`
+                    : 'eL Vision Subscription diskon 30-50% sepanjang tahun'}
+                </p>
+              </Button>
             </div>
 
             <Separator/>
             
             <div className="flex justify-between items-center">
               <Label className="text-muted-foreground">Total Harga</Label>
+              {proStatus.isPro && (
+                <span className="ml-2 px-2 py-1 bg-amber-400 text-black text-xs font-semibold rounded-full">
+                  DISC PRO MEMBER
+                </span>
+              )}
               <span className="font-bold text-lg text-primary">{formatCurrency(totalAmount)}</span>
             </div>
             <div className="flex justify-between items-center text-green-600 font-bold">

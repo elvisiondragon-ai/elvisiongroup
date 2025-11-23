@@ -30,6 +30,8 @@ import HungrylaterPaymentPage from "./pages/hungrylater";
 import ParfumPaymentPage from "./pages/parfum";
 import DevPaymentPage from "./pages/dev";
 import JewelryPaymentPage from "./pages/jewelry";
+import { Payment } from "./pages/Payment";
+import ProUpgradePage from "./pages/prostatus";
 import { AudioProvider } from "@/contexts/AudioContext";
 import UpdateBanner from "./updatebanner";
 
@@ -178,6 +180,14 @@ const AppContent = () => {
                 <Route
                   path="/jewelry"
                   element={<JewelryPaymentPage />}
+                />
+                <Route
+                  path="/payment"
+                  element={<Payment />}
+                />
+                <Route
+                  path="/prostatus"
+                  element={<ProUpgradePage />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

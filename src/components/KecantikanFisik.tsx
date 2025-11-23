@@ -329,6 +329,14 @@ export function KecantikanFisik({ onNavigate }: KecantikanFisikProps) {
             <Sparkles className="w-4 h-4 mr-2 flex-shrink-0" />
             <span className="truncate">Tenangkan diri anda di Verse of eL Vision</span>
           </Button>
+          <Button
+            onClick={() => window.open('https://app.drelf.id', '_blank')}
+            className="w-full bg-gradient-to-r from-teal-600 to-green-600 hover:from-teal-700 hover:to-green-700 text-white font-medium px-4 py-3 text-sm sm:text-base mt-2" // Added mt-2 for spacing and changed colors
+            size="lg"
+          >
+            <Flower className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span className="truncate">Dapatkan DRELF</span>
+          </Button>
           <p className="text-xs text-amber-300/80">
             Rasakan transformasi kecantikan dari dalam melalui praktik spiritual yang terbukti
           </p>

@@ -17,8 +17,12 @@ import { BloodCirculation } from "@/components/BloodCirculation";
 import { Finance } from "@/components/Finance";
 import { KecantikanFisik } from "@/components/KecantikanFisik";
 import { TrueDiet } from "@/components/TrueDiet";
-import { Lifestyle } from "@/components/Lifestyle";
+
+import { Perhiasan } from "@/components/Perhiasan";
+import { Aroma } from "@/components/Aroma";
 import { Pasangan } from "@/components/Pasangan";
+
+
 import { supabase } from "@/integrations/supabase/client";
 import { useMeditative } from "@/contexts/MeditativeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -245,9 +249,31 @@ const Index = () => {
             </div>
           </div>
         );
-      case "lifestyle":
-        console.log("Rendering Lifestyle component");
-        return <Lifestyle onNavigate={setActiveTab} />;
+      case "perhiasan":
+        console.log("Rendering Perhiasan component");
+        return (
+          <div className="min-h-screen bg-background pb-20">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
+                Perhiasan
+              </h1>
+              <Perhiasan onNavigate={setActiveTab} />
+            </div>
+          </div>
+        );
+      case "aroma":
+        console.log("Rendering Aroma component");
+        return (
+          <div className="min-h-screen bg-background pb-20">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
+                Aroma
+              </h1>
+              <Aroma onNavigate={setActiveTab} />
+            </div>
+          </div>
+        );
+
       case "pasangan":
         console.log("Rendering Pasangan component");
         return (

@@ -704,9 +704,8 @@ export function Payment({ onNavigate }: PaymentProps) {
                   placeholder={userDataLoading ? "Memuat email..." : "email@contoh.com"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-muted/50 cursor-not-allowed"
+                  className="pl-10"
                   required
-                  disabled
                 />
               </div>
               

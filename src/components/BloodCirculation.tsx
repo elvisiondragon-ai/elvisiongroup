@@ -198,6 +198,14 @@ export function BloodCirculation({ onNavigate }: BloodCirculationProps) {
             <Activity className="w-4 h-4 mr-2 flex-shrink-0" />
             <span className="truncate">Mulai Catat Aktivitas Elite Habit</span>
           </Button>
+          <Button
+            onClick={() => window.open('https://app.fitfactorherbal.com', '_blank')}
+            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium px-4 py-3 text-sm sm:text-base mt-2" // Added mt-2 for spacing
+            size="lg"
+          >
+            <Zap className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span className="truncate">Beli FitFactor</span>
+          </Button>
           <p className="text-xs text-orange-300/80">
             Dalam Elite Habit, Anda dapat mencatat aktivitas dan perasaan setelah melakukan aktivitas untuk optimasi peredaran darah
           </p>

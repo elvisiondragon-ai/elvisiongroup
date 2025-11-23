@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -16,10 +17,13 @@ interface AuthProps {
 }
 
 export function Auth({ onLogin }: AuthProps) {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
+
+  const redirectPath = new URLSearchParams(window.location.search).get('redirect') || '/';
 
 
   // Login form state
@@ -202,7 +206,7 @@ export function Auth({ onLogin }: AuthProps) {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}${redirectPath}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'select_account',
@@ -351,8 +355,8 @@ export function Auth({ onLogin }: AuthProps) {
         // Set login success flag for post-reload toast
         localStorage.setItem('login-success-pending', 'true');
         
-        // Force refresh after login
-        window.location.reload();
+        // Navigate to the redirect path
+        navigate(redirectPath);
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -471,6 +475,10 @@ export function Auth({ onLogin }: AuthProps) {
           // Continue even if email fails
         }
 
+        toast({
+          title: "Signup Successful!",
+          description: "Welcome to eL Vision. You are now being logged in.",
+        });
         onLogin(data.user);
       }
     } catch (error: any) {

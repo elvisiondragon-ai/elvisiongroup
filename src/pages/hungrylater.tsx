@@ -15,6 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePro } from '@/hooks/usePro';
 
 const WhatsAppButton = () => (
   <a
@@ -31,6 +33,8 @@ const WhatsAppButton = () => (
 export default function HungrylaterPaymentPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signOut, cleanupSupabase } = useAuth();
+  const { proStatus } = usePro();
   const whatsappLink = "https://wa.me/62895325633487";
 
   const productId = 'hungrylater_600k';
@@ -52,9 +56,23 @@ export default function HungrylaterPaymentPage() {
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
 
+  useEffect(() => {
+    if (user) {
+      setUserName(user.user_metadata.full_name || '');
+      setUserEmail(user.email || '');
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      setUserName(user.user_metadata.full_name || '');
+      setUserEmail(user.email || '');
+    }
+  }, [user]);
+
   const handleIncrement = () => setQuantity(prev => prev + 1);
   const handleDecrement = () => setQuantity(prev => Math.max(1, prev - 1));
-  const totalAmount = price * quantity;
+  const totalAmount = proStatus.isPro ? Math.round(price * quantity * 0.7) : (price * quantity);
 
   useEffect(() => {
     if (totalAmount > 5000000) {
@@ -123,6 +141,9 @@ export default function HungrylaterPaymentPage() {
           amount: totalAmount,
           quantity: quantity,
           productName: productName,
+          userId: user?.id,
+          userId: user?.id,
+          userId: user?.id,
         }
       });
 
@@ -406,17 +427,37 @@ export default function HungrylaterPaymentPage() {
       <Toaster />
       <WhatsAppButton />
       <div className="p-6 pb-4">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
-            Checkout Hungrylater
-          </h1>
+        <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+                    <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
+                    Checkout Hungrylater
+                </h1>
+            </div>
+            {user ? (
+                <Button variant="outline" onClick={signOut}>Logout</Button>
+            ) : (
+                <Button variant="outline" onClick={() => navigate('/auth?redirect=/hungrylater')}>Login</Button>
+            )}
         </div>
       </div>
 
       <div className="px-6 space-y-6">
+        <div className="text-center my-4">
+          <h3 className="text-lg font-semibold">Gabung Subscription dan dapatkan diskon 30% sepanjang tahun</h3>
+          <Button
+            onClick={() => navigate('/payment')}
+            className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black p-3 rounded-md text-center w-full h-auto mt-2"
+          >
+            <p className="font-bold whitespace-normal">
+              {proStatus.isPro
+                ? `Your Pro Plan until ${proStatus.expiresAt ? new Date(proStatus.expiresAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown'}`
+                : 'eL Vision Subscription diskon 30-50% sepanjang tahun'}
+            </p>
+          </Button>
+        </div>
         <Card>
           <CardHeader>
             <CardTitle>1. Rangkuman Pesanan</CardTitle>
@@ -449,6 +490,11 @@ export default function HungrylaterPaymentPage() {
             
             <div className="flex justify-between items-center">
               <Label className="text-muted-foreground">Total Harga</Label>
+              {proStatus.isPro && (
+                <span className="ml-2 px-2 py-1 bg-amber-400 text-black text-xs font-semibold rounded-full">
+                  DISC PRO MEMBER
+                </span>
+              )}
               <span className="font-bold text-lg text-primary">{formatCurrency(totalAmount)}</span>
             </div>
             <div className="flex justify-between items-center text-green-600 font-bold">
