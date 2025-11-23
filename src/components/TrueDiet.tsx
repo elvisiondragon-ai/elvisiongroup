@@ -273,7 +273,7 @@ export function TrueDiet({ onNavigate }: TrueDietProps) {
             <span className="truncate">Praktik Verse of eL Vision untuk Stress Management</span>
           </Button>
           <Button
-            onClick={() => window.open('https://app.hungrylater.com', '_blank')}
+            onClick={() => window.open('https://hungrylater.com', '_blank')}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium px-4 py-3 text-sm sm:text-base mt-2" // Added mt-2 for spacing and changed colors
             size="lg"
           >

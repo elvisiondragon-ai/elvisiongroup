@@ -199,7 +199,7 @@ export function BloodCirculation({ onNavigate }: BloodCirculationProps) {
             <span className="truncate">Mulai Catat Aktivitas Elite Habit</span>
           </Button>
           <Button
-            onClick={() => window.open('https://app.fitfactorherbal.com', '_blank')}
+            onClick={() => window.open('https://fitfactorherbal.com', '_blank')}
             className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium px-4 py-3 text-sm sm:text-base mt-2" // Added mt-2 for spacing
             size="lg"
           >

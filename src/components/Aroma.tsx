@@ -133,7 +133,7 @@ export const Aroma = ({ onNavigate }: AromaProps) => {
                 Dengarkan Verse of eL Vision
               </Button>
               <Button
-                onClick={() => window.open('https://app.elroyaleparfum.com', '_blank')}
+                onClick={() => window.open('https://elroyaleparfum.com', '_blank')}
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white mt-2" // Added mt-2 and new colors
               >
                 <Sparkles className="w-4 h-4 mr-2 flex-shrink-0" />
