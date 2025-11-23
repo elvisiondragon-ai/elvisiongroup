@@ -25,6 +25,11 @@ import Formid from "./pages/Formid";
 import FormAI from "./pages/FormAI";
 import Pricing from "./pages/Pricing";
 import DrelfPaymentPage from "./pages/drelf"; // Import the new DrelfPaymentPage component
+import FitfactorPaymentPage from "./pages/fitfactor";
+import HungrylaterPaymentPage from "./pages/hungrylater";
+import ParfumPaymentPage from "./pages/parfum";
+import DevPaymentPage from "./pages/dev";
+import JewelryPaymentPage from "./pages/jewelry";
 import { AudioProvider } from "@/contexts/AudioContext";
 import UpdateBanner from "./updatebanner";
 
@@ -153,6 +158,26 @@ const AppContent = () => {
                 <Route
                   path="/drelf"
                   element={<DrelfPaymentPage />}
+                />
+                <Route
+                  path="/fitfactor"
+                  element={<FitfactorPaymentPage />}
+                />
+                <Route
+                  path="/hungrylater"
+                  element={<HungrylaterPaymentPage />}
+                />
+                <Route
+                  path="/parfum"
+                  element={<ParfumPaymentPage />}
+                />
+                <Route
+                  path="/dev"
+                  element={<DevPaymentPage />}
+                />
+                <Route
+                  path="/jewelry"
+                  element={<JewelryPaymentPage />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

@@ -76,7 +76,7 @@ function getAmount($subscriptionType, $quantity = 1) {
 }
 
 // Generate order items berdasarkan subscription
-function generateOrderItems($subscriptionType, $amount, $quantity = 1) {
+function generateOrderItems($subscriptionType, $amount, $quantity = 1, $productNameFromRequest = null) {
     $productNames = [
         '1_day' => 'Premium Subscription - 1 Day',
         '1_week' => 'Premium Subscription - 1 Week',
@@ -85,16 +85,25 @@ function generateOrderItems($subscriptionType, $amount, $quantity = 1) {
         '10_credit' => 'Photo Credit - 10 Credits',
         '50_credit' => 'Photo Credit - 50 Credits',
         '100_credit' => 'Photo Credit - 100 Credits',
-        'drelf' => 'Drelf Product'
+        'drelf' => 'Drelf Product',
+        'fitfactor' => 'Fitfactor',
+        'hungrylater' => 'Hungrylater',
+        'parfum' => 'Parfum',
+        'dev' => 'Dev',
+        'jewelry' => 'Jewelry',
     ];
 
-    $itemQuantity = ($subscriptionType === 'drelf') ? $quantity : 1;
-    $pricePerItem = ($subscriptionType === 'drelf' && $quantity > 0) ? $amount / $quantity : $amount;
+    $name = $productNameFromRequest ?: ($productNames[$subscriptionType] ?? 'Premium Subscription');
 
+        $physicalProducts = ['drelf', 'fitfactor', 'hungrylater', 'parfum', 'dev', 'jewelry'];
+    $isPhysicalProduct = in_array($subscriptionType, $physicalProducts);
+
+    $itemQuantity = $isPhysicalProduct ? $quantity : 1;
+    $pricePerItem = ($isPhysicalProduct && $quantity > 0) ? $amount / $quantity : $amount;
 
     return [[
         'sku' => strtoupper($subscriptionType),
-        'name' => isset($productNames[$subscriptionType]) ? $productNames[$subscriptionType] : 'Premium Subscription',
+        'name' => $name,
         'price' => $pricePerItem,
         'quantity' => $itemQuantity,
         'product_url' => 'https://elvisiongroup.com/premium',
@@ -204,6 +213,7 @@ if ($path === '/create-payment' && $requestMethod === 'POST') {
         $userEmail = $input['userEmail'];
         $phoneNumber = $input['phoneNumber'];
         $quantity = $input['quantity'] ?? 1; // Default to 1 if not provided (for non-drelf products)
+        $productName = $input['productName'] ?? null;
         $userId = $input['userId'] ?? null;
 
         logMessage('✅ Input validation passed');
@@ -211,9 +221,13 @@ if ($path === '/create-payment' && $requestMethod === 'POST') {
         // 2. GENERATE DATA SISTEM
         $amount = 0;
         // Jika produknya drelf, gunakan amount dari frontend. Jika tidak, hitung seperti biasa.
-        if ($subscriptionType === 'drelf') {
+            $physicalProducts = ['drelf', 'fitfactor', 'hungrylater', 'parfum', 'dev', 'jewelry'];
+        if (in_array($subscriptionType, $physicalProducts)) {
+            if (empty($input['quantity']) || empty($input['amount']) || empty($input['productName'])) {
+                sendResponse(['success' => false, 'error' => 'Missing required fields for physical product: quantity, amount, productName'], 400);
+            }
             $amount = intval($input['amount']);
-            logMessage('✅ Using pre-calculated amount for drelf: ' . $amount);
+            logMessage('✅ Using pre-calculated amount for physical product: ' . $amount);
         } else {
             $amount = getAmount($subscriptionType, $quantity);
         }
@@ -228,7 +242,7 @@ if ($path === '/create-payment' && $requestMethod === 'POST') {
         $merchantRef = 'EVG_' . (time() * 1000) . '_' . $subscriptionType;
         $expiredTime = intval(floor(time()) + (24 * 60 * 60)); // 24 jam
         
-        $orderItems = generateOrderItems($subscriptionType, $amount, $quantity);
+        $orderItems = generateOrderItems($subscriptionType, $amount, $quantity, $productName);
         
         logMessage('💰 Amount: ' . $amount);
         logMessage('📋 Merchant Ref: ' . $merchantRef);

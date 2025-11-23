@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '@/components/ui/select'; // Import Select components
 import Adress from '@/components/adress';
-import drelfImage from '@/assets/drelf.png';
+import hungrylaterImage from '@/assets/hungry.jpg';
 import qrisBcaImage from '@/assets/qrisbca.jpeg';
 import { ArrowLeft, Copy, CreditCard, User, Mail, Phone, Home, Plus, Minus } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -15,8 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
-
-
 
 const WhatsAppButton = () => (
   <a
@@ -30,13 +28,13 @@ const WhatsAppButton = () => (
   </a>
 );
 
-export default function DrelfPaymentPage() {
+export default function HungrylaterPaymentPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const whatsappLink = "https://wa.me/62895325633487";
 
-  const productId = 'drelf_collagen_1x_600k';
-  const productName = 'Drelf Collagen';
+  const productId = 'hungrylater_600k';
+  const productName = 'Hungrylater';
   const price = 600000;
 
   const [quantity, setQuantity] = useState(1);
@@ -101,7 +99,7 @@ export default function DrelfPaymentPage() {
     try {
       const { data, error } = await supabase.functions.invoke('tripay-public-payment', {
         body: {
-          subscriptionType: 'drelf',
+          subscriptionType: 'hungrylater',
           paymentMethod: selectedPaymentMethod,
           userName: userName,
           userEmail: userEmail,
@@ -180,28 +178,28 @@ export default function DrelfPaymentPage() {
     
     const tableName = 'global_product';
     const channel = supabase
-      .channel(`payment-status-drelf-${paymentData.tripay_reference}`)
+      .channel(`payment-status-hungrylater-${paymentData.tripay_reference}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter: `tripay_reference=eq.${paymentData.tripay_reference}`},
         (payload) => {
           if (payload.new?.status === 'PAID') {
             toast({
                 title: "🎉 Pembayaran Berhasil!",
                 description: "Terima kasih, pembayaran Anda telah kami terima. Silakan hubungi CS untuk konfirmasi.",
-                duration: 0, // Don't auto-dismiss
+                duration: 0, 
                 action: (() => {
-                      const message = `Halo kak, saya sudah bayar untuk pesanan Drelf Collagen.\\n\\n` +
-                                      `Detail Pembayaran:\\n` +
-                                      `- Nama: ${userName}\\n` +
-                                      `- Email: ${userEmail}\\n` +
-                                      `- Telepon: ${phoneNumber}\\n` +
-                                      `- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}\\n` +
-                                      `- Produk: ${productName} (${quantity} unit)\\n` +
-                                      `- Total: ${formatCurrency(totalAmount)}\\n` +
-                                      `- Metode: ${selectedPaymentMethod}\\n` +
-                                      `- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}\\n` +
-                                      `- Status: PAID\\n` +
-                                      `${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}\\n` : ''}` +
-                                      `${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}\\n` : ''}` +
+                      const message = `Halo kak, saya sudah bayar untuk pesanan Hungrylater.\n\n` + 
+                                      `Detail Pembayaran:\n` + 
+                                      `- Nama: ${userName}\n` + 
+                                      `- Email: ${userEmail}\n` + 
+                                      `- Telepon: ${phoneNumber}\n` + 
+                                      `- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}\n` + 
+                                      `- Produk: ${productName} (${quantity} unit)\n` + 
+                                      `- Total: ${formatCurrency(totalAmount)}\n` + 
+                                      `- Metode: ${selectedPaymentMethod}\n` + 
+                                      `- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}\n` + 
+                                      `- Status: PAID\n` + 
+                                      `${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}\n` : ''}` + 
+                                      `${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}\n` : ''}` + 
                                       `Mohon konfirmasi pesanan saya. Terima kasih.`;
                       const encodedMessage = encodeURIComponent(message);
                       const whatsappHref = `https://wa.me/62895325633487?text=${encodedMessage}`;
@@ -305,19 +303,19 @@ export default function DrelfPaymentPage() {
                 {paymentData.paymentMethod === 'BCA_MANUAL' && paymentData.status === 'UNPAID' && (
                   <div className="my-12">
                     <a
-                      href={`https://wa.me/62895325633487?text=${encodeURIComponent(`Halo kak, saya sudah melakukan transfer manual BCA untuk pesanan Drelf Collagen.<br/><br/>` +
-`Detail Pembayaran:<br/>` +
-`- Nama: ${userName}<br/>` +
-`- Email: ${userEmail}<br/>` +
-`- Telepon: ${phoneNumber}<br/>` +
-`- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}<br/>` +
-`- Produk: ${productName} (${quantity} unit)<br/>` +
-`- Total: ${formatCurrency(totalAmount)}<br/>` +
-`- Metode: Manual Transfer BCA<br/>` +
-`- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}<br/>` +
-`- Status: UNPAID (Menunggu Konfirmasi)<br/>` +
-`${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}<br/>` : ''}` +
-`${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}<br/>` : ''}` +
+                      href={`https://wa.me/62895325633487?text=${encodeURIComponent(`Halo kak, saya sudah melakukan transfer manual BCA untuk pesanan Hungrylater.<br/><br/>` + 
+`Detail Pembayaran:<br/>` + 
+`- Nama: ${userName}<br/>` + 
+`- Email: ${userEmail}<br/>` + 
+`- Telepon: ${phoneNumber}<br/>` + 
+`- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}<br/>` + 
+`- Produk: ${productName} (${quantity} unit)<br/>` + 
+`- Total: ${formatCurrency(totalAmount)}<br/>` + 
+`- Metode: Manual Transfer BCA<br/>` + 
+`- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}<br/>` + 
+`- Status: UNPAID (Menunggu Konfirmasi)<br/>` + 
+`${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}<br/>` : ''}` + 
+`${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}<br/>` : ''}` + 
 `Mohon konfirmasi pesanan saya. Terima kasih.`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -402,7 +400,7 @@ export default function DrelfPaymentPage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
-            Checkout Drelf
+            Checkout Hungrylater
           </h1>
         </div>
       </div>
@@ -418,7 +416,7 @@ export default function DrelfPaymentPage() {
               <span className="font-medium">{productName}</span>
             </div>
             <div className="flex justify-center my-4">
-              <img src={drelfImage} alt="Drelf Product" className="w-48 h-48 object-contain" />
+              <img src={hungrylaterImage} alt="Hungrylater Product" className="w-48 h-48 object-contain" />
             </div>
 
             <Separator/>
@@ -434,10 +432,6 @@ export default function DrelfPaymentPage() {
                     <Plus className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-
-            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 rounded-md text-center">
-                <p className="font-bold">Promo: Beli 3 Dikirim 4!</p>
             </div>
 
             <Separator/>

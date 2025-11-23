@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '@/components/ui/select'; // Import Select components
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '@/components/ui/select';
 import Adress from '@/components/adress';
-import drelfImage from '@/assets/drelf.png';
+import parfumImage from '@/assets/parfum.jpg';
 import qrisBcaImage from '@/assets/qrisbca.jpeg';
 import { ArrowLeft, Copy, CreditCard, User, Mail, Phone, Home, Plus, Minus } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -15,8 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
-
-
 
 const WhatsAppButton = () => (
   <a
@@ -30,16 +28,22 @@ const WhatsAppButton = () => (
   </a>
 );
 
-export default function DrelfPaymentPage() {
+export default function ParfumPaymentPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const whatsappLink = "https://wa.me/62895325633487";
 
-  const productId = 'drelf_collagen_1x_600k';
-  const productName = 'Drelf Collagen';
-  const price = 600000;
+  const baseProductName = 'Parfum';
+  const variants = {
+    'eL Royale Phero': 600000,
+    'eL Royale Egoiste': 600000,
+  };
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantities, setQuantities] = useState({
+    'eL Royale Phero': 1,
+    'eL Royale Egoiste': 0,
+  });
+
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -54,9 +58,23 @@ export default function DrelfPaymentPage() {
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
 
-  const handleIncrement = () => setQuantity(prev => prev + 1);
-  const handleDecrement = () => setQuantity(prev => Math.max(1, prev - 1));
-  const totalAmount = price * quantity;
+  const handleQuantityChange = (variant, change) => {
+    setQuantities(prev => ({
+      ...prev,
+      [variant]: Math.max(0, prev[variant] + change)
+    }));
+  };
+
+  const totalAmount = Object.entries(quantities).reduce((acc, [variant, quantity]) => {
+    return acc + (variants[variant] * quantity);
+  }, 0);
+
+  const totalQuantity = Object.values(quantities).reduce((acc, quantity) => acc + quantity, 0);
+
+  const productName = Object.entries(quantities)
+    .filter(([, quantity]) => quantity > 0)
+    .map(([variant, quantity]) => `${baseProductName} - ${variant} (x${quantity})`)
+    .join(', ');
 
   const paymentMethods = [
     { code: 'BCA_MANUAL', name: 'Manual Transfer BCA', description: '' },
@@ -101,7 +119,7 @@ export default function DrelfPaymentPage() {
     try {
       const { data, error } = await supabase.functions.invoke('tripay-public-payment', {
         body: {
-          subscriptionType: 'drelf',
+          subscriptionType: 'parfum',
           paymentMethod: selectedPaymentMethod,
           userName: userName,
           userEmail: userEmail,
@@ -112,8 +130,8 @@ export default function DrelfPaymentPage() {
           kecamatan: kecamatan,
           kodePos: kodePos,
           amount: totalAmount,
-          quantity: quantity,
-          productName: productName,
+          quantity: totalQuantity,
+          productName: productName // Send full product name with variant
         }
       });
 
@@ -180,28 +198,28 @@ export default function DrelfPaymentPage() {
     
     const tableName = 'global_product';
     const channel = supabase
-      .channel(`payment-status-drelf-${paymentData.tripay_reference}`)
+      .channel(`payment-status-parfum-${paymentData.tripay_reference}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter: `tripay_reference=eq.${paymentData.tripay_reference}`},
         (payload) => {
           if (payload.new?.status === 'PAID') {
             toast({
                 title: "🎉 Pembayaran Berhasil!",
                 description: "Terima kasih, pembayaran Anda telah kami terima. Silakan hubungi CS untuk konfirmasi.",
-                duration: 0, // Don't auto-dismiss
+                duration: 0, 
                 action: (() => {
-                      const message = `Halo kak, saya sudah bayar untuk pesanan Drelf Collagen.\\n\\n` +
-                                      `Detail Pembayaran:\\n` +
-                                      `- Nama: ${userName}\\n` +
-                                      `- Email: ${userEmail}\\n` +
-                                      `- Telepon: ${phoneNumber}\\n` +
-                                      `- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}\\n` +
-                                      `- Produk: ${productName} (${quantity} unit)\\n` +
-                                      `- Total: ${formatCurrency(totalAmount)}\\n` +
-                                      `- Metode: ${selectedPaymentMethod}\\n` +
-                                      `- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}\\n` +
-                                      `- Status: PAID\\n` +
-                                      `${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}\\n` : ''}` +
-                                      `${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}\\n` : ''}` +
+                      const message = `Halo kak, saya sudah bayar untuk pesanan Parfum.\n\n` + 
+                                      `Detail Pembayaran:\n` + 
+                                      `- Nama: ${userName}\n` + 
+                                      `- Email: ${userEmail}\n` + 
+                                      `- Telepon: ${phoneNumber}\n` + 
+                                      `- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}\n` + 
+                                      `- Produk: ${productName} (${totalQuantity} unit)\n` + 
+                                      `- Total: ${formatCurrency(totalAmount)}\n` + 
+                                      `- Metode: ${selectedPaymentMethod}\n` + 
+                                      `- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}\n` + 
+                                      `- Status: PAID\n` + 
+                                      `${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}\n` : ''}` + 
+                                      `${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}\n` : ''}` + 
                                       `Mohon konfirmasi pesanan saya. Terima kasih.`;
                       const encodedMessage = encodeURIComponent(message);
                       const whatsappHref = `https://wa.me/62895325633487?text=${encodedMessage}`;
@@ -222,7 +240,7 @@ export default function DrelfPaymentPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast, userName, userEmail, phoneNumber, userAddress, selectedProvince, productName, quantity, totalAmount, selectedPaymentMethod]);
+  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast, userName, userEmail, phoneNumber, userAddress, selectedProvince, productName, totalQuantity, totalAmount, selectedPaymentMethod]);
 
   if (showPaymentInstructions && paymentData) {
     return (
@@ -305,20 +323,21 @@ export default function DrelfPaymentPage() {
                 {paymentData.paymentMethod === 'BCA_MANUAL' && paymentData.status === 'UNPAID' && (
                   <div className="my-12">
                     <a
-                      href={`https://wa.me/62895325633487?text=${encodeURIComponent(`Halo kak, saya sudah melakukan transfer manual BCA untuk pesanan Drelf Collagen.<br/><br/>` +
-`Detail Pembayaran:<br/>` +
-`- Nama: ${userName}<br/>` +
-`- Email: ${userEmail}<br/>` +
-`- Telepon: ${phoneNumber}<br/>` +
-`- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}<br/>` +
-`- Produk: ${productName} (${quantity} unit)<br/>` +
-`- Total: ${formatCurrency(totalAmount)}<br/>` +
-`- Metode: Manual Transfer BCA<br/>` +
-`- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}<br/>` +
-`- Status: UNPAID (Menunggu Konfirmasi)<br/>` +
-`${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}<br/>` : ''}` +
-`${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}<br/>` : ''}` +
-`Mohon konfirmasi pesanan saya. Terima kasih.`)}`}
+                      href={`https://wa.me/62895325633487?text=${encodeURIComponent(`Halo kak, saya sudah melakukan transfer manual BCA untuk pesanan Parfum.<br/><br/>` + 
+`Detail Pembayaran:<br/>` + 
+`- Nama: ${userName}<br/>` + 
+`- Email: ${userEmail}<br/>` + 
+`- Telepon: ${phoneNumber}<br/>` + 
+`- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}<br/>` + 
+`- Produk: ${productName} (${totalQuantity} unit)<br/>` + 
+`- Total: ${formatCurrency(totalAmount)}<br/>` + 
+`- Metode: Manual Transfer BCA<br/>` + 
+`- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}<br/>` + 
+`- Status: UNPAID (Menunggu Konfirmasi)<br/>` + 
+`${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}<br/>` : ''}` + 
+`${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}<br/>` : ''}` + 
+`Mohon konfirmasi pesanan saya. Terima kasih.`)}
+`} 
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full"
@@ -402,7 +421,7 @@ export default function DrelfPaymentPage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
-            Checkout Drelf
+            Checkout Parfum eL Royale
           </h1>
         </div>
       </div>
@@ -413,31 +432,30 @@ export default function DrelfPaymentPage() {
             <CardTitle>1. Rangkuman Pesanan</CardTitle>
             </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <Label className="text-muted-foreground">Produk</Label>
-              <span className="font-medium">{productName}</span>
-            </div>
             <div className="flex justify-center my-4">
-              <img src={drelfImage} alt="Drelf Product" className="w-48 h-48 object-contain" />
+              <img src={parfumImage} alt="Parfum Product" className="w-48 h-48 object-contain" />
             </div>
 
             <Separator/>
             
-            <div className="flex justify-between items-center">
-              <Label htmlFor="quantity" className="text-muted-foreground">Kuantitas</Label>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleDecrement}>
-                    <Minus className="h-4 w-4" />
-                </Button>
-                <span className="font-bold text-lg w-10 text-center">{quantity}</span>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleIncrement}>
-                    <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 rounded-md text-center">
-                <p className="font-bold">Promo: Beli 3 Dikirim 4!</p>
+            <div className="space-y-4">
+              {Object.entries(variants).map(([variantName, variantPrice]) => (
+                <div key={variantName} className="flex justify-between items-center">
+                  <div>
+                    <Label htmlFor={`quantity-${variantName}`} className="text-muted-foreground">{variantName}</Label>
+                    <p className="text-xs text-muted-foreground">{formatCurrency(variantPrice)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(variantName, -1)}>
+                        <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="font-bold text-lg w-10 text-center">{quantities[variantName]}</span>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(variantName, 1)}>
+                        <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
 
             <Separator/>
