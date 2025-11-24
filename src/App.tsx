@@ -30,6 +30,7 @@ import HungrylaterPaymentPage from "./pages/hungrylater";
 import ParfumPaymentPage from "./pages/parfum";
 import DevPaymentPage from "./pages/dev";
 import JewelryPaymentPage from "./pages/jewelry";
+import { WhatIsPro } from "./components/whatispro";
 import { Payment } from "./pages/Payment";
 import ProUpgradePage from "./pages/prostatus";
 import { AudioProvider } from "@/contexts/AudioContext";
@@ -180,6 +181,10 @@ const AppContent = () => {
                 <Route
                   path="/jewelry"
                   element={<JewelryPaymentPage />}
+                />
+                <Route
+                  path="/whatispro"
+                  element={<WhatIsPro />}
                 />
                 <Route
                   path="/payment"

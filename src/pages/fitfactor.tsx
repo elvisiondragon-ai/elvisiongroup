@@ -319,7 +319,7 @@ export default function FitfactorPaymentPage() {
               <div className="px-6 space-y-6">
                 <div className="text-center my-4">
                   <h3 className="text-lg font-semibold">Gabung Subscription dan dapatkan diskon 30%++</h3>
-                  <Card className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black p-3 rounded-md text-center cursor-pointer" onClick={() => navigate('/payment')}>
+                  <Card className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black p-3 rounded-md text-center cursor-pointer" onClick={() => navigate('/whatispro')}>
                         <p className="font-bold">eL Vision Subscription diskon 30-50% sepanjang tahun</p>
                   </Card>
                 </div>

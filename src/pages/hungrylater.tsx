@@ -142,8 +142,6 @@ export default function HungrylaterPaymentPage() {
           quantity: quantity,
           productName: productName,
           userId: user?.id,
-          userId: user?.id,
-          userId: user?.id,
         }
       });
 
@@ -448,7 +446,7 @@ export default function HungrylaterPaymentPage() {
         <div className="text-center my-4">
           <h3 className="text-lg font-semibold">Gabung Subscription dan dapatkan diskon 30% sepanjang tahun</h3>
           <Button
-            onClick={() => navigate('/payment')}
+            onClick={() => navigate('/whatispro')}
             className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black p-3 rounded-md text-center w-full h-auto mt-2"
           >
             <p className="font-bold whitespace-normal">

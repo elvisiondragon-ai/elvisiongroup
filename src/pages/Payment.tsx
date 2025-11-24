@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown, Edit, RefreshCw, Play } from 'lucide-react';
+import { ArrowLeft, CreditCard, Calendar, Phone, User, Mail, Copy, Crown, Edit, RefreshCw, Play, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -22,6 +22,8 @@ export function Payment({ onNavigate }: PaymentProps) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   
@@ -260,30 +262,20 @@ export function Payment({ onNavigate }: PaymentProps) {
   }, [user, userProfile, phoneNumber, fullName]);
 
   const handleCreatePayment = async () => {
-    if (!userId) {
-      toast({
-        title: "Error",
-        description: "Silakan login terlebih dahulu",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const profile = userProfile;
-    
     // Use form data if profile data not available
-    const finalPhoneNumber = profile?.phone_number?.trim() || phoneNumber.trim();
-    const finalDisplayName = profile?.display_name?.trim() || fullName.trim();
-    
-    if (!userId || !selectedPlan || !finalPhoneNumber || !finalDisplayName || !user?.email?.trim()) {
+    const finalPhoneNumber = phoneNumber.trim();
+    const finalDisplayName = fullName.trim();
+    const finalEmail = email.trim();
+
+    if (!selectedPlan || !finalPhoneNumber || !finalDisplayName || !finalEmail) {
       toast({
-        title: "Data Tidak Lengkap", 
+        title: "Data Tidak Lengkap",
         description: "Mohon lengkapi nama lengkap, nomor telepon, dan email",
         variant: "destructive",
       });
       return;
     }
-    
+
     if (!/^08[0-9]{6,13}$/.test(finalPhoneNumber)) {
       toast({
         title: "Nomor Telepon Tidak Valid",
@@ -293,35 +285,88 @@ export function Payment({ onNavigate }: PaymentProps) {
       return;
     }
     
-    // Always save payment form data to profile (like clicking "edit profil")
-    if (finalPhoneNumber && finalDisplayName) {
-      console.log('💾 Auto-saving payment data to profile:', { 
-        phone_number: finalPhoneNumber, 
-        display_name: finalDisplayName 
-      });
-      await supabase.from('profiles').update({ 
-        phone_number: finalPhoneNumber,
-        display_name: finalDisplayName,
-        updated_at: new Date().toISOString()
-      }).eq('user_id', userId);
-    }
-    
     setLoading(true);
-    
+
     toast({
       title: "Membuat Pembayaran...",
       description: "Sedang memproses permintaan Anda, mohon tunggu",
     });
-    
+
     try {
+      let currentUserId = userId;
+      let currentUserEmail = user?.email;
+
+      if (!user) {
+        if (password !== confirmPassword) {
+          toast({
+            title: "Password Tidak Cocok",
+            description: "Pastikan password dan konfirmasi password sama.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: finalEmail,
+          password: password,
+          options: {
+            data: {
+              full_name: finalDisplayName,
+              phone: finalPhoneNumber,
+            }
+          }
+        });
+
+        if (signUpError) {
+          toast({
+            title: "Error Pendaftaran",
+            description: signUpError.message,
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        if (signUpData.user) {
+          currentUserId = signUpData.user.id;
+          currentUserEmail = signUpData.user.email;
+          toast({
+            title: "Pendaftaran Berhasil",
+            description: "Akun Anda telah dibuat. Melanjutkan ke pembayaran.",
+          });
+        } else {
+            toast({
+                title: "Error Pendaftaran",
+                description: "Gagal membuat akun. Silakan coba lagi.",
+                variant: "destructive",
+            });
+            setLoading(false);
+            return;
+        }
+      } else {
+        // Always save payment form data to profile (like clicking "edit profil")
+        if (finalPhoneNumber && finalDisplayName) {
+          console.log('💾 Auto-saving payment data to profile:', {
+            phone_number: finalPhoneNumber,
+            display_name: finalDisplayName
+          });
+          await supabase.from('profiles').update({
+            phone_number: finalPhoneNumber,
+            display_name: finalDisplayName,
+            updated_at: new Date().toISOString()
+          }).eq('user_id', userId);
+        }
+      }
+
       const plan = subscriptionPlans.find(p => p.id === selectedPlan);
       if (!plan) throw new Error('Plan not found');
 
-      console.log('💳 Attempting payment creation for user:', userId);
+      console.log('💳 Attempting payment creation for user:', currentUserId);
       console.log('💰 Payment data:', {
-        user_id: userId,
+        user_id: currentUserId,
         user_name: finalDisplayName,
-        user_email: user?.email,
+        user_email: currentUserEmail,
         phone_number: finalPhoneNumber,
         subscription_type: selectedPlan,
         payment_method: selectedPaymentMethod,
@@ -333,7 +378,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           subscriptionType: plan.id,
           paymentMethod: selectedPaymentMethod,
           userName: finalDisplayName,
-          userEmail: user.email,
+          userEmail: currentUserEmail,
           phoneNumber: finalPhoneNumber,
           amount: plan.price
         }
@@ -354,7 +399,7 @@ export function Payment({ onNavigate }: PaymentProps) {
           });
         } else if (data.qrUrl) {
           toast({
-            title: "Pembayaran Berhasil Dibuat", 
+            title: "Pembayaran Berhasil Dibuat",
             description: "Silakan scan QR Code untuk menyelesaikan pembayaran",
           });
         } else {
@@ -709,6 +754,40 @@ export function Payment({ onNavigate }: PaymentProps) {
                 />
               </div>
               
+              {!user && (
+                <>
+                  <div>
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             <div>
@@ -808,20 +887,7 @@ export function Payment({ onNavigate }: PaymentProps) {
       {/* Fixed Bottom Button */}
       <div className="fixed bottom-20 left-6 right-6">
         <Button 
-          onClick={() => {
-            const profile = userProfile;
-            const finalPhoneNumber = profile?.phone_number?.trim() || phoneNumber.trim();
-            const finalDisplayName = profile?.display_name?.trim() || fullName.trim();
-            
-            console.log('%c🎁 Payment button clicked:', 'color: green; font-weight: bold;', {
-              name: finalDisplayName,
-              email: user?.email, // AUTH email
-              phone: finalPhoneNumber,
-              user_id: userId, // AUTH ID
-              subscription_plan: selectedPlan
-            });
-            handleCreatePayment();
-          }}
+          onClick={handleCreatePayment}
           disabled={loading || userDataLoading}
           className="w-full transition-all duration-150 transform hover:scale-105 active:scale-95 active:bg-primary/90"
           size="lg"
