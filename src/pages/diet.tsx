@@ -107,6 +107,20 @@ export default function DietPaymentPage() {
   
   const totalAmount = productPrice;
 
+  // Facebook Pixel - AddToCart event on page load
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      console.log('FB Pixel: Firing AddToCart for Ebook Diet');
+      (window as any).fbq('track', 'AddToCart', {
+        content_ids: ['ebook_diet'],
+        content_type: 'product',
+        value: productPrice,
+        currency: 'IDR',
+        pixel_id: '3319324491540889'
+      });
+    }
+  }, [productPrice]);
+
   useEffect(() => {
     if (totalAmount > 5000000) {
       setSelectedPaymentMethod('BCA_MANUAL');
@@ -315,6 +329,18 @@ export default function DietPaymentPage() {
                 description: "Terima kasih, pembayaran Anda telah kami terima. Silakan cek email Anda di Inbox, Important, atau Spam untuk link Ebook.",
                 duration: 0, 
             });
+
+            // Facebook Pixel - Purchase event
+            if (typeof window !== 'undefined' && (window as any).fbq) {
+              console.log('FB Pixel: Firing Purchase for Ebook Diet');
+              (window as any).fbq('track', 'Purchase', {
+                content_ids: ['ebook_diet'],
+                content_type: 'product',
+                value: payload.new?.amount || totalAmount, // Use amount from payload if available, fallback to local state
+                currency: 'IDR',
+                pixel_id: '3319324491540889'
+              });
+            }
             // Optionally navigate after showing toast
             // navigate('/success-page'); 
           } else {
