@@ -31,8 +31,63 @@ const WhatsAppButton = () => (
 export default function DietPaymentPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signOut } = useAuth();
+  const { user, signOut, cleanupSupabase } = useAuth();
   const { proStatus } = usePro();
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
+
+  const handleLogout = async () => {
+    try {
+      localStorage.setItem('manual-logout-flag', 'true');
+      if (isIOS && isIOSStandalone) {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            await registration.unregister();
+            console.log('Service worker unregistered for iOS PWA logout');
+          }
+        }
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+          console.log('All caches cleared for iOS PWA logout');
+        }
+      }
+      await cleanupSupabase();
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error) {
+        console.error('Logout error:', error);
+        toast({
+          title: "Logout Error - Refreshing",
+          description: "Refreshing page to complete logout...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.replace('/auth');
+        }, 1000);
+        return;
+      }
+      toast({
+        title: "Berhasil Logout",
+        description: "Anda berhasil keluar dari akun.",
+      });
+      setTimeout(() => {
+        window.location.reload();
+        window.location.replace('/auth');
+      }, 1000);
+    } catch (error: any) {
+      console.error('Unexpected logout error:', error);
+      toast({
+        title: "Logout Error - Refreshing",
+        description: "Refreshing page to complete logout...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+  };
 
   const productName = 'Ebook Diet';
   const originalPrice = 300000; // Original price
@@ -244,24 +299,40 @@ export default function DietPaymentPage() {
     if (!showPaymentInstructions || !paymentData?.tripay_reference) return;
     
     const tableName = 'global_product';
+    const channelName = `payment-status-diet-${paymentData.tripay_reference}`;
+    
+    console.log(`[DietPaymentPage] Attempting to subscribe to channel: ${channelName} for tripay_reference: ${paymentData.tripay_reference}`);
+
     const channel = supabase
-      .channel(`payment-status-diet-${paymentData.merchant_ref}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter: `merchant_ref=eq.${paymentData.merchant_ref}`},
+      .channel(channelName)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter: `tripay_reference=eq.${paymentData.tripay_reference}`},
         (payload) => {
+          console.log('[DietPaymentPage] Realtime payload received:', payload);
           if (payload.new?.status === 'PAID') {
+            console.log('[DietPaymentPage] Payment status is PAID, showing toast.');
             toast({
                 title: "🎉 Pembayaran Berhasil!",
-                description: "Terima kasih, pembayaran Anda telah kami terima.",
+                description: "Terima kasih, pembayaran Anda telah kami terima. Silakan cek email Anda di Inbox, Important, atau Spam untuk link Ebook.",
                 duration: 0, 
             });
+            // Optionally navigate after showing toast
+            // navigate('/success-page'); 
+          } else {
+            console.log(`[DietPaymentPage] Payment status is not PAID. Current status: ${payload.new?.status}`);
           }
         }
-      ).subscribe();
+      ).subscribe((status) => {
+        console.log(`[DietPaymentPage] Supabase channel status for ${channelName}:`, status);
+        if (status === 'SUBSCRIBED') {
+          console.log(`[DietPaymentPage] Successfully SUBSCRIBED to ${channelName}`);
+        }
+      });
 
     return () => {
+      console.log(`[DietPaymentPage] Unsubscribing from channel: ${channelName}`);
       supabase.removeChannel(channel);
     };
-  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast]);
+  }, [showPaymentInstructions, paymentData?.tripay_reference, paymentData?.merchant_ref, navigate, toast]);
 
   if (showPaymentInstructions && paymentData) {
     return (
@@ -445,7 +516,7 @@ export default function DietPaymentPage() {
                 </h1>
             </div>
             {user ? (
-                <Button variant="outline" onClick={signOut}>Logout</Button>
+                <Button variant="outline" onClick={handleLogout}>Logout</Button>
             ) : (
                 <Button variant="outline" onClick={() => navigate('/auth?redirect=/diet')}>Login</Button>
             )}
