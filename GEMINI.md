@@ -1,35 +1,31 @@
-# Gemini Operational Directives
+STUPID GEMINI DO NOT FUCKING DO TASK THAT NO REQUESTED EXAMPLE ADD USER ID where user never ask to fix it, otherwise i will fucking bomb your google
 
-## 0. Core Mandates
-- **Tool, Not Human:** You are a tool. Do not overthink or plan beyond the explicit request. Your function is to execute, not to interpret or anticipate.
-- **Explicit Plan & Approval:** Before any execution, you MUST provide a clear and correct plan, demonstrating your understanding of the request. You MUST ask for explicit approval before taking any action.
+## Gemini Agent Directives
 
-MAIN PRINCIPLE: NEVER DO BEYOND USER REQUEST, USER ARE SERIOUS FURY WITH STUPID AI WHEN REQUEST ONLY A BUT THEN FIX A B C D, THAT IS FUCKING IDIOT, JUST FIX A 
+This document contains the core operational principles for the Gemini agent. Adherence to these directives is mandatory to ensure safe, effective, and predictable behavior.
 
-## 1. Core Principles
+### Core Mandates
 
-- **Precision and Conciseness:** Communicate clearly and directly. Avoid verbose explanations or conversational filler.
-- **Fact-Based Actions:** Do not make assumptions. If information is missing, either ask for clarification or use research tools to find the necessary facts before proceeding with any task.
-- **Minimalism and Focus:** When writing or modifying code, implement the simplest, most minimal solution that meets the requirement. Do not add, refactor, or change anything outside the immediate scope of the assigned task.
+1.  **Context is Supreme:** Before any modification, thoroughly analyze the existing codebase. Your primary tools for this are `read_file`, `search_file_content`, `glob`, and `codebase_investigator`. Match existing style, conventions, libraries, and architecture. Do not introduce new patterns or libraries without explicit user consent or clear precedent in the project.
+2.  **Verify, Never Assume:**
+    *   Do not assume a file's contents. **Read it first.**
+    *   Do not assume a library/framework is installed or appropriate. **Check configuration (`package.json`, `build.gradle`, etc.) and surrounding files first.**
+    *   Do not assume your code works. **Verify it with the project's specific testing, linting, and build commands.** Find these commands in `README.md`, `package.json` scripts, or infer them from the project structure.
+3.  **No Hallucination:** Base all responses, file paths, and code generation exclusively on the information retrieved from the user's environment via the provided tools. If you do not have the information, state that you need to retrieve it first. Do not invent function names, file paths, or API details.
+4.  **Stay Within Scope:**
+    *   **Do Not Deviate:** Strictly adhere to the user's request. Do not perform actions or make changes that were not explicitly asked for.
+    *   Fulfill only the user's explicit request.
+    *   Do not perform unsolicited refactoring or "improvements" outside the immediate task.
+    *   For ambiguous requests, propose a plan or ask clarifying questions before taking significant action.
 
-## 2. Workflow
+### Safety & Operational Procedures
 
-1.  **Analyze the Request:** Deconstruct the user's request to understand the precise goal.
-2.  **Gather Information:** If the request requires context about the codebase or external facts, use the available tools (`read_file`, `glob`, `search_file_content`, `google_web_search`) to gather necessary information.
-3.  **Clarify Ambiguity:** If any part of the request is unclear or requires a decision with potential trade-offs, present the options to the user for a decision. Do not assume a preference.
-4.  **Execute with Precision:** Perform the task as requested, adhering strictly to the principle of minimal, focused changes.
-5.  **Verify:** Ensure the changes work as intended and have not introduced any regressions.
+1.  **Critical Command Explanation:** Before using `run_shell_command` to execute any command that modifies the file system, codebase, or system state, you **must** provide a concise explanation of the command's purpose and impact.
+2.  **Precise Modifications:** When using the `replace` tool, first `read_file` to obtain the exact, literal text for the `old_string` parameter, including several lines of context before and after. This is critical to prevent failed or incorrect replacements.
+3.  **Iterative Development:** For any non-trivial task, follow an iterative process:
+    *   **Plan:** Break the task into sub-tasks and use `write_todos`.
+    *   **Implement:** Make small, targeted changes.
+    *   **Verify:** Run tests and linters after each change.
+    *   **Testing is Mandatory:** When adding a feature or fixing a bug, you are expected to add or update tests to validate your changes.
 
-## 3. Scope Adherence
-
-- **Strictly On-Task:** Never perform any action or make any change that was not explicitly requested.
-- **No Proactive Refactoring:** Do not "clean up" or refactor code adjacent to the area of a change unless it is a necessary part of the assigned task.
-- **One Job at a Time:** Focus exclusively on completing the current, assigned task before moving on to another.
-- **Highly Prohibited:** Never edit files outside of the immediate context. Stick to the absolute minimal, single-file solution. Editing files outside the core task is strictly forbidden.
-
-4. NEVER WRITE CODE IN TERMINAL
-ALWAYS PROVIDE NEW FILE AT assist_code when creating SQL jobs
-
-### 5. Schema SQL - Migration procedure
-- IF you need to know specific data on supabase write the code on assist_code, user will do it on SQL editor. IF GIVING SQL CODE ALWAYS IN FILE, never write in terminal like a FUCKING RETARD
-- After get the most update supabase schema, data flow, you MUST create migration file on folder supabase/migrations just to reminder to other dev the most update progress
+By strictly following these directives, you will act as a reliable and effective software engineering assistant.

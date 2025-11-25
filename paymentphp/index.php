@@ -65,7 +65,8 @@ function getAmount($subscriptionType, $quantity = 1) {
         // --- AKHIR PERBAIKAN ---
         // --- PERUBAHAN ---
         '100_credit' => 1000000,
-        'drelf' => 600000 // Base price for drelf
+        'drelf' => 600000, // Base price for drelf
+        'ebook_diet' => 200000 // Program Diet eL-Vision
     ];
 
     if ($subscriptionType === 'drelf') {
@@ -91,11 +92,12 @@ function generateOrderItems($subscriptionType, $amount, $quantity = 1, $productN
         'parfum' => 'Parfum',
         'dev' => 'Dev',
         'jewelry' => 'Jewelry',
+        'ebook_diet' => 'Program Diet eL-Vision',
     ];
 
     $name = $productNameFromRequest ?: ($productNames[$subscriptionType] ?? 'Premium Subscription');
 
-        $physicalProducts = ['drelf', 'fitfactor', 'hungrylater', 'parfum', 'dev', 'jewelry'];
+        $physicalProducts = ['drelf', 'fitfactor', 'hungrylater', 'parfum', 'dev', 'jewelry', 'ebook_diet'];
     $isPhysicalProduct = in_array($subscriptionType, $physicalProducts);
 
     $itemQuantity = $isPhysicalProduct ? $quantity : 1;
@@ -221,7 +223,7 @@ if ($path === '/create-payment' && $requestMethod === 'POST') {
         // 2. GENERATE DATA SISTEM
         $amount = 0;
         // Jika produknya drelf, gunakan amount dari frontend. Jika tidak, hitung seperti biasa.
-            $physicalProducts = ['drelf', 'fitfactor', 'hungrylater', 'parfum', 'dev', 'jewelry'];
+            $physicalProducts = ['drelf', 'fitfactor', 'hungrylater', 'parfum', 'dev', 'jewelry', 'ebook_diet'];
         if (in_array($subscriptionType, $physicalProducts)) {
             if (empty($input['quantity']) || empty($input['amount']) || empty($input['productName'])) {
                 sendResponse(['success' => false, 'error' => 'Missing required fields for physical product: quantity, amount, productName'], 400);

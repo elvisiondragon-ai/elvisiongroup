@@ -5,10 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '@/components/ui/select'; // Import Select components
-import devImage from '@/assets/dev.ico';
+import dietImage from '@/assets/diet.jpg';
 import qrisBcaImage from '@/assets/qrisbca.jpeg';
-import { ArrowLeft, Copy, CreditCard, User, Mail, Phone, Home, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Copy, CreditCard, User, Mail, Phone } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +15,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePro } from '@/hooks/usePro';
+
 const WhatsAppButton = () => (
   <a
     href="https://wa.me/62895325633487"
@@ -28,116 +28,29 @@ const WhatsAppButton = () => (
   </a>
 );
 
-export default function DevPaymentPage() {
+export default function DietPaymentPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signOut, cleanupSupabase } = useAuth();
+  const { user, signOut } = useAuth();
   const { proStatus } = usePro();
-  const whatsappLink = "https://wa.me/62895325633487";
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
-
-  const handleLogout = async () => {
-    try {
-      localStorage.setItem('manual-logout-flag', 'true');
-      if (isIOS && isIOSStandalone) {
-        if ('serviceWorker' in navigator) {
-          const registrations = await navigator.serviceWorker.getRegistrations();
-          for (const registration of registrations) {
-            await registration.unregister();
-            console.log('Service worker unregistered for iOS PWA logout');
-          }
-        }
-        if ('caches' in window) {
-          const cacheNames = await caches.keys();
-          await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
-          console.log('All caches cleared for iOS PWA logout');
-        }
-      }
-      await cleanupSupabase();
-      const { error } = await supabase.auth.signOut({ scope: 'local' });
-      if (error) {
-        console.error('Logout error:', error);
-        toast({
-          title: "Logout Error - Refreshing",
-          description: "Refreshing page to complete logout...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.replace('/auth');
-        }, 1000);
-        return;
-      }
-      toast({
-        title: "Berhasil Logout",
-        description: "Anda berhasil keluar dari akun.",
-      });
-      setTimeout(() => {
-        window.location.reload();
-        window.location.replace('/auth');
-      }, 1000);
-    } catch (error: any) {
-      console.error('Unexpected logout error:', error);
-      toast({
-        title: "Logout Error - Refreshing",
-        description: "Refreshing page to complete logout...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
-  };
-
-  const baseProductName = 'Dev Service';
-  const variants = {
-    'UI Display': 1600000,
-    'Backend Integration': 3000000,
-    'Maintenance 6 Bulan': 10000000,
-  };
-
-  const [quantities, setQuantities] = useState({
-    'UI Display': 1,
-    'Backend Integration': 0,
-    'Maintenance 6 Bulan': 0,
-  });
+  const productName = 'Ebook Diet';
+  const originalPrice = 300000; // Original price
+  const productPrice = 200000; // Discounted price
+  const totalQuantity = 1;
 
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('QRIS');
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      setUserName(user.user_metadata.full_name || '');
-      setUserEmail(user.email || '');
-    }
-  }, [user]);
-
-  const handleQuantityChange = (variant, change) => {
-    setQuantities(prev => ({
-      ...prev,
-      [variant]: Math.max(0, prev[variant] + change)
-    }));
-  };
-
-  let calculatedTotalAmount = Object.entries(quantities).reduce((acc, [variant, quantity]) => {
-    return acc + (variants[variant] * quantity);
-  }, 0);
-
-  const totalAmount = proStatus.isPro ? Math.round(calculatedTotalAmount * 0.7) : calculatedTotalAmount;
-
-  const totalQuantity = Object.values(quantities).reduce((acc, quantity) => acc + quantity, 0);
-
-  const productName = Object.entries(quantities)
-    .filter(([, quantity]) => quantity > 0)
-    .map(([variant, quantity]) => `${baseProductName} - ${variant} (x${quantity})`)
-    .join(', ');
+  
+  const totalAmount = productPrice;
 
   useEffect(() => {
     if (totalAmount > 5000000) {
@@ -188,18 +101,76 @@ export default function DevPaymentPage() {
       return;
     }
 
-    const fullAddress = ''; // Address not required for digital product
+    let currentUserId = user?.id;
+
+    // If user is not logged in, attempt to sign them up
+    if (!user) {
+      if (!password || !confirmPassword) {
+        toast({
+          title: "Password Dibutuhkan",
+          description: "Silakan masukkan dan konfirmasi password Anda untuk membuat akun.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (password !== confirmPassword) {
+        toast({
+          title: "Password Tidak Cocok",
+          description: "Password dan konfirmasi password tidak sama.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setLoading(true);
+      
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: userEmail,
+        password: password,
+        options: {
+          data: {
+            full_name: userName,
+          }
+        }
+      });
+
+      if (signUpError) {
+        toast({
+          title: "Gagal Membuat Akun",
+          description: signUpError.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
+      if (!signUpData.user) {
+        toast({
+          title: "Verifikasi Email Dibutuhkan",
+          description: "Silakan cek email Anda untuk verifikasi sebelum melanjutkan pembayaran.",
+          variant: "default",
+        });
+        setLoading(false);
+        return;
+      }
+
+      currentUserId = signUpData.user.id;
+      toast({
+        title: "Akun Berhasil Dibuat!",
+        description: "Melanjutkan ke proses pembayaran...",
+      });
+    }
 
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('tripay-public-payment', {
         body: {
-          subscriptionType: 'dev',
+          subscriptionType: 'ebook_diet',
           paymentMethod: selectedPaymentMethod,
           userName: userName,
           userEmail: userEmail,
           phoneNumber: phoneNumber,
-          address: null, // Digital product, no physical address
+          address: null, 
           province: null,
           kota: null,
           kecamatan: null,
@@ -207,7 +178,7 @@ export default function DevPaymentPage() {
           amount: totalAmount,
           quantity: totalQuantity,
           productName: productName,
-          userId: user?.id,
+          userId: currentUserId,
         }
       });
 
@@ -217,7 +188,7 @@ export default function DevPaymentPage() {
             paymentMethod: selectedPaymentMethod,
             amount: totalAmount,
             status: 'UNPAID',
-            tripay_reference: `MANUAL-${Date.now()}`, // Provide a dummy reference
+            tripay_reference: `MANUAL-${Date.now()}`,
           });
           setShowPaymentInstructions(true);
           toast({
@@ -250,7 +221,7 @@ export default function DevPaymentPage() {
           paymentMethod: selectedPaymentMethod,
           amount: totalAmount,
           status: 'UNPAID',
-          tripay_reference: `MANUAL-${Date.now()}`, // Provide a dummy reference
+          tripay_reference: `MANUAL-${Date.now()}`,
         });
         setShowPaymentInstructions(true);
         toast({
@@ -274,7 +245,7 @@ export default function DevPaymentPage() {
     
     const tableName = 'global_product';
     const channel = supabase
-      .channel(`payment-status-dev-${paymentData.merchant_ref}`)
+      .channel(`payment-status-diet-${paymentData.merchant_ref}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter: `merchant_ref=eq.${paymentData.merchant_ref}`},
         (payload) => {
           if (payload.new?.status === 'PAID') {
@@ -290,7 +261,7 @@ export default function DevPaymentPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast, userName, userEmail, phoneNumber, productName, totalAmount, selectedPaymentMethod]);
+  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast]);
 
   if (showPaymentInstructions && paymentData) {
     return (
@@ -373,7 +344,7 @@ export default function DevPaymentPage() {
                 {paymentData.paymentMethod === 'BCA_MANUAL' && paymentData.status === 'UNPAID' && (
                   <div className="my-12">
                     <a
-                      href={`https://wa.me/62895325633487?text=${encodeURIComponent(`Halo kak, saya sudah melakukan transfer manual BCA untuk pesanan Dev.<br/><br/>` + 
+                      href={`https://wa.me/62895325633487?text=${encodeURIComponent(`Halo kak, saya sudah melakukan transfer manual BCA untuk pesanan Program Diet.<br/><br/>` + 
 `Detail Pembayaran:<br/>` + 
 `- Nama: ${userName}<br/>` + 
 `- Email: ${userEmail}<br/>` + 
@@ -470,13 +441,13 @@ export default function DevPaymentPage() {
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
-                    Checkout Dev
+                    Checkout Diet Program
                 </h1>
             </div>
             {user ? (
-                <Button variant="outline" onClick={handleLogout}>Logout</Button>
+                <Button variant="outline" onClick={signOut}>Logout</Button>
             ) : (
-                <Button variant="outline" onClick={() => navigate('/auth?redirect=/dev')}>Login</Button>
+                <Button variant="outline" onClick={() => navigate('/auth?redirect=/diet')}>Login</Button>
             )}
         </div>
       </div>
@@ -487,67 +458,36 @@ export default function DevPaymentPage() {
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
               <Label className="text-muted-foreground">Produk</Label>
-              <span className="font-medium">{baseProductName}</span>
+              <span className="font-medium">{productName}</span>
             </div>
             <div className="flex justify-center my-4">
-              <img src={devImage} alt="Dev Product" className="w-48 h-48 object-contain" />
-            </div>
-
-            <Separator/>
-            
-            <div className="space-y-4">
-              {Object.entries(variants).map(([variantName, variantPrice]) => (
-                <div key={variantName} className="flex justify-between items-center">
-                  <div>
-                    <Label htmlFor={`quantity-${variantName}`} className="text-muted-foreground">{variantName}</Label>
-                    <p className="text-xs text-muted-foreground">{formatCurrency(variantPrice)}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(variantName, -1)}>
-                        <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="font-bold text-lg w-10 text-center">{quantities[variantName]}</span>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(variantName, 1)}>
-                        <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center my-4">
-              <h3 className="text-lg font-semibold">Gabung Subscription dan dapatkan diskon 30% sepanjang tahun</h3>
-              <Button
-                onClick={() => navigate('/whatispro')}
-                className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black p-3 rounded-md text-center w-full h-auto mt-2"
-              >
-                <p className="font-bold whitespace-normal">
-                  {proStatus.isPro
-                    ? `Your Pro Plan until ${proStatus.expiresAt ? new Date(proStatus.expiresAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown'}`
-                    : 'eL Vision Subscription diskon 30-50% sepanjang tahun'}
-                </p>
-              </Button>
+              <img src={dietImage} alt="Diet Product" className="w-48 h-48 object-contain" />
             </div>
 
             <Separator/>
             
             <div className="flex justify-between items-center">
+              <Label className="text-muted-foreground">Harga Asli</Label>
+              <span className="font-medium line-through text-red-500">{formatCurrency(originalPrice)}</span>
+            </div>
+            <div className="flex justify-between items-center">
               <Label className="text-muted-foreground">Total Harga</Label>
-              {proStatus.isPro && (
-                <span className="ml-2 px-2 py-1 bg-amber-400 text-black text-xs font-semibold rounded-full">
-                  DISC PRO MEMBER
-                </span>
-              )}
+
               <span className="font-bold text-lg text-primary">{formatCurrency(totalAmount)}</span>
             </div>
             <div className="flex justify-between items-center text-green-600 font-bold">
               <Label className="text-green-600">Ongkos Kirim</Label>
               <span>FREE ONGKIR</span>
             </div>
+            <Card className="mt-4 bg-amber-400 text-black border-none shadow-md">
+              <CardContent className="p-4 text-center">
+                <p className="font-bold">Khusus Promo Hari ini saja! besok harga kembali Normal.</p>
+                <p className="text-sm mt-1">Ebook dikirimkan di email setelah membayar, secara otomatis.</p>
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
 
-        {/* Other cards (Informasi Pengiriman, Metode Pembayaran) remain the same */}
         <Card>
           <CardHeader><CardTitle>2. Informasi Pengiriman</CardTitle></CardHeader>
           <CardContent className="space-y-4">
@@ -563,6 +503,18 @@ export default function DevPaymentPage() {
               <Label htmlFor="phoneNumber"><Phone className="inline-block w-4 h-4 mr-2"/>Nomor Telepon</Label>
               <Input id="phoneNumber" type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="08123456789" required />
             </div>
+            {!user && (
+              <>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" required />
+                </div>
+              </>
+            )}
 
           </CardContent>
         </Card>

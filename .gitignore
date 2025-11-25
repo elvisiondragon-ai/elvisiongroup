@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 
 # Supabase Edge Functions - DO NOT COMMIT
-supabase/functions/
 .env.supabase
 
 # Environment variables

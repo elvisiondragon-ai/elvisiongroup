@@ -13,6 +13,8 @@ import { Auth } from "./pages/Auth";
 import { Signup } from "./pages/Signup";
 import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
+import IncomeDashboard from "./pages/IncomeDashboard";
+import DietPage from "./pages/diet";
 
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -193,6 +195,14 @@ const AppContent = () => {
                 <Route
                   path="/prostatus"
                   element={<ProUpgradePage />}
+                />
+                <Route
+                  path="/income"
+                  element={<IncomeDashboard />}
+                />
+                <Route
+                  path="/diet"
+                  element={<DietPage />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

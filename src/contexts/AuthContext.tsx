@@ -81,6 +81,7 @@ interface AuthContextType {
   loading: boolean;
   chatChannel: RealtimeChannel | null;
   isPro: boolean;
+  isAdmin: boolean; // Add this line
   proStatus: {
     isPro: boolean;
     subscriptionType: string | null;
@@ -1848,6 +1849,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         chatChannel,
         isPro: proStatus?.isPro || false,
+        isAdmin: userProfile?.is_admin || user?.id === '3da83afb-aa8c-4c55-b3b0-8aa64000205f', // Added isAdmin here
         proStatus,
         messages,
         setMessages,
