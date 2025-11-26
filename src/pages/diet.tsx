@@ -116,7 +116,7 @@ export default function DietPaymentPage() {
         content_type: 'product',
         value: productPrice,
         currency: 'IDR',
-        pixel_id: '3319324491540889'
+        pixel_id: '1819355072056679'
       });
     }
   }, [productPrice]);
@@ -338,7 +338,7 @@ export default function DietPaymentPage() {
                 content_type: 'product',
                 value: payload.new?.amount || totalAmount, // Use amount from payload if available, fallback to local state
                 currency: 'IDR',
-                pixel_id: '3319324491540889'
+                pixel_id: '1819355072056679'
               });
             }
             // Optionally navigate after showing toast
