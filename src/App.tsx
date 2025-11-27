@@ -15,6 +15,8 @@ import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
 import IncomeDashboard from "./pages/IncomeDashboard";
 import DietPage from "./pages/diet";
+import SlimPage from "./pages/SlimPage";
+import SlimcoPaymentPage from "./pages/slimco";
 
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -199,6 +201,14 @@ const AppContent = () => {
                 <Route
                   path="/income"
                   element={<IncomeDashboard />}
+                />
+                <Route
+                  path="/slim"
+                  element={<SlimPage />}
+                />
+                <Route
+                  path="/slim/co"
+                  element={<SlimcoPaymentPage />}
                 />
                 <Route
                   path="/diet"
