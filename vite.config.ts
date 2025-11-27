@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
     react(),
 
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       strategies: 'generateSW',
       devOptions: {
         enabled: false,
@@ -34,9 +34,20 @@ export default defineConfig(({ mode }) => ({
       disable: mode === 'development',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf,eot,pdf}'],
-        skipWaiting: false,
-        clientsClaim: false,
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
+          {
+            urlPattern: /\.(?:mp3|wav|ogg|m4a)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'audio-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              }
+            }
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
