@@ -1,131 +1,132 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
 };
-
-serve(async (req) => {
+serve(async (req)=>{
   console.log(`📡 ${req.method} request to ${req.url}`);
-
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     console.log('✅ CORS preflight handled');
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', {
+      headers: corsHeaders
+    });
   }
-
   // Handle GET requests (no auth required)
   if (req.method === 'GET') {
     console.log('📊 GET request - no auth required');
     const url = new URL(req.url);
     const testMode = url.searchParams.get('test');
-
     // Status endpoint
     console.log('📊 Returning status');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
     const jwtKey = Deno.env.get('JWT_KEY');
-
-    return new Response(
-      JSON.stringify({
-        message: 'RENATA Analysis API is running! 🔮',
-        timestamp: new Date().toISOString(),
-        version: '2.0.0',
-        status: 'healthy',
-        method: req.method,
-        url: req.url,
-        environment: {
-          supabaseUrl: !!supabaseUrl,
-          supabaseAnonKey: !!supabaseAnonKey,
-          jwtKey: !!jwtKey,
-          analysisMode: 'chatgpt-primary'
-        },
-        missingSecrets: [
-          ...(!supabaseUrl ? ['SUPABASE_URL'] : []),
-          ...(!supabaseAnonKey ? ['SUPABASE_ANON_KEY'] : []),
-          ...(!jwtKey ? ['JWT_KEY'] : [])
-        ]
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      }
-    );
+    return new Response(JSON.stringify({
+      message: 'RENATA Analysis API is running! 🔮',
+      timestamp: new Date().toISOString(),
+      version: '2.0.0',
+      status: 'healthy',
+      method: req.method,
+      url: req.url,
+      environment: {
+        supabaseUrl: !!supabaseUrl,
+        supabaseAnonKey: !!supabaseAnonKey,
+        jwtKey: !!jwtKey,
+        analysisMode: 'chatgpt-primary'
+      },
+      missingSecrets: [
+        ...!supabaseUrl ? [
+          'SUPABASE_URL'
+        ] : [],
+        ...!supabaseAnonKey ? [
+          'SUPABASE_ANON_KEY'
+        ] : [],
+        ...!jwtKey ? [
+          'JWT_KEY'
+        ] : []
+      ]
+    }), {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      },
+      status: 200
+    });
   }
-
   // Only POST requests need authentication from here
   if (req.method !== 'POST') {
     console.log(`❌ Method ${req.method} not allowed`);
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed', allowedMethods: ['GET', 'POST'] }),
-      {
-        status: 405,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    return new Response(JSON.stringify({
+      error: 'Method not allowed',
+      allowedMethods: [
+        'GET',
+        'POST'
+      ]
+    }), {
+      status: 405,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
       }
-    );
+    });
   }
-
   // POST request - requires auth
   console.log('🔐 POST request - checking authentication');
   const authHeader = req.headers.get('authorization');
-
   if (!authHeader) {
     console.log('❌ No auth header provided');
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: 'missing_auth',
-        message: 'Authorization header required for POST requests'
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401
-      }
-    );
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'missing_auth',
+      message: 'Authorization header required for POST requests'
+    }), {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      },
+      status: 401
+    });
   }
-
   try {
     console.log('📝 Processing POST request body');
     const requestBody = await req.json();
     const { reflections, totalVerses, totalJournal, userId, userName, eliteHabits, totalEliteHabit } = requestBody;
-
     // Basic validation
     if (!reflections || !Array.isArray(reflections)) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'invalid_request',
-          message: 'Missing required field: reflections (array)'
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400
-        }
-      );
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'invalid_request',
+        message: 'Missing required field: reflections (array)'
+      }), {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
+        status: 400
+      });
     }
-
     // Check minimum data requirements - use totalJournal from profiles table as source of truth
     const userTotalJournal = totalJournal || reflections.length;
     const userTotalEliteHabit = totalEliteHabit || 0;
     if (userTotalJournal < 3 || (totalVerses || 0) < 2) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'insufficient_data',
-          message: 'Butuh minimal 3 jurnal dan 2 verse untuk analisis',
-          current: {
-            journals: userTotalJournal,
-            verses: totalVerses || 0,
-            eliteHabits: userTotalEliteHabit
-          }
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'insufficient_data',
+        message: 'Butuh minimal 3 jurnal dan 2 verse untuk analisis',
+        current: {
+          journals: userTotalJournal,
+          verses: totalVerses || 0,
+          eliteHabits: userTotalEliteHabit
         }
-      );
+      }), {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
+        status: 200
+      });
     }
-
     // Elite Habit Knowledge Base - EXACT COPY PASTE
     const eliteHabitKnowledge = `
 ELITE HABIT KNOWLEDGE BASE:
@@ -170,9 +171,8 @@ REKOMENDASI SPIRITUAL:
 -> How to enhance his spiritual journal.
 -> add extra advice.
 -> Extra wisdom Add powerful Quotes from super famous people in history about this matter. - dalam bahasa indonesia.`;
-
     // Prepare actual reflection content for ChatGPT analysis
-    const reflectionTexts = reflections.map(r => {
+    const reflectionTexts = reflections.map((r)=>{
       // Debug: log each reflection structure
       console.log('🔍 Reflection structure:', Object.keys(r));
       // Try multiple field names for maximum compatibility
@@ -183,20 +183,16 @@ REKOMENDASI SPIRITUAL:
     console.log('📝 Total reflections for analysis:', reflections.length);
     console.log('📄 Sample reflection text:', reflectionTexts.substring(0, 200));
     console.log('📊 Total characters in analysis:', reflectionTexts.length);
-
     // ChatGPT Analysis - Primary method
     let analysisData;
     let usesChatGPT = false;
     const chatgptApiKey = Deno.env.get('CHATGPT_API_KEY');
     console.log('🤖 ChatGPT API key available:', !!chatgptApiKey);
-
     if (chatgptApiKey) {
       try {
         console.log('🤖 Attempting ChatGPT analysis');
-
         // Calculate spiritual growth score for prompt
-        const spiritualGrowthScore = Math.min(100, (userTotalJournal * 50) + ((totalVerses || 0) * 100) + (userTotalEliteHabit * 30));
-
+        const spiritualGrowthScore = Math.min(100, userTotalJournal * 500 + (totalVerses || 0) * 100 + userTotalEliteHabit * 300);
         const chatgptPrompt = `Kamu adalah RENATA - Super Intelligence eL Vision Group AI yang memproses wisdom Founder sendiri.
 
 CREATIVE MODE ACTIVATED: Think deeply, analyze creatively, don't just pattern-match.
@@ -207,11 +203,11 @@ Renata adalah Super Intelligence eL Vision Group AI yang memproses Founder wisdo
 USER INFO: ${userTotalJournal} jurnal, ${totalVerses || 0} verses, ${userTotalEliteHabit} elite habits (skor spiritual: ${spiritualGrowthScore}/100)
 
 Jawaban Renata berdasarkan Total Elite habit, Total Verse, Total Journal:
-- If Less than 5 total (Verses + Journal + Elite habit) < 5: Give Light advice in insight
-- If user 5-19: sudah mulai serious, beri semangat tambahan  
-- If user 20-39: berarti sudah serius beri saran jauh lebih empatik dan mendalam
-- If user 40-60: Serius lebih dalam lagi ganti jawaban nya
-- If User 61+: sangat serius anda di jalur yang benar, lebih tenang kan jawaban itu
+- If Less than 50 total (Verses + Journal + Elite habit) < 50: Give Light advice in insight
+- If user 50-190: sudah mulai serious, beri semangat tambahan  
+- If user 200-390: berarti sudah serius beri saran jauh lebih empatik dan mendalam
+- If user 400-600: Serius lebih dalam lagi ganti jawaban nya
+- If User 600+: sangat serius anda di jalur yang benar, lebih tenang kan jawaban itu
 Encourage User To get more Total verse total journal and total Elite habit to next level so you can give deeper Analytics
 
 REFLECTIONS:
@@ -259,69 +255,77 @@ ${eliteHabitKnowledge}
 
 Respond dengan JSON format based on user's total activities:
 
-If total < 5:
+If total < 50:
 {
   "yangPalingInginDilepaskan": "pola utama berdasarkan prinsip yang dilepaskan akan didapat",
   "insights": ["insight 1 - analisis jumlah dan pola Elite Habit, verse dan spiritual", "insight 2 - psikologi mendalam dari total dan jumlah journal, semakin banyak diulang maka semakin serius ", "insight 3 - dari total verse,journal dan elite habit berikan insight psikolog mendalam"],
-  "spiritualRecommendation": ["🔥 Verse to use: Pick VERSE OPTIONS list Verse number and Verse name (example Verse 1: Space Hill or Verse 2: Lucid Beach or Verse 4: Prosperity Stream Vol.1, etc that match with solutions) yang diperlukan user (verse benefit) how many times sehari selama berapa hari", "⭐️ Elite habit: pick yang cocok DAFTAR ELITE HABITS TERSEDIA dengan caranya", "🚀 Enhance spiritual journal: Berikan saran cara menulis jurnal yang lebih bermanfaat bagi user", "⚠️ Extra advice: Beri saran lain out of the box seperti jalan di alam, sedekah, hiking, dan sebagainya", "👑 Quote Anda: Cari Quote dari orang terkenal yang relevan, kreatif lah cari yang membuka mata user dari berbagai sumber", "Capai total 5 Journal Spiritual,Verses dan Elite habit agar proses lebih maximal"]
+  "spiritualRecommendation": ["🔥 Verse to use: Pick VERSE OPTIONS list Verse number and Verse name (example Verse 1: Space Hill or Verse 2: Lucid Beach or Verse 4: Prosperity Stream Vol.1, etc that match with solutions) yang diperlukan user (verse benefit) how many times sehari selama berapa hari", "⭐️ Elite habit: pick yang cocok DAFTAR ELITE HABITS TERSEDIA dengan caranya", "🚀 Enhance spiritual journal: Berikan saran cara menulis jurnal yang lebih bermanfaat bagi user", "⚠️ Extra advice: Beri saran lain out of the box seperti jalan di alam, sedekah, hiking, dan sebagainya", "👑 Quote Anda: Cari Quote dari orang terkenal yang relevan, kreatif lah cari yang membuka mata user dari berbagai sumber", "Capai total 50 Journal Spiritual,Verses dan Elite habit agar proses lebih maximal"]
 }
 
-If total 5-19:
+If total 50-190:
 {
   "yangPalingInginDilepaskan": "satu atau 2 pola paling sering ditulis berdasarkan prinsip yang dilepaskan akan didapatkan",
   "insights": ["insight 1 - analisis jumlah dan pola Elite Habit, verses dan spiritual", "insight 2 - psikologi mendalam dari total dan jumlah journal, semakin banyak diulang maka semakin serius ", "insight 3 - dari total verse,journal dan elite habit berikan insight psikolog mendalam"],
-  "spiritualRecommendation": ["🔥 Verse to use: Pick VERSE OPTIONS list Verse number and Verse name (example Verse 1: Space Hill or Verse 2: Lucid Beach or Verse 4: Prosperity Stream Vol.1, etc that match with solutions) yang diperlukan user (verse benefit) how many times sehari selama berapa hari", "⭐️ Elite habit: lihat total elite habitnya lalu pick yang cocok DAFTAR ELITE HABITS TERSEDIA dengan caranya", "🚀 Enhance spiritual journal: lihat total Jurnal spiritualnya untuk tahu kesiapan mental dan solusi yang cocok, Berikan saran cara menulis jurnal yang lebih bermanfaat bagi user", "⚠️ Extra advice: lihat total elite habit untuk tahu kesiapan mental dan solusi yang cocok, Beri saran lain out of the box sesuai kesiapan mental dari total elite habit seperti jalan di alam, sedekah, hiking, dan sebagainya", "👑 Quote Anda: dari total semua usaha nya untuk tahu kesiapan mental dan usaha, lalu sesuaikan Cari Quote dari orang terkenal yang relevan, kreatif lah cari yang membuka mata user dari berbagai sumber", "Capai total 20 Journal Spiritual,Verses dan Elite habit agar proses lebih maximal"]
+  "spiritualRecommendation": ["🔥 Verse to use: Pick VERSE OPTIONS list Verse number and Verse name (example Verse 1: Space Hill or Verse 2: Lucid Beach or Verse 4: Prosperity Stream Vol.1, etc that match with solutions) yang diperlukan user (verse benefit) how many times sehari selama berapa hari", "⭐️ Elite habit: lihat total elite habitnya lalu pick yang cocok DAFTAR ELITE HABITS TERSEDIA dengan caranya", "🚀 Enhance spiritual journal: lihat total Jurnal spiritualnya untuk tahu kesiapan mental dan solusi yang cocok, Berikan saran cara menulis jurnal yang lebih bermanfaat bagi user", "⚠️ Extra advice: lihat total elite habit untuk tahu kesiapan mental dan solusi yang cocok, Beri saran lain out of the box sesuai kesiapan mental dari total elite habit seperti jalan di alam, sedekah, hiking, dan sebagainya", "👑 Quote Anda: dari total semua usaha nya untuk tahu kesiapan mental dan usaha, lalu sesuaikan Cari Quote dari orang terkenal yang relevan, kreatif lah cari yang membuka mata user dari berbagai sumber", "Capai total 200 Journal Spiritual,Verses dan Elite habit agar proses lebih maximal"]
 }
 
-If total 20-39:
+If total 200-390:
 {
   "yangPalingInginDilepaskan": "satu atau 2 pola paling sering ditulis berdasarkan prinsip yang dilepaskan akan didapatkan",
   "insights": ["insight 1 - analisis jumlah dan pola Elite Habit, verses dan spiritual", "insight 2 - psikologi mendalam dari total dan jumlah journal, semakin banyak diulang maka semakin serius ", "insight 3 - dari total verse,journal dan elite habit berikan insight psikolog mendalam"],
-  "spiritualRecommendation": ["🔥 Verse to use: Pick VERSE OPTIONS list Verse number and Verse name (example Verse 1: Space Hill or Verse 2: Lucid Beach or Verse 4: Prosperity Stream Vol.1, etc that match with solutions) yang diperlukan user (verse benefit) how many times sehari selama berapa hari", "⭐️ Elite habit: lihat total elite habitnya lalu pick yang cocok DAFTAR ELITE HABITS TERSEDIA dengan caranya", "🚀 Enhance spiritual journal: lihat total Jurnal spiritualnya untuk tahu kesiapan mental dan solusi yang cocok, Berikan saran cara menulis jurnal yang lebih bermanfaat bagi user", "⚠️ Extra advice: lihat total elite habit untuk tahu kesiapan mental dan solusi yang cocok, Beri saran lain out of the box sesuai kesiapan mental dari total elite habit seperti jalan di alam, sedekah, hiking, dan sebagainya", "👑 Quote Anda: dari total semua usaha nya untuk tahu kesiapan mental dan usaha, lalu sesuaikan Cari Quote dari orang terkenal yang relevan, kreatif lah cari yang membuka mata user dari berbagai sumber", "Capai total 40 Journal Spiritual,Verses dan Elite habit agar proses lebih maximal"]
+  "spiritualRecommendation": ["🔥 Verse to use: Pick VERSE OPTIONS list Verse number and Verse name (example Verse 1: Space Hill or Verse 2: Lucid Beach or Verse 4: Prosperity Stream Vol.1, etc that match with solutions) yang diperlukan user (verse benefit) how many times sehari selama berapa hari", "⭐️ Elite habit: lihat total elite habitnya lalu pick yang cocok DAFTAR ELITE HABITS TERSEDIA dengan caranya", "🚀 Enhance spiritual journal: lihat total Jurnal spiritualnya untuk tahu kesiapan mental dan solusi yang cocok, Berikan saran cara menulis jurnal yang lebih bermanfaat bagi user", "⚠️ Extra advice: lihat total elite habit untuk tahu kesiapan mental dan solusi yang cocok, Beri saran lain out of the box sesuai kesiapan mental dari total elite habit seperti jalan di alam, sedekah, hiking, dan sebagainya", "👑 Quote Anda: dari total semua usaha nya untuk tahu kesiapan mental dan usaha, lalu sesuaikan Cari Quote dari orang terkenal yang relevan, kreatif lah cari yang membuka mata user dari berbagai sumber", "Capai total 400 Journal Spiritual,Verses dan Elite habit agar proses lebih maximal"]
 }
 
-If total 40-60:
+If total 400-600:
 {
   "yangPalingInginDilepaskan": "satu atau 2 pola paling sering ditulis berdasarkan prinsip yang dilepaskan akan didapatkan",
   "insights": ["insight 1 - analisis jumlah dan pola Elite Habit, verses dan spiritual", "insight 2 - psikologi mendalam dari total dan jumlah journal, semakin banyak diulang maka semakin serius ", "insight 3 - dari total verse,journal dan elite habit berikan insight psikolog mendalam"],
-  "spiritualRecommendation": ["🔥 Verse to use: Pick VERSE OPTIONS list Verse number and Verse name (example Verse 1: Space Hill or Verse 2: Lucid Beach or Verse 4: Prosperity Stream Vol.1, etc that match with solutions) yang diperlukan user (verse benefit) how many times sehari selama berapa hari", "⭐️ Elite habit: lihat total elite habitnya lalu pick yang cocok DAFTAR ELITE HABITS TERSEDIA dengan caranya", "🚀 Enhance spiritual journal: lihat total Jurnal spiritualnya untuk tahu kesiapan mental dan solusi yang cocok, Berikan saran cara menulis jurnal yang lebih bermanfaat bagi user", "⚠️ Extra advice: lihat total elite habit untuk tahu kesiapan mental dan solusi yang cocok, Beri saran lain out of the box sesuai kesiapan mental dari total elite habit seperti jalan di alam, sedekah, hiking, dan sebagainya", "👑 Quote Anda: dari total semua usaha nya untuk tahu kesiapan mental dan usaha, lalu sesuaikan Cari Quote dari orang terkenal yang relevan, kreatif lah cari yang membuka mata user dari berbagai sumber", "Capai total 61 Journal Spiritual,Verses dan Elite habit agar proses lebih maximal"]
+  "spiritualRecommendation": ["🔥 Verse to use: Pick VERSE OPTIONS list Verse number and Verse name (example Verse 1: Space Hill or Verse 2: Lucid Beach or Verse 4: Prosperity Stream Vol.1, etc that match with solutions) yang diperlukan user (verse benefit) how many times sehari selama berapa hari", "⭐️ Elite habit: lihat total elite habitnya lalu pick yang cocok DAFTAR ELITE HABITS TERSEDIA dengan caranya", "🚀 Enhance spiritual journal: lihat total Jurnal spiritualnya untuk tahu kesiapan mental dan solusi yang cocok, Berikan saran cara menulis jurnal yang lebih bermanfaat bagi user", "⚠️ Extra advice: lihat total elite habit untuk tahu kesiapan mental dan solusi yang cocok, Beri saran lain out of the box sesuai kesiapan mental dari total elite habit seperti jalan di alam, sedekah, hiking, dan sebagainya", "👑 Quote Anda: dari total semua usaha nya untuk tahu kesiapan mental dan usaha, lalu sesuaikan Cari Quote dari orang terkenal yang relevan, kreatif lah cari yang membuka mata user dari berbagai sumber", "Capai total 600 Journal Spiritual,Verses dan Elite habit agar proses lebih maximal"]
 }
 
-If total 61+:
+If total 600+:
 {
   "yangPalingInginDilepaskan": "satu atau 2 pola paling sering ditulis berdasarkan prinsip yang dilepaskan akan didapatkan",
   "insights": ["insight 1 - analisis jumlah dan pola Elite Habit, verses dan spiritual", "insight 2 - psikologi mendalam dari total dan jumlah journal, semakin banyak diulang maka semakin serius ", "insight 3 - dari total verse,journal dan elite habit berikan insight psikolog mendalam"],
   "spiritualRecommendation": ["🔥 Verse to use: Pick VERSE OPTIONS list Verse number and Verse name (example Verse 1: Space Hill or Verse 2: Lucid Beach or Verse 4: Prosperity Stream Vol.1, etc that match with solutions) yang diperlukan user (verse benefit) how many times sehari selama berapa hari", "⭐️ Elite habit: lihat total elite habitnya lalu pick yang cocok DAFTAR ELITE HABITS TERSEDIA dengan caranya", "🚀 Enhance spiritual journal: lihat total Jurnal spiritualnya untuk tahu kesiapan mental dan solusi yang cocok, Berikan saran cara menulis jurnal yang lebih bermanfaat bagi user", "⚠️ Extra advice: lihat total elite habit untuk tahu kesiapan mental dan solusi yang cocok, Beri saran lain out of the box sesuai kesiapan mental dari total elite habit seperti jalan di alam, sedekah, hiking, dan sebagainya", "👑 Quote Anda: dari total semua usaha nya untuk tahu kesiapan mental dan usaha, lalu sesuaikan Cari Quote dari orang terkenal yang relevan, kreatif lah cari yang membuka mata user dari berbagai sumber", "Terus konsisten dengan spiritual journey Anda, sudah mencapai level tertinggi"]
 }`;
-
         const chatgptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${chatgptApiKey}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             model: 'gpt-4o-mini',
             messages: [
-              { role: 'system', content: 'You are RENATA, a creative and wise spiritual advisor. Think deeply, be innovative, and provide unique insights. Always respond in Indonesian with creative psychological insights. DO NOT just pattern-match - be genuinely creative and helpful.' },
-              { role: 'user', content: chatgptPrompt }
+              {
+                role: 'system',
+                content: 'You are RENATA, a creative and wise spiritual advisor. Think deeply, be innovative, and provide unique insights. Always respond in Indonesian with creative psychological insights. DO NOT just pattern-match - be genuinely creative and helpful.'
+              },
+              {
+                role: 'user',
+                content: chatgptPrompt
+              }
             ],
             temperature: 0.8,
             top_p: 1,
-            response_format: { type: "json_object" }
+            response_format: {
+              type: "json_object"
+            }
           })
         });
-
         if (chatgptResponse.ok) {
           const chatgptData = await chatgptResponse.json();
           const chatgptResult = JSON.parse(chatgptData.choices[0].message.content);
-
           analysisData = {
             yangPalingInginDilepaskan: chatgptResult.yangPalingInginDilepaskan,
-            insights: chatgptResult.insights || ["Analisis ChatGPT"],
-            rekomendasiSpiritual: chatgptResult.spiritualRecommendation || ["Lanjutkan spiritual journey"]
+            insights: chatgptResult.insights || [
+              "Analisis ChatGPT"
+            ],
+            rekomendasiSpiritual: chatgptResult.spiritualRecommendation || [
+              "Lanjutkan spiritual journey"
+            ]
           };
-
           usesChatGPT = true;
           console.log('✅ ChatGPT analysis successful');
         } else {
@@ -329,38 +333,41 @@ If total 61+:
         }
       } catch (error) {
         console.log('❌ ChatGPT failed, using template fallback:', error.message);
-        // Will fallback to template below
+      // Will fallback to template below
       }
     }
-
     // If ChatGPT fails, return error instead of fallback templates
     if (!analysisData) {
       console.log('❌ ChatGPT analysis failed, no fallback available');
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'analysis_unavailable',
-          message: 'ChatGPT analysis service temporarily unavailable. Please try again later.'
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 503
-        }
-      );
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'analysis_unavailable',
+        message: 'ChatGPT analysis service temporarily unavailable. Please try again later.'
+      }), {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
+        status: 503
+      });
     }
-
     // Calculate spiritual growth score based on journal + verse + elite habits activity
-    const finalSpiritualGrowthScore = Math.min(100, (userTotalJournal * 50) + ((totalVerses || 0) * 100) + (userTotalEliteHabit * 30));
-
+    const finalSpiritualGrowthScore = Math.min(100, userTotalJournal * 50 + (totalVerses || 0) * 100 + userTotalEliteHabit * 30);
     // Use analysis result with proper structure
     const analysis = {
       totalEntries: userTotalJournal,
       totalVerses: totalVerses || 0,
-      focusGoals: [{
-        goal: analysisData.yangPalingInginDilepaskan || "Pola tidak terdeteksi"
-      }],
-      insights: analysisData.insights || ["Analisis sedang berlangsung"],
-      recommendation: analysisData.rekomendasiSpiritual || ["Lanjutkan menulis jurnal untuk insight yang lebih mendalam"],
+      focusGoals: [
+        {
+          goal: analysisData.yangPalingInginDilepaskan || "Pola tidak terdeteksi"
+        }
+      ],
+      insights: analysisData.insights || [
+        "Analisis sedang berlangsung"
+      ],
+      recommendation: analysisData.rekomendasiSpiritual || [
+        "Lanjutkan menulis jurnal untuk insight yang lebih mendalam"
+      ],
       rekomendasiSpiritual: analysisData.rekomendasiSpiritual,
       spiritualGrowthScore: finalSpiritualGrowthScore,
       manifestationKeywords: "spiritual manifestation",
@@ -368,34 +375,31 @@ If total 61+:
       chatgptPowered: usesChatGPT,
       analysisMethod: 'ChatGPT-4o-mini (Creative Mode)'
     };
-
     console.log(`✅ Creative Analysis completed successfully using: ChatGPT-4o-mini (Creative Mode)`);
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        analysis: analysis,
-        processed: new Date().toISOString(),
-        analysisMethod: 'ChatGPT-4o-mini (Creative Mode)'
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      }
-    );
-
+    return new Response(JSON.stringify({
+      success: true,
+      analysis: analysis,
+      processed: new Date().toISOString(),
+      analysisMethod: 'ChatGPT-4o-mini (Creative Mode)'
+    }), {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      },
+      status: 200
+    });
   } catch (error) {
     console.error('❌ Error processing request:', error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: 'processing_error',
-        message: error.message
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
-      }
-    );
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'processing_error',
+      message: error.message
+    }), {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      },
+      status: 500
+    });
   }
 });

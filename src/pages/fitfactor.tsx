@@ -175,7 +175,7 @@ export default function FitfactorPaymentPage() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('tripay-public-payment', {
+      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: 'fitfactor',
           paymentMethod: selectedPaymentMethod,

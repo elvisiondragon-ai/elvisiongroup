@@ -1,21 +1,17 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
 };
-
 // Mailketing API configuration  
 const MAILKETING_API_URL = Deno.env.get('MAILKETING_API_URL') || 'https://api.mailketing.co.id/api/v1';
 const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY') || '1858bc5ce747873d3eab0334c055cb9a';
 const MAILKETING_EMAIL = Deno.env.get('MAILKETING_EMAIL') || 'support@elvisiongroup.com';
-
 // Send expiry warning email
 async function sendExpiryWarningEmail(email, name, daysRemaining) {
   try {
     console.log(`📧 Sending expiry warning email to: ${email} (${daysRemaining} days remaining)`);
-    
     const subject = `⚠️ Langganan Pro Anda Akan Berakhir ${daysRemaining} Hari Lagi!`;
     const htmlContent = `
       <div style="width: 90%; max-width: none; margin: 0 auto; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border-radius: 15px; overflow: hidden;">
@@ -61,7 +57,6 @@ async function sendExpiryWarningEmail(email, name, daysRemaining) {
         </div>
       </div>
     `;
-
     const params = new URLSearchParams({
       api_token: MAILKETING_API_KEY,
       email: MAILKETING_EMAIL,
@@ -71,7 +66,6 @@ async function sendExpiryWarningEmail(email, name, daysRemaining) {
       subject: subject,
       content: htmlContent
     });
-
     const response = await fetch(`${MAILKETING_API_URL}/send`, {
       method: 'POST',
       headers: {
@@ -79,7 +73,6 @@ async function sendExpiryWarningEmail(email, name, daysRemaining) {
       },
       body: params
     });
-
     const result = await response.text();
     console.log(`📧 Expiry warning email result for ${email}:`, result);
     return response.ok;
@@ -88,12 +81,10 @@ async function sendExpiryWarningEmail(email, name, daysRemaining) {
     return false;
   }
 }
-
 // Send just expired email (0 hour notification)
 async function sendJustExpiredEmail(email, name) {
   try {
     console.log(`📧 Sending just expired email to: ${email}`);
-
     const subject = `⏰ Langganan Pro Anda Baru Saja Berakhir!`;
     const htmlContent = `
       <div style="width: 90%; max-width: none; margin: 0 auto; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border-radius: 15px; overflow: hidden;">
@@ -127,7 +118,6 @@ async function sendJustExpiredEmail(email, name) {
         </div>
       </div>
     `;
-
     const params = new URLSearchParams({
       api_token: MAILKETING_API_KEY,
       email: MAILKETING_EMAIL,
@@ -137,7 +127,6 @@ async function sendJustExpiredEmail(email, name) {
       subject: subject,
       content: htmlContent
     });
-
     const response = await fetch(`${MAILKETING_API_URL}/send`, {
       method: 'POST',
       headers: {
@@ -145,7 +134,6 @@ async function sendJustExpiredEmail(email, name) {
       },
       body: params
     });
-
     const result = await response.text();
     console.log(`📧 Just expired email result for ${email}:`, result);
     return response.ok;
@@ -154,12 +142,10 @@ async function sendJustExpiredEmail(email, name) {
     return false;
   }
 }
-
 // Send expired email
 async function sendExpiredEmail(email, name) {
   try {
     console.log(`📧 Sending expired email to: ${email}`);
-    
     const subject = `😞 Langganan Pro Anda Telah Berakhir - Mari Kembali!`;
     const htmlContent = `
       <div style="width: 90%; max-width: none; margin: 0 auto; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border-radius: 15px; overflow: hidden;">
@@ -214,7 +200,6 @@ async function sendExpiredEmail(email, name) {
         </div>
       </div>
     `;
-
     const params = new URLSearchParams({
       api_token: MAILKETING_API_KEY,
       email: MAILKETING_EMAIL,
@@ -224,7 +209,6 @@ async function sendExpiredEmail(email, name) {
       subject: subject,
       content: htmlContent
     });
-
     const response = await fetch(`${MAILKETING_API_URL}/send`, {
       method: 'POST',
       headers: {
@@ -232,7 +216,6 @@ async function sendExpiredEmail(email, name) {
       },
       body: params
     });
-
     const result = await response.text();
     console.log(`📧 Expired email result for ${email}:`, result);
     return response.ok;
@@ -241,28 +224,22 @@ async function sendExpiredEmail(email, name) {
     return false;
   }
 }
-
-const handler = async (req) => {
+const handler = async (req)=>{
   console.log('🚀 Expire Subscriptions Function Started');
-  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, {
       headers: corsHeaders
     });
   }
-
   try {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
     if (!supabaseUrl || !supabaseServiceRoleKey) {
       throw new Error('Missing Supabase environment variables');
     }
-    
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-
     const results = {
       warnings_sent: 0,
       expired_emails_sent: 0,
@@ -270,28 +247,19 @@ const handler = async (req) => {
       expired_records_deleted: false,
       errors: []
     };
-
     // Get users with subscriptions expiring in 3 days or less (warning)
-    const { data: expiringUsers, error: expiringError } = await supabase
-      .from('pro_subscriptions')
-      .select('user_id, user_email, subscription_end_date, subscription_type')
-      .eq('status', 'active')
-      .not('subscription_end_date', 'is', null)
-      .gt('subscription_end_date', new Date().toISOString()) // > now (not expired)
-      .lte('subscription_end_date', new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()); // <= 3 days from now
-
+    const { data: expiringUsers, error: expiringError } = await supabase.from('pro_subscriptions').select('user_id, user_email, subscription_end_date, subscription_type').eq('status', 'active').not('subscription_end_date', 'is', null).gt('subscription_end_date', new Date().toISOString()) // > now (not expired)
+    .lte('subscription_end_date', new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()); // <= 3 days from now
     if (expiringError) {
       console.error('Error fetching expiring users:', expiringError);
       results.errors.push(`Expiring users query error: ${expiringError.message}`);
     } else if (expiringUsers && expiringUsers.length > 0) {
       console.log(`📅 Found ${expiringUsers.length} users with subscriptions expiring within 3 days`);
-      
-      for (const user of expiringUsers) {
+      for (const user of expiringUsers){
         try {
           const endDate = new Date(user.subscription_end_date);
           const daysRemaining = Math.ceil((endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
           const userName = user.user_email.split('@')[0];
-          
           const sent = await sendExpiryWarningEmail(user.user_email, userName, daysRemaining);
           if (sent) {
             results.warnings_sent++;
@@ -302,29 +270,18 @@ const handler = async (req) => {
         }
       }
     }
-
     // Get users with subscriptions that just expired (within last hour) - immediate notification
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const now = new Date().toISOString();
-
-    const { data: justExpiredUsers, error: justExpiredError } = await supabase
-      .from('pro_subscriptions')
-      .select('user_id, user_email, subscription_end_date, subscription_type')
-      .eq('status', 'active')
-      .not('subscription_end_date', 'is', null)
-      .gte('subscription_end_date', oneHourAgo)
-      .lt('subscription_end_date', now);
-
+    const { data: justExpiredUsers, error: justExpiredError } = await supabase.from('pro_subscriptions').select('user_id, user_email, subscription_end_date, subscription_type').eq('status', 'active').not('subscription_end_date', 'is', null).gte('subscription_end_date', oneHourAgo).lt('subscription_end_date', now);
     if (justExpiredError) {
       console.error('Error fetching just expired users:', justExpiredError);
       results.errors.push(`Just expired users query error: ${justExpiredError.message}`);
     } else if (justExpiredUsers && justExpiredUsers.length > 0) {
       console.log(`📅 Found ${justExpiredUsers.length} users with subscriptions that just expired`);
-
-      for (const user of justExpiredUsers) {
+      for (const user of justExpiredUsers){
         try {
           const userName = user.user_email.split('@')[0];
-
           const sent = await sendJustExpiredEmail(user.user_email, userName);
           if (sent) {
             results.expired_emails_sent++;
@@ -335,26 +292,17 @@ const handler = async (req) => {
         }
       }
     }
-
     // CRITICAL FIX: Actually expire subscriptions that have passed their end date
-    const { data: expiredUsers, error: expiredError } = await supabase
-      .from('pro_subscriptions')
-      .select('user_id, user_email, subscription_end_date, subscription_type')
-      .eq('status', 'active')
-      .not('subscription_end_date', 'is', null)
-      .lt('subscription_end_date', now); // All subscriptions that have expired
-
+    const { data: expiredUsers, error: expiredError } = await supabase.from('pro_subscriptions').select('user_id, user_email, subscription_end_date, subscription_type').eq('status', 'active').not('subscription_end_date', 'is', null).lt('subscription_end_date', now); // All subscriptions that have expired
     if (expiredError) {
       console.error('Error fetching expired users:', expiredError);
       results.errors.push(`Expired users query error: ${expiredError.message}`);
     } else if (expiredUsers && expiredUsers.length > 0) {
       console.log(`🔥 CRITICAL: Found ${expiredUsers.length} users with expired subscriptions that are still active!`);
-      
       // STEP 1: Send comeback emails to recently expired (last 24 hours)
       const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const recentlyExpired = expiredUsers.filter(user => user.subscription_end_date >= yesterday);
-      
-      for (const user of recentlyExpired) {
+      const recentlyExpired = expiredUsers.filter((user)=>user.subscription_end_date >= yesterday);
+      for (const user of recentlyExpired){
         try {
           const userName = user.user_email.split('@')[0];
           const sent = await sendExpiredEmail(user.user_email, userName);
@@ -366,21 +314,13 @@ const handler = async (req) => {
           results.errors.push(`Expired email error for ${user.user_email}: ${error.message}`);
         }
       }
-
       // STEP 2: ACTUALLY EXPIRE THE SUBSCRIPTIONS - UPDATE DATABASE
       console.log(`💾 Updating ${expiredUsers.length} expired subscriptions to 'expired' status...`);
-      
-      const userIds = expiredUsers.map(user => user.user_id);
-      const { error: updateError } = await supabase
-        .from('pro_subscriptions')
-        .update({ 
-          status: 'expired',
-          updated_at: now 
-        })
-        .in('user_id', userIds)
-        .eq('status', 'active')
-        .lt('subscription_end_date', now);
-
+      const userIds = expiredUsers.map((user)=>user.user_id);
+      const { error: updateError } = await supabase.from('pro_subscriptions').update({
+        status: 'expired',
+        updated_at: now
+      }).in('user_id', userIds).eq('status', 'active').lt('subscription_end_date', now);
       if (updateError) {
         console.error('❌ CRITICAL ERROR: Failed to update expired subscriptions:', updateError);
         results.errors.push(`Failed to expire subscriptions: ${updateError.message}`);
@@ -388,15 +328,9 @@ const handler = async (req) => {
         console.log(`✅ SUCCESS: Updated ${expiredUsers.length} expired subscriptions to 'expired' status`);
         results.subscriptions_expired = expiredUsers.length;
       }
-
       // STEP 3: Delete expired subscriptions (trigger cleanup)
       console.log(`🗑️ Deleting expired subscriptions to free database space...`);
-      
-      const { error: deleteError } = await supabase
-        .from('pro_subscriptions')
-        .delete()
-        .eq('status', 'expired');
-
+      const { error: deleteError } = await supabase.from('pro_subscriptions').delete().eq('status', 'expired');
       if (deleteError) {
         console.error('⚠️ Warning: Failed to delete expired subscriptions:', deleteError);
         results.errors.push(`Failed to delete expired subscriptions: ${deleteError.message}`);
@@ -405,9 +339,7 @@ const handler = async (req) => {
         results.expired_records_deleted = true;
       }
     }
-
     console.log("✅ Expire subscriptions function completed successfully");
-    
     return new Response(JSON.stringify({
       success: true,
       message: 'Expire subscriptions processed successfully',
@@ -434,5 +366,4 @@ const handler = async (req) => {
     });
   }
 };
-
 serve(handler);

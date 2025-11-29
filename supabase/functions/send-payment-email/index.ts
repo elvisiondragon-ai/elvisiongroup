@@ -171,8 +171,48 @@ const handler = async (req)=>{
     } else {
       // payment_completed or success
       subject = "🎉 Selamat! Pembayaran Berhasil - ElVision Group Pro";
-      
-      // Original Pro content
+      // Special handling for ebook_diet
+      if (safeSubscriptionType === 'Program Diet eL-Vision' || safeSubscriptionType === 'ebook_diet' || safeSubscriptionType === 'Ebook Diet' || safeSubscriptionType === 'Ebook_diet' || safeSubscriptionType === 'Ebook Diet PAID') {
+        subject = "🎉 Pembayaran Berhasil! Link Ebook Diet Anda";
+        htmlContent = `
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px 15px 0 0; text-align: center;">
+              <h1 style="margin: 0; font-size: 28px;">🎉 PEMBAYARAN BERHASIL!</h1>
+              <p style="margin: 15px 0 0 0; font-size: 16px;">Terima kasih telah membeli Ebook Diet eL-Vision!</p>
+            </div>
+            <div style="background: white; padding: 40px; border-radius: 0 0 15px 15px;">
+              <h2 style="color: #333; margin-bottom: 25px;">Halo ${userName}! 👋</h2>
+              <p style="color: #666; line-height: 1.7; margin-bottom: 25px;">
+                Pembayaran Anda telah kami terima. Silakan unduh Ebook Diet Anda melalui tautan di bawah ini.
+              </p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="https://drive.google.com/file/d/1rf0yCAtllTFYjyFaSyMh8crp-B0jASHw/view?usp=share_link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold;">
+                  📥 Unduh Ebook Sekarang
+                </a>
+              </div>
+               <div style="background: #f8f9ff; padding: 25px; border-radius: 12px; border-left: 5px solid #667eea; margin: 25px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                  <span style="color: #666;">Produk:</span>
+                  <span style="font-weight: bold; color: #333;">${safeSubscriptionType}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                  <span style="color: #666;">Jumlah:</span>
+                  <span style="font-weight: bold; color: #00c851;">Rp ${safeAmount.toLocaleString('id-ID')}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #666;">Referensi:</span>
+                  <span style="font-weight: bold; color: #333;">${safeReference}</span>
+                </div>
+              </div>
+              <p style="color: #666; line-height: 1.7;">
+                Jika Anda mengalami kesulitan, jangan ragu untuk menghubungi kami di <a href="mailto:support@elvisiongroup.com" style="color: #667eea;">support@elvisiongroup.com</a>.
+              </p>
+            </div>
+          </div>
+        `;
+        console.log('DEBUG: Ebook htmlContent length:', htmlContent.length); // ADDED LOG
+      } else {
+        // Original Pro content
         htmlContent = `<!DOCTYPE html>
 <html lang="id">
 <head>
@@ -553,10 +593,10 @@ const handler = async (req)=>{
                 <div class="detail-row">
                     <span class="detail-label">📅 Berakhir Pada</span>
                     <span class="detail-value end-date">${new Date(endDate).toLocaleDateString('id-ID', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })}</span>
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}</span>
                 </div>
                 ` : ''}
             </div>

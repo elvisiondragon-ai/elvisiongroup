@@ -232,7 +232,7 @@ export default function DietPaymentPage() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('tripay-public-payment', {
+      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: 'ebook_diet',
           paymentMethod: selectedPaymentMethod,

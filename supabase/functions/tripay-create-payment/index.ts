@@ -1,96 +1,234 @@
+// Import Deno and Supabase modules
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.54.0';
+// Define CORS headers for cross-origin requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
+// --- SINGLE SOURCE OF TRUTH FOR PRODUCTS ---
+const productCatalog = {
+  // Digital Subscriptions (require authentication)
+  '1_day': {
+    name: 'Premium Subscription - 1 Day',
+    price: 4000,
+    requiresAuth: true,
+    physical: false
+  },
+  '1_week': {
+    name: 'Premium Subscription - 1 Week',
+    price: 30000,
+    requiresAuth: true,
+    physical: false
+  },
+  '1_month': {
+    name: 'Premium Subscription - 1 Month',
+    price: 100000,
+    requiresAuth: true,
+    physical: false
+  },
+  '1_year': {
+    name: 'Premium Subscription - 1 Year',
+    price: 800000,
+    requiresAuth: true,
+    physical: false
+  },
+  '10_credit': {
+    name: 'Photo Credit - 10 Credits',
+    price: 100000,
+    requiresAuth: true,
+    physical: false
+  },
+  '50_credit': {
+    name: 'Photo Credit - 50 Credits',
+    price: 450000,
+    requiresAuth: true,
+    physical: false
+  },
+  '100_credit': {
+    name: 'Photo Credit - 100 Credits',
+    price: 1000000,
+    requiresAuth: true,
+    physical: false
+  },
+  // Physical/Public Products (do not require authentication)
+  'drelf': {
+    name: 'Drelf Collagen',
+    price: 600000,
+    requiresAuth: false,
+    physical: true
+  },
+  'ebook_diet': {
+    name: 'Program Diet eL-Vision',
+    price: 200000,
+    requiresAuth: false,
+    physical: true
+  },
+  'fitfactor': {
+    name: 'Fitfactor',
+    price: 0,
+    requiresAuth: false,
+    physical: true
+  },
+  'hungrylater': {
+    name: 'Hungrylater',
+    price: 0,
+    requiresAuth: false,
+    physical: true
+  },
+  'parfum': {
+    name: 'Parfum',
+    price: 0,
+    requiresAuth: false,
+    physical: true
+  },
+  'jewelry': {
+    name: 'Jewelry',
+    price: 0,
+    requiresAuth: false,
+    physical: true
+  },
+  'dev': {
+    name: 'Dev Service',
+    price: 0,
+    requiresAuth: false,
+    physical: true
+  } // Price determined by request
+};
+// Main server function
 serve(async (req)=>{
-  console.log('🚀 Edge Function started');
-  console.log('Request method:', req.method);
-  console.log('Request URL:', req.url);
-  // Handle CORS
+  console.log('🚀 UNIFIED CREATE PAYMENT [V7-UNIVERSAL-NAME-FIX] - Edge Function Started');
   if (req.method === 'OPTIONS') {
-    console.log('✅ CORS preflight handled');
     return new Response('ok', {
       headers: corsHeaders
     });
   }
   try {
-    // Only accept POST
-    if (req.method !== 'POST') {
-      console.log('❌ Method not allowed:', req.method);
-      return new Response(JSON.stringify({
-        error: 'Method not allowed'
-      }), {
-        status: 405,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      });
-    }
-    // Initialize Supabase client for database operations
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    // Get auth token from request headers and verify user
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      console.log('❌ No authorization header');
-      return new Response(JSON.stringify({
-        error: 'Authorization header required'
-      }), {
-        status: 401,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      });
-    }
-    console.log('🔍 Raw auth header:', authHeader);
-    const token = authHeader.replace('Bearer ', '');
-    console.log('🔍 Extracted token (first 20 chars):', token.substring(0, 20) + '...');
-    // Create client with anon key to verify user
-    const supabaseClient = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_ANON_KEY'));
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
-    if (authError || !user || !user.id) {
-      console.log('❌ Authentication failed or user.id is null:', authError?.message);
-      console.log('❌ User object:', JSON.stringify(user));
-      return new Response(JSON.stringify({
-        error: 'Authentication failed - user ID is null'
-      }), {
-        status: 401,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      });
-    }
-    console.log('✅ Found user from auth token:', user.id);
-    console.log('🔍 User object:', JSON.stringify(user));
-    // Parse request body
-    console.log('📥 Parsing request body...');
+    // --- 1. INITIALIZE & VALIDATE INPUT ---
     const body = await req.json();
-    console.log('✅ Received body:', JSON.stringify(body));
-    console.log('🔍 Body userEmail:', body.userEmail);
-    console.log('🔍 User email from auth:', user.email);
-    // VPS URL
+    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address } = body;
+    const product = productCatalog[subscriptionType];
+    if (!product) {
+      return new Response(JSON.stringify({
+        error: `Invalid subscriptionType: ${subscriptionType}`
+      }), {
+        status: 400,
+        headers: corsHeaders
+      });
+    }
+    // --- UNIVERSAL PRODUCT NAME FORMATTING ---
+    let formattedProductName = body.productName || product.name;
+    // If the product is physical and the name doesn't already seem to have a quantity, format it.
+    if (product.physical && !formattedProductName.includes('(x')) {
+      formattedProductName = `${product.name} (x${quantity})`;
+    }
+    console.log(`Processing order for: ${formattedProductName}`);
+    // --- 2. AUTHENTICATION (IF REQUIRED) ---
+    let userId = null;
+    let user = null;
+    if (product.requiresAuth) {
+      const authHeader = req.headers.get('authorization');
+      if (!authHeader) {
+        return new Response(JSON.stringify({
+          error: 'Authorization header required for this product'
+        }), {
+          status: 401,
+          headers: corsHeaders
+        });
+      }
+      const token = authHeader.replace('Bearer ', '');
+      const supabaseClient = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_ANON_KEY'));
+      const { data: authData, error: authError } = await supabaseClient.auth.getUser(token);
+      if (authError || !authData.user) {
+        console.error('Authentication error:', authError);
+        return new Response(JSON.stringify({
+          error: 'Authentication failed'
+        }), {
+          status: 401,
+          headers: corsHeaders
+        });
+      }
+      user = authData.user;
+      userId = user.id;
+      console.log(`✅ Authenticated user: ${userId}`);
+    }
+    // --- 3. CALCULATE AMOUNT & GENERATE ORDER DETAILS ---
+    let amount = product.price;
+    if (product.physical && body.amount) {
+      amount = body.amount;
+    } else if (product.physical) {
+      amount = product.price * quantity;
+    }
+    if (amount < 0) {
+      return new Response(JSON.stringify({
+        error: 'Invalid amount or quantity for the selected product'
+      }), {
+        status: 400,
+        headers: corsHeaders
+      });
+    }
+    const merchantRef = `EVG_${Date.now()}_${subscriptionType}`;
+    const orderItems = [
+      {
+        'sku': subscriptionType.toUpperCase(),
+        'name': formattedProductName,
+        'price': amount / (quantity || 1),
+        'quantity': quantity,
+        'product_url': 'https://elvisiongroup.com/premium',
+        'image_url': 'https://elvisiongroup.com/assets/premium-icon.jpg'
+      }
+    ];
+    // --- 4. PRE-PAYMENT DATABASE INSERTION ---
+    const supabase = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
+    const ipAddress = req.headers.get('x-forwarded-for') ?? req.headers.get('remote-addr');
+    let dbRecordId = null;
+    if (product.physical) {
+      console.log('Inserting into global_product (UNPAID)');
+      const { data, error } = await supabase.from('global_product').insert({
+        name: userName,
+        phone: phoneNumber,
+        email: userEmail,
+        address: address,
+        product_name: formattedProductName,
+        amount: amount,
+        status: 'UNPAID',
+        merchant_ref: merchantRef,
+        user_id: userId
+      }).select('id').single();
+      if (error) throw new Error(`Database insert (global_product) failed: ${error.message}`);
+      dbRecordId = data.id;
+    } else if (product.requiresAuth) {
+      console.log('Inserting into waiting_payment (pending)');
+      const { data, error } = await supabase.from('waiting_payment').insert({
+        user_id: userId,
+        user_email: userEmail || user.email,
+        user_name: userName,
+        customer_phone: phoneNumber,
+        subscription_type: subscriptionType,
+        amount_paid: amount,
+        currency: body.currency || 'IDR',
+        status: 'pending',
+        tripay_reference: null,
+        ip_address: ipAddress
+      }).select('id').single();
+      if (error) throw new Error(`Database insert (waiting_payment) failed: ${error.message}`);
+      dbRecordId = data.id;
+    }
+    console.log(`✅ Pre-payment DB record created with ID: ${dbRecordId} for merchant_ref: ${merchantRef}`);
+    // --- 5. CALL GENERIC PHP PROXY ---
     const vpsUrl = "https://payment.elvisiongroup.com/create-payment";
-    // Map to VPS expected format (serverjs.txt line 104)
     const vpsPayload = {
-      subscriptionType: body.subscriptionType,
-      paymentMethod: body.paymentMethod,
-      userName: body.userName || body.fullName || user.email?.split('@')[0] || 'Anonymous',
-      userEmail: body.userEmail || user.email,
-      phoneNumber: body.phoneNumber || '08123456789',
-      userId: user.id // Kirim userId ke PHP, penting untuk 100_credit
+      method: paymentMethod,
+      merchant_ref: merchantRef,
+      amount: amount,
+      customer_name: userName || (userEmail || 'User').split('@')[0],
+      customer_email: userEmail || user.email,
+      customer_phone: phoneNumber || '081234567890',
+      order_items: orderItems,
+      return_url: 'https://elvisiongroup.com/payment/finish'
     };
-    // Forward to VPS directly
-    console.log('🌐 Sending to VPS...', vpsUrl);
-    // --- PENAMBAHAN LOG ---
-    console.log('📤 VPS Payload:', JSON.stringify(vpsPayload));
-    // --- AKHIR PENAMBAHAN ---
+    console.log('📤 Sending generic payload to PHP proxy:', JSON.stringify(vpsPayload, null, 2));
     const vpsResponse = await fetch(vpsUrl, {
       method: "POST",
       headers: {
@@ -98,188 +236,67 @@ serve(async (req)=>{
       },
       body: JSON.stringify(vpsPayload)
     });
-    console.log('📡 VPS Response status:', vpsResponse.status);
-    console.log('📡 VPS Response ok:', vpsResponse.ok);
-    // Read response as text first
     const responseText = await vpsResponse.text();
-    console.log('📄 VPS Response text length:', responseText.length);
-    // --- PENAMBAHAN LOG ---
-    // Ini adalah PENTING untuk debug 'Unexpected end of JSON input'
-    if (responseText.length === 0) {
-      console.log('⚠️⚠️⚠️ VPS returned an empty response body! Ini penyebab error di frontend.');
-    } else {
-      console.log('📄 VPS Response preview:', responseText.substring(0, 200));
+    if (!vpsResponse.ok) {
+      console.error(`Error from PHP proxy: ${vpsResponse.status} - ${responseText}`);
+      throw new Error(`Payment proxy service failed: ${responseText}`);
     }
-    // --- AKHIR PENAMBAHAN ---
-    // Try to parse as JSON
-    let vpsResult;
-    try {
-      vpsResult = JSON.parse(responseText);
-      console.log('✅ Parsed JSON successfully');
-      console.log('📋 Result keys:', Object.keys(vpsResult));
-      console.log('🕒 expiredTime value:', vpsResult.expiredTime, 'type:', typeof vpsResult.expiredTime);
-      console.log('💳 payCode value:', vpsResult.payCode);
-      console.log('📱 qrUrl value:', vpsResult.qrUrl);
-    } catch (parseError) {
-      console.log('⚠️ JSON parse failed:', parseError.message);
-      // --- PENAMBAHAN LOG ---
-      console.log('❌ VPS returned non-JSON response:', responseText.substring(0, 500));
-      // --- AKHIR PENAMBAHAN ---
-      return new Response(JSON.stringify({
-        error: 'Invalid VPS response format',
-        message: 'Payment service returned non-JSON data.',
-        // --- PENAMBAHAN ---
-        vps_response: responseText.substring(0, 500) // Kirim error VPS ke frontend
-      }), {
-        status: 502,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      });
-    }
-    // If VPS returns error status
-    if (vpsResponse.status !== 200) {
-      console.log('💥 VPS Error detected:', vpsResponse.status);
-      return new Response(JSON.stringify({
-        error: 'Payment service error',
-        message: 'VPS backend service returned an error.',
-        vps_response: vpsResult
-      }), {
-        status: vpsResponse.status,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      });
-    }
-    // --- PERUBAHAN ---
-    // Blok 'if (body.subscriptionType === '100_credit' ...)' DIHAPUS.
-    // Ini memaksa 100_credit untuk diperlakukan seperti pembayaran normal
-    // dan datanya akan dimasukkan ke 'waiting_payment'.
-    // --- AKHIR PERUBAHAN ---
-    // Database operations - Create subscription and payment records
-    console.log('💾 ===== DATABASE OPERATIONS START =====');
-    console.log('🔍 vpsResult.expired_time value:', vpsResult.expired_time, 'type:', typeof vpsResult.expired_time);
-    try {
-      // Create subscription record
-      console.log('💾 Creating subscription record:', {
-        user_id: user.id,
-        user_email: body.userEmail,
-        // --- PENAMBAHAN FIELD ---
-        user_name: body.userName,
-        // --- AKHIR PENAMBAHAN ---
-        subscription_type: body.subscriptionType,
-        amount_paid: body.amount || vpsResult.amount,
-        currency: body.currency || 'IDR',
-        status: 'pending',
-        tripay_reference: vpsResult.reference,
-        ip_address: req.headers.get('x-forwarded-for') || 'unknown',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-      console.log('🔍 DEBUG VALUES:');
-      console.log('  - user.id:', user.id);
-      console.log('  - body.userEmail:', body.userEmail);
-      console.log('  - user.email:', user.email);
-      const { data: waitingPayment, error: waitingError } = await supabase.from('waiting_payment').insert({
-        user_id: user.id,
-        user_email: body.userEmail,
-        // --- PENAMBAHAN FIELD ---
-        user_name: body.userName,
-        // --- AKHIR PENAMBAHAN ---
-        customer_phone: body.phoneNumber,
-        subscription_type: body.subscriptionType,
-        amount_paid: body.amount || vpsResult.amount,
-        currency: body.currency || 'IDR',
-        status: 'pending',
-        tripay_reference: vpsResult.reference,
-        ip_address: req.headers.get('x-forwarded-for') || 'unknown',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }).select().single();
-      if (waitingError) {
-        console.log('❌ Waiting payment creation error:', waitingError);
-        throw new Error(`Waiting payment creation failed: ${waitingError.message}`);
+    const vpsResult = JSON.parse(responseText);
+    console.log('✅ Received response from PHP proxy.');
+    // --- 6. UPDATE DB WITH TRIPAY REFERENCE ---
+    const tripayData = vpsResult.data || {};
+    const tripayReference = tripayData.reference;
+    if (vpsResult.success && tripayReference) {
+      const tableToUpdate = product.physical ? 'global_product' : 'waiting_payment';
+      let updateQuery;
+      if (product.physical) {
+        updateQuery = supabase.from(tableToUpdate).update({
+          tripay_reference: tripayReference
+        }).eq('merchant_ref', merchantRef);
+      } else {
+        updateQuery = supabase.from(tableToUpdate).update({
+          tripay_reference: tripayReference
+        }).eq('id', dbRecordId);
       }
-      console.log('✅ Created waiting payment ID:', waitingPayment.id);
-      // Create payment transaction record
-      // (Kode payment_transactions sepertinya tidak ada di file asli, jadi saya biarkan)
-      console.log('✅ Waiting payment creation complete');
-      // Send pending payment email
-      try {
-        await supabase.functions.invoke('send-payment-email', {
-          body: {
-            userEmail: body.userEmail || user.email,
-            amount: body.amount || vpsResult.amount,
-            currency: body.currency || 'IDR',
-            reference: vpsResult.reference,
-            subscriptionType: body.subscriptionType,
-            paymentMethod: body.paymentMethod,
-            status: 'payment_created'
-          }
-        });
-        console.log('📧 Pending payment email sent to:', body.userEmail || user.email);
-      } catch (emailError) {
-        console.log('📧 Email notification failed (non-critical):', emailError);
+      const { error } = await updateQuery;
+      if (error) {
+        console.error(`⚠️ Failed to update ${tableToUpdate} with Tripay reference: ${error.message}`);
+        vpsResult.warning = "Failed to link payment reference in database.";
+      } else {
+        console.log(`✅ Updated ${tableToUpdate} with Tripay reference ${tripayReference}`);
       }
-      // Return successful response mapping VPS fields correctly (serverjs.txt lines 199-214)
-      return new Response(JSON.stringify({
-        success: vpsResult.success,
-        paymentType: vpsResult.paymentType,
-        checkoutUrl: vpsResult.checkoutUrl,
-        payCode: vpsResult.payCode,
-        tripay_reference: vpsResult.tripay_reference,
-        reference: vpsResult.reference,
-        merchantRef: vpsResult.merchantRef,
-        amount: vpsResult.amount,
-        expiredTime: vpsResult.expiredTime,
-        paymentMethod: vpsResult.paymentMethod,
-        instructions: vpsResult.instructions,
-        qrString: vpsResult.qrString,
-        qrUrl: vpsResult.qrUrl,
-        status: vpsResult.status
-      }), {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        },
-        status: 200
-      });
-    } catch (dbError) {
-      console.log('❌ Database operations failed:', dbError.message);
-      console.log('⚠️ Continuing with payment creation despite database error...');
-      // Return VPS response even if database fails
-      return new Response(JSON.stringify({
-        success: vpsResult.success,
-        paymentType: vpsResult.paymentType,
-        checkoutUrl: vpsResult.checkoutUrl,
-        payCode: vpsResult.payCode,
-        tripay_reference: vpsResult.tripay_reference,
-        reference: vpsResult.reference,
-        merchantRef: vpsResult.merchantRef,
-        amount: vpsResult.amount,
-        expiredTime: vpsResult.expiredTime,
-        paymentMethod: vpsResult.paymentMethod,
-        instructions: vpsResult.instructions,
-        qrString: vpsResult.qrString,
-        qrUrl: vpsResult.qrUrl,
-        status: vpsResult.status,
-        warning: 'Database storage failed but payment created'
-      }), {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        },
-        status: 200
-      });
     }
+    // --- 7. FLATTEN & RETURN RESPONSE TO CLIENT ---
+    const clientResponse = {
+      success: vpsResult.success,
+      paymentType: tripayData.pay_url ? 'REDIRECT' : 'DIRECT',
+      checkoutUrl: tripayData.checkout_url,
+      payCode: tripayData.pay_code,
+      tripay_reference: tripayReference,
+      reference: tripayReference,
+      merchantRef: tripayData.merchant_ref,
+      amount: tripayData.amount,
+      expiredTime: tripayData.expired_time,
+      paymentMethod: tripayData.payment_method,
+      instructions: tripayData.instructions,
+      qrString: tripayData.qr_string,
+      qrUrl: tripayData.qr_url,
+      status: tripayData.status || 'UNPAID',
+      ...vpsResult.warning && {
+        warning: vpsResult.warning
+      }
+    };
+    return new Response(JSON.stringify(clientResponse), {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      },
+      status: 200
+    });
   } catch (error) {
-    // --- PENAMBAHAN LOG ---
-    console.error('💥💥💥 CREATE-PAYMENT EDGE FUNCTION CRASH 💥💥💥');
-    // --- AKHIR PENAMBAHAN ---
-    console.error('💥 Edge Function error:', error.message);
-    console.error('💥 Error stack:', error.stack);
+    console.error('💥💥💥 UNIFIED PAYMENT EDGE FUNCTION CRASH 💥💥💥');
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     return new Response(JSON.stringify({
       error: 'Internal server error',
       message: error.message

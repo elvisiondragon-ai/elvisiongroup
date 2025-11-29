@@ -101,27 +101,3 @@ const handler = async (req)=>{
   }
 };
 serve(handler);
-// Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
-import { delay } from "../async/mod.ts";
-/** Thrown by Server after it has been closed. */ const ERROR_SERVER_CLOSED = "Server closed";
-/** Default port for serving HTTP. */ const HTTP_PORT = 80;
-/** Default port for serving HTTPS. */ const HTTPS_PORT = 443;
-/** Initial backoff delay of 5ms following a temporary accept failure. */ const INITIAL_ACCEPT_BACKOFF_DELAY = 5;
-/** Max backoff delay of 1s following a temporary accept failure. */ const MAX_ACCEPT_BACKOFF_DELAY = 1000;
-/** Used to construct an HTTP server. */ export class Server {
-  #port;
-  #host;
-  #handler;
-  #closed = false;
-  #listeners = new Set();
-  #acceptBackoffDelayAbortController = new AbortController();
-  #httpConnections = new Set();
-  #onError;
-  /**
-   * Constructs a new HTTP Server instance.
-   *
-   * ```ts
-   * import { Server } from "https://deno.land/std@$STD_VERSION/http/server.ts";
-   *
-   * const port = 4505;
-   * const handler = (request: Request) => {

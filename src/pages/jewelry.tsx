@@ -135,7 +135,7 @@ export default function JewelryPaymentPage() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('tripay-public-payment', {
+      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: 'jewelry',
           paymentMethod: selectedPaymentMethod,

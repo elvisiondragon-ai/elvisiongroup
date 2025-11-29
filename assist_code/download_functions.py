@@ -6,17 +6,20 @@ import json
 from pathlib import Path
 
 # Configuration
-SUPABASE_ACCESS_TOKEN = "sbp_e75b191c6c88aae37812df73cbfff1f94016b309"
+SUPABASE_ACCESS_TOKEN = "sbp_fcfd5bb05ed39c23b04ee43526dd29c845ad1259"
 PROJECT_REF = "nlrgdhpmsittuwiiindq"
 BASE_URL = f"https://api.supabase.com/v1/projects/{PROJECT_REF}/functions"
 
 # List of functions to download
 FUNCTIONS = [
-    "tripay-callback", "tripay-create-payment", "vip-status-check", 
+    "send-chat-notification", "tripay-callback", "tripay-create-payment", "vip-status-check", 
     "tripay-store-payment", "pro-status-check", "update-subscription-status", 
     "send-payment-email", "auth-webhook", "send-reset-password-email", 
-    "send-welcome-email", "telegram-to-whatsapp", "chatgpt-renata", 
-    "expire-subscriptions", "Watzap-telegram", "auth-rate-limit"
+    "telegram-to-whatsapp", "chatgpt-renata", "expire-subscriptions", 
+    "Watzap-telegram", "auth-rate-limit", "send-signup-email", "renata-analysis", 
+    "downloadfolder", "media-compress", "save-avatar", "admin-update-user", 
+    "studio-portrait", "photo-payment", "demo", "tripay-public-payment", 
+    "public-callback", "send-ebook-email", "ebook-diet-mail"
 ]
 
 def extract_source_code(binary_data):
@@ -28,8 +31,7 @@ def extract_source_code(binary_data):
         # Look for import statements or serve functions that indicate TypeScript code
         patterns = [
             r'(import\s+.*?from\s+["\'].*?["\'];.*?serve\s*\(.*?\)\s*=>.*?)(?=---SUPABASE|$)',
-            r'(import.*?serve.*?\.ts.*?)(?=\n\n|\r\n\r\n|---)',
-            r'import\s+.*?serve.*?(\n|.)*?}\);'
+            r'(import.*?serve.*?\.ts.*?)(?=\n\n|\r\n\r\n|---)'
         ]
         
         for pattern in patterns:

@@ -1,3 +1,4 @@
+// Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 console.info('ChatGPT-Renata server started');
 Deno.serve(async (req)=>{
@@ -245,33 +246,3 @@ SETUP REQUIREMENTS:
    - Trial registration flow
    - Professional formatting rules
 */ 
-1.1// Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-console.info('ChatGPT-Renata server started');
-Deno.serve(async (req)=>{
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      }
-    });
-  }
-  // Simple GET endpoint to test function
-  if (req.method === 'GET') {
-    return new Response('ChatGPT-Renata function is running!', {
-      headers: {
-        'Content-Type': 'text/plain'
-      }
-    });
-  }
-  try {
-    // BLOCK 1: Parse incoming email data
-    const { from, to, subject, body } = await req.json();
-    console.log(`Processing email from: ${from}, subject: ${subject}`);
-    // BLOCK 2: Knowledge Base Renata - Hardcoded
-    const knowledgeBase = `
-RENATA AI - ASISTEN eL VISION GROUP

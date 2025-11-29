@@ -77,7 +77,7 @@ serve(async (req)=>{
       'parfum': 'Parfum',
       'dev': 'Dev',
       'jewelry': 'Jewelry',
-      'ebook_diet': 'Ebook_diet'
+      'ebook_diet': 'Ebook Diet'
     };
     const productName = body.productName || productMap[subscriptionType] || subscriptionType;
     // --- NEW LOGIC FOR PHYSICAL PRODUCTS ---                                                                                                                                   
@@ -190,7 +190,7 @@ serve(async (req)=>{
         status: 200
       });
     }
-   } catch (error) {
+  } catch (error) {
     console.error('💥💥💥 PUBLIC PAYMENT EDGE FUNCTION CRASH 💥💥💥');
     console.error('💥 Edge Function error:', error.message);
     console.error('💥 Error stack:', error.stack);

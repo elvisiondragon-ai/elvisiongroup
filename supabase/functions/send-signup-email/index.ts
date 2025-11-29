@@ -1,16 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
-
 // Mailketing API configuration
 const MAILKETING_API_URL = Deno.env.get('MAILKETING_API_URL') || 'https://api.mailketing.co.id/api/v1';
 const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY') || '1858bc5ce747873d3eab0334c055cb9a';
 const MAILKETING_EMAIL = Deno.env.get('MAILKETING_EMAIL') || 'support@elvisiongroup.com';
 const LIST_ID = '80713'; // Signup subscriber list ID
-
 // Add subscriber to Mailketing list
 async function addToMailketingList(email, name) {
   try {
@@ -22,7 +19,6 @@ async function addToMailketingList(email, name) {
       subscriber_email: email,
       name: name || email.split('@')[0]
     });
-
     const response = await fetch(`${MAILKETING_API_URL}/addsubtolist`, {
       method: 'POST',
       headers: {
@@ -30,7 +26,6 @@ async function addToMailketingList(email, name) {
       },
       body: params
     });
-
     const result = await response.json();
     console.log('📋 Add to signup list result:', result);
     return response.ok;
@@ -39,12 +34,10 @@ async function addToMailketingList(email, name) {
     return false;
   }
 }
-
 // Send welcome email via Mailketing
 async function sendWelcomeEmail(email, name) {
   try {
     console.log(`📧 Sending welcome email via Mailketing to: ${email}`);
-    
     const subject = "🎉 Selamat Datang di ElVision Group!";
     const htmlContent = `
       <div style="width: 90%; max-width: none; margin: 0 auto; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border-radius: 15px; overflow: hidden;">
@@ -97,7 +90,6 @@ async function sendWelcomeEmail(email, name) {
         </div>
       </div>
     `;
-
     const params = new URLSearchParams({
       api_token: MAILKETING_API_KEY,
       email: MAILKETING_EMAIL,
@@ -107,7 +99,6 @@ async function sendWelcomeEmail(email, name) {
       subject: subject,
       content: htmlContent
     });
-
     const response = await fetch(`${MAILKETING_API_URL}/send`, {
       method: 'POST',
       headers: {
@@ -115,14 +106,12 @@ async function sendWelcomeEmail(email, name) {
       },
       body: params
     });
-
     const result = await response.text();
     console.log('📧 Mailketing welcome email result:', result);
-    
     try {
       const jsonResult = JSON.parse(result);
       return jsonResult;
-    } catch {
+    } catch  {
       return {
         success: true,
         response: result
@@ -133,42 +122,32 @@ async function sendWelcomeEmail(email, name) {
     throw error;
   }
 }
-
-const handler = async (req) => {
+const handler = async (req)=>{
   console.log('🚀 Mailketing Signup Email Function Started');
-  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, {
       headers: corsHeaders
     });
   }
-
   try {
     const body = await req.json();
     console.log('📨 Received signup payload:', body);
-
     // Extract email from various possible fields
     const recipientEmail = body.userEmail || body.email;
     if (!recipientEmail) {
       throw new Error('Email address is required');
     }
-
     const userName = body.userName || body.name || recipientEmail.split('@')[0];
-    
     console.log('📊 Processed signup data:', {
       recipientEmail,
       userName
     });
-
     // Add user to mailing list first
     await addToMailketingList(recipientEmail, userName);
-
     // Send welcome email
     const emailResult = await sendWelcomeEmail(recipientEmail, userName);
-    
     console.log("✅ Mailketing signup email sent successfully");
-    
     return new Response(JSON.stringify({
       success: true,
       message: 'Signup welcome email sent successfully via Mailketing',
@@ -197,5 +176,4 @@ const handler = async (req) => {
     });
   }
 };
-
 serve(handler);
