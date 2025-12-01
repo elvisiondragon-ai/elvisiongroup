@@ -1,1 +1,0 @@
-What is the price for the jewelry product?

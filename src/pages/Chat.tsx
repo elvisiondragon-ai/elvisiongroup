@@ -784,6 +784,45 @@ export function Chat({ onNavigate }: ChatProps) {
           description: "",
           variant: "default"
         });
+
+        // ### AUTO-REPLY BOT LOGIC ###
+        const finalMessage = { ...optimisticMessage, id: data.id, created_at: data.created_at };
+        const BOT_USER_ID = '3da83afb-aa8c-4c55-b3b0-8aa64000205f'; // Assumes Dragon bot is the admin
+        if (user.id !== BOT_USER_ID) {
+          // Use a timeout for a more natural feel
+          setTimeout(async () => {
+            try {
+              // Prepare messages for the bot, including the last sent message
+              const messagesForBot = [...messages.slice(-4), finalMessage].map(m => ({
+                  role: m.user_id === BOT_USER_ID ? 'assistant' : 'user', // Determine role based on BOT_USER_ID
+                  content: m.message
+              }));
+              
+              const response = await fetch('https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/auto-reply', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    // Supabase requires an Authorization header, even for public functions
+                    'Authorization': `Bearer ${supabase.auth.getSession()?.access_token || ''}`
+                  },
+                  body: JSON.stringify({ messages: messagesForBot })
+              });
+
+              if (!response.ok) {
+                  const errorText = await response.text();
+                  throw new Error(`Bot reply failed: ${errorText}`);
+              }
+
+              const { reply } = await response.json();
+
+              // The fetch call above triggers the bot.
+              // We no longer need to manually add the message here,
+              // as it will arrive via the realtime subscription.
+            } catch (botError) {
+                console.error("Auto-reply error:", botError);
+            }
+          }, 1500); // 1.5-second delay before bot replies
+        }
       }
     } catch (err) {
       console.error('Unexpected error sending message:', err);

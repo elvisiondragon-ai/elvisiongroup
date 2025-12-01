@@ -1,7 +1,0 @@
-Archive:  /Users/eldragon/git/elvisiongroup/app-release.apks
-  Length      Date    Time    Name
----------  ---------- -----   ----
-       94  01-01-1981 01:01   toc.pb
-  6840492  01-01-1981 01:01   universal.apk
----------                     -------
-  6840586                     2 files

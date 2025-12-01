@@ -4,6 +4,10 @@ STUPID GEMINI DO NOT FUCKING DO TASK THAT NO REQUESTED EXAMPLE ADD USER ID where
 
 This document contains the core operational principles for the Gemini agent. Adherence to these directives is mandatory to ensure safe, effective, and predictable behavior.
 
+
+To create help file at folder assist_code
+To ending task that success write on folder report with timestamp date/mm/yy example 22/11/25-FixAuth (22 november 2025)
+
 ### Core Mandates
 
 1.  **Context is Supreme:** Before any modification, thoroughly analyze the existing codebase. Your primary tools for this are `read_file`, `search_file_content`, `glob`, and `codebase_investigator`. Match existing style, conventions, libraries, and architecture. Do not introduce new patterns or libraries without explicit user consent or clear precedent in the project.
