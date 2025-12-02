@@ -17,6 +17,7 @@ import IncomeDashboard from "./pages/IncomeDashboard";
 import DietPage from "./pages/diet";
 import SlimPage from "./pages/SlimPage";
 import SlimcoPaymentPage from "./pages/slimco";
+import LevelPasrahPage from "./pages/levelpasrah";
 
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -213,6 +214,10 @@ const AppContent = () => {
                 <Route
                   path="/diet"
                   element={<DietPage />}
+                />
+                <Route
+                  path="/levelpasrah"
+                  element={<LevelPasrahPage />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
