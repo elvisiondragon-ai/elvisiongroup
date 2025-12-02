@@ -1,5 +1,5 @@
 import React from 'react';
-import levelImage from '../assets/LEVL.jpg';
+
 
 const LevelPasrahPage = () => {
   return (
@@ -186,7 +186,7 @@ const LevelPasrahPage = () => {
         <div style={{ maxWidth: '1200px', width: '100%' }}>
             <div className="header">
                 <h1>🌳 Pohon Kekuatan Pasrah</h1>
-                <img src={levelImage} alt="Pohon Kekuatan Pasrah" className="header-image" />
+                <img src="/assets/LEVL.jpg" alt="Pohon Kekuatan Pasrah" className="header-image" />
                 <p>Semakin Dalam Kepasrahan, Semakin Mudah Menarik Hal Besar</p>
             </div>
             
