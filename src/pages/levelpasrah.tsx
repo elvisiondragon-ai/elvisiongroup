@@ -289,6 +289,9 @@ const LevelPasrahPage = () => {
             border-left: 4px solid #ffc107;
             margin-top: 25px;
         }
+        .highlight p {
+            color: black;
+        }
         .highlight strong {
             color: #856404;
             font-size: 18px;
