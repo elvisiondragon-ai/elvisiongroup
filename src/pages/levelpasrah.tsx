@@ -468,8 +468,15 @@ const LevelPasrahPage = () => {
                 <div className="header">
                     <h1>📝 Catatan: Fokus & Visi</h1>
                     <div className="subtitle">
-                        <p><strong>Fokus 1 titik:</strong> 100/100 dari Sadar ke 1 titik (Charge)</p>
-                        <p><strong>Keadaan Normal:</strong> 7/100 dari Fokus, 93/100 Random</p>
+                        <p>
+                            <strong>Fokus 1 titik:</strong> 100/100 dari Sadar ke 1 titik (Charge) Charge memiliki level, analogi nya jika kamu charge pakai watt kecil/10watt untuk mencapai 100% perlu 6 jam,  dan jika watt besar /70watt charge 100% hanya perlu 1 jam.<br/>
+                            <br/>Dalam Fokus 1 titik, charge watt besar adalah kepasrahan realita, inilah implementasi syukur dalam sains.<br/><br/> 
+                            Ketika Suara jalan yang kamu dengar visual kan pasrah, jelas. lalu murnikan visi itu. <br/>Charge kamu berubah dari 10 watt ke 30 watt, dan energi jadi lebih cepat terisi.<br/>
+                            Begitupun jika berfokus 1 titik pada mata. Visi kan yang kamu lihat jelas, teduh, pasrah, damai, dan murnikan visi itu, Charge otomatis akan naik dari 10 watt - ke yang lebih tinggi.. 
+                            <br/><br/> *Fungsi watt Besar: lebih mudah memurnikan visi kita yang lain tanpa kelelahan/tegang, biasanya saat memurnikan visi atau membawa visi ke realita ada ketegangan jika energi lemah.
+                            <br/><br/>
+                            <strong>Keadaan Normal:</strong> 7/100 dari Fokus, 93/100 Random
+                        </p>
                     </div>
                 </div>
 
