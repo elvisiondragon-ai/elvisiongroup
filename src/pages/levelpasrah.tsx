@@ -510,6 +510,24 @@ const LevelPasrahPage = () => {
                             </li>
                         </ul>
                     </div>
+                    
+                    {/* Diagram Comparison */}
+                    <div className="section" style={{ marginTop: '20px' }}>
+                        <h2>Perbandingan Charge</h2>
+                        <div className="wrong">
+                            <h3>❌ SALAH</h3>
+                            <p style={{ marginBottom: '10px', fontWeight: 'bold', color: 'black' }}>Charge Fokus 1 titik 1 Jam keadaan tegang - X</p>
+                        </div>
+                        <div className="correct">
+                            <h3>✓ BENAR</h3>
+                            <p style={{ marginBottom: '10px', fontWeight: 'bold', color: 'black' }}>Charge Fokus 1 Titik dalam visual pasrah:</p>
+                            <ul>
+                                <li>Jika suara yang jadi fokus, visualkan pasrah.</li>
+                                <li>Jika Pemandangan jadi fokus, Visualkan pasrah.</li>
+                            </ul>
+                            <p style={{ marginTop: '10px' }}>*INi membuat charge sangat cepat karena 100/100 diri kita dengan senang hati fokus (checklist green)</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="section">
