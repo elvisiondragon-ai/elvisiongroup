@@ -7,7 +7,7 @@ export default function BrandFlow() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
             Brand Awareness Flow
           </h1>
           <p className="text-xl text-gray-600">
@@ -25,7 +25,7 @@ export default function BrandFlow() {
           </div>
           
           <div className="bg-white rounded-xl p-6 shadow-md">
-            <div className="flex items-center justify-center gap-8">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-8">
               <div className="text-center">
                 <div className="bg-red-100 p-6 rounded-xl mb-4">
                   <ShoppingCart className="w-16 h-16 text-red-600 mx-auto" />
@@ -33,18 +33,18 @@ export default function BrandFlow() {
                 <p className="text-lg font-semibold text-gray-800">Iklan Marketplace</p>
                 <p className="text-sm text-gray-600">(Hard Sales)</p>
               </div>
-              
-              <div className="text-4xl text-red-500">→</div>
-              
+
+              <div className="text-4xl text-red-500 transform md:transform-none rotate-90 md:rotate-0">→</div>
+
               <div className="text-center">
                 <div className="bg-red-100 p-6 rounded-xl mb-4">
                   <Users className="w-16 h-16 text-red-600 mx-auto" />
                 </div>
                 <p className="text-lg font-semibold text-gray-800">100 Orang</p>
               </div>
-              
-              <div className="text-4xl text-red-500">→</div>
-              
+
+              <div className="text-4xl text-red-500 transform md:transform-none rotate-90 md:rotate-0">→</div>
+
               <div className="text-center">
                 <div className="bg-red-100 p-6 rounded-xl mb-4">
                   <p className="text-4xl font-bold text-red-600">1</p>
@@ -111,7 +111,7 @@ export default function BrandFlow() {
               <h3 className="text-2xl font-bold text-green-700">Step 2: Fase Konversi</h3>
             </div>
             
-            <div className="flex items-center justify-center gap-8">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-8">
               <div className="text-center">
                 <div className="bg-green-100 p-6 rounded-xl mb-4">
                   <ShoppingCart className="w-16 h-16 text-green-600 mx-auto" />
@@ -120,7 +120,7 @@ export default function BrandFlow() {
                 <p className="text-sm text-gray-600">(ke audience ter-brainwash)</p>
               </div>
               
-              <div className="text-4xl text-green-500">→</div>
+              <div className="text-4xl text-green-500 transform md:transform-none rotate-90 md:rotate-0">→</div>
               
               <div className="text-center">
                 <div className="bg-green-100 p-6 rounded-xl mb-4">
@@ -130,7 +130,7 @@ export default function BrandFlow() {
                 <p className="text-sm text-green-600 font-bold">(Sudah Aware)</p>
               </div>
               
-              <div className="text-4xl text-green-500">→</div>
+              <div className="text-4xl text-green-500 transform md:transform-none rotate-90 md:rotate-0">→</div>
               
               <div className="text-center">
                 <div className="bg-green-100 p-6 rounded-xl mb-4">
@@ -266,7 +266,28 @@ export default function BrandFlow() {
             📊 Perbedaan Utama
           </h2>
           
-          <div className="overflow-x-auto">
+          <div className="space-y-4 md:hidden">
+            {[
+              { aspect: "Tujuan", hardSales: "Jual langsung", brainwash: "Edukasi & awareness" },
+              { aspect: "Pendekatan", hardSales: "Promosi produk", brainwash: "Story telling & value" },
+              { aspect: "Hasil", hardSales: "Konversi 1-2%", brainwash: "Konversi 10%+" },
+              { aspect: "Jangka Waktu", hardSales: "Short-term", brainwash: "Long-term investment" },
+              { aspect: "Customer Trust", hardSales: "Rendah", brainwash: "Tinggi" },
+            ].map(item => (
+              <div key={item.aspect} className="bg-gray-50 rounded-lg p-4 shadow-sm">
+                <p className="font-bold text-lg text-gray-900 mb-3">{item.aspect}</p>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-red-700">Hard Sales:</span>
+                  <span className="text-gray-700 text-right">{item.hardSales}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-green-700">Brainwash System:</span>
+                  <span className="text-gray-700 text-right">{item.brainwash}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-100">
                 <tr>
