@@ -18,6 +18,7 @@ import DietPage from "./pages/diet";
 import SlimPage from "./pages/SlimPage";
 import SlimcoPaymentPage from "./pages/slimco";
 import LevelPasrahPage from "./pages/levelpasrah";
+import BrandFlow from "./pages/brandflow"; // Import the new BrandFlow component
 
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -218,6 +219,10 @@ const AppContent = () => {
                 <Route
                   path="/levelpasrah"
                   element={<LevelPasrahPage />}
+                />
+                <Route
+                  path="/brandflow"
+                  element={<BrandFlow />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
