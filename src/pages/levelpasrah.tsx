@@ -173,49 +173,7 @@ const LevelPasrahPage = () => {
         }
         
         /* Added styles from fokus-visi */
-        .fokus-container {
-            max-width: 900px;
-            margin: 40px auto 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-        }
-        .fokus-container .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            text-align: left;
-        }
-        .fokus-container h1 {
-            font-size: 28px;
-            margin-bottom: 15px;
-        }
-        .subtitle {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-        .section {
-            margin-bottom: 35px;
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 5px solid #667eea;
-        }
-        .section h2 {
-            color: #667eea;
-            font-size: 22px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-        }
-        .section h2::before {
-            content: "→";
-            margin-right: 10px;
-            font-weight: bold;
-        }
+
         .wrong {
             background: #ffe6e6;
             padding: 15px;
@@ -464,7 +422,7 @@ const LevelPasrahPage = () => {
                 <p>Kepasrahan bukan tentang menyerah, tapi tentang melepaskan kontrol dengan penuh kesadaran. Saat kita benar-benar pasrah, kita membuka ruang bagi alam semesta untuk memberikan yang terbaik. Paradoksnya: semakin kita melepas, semakin banyak yang datang.</p>
             </div>
 
-            <div className="fokus-container">
+            <div className="mt-8">
                 <div className="header">
                     <h1>📝 Catatan: Fokus & Visi</h1>
                     <div className="subtitle">
@@ -480,8 +438,8 @@ const LevelPasrahPage = () => {
                     </div>
                 </div>
 
-                <div className="section">
-                    <h2>Perbandingan Cara Fokus</h2>
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Perbandingan Cara Fokus</h2>
                     
                     <div className="wrong">
                         <h3>❌ SALAH</h3>
@@ -512,8 +470,8 @@ const LevelPasrahPage = () => {
                     </div>
                     
                     {/* Diagram Comparison */}
-                    <div className="section" style={{ marginTop: '20px' }}>
-                        <h2>Perbandingan Charge</h2>
+                    <div className="mt-8">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Perbandingan Charge</h2>
                         <div className="wrong">
                             <h3>❌ SALAH</h3>
                             <p style={{ marginBottom: '10px', fontWeight: 'bold', color: 'black' }}>Charge Fokus 1 titik 1 Jam keadaan tegang - X</p>
@@ -551,6 +509,90 @@ const LevelPasrahPage = () => {
                         Visi yang IDENTIK tapi tidak dilihat → Dialihkan ke Realita
                     </p>
                 </div>
+            </div>
+
+            {/* Charge Cage Section */}
+            <div className="mt-12">
+              <div className="relative z-10">
+                {/* Header */}
+                <div className="text-center mb-8">
+                  <div className="inline-block bg-gradient-to-r from-cyan-400 to-blue-400 text-transparent bg-clip-text mb-4">
+                    <h3 className="text-4xl font-bold">⚡ Charge Cage</h3>
+                  </div>
+                  <div className="inline-block bg-cyan-500/20 backdrop-blur-sm px-6 py-2 rounded-full border border-cyan-400/30">
+                    <p className="text-cyan-300 font-semibold text-lg">Charge Mode - Kurungan Fokus</p>
+                  </div>
+                </div>
+
+                {/* Content Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <div>
+                    <div className="bg-gradient-to-br from-cyan-400 to-blue-500 w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto shadow-lg">
+                      <span className="text-3xl">🧘</span>
+                    </div>
+                    <h4 className="text-cyan-300 font-bold text-lg mb-3 text-center">Step 1: Pasrah</h4>
+                    <p className="text-white/80 text-sm leading-relaxed">
+                      Fokuskan pada visual atau suara yang membuat diri terasa <span className="text-cyan-300 font-semibold">teduh, tenang, dan damai</span>
+                    </p>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+                    <div className="bg-gradient-to-br from-blue-400 to-indigo-500 w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto shadow-lg">
+                      <span className="text-3xl">🎯</span>
+                    </div>
+                    <h4 className="text-blue-300 font-bold text-lg mb-3 text-center">Step 2: Arahkan</h4>
+                    <p className="text-white/80 text-sm leading-relaxed">
+                      Setelah damai, arahkan <span className="text-blue-300 font-semibold">100/100 fokus diri</span> kita ke titik tersebut dengan sempurna
+                    </p>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+                    <div className="bg-gradient-to-br from-purple-400 to-pink-500 w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto shadow-lg">
+                      <span className="text-3xl">🛡️</span>
+                    </div>
+                    <h4 className="text-purple-300 font-bold text-lg mb-3 text-center">Step 3: Wadah Damai</h4>
+                    <p className="text-white/80 text-sm leading-relaxed">
+                      Wadah yang damai membuat penarikan 100/100 fokus <span className="text-purple-300 font-semibold">lebih ditoleransi pikiran</span>, tanpa rasa sakit
+                    </p>
+                  </div>
+
+                  {/* Step 4 */}
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+                    <div className="bg-gradient-to-br from-amber-400 to-orange-500 w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto shadow-lg">
+                      <span className="text-3xl">⏱️</span>
+                    </div>
+                    <h4 className="text-amber-300 font-bold text-lg mb-3 text-center">Step 4: Durasi</h4>
+                    <p className="text-white/80 text-sm leading-relaxed">
+                      Tahan fokus penuh selama <span className="text-amber-300 font-semibold">10 - 30 menit</span> untuk hasil maksimal
+                    </p>
+                  </div>
+                </div>
+
+                {/* Why Section */}
+                <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-6 border border-red-400/30 mb-8">
+                  <div className="text-center">
+                    <div className="bg-red-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                      <span className="text-3xl">❓</span>
+                    </div>
+                    <h4 className="text-red-300 font-bold text-xl mb-3">Kenapa Harus Teduh Dahulu?</h4>
+                    <p className="text-white/90 leading-relaxed">
+                      Dalam keadaan normal, menarik 100/100 fokus diri akan sangat <span className="text-red-300 font-bold">menyakitkan, melelahkan, dan tegang</span>. 
+                      Dengan menciptakan wadah yang damai terlebih dahulu, pikiran akan lebih toleran terhadap intensitas fokus penuh.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Key Insight */}
+                <div className="bg-gradient-to-r from-cyan-400/90 to-blue-500/90 rounded-2xl p-8 text-center shadow-2xl">
+                  <div className="text-5xl mb-4">⚡</div>
+                  <p className="text-white text-xl font-bold mb-2">Kunci Sukses Charge Cage</p>
+                  <p className="text-white/90 text-lg">
+                    Kedamaian adalah fondasi, Fokus adalah kekuatan, Durasi adalah hasil
+                  </p>
+                </div>
+              </div>
             </div>
         </div>
       </div>
