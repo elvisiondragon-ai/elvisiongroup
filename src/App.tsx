@@ -47,6 +47,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";
 import { supabase } from "@/integrations/supabase/client";
 import { setupDebugTools } from "@/utils/debugTools";
+import ServiceWorkerUpdater from "@/components/ServiceWorkerUpdater";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +100,7 @@ const AppContent = () => {
 
   return (
     <AppLoader>
+      <ServiceWorkerUpdater />
       {/* <UpdateBanner /> */}
       <AudioProvider>
         <MeditativeProvider>
