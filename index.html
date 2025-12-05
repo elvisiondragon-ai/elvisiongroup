@@ -139,6 +139,12 @@
         window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
       }
       
+      // Force a one-time service worker unregistration for all users to fix caching issues
+      if (localStorage.getItem('sw-unregistered-v1') !== 'true') {
+        window.recoveryMode();
+        localStorage.setItem('sw-unregistered-v1', 'true');
+      }
+
       // Service worker registration for development (production uses Vite PWA auto-registration)
       if ('serviceWorker' in navigator && location.hostname === 'localhost') {
         window.addEventListener('load', () => {
