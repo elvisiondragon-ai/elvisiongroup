@@ -19,6 +19,7 @@ import SlimPage from "./pages/SlimPage";
 import SlimcoPaymentPage from "./pages/slimco";
 import LevelPasrahPage from "./pages/levelpasrah";
 import BrandFlow from "./pages/brandflow"; // Import the new BrandFlow component
+import OnePercentRule from "./pages/1rule"; // Import the new OnePercentRule component
 
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -225,6 +226,10 @@ const AppContent = () => {
                 <Route
                   path="/brandflow"
                   element={<BrandFlow />}
+                />
+                <Route
+                  path="/1rule"
+                  element={<OnePercentRule />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
