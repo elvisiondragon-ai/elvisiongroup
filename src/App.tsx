@@ -21,6 +21,7 @@ import LevelPasrahPage from "./pages/levelpasrah";
 import BrandFlow from "./pages/brandflow"; // Import the new BrandFlow component
 import OnePercentRule from "./pages/1rule"; // Import the new OnePercentRule component
 import Page15jt from "./pages/15jt";
+import ELVision3000 from "./pages/3000";
 
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -235,6 +236,10 @@ const AppContent = () => {
                 <Route
                   path="/15jt"
                   element={<Page15jt />}
+                />
+                <Route
+                  path="/3000"
+                  element={<ELVision3000 />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
