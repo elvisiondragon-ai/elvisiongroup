@@ -342,7 +342,7 @@ export default function ELVision15JT() {
 
           <div className="max-w-4xl mx-auto space-y-6">
             {[ 
-              "6 Sesi Private 1:1 (90 menit per sesi) dengan metode eL Vision eksklusif",
+              "6 Sesi Private 1:1 (60 menit per sesi) dengan metode eL Vision eksklusif",
               "Vipassana & Kalibrasi khusus disesuaikan dengan tujuan spesifik Anda",
               "Akses langsung via WhatsApp untuk guidance di antara sesi",
               "Custom manifestation protocol berdasarkan energi signature Anda",
