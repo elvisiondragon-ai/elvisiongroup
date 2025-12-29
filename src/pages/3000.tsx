@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRight, Sparkles, Shield, Check } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRight, Sparkles, Shield, Check, Play, Pause } from 'lucide-react';
 
 export default function ELVision3000() {
   const testimonials = [
@@ -142,6 +142,45 @@ export default function ELVision3000() {
     }
   ];
 
+  // New Audio Player Component
+  const AudioPlayer = () => {
+    const audioRef = useRef(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    const togglePlayPause = () => {
+      if (audioRef.current.paused) {
+        audioRef.current.play();
+        setIsPlaying(true);
+      } else {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      }
+    };
+
+    // Listen for when audio ends to reset button
+    useEffect(() => {
+      const audio = audioRef.current;
+      if (audio) {
+        const handleEnded = () => setIsPlaying(false);
+        audio.addEventListener('ended', handleEnded);
+        return () => audio.removeEventListener('ended', handleEnded);
+      }
+    }, []);
+
+    return (
+      <div className="flex items-center justify-center p-4">
+        <button
+          onClick={togglePlayPause}
+          className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold py-3 px-6 rounded-full flex items-center gap-2 transition-all transform hover:scale-105 shadow-xl shadow-yellow-500/50"
+        >
+          {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+          {isPlaying ? 'Pause Audio' : 'Play Audio'}
+        </button>
+        <audio ref={audioRef} src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio/el3000.mp3" preload="auto" className="hidden" />
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
@@ -204,7 +243,58 @@ export default function ELVision3000() {
             FOLLOW OUR FOUNDER AT INSTAGRAM
           </button>
         
-        
+        {/* Audio Player */}
+        <div className="py-10 bg-black">
+          <div className="container mx-auto px-6">
+            <AudioPlayer />
+          </div>
+        </div>
+
+        {/* Reyzandra's Message */}
+        <div className="py-10 bg-black">
+          <div className="container mx-auto px-6 max-w-4xl">
+            <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-900/30 rounded-2xl p-10 mb-8 text-gray-300 leading-relaxed text-lg">
+              <p className="mb-4">My name is eL Reyzandra,</p>
+              <p className="mb-4">Founder of eL Vision.</p>
+              <p className="mb-4">By 2025, I have spent more than 15 years working in this field.</p>
+              <p className="mb-4">My clients are primarily individuals with significant responsibility—heads of intelligence units, founders of social foundations, scholarship institutions, and leaders who operate under constant pressure.</p>
+              <p className="mb-4">One category of client that has left a deep impression on me is those who come at the most critical moments of life.</p>
+              <p className="mb-4">For example, Mr. Arif, who in May 2025 was medically diagnosed with stage-4 brain cancer and given an estimated three months. As of December 2025, he remains alive, conscious, and functioning.</p>
+              <p className="mb-4">This experience reinforced a principle I have held for years:</p>
+              <p className="mb-4">science can measure probabilities, but it does not own the authority over life.</p>
+              <p className="mb-4">Life moves according to natural laws—and nature, when understood correctly, is far more compassionate than most people realize.</p>
+              <p className="mb-4">Many ask why my clients tend to be high-profile individuals.</p>
+              <p className="mb-4">The reason is simple:</p>
+              <p className="mb-4">the more knowledge and experience a person accumulates, the sooner they realize that there is an invisible limiting factor—a factor that blocks progress regardless of intelligence, strategy, or effort.</p>
+              <p className="mb-4">This is not a lack of skill.</p>
+              <p className="mb-4">It is a misalignment with natural law.</p>
+              <p className="mb-4">My journey began 15 years ago when I personally attempted to apply the Law of Attraction through popular teachings such as The Secret. I failed completely.</p>
+              <p className="mb-4">That failure forced me to ask a deeper question:</p>
+              <p className="mb-4">What is missing?</p>
+              <p className="mb-4">Years of research, personal testing, and sacrifice eventually revealed the gap.</p>
+              <p className="mb-4">That gap is what eL Vision now addresses—not as theory, but as a lived system that can be experienced directly.</p>
+              <p className="mb-4">This is also why the first session is offered free.</p>
+              <p className="mb-4">I do not sell motivation, belief, or advice.</p>
+              <p className="mb-4">I offer a working method.</p>
+              <p className="mb-4">One of my earliest international clients in Dubai came to me after losing his job. He joined a free session. Weeks later, he secured a better position as a manager at a premium gym.</p>
+              <p className="mb-4">No promises were made. No persuasion was used.</p>
+              <p className="mb-4">Am I extraordinary?</p>
+              <p className="mb-4">No.</p>
+              <p className="mb-4">What I have learned is this:</p>
+              <p className="mb-4">every human being carries an inner strength already granted by nature.</p>
+              <p className="mb-4">The difference lies only in knowing how to activate it.</p>
+              <p className="mb-4">If you genuinely wish to experience this for yourself,</p>
+              <p className="mb-4">start with the free session.</p>
+              <p className="mb-4">Only then decide whether the six-week program is right for you.</p>
+              <p className="mb-4">I have no interest in earning money by keeping people dependent or confused.</p>
+              <p className="mb-4">This is designed to be one of the most efficient investments you will ever make—</p>
+              <p className="mb-4">a small portion of your resources, in exchange for what matters most: clarity, alignment, and inner stability.</p>
+              <p className="mb-4">I look forward to meeting you in the class.</p>
+              <p className="mt-8 font-bold">— eL Reyzandra</p>
+              <p className="font-bold">Founder, eL Vision</p>
+            </div>
+          </div>
+        </div>
 
       {/* Story-Based Case Studies Section */}
       <div className="py-20 bg-gradient-to-b from-black to-gray-900">
