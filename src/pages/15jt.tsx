@@ -73,6 +73,12 @@ export default function ELVision15K() {
       title: "Klien eL Vision",
       videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/VIOVIDEO_WA.mp4",
       thumbnail: "✨"
+    },
+    {
+      name: "Arif",
+      title: "Klien eL Vision",
+      videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4",
+      thumbnail: "👨‍💻"
     }
   ];
 
