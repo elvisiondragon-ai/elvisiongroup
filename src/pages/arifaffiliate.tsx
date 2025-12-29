@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Sparkles, ArrowRight, Gift, Star, Clock, Instagram, ShoppingBag } from 'lucide-react';
+import { Heart, Sparkles, ArrowRight, Gift, Star, Clock, Instagram, ShoppingBag, Facebook } from 'lucide-react';
 import arif1 from '../assets/arif1.jpg'; // Import the image
 
 export default function ArifAffiliate() {
@@ -340,13 +340,22 @@ export default function ArifAffiliate() {
             <p className="text-2xl font-bold mb-6">Ikuti Perjalanan Saya:</p>
             <div className="flex flex-wrap justify-center gap-6">
               <a 
-                href="https://instagram.com/arifsyarifudin" 
+                href="https://instagram.com/syarifudin_arif25" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gradient-to-r from-pink-500 to-purple-500 px-8 py-4 rounded-full font-bold hover:from-pink-400 hover:to-purple-400 transition-all inline-flex items-center gap-3"
               >
                 <Instagram className="w-6 h-6" />
                 @arifsyarifudin
+              </a>
+              <a 
+                href="https://www.facebook.com/share/1bgZgC7cp8/" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-4 rounded-full font-bold hover:from-blue-500 hover:to-blue-700 transition-all inline-flex items-center gap-3"
+              >
+                <Facebook className="w-6 h-6" />
+                Facebook
               </a>
               <a 
                 href="https://shopee.co.id/arifsyarifudin" 
