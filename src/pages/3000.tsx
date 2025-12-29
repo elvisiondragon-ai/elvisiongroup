@@ -2,6 +2,34 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRight, Sparkles, Shield, Check, Play, Pause } from 'lucide-react';
 
 export default function ELVision3000() {
+  // Facebook Pixel Code
+  useEffect(() => {
+    !(function (f: any, b: any, e: any, v: any, n: any, t: any, s: any) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod
+          ? n.callMethod.apply(n, arguments)
+          : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = !0;
+      n.version = '2.0';
+      n.queue = [];
+      t = b.createElement(e);
+      t.async = !0;
+      t.src = v;
+      s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    })(
+      window,
+      document,
+      'script',
+      'https://connect.facebook.net/en_US/fbevents.js'
+    );
+    fbq('init', '3319324491540889');
+    fbq('track', 'PageView');
+  }, []);
   const testimonials = [
     {
       name: "Felicia Quincy",
@@ -151,6 +179,14 @@ export default function ELVision3000() {
       if (audioRef.current.paused) {
         audioRef.current.play();
         setIsPlaying(true);
+        // Track custom event for audio playback
+        // @ts-ignore
+        if (typeof fbq === 'function') {
+          // @ts-ignore
+          fbq('trackCustom', 'AudioPlayed', {
+            audio_src: audioRef.current.src,
+          });
+        }
       } else {
         audioRef.current.pause();
         setIsPlaying(false);
@@ -705,7 +741,16 @@ export default function ELVision3000() {
 
             <button 
               className="group bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center gap-4 mx-auto mb-8"
-              onClick={() => window.open('https://wa.me/62895325633487?text=Hi%20I%20would%20like%20to%20apply%20VIP%201%3A1%20%0AName:%20%0ASpecific%20Goal:%3A', '_blank')}
+              onClick={() => {
+                // @ts-ignore
+                if (typeof fbq === 'function') {
+                  // @ts-ignore
+                  fbq('track', 'AddToCart', {
+                    content_name: 'EL Vision 3000 Coaching',
+                  });
+                }
+                window.open('https://wa.me/62895325633487?text=Hi%20I%20would%20like%20to%20apply%20VIP%201%3A1%20%0AName:%20%0ASpecific%20Goal:%3A', '_blank');
+              }}
             >
               <Phone className="w-8 h-8" />
               BOOK A CALL NOW

@@ -74,14 +74,14 @@ export const VerseToast = () => {
     ];
 
     const activities = [
-      'Sedang Mendengarkan Verse 1 - The Space Hill',
-      'Sedang Mendengarkan Verse 2 - Lucid Beach',
-      'Sedang Mendengarkan Verse 3 - Syukur Meditation',
-      'Sedang Mendengarkan Verse 4 - Prosperity Stream',
-      'Sedang Mendengarkan Verse 5 - Vitality Vortex',
-      'Sedang Mendengarkan Verse 8 - Love Magnet',
-      'Sedang Mendengarkan Guided to Inner Silence',
-      'Sedang Mendengarkan eL Vision Delta Breathing'
+      'Listening to Verse 1 - The Space Hill',
+      'Listening to Verse 2 - Lucid Beach',
+      'Listening to Verse 3 - Gratitude Meditation',
+      'Listening to Verse 4 - Prosperity Stream',
+      'Listening to Verse 5 - Vitality Vortex',
+      'Listening to Verse 8 - Love Magnet',
+      'Listening to Guided to Inner Silence',
+      'Listening to eL Vision Delta Breathing'
     ];
 
     // Seeded random number generator for deterministic shuffling
@@ -121,10 +121,10 @@ export const VerseToast = () => {
       const displayName = randomUser;
       
       // Extract verse title from activity
-      const verseTitle = randomActivity.replace('Sedang Mendengarkan ', '');
+      const verseTitle = randomActivity.replace('Listening to ', '');
 
       toast({
-        title: `${displayName} Sedang Mendengarkan 🎧`,
+        title: `${displayName} is Listening 🎧`,
         description: `${verseTitle} 🔥`,
         duration: 6000, // Show for 6 seconds
         className: "p-3 pr-4 space-x-3 [&>div>*:first-child]:text-sm [&>div>*:last-child]:text-sm",
@@ -187,7 +187,7 @@ export const VerseToast = () => {
         void activityUserId; // Keep variable "alive" without console.log
         
         toast({
-          title: `${display_name} Sedang Mendengarkan 🎧`,
+          title: `${display_name} is Listening 🎧`,
           description: `${verse_title} 🔥`,
           duration: 6000, // Show for 6 seconds
           className: "p-3 pr-4 space-x-3 [&>div>*:first-child]:text-sm [&>div>*:last-child]:text-sm",

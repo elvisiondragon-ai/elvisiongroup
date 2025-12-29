@@ -1,0 +1,4 @@
+25/12/29-AddPixelAndEvents
+- Added Facebook Pixel base code and PageView event to `src/pages/3000.tsx`.
+- Modified "BOOK A CALL NOW" button to fire an "AddToCart" event before opening the WhatsApp link.
+- Modified the `AudioPlayer` component's `togglePlayPause` function to fire a custom "AudioPlayed" event when audio starts playing.
