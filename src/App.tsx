@@ -23,6 +23,8 @@ import OnePercentRule from "./pages/1rule"; // Import the new OnePercentRule com
 import Page15jt from "./pages/15jt";
 import ELVision3000 from "./pages/3000";
 import PaypalPaymentPage from "./pages/paypal"; // Import the new PaypalPaymentPage component
+import AffiliatePage from "./pages/affiliate"; // Import the new AffiliatePage component
+import ArifAffiliate from "./pages/arifaffiliate"; // Import the ArifAffiliate component
 
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -245,6 +247,14 @@ const AppContent = () => {
                 <Route
                   path="/paypal"
                   element={<PaypalPaymentPage />}
+                />
+                <Route
+                  path="/affiliate"
+                  element={<AffiliatePage />}
+                />
+                <Route
+                  path="/arif9"
+                  element={<ArifAffiliate />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

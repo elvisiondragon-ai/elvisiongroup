@@ -72,7 +72,7 @@ export default function HungrylaterPaymentPage() {
 
   const handleIncrement = () => setQuantity(prev => prev + 1);
   const handleDecrement = () => setQuantity(prev => Math.max(1, prev - 1));
-  const totalAmount = proStatus.isPro ? Math.round(price * quantity * 0.7) : (price * quantity);
+  const totalAmount = price * quantity;
 
   useEffect(() => {
     if (totalAmount > 5000000) {
@@ -443,19 +443,6 @@ export default function HungrylaterPaymentPage() {
       </div>
 
       <div className="px-6 space-y-6">
-        <div className="text-center my-4">
-          <h3 className="text-lg font-semibold">Gabung Subscription dan dapatkan diskon 30% sepanjang tahun</h3>
-          <Button
-            onClick={() => navigate('/whatispro')}
-            className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black p-3 rounded-md text-center w-full h-auto mt-2"
-          >
-            <p className="font-bold whitespace-normal">
-              {proStatus.isPro
-                ? `Your Pro Plan until ${proStatus.expiresAt ? new Date(proStatus.expiresAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown'}`
-                : 'eL Vision Subscription diskon 30-50% sepanjang tahun'}
-            </p>
-          </Button>
-        </div>
         <Card>
           <CardHeader>
             <CardTitle>1. Rangkuman Pesanan</CardTitle>
@@ -488,11 +475,6 @@ export default function HungrylaterPaymentPage() {
             
             <div className="flex justify-between items-center">
               <Label className="text-muted-foreground">Total Harga</Label>
-              {proStatus.isPro && (
-                <span className="ml-2 px-2 py-1 bg-amber-400 text-black text-xs font-semibold rounded-full">
-                  DISC PRO MEMBER
-                </span>
-              )}
               <span className="font-bold text-lg text-primary">{formatCurrency(totalAmount)}</span>
             </div>
             <div className="flex justify-between items-center text-green-600 font-bold">

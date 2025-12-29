@@ -1,0 +1,5 @@
+25/12/29-UpdateAffiliateProductGenerator
+- Modified `src/pages/affiliate.tsx` to replace the free-form "URL Produk" input with a Shadcn UI `Select` component.
+- Added a `productOptions` array with predefined product names and their corresponding URLs.
+- The `productUrlInput` state is now initialized with the URL of the first product option and updates automatically when a new product is selected from the dropdown.
+- This change enhances user experience by providing curated product options for affiliate link generation.
