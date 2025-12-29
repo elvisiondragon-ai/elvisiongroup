@@ -1,0 +1,5 @@
+25/12/29-CreatePaypalPage
+- Created `src/pages/paypal.tsx` with a button to buy the $3000 installment.
+- The button triggers a Facebook Pixel "Purchase" event with the product details.
+- The button redirects to the specified PayPal payment link upon click.
+- Added a new route `/paypal` in `src/App.tsx` to render the `PaypalPaymentPage` component.

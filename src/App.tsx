@@ -22,6 +22,7 @@ import BrandFlow from "./pages/brandflow"; // Import the new BrandFlow component
 import OnePercentRule from "./pages/1rule"; // Import the new OnePercentRule component
 import Page15jt from "./pages/15jt";
 import ELVision3000 from "./pages/3000";
+import PaypalPaymentPage from "./pages/paypal"; // Import the new PaypalPaymentPage component
 
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -240,6 +241,10 @@ const AppContent = () => {
                 <Route
                   path="/3000"
                   element={<ELVision3000 />}
+                />
+                <Route
+                  path="/paypal"
+                  element={<PaypalPaymentPage />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
