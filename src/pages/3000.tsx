@@ -13,7 +13,7 @@ export default function ELVision3000() {
     },
     {
       name: "Agus Mulyadi, SH., MH.",
-      title: "Head of Intelligence, Indonesia | Instagram: @AgusMulyadi",
+      title: "Head of Pangandaran Intelligence, Indonesia",
       verified: true,
       image: "👨‍💼",
       rating: 5,
@@ -196,6 +196,16 @@ export default function ELVision3000() {
         </div>
       </div>
 
+          <button 
+            className="group bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-black font-bold text-xl px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-xl shadow-purple-500/50 flex items-center gap-4 mx-auto mb-16"
+            onClick={() => window.open('https://instagram.com/elreyzandra', '_blank')}
+          >
+            <ArrowRight className="w-6 h-6" />
+            FOLLOW OUR FOUNDER AT INSTAGRAM
+          </button>
+        
+        
+
       {/* Story-Based Case Studies Section */}
       <div className="py-20 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-6">
@@ -361,27 +371,31 @@ export default function ELVision3000() {
 
               <div className="bg-gradient-to-br from-green-900/30 to-black border-2 border-green-500/50 rounded-2xl p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 text-9xl opacity-10">✓</div>
-                <h3 className="text-2xl font-bold text-green-400 mb-4">What You Get</h3>
-                <ul className="space-y-3 text-left">
-                  <li className="flex items-start gap-3 text-gray-300">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span><strong>Measurable results</strong> in the first week</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-gray-300">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span><strong>Energy transformation</strong> you can feel</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-gray-300">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span><strong>Clarity</strong> for major decisions</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-gray-300">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                    <span><strong>Real manifestation</strong> like our clients</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
+<h3 className="text-2xl font-bold text-green-400 mb-4">What You Get</h3>
+<ul className="space-y-4 text-left">
+<li className="flex items-start gap-3 text-gray-300">
+<span className="text-2xl mt-1 flex-shrink-0">🏥</span>
+<span><strong>Health transformations:</strong> We've helped clients defy terminal diagnoses. Mr. Arif was diagnosed with cancer and given 3 months to live in May 2025 - he's alive and thriving today. You can contact him directly to hear his story.</span>
+</li>
+<li className="flex items-start gap-3 text-gray-300">
+<span className="text-2xl mt-1 flex-shrink-0">💰</span>
+<span><strong>Financial breakthroughs:</strong> One foundation owner grew their scholarship donations from zero to $6M/year after working with us.</span>
+</li>
+<li className="flex items-start gap-3 text-gray-300">
+<span className="text-2xl mt-1 flex-shrink-0">👨‍👩‍👧‍👦</span>
+<span><strong>Family healing:</strong> Successful men often struggle with feeling respected at home. When ego clashes seem unsolvable, we create change within weeks - not years.</span>
+</li>
+<li className="flex items-start gap-3 text-gray-300">
+<span className="text-2xl mt-1 flex-shrink-0">☮️</span>
+<span><strong>True peace & happiness:</strong> Money and happiness are different. Money buys hospital visits and stress relief - not joy. Real happiness comes from attitude and giving. In your first session, you'll discover happiness through simple things: your breath, what you see, how you sense the world. Your finances become a bonus to happiness itself.</span>
+</li>
+<li className="flex items-start gap-3 text-gray-300">
+<span className="text-2xl mt-1 flex-shrink-0">❤️</span>
+<span><strong>Love & relationships:</strong> Our male clients who want to attract a specific woman have a 95% success rate within 6 weeks. For transparency: women seeking to attract a specific man have a 50% success rate in the same timeframe. However, women working to heal existing marriages also achieve 95% success - which is why we often recommend that path.</span>
+</li>
+</ul>
+</div>
+</div>
 
             <div className="mt-12 bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-8">
               <p className="text-2xl text-gray-300 leading-relaxed">
