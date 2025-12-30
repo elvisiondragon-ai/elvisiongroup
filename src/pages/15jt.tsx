@@ -73,6 +73,12 @@ export default function ELVision15K() {
       title: "Klien eL Vision",
       videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/VIOVIDEO_WA.mp4",
       thumbnail: "✨"
+    },
+    {
+      name: "Arif",
+      title: "Klien eL Vision",
+      videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4",
+      thumbnail: "👨‍💻"
     }
   ];
 
@@ -129,6 +135,14 @@ export default function ELVision15K() {
       image: "🎯",
       rating: 5,
       text: "6 minggu mengubah 15 tahun pola pikir. Kekayaan ada, tapi kedamaian tidak. Sekarang saya mengerti: kemakmuran sejati dimulai dengan 1% fokus yang tepat."
+    },
+    {
+      name: "Arif",
+      title: "Klien eL Vision",
+      verified: true,
+      image: "👨‍💻",
+      rating: 5,
+      text: "Saya didiagnosis kanker otak stadium 4 dan divonis mati 3 bulan kemudian, sekarang sudah 1 tahun lebih saya hidup dan lebih baik dari sebelumnya, tehnik ini bukan tehnik biasa"
     }
   ];
 
