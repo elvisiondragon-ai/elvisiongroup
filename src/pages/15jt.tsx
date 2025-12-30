@@ -73,12 +73,6 @@ export default function ELVision15K() {
       title: "Klien eL Vision",
       videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/VIOVIDEO_WA.mp4",
       thumbnail: "✨"
-    },
-    {
-      name: "Arif",
-      title: "Klien eL Vision",
-      videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4",
-      thumbnail: "👨‍💻"
     }
   ];
 
@@ -248,7 +242,7 @@ export default function ELVision15K() {
           {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
           {isPlaying ? 'Jeda Audio' : 'Putar Audio'}
         </button>
-        <audio ref={audioRef} src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio/el15jt.mp3" preload="auto" className="hidden" />
+        <audio ref={audioRef} src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio/el.mp3" preload="auto" className="hidden" />
       </div>
     );
   };
@@ -784,6 +778,179 @@ export default function ELVision15K() {
               </p>
               <p className="text-lg text-gray-400">
                 Setiap testimoni adalah bukti kalibrasi energi yang presisi.
+              </p>
+            </div>
+          </div>
+
+          {/* Metode yang Kami Gunakan Section */}
+          <div className="mt-20 text-left">
+            <h2 className="text-5xl font-bold text-center mb-12">
+              <span className="bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
+                Metode yang Kami Gunakan
+              </span>
+            </h2>
+
+            <div className="max-w-4xl mx-auto space-y-6 text-gray-300 leading-relaxed text-lg">
+              <p>
+                Metode eL Vision <strong className="text-yellow-400">bukanlah magic</strong>, bukan sugesti kosong, dan bukan sekadar <em>positive thinking</em>.
+                Pendekatan ini merupakan <strong className="text-yellow-400">kalibrasi sistem internal manusia</strong>, yang bekerja pada tiga lapisan utama:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>energi fisiologis (kondisi tubuh & sistem saraf),</li>
+                <li>alam bawah sadar,</li>
+                <li>serta pola pengambilan keputusan yang secara konsisten membentuk realitas sehari-hari.</li>
+              </ul>
+              <p>
+                Dalam ilmu saraf dan psikologi modern, manusia <strong className="text-yellow-400">tidak terutama digerakkan oleh niat sadar</strong>,
+                melainkan oleh <strong className="text-yellow-400">pola bawah sadar yang bekerja otomatis</strong>.
+              </p>
+              <p>
+                Berbagai riset menunjukkan bahwa:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>sekitar <strong className="text-yellow-400">90–95% keputusan manusia bersifat non-sadar</strong>,</li>
+                <li>sementara pikiran sadar sering kali hanya berfungsi untuk
+                  <strong className="text-yellow-400">membenarkan keputusan yang telah dibuat oleh sistem bawah sadar</strong>.
+                </li>
+              </ul>
+              <p className="italic text-gray-400">
+                (Referensi: Daniel Kahneman – <em>Thinking, Fast and Slow</em>)
+              </p>
+
+              <h3 className="text-3xl font-bold text-yellow-400 pt-8 mb-4">Letak Masalah 90% Orang yang “Stuck”</h3>
+              <p>
+                Sebagian besar orang yang merasa mentok <strong className="text-yellow-400">bukan karena kekurangan strategi, ilmu, atau usaha</strong>.
+                Justru masalahnya berada di level yang lebih dalam, yaitu <strong className="text-yellow-400">ketidaksinkronan internal</strong>.
+              </p>
+              <p>
+                Polanya hampir selalu sama:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>Sistem saraf berada dalam kondisi <strong className="text-yellow-400">tegang kronis</strong>
+                  (stres berkepanjangan, kewaspadaan berlebih, tekanan yang tidak disadari)
+                </li>
+                <li>Energi tubuh <strong className="text-yellow-400">tidak selaras</strong> dengan tujuan dan visi hidup</li>
+                <li><strong className="text-yellow-400">Keyakinan lama tetap aktif</strong>, meskipun secara logika sudah “tahu harus berubah”</li>
+              </ul>
+              <p>
+                Akibatnya:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>Visi besar terasa berat</li>
+                <li>Eksekusi tidak konsisten</li>
+                <li>Keputusan kecil sering tertunda</li>
+                <li>Hasil hidup stagnan meski usaha terus ditingkatkan</li>
+              </ul>
+              <p>
+                Ini <strong className="text-yellow-400">bukan kemalasan</strong>.
+                Ini adalah <strong className="text-yellow-400">masalah sinkronisasi sistem internal</strong>.
+              </p>
+
+              <h3 className="text-3xl font-bold text-yellow-400 pt-8 mb-4">Apa yang Kami Lakukan (Secara Nyata)</h3>
+              <p>
+                Dalam sesi privat eL Vision, kami <strong className="text-yellow-400">tidak bekerja di level motivasi atau nasihat</strong>.
+                Kami bekerja <strong className="text-yellow-400">langsung ke sistem bawah sadar</strong>.
+              </p>
+              <p>
+                Pendekatan ini memanfaatkan prinsip dari:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li><strong className="text-yellow-400">Neuroscience</strong> (khususnya neuroplasticity)</li>
+                <li><strong className="text-yellow-400">Somatic psychology</strong> (hubungan tubuh, emosi, dan pikiran)</li>
+                <li><strong className="text-yellow-400">Subconscious patterning</strong> dan <em>emotional recalibration</em></li>
+              </ul>
+              <p>
+                Founder eL Vision memiliki <strong className="text-yellow-400">pengalaman lebih dari 15 tahun</strong>
+                dalam memandu individu masuk ke kondisi internal tertentu,
+                di mana <strong className="text-yellow-400">keyakinan, rasa diri, dan pola emosi dapat ditata ulang secara bertahap</strong>.
+              </p>
+              <p>
+                Dalam literatur psikologi, proses ini sering disebut sebagai:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li><em>bypassing conscious resistance</em>, atau</li>
+                <li><em>direct subconscious access</em></li>
+              </ul>
+              <p>
+                Bukan dipaksa.
+                Bukan dilawan.
+                Melainkan <strong className="text-yellow-400">diatur ulang dari dalam</strong>.
+              </p>
+
+              <h3 className="text-3xl font-bold text-yellow-400 pt-8 mb-4">Mengapa Ini Bukan Law of Attraction Biasa</h3>
+              <p>
+                Teknik eL Vision <strong className="text-yellow-400">bukan sekadar Law of Attraction versi motivasi</strong>.
+                Kami menyebutnya sebagai <strong className="text-yellow-400">upgrade sistem</strong>, karena bekerja dengan <strong className="text-yellow-400">dua arus sekaligus</strong>.
+              </p>
+              <h4 className="text-2xl font-bold text-amber-400 pt-4 mb-2">1. Arus Visi <em>(Goal / Keinginan)</em></h4>
+              <p>
+                Ini adalah niat sadar, target, dan gambaran masa depan yang ingin dicapai.
+              </p>
+              <h4 className="text-2xl font-bold text-amber-400 pt-4 mb-2">2. Arus Kenyataan <em>(Kondisi Internal Saat Ini)</em></h4>
+              <p>
+                Ini mencakup:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>emosi dominan sehari-hari,</li>
+                <li>tonus sistem saraf,</li>
+                <li>rasa aman, percaya diri,</li>
+                <li>serta tingkat kehadiran seseorang di dalam tubuhnya.</li>
+              </ul>
+
+              <h3 className="text-3xl font-bold text-yellow-400 pt-8 mb-4">Masalah Kebanyakan Orang</h3>
+              <p>
+                Pada mayoritas orang:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li><strong className="text-yellow-400">Arus visinya sangat kuat</strong></li>
+                <li>tetapi <strong className="text-yellow-400">arus kenyataannya tidak selaras dengan visi tersebut</strong></li>
+              </ul>
+              <p>
+                Visi dibangun oleh pikiran sadar,
+                sementara arus kenyataan dikendalikan oleh <strong className="text-yellow-400">alam bawah sadar</strong> —
+                dan alam bawah sadar <strong className="text-yellow-400">selalu lebih dominan</strong>.
+              </p>
+              <p>
+                Dalam fisika sistem dan psikologi dinamis berlaku prinsip sederhana:
+              </p>
+              <blockquote className="border-l-4 border-yellow-500 pl-4 italic text-gray-400">
+                <p><strong className="text-yellow-400">Sistem yang lebih stabil dan konsisten akan menyeret sistem yang lebih lemah.</strong></p>
+              </blockquote>
+              <p>
+                Jika arus kenyataan bertentangan dengan visi,
+                maka visi akan terus mengalami friksi, sabotase halus, dan penundaan.
+              </p>
+
+              <h3 className="text-3xl font-bold text-yellow-400 pt-8 mb-4">Prinsip Inti eL Vision</h3>
+              <p>
+                Dalam eL Vision:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li><strong className="text-yellow-400">Bukan visi yang dikejar mati-matian</strong></li>
+                <li>melainkan <strong className="text-yellow-400">arus kenyataan yang diselaraskan dan diperkuat terlebih dahulu</strong></li>
+              </ul>
+              <p>
+                Saat:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>tubuh menjadi lebih tenang,</li>
+                <li>emosi lebih sinkron,</li>
+                <li>dan keyakinan internal lebih stabil,</li>
+              </ul>
+              <p>
+                maka <strong className="text-yellow-400">arus kenyataan mulai searah dengan visi</strong>.
+              </p>
+              <p>
+                Dan ketika arus kenyataan sudah selaras dan cukup kuat,
+                visi <strong className="text-yellow-400">tidak perlu lagi dipaksakan</strong> —
+                ia <strong className="text-yellow-400">terbawa masuk ke realitas secara alami</strong>.
+              </p>
+              <p>
+                Inilah yang oleh banyak orang disebut sebagai <em>“terwujud”</em>.
+              </p>
+              <p>
+                Bukan karena berharap.
+                Melainkan karena <strong className="text-yellow-400">sistem internal sudah berada di arah yang benar</strong>.
               </p>
             </div>
           </div>

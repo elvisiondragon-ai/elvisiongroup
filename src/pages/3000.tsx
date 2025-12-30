@@ -662,37 +662,6 @@ export default function ELVision3000() {
             Those who've already "succeeded" but seek the next level
           </p>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {testimonials.map((testimonial, idx) => (
-              <div key={idx} className="bg-gradient-to-br from-gray-900 to-black border border-yellow-900/30 rounded-2xl p-8 hover:border-yellow-500/50 transition-all">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="text-5xl">{testimonial.image}</div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xl font-bold text-yellow-400">{testimonial.name}</h3>
-                      {testimonial.verified && (
-                        <div className="bg-blue-500 rounded-full p-1" title="Verified">
-                          <CheckCircle className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-400">{testimonial.title}</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
-                  ))}
-                </div>
-
-                <p className="text-gray-300 leading-relaxed italic">
-                  "{testimonial.text}"
-                </p>
-              </div>
-            ))}
-          </div>
-
           <div className="mt-16 text-center">
             <div className="inline-block bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-2xl px-8 py-6">
               <p className="text-xl text-gray-300 mb-2">
@@ -700,6 +669,180 @@ export default function ELVision3000() {
               </p>
               <p className="text-lg text-gray-400">
                 Every testimony is proof of precise energy calibration.
+              </p>
+            </div>
+          </div>
+
+          {/* Our Method Section */}
+          <div className="mt-20 text-left">
+            <h2 className="text-5xl font-bold text-center mb-12">
+              <span className="bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
+                Our Method
+              </span>
+            </h2>
+
+            <div className="max-w-4xl mx-auto space-y-6 text-gray-300 leading-relaxed text-lg">
+              <p>
+                The eL Vision method is <strong className="text-yellow-400">not magic</strong>, not empty suggestion, and not mere <em>positive thinking</em>.
+                It is a <strong className="text-yellow-400">calibration of the human internal system</strong>, working across three interconnected layers:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>physiological energy and nervous system regulation,</li>
+                <li>subconscious patterning,</li>
+                <li>and decision-making mechanisms that consistently shape daily reality.</li>
+              </ul>
+              <p>
+                Modern neuroscience and psychology show that human behavior is <strong className="text-yellow-400">not primarily driven by conscious intention</strong>,
+                but by <strong className="text-yellow-400">automatic subconscious processes</strong>.
+              </p>
+              <p>
+                Research indicates that:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>approximately <strong className="text-yellow-400">90–95% of human decisions are non-conscious</strong>,</li>
+                <li>while the conscious mind often functions only to
+                  <strong className="text-yellow-400">justify decisions already made by the subconscious system</strong>.
+                </li>
+              </ul>
+              <p className="italic text-gray-400">
+                (Reference: Daniel Kahneman — <em>Thinking, Fast and Slow</em>)
+              </p>
+
+              <h3 className="text-3xl font-bold text-yellow-400 pt-8 mb-4">Where 90% of People Get “Stuck”</h3>
+              <p>
+                Most people who feel stuck are <strong className="text-yellow-400">not lacking strategy, effort, or intelligence</strong>.
+                The issue exists at a deeper level: <strong className="text-yellow-400">internal misalignment</strong>.
+              </p>
+              <p>
+                The pattern is consistent:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>the nervous system remains in a state of <strong className="text-yellow-400">chronic tension</strong>
+                  (persistent stress, hyper-vigilance, unprocessed pressure),
+                </li>
+                <li>bodily energy is <strong className="text-yellow-400">out of sync</strong> with personal goals,</li>
+                <li>outdated subconscious beliefs remain active,
+                  even when the person <em>logically knows</em> they should change.
+                </li>
+              </ul>
+              <p>
+                As a result:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>big visions feel heavy,</li>
+                <li>execution becomes inconsistent,</li>
+                <li>small decisions are delayed,</li>
+                <li>outcomes plateau despite increased effort.</li>
+              </ul>
+              <p>
+                This is <strong className="text-yellow-400">not laziness</strong>.
+                It is <strong className="text-yellow-400">systemic internal incoherence</strong>.
+              </p>
+
+              <h3 className="text-3xl font-bold text-yellow-400 pt-8 mb-4">What We Actually Do</h3>
+              <p>
+                In private eL Vision sessions, we <strong className="text-yellow-400">do not work at the level of motivation or advice</strong>.
+                We work <strong className="text-yellow-400">directly with the subconscious system</strong>.
+              </p>
+              <p>
+                Our approach is grounded in principles from:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li><strong className="text-yellow-400">Neuroscience</strong> (particularly neuroplasticity),</li>
+                <li><strong className="text-yellow-400">Somatic psychology</strong> (the body–emotion–mind connection),</li>
+                <li><strong className="text-yellow-400">Subconscious patterning</strong> and emotional recalibration.</li>
+              </ul>
+              <p>
+                The founder of eL Vision has <strong className="text-yellow-400">over 15 years of experience</strong> guiding individuals into specific internal states
+                where <strong className="text-yellow-400">beliefs, self-identity, and emotional patterns can be gradually restructured</strong>.
+              </p>
+              <p>
+                In psychological literature, this process is often described as:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li><em>bypassing conscious resistance</em>, or</li>
+                <li><em>direct subconscious access</em>.</li>
+              </ul>
+              <p>
+                Nothing is forced.
+                Nothing is fought.
+                The system is <strong className="text-yellow-400">reorganized from within</strong>.
+              </p>
+
+              <h3 className="text-3xl font-bold text-yellow-400 pt-8 mb-4">Why This Is Not Traditional Law of Attraction</h3>
+              <p>
+                The eL Vision technique is <strong className="text-yellow-400">not a motivational version of the Law of Attraction</strong>.
+                It is a <strong className="text-yellow-400">system upgrade</strong> because it operates on <strong className="text-yellow-400">two simultaneous flows</strong>.
+              </p>
+              <h4 className="text-2xl font-bold text-amber-400 pt-4 mb-2">1. The Vision Flow <em>(Goals & Intentions)</em></h4>
+              <p>
+                Conscious goals, future images, and desired outcomes.
+              </p>
+              <h4 className="text-2xl font-bold text-amber-400 pt-4 mb-2">2. The Reality Flow <em>(Current Internal State)</em></h4>
+              <p>
+                This includes:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>dominant emotional patterns,</li>
+                <li>nervous system tone,</li>
+                <li>felt sense of safety and confidence,</li>
+                <li>and embodied presence in daily life.</li>
+              </ul>
+
+              <h3 className="text-3xl font-bold text-yellow-400 pt-8 mb-4">The Core Problem Most People Face</h3>
+              <p>
+                For most individuals:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li><strong className="text-yellow-400">the vision flow is strong</strong>,</li>
+                <li>but <strong className="text-yellow-400">the reality flow is misaligned with that vision</strong>.</li>
+              </ul>
+              <p>
+                Vision is created by the conscious mind,
+                while the reality flow is governed by the <strong className="text-yellow-400">subconscious</strong> —
+                and the subconscious <strong className="text-yellow-400">always dominates</strong>.
+              </p>
+              <p>
+                In systems physics and dynamic psychology, one principle applies:
+              </p>
+              <blockquote className="border-l-4 border-yellow-500 pl-4 italic text-gray-400">
+                <p><strong className="text-yellow-400">The more stable and consistent system will always override the weaker one.</strong></p>
+              </blockquote>
+              <p>
+                When the internal reality flow contradicts the vision,
+                the result is friction, subtle self-sabotage, and delayed manifestation.
+              </p>
+
+              <h3 className="text-3xl font-bold text-yellow-400 pt-8 mb-4">The Core Principle of eL Vision</h3>
+              <p>
+                In eL Vision:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>we <strong className="text-yellow-400">do not chase vision aggressively</strong>,</li>
+                <li>we <strong className="text-yellow-400">first align and strengthen the reality flow</strong>.</li>
+              </ul>
+              <p>
+                When:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>the body becomes calmer,</li>
+                <li>emotions become coherent,</li>
+                <li>and internal beliefs stabilize,</li>
+              </ul>
+              <p>
+                the reality flow begins to <strong className="text-yellow-400">move in the same direction as the vision</strong>.
+              </p>
+              <p>
+                Once this alignment occurs,
+                vision no longer needs to be forced —
+                it is <strong className="text-yellow-400">carried into reality naturally</strong>.
+              </p>
+              <p>
+                This is what many people describe as <em>“manifestation.”</em>
+              </p>
+              <p>
+                Not because of wishing.
+                But because the <strong className="text-yellow-400">internal system is finally coherent</strong>.
               </p>
             </div>
           </div>
