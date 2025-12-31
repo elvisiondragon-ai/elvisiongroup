@@ -417,6 +417,243 @@ export default function ELVision15K() {
               Studi kasus dari high-performers yang menembus batasan internal
             </p>
 
+            {/* Health Section - Arif's Story */}
+      <div className="py-20 bg-gradient-to-b from-gray-900 to-black">
+        <div className="container mx-auto px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="inline-block bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-full px-6 py-2 mb-4">
+                <span className="text-green-400 font-bold">TRANSFORMASI KESEHATAN</span>
+              </div>
+              <h2 className="text-5xl font-bold mb-6">
+                <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                  Ketika Medis Memberikan Vonis, Alam Memberikan Jalan Lain
+                </span>
+              </h2>
+            </div>
+
+            {/* Arif's Video Testimonial */}
+            <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-green-500/50 rounded-2xl p-10 mb-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="text-5xl">🏥</div>
+                <div className="flex-1">
+                  <h3 className="text-3xl font-bold text-green-400">Syarifudin Arif</h3>
+                  <p className="text-lg text-gray-400">Instagram: @syarifudin_arif25</p>
+                  <p className="text-sm text-gray-500 mt-1">Penyintas Kanker Otak Stadium 4</p>
+                </div>
+              </div>
+              
+              <video 
+                className="w-full rounded-lg mb-6"
+                controls
+                preload="metadata"
+                playsInline
+                webkit-playsinline="true"
+              >
+                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4" type="video/mp4" />
+                Browser Anda tidak mendukung pemutaran video.
+              </video>
+
+              <div className="bg-gradient-to-r from-red-900/30 to-green-900/30 border border-green-500/30 rounded-xl p-6 mb-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <div className="text-red-400 font-bold text-lg mb-2">📋 Vonis Medis - Mei 2025</div>
+                    <p className="text-gray-300">Kanker Otak Stadium 4</p>
+                    <p className="text-gray-300">Estimasi Waktu: 3 Bulan</p>
+                  </div>
+                  <div>
+                    <div className="text-green-400 font-bold text-lg mb-2">✨ Realitas - Desember 2025</div>
+                    <p className="text-gray-300">Masih Hidup & Sehat</p>
+                    <p className="text-gray-300">Kondisi Semakin Membaik</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-gray-300 leading-relaxed">
+                <p className="text-xl font-semibold text-white">
+                  Bagaimana eL Vision Membantu Transformasi Kesehatan Pak Arif?
+                </p>
+                
+                <p>
+                  Ketika Pak Arif datang kepada kami pada Mei 2025, kondisi medisnya sudah divonis stadium akhir dengan estimasi waktu 3 bulan. Namun kami percaya bahwa <span className="text-green-400 font-semibold">tubuh manusia memiliki kemampuan penyembuhan alami yang luar biasa</span> - yang sering kali terblokir oleh kondisi mental dan emosional.
+                </p>
+
+                <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-6 my-4">
+                  <h4 className="text-xl font-bold text-green-400 mb-3">🧠 Metode Custom Terapi Frekuensi eL Vision</h4>
+                  <p className="mb-3">
+                    Kami bekerja pada level <span className="text-green-400 font-semibold">alam bawah sadar untuk menetralkan sel-sel abnormal</span>. Meski terdengar mustahil bagi pendekatan medis konvensional, prinsip ini sebenarnya sudah diakui dalam bidang psychoneuroimmunology - ilmu yang mempelajari hubungan antara pikiran, sistem saraf, dan sistem kekebalan tubuh.
+                  </p>
+                  
+                  <div className="space-y-2 ml-4">
+                    <p className="flex items-start gap-2">
+                      <span className="text-green-400 mt-1">•</span>
+                      <span><strong>Kalibrasi Alam Bawah Sadar:</strong> Kami memprogram ulang respons otomatis tubuh terhadap sel abnormal, mengaktifkan mekanisme penyembuhan alami yang selama ini tertidur</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-green-400 mt-1">•</span>
+                      <span><strong>Terapi Frekuensi Spesifik:</strong> Setiap sel memiliki frekuensi getaran. Kami membantu menyelaraskan frekuensi tubuh ke kondisi optimal untuk regenerasi</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-green-400 mt-1">•</span>
+                      <span><strong>Water Fasting Protocol:</strong> Dikombinasikan dengan protokol puasa air yang terbukti memicu autophagy - proses alami tubuh membersihkan sel-sel rusak</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-green-400 mt-1">•</span>
+                      <span><strong>Stress Neutralization:</strong> Menghilangkan stres kronis yang menekan sistem imun, membiarkan tubuh fokus pada penyembuhan</span>
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-lg text-yellow-400 font-semibold italic">
+                  "Sains medis mengukur probabilitas, tetapi tidak memiliki otoritas penuh atas kehidupan. Alam, ketika dipahami dan diselaraskan dengan benar, jauh lebih penuh belas kasih dari yang dibayangkan."
+                </p>
+
+                <p>
+                  Hasil Pak Arif bukan keajaiban dalam artian supernatural - ini adalah <span className="text-green-400 font-semibold">hasil dari mengaktifkan kembali sistem penyembuhan alami tubuh yang sudah ada sejak lahir</span>, namun sering terblokir oleh pola pikir, emosi negatif, dan stres berkepanjangan.
+                </p>
+
+                <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4 mt-4">
+                  <p className="text-amber-400 text-sm">
+                    <strong>Disclaimer:</strong> Metode eL Vision bukan pengganti pengobatan medis. Kami bekerja sebagai pendamping yang mengoptimalkan kondisi mental-emosional untuk mendukung proses penyembuhan alami tubuh. Konsultasikan dengan dokter Anda untuk keputusan medis.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <p className="text-2xl text-gray-300 italic">
+                "Tubuh Anda lebih kuat dari diagnosis. Anda hanya perlu tahu cara membuka kuncinya."
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Business Section */}
+      <div className="py-20 bg-black">
+        <div className="container mx-auto px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="inline-block bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-full px-6 py-2 mb-4">
+                <span className="text-blue-400 font-bold">TRANSFORMASI BISNIS</span>
+              </div>
+              <h2 className="text-5xl font-bold mb-6">
+                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Bisnis Stuck? Masalahnya Bukan di Luar
+                </span>
+              </h2>
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                Ketika strategi sudah benar, tim sudah kuat, tetapi hasil tetap mentok - masalahnya ada di dalam
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-blue-500/50 rounded-2xl p-10">
+              <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
+                <div className="bg-gradient-to-r from-red-900/30 to-orange-900/30 border border-red-500/30 rounded-xl p-6">
+                  <h3 className="text-2xl font-bold text-red-400 mb-4">❌ Pola yang Sering Terjadi</h3>
+                  <div className="space-y-3">
+                    <p className="flex items-start gap-3">
+                      <span className="text-red-400 text-xl mt-1">•</span>
+                      <span>Owner/CEO sudah punya strategi sempurna, tetapi eksekusi selalu tertunda atau tidak maksimal</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-red-400 text-xl mt-1">•</span>
+                      <span>Tim kompeten, modal cukup, sistem bagus - tapi pertumbuhan terhenti di ceiling yang sama</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-red-400 text-xl mt-1">•</span>
+                      <span>Setiap keputusan besar terasa berat, penuh keraguan, menguras energi mental</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-red-400 text-xl mt-1">•</span>
+                      <span>Kompetitor dengan sumber daya lebih sedikit justru berkembang lebih cepat</span>
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-2xl font-bold text-white text-center py-4">
+                  Ini Bukan Masalah Strategi. Ini Masalah <span className="text-blue-400">Alignment</span>.
+                </p>
+
+                <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-xl p-6">
+                  <h3 className="text-2xl font-bold text-blue-400 mb-4">✨ Akar Masalah Sebenarnya</h3>
+                  <p className="mb-4">
+                    Seringkali bisnis stuck <span className="text-blue-400 font-semibold">bukan karena faktor eksternal</span> seperti pasar, kompetitor, atau modal - melainkan karena <span className="text-blue-400 font-semibold">kondisi internal owner/CEO</span>.
+                  </p>
+                  
+                  <div className="space-y-4 mt-4">
+                    <div>
+                      <h4 className="text-xl font-bold text-purple-400 mb-2">🧠 Mental & Pemikiran yang Tidak Selaras</h4>
+                      <p>
+                        Jika seorang pemimpin terus beroperasi dengan <span className="text-purple-400 font-semibold">keraguan, kecemasan, atau ketakutan tersembunyi</span> - maka energi itu akan merembes ke setiap keputusan, setiap interaksi tim, dan akhirnya ke hasil bisnis.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="text-xl font-bold text-purple-400 mb-2">⚡ Hukum Frekuensi dalam Bisnis</h4>
+                      <p>
+                        Bisnis adalah manifestasi dari <span className="text-purple-400 font-semibold">frekuensi internal pemimpinnya</span>. Jika frekuensi internal (keyakinan, emosi, energi) tidak selaras dengan visi dan goal - maka akan selalu ada gesekan, sabotase halus, dan hambatan yang tampak "dari luar" padahal sebenarnya berasal dari dalam.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-500/30 rounded-xl p-6">
+                  <h3 className="text-2xl font-bold text-green-400 mb-4">🎯 Solusi eL Vision untuk Bisnis</h3>
+                  <p className="mb-4">
+                    Kami menggunakan <span className="text-green-400 font-semibold">teknik alignment frekuensi</span> yang membuat <span className="text-green-400 font-semibold">arus realitas Anda selaras dengan tujuan bisnis Anda</span>.
+                  </p>
+
+                  <div className="space-y-3 mt-4">
+                    <p className="flex items-start gap-3">
+                      <span className="text-green-400 text-xl">✓</span>
+                      <span><strong>Menghapus Keraguan di Level Bawah Sadar:</strong> Keraguan yang tampak "logis" sebenarnya sering berakar dari program lama di alam bawah sadar. Kami bersihkan itu.</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-green-400 text-xl">✓</span>
+                      <span><strong>Kalibrasi Keputusan:</strong> Membuat proses pengambilan keputusan menjadi lebih jelas, cepat, dan tanpa beban mental berlebih</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-green-400 text-xl">✓</span>
+                      <span><strong>Alignment Visi-Realitas:</strong> Menyinkronkan frekuensi dunia nyata Anda (kondisi mental, emosi, energi) dengan visi besar bisnis Anda</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-green-400 text-xl">✓</span>
+                      <span><strong>Flow State Execution:</strong> Eksekusi menjadi natural, tanpa paksaan - seperti air yang mengalir ke tujuannya</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-center py-6">
+                  <p className="text-2xl text-yellow-400 font-bold italic mb-2">
+                    "Ketika Owner Selaras, Bisnis Mengalir"
+                  </p>
+                  <p className="text-lg text-gray-400">
+                    Bukan motivasi. Bukan mindset biasa. Ini adalah rekalibrasi sistem internal yang menggerakkan segalanya.
+                  </p>
+                </div>
+
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6">
+                  <h4 className="text-xl font-bold text-blue-400 mb-3">📊 Hasil Nyata dari Klien Bisnis Kami</h4>
+                  <div className="space-y-2 text-gray-300">
+                    <p>• CEO Tech Startup (Valuasi $50M): <em>"Bisnis berkembang tanpa drama setelah kalibrasi energi"</em></p>
+                    <p>• Pemilik Bisnis John: <em>"Breakthrough akhirnya terjadi setelah hambatan internal dihilangkan"</em></p>
+                    <p>• Pemimpin Yayasan: <em>"Donasi meningkat dari $0 ke $6M/tahun setelah alignment internal"</em></p>
+                  </div>
+                </div>
+
+                <p className="text-xl text-center text-white font-semibold pt-4">
+                  Siap untuk menyelaraskan bisnis Anda dengan potensi sebenarnya?
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Proof Not Advice Section */}
+      <div className="py-20 bg-gradient-to-b from-gray-900 to-black"></div>
+
             {/* John's Story */}
             <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-900/30 rounded-2xl p-10 mb-8">
               <div className="inline-block bg-yellow-500/20 border border-yellow-500/30 rounded-full px-4 py-1 mb-4">
@@ -1023,6 +1260,26 @@ export default function ELVision15K() {
               BOOK SEKARANG
               <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
             </button>
+
+            <button 
+  className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xl px-12 py-6 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-blue-500/50 flex items-center gap-4 mx-auto mb-8"
+  onClick={() => {
+    // @ts-ignore
+    if (typeof fbq === 'function') {
+      // @ts-ignore
+      fbq('trackCustom', 'EbookClick', {
+        content_name: 'Ebook Dasar',
+        value: 200000,
+        currency: 'IDR'
+      });
+    }
+    window.open('https://elvisiongroup.com/product/ebook/', '_blank');
+  }}
+>
+  📖
+  Beli Ebook Dasar Dulu Rp 200.000
+  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+</button>
 
             <p className="text-gray-500 text-sm">
               Slot terbatas. Kami hanya bekerja dengan mereka yang serius tentang transformasi mendalam.

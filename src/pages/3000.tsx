@@ -345,6 +345,239 @@ export default function ELVision3000() {
               Case studies from high-performers who broke through internal ceilings
             </p>
 
+            {/* Health Section - Arif's Story */}
+      <div className="py-20 bg-gradient-to-b from-gray-900 to-black">
+        <div className="container mx-auto px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="inline-block bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-full px-6 py-2 mb-4">
+                <span className="text-green-400 font-bold">HEALTH TRANSFORMATION</span>
+              </div>
+              <h2 className="text-5xl font-bold mb-6">
+                <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                  When Medicine Gives a Verdict, Nature Offers Another Path
+                </span>
+              </h2>
+            </div>
+
+            {/* Arif's Video Testimonial */}
+            <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-green-500/50 rounded-2xl p-10 mb-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="text-5xl">🏥</div>
+                <div className="flex-1">
+                  <h3 className="text-3xl font-bold text-green-400">Syarifudin Arif</h3>
+                  <p className="text-lg text-gray-400">Instagram: @syarifudin_arif25</p>
+                  <p className="text-sm text-gray-500 mt-1">Stage 4 Brain Cancer Survivor</p>
+                </div>
+              </div>
+              
+              <video 
+                className="w-full rounded-lg mb-6"
+                controls
+                preload="metadata"
+                playsInline
+              >
+                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4" type="video/mp4" />
+                Your browser does not support video playback.
+              </video>
+
+              <div className="bg-gradient-to-r from-red-900/30 to-green-900/30 border border-green-500/30 rounded-xl p-6 mb-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <div className="text-red-400 font-bold text-lg mb-2">📋 Medical Verdict - May 2025</div>
+                    <p className="text-gray-300">Stage 4 Brain Cancer</p>
+                    <p className="text-gray-300">Estimated Time: 3 Months</p>
+                  </div>
+                  <div>
+                    <div className="text-green-400 font-bold text-lg mb-2">✨ Reality - December 2025</div>
+                    <p className="text-gray-300">Still Alive & Healthy</p>
+                    <p className="text-gray-300">Condition Continuously Improving</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-gray-300 leading-relaxed">
+                <p className="text-xl font-semibold text-white">
+                  How Did eL Vision Help Transform Mr. Arif's Health?
+                </p>
+                
+                <p>
+                  When Mr. Arif came to us in May 2025, his medical condition had been diagnosed as terminal with an estimated time of 3 months. However, we believe that <span className="text-green-400 font-semibold">the human body has extraordinary natural healing capabilities</span> - which are often blocked by mental and emotional conditions.
+                </p>
+
+                <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-6 my-4">
+                  <h4 className="text-xl font-bold text-green-400 mb-3">🧠 eL Vision Custom Frequency Therapy Method</h4>
+                  <p className="mb-3">
+                    We work at the <span className="text-green-400 font-semibold">subconscious level to neutralize abnormal cells</span>. Though it may sound impossible to conventional medical approaches, this principle is actually recognized in the field of psychoneuroimmunology - the science that studies the relationship between mind, nervous system, and immune system.
+                  </p>
+                  
+                  <div className="space-y-2 ml-4">
+                    <p className="flex items-start gap-2">
+                      <span className="text-green-400 mt-1">•</span>
+                      <span><strong>Subconscious Calibration:</strong> We reprogram the body's automatic response to abnormal cells, activating natural healing mechanisms that have been dormant</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-green-400 mt-1">•</span>
+                      <span><strong>Specific Frequency Therapy:</strong> Every cell has a vibrational frequency. We help align the body's frequency to optimal conditions for regeneration</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-green-400 mt-1">•</span>
+                      <span><strong>Water Fasting Protocol:</strong> Combined with water fasting protocol proven to trigger autophagy - the body's natural process of cleansing damaged cells</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-green-400 mt-1">•</span>
+                      <span><strong>Stress Neutralization:</strong> Eliminating chronic stress that suppresses the immune system, allowing the body to focus on healing</span>
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-lg text-yellow-400 font-semibold italic">
+                  "Medical science measures probability, but does not have full authority over life. Nature, when understood and aligned correctly, is far more compassionate than imagined."
+                </p>
+
+                <p>
+                  Mr. Arif's result is not a miracle in the supernatural sense - this is <span className="text-green-400 font-semibold">the result of reactivating the body's natural healing system that has existed since birth</span>, but is often blocked by thought patterns, negative emotions, and prolonged stress.
+                </p>
+
+                <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4 mt-4">
+                  <p className="text-amber-400 text-sm">
+                    <strong>Disclaimer:</strong> The eL Vision method is not a substitute for medical treatment. We work as a complement that optimizes mental-emotional conditions to support the body's natural healing process. Consult with your doctor for medical decisions.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <p className="text-2xl text-gray-300 italic">
+                "Your body is stronger than the diagnosis. You just need to know how to unlock it."
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Business Section */}
+      <div className="py-20 bg-black">
+        <div className="container mx-auto px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="inline-block bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-full px-6 py-2 mb-4">
+                <span className="text-blue-400 font-bold">BUSINESS TRANSFORMATION</span>
+              </div>
+              <h2 className="text-5xl font-bold mb-6">
+                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Business Stuck? The Problem Isn't External
+                </span>
+              </h2>
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                When strategy is right, team is strong, but results still plateau - the problem is internal
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-blue-500/50 rounded-2xl p-10">
+              <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
+                <div className="bg-gradient-to-r from-red-900/30 to-orange-900/30 border border-red-500/30 rounded-xl p-6">
+                  <h3 className="text-2xl font-bold text-red-400 mb-4">❌ Common Patterns</h3>
+                  <div className="space-y-3">
+                    <p className="flex items-start gap-3">
+                      <span className="text-red-400 text-xl mt-1">•</span>
+                      <span>Owner/CEO has perfect strategy, but execution is always delayed or suboptimal</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-red-400 text-xl mt-1">•</span>
+                      <span>Competent team, sufficient capital, good systems - but growth stops at the same ceiling</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-red-400 text-xl mt-1">•</span>
+                      <span>Every major decision feels heavy, full of doubt, draining mental energy</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-red-400 text-xl mt-1">•</span>
+                      <span>Competitors with fewer resources are actually growing faster</span>
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-2xl font-bold text-white text-center py-4">
+                  This Isn't a Strategy Problem. This Is an <span className="text-blue-400">Alignment</span> Problem.
+                </p>
+
+                <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-xl p-6">
+                  <h3 className="text-2xl font-bold text-blue-400 mb-4">✨ The Real Root Cause</h3>
+                  <p className="mb-4">
+                    Often businesses get stuck <span className="text-blue-400 font-semibold">not because of external factors</span> like market, competitors, or capital - but because of the <span className="text-blue-400 font-semibold">owner/CEO's internal condition</span>.
+                  </p>
+                  
+                  <div className="space-y-4 mt-4">
+                    <div>
+                      <h4 className="text-xl font-bold text-purple-400 mb-2">🧠 Misaligned Mental & Thinking</h4>
+                      <p>
+                        If a leader continues to operate with <span className="text-purple-400 font-semibold">doubt, anxiety, or hidden fears</span> - that energy will seep into every decision, every team interaction, and ultimately into business results.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="text-xl font-bold text-purple-400 mb-2">⚡ The Law of Frequency in Business</h4>
+                      <p>
+                        Business is a manifestation of the <span className="text-purple-400 font-semibold">leader's internal frequency</span>. If internal frequency (beliefs, emotions, energy) is not aligned with vision and goals - there will always be friction, subtle sabotage, and obstacles that appear "external" when they actually originate from within.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-500/30 rounded-xl p-6">
+                  <h3 className="text-2xl font-bold text-green-400 mb-4">🎯 eL Vision Solution for Business</h3>
+                  <p className="mb-4">
+                    We use <span className="text-green-400 font-semibold">frequency alignment techniques</span> that make <span className="text-green-400 font-semibold">your reality stream align with your business goals</span>.
+                  </p>
+
+                  <div className="space-y-3 mt-4">
+                    <p className="flex items-start gap-3">
+                      <span className="text-green-400 text-xl">✓</span>
+                      <span><strong>Removing Doubt at Subconscious Level:</strong> Doubt that seems "logical" often actually stems from old programs in the subconscious. We clear that.</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-green-400 text-xl">✓</span>
+                      <span><strong>Decision Calibration:</strong> Making the decision-making process clearer, faster, and without excessive mental burden</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-green-400 text-xl">✓</span>
+                      <span><strong>Vision-Reality Alignment:</strong> Synchronizing your real-world frequency (mental condition, emotions, energy) with your business vision</span>
+                    </p>
+                    <p className="flex items-start gap-3">
+                      <span className="text-green-400 text-xl">✓</span>
+                      <span><strong>Flow State Execution:</strong> Execution becomes natural, without force - like water flowing to its destination</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-center py-6">
+                  <p className="text-2xl text-yellow-400 font-bold italic mb-2">
+                    "When the Owner Is Aligned, Business Flows"
+                  </p>
+                  <p className="text-lg text-gray-400">
+                    Not motivation. Not ordinary mindset. This is internal system recalibration that drives everything.
+                  </p>
+                </div>
+
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6">
+                  <h4 className="text-xl font-bold text-blue-400 mb-3">📊 Real Results from Our Business Clients</h4>
+                  <div className="space-y-2 text-gray-300">
+                    <p>• Tech Startup CEO ($50M Valuation): <em>"Business grows without drama after energy calibration"</em></p>
+                    <p>• Business Owner John: <em>"Breakthrough finally happened after internal obstacles were removed"</em></p>
+                    <p>• Foundation Leader: <em>"Donations increased from $0 to $6M/year after internal alignment"</em></p>
+                  </div>
+                </div>
+
+                <p className="text-xl text-center text-white font-semibold pt-4">
+                  Ready to align your business with its true potential?
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
             {/* John's Story */}
             <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-900/30 rounded-2xl p-10 mb-8">
               <div className="inline-block bg-yellow-500/20 border border-yellow-500/30 rounded-full px-4 py-1 mb-4">
