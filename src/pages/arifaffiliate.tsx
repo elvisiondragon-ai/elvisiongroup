@@ -495,7 +495,7 @@ export default function ArifAffiliate() {
         currency: 'IDR'
       });
     }
-    window.open('https://elvisiongroup.com/product/ebook/', '_blank');
+    window.open('https://app.elvisiongroup.com/ebook_elvision?ref=8c2cd3b1-6b77-4df9-92c5-467182ecd13d', '_blank');
   }}
 >
   📖
