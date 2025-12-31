@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,6 +36,7 @@ const productOptions = [
 export default function AffiliatePage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate(); // Initialize useNavigate
   const [affiliateCode, setAffiliateCode] = useState<string | null>(null);
   // Initialize with the URL of the first product option
   const [productUrlInput, setProductUrlInput] = useState<string>(productOptions[0].url); 
@@ -144,8 +146,11 @@ export default function AffiliatePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p>Anda perlu login untuk melihat halaman afiliasi.</p>
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center space-y-4">
+        <p className="text-lg">Anda perlu login untuk melihat halaman afiliasi.</p>
+        <Button onClick={() => navigate('/auth')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
+          Login
+        </Button>
       </div>
     );
   }
