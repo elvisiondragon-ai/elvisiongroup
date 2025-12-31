@@ -29,6 +29,7 @@ const productOptions = [
   { name: 'eL Royale Jewelry', url: 'https://app.elvisiongroup.com/jewelry' },
   { name: 'Drelf', url: 'https://app.elvisiongroup.com/drelf' },
   { name: 'Hungry Later Diet', url: 'https://app.elvisiongroup.com/diet' },
+  { name: 'Ebook eL Vision', url: 'https://app.elvisiongroup.com/ebook_elvision' },
 ];
 
 export default function AffiliatePage() {

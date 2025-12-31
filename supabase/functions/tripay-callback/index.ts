@@ -110,8 +110,16 @@ serve(async (req)=>{
       // 3. Kirim email sukses (Opsional)
       try {
         console.log('3. 📧 Sending success email...');
-        const isEbook = globalProductTx.product_name === 'Ebook Diet';
-        const functionToInvoke = isEbook ? 'ebook-diet-mail' : 'send-payment-email';
+        const isEbookDiet = globalProductTx.product_name && globalProductTx.product_name.includes('Ebook Diet');
+        const isEbookElVision = globalProductTx.product_name && globalProductTx.product_name.includes('Ebook eL-Vision');
+        let functionToInvoke;
+        if (isEbookDiet) {
+          functionToInvoke = 'ebook-diet-mail';
+        } else if (isEbookElVision) {
+          functionToInvoke = 'ebook-elvision-mail';
+        } else {
+          functionToInvoke = 'send-payment-email';
+        }
         await supabase.functions.invoke(functionToInvoke, {
           body: {
             userEmail: globalProductTx.email,

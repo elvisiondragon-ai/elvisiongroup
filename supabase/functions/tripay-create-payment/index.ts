@@ -65,6 +65,12 @@ const productCatalog = {
     requiresAuth: false,
     physical: true
   },
+  'ebook_elvision': {
+    name: 'Ebook eL Vision',
+    price: 200000,
+    requiresAuth: false,
+    physical: false
+  }, // New Ebook Product
   'fitfactor': {
     name: 'Fitfactor',
     price: 0,

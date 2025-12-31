@@ -25,6 +25,7 @@ import ELVision3000 from "./pages/3000";
 import PaypalPaymentPage from "./pages/paypal"; // Import the new PaypalPaymentPage component
 import AffiliatePage from "./pages/affiliate"; // Import the new AffiliatePage component
 import ArifAffiliate from "./pages/arifaffiliate"; // Import the ArifAffiliate component
+import EbookElvisionPaymentPage from "./pages/ebookelvision"; // Import the EbookElvisionPaymentPage component
 
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -223,6 +224,10 @@ const AppContent = () => {
                 <Route
                   path="/diet"
                   element={<DietPage />}
+                />
+                <Route
+                  path="/ebook_elvision"
+                  element={<EbookElvisionPaymentPage />}
                 />
                 <Route
                   path="/levelpasrah"
