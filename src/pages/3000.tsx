@@ -378,7 +378,7 @@ export default function ELVision3000() {
                 preload="metadata"
                 playsInline
               >
-                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4" type="video/mp4" />
+                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif2.mp4" type="video/mp4" />
                 Your browser does not support video playback.
               </video>
 
