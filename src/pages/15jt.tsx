@@ -28,6 +28,7 @@ export default function ELVision15K() {
       'https://connect.facebook.net/en_US/fbevents.js'
     );
     fbq('init', '3319324491540889');
+    fbq('init', 'EAAGuZBVYmBugBQfJ6MZBZBcqAIqy5a0CKROzIMwIJuccEYTefeNktWJyUuOLxvMTEZCThXsF7psOmNG6GH7YGs6UZC4EMZApVUc9xJMZCs9OArCXx22hZCTwzZC67iwlKbvoZBpqZALJv9DbT9sHoQ3HQR2L4WhOnMV2ZAvX4iZBpoFBSq9YfALyo8DqyZBeGg6BPKaiqRCQZDZD');
     fbq('track', 'PageView');
   }, []);
 

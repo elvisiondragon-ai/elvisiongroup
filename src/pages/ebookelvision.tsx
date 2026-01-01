@@ -560,7 +560,7 @@ export default function EbookElvisionPaymentPage() {
             <div>
               <h3 className="text-lg mb-2">Yang Anda Dapatkan:</h3>
               <ul className="list-disc list-inside space-y-1">
-                <li>eBook PRO – panduan sistematis untuk menata ulang frekuensi hidup</li>
+                <li>eBook PRO dan Audio Frekuensi Alam Bawah sadar – panduan sistematis untuk menata ulang frekuensi hidup</li>
                 <li>Akses komunitas Telegram (satu arah)</li>
                 <li>Akses platform resmi: <a href="https://app.elvisiongroup.com" target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:underline">https://app.elvisiongroup.com</a></li>
               </ul>
