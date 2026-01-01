@@ -238,7 +238,7 @@ export default function ArifAffiliate() {
               className="w-full rounded-xl shadow-lg mb-8"
               poster={arif1}
             >
-              <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/diet/diet1.mp4" type="video/mp4" />
+              <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             
@@ -470,7 +470,7 @@ export default function ArifAffiliate() {
                 Facebook
               </a>
               <a 
-                href="https://shopee.co.id/arifsyarifudin" 
+                href="https://shopee.co.id/syarifudinarif881" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 rounded-full font-bold hover:from-orange-400 hover:to-red-400 transition-all inline-flex items-center gap-3"
