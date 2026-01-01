@@ -46,7 +46,7 @@ export default function ArifAffiliate() {
             </h1>
             
             <p className="text-xl md:text-2xl text-emerald-50 max-w-3xl mx-auto">
-              Temukan bagaimana saya, Syarifudin Arif, mengalahkan vonis kematian 3 bulan dan kini hidup lebih sehat dari sebelumnya—tanpa obat kimia, tanpa operasi
+              Temukan bagaimana saya, Syarifudin Arif, mengalahkan vonis kematian dan kini hidup lebih sehat dari sebelumnya—tanpa obat kimia, tanpa operasi
             </p>
 
       {/* Health Section - Arif's Story */}
@@ -89,9 +89,9 @@ export default function ArifAffiliate() {
               <div className="bg-gradient-to-r from-red-900/30 to-green-900/30 border border-green-500/30 rounded-xl p-6 mb-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <div className="text-red-400 font-bold text-lg mb-2">📋 Vonis Medis - Mei 2025</div>
+                    <div className="text-red-400 font-bold text-lg mb-2">📋 Vonis Medis - Maret 2023</div>
                     <p className="text-gray-300">Kanker Otak Stadium 4</p>
-                    <p className="text-gray-300">Estimasi Waktu: 3 Bulan</p>
+                    <p className="text-gray-300">Estimasi Waktu: 7-18 Bulan</p>
                   </div>
                   <div>
                     <div className="text-green-400 font-bold text-lg mb-2">✨ Realitas - Desember 2025</div>
@@ -107,7 +107,7 @@ export default function ArifAffiliate() {
                 </p>
                 
                 <p>
-                  Ketika Pak Arif datang kepada kami pada Mei 2025, kondisi medisnya sudah divonis stadium akhir dengan estimasi waktu 3 bulan. Namun kami percaya bahwa <span className="text-green-400 font-semibold">tubuh manusia memiliki kemampuan penyembuhan alami yang luar biasa</span> - yang sering kali terblokir oleh kondisi mental dan emosional.
+                  Perlu diketahui, vonis awal kanker stadium akhir telah diterima sejak Maret 2023, dengan estimasi medis bertahan hidup antara 7 hingga 18 bulan sejak vonis tersebut.  <span className="text-green-400 font-semibold">tubuh manusia memiliki kemampuan penyembuhan alami yang luar biasa</span> - yang sering kali terblokir oleh kondisi mental dan emosional.
                 </p>
 
                 <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-6 my-4">
@@ -214,7 +214,7 @@ export default function ArifAffiliate() {
           <div className="bg-white p-8 rounded-2xl shadow-xl border-2 border-emerald-200 hover:shadow-2xl transition-all">
             <Gift className="w-12 h-12 text-emerald-600 mb-4" />
             <h3 className="text-2xl font-bold text-gray-800 mb-3">Cerita Nyata Tanpa Filter</h3>
-            <p className="text-gray-600">Dokumentasi lengkap perjalanan saya dari vonis Maret 2025 hingga Desember 2025—bukti bahwa ini BUKAN kebetulan</p>
+            <p className="text-gray-600">Dokumentasi lengkap perjalanan saya dari vonis Maret 2023 hingga Desember 2025—bukti bahwa ini BUKAN kebetulan</p>
           </div>
 
           <div className="bg-white p-8 rounded-2xl shadow-xl border-2 border-teal-200 hover:shadow-2xl transition-all md:col-span-2">
