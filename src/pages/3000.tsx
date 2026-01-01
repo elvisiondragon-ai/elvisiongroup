@@ -382,7 +382,7 @@ export default function ELVision3000() {
                 Your browser does not support video playback.
               </video>
 
-              <div className="bg-gradient-to-r from-red-900/30 to-green-900/30 border border-green-500/30 rounded-xl p-6 mb-6">
+              <div className="bg-gradient-to-r from-red-900/30 to-green-900/30 border border-green-500/30 rounded-xl p-6 mb-6 -mx-7">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <div className="text-red-400 font-bold text-lg mb-2">📋 Medical Verdict - May 2025</div>
@@ -406,7 +406,7 @@ export default function ELVision3000() {
                   When Mr. Arif came to us in May 2025, his medical condition had been diagnosed as terminal with an estimated time of 3 months. However, we believe that <span className="text-green-400 font-semibold">the human body has extraordinary natural healing capabilities</span> - which are often blocked by mental and emotional conditions.
                 </p>
 
-                <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-6 my-4">
+                <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-6 my-4 -mx-7">
                   <h4 className="text-xl font-bold text-green-400 mb-3">🧠 eL Vision Custom Frequency Therapy Method</h4>
                   <p className="mb-3">
                     We work at the <span className="text-green-400 font-semibold">subconscious level to neutralize abnormal cells</span>. Though it may sound impossible to conventional medical approaches, this principle is actually recognized in the field of psychoneuroimmunology - the science that studies the relationship between mind, nervous system, and immune system.
@@ -477,7 +477,7 @@ export default function ELVision3000() {
 
             <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-blue-500/50 rounded-2xl p-10">
               <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
-                <div className="bg-gradient-to-r from-red-900/30 to-orange-900/30 border border-red-500/30 rounded-xl p-6">
+                <div className="bg-gradient-to-r from-red-900/30 to-orange-900/30 border border-red-500/30 rounded-xl p-6 -mx-7">
                   <h3 className="text-2xl font-bold text-red-400 mb-4">❌ Common Patterns</h3>
                   <div className="space-y-3">
                     <p className="flex items-start gap-3">
@@ -503,7 +503,7 @@ export default function ELVision3000() {
                   This Isn't a Strategy Problem. This Is an <span className="text-blue-400">Alignment</span> Problem.
                 </p>
 
-                <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-xl p-6">
+                <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-xl p-6 -mx-7">
                   <h3 className="text-2xl font-bold text-blue-400 mb-4">✨ The Real Root Cause</h3>
                   <p className="mb-4">
                     Often businesses get stuck <span className="text-blue-400 font-semibold">not because of external factors</span> like market, competitors, or capital - but because of the <span className="text-blue-400 font-semibold">owner/CEO's internal condition</span>.
@@ -526,7 +526,7 @@ export default function ELVision3000() {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-500/30 rounded-xl p-6">
+                <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-500/30 rounded-xl p-6 -mx-7">
                   <h3 className="text-2xl font-bold text-green-400 mb-4">🎯 eL Vision Solution for Business</h3>
                   <p className="mb-4">
                     We use <span className="text-green-400 font-semibold">frequency alignment techniques</span> that make <span className="text-green-400 font-semibold">your reality stream align with your business goals</span>.
@@ -561,7 +561,7 @@ export default function ELVision3000() {
                   </p>
                 </div>
 
-                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6">
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6 -mx-8">
                   <h4 className="text-xl font-bold text-blue-400 mb-3">📊 Real Results from Our Business Clients</h4>
                   <div className="space-y-2 text-gray-300">
                     <p>• Tech Startup CEO ($50M Valuation): <em>"Business grows without drama after energy calibration"</em></p>
