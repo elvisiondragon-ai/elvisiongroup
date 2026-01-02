@@ -26,7 +26,7 @@ import PaypalPaymentPage from "./pages/paypal"; // Import the new PaypalPaymentP
 import AffiliatePage from "./pages/affiliate"; // Import the new AffiliatePage component
 import ArifAffiliate from "./pages/arifaffiliate"; // Import the ArifAffiliate component
 import EbookElvisionPaymentPage from "./pages/ebookelvision"; // Import the EbookElvisionPaymentPage component
-
+import FitFactorLP from "./pages/fitfactorlp";
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
@@ -260,6 +260,10 @@ const AppContent = () => {
                 <Route
                   path="/arif9"
                   element={<ArifAffiliate />}
+                />
+                <Route
+                  path="/fitfactorlp"
+                  element={<FitFactorLP />}
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

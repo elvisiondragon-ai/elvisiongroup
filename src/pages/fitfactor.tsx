@@ -40,6 +40,43 @@ export default function FitfactorPaymentPage() {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
 
+  useEffect(() => {
+    // Standard Facebook Pixel script injection
+    !(function (f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod
+          ? n.callMethod.apply(n, arguments)
+          : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = !0;
+      n.version = "2.0";
+      n.queue = [];
+      t = b.createElement(e);
+      t.async = !0;
+      t.src = v;
+      s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    })(
+      window,
+      document,
+      "script",
+      "https://connect.facebook.net/en_US/fbevents.js"
+    );
+
+    // Initialize and track PageView
+    fbq("init", "1797660474333865"); // Replace with your actual Pixel ID
+    fbq("track", "PageView");
+    fbq("track", "AddToCart", {
+      content_ids: ['fitfactor_450k'],
+      content_name: 'Fitfactor Product',
+      value: 150000,
+      currency: 'IDR'
+    });
+  }, []);
+
   const handleLogout = async () => {
     try {
       localStorage.setItem('manual-logout-flag', 'true');
@@ -95,7 +132,7 @@ export default function FitfactorPaymentPage() {
 
   const productId = 'fitfactor_450k';
   const productName = 'Fitfactor';
-  const price = 450000;
+  const price = 150000;
 
   const [quantity, setQuantity] = useState(1);
   const [userName, setUserName] = useState('');
@@ -175,6 +212,15 @@ export default function FitfactorPaymentPage() {
 
     setLoading(true);
     try {
+      // Facebook Pixel: InitiateCheckout
+      fbq('track', 'InitiateCheckout', {
+        content_ids: [productId],
+        content_name: productName,
+        value: totalAmount,
+        currency: 'IDR',
+        num_items: quantity,
+      });
+
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: 'fitfactor',
@@ -261,6 +307,15 @@ export default function FitfactorPaymentPage() {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter: `tripay_reference=eq.${paymentData.tripay_reference}`},
         (payload) => {
           if (payload.new?.status === 'PAID') {
+            // Facebook Pixel: Purchase event
+            fbq('track', 'Purchase', {
+              content_ids: [productId],
+              content_name: productName,
+              value: totalAmount,
+              currency: 'IDR',
+              num_items: quantity,
+              transaction_id: payload.new?.tripay_reference, // Use tripay_reference as transaction_id
+            });
             toast({
                 title: "🎉 Pembayaran Berhasil!",
                 description: "Terima kasih, pembayaran Anda telah kami terima. Silakan hubungi CS untuk konfirmasi.",
