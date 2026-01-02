@@ -31,6 +31,65 @@ export default function ELVision3000() {
     fbq('init', 'EAAGuZBVYmBugBQXvt52SiECtanczI1jMngHkCHWLWDQOIQGZBnkLipg0poGZBZBaJ7RNxa2fcesMH8mtyizKHSG9nZARKg622a8q3jcZCcKLGXXST9pNg26RZBFZBFrtSWT5C23oJBONslIQeOyTirGDjJp6gbrbGExxCF1D7VsdmrOoswXdy1UPomLrM8nJ4ih9MQZDZD');
     fbq('track', 'PageView');
   }, []);
+  const videoTestimonials = [
+    {
+      name: "Agus Mulyadi, SH., MH.",
+      title: "Head of Pangandaran Intelligence",
+      type: "image",
+      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/agus.jpg",
+      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/agus.jpg"
+    },
+    {
+      name: "Dr. Gumilar",
+      title: "Hypnotherapist & Foundation Leader",
+      type: "image",
+      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/dr.jpg",
+      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/dr.jpg"
+    },
+    {
+      name: "Habib Umar",
+      title: "Leader of Atsaqofah Islamic Boarding School",
+      type: "image",
+      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/habib.jpg",
+      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/habib.jpg"
+    },
+    {
+      name: "Umi Jamilah",
+      title: "Foundation Leader",
+      type: "image",
+      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/umi.jpg",
+      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/umi.jpg"
+    },
+    {
+      name: "Felicia",
+      title: "Entrepreneur",
+      type: "image",
+      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/felicia.jpg",
+      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/felicia.jpg"
+    },
+    {
+      name: "Lena",
+      title: "eL Vision Client",
+      type: "image",
+      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/lena.jpg",
+      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/lena.jpg"
+    },
+    {
+      name: "Vio",
+      title: "eL Vision Client",
+      type: "video",
+      videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/vio2.mp4",
+      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/vio2.jpg" // Placeholder thumbnail
+    },
+    {
+      name: "Arif",
+      title: "eL Vision Client",
+      type: "video",
+      videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif2.mp4",
+      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif2.jpg" // Placeholder thumbnail
+    }
+  ];
+
   const testimonials = [
     {
       name: "Felicia Quincy",
@@ -98,6 +157,22 @@ export default function ELVision3000() {
       image: "🎯",
       rating: 5,
       text: "6 weeks changed 15 years of mindset. Wealth was there, but peace wasn't. Now I understand: true prosperity starts with 1% of the right focus."
+    },
+    {
+      name: "Lent Laurencia",
+      title: "TikTok: @lentlaurensiah",
+      verified: true,
+      image: "✨",
+      rating: 5,
+      text: "eL Vision has transformed my life! The clarity and peace I gained are incredible. Highly recommend to anyone seeking true alignment."
+    },
+    {
+      name: "Meylen",
+      title: "TikTok: @meylen4_",
+      verified: true,
+      image: "🌟",
+      rating: 5,
+      text: "The coaching from eL Vision brought amazing results. I feel more aligned and my goals are manifesting with ease."
     }
   ];
 
@@ -170,6 +245,49 @@ export default function ELVision3000() {
       description: "Authentic and deep relationships. Natural magnetic presence."
     }
   ];
+
+  // Video Testimonial Component
+  const VideoTestimonial = ({ testimonial }) => {
+    const videoRef = useRef(null);
+
+    return (
+      <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-900/30 rounded-2xl p-6 hover:border-yellow-500/50 transition-all">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="flex-shrink-0">
+            {testimonial.thumbnail && (
+              <img src={testimonial.thumbnail} alt="Thumbnail" className="w-16 h-16 rounded-full object-cover" />
+            )}
+          </div>
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-yellow-400">{testimonial.name}</h3>
+            <p className="text-sm text-gray-400">{testimonial.title}</p>
+          </div>
+        </div>
+        
+        {testimonial.type === "video" && (
+          <video 
+            ref={videoRef}
+            className="w-full rounded-lg"
+            controls
+            preload="metadata"
+            playsInline
+            webkit-playsinline="true"
+            poster={testimonial.thumbnail} // Use thumbnail as poster for videos
+          >
+            <source src={testimonial.videoUrl} type="video/mp4" />
+            Your browser does not support video playback.
+          </video>
+        )}
+        {testimonial.type === "image" && (
+          <img 
+            src={testimonial.imageUrl} 
+            alt={`Testimonial from ${testimonial.name}`} 
+            className="w-full rounded-lg object-cover"
+          />
+        )}
+      </div>
+    );
+  };
 
   // New Audio Player Component
   const AudioPlayer = () => {
@@ -884,6 +1002,26 @@ export default function ELVision3000() {
         </div>
       </div>
 
+      {/* Video Testimonials Section */}
+      <div className="py-20 bg-gradient-to-b from-gray-900 to-black">
+        <div className="container mx-auto px-6">
+          <h2 className="text-5xl font-bold text-center mb-6">
+            <span className="bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
+              Our Client Video Testimonials
+            </span>
+          </h2>
+          <p className="text-xl text-gray-400 text-center mb-16">
+            Hear directly from those who have experienced the transformation
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {videoTestimonials.map((testimonial, idx) => (
+              <VideoTestimonial key={idx} testimonial={testimonial} />
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Testimonials Section */}
       <div className="py-20 bg-gradient-to-b from-gray-900 to-black">
         <div className="container mx-auto px-6">
@@ -895,6 +1033,37 @@ export default function ELVision3000() {
           <p className="text-xl text-gray-400 text-center mb-16">
             Those who've already "succeeded" but seek the next level
           </p>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {testimonials.map((testimonial, idx) => (
+              <div key={idx} className="bg-gradient-to-br from-gray-900 to-black border border-yellow-900/30 rounded-2xl p-8 hover:border-yellow-500/50 transition-all">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="text-5xl">{testimonial.image}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-bold text-yellow-400">{testimonial.name}</h3>
+                      {testimonial.verified && (
+                        <div className="bg-blue-500 rounded-full p-1" title="Verified">
+                          <CheckCircle className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-400">{testimonial.title}</p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                  ))}
+                </div>
+
+                <p className="text-gray-300 leading-relaxed italic">
+                  "{testimonial.text}"
+                </p>
+              </div>
+            ))}
+          </div>
 
           <div className="mt-16 text-center">
             <div className="inline-block bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-2xl px-8 py-6">

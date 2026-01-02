@@ -86,7 +86,7 @@ export default function ELVision15K() {
   const testimonials = [
     {
       name: "Felicia Quincy",
-      title: "Instagram: @itsfelicia.quincy",
+      title: "Instagram: @itsfelicia.quincy, @felicia.quincy",
       verified: true,
       image: "👩‍💼",
       rating: 5,
@@ -139,7 +139,7 @@ export default function ELVision15K() {
     },
     {
       name: "Arif",
-      title: "Klien eL Vision",
+      title: "Klien eL Vision, Instagram: @syarifuddi",
       verified: true,
       image: "👨‍💻",
       rating: 5,
