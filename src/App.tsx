@@ -121,10 +121,42 @@ const AppContent = () => {
               v7_relativeSplatPath: true
             }}>
               <Routes>
+                {/* Public routes - accessible without authentication */}
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/testi/arif" element={<ArifTestimonial />} />
+                <Route path="/oldmember" element={<OldMember />} />
+                <Route path="/delete" element={<DeleteAccount />} />
+                <Route path="/kalibrasi" element={<Kalibrasi />} />
+                <Route path="/formid" element={<Formid />} />
+                <Route path="/formai" element={<FormAI />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/drelf" element={<DrelfPaymentPage />} />
+                <Route path="/fitfactor" element={<FitfactorPaymentPage />} />
+                <Route path="/hungrylater" element={<HungrylaterPaymentPage />} />
+                <Route path="/parfum" element={<ParfumPaymentPage />} />
+                <Route path="/dev" element={<DevPaymentPage />} />
+                <Route path="/jewelry" element={<JewelryPaymentPage />} />
+                <Route path="/whatispro" element={<WhatIsPro />} />
+                <Route path="/payment" element={<Payment />} />
+                <Route path="/prostatus" element={<ProUpgradePage />} />
+                <Route path="/slim" element={<SlimPage />} />
+                <Route path="/slim/co" element={<SlimcoPaymentPage />} />
+                <Route path="/diet" element={<DietPage />} />
+                <Route path="/ebook_elvision" element={<EbookElvisionPaymentPage />} />
+                <Route path="/levelpasrah" element={<LevelPasrahPage />} />
+                <Route path="/brandflow" element={<BrandFlow />} />
+                <Route path="/1rule" element={<OnePercentRule />} />
+                <Route path="/15jt" element={<Page15jt />} />
+                <Route path="/3000" element={<ELVision3000 />} />
+                <Route path="/paypal" element={<PaypalPaymentPage />} />
+                <Route path="/affiliate" element={<AffiliatePage />} />
+                <Route path="/arif9" element={<ArifAffiliate />} />
+                <Route path="/fitfactorlp" element={<FitFactorLP />} />
+                <Route path="/income" element={<IncomeDashboard />} />
+                
+                {/* Auth routes */}
                 <Route
-                                    path="/"
-                                    element={loading ? null : <Index />}
-                                  />                <Route
                   path="/auth"
                   element={loading ? null : (user ? <Navigate to="/" replace /> : <Auth />)}
                 />
@@ -132,140 +164,15 @@ const AppContent = () => {
                   path="/signup"
                   element={loading ? null : (user ? <Navigate to="/" replace /> : <Signup />)}
                 />
-
+                <Route path="/reset-password" element={<ResetPassword />} />
+                
+                {/* Protected root route - requires authentication */}
                 <Route
-                  path="/reset-password"
-                  element={<ResetPassword />}
+                  path="/"
+                  element={loading ? null : <Index />}
                 />
-                <Route
-                  path="/terms"
-                  element={<Terms />}
-                />
-                <Route
-                  path="/privacy-policy"
-                  element={<PrivacyPolicy />}
-                />
-                <Route
-                  path="/testi/arif"
-                  element={<ArifTestimonial />}
-                />
-                <Route
-                  path="/oldmember"
-                  element={<OldMember />}
-                />
-                <Route
-                  path="/delete"
-                  element={<DeleteAccount />}
-                />
-                <Route
-                  path="/kalibrasi"
-                  element={<Kalibrasi />}
-                />
-                <Route
-                  path="/formid"
-                  element={<Formid />}
-                />
-                <Route
-                  path="/formai"
-                  element={<FormAI />}
-                />
-                <Route
-                  path="/pricing"
-                  element={<Pricing />}
-                />
-                <Route
-                  path="/drelf"
-                  element={<DrelfPaymentPage />}
-                />
-                <Route
-                  path="/fitfactor"
-                  element={<FitfactorPaymentPage />}
-                />
-                <Route
-                  path="/hungrylater"
-                  element={<HungrylaterPaymentPage />}
-                />
-                <Route
-                  path="/parfum"
-                  element={<ParfumPaymentPage />}
-                />
-                <Route
-                  path="/dev"
-                  element={<DevPaymentPage />}
-                />
-                <Route
-                  path="/jewelry"
-                  element={<JewelryPaymentPage />}
-                />
-                <Route
-                  path="/whatispro"
-                  element={<WhatIsPro />}
-                />
-                <Route
-                  path="/payment"
-                  element={<Payment />}
-                />
-                <Route
-                  path="/prostatus"
-                  element={<ProUpgradePage />}
-                />
-                <Route
-                  path="/income"
-                  element={<IncomeDashboard />}
-                />
-                <Route
-                  path="/slim"
-                  element={<SlimPage />}
-                />
-                <Route
-                  path="/slim/co"
-                  element={<SlimcoPaymentPage />}
-                />
-                <Route
-                  path="/diet"
-                  element={<DietPage />}
-                />
-                <Route
-                  path="/ebook_elvision"
-                  element={<EbookElvisionPaymentPage />}
-                />
-                <Route
-                  path="/levelpasrah"
-                  element={<LevelPasrahPage />}
-                />
-                <Route
-                  path="/brandflow"
-                  element={<BrandFlow />}
-                />
-                <Route
-                  path="/1rule"
-                  element={<OnePercentRule />}
-                />
-                <Route
-                  path="/15jt"
-                  element={<Page15jt />}
-                />
-                <Route
-                  path="/3000"
-                  element={<ELVision3000 />}
-                />
-                <Route
-                  path="/paypal"
-                  element={<PaypalPaymentPage />}
-                />
-                <Route
-                  path="/affiliate"
-                  element={<AffiliatePage />}
-                />
-                <Route
-                  path="/arif9"
-                  element={<ArifAffiliate />}
-                />
-                <Route
-                  path="/fitfactorlp"
-                  element={<FitFactorLP />}
-                />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                
+                {/* 404 catch-all */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
