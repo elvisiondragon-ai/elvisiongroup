@@ -44,7 +44,7 @@ const FitFactorLP = () => {
   };
 
   // Helper function to send events to the CAPI Edge Function
-  const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
+  const sendCAPIEvent = useCallback(async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
     const { fbp, fbc } = getFBCookies();
 
     try {
@@ -59,6 +59,7 @@ const FitFactorLP = () => {
             ...userData,
             fbp,
             fbc,
+            client_user_agent: navigator.userAgent,
           },
           customData,
           eventId, // Pass eventId to the Edge Function
@@ -74,7 +75,7 @@ const FitFactorLP = () => {
     } catch (error) {
       console.error(`Network error sending CAPI event ${eventName}:`, error);
     }
-  };
+  }, [CAPI_EDGE_FUNCTION_URL]);
 
   useEffect(() => {
     // Standard Facebook Pixel script injection
@@ -110,7 +111,7 @@ const FitFactorLP = () => {
 
     // Send PageView event to CAPI Edge Function
     sendCAPIEvent('PageView', {}, {}, pageViewEventId);
-  }, []);
+  }, [sendCAPIEvent]);
 
   const benefits = [
     {
@@ -210,6 +211,26 @@ const FitFactorLP = () => {
   ];
 
   const handlePay = () => {
+    const initiateCheckoutEventId = crypto.randomUUID();
+
+    // Track InitiateCheckout with Facebook Pixel
+    fbq('track', 'InitiateCheckout', {
+      value: quantity * pricePerBottle,
+      currency: 'IDR',
+      content_type: 'product',
+      content_ids: ['fitfactor_bundle'],
+      num_items: quantity,
+    }, { eventID: initiateCheckoutEventId });
+
+    // Send InitiateCheckout event to CAPI Edge Function
+    sendCAPIEvent('InitiateCheckout', {}, {
+      value: quantity * pricePerBottle,
+      currency: 'IDR',
+      content_type: 'product',
+      content_ids: ['fitfactor_bundle'],
+      num_items: quantity,
+    }, initiateCheckoutEventId);
+
     window.location.href = "https://app.elvisiongroup.com/fitfactor";
   };
 
