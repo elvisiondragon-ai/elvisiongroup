@@ -69,6 +69,7 @@ export default function FitfactorPaymentPage() {
     // Initialize and track PageView
     fbq("init", "1797660474333865"); // Replace with your actual Pixel ID
     fbq("track", "PageView");
+    fbq('trackSingle', 'PageView', {}, {eventID: 'TEST86041'});
     fbq("track", "AddToCart", {
       content_ids: ['fitfactor_450k'],
       content_name: 'Fitfactor Product',
