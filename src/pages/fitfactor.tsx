@@ -94,47 +94,8 @@ export default function FitfactorPaymentPage() {
   const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
 
   useEffect(() => {
-    // Standard Facebook Pixel script injection
-    !(function (f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function () {
-        n.callMethod
-          ? n.callMethod.apply(n, arguments)
-          : n.queue.push(arguments);
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = !0;
-      n.version = "2.0";
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = !0;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    })(
-      window,
-      document,
-      "script",
-      "https://connect.facebook.net/en_US/fbevents.js"
-    );
-
-    const pageViewEventId = crypto.randomUUID(); // Generate unique event ID for PageView
-
-    // Initialize and track PageView with Facebook Pixel, including event_id for deduplication
+    // Initialize Facebook Pixel
     fbq("init", "1797660474333865"); // Replace with your actual Pixel ID
-    fbq("track", "PageView", {}, { eventID: pageViewEventId });
-
-    // Send PageView event to CAPI Edge Function
-    sendCAPIEvent('PageView', {}, {}, pageViewEventId);
-
-    // Initial AddToCart event (kept as is, but consider sending to CAPI if relevant)
-    fbq("track", "AddToCart", {
-      content_ids: ['fitfactor_450k'],
-      content_name: 'Fitfactor Product',
-      value: 150000,
-      currency: 'IDR'
-    });
   }, []);
 
   const handleLogout = async () => {

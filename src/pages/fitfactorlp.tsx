@@ -111,6 +111,14 @@ const FitFactorLP = () => {
 
     // Send PageView event to CAPI Edge Function
     sendCAPIEvent('PageView', {}, {}, pageViewEventId);
+
+    const testCapiPageViewEventId = crypto.randomUUID();
+
+    // Initialize and track PageView with Facebook Pixel, including event_id for deduplication
+    fbq("track", "PageView", {content_name: 'Test CAPI PageView'}, { eventID: testCapiPageViewEventId });
+
+    // Send PageView event to CAPI Edge Function
+    sendCAPIEvent('PageView', {}, {content_name: 'Test CAPI PageView'}, testCapiPageViewEventId);
   }, [sendCAPIEvent]);
 
   const benefits = [
@@ -211,26 +219,6 @@ const FitFactorLP = () => {
   ];
 
   const handlePay = () => {
-    const initiateCheckoutEventId = crypto.randomUUID();
-
-    // Track InitiateCheckout with Facebook Pixel
-    fbq('track', 'InitiateCheckout', {
-      value: quantity * pricePerBottle,
-      currency: 'IDR',
-      content_type: 'product',
-      content_ids: ['fitfactor_bundle'],
-      num_items: quantity,
-    }, { eventID: initiateCheckoutEventId });
-
-    // Send InitiateCheckout event to CAPI Edge Function
-    sendCAPIEvent('InitiateCheckout', {}, {
-      value: quantity * pricePerBottle,
-      currency: 'IDR',
-      content_type: 'product',
-      content_ids: ['fitfactor_bundle'],
-      num_items: quantity,
-    }, initiateCheckoutEventId);
-
     window.location.href = "https://app.elvisiongroup.com/fitfactor";
   };
 
