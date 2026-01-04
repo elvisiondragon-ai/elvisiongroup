@@ -26,6 +26,57 @@ const FitFactorLP = () => {
   const [quantity, setQuantity] = useState(1);
   const pricePerBottle = 450000;
 
+  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-fitfactor';
+
+  // Helper to extract _fbp and _fbc cookies
+  const getFBCookies = () => {
+    const cookies = document.cookie.split(';');
+    let fbp, fbc;
+    for (const cookie of cookies) {
+      const trimmedCookie = cookie.trim();
+      if (trimmedCookie.startsWith('_fbp=')) {
+        fbp = trimmedCookie.substring('_fbp='.length);
+      } else if (trimmedCookie.startsWith('_fbc=')) {
+        fbc = trimmedCookie.substring('_fbc='.length);
+      }
+    }
+    return { fbp, fbc };
+  };
+
+  // Helper function to send events to the CAPI Edge Function
+  const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}) => {
+    const { fbp, fbc } = getFBCookies();
+
+    try {
+      const response = await fetch(CAPI_EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          eventName,
+          userData: {
+            ...userData,
+            fbp,
+            fbc,
+            // You can add more user data here if available, e.g., email, phone.
+            // The Edge Function will hash them.
+          },
+          customData,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error(`Error sending CAPI event ${eventName}:`, errorData);
+      } else {
+        console.log(`CAPI event ${eventName} sent successfully.`);
+      }
+    } catch (error) {
+      console.error(`Network error sending CAPI event ${eventName}:`, error);
+    }
+  };
+
   useEffect(() => {
     // Standard Facebook Pixel script injection
     !(function (f, b, e, v, n, t, s) {
@@ -52,9 +103,12 @@ const FitFactorLP = () => {
       "https://connect.facebook.net/en_US/fbevents.js"
     );
 
-    // Initialize and track PageView
+    // Initialize and track PageView with Facebook Pixel
     fbq("init", "1797660474333865"); // Replace with your actual Pixel ID
     fbq("track", "PageView");
+
+    // Send PageView event to CAPI Edge Function
+    sendCAPIEvent('PageView');
   }, []);
 
   const benefits = [
@@ -154,7 +208,15 @@ const FitFactorLP = () => {
     }
   ];
 
-  const handlePay = () => {
+  const handlePay = async () => {
+    // Send Purchase event to CAPI Edge Function
+    await sendCAPIEvent('Purchase', {}, {
+      value: (pricePerBottle * quantity) / 10000, // Assuming price is in IDR and value needs to be in USD or similar for FB, adjusting conversion factor
+      currency: 'IDR', // Use the correct currency
+      content_ids: [`fitfactor-${quantity}_bottles`],
+      content_type: 'product',
+      num_items: quantity,
+    });
     window.location.href = "https://app.elvisiongroup.com/fitfactor";
   };
 
