@@ -1304,6 +1304,15 @@ export default function ELVision3000() {
               <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
             </button>
 
+            <button
+              className="group bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-blue-500/50 flex items-center gap-4 mx-auto mb-8"
+              onClick={() => window.open('https://www.paypal.com/ncp/payment/3XU3SJV595CE4', '_blank')}
+            >
+              <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-mark-color.svg" alt="PayPal" className="w-8 h-8" />
+              PAY 6 WEEKS PROGRAM VIA PAYPAL
+              <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+            </button>
+
             <p className="text-gray-500 text-sm">
               Limited slots. We only work with those serious about deep transformation.
             </p>
