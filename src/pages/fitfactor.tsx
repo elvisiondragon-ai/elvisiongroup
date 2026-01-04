@@ -30,6 +30,59 @@ const WhatsAppButton = () => (
   </a>
 );
 
+// URL of the deployed Supabase Edge Function for CAPI
+const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-fitfactor';
+
+// Helper to extract _fbp and _fbc cookies
+const getFBCookies = () => {
+  const cookies = document.cookie.split(';');
+  let fbp, fbc;
+  for (const cookie of cookies) {
+    const trimmedCookie = cookie.trim();
+    if (trimmedCookie.startsWith('_fbp=')) {
+      fbp = trimmedCookie.substring('_fbp='.length);
+    } else if (trimmedCookie.startsWith('_fbc=')) {
+      fbc = trimmedCookie.substring('_fbc='.length);
+    }
+  }
+  return { fbp, fbc };
+};
+
+// Helper function to send events to the CAPI Edge Function
+const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
+  const { fbp, fbc } = getFBCookies();
+
+  try {
+    const response = await fetch(CAPI_EDGE_FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        eventName,
+        userData: {
+          ...userData,
+          fbp,
+          fbc,
+          client_ip_address: null, // Edge function will extract
+          client_user_agent: navigator.userAgent,
+        },
+        customData,
+        eventId, // Pass eventId for deduplication
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error(`Error sending CAPI event ${eventName}:`, errorData);
+    } else {
+      console.log(`CAPI event ${eventName} sent successfully.`);
+    }
+  } catch (error) {
+    console.error(`Network error sending CAPI event ${eventName}:`, error);
+  }
+};
+
 export default function FitfactorPaymentPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -66,10 +119,16 @@ export default function FitfactorPaymentPage() {
       "https://connect.facebook.net/en_US/fbevents.js"
     );
 
-    // Initialize and track PageView
+    const pageViewEventId = crypto.randomUUID(); // Generate unique event ID for PageView
+
+    // Initialize and track PageView with Facebook Pixel, including event_id for deduplication
     fbq("init", "1797660474333865"); // Replace with your actual Pixel ID
-    fbq("track", "PageView");
-    fbq('trackSingle', 'PageView', {}, {eventID: 'TEST86041'});
+    fbq("track", "PageView", {}, { eventID: pageViewEventId });
+
+    // Send PageView event to CAPI Edge Function
+    sendCAPIEvent('PageView', {}, {}, pageViewEventId);
+
+    // Initial AddToCart event (kept as is, but consider sending to CAPI if relevant)
     fbq("track", "AddToCart", {
       content_ids: ['fitfactor_450k'],
       content_name: 'Fitfactor Product',
@@ -210,6 +269,7 @@ export default function FitfactorPaymentPage() {
     }
 
     const fullAddress = `${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}`;
+    const initiateCheckoutEventId = crypto.randomUUID(); // Unique ID for InitiateCheckout
 
     setLoading(true);
     try {
@@ -220,7 +280,24 @@ export default function FitfactorPaymentPage() {
         value: totalAmount,
         currency: 'IDR',
         num_items: quantity,
-      });
+      }, { eventID: initiateCheckoutEventId });
+
+      // CAPI: InitiateCheckout
+      await sendCAPIEvent('InitiateCheckout', {
+        em: userEmail,
+        ph: phoneNumber,
+        fn: userName.split(' ')[0], // Assuming first name
+        ct: kota, // City
+        zp: kodePos, // Zip code
+        country: 'ID' // Assuming Indonesia
+      }, {
+        value: totalAmount,
+        currency: 'IDR',
+        content_ids: [productId],
+        content_type: 'product',
+        num_items: quantity,
+      }, initiateCheckoutEventId);
+
 
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
@@ -238,6 +315,8 @@ export default function FitfactorPaymentPage() {
           quantity: quantity,
           productName: productName,
           userId: user?.id,
+          // Optionally pass the event ID to the backend if you want to store it with the payment
+          // initiateCheckoutEventId: initiateCheckoutEventId,
         }
       });
 
@@ -272,6 +351,10 @@ export default function FitfactorPaymentPage() {
           title: "Pembayaran Berhasil Dibuat",
           description: "Silakan selesaikan pembayaran.",
         });
+        // Store the initiateCheckoutEventId temporarily if needed for later purchase event,
+        // or ensure the backend can pass a common ID. For simplicity, we'll generate a new one
+        // for the final purchase confirmation if not persisted.
+        localStorage.setItem('lastInitiateCheckoutEventId', initiateCheckoutEventId);
       }
     } catch (error: any) {
       console.error('Tripay payment error:', error);
@@ -306,17 +389,40 @@ export default function FitfactorPaymentPage() {
     const channel = supabase
       .channel(`payment-status-fitfactor-${paymentData.tripay_reference}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter: `tripay_reference=eq.${paymentData.tripay_reference}`},
-        (payload) => {
+        async (payload) => { // Made async to await sendCAPIEvent
           if (payload.new?.status === 'PAID') {
-            // Facebook Pixel: Purchase event
-            fbq('track', 'Purchase', {
-              content_ids: [productId],
-              content_name: productName,
+            const purchaseEventId = crypto.randomUUID(); // Unique ID for Purchase
+            const initiateCheckoutEventId = localStorage.getItem('lastInitiateCheckoutEventId'); // Get ID from InitiateCheckout
+
+            // User Data for Purchase
+            const purchaseUserData = {
+              em: userEmail,
+              ph: phoneNumber,
+              fn: userName.split(' ')[0],
+              ct: kota,
+              zp: kodePos,
+              country: 'ID'
+            };
+
+            // Custom Data for Purchase
+            const purchaseCustomData = {
               value: totalAmount,
               currency: 'IDR',
+              content_ids: [productId],
+              content_name: productName,
+              content_type: 'product',
               num_items: quantity,
-              transaction_id: payload.new?.tripay_reference, // Use tripay_reference as transaction_id
+              transaction_id: payload.new?.tripay_reference,
+            };
+
+            // Facebook Pixel: Purchase event
+            fbq('track', 'Purchase', purchaseCustomData, { 
+                eventID: initiateCheckoutEventId || purchaseEventId // Reuse initiate ID if available, otherwise new ID
             });
+
+            // CAPI: Purchase event
+            await sendCAPIEvent('Purchase', purchaseUserData, purchaseCustomData, initiateCheckoutEventId || purchaseEventId);
+
             toast({
                 title: "🎉 Pembayaran Berhasil!",
                 description: "Terima kasih, pembayaran Anda telah kami terima. Silakan hubungi CS untuk konfirmasi.",
@@ -348,6 +454,7 @@ export default function FitfactorPaymentPage() {
                       );
                     })(),
             });
+            localStorage.removeItem('lastInitiateCheckoutEventId'); // Clean up
           }
         }
       ).subscribe();
@@ -355,7 +462,7 @@ export default function FitfactorPaymentPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast, userName, userEmail, phoneNumber, userAddress, selectedProvince, productName, quantity, totalAmount, selectedPaymentMethod]);
+  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast, userName, userEmail, phoneNumber, userAddress, selectedProvince, productName, quantity, totalAmount, selectedPaymentMethod, kota, kodePos]); // Added kota, kodePos to dependencies
 
   if (showPaymentInstructions && paymentData) {
     return (

@@ -44,7 +44,7 @@ const FitFactorLP = () => {
   };
 
   // Helper function to send events to the CAPI Edge Function
-  const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}) => {
+  const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
     const { fbp, fbc } = getFBCookies();
 
     try {
@@ -59,10 +59,9 @@ const FitFactorLP = () => {
             ...userData,
             fbp,
             fbc,
-            // You can add more user data here if available, e.g., email, phone.
-            // The Edge Function will hash them.
           },
           customData,
+          eventId, // Pass eventId to the Edge Function
         }),
       });
 
@@ -103,12 +102,14 @@ const FitFactorLP = () => {
       "https://connect.facebook.net/en_US/fbevents.js"
     );
 
-    // Initialize and track PageView with Facebook Pixel
+    const pageViewEventId = crypto.randomUUID(); // Generate unique event ID for PageView
+
+    // Initialize and track PageView with Facebook Pixel, including event_id for deduplication
     fbq("init", "1797660474333865"); // Replace with your actual Pixel ID
-    fbq("track", "PageView");
+    fbq("track", "PageView", {}, { eventID: pageViewEventId });
 
     // Send PageView event to CAPI Edge Function
-    sendCAPIEvent('PageView');
+    sendCAPIEvent('PageView', {}, {}, pageViewEventId);
   }, []);
 
   const benefits = [
@@ -208,15 +209,7 @@ const FitFactorLP = () => {
     }
   ];
 
-  const handlePay = async () => {
-    // Send Purchase event to CAPI Edge Function
-    await sendCAPIEvent('Purchase', {}, {
-      value: (pricePerBottle * quantity) / 10000, // Assuming price is in IDR and value needs to be in USD or similar for FB, adjusting conversion factor
-      currency: 'IDR', // Use the correct currency
-      content_ids: [`fitfactor-${quantity}_bottles`],
-      content_type: 'product',
-      num_items: quantity,
-    });
+  const handlePay = () => {
     window.location.href = "https://app.elvisiongroup.com/fitfactor";
   };
 

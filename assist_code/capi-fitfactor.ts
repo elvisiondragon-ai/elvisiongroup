@@ -11,7 +11,9 @@ async function hashSha256(value: string): Promise<string> {
 }
 
 Deno.serve(async (req) => {
+  console.log('--- capi-fitfactor Edge Function Start ---');
   if (req.method !== 'POST') {
+    console.log('Method Not Allowed:', req.method);
     return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
       status: 405,
       headers: { 'Content-Type': 'application/json' },
@@ -23,6 +25,7 @@ Deno.serve(async (req) => {
   const FACEBOOK_ACCESS_TOKEN = Deno.env.get('FACEBOOK_ACCESS_TOKEN');
 
   if (!FACEBOOK_PIXEL_ID || !FACEBOOK_ACCESS_TOKEN) {
+    console.error('Configuration Error: Facebook Pixel ID or Access Token not configured.');
     return new Response(JSON.stringify({ error: 'Facebook Pixel ID or Access Token not configured in environment variables.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -30,9 +33,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { eventName, userData, customData } = await req.json();
+    const { eventName, userData, customData, eventId } = await req.json(); // Added eventId
+
+    console.log('Incoming Event Data:', { eventName, userData, customData, eventId });
 
     if (!eventName) {
+      console.log('Validation Error: eventName is required.');
       return new Response(JSON.stringify({ error: 'eventName is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -58,6 +64,7 @@ Deno.serve(async (req) => {
       const clientUserAgent = userData.client_user_agent || req.headers.get('user-agent');
       if (clientUserAgent) processedUserData.client_user_agent = clientUserAgent;
     }
+    console.log('Processed User Data:', processedUserData);
 
     // Construct the event payload for Facebook Conversions API
     const events = [{
@@ -66,10 +73,16 @@ Deno.serve(async (req) => {
       action_source: 'website', // or 'app', 'physical_store', etc.
       user_data: processedUserData,
       custom_data: customData, // e.g., { value: 100, currency: 'USD' }
-      // event_id: unique ID for deduplication if you send from browser and server
+      event_id: eventId || undefined, // Include event_id for deduplication
+      // external_id: (optional) a unique ID from your system
+      // fbp: (optional) _fbp cookie value
+      // fbc: (optional) _fbc cookie value
     }];
+    console.log('Constructed Facebook Events Payload:', JSON.stringify({ data: events }, null, 2));
+
 
     const facebookApiUrl = `https://graph.facebook.com/v19.0/${FACEBOOK_PIXEL_ID}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
+    console.log('Sending to Facebook API URL:', facebookApiUrl);
 
     const response = await fetch(facebookApiUrl, {
       method: 'POST',
@@ -80,6 +93,9 @@ Deno.serve(async (req) => {
     });
 
     const result = await response.json();
+    console.log('Facebook API Response Status:', response.status);
+    console.log('Facebook API Response Body:', JSON.stringify(result, null, 2));
+
 
     if (!response.ok) {
       console.error('Error sending event to Facebook CAPI:', result);
@@ -89,6 +105,7 @@ Deno.serve(async (req) => {
       });
     }
 
+    console.log('--- capi-fitfactor Edge Function End ---');
     return new Response(JSON.stringify({ message: 'Event sent to Facebook CAPI successfully', result }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
