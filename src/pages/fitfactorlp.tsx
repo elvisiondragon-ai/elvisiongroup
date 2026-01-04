@@ -447,7 +447,7 @@ const FitFactorLP = () => {
           className="bg-white text-orange-600 hover:bg-gray-100 font-bold"
           onClick={handlePay}
         >
-          Pesan FitFactorHerbal Sekarang
+          Pesan Fit Factor
           <ArrowRight className="ml-2" />
         </Button>
       </div>
@@ -715,7 +715,7 @@ const FitFactorLP = () => {
           className="bg-white text-orange-600 hover:bg-gray-100 font-bold text-lg px-10 py-6"
           onClick={handlePay}
         >
-          Ya, Saya Ingin Bebas dari Nyeri!
+          Pesan Fit Factor
           <ArrowRight className="ml-2" />
         </Button>
       </div>
@@ -856,14 +856,7 @@ const FitFactorLP = () => {
         </h3>
         
         <div className="relative">
-          {/* Central Circle */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-center z-10 shadow-xl">
-            <div>
-              <div className="text-2xl">💪</div>
-              <div className="text-xs">DAYA TAHAN</div>
-              <div className="text-xs">PULIH!</div>
-            </div>
-          </div>
+
 
           <div className="space-y-4 pt-4">
             <div className="bg-white border-l-4 border-emerald-500 p-5 rounded-lg shadow-md hover:shadow-xl transition-all">
