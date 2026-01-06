@@ -49,8 +49,6 @@ export function VerseAudioCard({
   const [currentTime, setCurrentTime] = useState(0);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isDownloaded, setIsDownloaded] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
   
   const isPlaying = currentPlayingVerse === verse.id;
   const attachedAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -125,15 +123,7 @@ export function VerseAudioCard({
     };
   }, [currentVerseAudio, currentPlayingVerse, verse.id]);
 
-  useEffect(() => {
-    const checkCacheStatus = async () => {
-      if (verse.audioPath) {
-        const cached = await isCached(verse.audioPath);
-        setIsDownloaded(cached);
-      }
-    };
-    checkCacheStatus();
-  }, [verse.audioPath, isCached]);
+
 
   const handlePlayClick = async () => {
     if (!verse.unlocked || !verse.audioPath) return;
@@ -285,20 +275,32 @@ export function VerseAudioCard({
   const progress = audioDuration ? (currentTime / audioDuration) * 100 : 0;
 
   const handleDownloadClick = async () => {
-    if (!verse.unlocked || !verse.audioPath || isDownloading || isDownloaded) return;
-    
+    if (!verse.unlocked || !verse.audioPath || isDownloading) return;
+
     setIsDownloading(true);
-    setDownloadProgress(0);
-    
-    toast({ title: "Sedang Download Audio... 📥", description: "Setelah download Audio Tidak akan memakai kuota internet", duration: 5000, className: "bg-blue-100 border-blue-400 text-blue-800" });
-    
+    toast({ title: "Starting Download... 📥", description: "Your download will begin shortly.", duration: 5000, className: "bg-blue-100 border-blue-400 text-blue-800" });
+
     try {
-      await createProtectedAudio(verse.audioPath, undefined, setDownloadProgress);
-      setIsDownloaded(true);
-      toast({ title: "Download Selesai! 🎉", duration: 3000, className: "bg-green-100 border-green-400 text-green-800" });
+      const response = await fetch(verse.audioPath);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      // Extract filename from path
+      const filename = verse.audioPath.split('/').pop() || 'audio.mp3';
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast({ title: "Download Started! 🎉", description: "Check your browser downloads.", duration: 3000, className: "bg-green-100 border-green-400 text-green-800" });
     } catch (error) {
       console.error('Download failed:', error);
-      toast({ title: "Download Gagal", description: "Coba lagi nanti", duration: 3000, className: "bg-red-100 border-red-400 text-red-800" });
+      toast({ title: "Download Failed", description: "Please try again later.", duration: 3000, className: "bg-red-100 border-red-400 text-red-800" });
     } finally {
       setIsDownloading(false);
     }
@@ -324,15 +326,12 @@ export function VerseAudioCard({
             </div>
           </div>
           
-          {canPlay && !isDownloaded && (
+          {canPlay && (
             <div className="absolute -top-6 -right-[14px] flex items-center gap-2">
               <div className="text-[10px] text-white/90 font-medium bg-black/70 px-1.5 py-0.5 rounded backdrop-blur-sm">Download Verses</div>
-              <button onClick={(e) => { e.stopPropagation(); handleDownloadClick(); }} disabled={isDownloading} className={`w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform transition-all duration-300 ${isDownloading ? 'bg-gradient-to-r from-gray-600 to-gray-700 cursor-not-allowed' : 'bg-gradient-to-r from-gray-800 via-gray-900 to-black hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 hover:scale-110 active:scale-95 hover:shadow-2xl hover:shadow-gray-500/50'}`} title={isDownloading ? 'Mendownload...' : 'Download untuk offline'}>
+              <button onClick={(e) => { e.stopPropagation(); handleDownloadClick(); }} disabled={isDownloading} className={`w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform transition-all duration-300 ${isDownloading ? 'bg-gradient-to-r from-gray-600 to-gray-700 cursor-not-allowed' : 'bg-gradient-to-r from-gray-800 via-gray-900 to-black hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 hover:scale-110 active:scale-95 hover:shadow-2xl hover:shadow-gray-500/50'}`} title={isDownloading ? 'Downloading...' : 'Download for offline'}>
                 {isDownloading ? (
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <svg className="w-full h-full" viewBox="0 0 36 36"><path className="text-gray-400" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" strokeWidth="4" /><path className="text-white" strokeDasharray={`${downloadProgress}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" strokeWidth="4" strokeLinecap="round" /></svg>
-                    <span className="absolute text-white text-xs font-bold">{downloadProgress}%</span>
-                  </div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <Download className="w-4 h-4 text-white" />
                 )}

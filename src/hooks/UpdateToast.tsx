@@ -67,8 +67,9 @@ export const useUpdateToast = () => {
     // Allow latest toast - dismiss any existing and show new one
     console.log('🔄 Showing latest update toast');
     const toastConfig = {
-      title: "🐢 Otomatis Update Initiate",
-      duration: 3000, // 3 seconds for both iOS and Android
+      title: "🎉 Update Januari 2026",
+      description: "Audio bisa di download di device anda :)",
+      duration: 5000, // Increased duration for better visibility
       className: "p-3 pr-4 space-x-3 [&>div>*:first-child]:text-sm",
     };
 
@@ -313,8 +314,7 @@ export const useUpdateToast = () => {
           return;
         }
 
-        // Toast removed per user request - no longer shows on update
-        // showUpdateToast();
+        showUpdateToast();
         toastShownRef.current = true;
         console.log('✅ Update initiated silently (toast removed)');
       } else {

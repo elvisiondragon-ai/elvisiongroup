@@ -105,6 +105,37 @@ const AppContent = () => {
     setupDebugTools();
   }, []);
 
+  useEffect(() => {
+    const clearAudioCache = async () => {
+      const cacheCleared = localStorage.getItem('audioCacheCleared_v1');
+      if (!cacheCleared) {
+        console.log('Attempting to clear old audio cache...');
+        try {
+          await new Promise<void>((resolve, reject) => {
+            const deleteRequest = indexedDB.deleteDatabase('ElVisionAudioCache');
+            deleteRequest.onsuccess = () => {
+              console.log('Old audio cache (ElVisionAudioCache) deleted successfully.');
+              localStorage.setItem('audioCacheCleared_v1', 'true');
+              resolve();
+            };
+            deleteRequest.onerror = (event) => {
+              console.error('Error deleting old audio cache:', event);
+              reject(new Error('Could not delete database'));
+            };
+            deleteRequest.onblocked = (event) => {
+              console.warn('Old audio cache deletion is blocked. Please close other tabs with this app open.', event);
+              reject(new Error('Database deletion blocked'));
+            };
+          });
+        } catch (error) {
+          console.error('Failed to clear old audio cache:', error);
+        }
+      }
+    };
+
+    clearAudioCache();
+  }, []);
+
   return (
     <AppLoader>
       <ServiceWorkerUpdater />
