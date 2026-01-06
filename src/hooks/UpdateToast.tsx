@@ -16,34 +16,6 @@ export const useUpdateToast = () => {
   // Android detection
   const isAndroid = /Android/.test(navigator.userAgent);
 
-  // Check for updates via version.json
-  useEffect(() => {
-    const checkVersion = async () => {
-      try {
-        const response = await fetch('/version.json?t=' + new Date().getTime()); // Prevent caching
-        const data = await response.json();
-        const latestVersion = data.version;
-
-        const clientVersion = localStorage.getItem('appVersion') || '1.0.0';
-
-        if (latestVersion && clientVersion !== latestVersion) {
-          showUpdateToast();
-          localStorage.setItem('appVersion', latestVersion);
-        }
-      } catch (error) {
-        console.error("Failed to check for updates:", error);
-      }
-    };
-
-    // Check every 5 minutes
-    const intervalId = setInterval(checkVersion, 5 * 60 * 1000);
-
-    // Initial check
-    checkVersion();
-
-    return () => clearInterval(intervalId);
-  }, []);
-
   // Check for success flag after refresh + show pending updates + SW recovery success
   useEffect(() => {
     // Android aggressive clearing success - Silent (no toast)
