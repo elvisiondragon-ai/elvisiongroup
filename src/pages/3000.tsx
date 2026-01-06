@@ -1318,7 +1318,7 @@ export default function ELVision3000() {
               <div className="text-sm text-gray-400 mb-6">Pay After Session 1 • 1 Session per Week</div>
               
               <div className="inline-block bg-yellow-500/20 border border-yellow-500/30 rounded-lg px-6 py-3">
-                <p className="text-yellow-400 font-semibold">⚡ Limited: Only 3 Slots per Month</p>
+                <p className="text-yellow-400 font-semibold">⚡ Limited</p>
               </div>
             </div>
 
