@@ -294,20 +294,18 @@ export default function ELVision3000() {
         </div>
         
         {testimonial.type === "video" && (
-          <div className="relative w-full max-w-sm mx-auto rounded-lg overflow-hidden" style={{ paddingBottom: '177.77%' }}>
-            <video 
-              ref={videoRef}
-              className="absolute inset-0 w-full h-full object-cover"
-              controls
-              preload="metadata"
-              playsInline
-              webkit-playsinline="true"
-              poster={testimonial.thumbnail} // Use thumbnail as poster for videos
-            >
-              <source src={testimonial.videoUrl} type="video/mp4" />
-              Your browser does not support video playback.
-            </video>
-          </div>
+          <video
+            ref={videoRef}
+            className="w-full rounded-lg"
+            controls
+            preload="metadata"
+            playsInline
+            webkit-playsinline="true"
+            poster={testimonial.thumbnail} // Use thumbnail as poster for videos
+          >
+            <source src={testimonial.videoUrl} type="video/mp4" />
+            Your browser does not support video playback.
+          </video>
         )}
         {testimonial.type === "image" && (
           <img 
