@@ -87,8 +87,37 @@ export default function ELVision3000() {
       type: "video",
       videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif2.mp4",
       thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif2.jpg" // Placeholder thumbnail
+    },
+    {
+      name: "Jacob",
+      title: "eL Vision Client",
+      type: "video",
+      videoUrl: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/jacob.mp4",
+      thumbnail: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/jacob.jpg"
+    },
+    {
+      name: "Wiliam",
+      title: "eL Vision Client",
+      type: "video",
+      videoUrl: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/wiliam.mp4",
+      thumbnail: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/wiliam.jpg"
+    },
+    {
+      name: "Ana",
+      title: "eL Vision Client",
+      type: "video",
+      videoUrl: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/ana.mp4",
+      thumbnail: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/ana.jpg"
     }
   ];
+
+  const founderVideoTestimonial = {
+      name: "eL Reyzandra (Founder)",
+      title: "eL Vision Founder",
+      type: "video",
+      videoUrl: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/founder.mp4",
+      thumbnail: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/founder.jpg"
+    };
 
   const testimonials = [
     {
@@ -265,18 +294,20 @@ export default function ELVision3000() {
         </div>
         
         {testimonial.type === "video" && (
-          <video 
-            ref={videoRef}
-            className="w-full rounded-lg"
-            controls
-            preload="metadata"
-            playsInline
-            webkit-playsinline="true"
-            poster={testimonial.thumbnail} // Use thumbnail as poster for videos
-          >
-            <source src={testimonial.videoUrl} type="video/mp4" />
-            Your browser does not support video playback.
-          </video>
+          <div className="relative w-full max-w-sm mx-auto rounded-lg overflow-hidden" style={{ paddingBottom: '177.77%' }}>
+            <video 
+              ref={videoRef}
+              className="absolute inset-0 w-full h-full object-cover"
+              controls
+              preload="metadata"
+              playsInline
+              webkit-playsinline="true"
+              poster={testimonial.thumbnail} // Use thumbnail as poster for videos
+            >
+              <source src={testimonial.videoUrl} type="video/mp4" />
+              Your browser does not support video playback.
+            </video>
+          </div>
         )}
         {testimonial.type === "image" && (
           <img 
@@ -398,6 +429,13 @@ export default function ELVision3000() {
             FOLLOW OUR FOUNDER AT INSTAGRAM
           </button>
         
+        {/* eL Reyzandra's Video Testimonial */}
+        <div className="py-10 bg-black">
+          <div className="container mx-auto px-6">
+            <VideoTestimonial testimonial={founderVideoTestimonial} />
+          </div>
+        </div>
+
         {/* Audio Player */}
         <div className="py-10 bg-black">
           <div className="container mx-auto px-6">
