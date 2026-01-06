@@ -36,78 +36,78 @@ export default function ELVision3000() {
       name: "Agus Mulyadi, SH., MH.",
       title: "Head of Pangandaran Intelligence",
       type: "image",
-      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/agus.jpg",
-      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/agus.jpg"
+      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/agus.jpg",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/agus.jpg"
     },
     {
       name: "Dr. Gumilar",
       title: "Hypnotherapist & Foundation Leader",
       type: "image",
-      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/dr.jpg",
-      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/dr.jpg"
+      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/dr.jpg",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/dr.jpg"
     },
     {
       name: "Habib Umar",
       title: "Leader of Atsaqofah Islamic Boarding School",
       type: "image",
-      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/habib.jpg",
-      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/habib.jpg"
+      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/habib.jpg",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/habib.jpg"
     },
     {
       name: "Umi Jamilah",
       title: "Foundation Leader",
       type: "image",
-      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/umi.jpg",
-      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/umi.jpg"
+      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/umi.jpg",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/umi.jpg"
     },
     {
       name: "Felicia",
       title: "Entrepreneur",
       type: "image",
-      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/felicia.jpg",
-      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/felicia.jpg"
+      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/felicia.jpg",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/felicia.jpg"
     },
     {
       name: "Lena",
       title: "eL Vision Client",
       type: "image",
-      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/lena.jpg",
-      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/lena.jpg"
+      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/lena.jpg",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/lena.jpg"
     },
     {
       name: "Vio",
       title: "eL Vision Client",
       type: "video",
-      videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/vio2.mp4",
-      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/vio2.jpg" // Placeholder thumbnail
+      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/vio2.mp4",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/vio2.jpg" // Placeholder thumbnail
     },
     {
       name: "Arif",
       title: "eL Vision Client",
       type: "video",
-      videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif2.mp4",
-      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif2.jpg" // Placeholder thumbnail
+      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.mp4",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.jpg" // Placeholder thumbnail
     },
     {
       name: "Jacob",
       title: "eL Vision Client",
       type: "video",
-      videoUrl: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/jacob.mp4",
-      thumbnail: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/jacob.jpg"
+      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/jacob.mp4",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/jacob.jpg"
     },
     {
       name: "Wiliam",
       title: "eL Vision Client",
       type: "video",
-      videoUrl: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/wiliam.mp4",
-      thumbnail: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/wiliam.jpg"
+      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/wiliam.mp4",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/wiliam.jpg"
     },
     {
       name: "Ana",
       title: "eL Vision Client",
       type: "video",
-      videoUrl: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/ana.mp4",
-      thumbnail: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/ana.jpg"
+      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/ana.mp4",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/ana.jpg"
     }
   ];
 
@@ -115,8 +115,8 @@ export default function ELVision3000() {
       name: "eL Reyzandra (Founder)",
       title: "eL Vision Founder",
       type: "video",
-      videoUrl: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/founder.mp4",
-      thumbnail: "https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/founder.jpg"
+      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/founder.mp4",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/founder.jpg"
     };
 
   const testimonials = [
@@ -360,7 +360,7 @@ export default function ELVision3000() {
           {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
           {isPlaying ? 'Pause Audio' : 'Play Audio'}
         </button>
-        <audio ref={audioRef} src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/audio/el3000.mp3" preload="auto" className="hidden" />
+        <audio ref={audioRef} src="https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/el3000.mp3" preload="auto" className="hidden" />
       </div>
     );
   };
@@ -531,9 +531,9 @@ export default function ELVision3000() {
                 controls
                 preload="metadata"
                 playsInline
-                poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif2.jpg"
+                poster="https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.jpg"
               >
-                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif2.mp4" type="video/mp4" />
+                <source src="https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.mp4" type="video/mp4" />
                 Your browser does not support video playback.
               </video>
 
