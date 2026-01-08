@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -85,6 +85,8 @@ const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: 
 
 export default function FitfactorPaymentPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const affiliateRef = searchParams.get('ref');
   const { toast } = useToast();
   const { user, signOut, cleanupSupabase } = useAuth();
   const { proStatus } = usePro();
@@ -276,6 +278,7 @@ export default function FitfactorPaymentPage() {
           quantity: quantity,
           productName: productName,
           userId: user?.id,
+          affiliateRef: affiliateRef, // Pass affiliate reference
           // Optionally pass the event ID to the backend if you want to store it with the payment
           // initiateCheckoutEventId: initiateCheckoutEventId,
         }

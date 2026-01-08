@@ -61,45 +61,103 @@ serve(async (req)=>{
       error: 'Invalid JSON payload'
     }, true);
   }
-  const { reference: tripayReference, status: paymentStatus, payment_method: paymentMethod, amount } = body;
-  console.log('✅ Callback data received:', {
-    tripayReference,
-    paymentStatus,
-    amount
-  });
-  if (!tripayReference || !paymentStatus) {
-    return logAndRespond('Missing required fields in payload (reference, status)', 400, {
-      success: false,
-      error: 'Missing required fields'
-    }, true);
-  }
-  // ===================================
-  // ALUR A: Status PAID (Utama)
-  // ===================================
-  if (paymentStatus === 'PAID') {
-    console.log(`🎉 Payment PAID for ${tripayReference}. Processing...`);
-    // --- 1. Cek Global Product (Drelf) ---
-    console.log(`1. 🔍 Searching for product transaction '${tripayReference}' in global_product...`);
-    // FIX: Menggunakan .limit(1) untuk menghindari crash pada kasus data tidak bersih (walau sudah dijamin bersih)
-    // dan memastikan hanya satu record yang diolah.
-    const { data: globalProductTxData, error: selectGlobalError } = await supabase.from('global_product').select('id, name, email, product_name, amount, status').eq('tripay_reference', tripayReference).neq('status', 'PAID') // Cari yang belum PAID
-    .limit(1);
-    if (selectGlobalError) {
-      console.error('   - ❌ CRITICAL DB Select Error (global_product):', selectGlobalError.message);
-      return logAndRespond('Database Select Error', 500, {
+    const { reference: tripayReference, merchant_ref: merchantRef, status: paymentStatus, payment_method: paymentMethod, amount } = body;
+    console.log('✅ Callback data received:', {
+      tripayReference,
+      merchantRef,
+      paymentStatus,
+      amount
+    });
+  
+    if (!tripayReference || !paymentStatus) {
+      return logAndRespond('Missing required fields in payload (reference, status)', 400, {
         success: false,
-        error: selectGlobalError.message
+        error: 'Missing required fields'
       }, true);
     }
-    // Ambil data pertama dari hasil select (jika ada)
-    const globalProductTx = globalProductTxData ? globalProductTxData[0] : null;
-    if (globalProductTx) {
-      console.log(`   - ✅ Found Global Product ID: ${globalProductTx.id}. Updating status to PAID.`);
-      // 2. Update Status di global_product
-      const { error: updateError } = await supabase.from('global_product').update({
-        status: 'PAID'
-      }).eq('id', globalProductTx.id);
-      if (updateError) {
+  
+    // ===================================
+    // ALUR A: Status PAID (Utama)
+    // ===================================
+    if (paymentStatus === 'PAID') {
+      console.log(`🎉 Payment PAID for ${tripayReference}. Processing...`);
+  
+      // --- 1. Cek Global Product (Drelf/FitFactor) ---
+      console.log(`1. 🔍 Searching for product transaction '${tripayReference}' or merchant_ref '${merchantRef}' in global_product...`);
+      
+            // FIX: Search by tripay_reference OR merchant_ref to handle cases where the update missed
+            let query = supabase.from('global_product')
+              .select('id, name, email, product_name, amount, status, tripay_reference, affiliate_id') // Added affiliate_id
+              .neq('status', 'PAID');
+      
+            if (merchantRef) {
+               query = query.or(`tripay_reference.eq.${tripayReference},merchant_ref.eq.${merchantRef}`);
+            } else {
+               query = query.eq('tripay_reference', tripayReference);
+            }
+            
+            const { data: globalProductTxData, error: selectGlobalError } = await query.limit(1);
+      
+            if (selectGlobalError) {
+              console.error('   - ❌ CRITICAL DB Select Error (global_product):', selectGlobalError.message);
+              return logAndRespond('Database Select Error', 500, {
+                success: false,
+                error: selectGlobalError.message
+              }, true);
+            }
+      
+            // Ambil data pertama dari hasil select (jika ada)
+            const globalProductTx = globalProductTxData ? globalProductTxData[0] : null;
+      
+            if (globalProductTx) {
+              console.log(`   - ✅ Found Global Product ID: ${globalProductTx.id}. Updating status to PAID.`);
+              
+              // Update object
+              const updatePayload: any = { status: 'PAID' };
+              // Ensure tripay_reference is synced if it was missing
+              if (!globalProductTx.tripay_reference && tripayReference) {
+                  updatePayload.tripay_reference = tripayReference;
+              }
+      
+              // 2. Update Status di global_product
+              const { error: updateError } = await supabase.from('global_product').update(updatePayload).eq('id', globalProductTx.id);
+      
+              if (updateError) {
+                  console.error('   - ❌ FAILED to update global_product status:', updateError.message);
+                  // Don't return error here, try to process commission/email anyway if update failed? No, strict consistency.
+                  // But wait, if update failed, we might charge double if we retry? 
+                  // Better to return 500.
+                   return logAndRespond('Failed to update global_product status', 500, {
+                    success: false,
+                    error: updateError.message
+                  }, true);
+              }
+              console.log('   - ✅ Successfully updated global_product to PAID.');
+      
+              // --- NEW: PROCESS AFFILIATE COMMISSION ---
+              if (globalProductTx.affiliate_id) {
+                 console.log(`   - 🤝 Processing Affiliate Commission for: ${globalProductTx.affiliate_id}`);
+                 const commissionRate = 0.30; // 30%
+                 const commissionAmount = Math.floor(globalProductTx.amount * commissionRate);
+      
+                 const { error: commissionError } = await supabase.from('commissions').insert({
+                     affiliate_user_id: globalProductTx.affiliate_id,
+                     user_email: globalProductTx.email,
+                     product_name: globalProductTx.product_name,
+                     sale_amount: globalProductTx.amount,
+                     commission_percentage: commissionRate * 100,
+                     commission_amount: commissionAmount,
+                     transaction_id: tripayReference
+                 });
+      
+                 if (commissionError) {
+                     console.error('   - ⚠️ Failed to record commission:', commissionError.message);
+                     // Non-critical, proceed with email
+                 } else {
+                     console.log(`   - 💰 Commission of ${commissionAmount} recorded successfully.`);
+                 }
+              }
+            if (updateError) {
         console.error('   - ❌ FAILED to update global_product status:', updateError.message);
         return logAndRespond('Failed to update global_product status', 500, {
           success: false,
@@ -144,35 +202,63 @@ serve(async (req)=>{
         action: 'global_product_activated'
       });
     }
-    // --- OLD FLOW: Fallback ke waiting_payment (Hanya dijalankan jika global_product tidak ditemukan) ---
-    console.log(`2. 🔍 Searching for pending transaction '${tripayReference}' in waiting_payment...`);
-    // FIX: Menggunakan .maybeSingle() agar tidak crash jika tidak ada transaksi
-    const { data: waitingTx, error: selectError } = await supabase.from('waiting_payment').select('*').eq('tripay_reference', tripayReference).neq('status', 'paid').maybeSingle();
-    if (selectError) {
-      console.error('   - ❌ DB Select Error (Waiting Payment):', selectError.message);
-      return logAndRespond('Critical DB Error: Duplicate pending transaction found.', 500, {
-        success: false,
-        error: selectError.message
-      }, true);
-    }
-    if (!waitingTx) {
-      // Jika tidak ditemukan di global_product DAN tidak ditemukan di waiting_payment
-      return logAndRespond('Callback received but no matching pending transaction found.', 200, {
-        success: true,
-        info: 'No matching pending transaction'
-      }, true);
-    }
-    // 3. Update status di waiting_payment
-    const { error: updateWaitingError } = await supabase.from('waiting_payment').update({
-      status: 'paid'
-    }).eq('id', waitingTx.id);
-    if (updateWaitingError) {
-      console.error('   - ❌ FAILED to update waiting_payment status:', updateWaitingError.message);
-      return logAndRespond('Failed to update waiting_payment status', 500, {
-        success: false,
-        error: updateWaitingError.message
-      }, true);
-    }
+        // --- OLD FLOW: Fallback ke waiting_payment (Hanya dijalankan jika global_product tidak ditemukan) ---
+        console.log(`2. 🔍 Searching for pending transaction '${tripayReference}' in waiting_payment...`);
+        // FIX: Menggunakan .maybeSingle() agar tidak crash jika tidak ada transaksi
+        // Added affiliate_id to selection
+        const { data: waitingTx, error: selectError } = await supabase.from('waiting_payment').select('*').eq('tripay_reference', tripayReference).neq('status', 'paid').maybeSingle();
+    
+        if (selectError) {
+          console.error('   - ❌ DB Select Error (Waiting Payment):', selectError.message);
+          return logAndRespond('Critical DB Error: Duplicate pending transaction found.', 500, {
+            success: false,
+            error: selectError.message
+          }, true);
+        }
+    
+        if (!waitingTx) {
+          // Jika tidak ditemukan di global_product DAN tidak ditemukan di waiting_payment
+          return logAndRespond('Callback received but no matching pending transaction found.', 200, {
+            success: true,
+            info: 'No matching pending transaction'
+          }, true);
+        }
+    
+        // 3. Update status di waiting_payment
+        const { error: updateWaitingError } = await supabase.from('waiting_payment').update({
+          status: 'paid'
+        }).eq('id', waitingTx.id);
+    
+        if (updateWaitingError) {
+          console.error('   - ❌ FAILED to update waiting_payment status:', updateWaitingError.message);
+          return logAndRespond('Failed to update waiting_payment status', 500, {
+            success: false,
+            error: updateWaitingError.message
+          }, true);
+        }
+        
+         // --- NEW: PROCESS AFFILIATE COMMISSION (Waiting Payment) ---
+         if (waitingTx.affiliate_id) {
+            console.log(`   - 🤝 Processing Affiliate Commission (Waiting Payment) for: ${waitingTx.affiliate_id}`);
+            const commissionRate = 0.30; // 30%
+            const commissionAmount = Math.floor(waitingTx.amount_paid * commissionRate);
+    
+            const { error: commissionError } = await supabase.from('commissions').insert({
+                affiliate_user_id: waitingTx.affiliate_id,
+                user_email: waitingTx.user_email,
+                product_name: waitingTx.subscription_type, // or logic to get nice name
+                sale_amount: waitingTx.amount_paid,
+                commission_percentage: commissionRate * 100,
+                commission_amount: commissionAmount,
+                transaction_id: tripayReference
+            });
+    
+            if (commissionError) {
+                console.error('   - ⚠️ Failed to record commission:', commissionError.message);
+            } else {
+                console.log(`   - 💰 Commission of ${commissionAmount} recorded successfully.`);
+            }
+         }
     // 4. Aksi berdasarkan subscription_type
     let rpcResult;
     if (waitingTx.subscription_type === 'credit') {

@@ -113,7 +113,7 @@ serve(async (req)=>{
   try {
     // --- 1. INITIALIZE & VALIDATE INPUT ---
     const body = await req.json();
-    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address } = body;
+    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef } = body;
     const product = productCatalog[subscriptionType];
     if (!product) {
       return new Response(JSON.stringify({
@@ -189,6 +189,10 @@ serve(async (req)=>{
     const supabase = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
     const ipAddress = req.headers.get('x-forwarded-for') ?? req.headers.get('remote-addr');
     let dbRecordId = null;
+
+    // Validate affiliateRef is a valid UUID if present (basic check)
+    const validAffiliateId = affiliateRef && affiliateRef.length > 20 ? affiliateRef : null;
+
     if (product.physical) {
       console.log('Inserting into global_product (UNPAID)');
       const { data, error } = await supabase.from('global_product').insert({
@@ -200,7 +204,8 @@ serve(async (req)=>{
         amount: amount,
         status: 'UNPAID',
         merchant_ref: merchantRef,
-        user_id: userId
+        user_id: userId,
+        affiliate_id: validAffiliateId // Save affiliate ID
       }).select('id').single();
       if (error) throw new Error(`Database insert (global_product) failed: ${error.message}`);
       dbRecordId = data.id;
@@ -216,7 +221,8 @@ serve(async (req)=>{
         currency: body.currency || 'IDR',
         status: 'pending',
         tripay_reference: null,
-        ip_address: ipAddress
+        ip_address: ipAddress,
+        affiliate_id: validAffiliateId // Save affiliate ID
       }).select('id').single();
       if (error) throw new Error(`Database insert (waiting_payment) failed: ${error.message}`);
       dbRecordId = data.id;
