@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRight, Sparkles, Shield, Check, Play, Pause } from 'lucide-react';
 
 export default function ELVision3000() {
   // Facebook Pixel Code
   useEffect(() => {
-    !(function (f: any, b: any, e: any, v: any, n: any, t: any, s: any) {
+    (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
       if (f.fbq) return;
       n = f.fbq = function () {
         n.callMethod
@@ -276,8 +276,8 @@ export default function ELVision3000() {
   ];
 
   // Video Testimonial Component
-  const VideoTestimonial = ({ testimonial }) => {
-    const videoRef = useRef(null);
+  const VideoTestimonial = ({ testimonial }: { testimonial: any }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     return (
       <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-900/30 rounded-2xl p-6 hover:border-yellow-500/50 transition-all">
@@ -320,10 +320,12 @@ export default function ELVision3000() {
 
   // New Audio Player Component
   const AudioPlayer = () => {
-    const audioRef = useRef(null);
+    const audioRef = useRef<HTMLAudioElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
     const togglePlayPause = () => {
+      if (!audioRef.current) return;
+
       if (audioRef.current.paused) {
         audioRef.current.play();
         setIsPlaying(true);
