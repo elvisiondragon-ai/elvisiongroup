@@ -119,45 +119,9 @@ serve(async (req)=>{
                   updatePayload.tripay_reference = tripayReference;
               }
       
-              // 2. Update Status di global_product
-              const { error: updateError } = await supabase.from('global_product').update(updatePayload).eq('id', globalProductTx.id);
-      
-              if (updateError) {
-                  console.error('   - ❌ FAILED to update global_product status:', updateError.message);
-                  // Don't return error here, try to process commission/email anyway if update failed? No, strict consistency.
-                  // But wait, if update failed, we might charge double if we retry? 
-                  // Better to return 500.
-                   return logAndRespond('Failed to update global_product status', 500, {
-                    success: false,
-                    error: updateError.message
-                  }, true);
-              }
-              console.log('   - ✅ Successfully updated global_product to PAID.');
-      
-              // --- NEW: PROCESS AFFILIATE COMMISSION ---
-              if (globalProductTx.affiliate_id) {
-                 console.log(`   - 🤝 Processing Affiliate Commission for: ${globalProductTx.affiliate_id}`);
-                 const commissionRate = 0.30; // 30%
-                 const commissionAmount = Math.floor(globalProductTx.amount * commissionRate);
-      
-                 const { error: commissionError } = await supabase.from('commissions').insert({
-                     affiliate_user_id: globalProductTx.affiliate_id,
-                     user_email: globalProductTx.email,
-                     product_name: globalProductTx.product_name,
-                     sale_amount: globalProductTx.amount,
-                     commission_percentage: commissionRate * 100,
-                     commission_amount: commissionAmount,
-                     transaction_id: tripayReference
-                 });
-      
-                 if (commissionError) {
-                     console.error('   - ⚠️ Failed to record commission:', commissionError.message);
-                     // Non-critical, proceed with email
-                 } else {
-                     console.log(`   - 💰 Commission of ${commissionAmount} recorded successfully.`);
-                 }
-              }
-            if (updateError) {
+        // 2. Update Status di global_product
+        const { error: updateError } = await supabase.from('global_product').update(updatePayload).eq('id', globalProductTx.id);
+      if (updateError) {
         console.error('   - ❌ FAILED to update global_product status:', updateError.message);
         return logAndRespond('Failed to update global_product status', 500, {
           success: false,
@@ -224,43 +188,18 @@ serve(async (req)=>{
           }, true);
         }
     
-        // 3. Update status di waiting_payment
-        const { error: updateWaitingError } = await supabase.from('waiting_payment').update({
-          status: 'paid'
-        }).eq('id', waitingTx.id);
-    
-        if (updateWaitingError) {
-          console.error('   - ❌ FAILED to update waiting_payment status:', updateWaitingError.message);
-          return logAndRespond('Failed to update waiting_payment status', 500, {
-            success: false,
-            error: updateWaitingError.message
-          }, true);
-        }
-        
-         // --- NEW: PROCESS AFFILIATE COMMISSION (Waiting Payment) ---
-         if (waitingTx.affiliate_id) {
-            console.log(`   - 🤝 Processing Affiliate Commission (Waiting Payment) for: ${waitingTx.affiliate_id}`);
-            const commissionRate = 0.30; // 30%
-            const commissionAmount = Math.floor(waitingTx.amount_paid * commissionRate);
-    
-            const { error: commissionError } = await supabase.from('commissions').insert({
-                affiliate_user_id: waitingTx.affiliate_id,
-                user_email: waitingTx.user_email,
-                product_name: waitingTx.subscription_type, // or logic to get nice name
-                sale_amount: waitingTx.amount_paid,
-                commission_percentage: commissionRate * 100,
-                commission_amount: commissionAmount,
-                transaction_id: tripayReference
-            });
-    
-            if (commissionError) {
-                console.error('   - ⚠️ Failed to record commission:', commissionError.message);
-            } else {
-                console.log(`   - 💰 Commission of ${commissionAmount} recorded successfully.`);
+            // 3. Update status di waiting_payment
+            const { error: updateWaitingError } = await supabase.from('waiting_payment').update({
+              status: 'paid'
+            }).eq('id', waitingTx.id);
+            if (updateWaitingError) {
+              console.error('   - ❌ FAILED to update waiting_payment status:', updateWaitingError.message);
+              return logAndRespond('Failed to update waiting_payment status', 500, {
+                success: false,
+                error: updateWaitingError.message
+              }, true);
             }
-         }
-    // 4. Aksi berdasarkan subscription_type
-    let rpcResult;
+            // 4. Aksi berdasarkan subscription_type    let rpcResult;
     if (waitingTx.subscription_type === 'credit') {
       console.log('4. 💳 Executing update_credit_by_email RPC...');
       const { data, error } = await supabase.rpc('update_credit_by_email', {
