@@ -337,7 +337,7 @@ export default function ELVision15K() {
               <Shield className="w-12 h-12 text-blue-400 flex-shrink-0" />
               <div className="text-left">
                 <div className="text-xl font-bold text-blue-400 uppercase tracking-wider">Money Back Guarantee</div>
-                <div className="text-gray-300">Jika Anda tidak merasa lega dan tidak memiliki kemajuan positif selama 6 sesi, kami memiliki tingkat keberhasilan 99%</div>
+                <div className="text-gray-300">Berdasarkan masukan klien internal, sebagian besar merasakan kemajuan positif di awal proses.</div>
               </div>
             </div>
           </div>
@@ -398,12 +398,87 @@ export default function ELVision15K() {
             <p className="mb-4">Saya menantikan untuk bertemu Anda di kelas.</p>
             <p className="mt-8 font-bold">— eL Reyzandra</p>
             <p className="font-bold">Pendiri, eL Vision</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Story-Based Case Studies Section */}
-      <div className="py-20 bg-gradient-to-b from-black to-gray-900">
+                      </div>
+                    </div>
+                  </div>
+          
+                {/* Founder History & Why It Works Section */}
+                <div className="py-20 bg-gray-900">
+                  <div className="container mx-auto px-6 max-w-5xl">
+                    <div className="flex flex-col md:flex-row gap-12 items-center mb-16">
+                      <div className="w-full md:w-1/3">
+                         <div className="bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-500/30 rounded-3xl p-8 text-center backdrop-blur-sm">
+                           <div className="text-6xl mb-6">📰</div>
+                           <div className="font-bold text-yellow-500 text-sm tracking-wider uppercase mb-2">Diliput Oleh</div>
+                           <div className="text-3xl font-bold text-white mb-4">Liputan6</div>
+                           <div className="h-px w-16 bg-yellow-500/50 mx-auto mb-4"></div>
+                           <p className="text-gray-300 italic">"Membantu ratusan pengusaha dengan tingkat keberhasilan 98%"</p>
+                         </div>
+                      </div>
+                      <div className="w-full md:w-2/3">
+                        <h2 className="text-4xl font-bold mb-6">
+                          <span className="bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
+                            Dari Motivator yang Diakui Media Menjadi Arsitek Sistem
+                          </span>
+                        </h2>
+                        <p className="text-gray-300 text-lg leading-relaxed mb-6">
+                          Sebelum eL Vision menjadi layanan 1:1 eksklusif, <strong className="text-white">eL Reyzandra</strong> diakui oleh media nasional (Liputan6) sebagai motivator bisnis yang sukses membimbing ratusan pengusaha pemula menuju profitabilitas.
+                        </p>
+                        <p className="text-gray-300 text-lg leading-relaxed">
+                          Namun dalam perjalanan ini, ia menemukan kebenaran kritis: <strong>Motivasi itu sementara. Sistem itu permanen.</strong>
+                        </p>
+                        <p className="text-gray-300 text-lg leading-relaxed mt-4">
+                          Ia menyadari bahwa 2% yang gagal bukan karena kurang usaha—mereka memiliki "algoritma" internal yang menolak kesuksesan. Hal ini menyebabkan terciptanya Metode eL Vision: sebuah protokol bukan untuk memotivasi pikiran, melainkan untuk <strong className="text-yellow-400">memprogram ulang sistem biologis dan energetik</strong> itu sendiri.
+                        </p>
+                      </div>
+                    </div>
+          
+                    <div className="text-center mb-12">
+                      <h3 className="text-3xl font-bold text-white mb-4">Mengapa Sistem Ini Berhasil di Semua Bidang</h3>
+                      <p className="text-xl text-gray-400">Kami tidak menyelesaikan masalah. Kami memperbaiki mesin yang merasakannya.</p>
+                    </div>
+          
+                    <div className="grid md:grid-cols-3 gap-8">
+                      {/* Finance */}
+                      <div className="bg-gradient-to-br from-black to-gray-900 border border-gray-800 p-8 rounded-2xl hover:border-green-500/30 transition-all group">
+                         <div className="w-14 h-14 bg-green-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                           <DollarSign className="w-8 h-8 text-green-400" />
+                         </div>
+                         <h4 className="text-xl font-bold text-white mb-3">Keuangan</h4>
+                         <div className="text-green-500 text-sm font-bold mb-3 uppercase tracking-wider">Algoritma "Profit"</div>
+                         <p className="text-gray-400 leading-relaxed">
+                           Sebagian besar hambatan finansial bukan masalah strategis—melainkan energetik. Kami memasang "Algoritma Kesuksesan" yang menyelaraskan fokus bawah sadar Anda dengan peluang pasar, membuat penciptaan kekayaan terasa seperti refleks alami daripada usaha yang dipaksakan.
+                         </p>
+                      </div>
+          
+                      {/* Health */}
+                      <div className="bg-gradient-to-br from-black to-gray-900 border border-gray-800 p-8 rounded-2xl hover:border-red-500/30 transition-all group">
+                         <div className="w-14 h-14 bg-red-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                           <Heart className="w-8 h-8 text-red-400" />
+                         </div>
+                         <h4 className="text-xl font-bold text-white mb-3">Kesehatan</h4>
+                         <div className="text-red-500 text-sm font-bold mb-3 uppercase tracking-wider">Mode "Perbaikan"</div>
+                         <p className="text-gray-400 leading-relaxed">
+                           Para high achiever hidup dalam stres simpatik (fight-or-flight) kronis. Metode kami memaksa sistem saraf masuk ke dominasi parasimpatik yang dalam—satu-satunya kondisi di mana tubuh dapat memperbaiki jaringan, membunuh sel abnormal (seperti yang terlihat pada kasus penyintas kanker kami), dan membalikkan penuaan.
+                         </p>
+                      </div>
+          
+                      {/* Relationship */}
+                      <div className="bg-gradient-to-br from-black to-gray-900 border border-gray-800 p-8 rounded-2xl hover:border-purple-500/30 transition-all group">
+                         <div className="w-14 h-14 bg-purple-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                           <Crown className="w-8 h-8 text-purple-400" />
+                         </div>
+                         <h4 className="text-xl font-bold text-white mb-3">Hubungan</h4>
+                         <div className="text-purple-500 text-sm font-bold mb-3 uppercase tracking-wider">Hukum "Resonansi"</div>
+                         <p className="text-gray-400 leading-relaxed">
+                           Anda tidak mendapatkan apa yang Anda inginkan; Anda mendapatkan siapa diri Anda. Dengan mengkalibrasi baseline emosional internal Anda, Anda secara alami menolak dinamika beracun dan secara magnetis menarik pasangan (atau menyembuhkan pernikahan yang ada) yang menghormati dan menghargai kehadiran Anda tanpa Anda mengucapkan sepatah kata pun.
+                         </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          
+                {/* Story-Based Case Studies Section */}      <div className="py-20 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-6">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-5xl font-bold text-center mb-6">
@@ -1234,7 +1309,7 @@ export default function ELVision15K() {
                 <Shield className="w-8 h-8 text-blue-400 flex-shrink-0" />
                 <div className="text-left text-sm text-gray-300">
                   <span className="font-bold text-blue-400 block mb-1 uppercase tracking-wider">Money Back Guarantee</span>
-                  Jika Anda tidak merasa lega dan tidak memiliki kemajuan positif selama 6 sesi, kami memiliki tingkat keberhasilan 99%
+                  Berdasarkan masukan klien internal, sebagian besar merasakan kemajuan positif di awal proses.
                 </div>
               </div>
               

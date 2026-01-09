@@ -414,7 +414,7 @@ export default function ELVision3000() {
               <Shield className="w-12 h-12 text-blue-400 flex-shrink-0" />
               <div className="text-left">
                 <div className="text-xl font-bold text-blue-400 uppercase tracking-wider">Money Back Guarantee</div>
-                <div className="text-gray-300">If you do not relieve and have positive progress during 6 sessions, we have 99% success rate</div>
+                <div className="text-gray-300">Based on internal client feedback, the vast majority experience positive progress early in the process.</div>
               </div>
             </div>
           </div>
@@ -485,6 +485,82 @@ export default function ELVision3000() {
             </div>
           </div>
         </div>
+
+      {/* Founder History & Why It Works Section */}
+      <div className="py-20 bg-gray-900">
+        <div className="container mx-auto px-6 max-w-5xl">
+          <div className="flex flex-col md:flex-row gap-12 items-center mb-16">
+            <div className="w-full md:w-1/3">
+               <div className="bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-500/30 rounded-3xl p-8 text-center backdrop-blur-sm">
+                 <div className="text-6xl mb-6">📰</div>
+                 <div className="font-bold text-yellow-500 text-sm tracking-wider uppercase mb-2">As Featured In</div>
+                 <div className="text-3xl font-bold text-white mb-4">Liputan6</div>
+                 <div className="h-px w-16 bg-yellow-500/50 mx-auto mb-4"></div>
+                 <p className="text-gray-300 italic">"Helped hundreds of entrepreneurs with 98% success rate"</p>
+               </div>
+            </div>
+            <div className="w-full md:w-2/3">
+              <h2 className="text-4xl font-bold mb-6">
+                <span className="bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
+                  From Media-Recognized Motivator to System Architect
+                </span>
+              </h2>
+              <p className="text-gray-300 text-lg leading-relaxed mb-6">
+                Before eL Vision became an exclusive 1:1 service, <strong className="text-white">eL Reyzandra</strong> was recognized by national media (Liputan6) as a business motivator who successfully guided hundreds of beginner entrepreneurs to profitability.
+              </p>
+              <p className="text-gray-300 text-lg leading-relaxed">
+                But during this journey, he discovered a critical truth: <strong>Motivation is temporary. Systems are permanent.</strong>
+              </p>
+              <p className="text-gray-300 text-lg leading-relaxed mt-4">
+                He realized that the 2% who failed didn't lack effort—they had internal "algorithms" that rejected success. This led to the creation of the eL Vision Method: a protocol not to <em>motivate</em> the mind, but to <strong className="text-yellow-400">reprogram the biological and energetic system</strong> itself.
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-white mb-4">Why The System Works Across All Areas</h3>
+            <p className="text-xl text-gray-400">We don't solve problems. We fix the machine that perceives them.</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Finance */}
+            <div className="bg-gradient-to-br from-black to-gray-900 border border-gray-800 p-8 rounded-2xl hover:border-green-500/30 transition-all group">
+               <div className="w-14 h-14 bg-green-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                 <DollarSign className="w-8 h-8 text-green-400" />
+               </div>
+               <h4 className="text-xl font-bold text-white mb-3">Finance</h4>
+               <div className="text-green-500 text-sm font-bold mb-3 uppercase tracking-wider">The "Profit" Algorithm</div>
+               <p className="text-gray-400 leading-relaxed">
+                 Most financial blocks aren't strategic—they are energetic. We install a "Success Algorithm" that aligns your subconscious focus with market opportunities, making wealth creation feel like a natural reflex rather than a forced effort.
+               </p>
+            </div>
+
+            {/* Health */}
+            <div className="bg-gradient-to-br from-black to-gray-900 border border-gray-800 p-8 rounded-2xl hover:border-red-500/30 transition-all group">
+               <div className="w-14 h-14 bg-red-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                 <Heart className="w-8 h-8 text-red-400" />
+               </div>
+               <h4 className="text-xl font-bold text-white mb-3">Health</h4>
+               <div className="text-red-500 text-sm font-bold mb-3 uppercase tracking-wider">The "Repair" Mode</div>
+               <p className="text-gray-400 leading-relaxed">
+                 High achievers live in chronic sympathetic (fight-or-flight) stress. Our method forces the nervous system into deep parasympathetic dominance—the only state where the body can repair tissues, kill abnormal cells (as seen in our cancer survivor cases), and reverse aging.
+               </p>
+            </div>
+
+            {/* Relationship */}
+            <div className="bg-gradient-to-br from-black to-gray-900 border border-gray-800 p-8 rounded-2xl hover:border-purple-500/30 transition-all group">
+               <div className="w-14 h-14 bg-purple-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                 <Crown className="w-8 h-8 text-purple-400" />
+               </div>
+               <h4 className="text-xl font-bold text-white mb-3">Relationship</h4>
+               <div className="text-purple-500 text-sm font-bold mb-3 uppercase tracking-wider">The "Resonance" Law</div>
+               <p className="text-gray-400 leading-relaxed">
+                 You don't get what you want; you get who you are. By calibrating your internal emotional baseline, you naturally repel toxic dynamics and magnetically attract partners (or heal existing marriages) who respect and value your presence without you saying a word.
+               </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Story-Based Case Studies Section */}
       <div className="py-20 bg-gradient-to-b from-black to-gray-900">
@@ -1316,7 +1392,7 @@ export default function ELVision3000() {
                 <Shield className="w-8 h-8 text-blue-400 flex-shrink-0" />
                 <div className="text-left text-sm text-gray-300">
                   <span className="font-bold text-blue-400 block mb-1 uppercase tracking-wider">Money Back Guarantee</span>
-                  If you do not relieve and have positive progress during 6 sessions, we have 99% success rate
+                  Based on internal client feedback, the vast majority experience positive progress early in the process.
                 </div>
               </div>
               
