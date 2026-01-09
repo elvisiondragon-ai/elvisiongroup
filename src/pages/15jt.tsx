@@ -325,21 +325,21 @@ export default function ELVision15K() {
             Untuk mereka yang sudah memiliki segalanya, namun masih mencari sesuatu yang lebih dalam
           </p>
 
-          {/* Free Trial Badge */}
-          <div className="inline-block bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-2 border-green-500/50 rounded-2xl px-8 py-4 mb-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-8 h-8 text-green-400" />
-              <div className="text-left">
-                <div className="text-2xl font-bold text-green-400">SESI PERTAMA GRATIS</div>
-                <div className="text-sm text-gray-300">Rasakan Nilainya, Bayar Saat Anda Yakin</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-8 max-w-2xl mx-auto backdrop-blur-sm mb-8">
+          <div className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-8 max-w-2xl mx-auto backdrop-blur-sm mb-6">
             <div className="text-5xl font-bold text-yellow-400 mb-2">Rp 15.000.000</div>
             <div className="text-xl text-gray-300 mb-1">6 Minggu • 6 Sesi Private (60 menit/sesi)</div>
-            <div className="text-sm text-gray-400">Bayar Setelah Sesi 1 • 1 Sesi per Minggu</div>
+            <div className="text-sm text-gray-400">1 Sesi per Minggu</div>
+          </div>
+
+          {/* Money Back Guarantee Box */}
+          <div className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-500/30 rounded-2xl p-6 max-w-2xl mx-auto backdrop-blur-sm mb-8">
+            <div className="flex items-center gap-4">
+              <Shield className="w-12 h-12 text-blue-400 flex-shrink-0" />
+              <div className="text-left">
+                <div className="text-xl font-bold text-blue-400 uppercase tracking-wider">Money Back Guarantee</div>
+                <div className="text-gray-300">Jika Anda tidak merasa lega dan tidak memiliki kemajuan positif selama 6 sesi, kami memiliki tingkat keberhasilan 99%</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -382,19 +382,16 @@ export default function ELVision15K() {
             <p className="mb-4">Apa yang hilang?</p>
             <p className="mb-4">Bertahun-tahun penelitian, pengujian pribadi, dan pengorbanan akhirnya mengungkap celahnya.</p>
             <p className="mb-4">Celah itulah yang sekarang ditangani oleh eL Vision—bukan sebagai teori, tetapi sebagai sistem yang hidup yang dapat dialami secara langsung.</p>
-            <p className="mb-4">Inilah sebabnya sesi pertama ditawarkan gratis.</p>
             <p className="mb-4">Saya tidak menjual motivasi, kepercayaan, atau nasihat.</p>
             <p className="mb-4">Saya menawarkan metode yang bekerja.</p>
-            <p className="mb-4">Salah satu klien internasional pertama saya di Dubai datang kepada saya setelah kehilangan pekerjaannya. Dia bergabung dengan sesi gratis. Minggu kemudian, dia mendapatkan posisi yang lebih baik sebagai manajer di gym premium.</p>
+            <p className="mb-4">Salah satu klien internasional pertama saya di Dubai datang kepada saya setelah kehilangan pekerjaannya. Minggu kemudian, dia mendapatkan posisi yang lebih baik sebagai manajer di gym premium setelah menerapkan metode kami.</p>
             <p className="mb-4">Tidak ada janji yang dibuat. Tidak ada bujukan yang digunakan.</p>
             <p className="mb-4">Apakah saya luar biasa?</p>
             <p className="mb-4">Tidak.</p>
             <p className="mb-4">Yang telah saya pelajari adalah ini:</p>
             <p className="mb-4">setiap manusia membawa kekuatan batin yang sudah diberikan oleh alam.</p>
             <p className="mb-4">Perbedaannya hanya terletak pada mengetahui cara mengaktifkannya.</p>
-            <p className="mb-4">Jika Anda benar-benar ingin mengalami ini sendiri,</p>
-            <p className="mb-4">mulailah dengan sesi gratis.</p>
-            <p className="mb-4">Baru kemudian putuskan apakah program enam minggu ini tepat untuk Anda.</p>
+            <p className="mb-4">Jika Anda benar-benar ingin mengalami ini sendiri, bergabunglah dengan program enam minggu ini.</p>
             <p className="mb-4">Saya tidak tertarik mendapatkan uang dengan membuat orang tetap tergantung atau bingung.</p>
             <p className="mb-4">Ini dirancang untuk menjadi salah satu investasi paling efisien yang pernah Anda buat—</p>
             <p className="mb-4">sebagian kecil dari sumber daya Anda, sebagai pertukaran untuk apa yang paling penting: kejelasan, keselarasan, dan stabilitas batin.</p>
@@ -835,7 +832,6 @@ export default function ELVision15K() {
 
             <div className="mt-12 bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-8">
               <p className="text-2xl text-gray-300 leading-relaxed">
-                Itulah mengapa <strong className="text-yellow-400">SESI PERTAMA GRATIS</strong>.<br />
                 Anda tidak harus percaya kata-kata kami.<br />
                 <span className="text-3xl font-bold text-yellow-400">Rasakan buktinya sendiri.</span>
               </p>
@@ -1230,12 +1226,17 @@ export default function ELVision15K() {
             </p>
 
             <div className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-10 backdrop-blur-sm mb-12">
-              <div className="inline-block bg-green-500/20 border border-green-500/50 rounded-full px-6 py-2 mb-4">
-                <span className="text-green-400 font-bold text-lg">✓ SESI PERTAMA GRATIS - Tanpa Risiko</span>
-              </div>
               <div className="text-5xl font-bold text-yellow-400 mb-3">Rp 15.000.000</div>
               <div className="text-xl text-gray-300 mb-2">Transformasi 6 Minggu (60 menit/sesi)</div>
-              <div className="text-sm text-gray-400 mb-6">Bayar Setelah Sesi 1 • 1 Sesi per Minggu</div>
+              <div className="text-sm text-gray-400 mb-6">1 Sesi per Minggu</div>
+
+              <div className="flex items-center gap-4 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
+                <Shield className="w-8 h-8 text-blue-400 flex-shrink-0" />
+                <div className="text-left text-sm text-gray-300">
+                  <span className="font-bold text-blue-400 block mb-1 uppercase tracking-wider">Money Back Guarantee</span>
+                  Jika Anda tidak merasa lega dan tidak memiliki kemajuan positif selama 6 sesi, kami memiliki tingkat keberhasilan 99%
+                </div>
+              </div>
               
               <div className="inline-block bg-yellow-500/20 border border-yellow-500/30 rounded-lg px-6 py-3">
                 <p className="text-yellow-400 font-semibold">⚡ Terbatas: Hanya 3 Slot per Bulan</p>
@@ -1261,26 +1262,6 @@ export default function ELVision15K() {
               BOOK SEKARANG
               <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
             </button>
-
-            <button 
-  className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xl px-12 py-6 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-blue-500/50 flex items-center gap-4 mx-auto mb-8"
-  onClick={() => {
-    // @ts-ignore
-    if (typeof fbq === 'function') {
-      // @ts-ignore
-      fbq('trackCustom', 'EbookClick', {
-        content_name: 'Ebook Dasar',
-        value: 200000,
-        currency: 'IDR'
-      });
-    }
-    window.open('https://elvisiongroup.com/product/ebook/', '_blank');
-  }}
->
-  📖
-  Beli Ebook Dasar Dulu Rp 200.000
-  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-</button>
 
             <p className="text-gray-500 text-sm">
               Slot terbatas. Kami hanya bekerja dengan mereka yang serius tentang transformasi mendalam.
