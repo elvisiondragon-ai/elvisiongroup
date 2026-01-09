@@ -178,7 +178,7 @@ export default function ELVision3000() {
       title: "Art Gallery Owner, Singapore",
       image: "🎨",
       rating: 5,
-      text: "After the free first session, I immediately knew this was different. Not empty advice, but real results. 3 weeks later, my collection sold for 3x expected price. The energy shift is real."
+      text: "I immediately knew this was different. Not empty advice, but real results. 3 weeks later, my collection sold for 3x expected price. The energy shift is real."
     },
     {
       name: "Budi Hermawan",
@@ -402,21 +402,21 @@ export default function ELVision3000() {
             For those who already have everything, but still searching for something deeper
           </p>
 
-          {/* Free Trial Badge */}
-          <div className="inline-block bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-2 border-green-500/50 rounded-2xl px-8 py-4 mb-6 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-8 h-8 text-green-400" />
-              <div className="text-left">
-                <div className="text-2xl font-bold text-green-400">FIRST SESSION FREE</div>
-                <div className="text-sm text-gray-300">Experience The Value, Pay When You're Sure</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-8 max-w-2xl mx-auto backdrop-blur-sm mb-8">
+          <div className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-8 max-w-2xl mx-auto backdrop-blur-sm mb-6">
             <div className="text-5xl font-bold text-yellow-400 mb-2">$3,000</div>
             <div className="text-xl text-gray-300 mb-1">6 Weeks • 6 Private Sessions (60 min/session)</div>
-            <div className="text-sm text-gray-400">Pay After Session 1 • 1 Session per Week</div>
+            <div className="text-sm text-gray-400">1 Session per Week</div>
+          </div>
+
+          {/* Money Back Guarantee Box */}
+          <div className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-500/30 rounded-2xl p-6 max-w-2xl mx-auto backdrop-blur-sm mb-8">
+            <div className="flex items-center gap-4">
+              <Shield className="w-12 h-12 text-blue-400 flex-shrink-0" />
+              <div className="text-left">
+                <div className="text-xl font-bold text-blue-400 uppercase tracking-wider">Money Back Guarantee</div>
+                <div className="text-gray-300">If you do not relieve and have positive progress during 6 sessions, we have 99% success rate</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -466,19 +466,16 @@ export default function ELVision3000() {
               <p className="mb-4">What is missing?</p>
               <p className="mb-4">Years of research, personal testing, and sacrifice eventually revealed the gap.</p>
               <p className="mb-4">That gap is what eL Vision now addresses—not as theory, but as a lived system that can be experienced directly.</p>
-              <p className="mb-4">This is also why the first session is offered free.</p>
               <p className="mb-4">I do not sell motivation, belief, or advice.</p>
               <p className="mb-4">I offer a working method.</p>
-              <p className="mb-4">One of my earliest international clients in Dubai came to me after losing his job. He joined a free session. Weeks later, he secured a better position as a manager at a premium gym.</p>
+              <p className="mb-4">One of my earliest international clients in Dubai came to me after losing his job. Weeks later, he secured a better position as a manager at a premium gym after applying our method.</p>
               <p className="mb-4">No promises were made. No persuasion was used.</p>
               <p className="mb-4">Am I extraordinary?</p>
               <p className="mb-4">No.</p>
               <p className="mb-4">What I have learned is this:</p>
               <p className="mb-4">every human being carries an inner strength already granted by nature.</p>
               <p className="mb-4">The difference lies only in knowing how to activate it.</p>
-              <p className="mb-4">If you genuinely wish to experience this for yourself,</p>
-              <p className="mb-4">start with the free session.</p>
-              <p className="mb-4">Only then decide whether the six-week program is right for you.</p>
+              <p className="mb-4">If you genuinely wish to experience this for yourself, join the six-week program.</p>
               <p className="mb-4">I have no interest in earning money by keeping people dependent or confused.</p>
               <p className="mb-4">This is designed to be one of the most efficient investments you will ever make—</p>
               <p className="mb-4">a small portion of your resources, in exchange for what matters most: clarity, alignment, and inner stability.</p>
@@ -916,7 +913,6 @@ export default function ELVision3000() {
 
             <div className="mt-12 bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-8">
               <p className="text-2xl text-gray-300 leading-relaxed">
-                That's why <strong className="text-yellow-400">FIRST SESSION IS FREE</strong>.<br />
                 You don't have to believe our words.<br />
                 <span className="text-3xl font-bold text-yellow-400">Experience the proof yourself.</span>
               </p>
@@ -1312,12 +1308,17 @@ export default function ELVision3000() {
             </p>
 
             <div className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-10 backdrop-blur-sm mb-12">
-              <div className="inline-block bg-green-500/20 border border-green-500/50 rounded-full px-6 py-2 mb-4">
-                <span className="text-green-400 font-bold text-lg">✓ FIRST SESSION FREE - Zero Risk</span>
-              </div>
               <div className="text-5xl font-bold text-yellow-400 mb-3">$3,000</div>
               <div className="text-xl text-gray-300 mb-2">6 Weeks Transformation (60 min/session)</div>
-              <div className="text-sm text-gray-400 mb-6">Pay After Session 1 • 1 Session per Week</div>
+              <div className="text-sm text-gray-400 mb-6">1 Session per Week</div>
+
+              <div className="flex items-center gap-4 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
+                <Shield className="w-8 h-8 text-blue-400 flex-shrink-0" />
+                <div className="text-left text-sm text-gray-300">
+                  <span className="font-bold text-blue-400 block mb-1 uppercase tracking-wider">Money Back Guarantee</span>
+                  If you do not relieve and have positive progress during 6 sessions, we have 99% success rate
+                </div>
+              </div>
               
               <div className="inline-block bg-yellow-500/20 border border-yellow-500/30 rounded-lg px-6 py-3">
                 <p className="text-yellow-400 font-semibold">⚡ Limited</p>
