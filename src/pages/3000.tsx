@@ -418,6 +418,24 @@ export default function ELVision3000() {
               </div>
             </div>
           </div>
+
+          <button 
+            className="group bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center gap-4 mx-auto mb-8"
+            onClick={() => {
+              // @ts-ignore
+              if (typeof fbq === 'function') {
+                // @ts-ignore
+                fbq('track', 'AddToCart', {
+                  content_name: 'EL Vision 3000 Coaching',
+                });
+              }
+              window.location.href = 'https://app.elvisiongroup.com/3000survey';
+            }}
+          >
+            <Phone className="w-8 h-8" />
+            BOOK A CALL NOW
+            <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+          </button>
         </div>
       </div>
 
@@ -1411,7 +1429,7 @@ export default function ELVision3000() {
                     content_name: 'EL Vision 3000 Coaching',
                   });
                 }
-                window.open('https://wa.me/62895325633487?text=Hi%20I%20would%20like%20to%20apply%20VIP%201%3A1%20%0AName:%20%0ASpecific%20Goal:%3A', '_blank');
+                window.location.href = 'https://app.elvisiongroup.com/3000survey';
               }}
             >
               <Phone className="w-8 h-8" />
