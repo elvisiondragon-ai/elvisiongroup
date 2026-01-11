@@ -104,18 +104,6 @@ export default defineConfig(({ mode }) => ({
                 maxAgeSeconds: 60 * 2 // 2 minutes for API requests
               }
             }
-          },
-          {
-            urlPattern: ({ request }) => request.mode === 'navigate',
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'navigation-cache',
-              networkTimeoutSeconds: 3,
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5 // 5 minutes
-              }
-            }
           }
         ],
         // Automatically update when files change
