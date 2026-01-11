@@ -27,6 +27,8 @@ import PaypalPaymentPage from "./pages/paypal"; // Import the new PaypalPaymentP
 import AffiliatePage from "./pages/affiliate"; // Import the new AffiliatePage component
 import ArifAffiliate from "./pages/arifaffiliate"; // Import the ArifAffiliate component
 import EbookElvisionPaymentPage from "./pages/ebookelvision"; // Import the EbookElvisionPaymentPage component
+import EbookHealthLP from "./pages/ebookhealthlp"; // Import the EbookHealthLP component
+import PayPalFinish from "./pages/PayPalFinish"; // Import the PayPalFinish component
 import FitFactorLP from "./pages/fitfactorlp";
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -186,6 +188,8 @@ const AppContent = () => {
                 <Route path="/affiliate" element={<AffiliatePage />} />
                 <Route path="/arif9" element={<ArifAffiliate />} />
                 <Route path="/fitfactorlp" element={<FitFactorLP />} />
+                <Route path="/ebookhealthlp" element={<EbookHealthLP />} />
+                <Route path="/payment/paypal-finish" element={<PayPalFinish />} />
                 <Route path="/income" element={<IncomeDashboard />} />
                 
                 {/* Auth routes */}

@@ -61,6 +61,66 @@ serve(async (req)=>{
       error: 'Invalid JSON payload'
     }, true);
   }
+
+  // --- SPECIAL HANDLING: PAYPAL CAPTURE TRIGGER ---
+  // Frontend calls this manually after user approves payment
+  if (body.action === 'CAPTURE_PAYPAL' && body.orderId) {
+      console.log(`🔵 PayPal Capture Triggered for Order: ${body.orderId}`);
+      
+      const clientId = Deno.env.get('PAYPAL_CLIENT_ID');
+      const clientSecret = Deno.env.get('PAYPAL_CLIENT_SECRET');
+      const isSandbox = Deno.env.get('PAYPAL_MODE') === 'sandbox';
+      const baseUrl = isSandbox ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
+
+      if (!clientId || !clientSecret) return logAndRespond('Server config missing (PayPal)', 500, { success: false }, true);
+
+      try {
+          // 1. Get Token
+          const auth = btoa(`${clientId}:${clientSecret}`);
+          const tokenResp = await fetch(`${baseUrl}/v1/oauth2/token`, {
+              method: "POST",
+              headers: { "Authorization": `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" },
+              body: "grant_type=client_credentials"
+          });
+          const tokenData = await tokenResp.json();
+          const accessToken = tokenData.access_token;
+
+          // 2. Capture Order
+          const captureResp = await fetch(`${baseUrl}/v2/checkout/orders/${body.orderId}/capture`, {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${accessToken}`, "Content-Type": "application/json" }
+          });
+          const captureData = await captureResp.json();
+          
+          if (!captureResp.ok) {
+              // If already captured, we might still want to proceed to ensure DB is synced
+               if (captureData.details && captureData.details[0]?.issue === 'ORDER_ALREADY_CAPTURED') {
+                   console.log('⚠️ Order already captured. Proceeding to sync DB.');
+               } else {
+                   return logAndRespond('PayPal Capture Failed', 400, { error: captureData }, true);
+               }
+          }
+
+          console.log('✅ PayPal Captured Successfully.');
+          
+          // 3. TRANSFORM PAYPAL DATA TO "TRIPAY STYLE" DATA
+          // This allows us to reuse the exact same logic below without rewriting it
+          // We overwrite 'body' so the rest of the script thinks it came from Tripay
+          body = {
+              reference: body.orderId, // The PayPal Order ID is our "Tripay Reference"
+              merchant_ref: null, // We let the script find it via reference
+              status: 'PAID',
+              payment_method: 'PAYPAL',
+              amount: captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || '20.00' // Get real amount
+          };
+          console.log('🔄 Transformed PayPal data for internal processing:', body);
+
+      } catch (err) {
+          return logAndRespond('PayPal Integration Error', 500, { error: err.message }, true);
+      }
+  }
+  // --- END SPECIAL HANDLING ---
+
     const { reference: tripayReference, merchant_ref: merchantRef, status: paymentStatus, payment_method: paymentMethod, amount } = body;
     console.log('✅ Callback data received:', {
       tripayReference,
@@ -134,11 +194,15 @@ serve(async (req)=>{
         console.log('3. 📧 Sending success email...');
         const isEbookDiet = globalProductTx.product_name && globalProductTx.product_name.includes('Ebook Diet');
         const isEbookElVision = globalProductTx.product_name && globalProductTx.product_name.includes('Ebook eL-Vision');
+        const isEbookHealth = globalProductTx.product_name && (globalProductTx.product_name.includes('Health Recovery') || globalProductTx.product_name.includes('ebook_health20'));
+
         let functionToInvoke;
         if (isEbookDiet) {
           functionToInvoke = 'ebook-diet-mail';
         } else if (isEbookElVision) {
           functionToInvoke = 'ebook-elvision-mail';
+        } else if (isEbookHealth) {
+          functionToInvoke = 'ebook-health20-email';
         } else {
           functionToInvoke = 'send-payment-email';
         }

@@ -71,6 +71,12 @@ const productCatalog = {
     requiresAuth: false,
     physical: false
   }, // New Ebook Product
+  'ebook_health20': {
+    name: 'Ebook Health Recovery (Promo)',
+    price: 300000,
+    requiresAuth: false,
+    physical: true
+  },
   'fitfactor': {
     name: 'Fitfactor',
     price: 0,
@@ -114,6 +120,9 @@ serve(async (req)=>{
     // --- 1. INITIALIZE & VALIDATE INPUT ---
     const body = await req.json();
     const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef } = body;
+    
+    console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod}`);
+
     const product = productCatalog[subscriptionType];
     if (!product) {
       return new Response(JSON.stringify({
@@ -228,7 +237,99 @@ serve(async (req)=>{
       dbRecordId = data.id;
     }
     console.log(`✅ Pre-payment DB record created with ID: ${dbRecordId} for merchant_ref: ${merchantRef}`);
-    // --- 5. CALL GENERIC PHP PROXY ---
+    
+    // --- 5. BRANCHING LOGIC: PAYPAL VS TRIPAY ---
+    if (paymentMethod === 'PAYPAL') {
+        console.log('🔵 Processing PayPal Order Creation...');
+        const clientId = Deno.env.get('PAYPAL_CLIENT_ID');
+        const clientSecret = Deno.env.get('PAYPAL_CLIENT_SECRET');
+        const isSandbox = Deno.env.get('PAYPAL_MODE') === 'sandbox'; // Set PAYPAL_MODE in secrets
+        const baseUrl = isSandbox ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
+
+        if (!clientId || !clientSecret) {
+             throw new Error("PayPal credentials missing in Supabase secrets.");
+        }
+
+        // 5a. Get Access Token
+        const auth = btoa(`${clientId}:${clientSecret}`);
+        const tokenResp = await fetch(`${baseUrl}/v1/oauth2/token`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Basic ${auth}`,
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "grant_type=client_credentials"
+        });
+        const tokenData = await tokenResp.json();
+        if (!tokenResp.ok) throw new Error(`PayPal Token Error: ${JSON.stringify(tokenData)}`);
+        const accessToken = tokenData.access_token;
+
+        // 5b. Create Order
+        // Note: We hardcode $20.00 USD for ebook_health20, otherwise convert IDR to USD approx (or use fixed mapping)
+        // For safety, let's use a fixed USD price map for now or default to simple conversion
+        let usdAmount = "20.00"; 
+        if (subscriptionType !== 'ebook_health20') {
+            // Fallback for other products if someone tries to pay via PayPal (Simple /15000 approx)
+             usdAmount = (amount / 16000).toFixed(2);
+        }
+
+        const orderPayload = {
+            intent: "CAPTURE",
+            purchase_units: [{
+                reference_id: merchantRef, // Link PayPal to our Merchant Ref
+                amount: {
+                    currency_code: "USD",
+                    value: usdAmount
+                },
+                description: formattedProductName
+            }],
+            application_context: {
+                return_url: "https://app.elvisiongroup.com/payment/paypal-finish",
+                cancel_url: "https://app.elvisiongroup.com/ebookhealthlp",
+                user_action: "PAY_NOW",
+                landing_page: "BILLING"
+            }
+        };
+
+        const orderResp = await fetch(`${baseUrl}/v2/checkout/orders`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(orderPayload)
+        });
+        const orderData = await orderResp.json();
+        if (!orderResp.ok) throw new Error(`PayPal Create Order Error: ${JSON.stringify(orderData)}`);
+        
+        console.log(`✅ PayPal Order Created: ${orderData.id}`);
+
+        // Get the approval link
+        const approvalUrl = orderData.links.find((l: any) => l.rel === 'approve')?.href;
+
+        // 5c. Update DB with PayPal Order ID (as tripay_reference equivalent)
+        const tableToUpdate = product.physical ? 'global_product' : 'waiting_payment';
+        let updateQuery;
+        if (product.physical) {
+             updateQuery = supabase.from(tableToUpdate).update({ tripay_reference: orderData.id }).eq('merchant_ref', merchantRef);
+        } else {
+             updateQuery = supabase.from(tableToUpdate).update({ tripay_reference: orderData.id }).eq('id', dbRecordId);
+        }
+        await updateQuery;
+
+        // 5d. Return to Client
+        return new Response(JSON.stringify({
+            success: true,
+            paymentType: 'PAYPAL',
+            paypalOrderId: orderData.id,
+            checkoutUrl: approvalUrl, // Use the official link
+            merchantRef: merchantRef,
+            amount: usdAmount,
+            currency: 'USD'
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 });
+    }
+
+    // --- 6. EXISTING TRIPAY FLOW (Generic PHP Proxy) ---
     const vpsUrl = "https://payment.elvisiongroup.com/create-payment";
     const vpsPayload = {
       method: paymentMethod,
@@ -255,7 +356,7 @@ serve(async (req)=>{
     }
     const vpsResult = JSON.parse(responseText);
     console.log('✅ Received response from PHP proxy.');
-    // --- 6. UPDATE DB WITH TRIPAY REFERENCE ---
+    // --- 7. UPDATE DB WITH TRIPAY REFERENCE ---
     const tripayData = vpsResult.data || {};
     const tripayReference = tripayData.reference;
     if (vpsResult.success && tripayReference) {
@@ -278,7 +379,7 @@ serve(async (req)=>{
         console.log(`✅ Updated ${tableToUpdate} with Tripay reference ${tripayReference}`);
       }
     }
-    // --- 7. FLATTEN & RETURN RESPONSE TO CLIENT ---
+    // --- 8. FLATTEN & RETURN RESPONSE TO CLIENT ---
     const clientResponse = {
       success: vpsResult.success,
       paymentType: tripayData.pay_url ? 'REDIRECT' : 'DIRECT',
