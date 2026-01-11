@@ -107,6 +107,22 @@ const EbookHealthLP = () => {
           <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
             "How I Cured My Stage 4 Brain Cancer Without Chemotherapy"
           </h1>
+          <div className="bg-blue-600 text-white py-3 px-6 rounded-2xl mb-8 inline-block shadow-lg border-2 border-white transform -rotate-1">
+            <p className="text-lg md:text-xl font-bold italic">
+              "This method works for ANY disease—especially conditions lighter than mine."
+            </p>
+          </div>
+          <p className="text-xl md:text-2xl text-gray-600 mb-4 max-w-2xl mx-auto">
+            If it can reverse Stage 4 Cancer, it can easily handle:
+          </p>
+          <div className="flex flex-wrap justify-center gap-3 mb-8 text-sm font-bold text-blue-700 uppercase tracking-wide">
+            <span className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Autoimmune</span>
+            <span className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Diabetes</span>
+            <span className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Hypertension</span>
+            <span className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Chronic Pain</span>
+            <span className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Anxiety & Depression</span>
+            <span className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Inflammation</span>
+          </div>
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Discover the Plug-and-Play Audio Therapy that reprograms your subconscious to heal any disease—even when doctors say there's no hope.
           </p>
