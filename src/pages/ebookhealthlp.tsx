@@ -54,6 +54,17 @@ const EbookHealthLP = () => {
       const btn = document.getElementById('buy-btn');
       if(btn) btn.innerText = "Processing...";
 
+      // Track InitiateCheckout on Facebook
+      // @ts-ignore
+      if (typeof fbq === 'function') {
+        // @ts-ignore
+        fbq('track', 'InitiateCheckout', {
+          content_name: 'Ebook Health Recovery Protocol',
+          value: 20.00,
+          currency: 'USD'
+        });
+      }
+
       // 1. Create Order using Supabase Client (Handles Auth automatically)
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {

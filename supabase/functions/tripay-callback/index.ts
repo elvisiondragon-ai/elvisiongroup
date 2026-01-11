@@ -219,6 +219,31 @@ serve(async (req)=>{
           }
         });
         console.log('   - 📧 Email sent to:', globalProductTx.email);
+
+        // --- Facebook CAPI Tracking for Purchase ---
+        if (isEbookHealth) {
+          try {
+            console.log('   - 🎯 Sending CAPI Purchase event for ebook_health...');
+            await supabase.functions.invoke('capi-manifestation', {
+              body: {
+                eventName: 'Purchase',
+                userData: {
+                  email: globalProductTx.email,
+                  client_ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip')
+                },
+                customData: {
+                  value: 20.00,
+                  currency: 'USD',
+                  content_name: 'Ebook Health Recovery Protocol',
+                  order_id: tripayReference
+                },
+                eventId: tripayReference // Deduplication ID
+              }
+            });
+          } catch (capiError) {
+            console.error('   - ⚠️ CAPI Error (non-critical):', capiError);
+          }
+        }
       } catch (emailError) {
         console.log('   - ⚠️ Email failed (non-critical):', emailError);
       }

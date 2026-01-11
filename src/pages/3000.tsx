@@ -2,6 +2,38 @@ import { useState, useEffect, useRef } from 'react';
 import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRight, Sparkles, Shield, Check, Play, Pause } from 'lucide-react';
 
 export default function ELVision3000() {
+  // CAPI Configuration
+  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-manifestation'; // Using the Manifestation CAPI function
+
+  // Helper to send CAPI events
+  const sendCAPIEvent = async (eventName: string, customData: any = {}, eventId?: string) => {
+    try {
+       // Simple cookie helper
+       const getCookie = (name: string) => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop()?.split(';').shift();
+       };
+
+      await fetch(CAPI_EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventName,
+          userData: {
+             fbp: getCookie('_fbp'),
+             fbc: getCookie('_fbc'),
+             client_user_agent: navigator.userAgent
+          },
+          customData,
+          eventId
+        }),
+      });
+    } catch (e) {
+      console.error('CAPI Error:', e);
+    }
+  };
+
   // Facebook Pixel Code
   useEffect(() => {
     (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
@@ -27,9 +59,13 @@ export default function ELVision3000() {
       'script',
       'https://connect.facebook.net/en_US/fbevents.js'
     );
+    
+    const eventId = crypto.randomUUID();
     fbq('init', '1393383179182528');
-    fbq('init', 'EAAGuZBVYmBugBQXvt52SiECtanczI1jMngHkCHWLWDQOIQGZBnkLipg0poGZBZBaJ7RNxa2fcesMH8mtyizKHSG9nZARKg622a8q3jcZCcKLGXXST9pNg26RZBFZBFrtSWT5C23oJBONslIQeOyTirGDjJp6gbrbGExxCF1D7VsdmrOoswXdy1UPomLrM8nJ4ih9MQZDZD');
-    fbq('track', 'PageView');
+    fbq('track', 'PageView', {}, { eventID: eventId });
+    
+    // Send Server-Side Event
+    sendCAPIEvent('PageView', {}, eventId);
   }, []);
   const videoTestimonials = [
     {
@@ -420,19 +456,28 @@ export default function ELVision3000() {
           </div>
 
           <button 
-            className="group bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center gap-4 mx-auto mb-8"
-            onClick={() => {
-              // @ts-ignore
-              if (typeof fbq === 'function') {
-                // @ts-ignore
-                fbq('track', 'AddToCart', {
-                  content_name: 'EL Vision 3000 Coaching',
-                });
-              }
-              window.location.href = 'https://app.elvisiongroup.com/3000survey';
-            }}
-          >
-            <Phone className="w-8 h-8" />
+                        className="group bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center gap-4 mx-auto mb-8"
+                        onClick={() => {
+                          const eventId = crypto.randomUUID();
+                          // @ts-ignore
+                          if (typeof fbq === 'function') {
+                            // @ts-ignore
+                            fbq('track', 'AddToCart', {
+                              content_name: 'EL Vision 3000 Coaching',
+                              value: 3000,
+                              currency: 'USD'
+                            }, { eventID: eventId });
+                          }
+                          // Send Server-Side Event
+                          sendCAPIEvent('AddToCart', {
+                              content_name: 'EL Vision 3000 Coaching',
+                              value: 3000,
+                              currency: 'USD'
+                          }, eventId);
+            
+                          window.location.href = 'https://app.elvisiongroup.com/3000survey';
+                        }}
+                      >            <Phone className="w-8 h-8" />
             BOOK A CALL NOW
             <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
           </button>
@@ -1420,19 +1465,28 @@ export default function ELVision3000() {
             </div>
 
             <button 
-              className="group bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center gap-4 mx-auto mb-8"
-              onClick={() => {
-                // @ts-ignore
-                if (typeof fbq === 'function') {
-                  // @ts-ignore
-                  fbq('track', 'AddToCart', {
-                    content_name: 'EL Vision 3000 Coaching',
-                  });
-                }
-                window.location.href = 'https://app.elvisiongroup.com/3000survey';
-              }}
-            >
-              <Phone className="w-8 h-8" />
+                          className="group bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center gap-4 mx-auto mb-8"
+                          onClick={() => {
+                            const eventId = crypto.randomUUID();
+                            // @ts-ignore
+                            if (typeof fbq === 'function') {
+                              // @ts-ignore
+                              fbq('track', 'AddToCart', {
+                                content_name: 'EL Vision 3000 Coaching',
+                                value: 3000,
+                                currency: 'USD'
+                              }, { eventID: eventId });
+                            }
+                            // Send Server-Side Event
+                            sendCAPIEvent('AddToCart', {
+                                content_name: 'EL Vision 3000 Coaching',
+                                value: 3000,
+                                currency: 'USD'
+                            }, eventId);
+              
+                            window.location.href = 'https://app.elvisiongroup.com/3000survey';
+                          }}
+                        >              <Phone className="w-8 h-8" />
               BOOK A CALL NOW
               <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
             </button>
