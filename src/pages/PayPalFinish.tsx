@@ -10,6 +10,23 @@ const PayPalFinish = () => {
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState("Finalizing your secure payment...");
 
+  // Facebook Pixel Init
+  useEffect(() => {
+    // @ts-ignore
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    // @ts-ignore
+    fbq('init', '1393383179182528');
+    // @ts-ignore
+    fbq('track', 'PageView');
+  }, []);
+
   useEffect(() => {
     const token = searchParams.get('token'); // PayPal sends 'token' as the Order ID
     
@@ -36,6 +53,18 @@ const PayPalFinish = () => {
 
         setStatus('success');
         setMessage("Payment successful! Please check your Email Inbox (and Spam/Important folder). Your Ebook & Audio download links have been sent.");
+
+        // Track Purchase Event
+        // @ts-ignore
+        if (typeof fbq === 'function') {
+          // @ts-ignore
+          fbq('track', 'Purchase', {
+            value: 20.00,
+            currency: 'USD',
+            content_name: 'Ebook Health Recovery Protocol',
+            order_id: token
+          });
+        }
 
       } catch (err: any) {
         console.error("Capture Error:", err);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Star, Check, Shield, Clock, PlayCircle, MessageCircle, ArrowRight, Instagram, Globe, HeartHandshake, ShieldCheck } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -6,11 +6,38 @@ const EbookHealthLP = () => {
   const [loading, setLoading] = React.useState(false);
   const [email, setEmail] = React.useState("");
 
+  // Facebook Pixel
+  useEffect(() => {
+    // @ts-ignore
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    
+    // @ts-ignore
+    fbq('init', '1393383179182528');
+    // @ts-ignore
+    fbq('track', 'PageView');
+  }, []);
+
   const scrollToPurchase = () => {
     const element = document.getElementById('email-input');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
       element.focus();
+      // @ts-ignore
+      if (typeof fbq === 'function') {
+        // @ts-ignore
+        fbq('track', 'AddToCart', {
+          content_name: 'Ebook Health Recovery Protocol',
+          value: 20.00,
+          currency: 'USD'
+        });
+      }
     }
   };
 
