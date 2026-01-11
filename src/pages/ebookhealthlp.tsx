@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Check, Shield, Clock, PlayCircle, MessageCircle, ArrowRight, Instagram } from 'lucide-react';
+import { Star, Check, Shield, Clock, PlayCircle, MessageCircle, ArrowRight, Instagram, Globe, HeartHandshake, ShieldCheck } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 
 const EbookHealthLP = () => {
@@ -355,6 +355,53 @@ const EbookHealthLP = () => {
                 <div>
                   <div className="font-bold">Elena M.</div>
                   <div className="text-xs text-green-600">Verified Purchase</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Money Back Guarantee - Fantastic Card */}
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white border-2 border-yellow-400 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-400 opacity-10 rounded-bl-full pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-400 opacity-10 rounded-tr-full pointer-events-none"></div>
+            
+            <div className="flex flex-col md:flex-row items-center gap-10">
+              <div className="flex-shrink-0 relative">
+                <div className="w-40 h-40 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-xl border-4 border-white">
+                  <ShieldCheck size={80} className="text-white" />
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-2 rounded-full shadow-lg">
+                  <Check size={24} strokeWidth={3} />
+                </div>
+              </div>
+              
+              <div className="flex-1 text-center md:text-left">
+                <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 uppercase tracking-tight">
+                  100% Risk-Free Guarantee
+                </h2>
+                <p className="text-xl text-gray-700 leading-relaxed mb-6 font-medium">
+                  "If this is BS or a SCAM, I want you to take your money back."
+                </p>
+                <div className="space-y-4 text-gray-600">
+                  <p>
+                    We are a <strong>worldwide community</strong> dedicated to guiding people through their darkest health challenges. We are not just a website; we are real people with real results.
+                  </p>
+                  <p className="font-semibold text-gray-800">
+                    If you don't feel the shift in your energy within 30 days, we will refund 100% of your payment—no questions asked.
+                  </p>
+                </div>
+                
+                <div className="mt-8 flex flex-wrap justify-center md:justify-start gap-4">
+                  <div className="flex items-center gap-2 text-blue-600 font-bold">
+                    <Globe size={20} /> Worldwide Community
+                  </div>
+                  <div className="flex items-center gap-2 text-green-600 font-bold">
+                    <HeartHandshake size={20} /> You Are In Safe Hands
+                  </div>
                 </div>
               </div>
             </div>
