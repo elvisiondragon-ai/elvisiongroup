@@ -6,6 +6,38 @@ const EbookHealthLP = () => {
   const [loading, setLoading] = React.useState(false);
   const [email, setEmail] = React.useState("");
 
+  // CAPI Configuration
+  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-manifestation';
+
+  // Helper to send CAPI events
+  const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
+    try {
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+      };
+
+      await fetch(CAPI_EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventName,
+          userData: {
+            ...userData,
+            fbp: getCookie('_fbp'),
+            fbc: getCookie('_fbc'),
+            client_user_agent: navigator.userAgent
+          },
+          customData,
+          eventId
+        }),
+      });
+    } catch (e) {
+      console.error('CAPI Error:', e);
+    }
+  };
+
   // Facebook Pixel
   useEffect(() => {
     // @ts-ignore
@@ -18,10 +50,13 @@ const EbookHealthLP = () => {
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     
+    const eventId = crypto.randomUUID();
     // @ts-ignore
     fbq('init', '1393383179182528');
     // @ts-ignore
-    fbq('track', 'PageView');
+    fbq('track', 'PageView', {}, { eventID: eventId });
+
+    sendCAPIEvent('PageView', {}, {}, eventId);
   }, []);
 
   const scrollToPurchase = () => {
@@ -54,6 +89,7 @@ const EbookHealthLP = () => {
       const btn = document.getElementById('buy-btn');
       if(btn) btn.innerText = "Processing...";
 
+      const eventId = crypto.randomUUID();
       // Track InitiateCheckout on Facebook
       // @ts-ignore
       if (typeof fbq === 'function') {
@@ -62,8 +98,16 @@ const EbookHealthLP = () => {
           content_name: 'Ebook Health Recovery Protocol',
           value: 20.00,
           currency: 'USD'
-        });
+        }, { eventID: eventId });
       }
+
+      sendCAPIEvent('InitiateCheckout', {
+        email: email
+      }, {
+        content_name: 'Ebook Health Recovery Protocol',
+        value: 20.00,
+        currency: 'USD'
+      }, eventId);
 
       // 1. Create Order using Supabase Client (Handles Auth automatically)
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {

@@ -195,6 +195,7 @@ serve(async (req)=>{
         const isEbookDiet = globalProductTx.product_name && globalProductTx.product_name.includes('Ebook Diet');
         const isEbookElVision = globalProductTx.product_name && globalProductTx.product_name.includes('Ebook eL-Vision');
         const isEbookHealth = globalProductTx.product_name && (globalProductTx.product_name.includes('Health Recovery') || globalProductTx.product_name.includes('ebook_health20'));
+        const isCoaching3000 = globalProductTx.product_name && globalProductTx.product_name.includes('3000 Coaching');
 
         let functionToInvoke;
         if (isEbookDiet) {
@@ -221,9 +222,12 @@ serve(async (req)=>{
         console.log('   - 📧 Email sent to:', globalProductTx.email);
 
         // --- Facebook CAPI Tracking for Purchase ---
-        if (isEbookHealth) {
+        if (isEbookHealth || isCoaching3000) {
           try {
-            console.log('   - 🎯 Sending CAPI Purchase event for ebook_health...');
+            console.log(`   - 🎯 Sending CAPI Purchase event for ${globalProductTx.product_name}...`);
+            const purchaseValue = isCoaching3000 ? 3000.00 : 20.00;
+            const purchaseCurrency = isCoaching3000 ? 'USD' : 'USD';
+            
             await supabase.functions.invoke('capi-manifestation', {
               body: {
                 eventName: 'Purchase',
@@ -232,9 +236,9 @@ serve(async (req)=>{
                   client_ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip')
                 },
                 customData: {
-                  value: 20.00,
-                  currency: 'USD',
-                  content_name: 'Ebook Health Recovery Protocol',
+                  value: purchaseValue,
+                  currency: purchaseCurrency,
+                  content_name: globalProductTx.product_name,
                   order_id: tripayReference
                 },
                 eventId: tripayReference // Deduplication ID
