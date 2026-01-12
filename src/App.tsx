@@ -52,6 +52,7 @@ import ProUpgradePage from "./pages/prostatus";
 import { AudioProvider } from "@/contexts/AudioContext";
 import UpdateBanner from "./updatebanner";
 import Intro from "./pages/intro";
+import DisplayPage from "./pages/display";
 
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -193,6 +194,7 @@ const AppContent = () => {
                 <Route path="/payment/paypal-finish" element={<PayPalFinish />} />
                 <Route path="/income" element={<IncomeDashboard />} />
                 <Route path="/intro" element={<Intro />} />
+                <Route path="/display" element={<DisplayPage />} />
                 
                 {/* Auth routes */}
                 <Route
