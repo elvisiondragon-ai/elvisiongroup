@@ -82,7 +82,23 @@ export default function EbookPercayaDiriLP() {
 
   // Pixel Tracking
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).fbq) {
+    if (typeof window !== 'undefined') {
+      // Initialize Pixel
+      if (!(window as any).fbq) {
+        // @ts-ignore
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+      }
+
+      (window as any).fbq('init', '3319324491540889');
+      (window as any).fbq('track', 'PageView');
+
       (window as any).fbq('track', 'ViewContent', {
         content_name: displayProductName,
         content_ids: [productNameBackend],
@@ -123,6 +139,26 @@ export default function EbookPercayaDiriLP() {
     const checkoutSection = document.getElementById('checkout-section');
     if (checkoutSection) {
       checkoutSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Helper to send CAPI events
+  const sendCapiEvent = async (eventName: string, eventData: any) => {
+    try {
+      await supabase.functions.invoke('capi-ebookindo', {
+        body: {
+          eventName,
+          userData: {
+            email: userEmail,
+            phone: phoneNumber,
+            client_user_agent: navigator.userAgent,
+          },
+          customData: eventData,
+          eventId: paymentData?.tripay_reference ? `${eventName}-${paymentData.tripay_reference}` : undefined // Simple deduplication ID if available
+        }
+      });
+    } catch (err) {
+      console.error('Failed to send CAPI event:', err);
     }
   };
 
@@ -199,6 +235,14 @@ export default function EbookPercayaDiriLP() {
           currency: 'IDR'
         });
       }
+      
+      // Send CAPI AddToCart
+      sendCapiEvent('AddToCart', {
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: totalAmount,
+        currency: 'IDR'
+      });
 
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
@@ -274,6 +318,14 @@ export default function EbookPercayaDiriLP() {
               currency: 'IDR'
             });
           }
+          
+          // Send CAPI Purchase
+          sendCapiEvent('Purchase', {
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'IDR'
+          });
           
           // Optional: redirect to a thank you page or just show success state
         }
