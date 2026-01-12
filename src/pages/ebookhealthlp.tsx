@@ -7,7 +7,8 @@ const EbookHealthLP = () => {
   const [email, setEmail] = React.useState("");
 
   // CAPI Configuration
-  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-manifestation';
+  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
+  const PIXEL_ID = '1393383179182528';
 
   // Helper to send CAPI events
   const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
@@ -22,6 +23,7 @@ const EbookHealthLP = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          pixelId: PIXEL_ID,
           eventName,
           userData: {
             ...userData,

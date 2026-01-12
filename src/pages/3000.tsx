@@ -3,7 +3,8 @@ import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRi
 
 export default function ELVision3000() {
   // CAPI Configuration
-  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-manifestation'; // Using the Manifestation CAPI function
+  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
+  const PIXEL_ID = '1393383179182528';
 
   // Helper to send CAPI events
   const sendCAPIEvent = async (eventName: string, customData: any = {}, eventId?: string) => {
@@ -19,6 +20,7 @@ export default function ELVision3000() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          pixelId: PIXEL_ID,
           eventName,
           userData: {
              fbp: getCookie('_fbp'),

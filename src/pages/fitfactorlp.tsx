@@ -26,7 +26,8 @@ const FitFactorLP = () => {
   const [quantity, setQuantity] = useState(1);
   const pricePerBottle = 450000;
 
-  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-fitfactor';
+  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
+  const PIXEL_ID = '1797660474333865';
 
   // Helper to extract _fbp and _fbc cookies
   const getFBCookies = () => {
@@ -54,6 +55,7 @@ const FitFactorLP = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          pixelId: PIXEL_ID,
           eventName,
           userData: {
             ...userData,

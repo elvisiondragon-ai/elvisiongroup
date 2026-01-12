@@ -143,8 +143,9 @@ export default function EbookPercayaDiriLP() {
   // Helper to send CAPI events
   const sendCapiEvent = async (eventName: string, eventData: any) => {
     try {
-      await supabase.functions.invoke('capi-ebookindo', {
+      await supabase.functions.invoke('capi-universal', {
         body: {
+          pixelId: '3319324491540889',
           eventName,
           userData: {
             email: userEmail,

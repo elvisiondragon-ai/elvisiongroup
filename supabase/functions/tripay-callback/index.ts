@@ -196,6 +196,8 @@ serve(async (req)=>{
         const isEbookElVision = globalProductTx.product_name && globalProductTx.product_name.includes('Ebook eL-Vision');
         const isEbookHealth = globalProductTx.product_name && (globalProductTx.product_name.includes('Health Recovery') || globalProductTx.product_name.includes('ebook_health20'));
         const isCoaching3000 = globalProductTx.product_name && globalProductTx.product_name.includes('3000 Coaching');
+        const isEbookPercayaDiri = globalProductTx.product_name && (globalProductTx.product_name.includes('ebook_percayadiri') || globalProductTx.product_name.includes('Ebook Percaya Diri'));
+        const isFitFactor = globalProductTx.product_name && globalProductTx.product_name.includes('Fitfactor');
 
         let functionToInvoke;
         if (isEbookDiet) {
@@ -204,6 +206,8 @@ serve(async (req)=>{
           functionToInvoke = 'ebook-elvision-mail';
         } else if (isEbookHealth) {
           functionToInvoke = 'ebook-health20-email';
+        } else if (isEbookPercayaDiri) {
+          functionToInvoke = 'ebook-percayadiri-mail';
         } else {
           functionToInvoke = 'send-payment-email';
         }
@@ -221,32 +225,48 @@ serve(async (req)=>{
         });
         console.log('   - 📧 Email sent to:', globalProductTx.email);
 
-        // --- Facebook CAPI Tracking for Purchase ---
+        // --- UNIVERSAL CAPI TRACKING ---
+        let capiPixelId = null;
+        let capiValue = 0;
+        let capiCurrency = 'IDR';
+
         if (isEbookHealth || isCoaching3000) {
-          try {
-            console.log(`   - 🎯 Sending CAPI Purchase event for ${globalProductTx.product_name}...`);
-            const purchaseValue = isCoaching3000 ? 3000.00 : 20.00;
-            const purchaseCurrency = isCoaching3000 ? 'USD' : 'USD';
-            
-            await supabase.functions.invoke('capi-manifestation', {
-              body: {
-                eventName: 'Purchase',
-                userData: {
-                  email: globalProductTx.email,
-                  client_ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip')
-                },
-                customData: {
-                  value: purchaseValue,
-                  currency: purchaseCurrency,
-                  content_name: globalProductTx.product_name,
-                  order_id: tripayReference
-                },
-                eventId: tripayReference // Deduplication ID
-              }
-            });
-          } catch (capiError) {
-            console.error('   - ⚠️ CAPI Error (non-critical):', capiError);
-          }
+            capiPixelId = '1393383179182528'; // Manifestation Pixel
+            capiValue = isCoaching3000 ? 3000.00 : 20.00;
+            capiCurrency = 'USD';
+        } else if (isEbookPercayaDiri) {
+            capiPixelId = '3319324491540889'; // EbookIndo Pixel
+            capiValue = amount || globalProductTx.amount || 100000;
+            capiCurrency = 'IDR';
+        } else if (isFitFactor) {
+            capiPixelId = '1797660474333865'; // Fit Factor Pixel
+            capiValue = amount || globalProductTx.amount || 0;
+            capiCurrency = 'IDR';
+        }
+
+        if (capiPixelId) {
+             try {
+                console.log(`   - 🎯 Sending CAPI Purchase event via capi-universal to Pixel ${capiPixelId}...`);
+                await supabase.functions.invoke('capi-universal', {
+                  body: {
+                    pixelId: capiPixelId,
+                    eventName: 'Purchase',
+                    userData: {
+                      email: globalProductTx.email,
+                      client_ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip')
+                    },
+                    customData: {
+                      value: capiValue,
+                      currency: capiCurrency,
+                      content_name: globalProductTx.product_name,
+                      order_id: tripayReference
+                    },
+                    eventId: tripayReference
+                  }
+                });
+             } catch (capiError) {
+                console.error('   - ⚠️ CAPI Universal Error (non-critical):', capiError);
+             }
         }
       } catch (emailError) {
         console.log('   - ⚠️ Email failed (non-critical):', emailError);
