@@ -51,6 +51,7 @@ import { Payment } from "./pages/Payment";
 import ProUpgradePage from "./pages/prostatus";
 import { AudioProvider } from "@/contexts/AudioContext";
 import UpdateBanner from "./updatebanner";
+import Intro from "./pages/intro";
 
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -191,6 +192,7 @@ const AppContent = () => {
                 <Route path="/ebookhealthlp" element={<EbookHealthLP />} />
                 <Route path="/payment/paypal-finish" element={<PayPalFinish />} />
                 <Route path="/income" element={<IncomeDashboard />} />
+                <Route path="/intro" element={<Intro />} />
                 
                 {/* Auth routes */}
                 <Route
