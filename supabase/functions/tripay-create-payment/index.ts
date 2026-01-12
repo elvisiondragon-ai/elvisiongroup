@@ -71,6 +71,12 @@ const productCatalog = {
     requiresAuth: false,
     physical: false
   }, // New Ebook Product
+  'ebook_percayadiri': {
+    name: 'Ebook Pria Alpha',
+    price: 100000,
+    requiresAuth: false,
+    physical: true
+  },
   'ebook_health20': {
     name: 'Ebook Health Recovery (Promo)',
     price: 300000,
