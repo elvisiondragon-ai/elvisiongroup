@@ -72,8 +72,6 @@ export default function EbookPercayaDiriLP() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('QRIS');
   const [loading, setLoading] = useState(false);
@@ -173,56 +171,6 @@ export default function EbookPercayaDiriLP() {
     }
 
     let currentUserId = user?.id;
-
-    // Auto-signup if not logged in
-    if (!user) {
-       if (!password || !confirmPassword) {
-        toast({
-          title: "Password Dibutuhkan",
-          description: "Silakan masukkan password untuk membuat akun member area.",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (password !== confirmPassword) {
-        toast({
-          title: "Password Tidak Cocok",
-          description: "Konfirmasi password tidak sesuai.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setLoading(true);
-      
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: userEmail,
-        password: password,
-        options: {
-          data: {
-            full_name: userName,
-            phone: phoneNumber,
-          }
-        }
-      });
-
-      if (signUpError) {
-        // If user already exists, try to proceed without signing up (backend might handle it or fail)
-        // ideally we should ask to login, but for funnel speed we might just proceed
-        // For this implementation, we'll show error
-        toast({
-          title: "Gagal Membuat Akun",
-          description: signUpError.message, // Likely "User already registered"
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-      
-      if (signUpData.user) {
-        currentUserId = signUpData.user.id;
-      }
-    }
 
     setLoading(true);
     try {
@@ -799,23 +747,6 @@ export default function EbookPercayaDiriLP() {
                                     />
                                 </div>
                             </div>
-                            
-                             {!user && (
-                              <div className="grid md:grid-cols-2 gap-4 bg-blue-50 p-6 rounded-xl border border-blue-100 mt-2">
-                                <div className="md:col-span-2">
-                                  <Label className="font-bold text-blue-900 text-base">Buat Password Akun Member Area</Label>
-                                  <p className="text-sm text-blue-700 mb-4 italic">Password ini digunakan untuk login ke aplikasi dan mengakses audio.</p>
-                                </div>
-                                <div>
-                                  <Label htmlFor="pass" className="text-slate-700 font-semibold mb-1 block">Password</Label>
-                                  <Input id="pass" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="******" className="bg-white text-slate-900 border-blue-200 h-12 placeholder:text-slate-400" />
-                                </div>
-                                <div>
-                                  <Label htmlFor="confpass" className="text-slate-700 font-semibold mb-1 block">Konfirmasi Password</Label>
-                                  <Input id="confpass" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="******" className="bg-white text-slate-900 border-blue-200 h-12 placeholder:text-slate-400" />
-                                </div>
-                              </div>
-                            )}
 
                         </div>
                     </div>
