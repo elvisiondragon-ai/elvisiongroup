@@ -1,15 +1,36 @@
 import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 const NotFound = () => {
   const location = useLocation();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     console.error(
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
+    
+    // Delay showing the 404 to allow Service Worker updates to trigger a reload
+    // This prevents the "Flash of 404" when a new route is added but the old SW is still active
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, [location.pathname]);
+
+  if (!isReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-muted-foreground animate-pulse">Checking routes...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
