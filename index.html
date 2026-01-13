@@ -71,74 +71,78 @@
     </style>
     
     <script>
-      // SIMPLE RECOVERY SERVICE WORKER - NO RACE CONDITIONS
-      
-      // Immediate black screen detection and recovery
-      let isBlackScreen = false;
-      const checkForBlackScreen = () => {
-        const root = document.getElementById('root');
-        if (!root || !root.children.length) {
-          isBlackScreen = true;
-          console.log('🚑 BLACK SCREEN DETECTED - Starting recovery');
-          return true;
-        }
-        return false;
-      };
-      
-      // Recovery checker - only starts when SW update is needed
-      let blackScreenChecker = null;
-      
-      // Function to start recovery monitoring (called when onNeedRefresh triggers)
-      window.startUpdateRecovery = function() {
-        if (blackScreenChecker) return; // Already monitoring
+      // SAFARI CACHE & SW CLEANER (Fixes Black Screen/Stale Cache)
+      (function() {
+        var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         
-        console.log('🛡️ Starting update recovery monitoring...');
-        blackScreenChecker = setInterval(() => {
-          if (checkForBlackScreen()) {
-            console.log('🚑 Auto-recovery: Black screen detected during SW update');
-            window.recoveryMode();
-            clearInterval(blackScreenChecker);
-            blackScreenChecker = null;
-          }
-        }, 3000);
+        // Configuration: Bump this version to force a re-clean for all Safari users
+        var CLEANUP_VERSION = 'safari_fix_2026_01_13_v2';
         
-        // Stop monitoring after 30 seconds (enough time for update process)
-        setTimeout(() => {
-          if (blackScreenChecker) {
-            clearInterval(blackScreenChecker);
-            blackScreenChecker = null;
-            console.log('✅ Update recovery monitoring stopped - update completed');
-          }
-        }, 30000);
-      };
-      
-      // Recovery function
-      window.recoveryMode = function() {
-        console.log('🚑 RECOVERY MODE ACTIVATED');
-        localStorage.clear();
-        sessionStorage.clear();
-        if (window.indexedDB) {
-          indexedDB.deleteDatabase('supabase-auth-token');
-        }
-        
-        // Unregister all service workers
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
-              registration.unregister();
+        if (isSafari) {
+          try {
+            var hasCleaned = localStorage.getItem(CLEANUP_VERSION);
+            
+            if (!hasCleaned) {
+              console.log('🦁 Safari detected: Executing one-time Service Worker & Cache cleanup...');
+              
+              // 1. Unregister all Service Workers
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  if (registrations.length === 0) {
+                     // No SW found, just mark as cleaned
+                     localStorage.setItem(CLEANUP_VERSION, 'true');
+                     return;
+                  }
+                  
+                  var promises = registrations.map(function(r) {
+                    console.log('🗑️ Unregistering SW:', r.scope);
+                    return r.unregister();
+                  });
+                  
+                  Promise.all(promises).then(function() {
+                    console.log('✅ All SWs unregistered');
+                    // Continue to clear caches
+                    clearCachesAndReload();
+                  });
+                });
+              } else {
+                // No SW support, just clear caches
+                clearCachesAndReload();
+              }
+              
+              function clearCachesAndReload() {
+                if ('caches' in window) {
+                  caches.keys().then(function(names) {
+                    Promise.all(names.map(function(name) {
+                      console.log('🗑️ Deleting Cache:', name);
+                      return caches.delete(name);
+                    })).then(function() {
+                      console.log('✅ All Caches cleared');
+                      finish();
+                    });
+                  });
+                } else {
+                  finish();
+                }
+              }
+              
+              function finish() {
+                localStorage.setItem(CLEANUP_VERSION, 'true');
+                console.log('🔄 Reloading to apply fresh state...');
+                window.location.reload();
+              }
+              
+              // Halt execution to prevent app from booting in broken state while we clean
+              // (This is a soft halt, we can't truly stop the parser, but we can reload fast)
+              return; 
             }
-            window.location.href = window.location.origin;
-          });
-        } else {
-          window.location.href = window.location.origin;
+          } catch (e) {
+            console.error('Safari cleanup failed:', e);
+            // Fallback: mark as cleaned to prevent loops
+            localStorage.setItem(CLEANUP_VERSION, 'true');
+          }
         }
-      };
-      
-      // Clean up recovery URL parameter
-      if (window.location.search.includes('recovery_manual')) {
-        console.log('🧹 Cleaning up recovery URL');
-        window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
-      }
+      })();
       
       // Service worker registration for development (production uses Vite PWA auto-registration)
       if ('serviceWorker' in navigator && location.hostname === 'localhost') {
