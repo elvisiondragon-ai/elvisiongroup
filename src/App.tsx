@@ -31,6 +31,7 @@ import EbookHealthLP from "./pages/ebookhealthlp"; // Import the EbookHealthLP c
 import EbookPercayaDiriLP from "./pages/ebookpercayadirilp"; // Import the EbookPercayaDiriLP component
 import EbookFeminineLanding from "./pages/ebookfeminine"; // Import the EbookFeminineLanding component
 import UangPanasLanding from "./pages/uangpanas"; // Import the UangPanasLanding component
+import LeadMagnet from "./pages/LeadMagnet"; // Import the LeadMagnet component
 import PayPalFinish from "./pages/PayPalFinish"; // Import the PayPalFinish component
 import FitFactorLP from "./pages/fitfactorlp";
 import NotFound from "./pages/NotFound";
@@ -199,6 +200,7 @@ const AppContent = () => {
                 <Route path="/ebookpercayadiri" element={<EbookPercayaDiriLP />} />
                 <Route path="/ebookfeminine" element={<EbookFeminineLanding />} />
                 <Route path="/uangpanas" element={<UangPanasLanding />} />
+                <Route path="/leadmagnet" element={<LeadMagnet />} />
                 <Route path="/payment/paypal-finish" element={<PayPalFinish />} />
                 <Route path="/income" element={<IncomeDashboard />} />
                 <Route path="/intro" element={<Intro />} />
