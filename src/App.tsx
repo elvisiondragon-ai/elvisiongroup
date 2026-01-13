@@ -56,6 +56,7 @@ import UpdateBanner from "./updatebanner";
 import Intro from "./pages/intro";
 import DisplayPage from "./pages/display";
 import WatchlistPage from "./pages/watchlist";
+import ReportSales from "./pages/reportsales";
 
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -201,6 +202,7 @@ const AppContent = () => {
                 <Route path="/intro" element={<Intro />} />
                 <Route path="/display" element={<DisplayPage />} />
                 <Route path="/watchlist" element={<WatchlistPage />} />
+                <Route path="/reportsales" element={<ReportSales />} />
                 
                 {/* Auth routes */}
                 <Route
