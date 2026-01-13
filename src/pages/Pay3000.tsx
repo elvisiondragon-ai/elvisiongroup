@@ -1,0 +1,233 @@
+import { useState, useEffect } from 'react';
+import { ArrowRight, CheckCircle, Shield, Sparkles } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
+
+export default function Pay3000() {
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+
+  // CAPI Configuration
+  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
+  const PIXEL_ID = '1393383179182528';
+
+  // Helper to send CAPI events
+  const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
+    try {
+       // Simple cookie helper
+       const getCookie = (name: string) => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop()?.split(';').shift();
+       };
+
+      await fetch(CAPI_EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pixelId: PIXEL_ID,
+          eventName,
+          userData: {
+             ...userData,
+             fbp: getCookie('_fbp'),
+             fbc: getCookie('_fbc'),
+             client_user_agent: navigator.userAgent
+          },
+          customData,
+          eventId
+        }),
+      });
+    } catch (e) {
+      console.error('CAPI Error:', e);
+    }
+  };
+
+  // Facebook Pixel Code
+  useEffect(() => {
+    (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod
+          ? n.callMethod.apply(n, arguments)
+          : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = !0;
+      n.version = '2.0';
+      n.queue = [];
+      t = b.createElement(e);
+      t.async = !0;
+      t.src = v;
+      s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    })(
+      window,
+      document,
+      'script',
+      'https://connect.facebook.net/en_US/fbevents.js'
+    );
+    
+    const eventId = crypto.randomUUID();
+    // @ts-ignore
+    if (typeof fbq === 'function') {
+        // @ts-ignore
+        fbq('init', '1393383179182528');
+        // @ts-ignore
+        fbq('track', 'PageView', {}, { eventID: eventId });
+    }
+    
+    // Send Server-Side Event
+    sendCAPIEvent('PageView', {}, {}, eventId);
+  }, []);
+
+  const handlePurchase = async () => {
+    if (!email || !email.includes('@')) {
+      alert("Please enter a valid email address first to proceed with payment.");
+      const emailInput = document.getElementById('email-input-final');
+      if (emailInput) emailInput.focus();
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const eventId = crypto.randomUUID();
+      // Track InitiateCheckout
+      // @ts-ignore
+      if (typeof fbq === 'function') {
+        // @ts-ignore
+        fbq('track', 'InitiateCheckout', {
+          content_name: 'VIP SESSION 6 Week',
+          value: 1500.00,
+          currency: 'USD'
+        }, { eventID: eventId });
+      }
+
+      sendCAPIEvent('InitiateCheckout', {
+        email: email
+      }, {
+        content_name: 'VIP SESSION 6 Week',
+        value: 1500.00,
+        currency: 'USD'
+      }, eventId);
+
+      // Create Payment
+      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
+        body: {
+          subscriptionType: "VIP6WEEK",
+          paymentMethod: "PAYPAL",
+          userEmail: email,
+          userName: email.split('@')[0],
+          quantity: 1
+        }
+      });
+
+      if (error) throw new Error(error.message || "Connection failed");
+      if (!data || !data.success) throw new Error("Failed to init payment");
+
+      // Redirect
+      window.location.href = data.checkoutUrl;
+
+    } catch (err) {
+      alert("Payment Error: " + (err instanceof Error ? err.message : "Unknown error"));
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      <div className="py-20 bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 blur-3xl" />
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <Sparkles className="w-16 h-16 text-yellow-500 mx-auto mb-8" />
+            
+            <h2 className="text-5xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
+                Secure Your Spot
+              </span>
+            </h2>
+
+            <div className="bg-gradient-to-r from-yellow-900/20 to-amber-900/20 border border-yellow-500/30 rounded-2xl p-8 mb-12 text-left">
+                <h3 className="text-2xl font-bold text-white mb-6 text-center">What You Get in 6 Weeks</h3>
+                
+                <div className="space-y-4">
+                    <div className="flex items-start gap-4">
+                        <CheckCircle className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
+                        <div>
+                            <p className="text-lg font-bold text-yellow-400">Personal Meditation Session</p>
+                            <p className="text-gray-300">60 minutes per week for 6 weeks. Direct 1:1 guidance.</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                        <CheckCircle className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
+                        <div>
+                            <p className="text-lg font-bold text-yellow-400">Daily Agenda & Recalibration</p>
+                            <p className="text-gray-300">Daily tasks to do and write to recalibrate your internal state.</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                        <CheckCircle className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
+                        <div>
+                            <p className="text-lg font-bold text-yellow-400">Proven Results</p>
+                            <p className="text-gray-300">Normally in 2 weeks most clients feel the big difference.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-10 backdrop-blur-sm mb-12">
+              <div className="text-5xl font-bold text-yellow-400 mb-3">$1,500</div>
+              <div className="text-xl text-gray-300 mb-2 line-through opacity-50">$3,000</div>
+              <div className="text-sm text-yellow-500 font-bold mb-6 uppercase tracking-wider">50% Discount Applied</div>
+
+              <div className="flex items-center gap-4 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
+                <Shield className="w-8 h-8 text-blue-400 flex-shrink-0" />
+                <div className="text-left text-sm text-gray-300">
+                  <span className="font-bold text-blue-400 block mb-1 uppercase tracking-wider">Money Back Guarantee</span>
+                  Based on internal client feedback, the vast majority experience positive progress early in the process.
+                </div>
+              </div>
+              
+              <div className="flex flex-col items-center gap-4 mb-8 max-w-md mx-auto">
+                <input
+                    id="email-input-final"
+                    type="email"
+                    placeholder="Enter your email to proceed..."
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-6 py-4 rounded-full border border-gray-700 bg-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none text-lg text-center text-white placeholder-gray-500 transition-all shadow-inner"
+                />
+                
+                <button
+                    onClick={handlePurchase}
+                    disabled={loading}
+                    className="w-full group bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white font-bold text-xl px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-blue-500/50 flex items-center justify-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {loading ? (
+                    <span className="animate-pulse">Processing...</span>
+                    ) : (
+                    <>
+                        <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-mark-color.svg" alt="PayPal" className="w-6 h-6" />
+                        PAY VIP 6 WEEKS ($1500)
+                        <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                    </>
+                    )}
+                </button>
+               </div>
+            </div>
+
+             <p className="text-gray-500 text-sm">
+              Limited slots. We only work with those serious about deep transformation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

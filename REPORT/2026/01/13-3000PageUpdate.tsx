@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRight, Sparkles, Shield, Check, Play, Pause } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ELVision3000() {
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+
   // CAPI Configuration
   const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
   const PIXEL_ID = '1393383179182528';
@@ -71,7 +75,59 @@ export default function ELVision3000() {
     sendCAPIEvent('PageView', {}, {}, eventId);
   }, []);
 
+  const handlePurchase = async () => {
+    if (!email || !email.includes('@')) {
+      alert("Please enter a valid email address first to proceed with payment.");
+      const emailInput = document.getElementById('email-input-final');
+      if (emailInput) emailInput.focus();
+      return;
+    }
 
+    try {
+      setLoading(true);
+      
+      const eventId = crypto.randomUUID();
+      // Track InitiateCheckout
+      // @ts-ignore
+      if (typeof fbq === 'function') {
+        // @ts-ignore
+        fbq('track', 'InitiateCheckout', {
+          content_name: 'VIP SESSION 6 Week',
+          value: 1500.00,
+          currency: 'USD'
+        }, { eventID: eventId });
+      }
+
+      sendCAPIEvent('InitiateCheckout', {
+        email: email
+      }, {
+        content_name: 'VIP SESSION 6 Week',
+        value: 1500.00,
+        currency: 'USD'
+      }, eventId);
+
+      // Create Payment
+      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
+        body: {
+          subscriptionType: "VIP6WEEK",
+          paymentMethod: "PAYPAL",
+          userEmail: email,
+          userName: email.split('@')[0],
+          quantity: 1
+        }
+      });
+
+      if (error) throw new Error(error.message || "Connection failed");
+      if (!data || !data.success) throw new Error("Failed to init payment");
+
+      // Redirect
+      window.location.href = data.checkoutUrl;
+
+    } catch (err) {
+      alert("Payment Error: " + (err instanceof Error ? err.message : "Unknown error"));
+      setLoading(false);
+    }
+  };
   const videoTestimonials = [
     {
       name: "Agus Mulyadi, SH., MH.",
@@ -408,30 +464,8 @@ export default function ELVision3000() {
     );
   };
 
-
-
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Promo Card */}
-      <div 
-        onClick={() => window.location.href = 'https://app.elvisiongroup.com/pay3000'}
-        className="cursor-pointer bg-gradient-to-r from-red-600 to-red-800 text-white py-4 px-6 text-center sticky top-0 z-50 shadow-lg animate-pulse hover:from-red-500 hover:to-red-700 transition-all"
-      >
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-center gap-4">
-          <span className="text-2xl md:text-3xl font-extrabold uppercase tracking-wider">
-            🚨 Get your 50% Discount VIP NOW!
-          </span>
-          <div className="flex items-center gap-3 bg-black/30 px-4 py-2 rounded-lg">
-             <span className="text-xl text-gray-300 line-through font-bold">$3,000</span>
-             <ArrowRight className="w-6 h-6 text-white" />
-             <span className="text-3xl font-black text-yellow-400">$1,500</span>
-          </div>
-          <span className="text-sm md:text-base font-semibold underline decoration-2 decoration-yellow-400">
-            Click here to claim via PayPal
-          </span>
-        </div>
-      </div>
-
       {/* Hero Section */}
       <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Static Background */}
@@ -1519,12 +1553,29 @@ export default function ELVision3000() {
             </button>
 
             <div className="flex flex-col items-center gap-4 mb-8 max-w-md mx-auto">
+              <input
+                id="email-input-final"
+                type="email"
+                placeholder="Enter your email to proceed..."
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-6 py-4 rounded-full border border-gray-700 bg-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none text-lg text-center text-white placeholder-gray-500 transition-all shadow-inner"
+              />
+              
               <button
-                onClick={() => window.location.href = 'https://app.elvisiongroup.com/pay3000'}
-                className="w-full group bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white font-bold text-xl px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-blue-500/50 flex items-center justify-center gap-4"
+                onClick={handlePurchase}
+                disabled={loading}
+                className="w-full group bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white font-bold text-xl px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-blue-500/50 flex items-center justify-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                CLAIM 50% DISCOUNT
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                {loading ? (
+                  <span className="animate-pulse">Processing...</span>
+                ) : (
+                  <>
+                    <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-mark-color.svg" alt="PayPal" className="w-6 h-6" />
+                    PAY VIP 6 WEEKS ($1500)
+                    <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                  </>
+                )}
               </button>
             </div>
 

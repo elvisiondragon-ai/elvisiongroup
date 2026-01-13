@@ -22,6 +22,7 @@ import BrandFlow from "./pages/brandflow"; // Import the new BrandFlow component
 import OnePercentRule from "./pages/1rule"; // Import the new OnePercentRule component
 import Page15jt from "./pages/15jt";
 import ELVision3000 from "./pages/3000";
+import Pay3000 from "./pages/Pay3000";
 import Survey3000 from "./pages/3000survey";
 import PaypalPaymentPage from "./pages/paypal"; // Import the new PaypalPaymentPage component
 import AffiliatePage from "./pages/affiliate"; // Import the new AffiliatePage component
@@ -191,6 +192,7 @@ const AppContent = () => {
                 <Route path="/1rule" element={<OnePercentRule />} />
                 <Route path="/15jt" element={<Page15jt />} />
                 <Route path="/3000" element={<ELVision3000 />} />
+                <Route path="/pay3000" element={<Pay3000 />} />
                 <Route path="/3000survey" element={<Survey3000 />} />
                 <Route path="/paypal" element={<PaypalPaymentPage />} />
                 <Route path="/affiliate" element={<AffiliatePage />} />
