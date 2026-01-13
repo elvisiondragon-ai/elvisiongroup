@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Uang Panas - Ebook</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+        :root {
+            --primary: #c0392b;
+            --secondary: #d35400;
+            --text-color: #2c3e50;
+            --bg-color: #ffffff;
+            --page-bg: #fdfdfd;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #e9ecef;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .ebook-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--page-bg);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Merriweather', serif;
+            color: #2c3e50;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.2em;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 1em;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            color: var(--secondary);
+            font-weight: 500;
+            margin-bottom: 2em;
+        }
+
+        .author {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+
+        .download-links {
+            text-align: center;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            border: 1px solid #ddd;
+        }
+
+        .download-links a {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: bold;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+
+        .download-links a:hover {
+            color: var(--secondary);
+            text-decoration: underline;
+        }
+
+        p {
+            margin-bottom: 1em;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-bottom: 1em;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 0.5em;
+        }
+
+        blockquote {
+            background: #f9f9f9;
+            border-left: 5px solid var(--primary);
+            margin: 1.5em 0;
+            padding: 1em;
+            font-style: italic;
+            color: #555;
+        }
+
+        code, pre {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background-color: #f1f1f1;
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: #e74c3c;
+        }
+
+        pre {
+            display: block;
+            padding: 15px;
+            white-space: pre-wrap;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .page-break {
+            page-break-after: always;
+            border-top: 2px dashed #ccc;
+            margin: 50px 0;
+            display: block;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            .ebook-container {
+                box-shadow: none;
+                padding: 20px;
+                max-width: 100%;
+            }
+            .page-break {
+                border: none;
+                margin: 0;
+            }
+            .download-links {
+                display: none; /* Hide download links in print version usually */
+            }
+            a {
+                text-decoration: underline;
+                color: black;
+            }
+        }
+        
+        /* Section styling */
+        .section-title {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            margin-top: 40px;
+            border-radius: 4px;
+            font-family: 'Merriweather', serif;
+        }
+
+        .next-step-box {
+            background-color: #2ecc71;
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 40px;
+            border: 2px solid #27ae60;
+        }
+
+        .next-step-button {
+            display: inline-block;
+            background-color: white;
+            color: #27ae60;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .next-step-button:hover {
+            transform: scale(1.05);
+            background-color: #f8f9fa;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="ebook-container">
+    <h1>SISTEM UANG PANAS</h1>
+    <div class="subtitle">Cara Menghasilkan Rp500.000/Hari dengan Kekuatan Pikiran & Strategi Terbukti</div>
+    <div class="author">By eL Vision Group</div>
+
+    <div class="download-links">
+        <a href="https://drive.google.com/drive/folders/1wJMALmmEw_07jRc8lkQhT2hROgqpI82a?usp=sharing" target="_blank">📥 DOWNLOAD AUDIO DISINI</a> | 
+        <a href="https://t.me/elvision1" target="_blank">📱 JOIN TELEGRAM KOMUNITAS</a>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 1: COVER & PERINGATAN</h2>
+
+    <div class="warning-box">
+        <strong>PERINGATAN PENTING:</strong>
+        <p>Ebook ini bukan teori motivasi biasa. Ini adalah blueprint nyata yang telah mengubah hidup 10.000+ orang dari berbagai latar belakang—UMKM yang tercekik marketplace, karyawan yang ter-PHK, hingga mahasiswa yang ingin mandiri finansial.</p>
+    </div>
+
+    <p><strong>Jika Anda mencari:</strong></p>
+    <ul>
+        <li>❌ Skema cepat kaya tanpa usaha</li>
+        <li>❌ MLM atau piramida</li>
+        <li>❌ Motivasi sementara yang hilang besok pagi</li>
+    </ul>
+
+    <p><strong>TUTUP EBOOK INI SEKARANG.</strong></p>
+
+    <p><strong>Tapi jika Anda siap untuk:</strong></p>
+    <ul>
+        <li>✅ Mengubah SISTEM INTERNAL Anda (95% pikiran bawah sadar)</li>
+        <li>✅ Bekerja 2 jam/hari dengan fokus</li>
+        <li>✅ Menerima bahwa ENERGI menentukan REZEKI</li>
+    </ul>
+
+    <p><strong>Selamat datang di revolusi finansial Anda.</strong></p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 2-3: PENDAHULUAN - KRISIS YANG ANDA HADAPI</h2>
+
+    <h3>Mengapa Anda Membaca Ini?</h3>
+
+    <p>Kemungkinan besar, Anda sedang mengalami salah satu (atau semua) dari situasi ini:</p>
+
+    <p><strong>📉 UMKM Anda Tercekik:</strong></p>
+    <ul>
+        <li>Potongan marketplace 20-30% menggerogoti profit</li>
+        <li>Ongkir yang mahal membuat produk Anda tidak kompetitif</li>
+        <li>Pajak UMKM terus naik, margin semakin tipis</li>
+        <li>Kompetisi harga yang brutal dari seller besar</li>
+        <li>Algoritma marketplace yang tidak adil</li>
+    </ul>
+
+    <p><strong>💼 Karir Anda Terancam:</strong></p>
+    <ul>
+        <li>Gelombang PHK 2025 mengancam pekerjaan Anda</li>
+        <li>Gaji stagnan selama 3-5 tahun terakhir</li>
+        <li>Inflasi 6% tapi kenaikan gaji hanya 3%</li>
+        <li>Tabungan terkuras untuk kebutuhan sehari-hari</li>
+        <li>Tidak ada waktu untuk cari side income</li>
+    </ul>
+
+    <p><strong>🔄 Sudah Coba Banyak Cara, Gagal Terus:</strong></p>
+    <ul>
+        <li>Belajar dropship → investasi waktu & uang sia-sia</li>
+        <li>Ikut MLM → rugi modal & kehilangan teman</li>
+        <li>Jualan online → sepi pembeli, stok menumpuk</li>
+        <li>Ikut kursus digital marketing → teori bagus, praktik bingung</li>
+        <li>Coba forex/crypto → uang habis, mental terguncang</li>
+    </ul>
+
+    <p><strong>Apakah ini salah Anda?</strong></p>
+    <p><strong>TIDAK.</strong></p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 4-5: RAHASIA YANG DISEMBUNYIKAN</h2>
+
+    <h3>Mengapa Orang Pintar, Rajin, dan Berstrategi Tetap Gagal?</h3>
+
+    <p>Selama 15 tahun mengajar ratusan ribu entrepreneur, saya (eL Reyzandra) menemukan pola yang mengerikan:</p>
+
+    <p><strong>98% orang SUKSES dengan strategi yang saya ajarkan.</strong><br>
+    <strong>2% GAGAL TOTAL—meski mereka kerja lebih keras dari yang 98%.</strong></p>
+
+    <p>Ini membuat saya frustasi. Mengapa Pattern A berhasil untuk John tapi gagal untuk Mike?</p>
+
+    <p>Setelah penelitian mendalam, saya menemukan jawaban yang mengubah segalanya:</p>
+
+    <blockquote>
+        <strong>"Masalahnya bukan di STRATEGI. Masalahnya di OPERATOR."</strong>
+    </blockquote>
+
+    <p>Bayangkan Anda punya mobil Ferrari terbaik (strategi bisnis terbaik). Tapi mesinnya rusak (sistem internal Anda penuh dengan program "uang itu sulit", "saya tidak pantas kaya", "kalau saya sukses, orang akan iri").</p>
+
+    <p><strong>Apa yang terjadi?</strong></p>
+    <p>Ferrari Anda tidak akan jalan. Bahkan kalau jalan, akan mogok di tengah jalan.</p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 6-7: SAINS DI BALIK KEGAGALAN ANDA</h2>
+
+    <h3>Pikiran Sadar vs Pikiran Bawah Sadar</h3>
+
+    <p><strong>FAKTA NEUROSCIENCE:</strong></p>
+
+    <p>🧠 <strong>Pikiran Sadar (Conscious Mind)</strong> = 5% dari otak</p>
+    <ul>
+        <li>Ini yang Anda gunakan saat berpikir logis</li>
+        <li>Ini yang bilang "Saya mau sukses!"</li>
+        <li>Ini yang baca buku motivasi dan ikut seminar</li>
+    </ul>
+
+    <p>🧠 <strong>Pikiran Bawah Sadar (Subconscious Mind)</strong> = 95% dari otak</p>
+    <ul>
+        <li>Ini yang menjalankan 95% keputusan Anda</li>
+        <li>Ini yang diprogram sejak kecil: "Uang itu susah", "Orang kaya itu jahat"</li>
+        <li>Ini yang DIAM-DIAM SABOTASE setiap usaha Anda</li>
+    </ul>
+
+    <p><strong>Contoh Nyata:</strong></p>
+
+    <p>Anda (pikiran sadar) bilang: "Tahun ini saya harus closing 10 klien besar!"</p>
+
+    <p>Tapi pikiran bawah sadar Anda bisik-bisik:</p>
+    <ul>
+        <li>"Kamu tidak cukup pintar untuk dapat klien sebesar itu..."</li>
+        <li>"Kalau kamu sukses, teman-teman akan iri..."</li>
+        <li>"Orang tua kamu aja tidak kaya, mana mungkin kamu bisa?"</li>
+    </ul>
+
+    <p><strong>Hasilnya?</strong></p>
+    <p>Anda sabotase diri sendiri:</p>
+    <ul>
+        <li>Chat klien terlambat dibalas</li>
+        <li>Presentasi mendadak nervous</li>
+        <li>Deal hampir closing, tiba-tiba ada "masalah teknis"</li>
+        <li>Atau yang paling parah: Anda "lupa" follow up</li>
+    </ul>
+
+    <p><strong>Ini bukan kebetulan. Ini SISTEM INTERNAL Anda yang melindungi zona nyaman.</strong></p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 8-9: MENGAPA "POSITIVE THINKING" GAGAL</h2>
+
+    <h3>The Truth About Affirmations</h3>
+
+    <p>Pernahkah Anda coba afirmasi seperti ini?</p>
+    <p><em>"Saya kaya, saya berlimpah, uang mengalir ke saya..."</em></p>
+    <p>Lalu berapa lama efeknya bertahan? 5 menit? 1 jam? Besok pagi sudah lupa?</p>
+
+    <p><strong>Mengapa?</strong></p>
+    <p>Karena Anda mencoba mengubah program di <strong>Pikiran Bawah Sadar (95%)</strong> dengan alat dari <strong>Pikiran Sadar (5%)</strong>.</p>
+    <p>Ini seperti mencoba mendorong truk trailer dengan sepeda. Tidak akan bergerak.</p>
+
+    <p><strong>Hukum Fisika Stabilitas:</strong></p>
+    <blockquote>
+        "Dalam sistem apapun, frekuensi yang lebih STABIL akan mengalahkan frekuensi yang lebih lemah."
+    </blockquote>
+
+    <p>Jika:</p>
+    <ul>
+        <li>Pikiran sadar Anda (5%) bilang: "Saya kaya" (10 menit per hari)</li>
+        <li>Pikiran bawah sadar Anda (95%) bilang: "Uang itu sulit" (24 jam sehari, 365 hari setahun sejak lahir)</li>
+    </ul>
+
+    <p><strong>Siapa yang menang?</strong></p>
+    <p>Pikiran bawah sadar. SELALU.</p>
+
+    <p><strong>Inilah mengapa Anda butuh metode yang berbeda.</strong></p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 10-11: METODE eL VISION - BIO-ENERGETIC CALIBRATION</h2>
+
+    <h3>Cara Kerja Audio Hipnosis Rezeki</h3>
+
+    <p><strong>STEP 1: Neutralization (Interrupt Pattern)</strong></p>
+    <p>Audio kami menggunakan frekuensi khusus untuk meng-interrupt "Beta Loop" (siklus overthinking & stress kronis) yang membuat Anda stuck.</p>
+    <p>Saat Anda mendengar audio, gelombang otak Anda perlahan turun dari:</p>
+    <ul>
+        <li><strong>Beta (14-30Hz)</strong> - Stress, anxiety, overthinking</li>
+        <li>Menuju <strong>Alpha (8-13Hz)</strong> - Relaks, fokus</li>
+        <li>Menuju <strong>Theta (4-7Hz)</strong> - PINTU MASUK KE BAWAH SADAR</li>
+    </ul>
+
+    <p><strong>STEP 2: Access The Subconscious (Theta State)</strong></p>
+    <p>Dalam gelombang Theta:</p>
+    <ul>
+        <li>Pikiran kritis Anda "tidur"</li>
+        <li>Pikiran bawah sadar Anda "terbuka"</li>
+        <li>Program lama bisa di-OVERWRITE</li>
+        <li>Program baru bisa di-INSTALL</li>
+    </ul>
+
+    <p><strong>STEP 3: Reality Flow Alignment</strong></p>
+    <p>Kami tidak memaksa Anda untuk "percaya" bahwa Anda kaya (itu tidak akan work).</p>
+    <p>Kami membuat TUBUH Anda MERASAKAN bahwa memiliki uang itu:</p>
+    <ul>
+        <li>AMAN (bukan bahaya)</li>
+        <li>NORMAL (bukan luar biasa)</li>
+        <li>SUDAH TERJADI (bukan "nanti")</li>
+    </ul>
+
+    <p><strong>Saat tubuh merasa "ini sudah normal", dunia eksternal akan REARRANGE dirinya untuk match dengan realitas internal Anda.</strong></p>
+    <p>Ini bukan magic. Ini fisika kuantum + neuroscience.</p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 12-13: MENGAPA AUDIO HARUS DIDENGAR 2X SEHARI</h2>
+
+    <h3>Pagi (Saat Bangun Tidur) - Programming</h3>
+
+    <p><strong>Mengapa pagi?</strong></p>
+    <p>Saat baru bangun, otak Anda masih dalam frekuensi Theta (4-7Hz) selama 10-15 menit pertama. Ini adalah <strong>GOLDEN WINDOW</strong> untuk install program baru.</p>
+
+    <p><strong>Apa yang terjadi jika Anda dengar audio pagi:</strong></p>
+    <ul>
+        <li>Program "Rezeki mengalir mudah" ter-install</li>
+        <li>Reticular Activating System (RAS) Anda di-set untuk CARI peluang rezeki</li>
+        <li>Anda akan "kebetulan" bertemu orang yang tepat</li>
+        <li>Ide bisnis muncul dari mana-mana</li>
+        <li>Chat closing deal masuk tiba-tiba</li>
+    </ul>
+
+    <p><strong>Apa yang terjadi jika Anda TIDAK dengar audio pagi:</strong></p>
+    <ul>
+        <li>Anda langsung cek HP → bad news → stress mode ON</li>
+        <li>Otak masuk ke Beta (overthinking)</li>
+        <li>RAS Anda set untuk CARI masalah</li>
+        <li>Seharian Anda reactive, bukan proactive</li>
+    </ul>
+
+    <h3>Malam (Sebelum Tidur) - Reinforcement</h3>
+
+    <p><strong>Mengapa malam?</strong></p>
+    <p>Saat Anda tidur, otak Anda memproses semua informasi hari itu dan meng-consolidate memory.</p>
+
+    <p><strong>Apa yang terjadi jika Anda dengar audio malam:</strong></p>
+    <ul>
+        <li>Program "Rezeki" diperkuat 10x lipat saat tidur</li>
+        <li>Otak Anda "mimpi" tentang solusi masalah bisnis</li>
+        <li>Bangun pagi dengan clarity & energi tinggi</li>
+        <li>Nervous system Anda reset (dari Sympathetic ke Parasympathetic)</li>
+    </ul>
+
+    <p><strong>Apa yang terjadi jika Anda TIDAK dengar audio malam:</strong></p>
+    <ul>
+        <li>Tidur dengan pikiran "besok harus bayar ini itu" → mimpi buruk</li>
+        <li>Bangun dengan anxiety</li>
+        <li>Siklus stress berlanjut</li>
+    </ul>
+
+    <p><strong>KONSISTENSI = KUNCI</strong></p>
+    <ul>
+        <li>1 hari dengar audio = efek 10%</li>
+        <li>7 hari dengar audio = efek 40%</li>
+        <li>21 hari dengar audio = efek 80%</li>
+        <li>30 hari dengar audio = <strong>PERMANENT SHIFT</strong></li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 14-15: STRATEGI UANG PANAS - AFFILIATE 50%</h2>
+
+    <h3>Mengapa Affiliate Marketing?</h3>
+
+    <p>Setelah energi internal Anda ter-kalibrasi dengan audio, Anda butuh <strong>VEHICLE</strong> untuk manifestasi rezeki.</p>
+
+    <p><strong>Kami pilih Affiliate Marketing karena:</strong></p>
+
+    <p>✅ <strong>Modal Kecil (Rp100rb sekali bayar)</strong></p>
+    <ul>
+        <li>Tidak ada inventory</li>
+        <li>Tidak ada COD gagal</li>
+        <li>Tidak ada packing & kirim barang</li>
+    </ul>
+
+    <p>✅ <strong>Komisi Besar (50% seumur hidup)</strong></p>
+    <ul>
+        <li>Setiap sale = Rp50.000 ke rekening Anda</li>
+        <li>Komisi recurring (bukan satu kali)</li>
+        <li>Pasif income yang real</li>
+    </ul>
+
+    <p>✅ <strong>Sistem Sudah Siap</strong></p>
+    <ul>
+        <li>Lead magnet sudah dibuat</li>
+        <li>Script iklan sudah proven</li>
+        <li>Dashboard tracking real-time</li>
+    </ul>
+
+    <p>✅ <strong>Produk Yang Orang BUTUH</strong></p>
+    <ul>
+        <li>Di masa ekonomi sulit, orang cari solusi finansial</li>
+        <li>Produk digital (tidak ada limit stock)</li>
+        <li>Harga terjangkau (Rp100rb) = conversion tinggi</li>
+    </ul>
+
+    <p><strong>Tapi tunggu...</strong></p>
+    <p>Kenapa orang akan beli lewat link Anda?</p>
+
+    <p><strong>Karena Anda sudah BERUBAH.</strong></p>
+    <p>Saat energi Anda shift (setelah 7-14 hari dengar audio), orang akan MERASAKAN perbedaannya:</p>
+    <ul>
+        <li>Cara Anda bicara lebih tenang & confident</li>
+        <li>Posting sosmed Anda lebih "hidup"</li>
+        <li>Orang tertarik tanpa Anda "jualan keras"</li>
+    </ul>
+
+    <p><strong>Ini yang kami sebut: "Selling Without Selling"</strong></p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 16-17: 7 STRATEGI LEAD MAGNET (OVERVIEW)</h2>
+
+    <h3>Dari Zero ke Rp500.000/Hari</h3>
+
+    <p>Kami sudah uji 27 strategi selama 2 tahun. Hanya 7 yang CONSISTENTLY menghasilkan.</p>
+
+    <p><strong>Berikut ringkasannya:</strong></p>
+
+    <p><strong>1. Viral WhatsApp & Social Media Sharing</strong></p>
+    <ul>
+        <li>Share video promosi + copywriting + link affiliate</li>
+        <li>Target: Teman, keluarga, grup WA</li>
+        <li>Konversi: 1-3% (dari 100 orang lihat, 1-3 orang beli)</li>
+    </ul>
+
+    <p><strong>2. UGC (User Generated Content)</strong></p>
+    <ul>
+        <li>Buat video testimoni jujur Anda</li>
+        <li>Posting di TikTok/Reels/Shorts</li>
+        <li>Konversi: 3-7% (UGC 10x lebih dipercaya)</li>
+    </ul>
+
+    <p><strong>3. Paid Ads (Facebook/TikTok Ads)</strong></p>
+    <ul>
+        <li>Modal kecil (Rp20-50rb/hari)</li>
+        <li>Target: Orang cari "side income", "UMKM kesulitan"</li>
+        <li>Konversi: 2-5% (butuh testing)</li>
+    </ul>
+
+    <p><strong>4. Dengar Bareng (Live Session)</strong></p>
+    <ul>
+        <li>Ajak orang dengar audio bareng via Zoom/IG Live</li>
+        <li>Mereka rasakan efeknya langsung</li>
+        <li>Konversi: 10-20% (tertinggi!)</li>
+    </ul>
+
+    <p><strong>5. AI Content Creator</strong></p>
+    <ul>
+        <li>Gunakan ChatGPT untuk buat script viral</li>
+        <li>Hook 3 detik pertama = penentu</li>
+        <li>Konversi: 5-10%</li>
+    </ul>
+
+    <p><strong>6. Jurnal Perubahan Harian</strong></p>
+    <ul>
+        <li>Posting progress Anda setiap hari</li>
+        <li>Orang tidak suka dijualin, tapi suka lihat hasil</li>
+        <li>Konversi: 15-25% (slow but steady)</li>
+    </ul>
+
+    <p><strong>7. Kalibrasi Diri (The Secret Weapon)</strong></p>
+    <ul>
+        <li>Dengar audio dengan fokus penuh</li>
+        <li>Energi Anda naik = orang tertarik otomatis</li>
+        <li>Konversi: ???% (tidak terukur, tapi PALING POWERFUL)</li>
+    </ul>
+
+    <p><strong>Di halaman selanjutnya, kita bahas satu-satu secara detail.</strong></p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 18-19: STRATEGI #1 - VIRAL WHATSAPP & SOCIAL MEDIA</h2>
+
+    <h3>Step-by-Step Implementation</h3>
+
+    <p><strong>LANGKAH 1: Dapatkan Link Affiliate Anda</strong></p>
+    <ol>
+        <li>Login ke <a href="https://app.elvisiongroup.com/affiliate">Dashboard Affiliate</a></li>
+        <li>Pilih produk "Sistem Uang Panas (Komisi 50%)"</li>
+        <li>Klik "Buat Link Afiliasi"</li>
+        <li>Copy link tersebut (contoh: https://uangpanas.com/?ref=NAMAKAMU)</li>
+        <li><strong>SIMPAN DI NOTES HP ANDA</strong> (ini modal jualan Anda)</li>
+    </ol>
+
+    <p><strong>LANGKAH 2: Download Materi Promosi</strong></p>
+    <p>Kami sudah sediakan:</p>
+    <ul>
+        <li>10 video promosi siap pakai</li>
+        <li>20 copywriting template</li>
+        <li>15 gambar poster HD</li>
+    </ul>
+    <p>Download di member area Anda.</p>
+
+    <p><strong>LANGKAH 3: Posting Strategi</strong></p>
+
+    <p><strong>A. WhatsApp Status (Pagi 6-8am, Sore 5-7pm, Malam 8-10pm)</strong></p>
+
+    <p>Template copy-paste:</p>
+
+    <pre>
+❗UMKM LAGI SUSAH? PHK DIMANA-MANA?
+
+Gue baru nemu cara menghasilkan Rp500rb/hari dari rumah. Modalnya cuma 100rb doang (lebih murah dari nasi padang seminggu).
+
+Sistem nya pakai Audio Hipnosis + Affiliate Marketing. 
+Gak perlu jualan, gak perlu modal gede.
+
+Yang udah 2.800+ orang buktiin.
+
+Cek disini: [LINK AFFILIATE ANDA]
+
+Kalau gak berhasil, uang balik 100%. Gue juga lagi coba, nanti gue update hasilnya.
+    </pre>
+
+    <p><strong>B. Grup WhatsApp (1x sehari, jangan spam)</strong></p>
+
+    <p>Template:</p>
+
+    <pre>
+Izin share, mungkin ada yang butuh.
+
+Buat yang lagi cari side income atau UMKM yang lagi kesulitan, ada sistem baru namanya "Uang Panas".
+
+Konsepnya: Fix dulu ENERGI INTERNAL (pakai audio hipnosis), baru eksekusi STRATEGI (affiliate marketing).
+
+Komisi 50%, modal cuma 100rb.
+
+Detail: [LINK AFFILIATE ANDA]
+
+Maaf kalau mengganggu 🙏
+    </pre>
+
+    <p><strong>LANGKAH 4: Instagram/Facebook/TikTok</strong></p>
+    <ul>
+        <li>Posting video promosi di Feed (1x sehari)</li>
+        <li>Story (3-5x sehari)</li>
+        <li>Link di Bio/Caption</li>
+    </ul>
+
+    <p><strong>PRO TIPS:</strong></p>
+    <ul>
+        <li>Jangan hard selling ("BeLi sEkArAnG!!!")</li>
+        <li>Soft selling ("Gue lagi coba ini, nanti gue update ya")</li>
+        <li>Social proof ("Udah 2.800 orang join")</li>
+    </ul>
+
+    <p><strong>Target:</strong> 5-10 sale/bulan = Rp250-500rb</p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 20-21: STRATEGI #2 - UGC (USER GENERATED CONTENT)</h2>
+
+    <h3>Cara Membuat Konten yang Viral & Menjual</h3>
+
+    <p><strong>Mengapa UGC?</strong></p>
+    <p>Orang TIDAK percaya iklan.</p>
+    <p>Orang PERCAYA testimoni asli dari orang biasa seperti mereka.</p>
+
+    <p><strong>Formula UGC yang Convert:</strong></p>
+
+    <h3>HOOK (3 detik pertama) - PALING PENTING</h3>
+
+    <p>Contoh hook yang work:</p>
+    <ul>
+        <li>"Gue kehilangan pekerjaan 2 bulan lalu, sekarang gue menghasilkan lebih banyak dari gaji gue dulu..."</li>
+        <li>"UMKM gue hampir bangkrut karena marketplace, tapi cara ini nyelamatin gue..."</li>
+        <li>"Gue skeptis banget sama yang namanya audio hipnosis, tapi setelah coba 7 hari..."</li>
+    </ul>
+
+    <p><strong>Prinsip hook:</strong></p>
+    <ul>
+        <li>Relatable (orang bisa merasa "ini gue banget")</li>
+        <li>Curiosity gap (bikin penasaran)</li>
+        <li>Promise (ada solusi)</li>
+    </ul>
+
+    <h3>BODY (30-60 detik) - CERITA</h3>
+
+    <p>Struktur:</p>
+    <ol>
+        <li><strong>Problem</strong> (Situasi jelek Anda sebelumnya)</li>
+        <li><strong>Discovery</strong> (Ketemu Sistem Uang Panas)</li>
+        <li><strong>Action</strong> (Apa yang Anda lakukan)</li>
+        <li><strong>Result</strong> (Perubahan yang terjadi)</li>
+    </ol>
+
+    <p>Contoh script:</p>
+
+    <pre>
+2 bulan lalu, gue kena PHK. Tabungan habis buat bayar kontrakan. Gue panik total.
+
+Terus gue nemu sistem "Uang Panas" ini. Awalnya skeptis—audio hipnosis? Afiliasi? Sounds too good to be true.
+
+Tapi karena desperate, gue coba. Modal cuma 100rb. 
+
+Gue dengerin audionya setiap pagi dan malam. Terus gue mulai share link affiliate ke temen-temen.
+
+Hari ke-3, komisi pertama masuk: 50rb. Gue kaget.
+
+Hari ke-7, udah dapet 6 sale = 300rb.
+
+Sekarang bulan ke-2, rata-rata gue dapet 500rb/hari.
+
+Yang gila: gue kerja cuma 2 jam/hari. Sisanya gue bisa quality time sama anak.
+    </pre>
+
+    <h3>CTA (Call To Action - 5 detik terakhir)</h3>
+
+    <pre>
+Link ada di bio. Atau DM gue kalau mau tanya-tanya dulu. 
+
+Harga cuma 100rb, garansi 30 hari uang kembali. Worth it lah dicoba.
+    </pre>
+
+    <p><strong>Platform:</strong></p>
+    <ul>
+        <li>TikTok (3x sehari)</li>
+        <li>Instagram Reels (2x sehari)</li>
+        <li>YouTube Shorts (1x sehari)</li>
+    </ul>
+
+    <p><strong>Target:</strong> 1 konten viral (100k+ views) bisa hasilkan 50-100 sale = Rp2.5jt - Rp5jt</p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 22-23: STRATEGI #3 - PAID ADS (FACEBOOK/TIKTOK)</h2>
+
+    <h3>Cara Beriklan dengan Modal Kecil</h3>
+
+    <p><strong>Mindset Penting:</strong></p>
+    <p>Paid ads BUKAN judi. Ini adalah <strong>MESIN AMPLIFIKASI</strong>.</p>
+    <p>Jika konten organik Anda sudah ada yang convert (misal 1 video dapat 3 sale), paid ads akan 10x-kan hasilnya.</p>
+
+    <p><strong>JANGAN iklan kalau:</strong></p>
+    <ul>
+        <li>Belum pernah closing organic</li>
+        <li>Belum paham produk</li>
+        <li>Belum dengar audio (energi Anda belum siap)</li>
+    </ul>
+
+    <p><strong>Iklan kalau:</strong></p>
+    <ul>
+        <li>Sudah dapat 5-10 sale organic</li>
+        <li>Punya budget minimal Rp300rb untuk testing</li>
+        <li>Sudah siap scale</li>
+    </ul>
+
+    <h3>Platform: Meta Ads (Facebook/Instagram)</h3>
+
+    <p><strong>STEP 1: Targeting</strong></p>
+    <p>Interest targeting:</p>
+    <ul>
+        <li>"Usaha dari rumah"</li>
+        <li>"UMKM Indonesia"</li>
+        <li>"Side income"</li>
+        <li>"Passive income"</li>
+        <li>"Affiliate marketing"</li>
+    </ul>
+
+    <p>Demografi:</p>
+    <ul>
+        <li>Umur: 25-45 tahun</li>
+        <li>Jenis kelamin: Semua</li>
+        <li>Lokasi: Indonesia (kota besar prioritas)</li>
+        <li>Bahasa: Bahasa Indonesia</li>
+    </ul>
+
+    <p><strong>STEP 2: Creative</strong></p>
+    <p>Gunakan video UGC (dari strategi #2) karena:</p>
+    <ul>
+        <li>Native look (tidak terlihat seperti iklan)</li>
+        <li>Higher engagement</li>
+        <li>Lower cost per click</li>
+    </ul>
+
+    <p><strong>STEP 3: Budget & Optimization</strong></p>
+    <p>Mulai dengan:</p>
+    <ul>
+        <li>Rp50.000/hari</li>
+        <li>Campaign Objective: "Traffic" atau "Conversions"</li>
+        <li>Run selama 3-5 hari untuk gathering data</li>
+    </ul>
+
+    <p><strong>Perhitungan ROI:</strong></p>
+    <ul>
+        <li>Budget: Rp50.000/hari</li>
+        <li>CTR: 2% (industri standard)</li>
+        <li>Conversion rate: 3%</li>
+        <li>Harga produk: Rp100.000</li>
+        <li>Komisi Anda: Rp50.000</li>
+    </ul>
+    <ul>
+        <li>Impressions: 5.000</li>
+        <li>Clicks: 100 (2% dari 5.000)</li>
+        <li>Sales: 3 (3% dari 100)</li>
+        <li>Revenue: Rp150.000</li>
+    </ul>
+
+    <p><strong>ROI: +200% (profit Rp100rb dari modal Rp50rb)</strong></p>
+
+    <p><strong>SCALING:</strong></p>
+    <p>Setelah 5 hari profitable, naikan budget 20% per hari:</p>
+    <ul>
+        <li>Hari 1-5: Rp50rb/hari</li>
+        <li>Hari 6-10: Rp60rb/hari</li>
+        <li>Hari 11-15: Rp75rb/hari</li>
+        <li>Hari 16-20: Rp90rb/hari</li>
+        <li>Hari 20+: Rp100rb/hari</li>
+    </ul>
+
+    <p><strong>Target dengan paid ads:</strong> Rp1-3jt/bulan (net profit)</p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 24-25: STRATEGI #4 - DENGAR BARENG (LIVE SESSION)</h2>
+
+    <h3>The Highest Converting Strategy</h3>
+
+    <p><strong>Fakta:</strong></p>
+    <p>Dari 100 orang yang ikut sesi "Dengar Audio Bareng", 15-25 orang langsung beli.</p>
+
+    <p><strong>Mengapa conversion-nya sangat tinggi?</strong></p>
+    <p>Karena mereka <strong>MERASAKAN</strong> langsung efek audionya.</p>
+    <p>Bukan teori. Bukan janji. Tapi <strong>EXPERIENCE</strong>.</p>
+
+    <h3>Cara Mengadakan Sesi Dengar Bareng</h3>
+
+    <p><strong>FORMAT 1: Zoom/Google Meet (Private)</strong></p>
+    <ol>
+        <li>Ajak 10-20 teman dekat/keluarga</li>
+        <li>Jadwalkan Sabtu/Minggu pagi (9-11am)</li>
+        <li>Rundown:
+            <ul>
+                <li>15 menit: Opening + penjelasan singkat</li>
+                <li>30 menit: <strong>DENGAR AUDIO BARENG</strong> (volume sama, synchronize)</li>
+                <li>15 menit: Sharing session (apa yang mereka rasakan?)</li>
+                <li>10 menit: Q&A + soft CTA</li>
+            </ul>
+        </li>
+    </ol>
+
+    <p><strong>SCRIPT OPENING:</strong></p>
+
+    <pre>
+Terima kasih udah join. Ini bukan sesi jualan kok, ini sesi GRATIS.
+
+Gue cuma mau share sesuatu yang mengubah hidup gue: Audio Bio-Energetik dari eL Vision.
+
+Konsepnya simpel: Reprogram pikiran bawah sadar kita yang sering sabotase diri sendiri.
+
+Kita akan dengar bareng selama 30 menit. Siapkan headset, cari tempat yang tenang.
+
+Setelah selesai, gue mau denger apa yang kalian rasakan. Deal?
+
+Oke, let's start.
+    </pre>
+
+    <p><strong>SCRIPT PENUTUP (SOFT CTA):</strong></p>
+
+    <pre>
+Gimana? Ada yang merasakan sesuatu?
+
+[Biarkan mereka sharing]
+
+Nah, audio yang tadi kita dengar itu adalah SAMPLE. 
+
+Ada 2 audio lengkap:
+- Audio Rezeki Pagi (untuk programming)
+- Audio Rezeki Malam (untuk reinforcement)
+
+Plus ebook, lead magnet, dan sistem affiliate yang komisinya 50%.
+
+Harga normalnya Rp500rb, tapi sekarang lagi promo Rp100rb.
+
+Gue gak maksa kalian beli ya. Tapi kalau ada yang tertarik, link nya gue share di grup chat.
+
+[Share link affiliate]
+
+Ada yang mau tanya-tanya dulu?
+    </pre>
+
+    <p><strong>FORMAT 2: Instagram/TikTok Live (Public)</strong></p>
+    <ol>
+        <li>Jadwal: Kamis/Jumat malam (8-9pm)</li>
+        <li>Announce 2-3 hari sebelumnya di story/feed</li>
+        <li>Rundown sama seperti Zoom</li>
+    </ol>
+
+    <p><strong>PRO TIPS:</strong></p>
+    <ul>
+        <li>Jangan hard selling</li>
+        <li>Biarkan audio yang "bicara"</li>
+        <li>Fokus di experience, bukan product feature</li>
+    </ul>
+
+    <p><strong>Target:</strong> 1 sesi per minggu = 5-10 sale = Rp250-500rb</p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 26-27: STRATEGI #5 & #6 - AI CONTENT & JURNAL HARIAN</h2>
+
+    <h3>Strategi #5: Content Creator AI & Hook Maut</h3>
+
+    <p><strong>Tools yang bisa digunakan:</strong></p>
+    <ul>
+        <li>ChatGPT</li>
+        <li>Gemini</li>
+        <li>Claude</li>
+    </ul>
+
+    <p><strong>Prompt untuk generate script viral:</strong></p>
+
+    <pre>
+Buatkan script video TikTok/Reels 60 detik dengan struktur:
+
+HOOK (3 detik): Relatable pain point tentang [UMKM tercekik/PHK/side income]
+BODY (50 detik): Cerita personal dari orang pertama (POV) yang menemukan solusi dari "Sistem Uang Panas" - audio hipnosis + affiliate marketing
+CTA (7 detik): Ajakan soft untuk cek link di bio
+
+Tone: Conversational, jujur, tidak lebay
+Target audience: Usia 25-45, pernah coba berbagai side hustle tapi gagal
+    </pre>
+
+    <p>AI akan generate 3-5 variasi script. Pilih yang paling "YOU", lalu rekam.</p>
+
+    <p><strong>Strategi Posting:</strong></p>
+    <ul>
+        <li>3 video per hari (pagi, siang, malam)</li>
+        <li>1 video = 1 hook yang berbeda</li>
+        <li>Testing: Lihat mana yang views-nya tinggi, double down</li>
+    </ul>
+
+    <hr>
+
+    <h3>Strategi #6: Jurnal Perubahan Harian</h3>
+
+    <p><strong>Konsep:</strong></p>
+    <p>Jadilah bukti hidup. Dokumentasikan journey Anda dari Day 1.</p>
+
+    <p><strong>Apa yang diposting?</strong></p>
+
+    <p><strong>Week 1: The Beginning</strong></p>
+    <ul>
+        <li>"Hari ke-1: Baru beli Sistem Uang Panas. Skeptis tapi penasaran."</li>
+        <li>"Hari ke-3: Dengar audio pagi pertama kali. Berasa lebih tenang, entah sugesti atau beneran."</li>
+        <li>"Hari ke-7: Komisi pertama masuk Rp50rb. Masih ga percaya."</li>
+    </ul>
+
+    <p><strong>Week 2: The Shift</strong></p>
+    <ul>
+        <li>"Hari ke-10: Udah dapet 5 sale. Mulai percaya sistem ini bukan scam."</li>
+        <li>"Hari ke-14: Ada yang aneh. Teman-teman mulai DM nanya 'lu kenapa kayak beda gitu?'"</li>
+    </ul>
+
+    <p><strong>Week 3-4: The Momentum</strong></p>
+    <ul>
+        <li>"Hari ke-21: Total income minggu ini Rp1.2jt. Kerja cuma 2 jam/hari."</li>
+        <li>"Hari ke-30: Bulan pertama closing di Rp3.8jt. Officially more than my last salary."</li>
+    </ul>
+
+    <p><strong>Mengapa ini work?</strong></p>
+    <ol>
+        <li><strong>Authenticity:</strong> Orang tahu ini bukan iklan, ini real journey</li>
+        <li><strong>FOMO:</strong> Orang ingin ikut serta dalam keberhasilan Anda</li>
+        <li><strong>Trust:</strong> 30 hari konsisten posting = credibility tinggi</li>
+    </ol>
+
+    <p><strong>Format:</strong></p>
+    <ul>
+        <li>Instagram Story (daily)</li>
+        <li>Instagram Feed (weekly summary)</li>
+        <li>Thread Twitter/X (weekly)</li>
+    </ul>
+
+    <p><strong>Target:</strong> By end of month, 20-30 orang DM Anda sendiri asking "how?"</p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 28: STRATEGI #7 - KALIBRASI DIRI (THE SECRET WEAPON)</h2>
+
+    <h3>90% Gagal Karena Ini</h3>
+
+    <p>Ini adalah strategi yang TIDAK bisa kami ajarkan dalam text.</p>
+    <p>Karena ini bukan <strong>DOING</strong>, ini adalah <strong>BEING</strong>.</p>
+
+    <p><strong>Fakta keras:</strong></p>
+    <p>90% member kami yang gagal bukan karena kurang ambisi, kurang cerdas, atau kurang modal.</p>
+    <p>Mereka gagal karena <strong>kurang fokus pada proses kalibrasi.</strong></p>
+    <p>Mereka sibuk posting, sibuk broadcast, sibuk bikin konten... tapi dengan energi <strong>SCARCITY (KEKURANGAN)</strong>.<br>
+    "Saya butuh uang... saya harus closing... tolong beli produk saya..."</p>
+
+    <p>Energy ini TERCIUM oleh prospek. Dan hasilnya? Prospek lari.</p>
+
+    <p><strong>Strategi #7 adalah:</strong><br>
+    <strong>JANGAN JUALAN SEBELUM ENERGI ANDA STABIL.</strong></p>
+
+    <p>Sebelum posting status WA, dengarkan audio dulu 10 menit.<br>
+    Sebelum reply chat prospek, tarik napas dan rasakan gratitude.<br>
+    Sebelum bikin video TikTok, visualisasikan video itu membantu ribuan orang.</p>
+
+    <p>Saat Anda beroperasi dari frekuensi <strong>ABUNDANCE (KELIMPAHAN)</strong>:</p>
+    <ul>
+        <li>Kata-kata Anda lebih persuasive</li>
+        <li>Ide konten mengalir deras</li>
+        <li>Orang percaya pada Anda tanpa alasan logis</li>
+        <li>Rezeki datang dari arah yang tidak disangka (bukan cuma dari affiliate)</li>
+    </ul>
+
+    <p><strong>Ingat Rumus Ini:</strong></p>
+    <blockquote>
+        <strong>Strategy (20%) + Internal Energy (80%) = 100% Result</strong>
+    </blockquote>
+
+    <p>Jangan balik persentasenya.</p>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 29: BLUEPRINT 30 HARI (RENCANA AKSI)</h2>
+
+    <p><strong>Minggu 1: The Reset (Fokus Internal)</strong></p>
+    <ul>
+        <li><strong>Pagi:</strong> Dengar Audio Rezeki Pagi (wajib)</li>
+        <li><strong>Siang:</strong> Pelajari materi member area (1 jam)</li>
+        <li><strong>Malam:</strong> Dengar Audio Rezeki Malam (wajib)</li>
+        <li><strong>Action:</strong> JANGAN JUALAN DULU. Siapkan akun sosmed, rapikan profil.</li>
+    </ul>
+
+    <p><strong>Minggu 2: The Seed (Mulai Menanam)</strong></p>
+    <ul>
+        <li><strong>Pagi/Malam:</strong> Audio rutin.</li>
+        <li><strong>Action:</strong> Mulai share ke Circle 1 (Keluarga/Teman dekat) via WA.</li>
+        <li><strong>Action:</strong> Posting Jurnal Perubahan Hari 1-7 di Story/Status.</li>
+        <li><strong>Goal:</strong> 1-3 closing pertama (untuk boost kepercayaan diri).</li>
+    </ul>
+
+    <p><strong>Minggu 3: The Bloom (Mulai Terlihat)</strong></p>
+    <ul>
+        <li><strong>Pagi/Malam:</strong> Audio rutin.</li>
+        <li><strong>Action:</strong> Mulai posting konten UGC di TikTok/Reels (3x sehari).</li>
+        <li><strong>Action:</strong> Adakan sesi "Dengar Bareng" pertama (Zoom/Live).</li>
+        <li><strong>Goal:</strong> 5-10 closing (komisi Rp250-500rb).</li>
+    </ul>
+
+    <p><strong>Minggu 4: The Harvest (Panen Raya)</strong></p>
+    <ul>
+        <li><strong>Pagi/Malam:</strong> Audio rutin.</li>
+        <li><strong>Action:</strong> Evaluasi konten yang viral -> Boost dengan Ads (budget Rp50rb).</li>
+        <li><strong>Action:</strong> Follow up leads yang belum closing.</li>
+        <li><strong>Goal:</strong> Konsisten Rp100-300rb per hari.</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h2 class="section-title">HALAMAN 30: KATA PENUTUP</h2>
+
+    <h3>Pilihan Ada Di Tangan Anda</h3>
+
+    <p>Anda sudah punya semuanya sekarang:</p>
+    <ol>
+        <li><strong>Sistem Internal:</strong> Audio Hipnosis untuk reset mindset bawah sadar.</li>
+        <li><strong>Kendaraan:</strong> Produk digital high-demand dengan komisi 50%.</li>
+        <li><strong>Peta:</strong> 7 Strategi yang sudah terbukti.</li>
+        <li><strong>Bahan Bakar:</strong> Materi promosi siap pakai.</li>
+    </ol>
+
+    <p>Tidak ada lagi alasan "tidak bakat", "tidak punya modal", atau "tidak tahu caranya".</p>
+
+    <p>Satu-satunya yang bisa menghentikan Anda adalah <strong>DIRI ANDA SENDIRI</strong>.</p>
+
+    <p><strong>30 Hari dari sekarang, Anda bisa:</strong></p>
+    <p>A. Tetap di posisi yang sama, mengeluh tentang ekonomi dan nasib.<br>
+    B. Atau sudah memegang income tambahan Rp3-5 juta pertama Anda.</p>
+
+    <p><strong>Kami tunggu kisah sukses Anda di Grup Member.</strong></p>
+
+    <p><strong>Sampai jumpa di puncak.</strong></p>
+
+    <div class="next-step-box">
+        <h3>🚀 NEXT STEP: MULAI HASILKAN KOMISI!</h3>
+        <p>Pergi ke link di bawah, pilih <strong>Ebook Uang Panas</strong>, ambil URL Affiliate Anda, lalu klik <strong>Lead Magnet Uang Panas</strong> untuk mendapatkan konten-konten promosinya. Cukup sebarkan ke sosmed mengikuti panduan Lead Magnet di dalamnya!</p>
+        <a href="https://app.elvisiongroup.com/affiliate" class="next-step-button" target="_blank">AMBIL LINK AFFILIATE ANDA DISINI</a>
+    </div>
+
+    <br><br>
+
+    <p><strong>Salam Abundance,</strong></p>
+    <p><strong>eL Vision Group</strong></p>
+
+</div>
+
+</body>
+</html>

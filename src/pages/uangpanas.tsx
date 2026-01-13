@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Check, X, Star, Clock, Users, Shield, TrendingUp, Zap, ChevronDown, ArrowRight, Gift, User, Mail, Phone, CreditCard, ShieldCheck, Copy } from 'lucide-react';
+import { Play, Check, X, Star, Clock, Users, Shield, TrendingUp, Zap, ChevronDown, User, Mail, Phone, CreditCard, Copy, ArrowRight, Gift } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +12,14 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/toaster';
+
+const communityTestimonials = Object.values(
+  import.meta.glob('../assets/TESTI_KOMUNITAS/*.{png,jpg,jpeg,PNG,JPG,JPEG}', { 
+    eager: true, 
+    query: '?url', 
+    import: 'default' 
+  })
+) as string[];
 
 const VideoModal = ({ video, onClose }: { video: string, onClose: () => void }) => (
   <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -36,9 +44,9 @@ const VideoModal = ({ video, onClose }: { video: string, onClose: () => void }) 
 
 export default function UangPanasLanding() {
   const [timeLeft, setTimeLeft] = useState({
-    hours: 2,
-    minutes: 15,
-    seconds: 0
+    hours: 5,
+    minutes: 23,
+    seconds: 47
   });
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [memberCount, setMemberCount] = useState(2847);
@@ -177,7 +185,7 @@ export default function UangPanasLanding() {
     try {
       await supabase.functions.invoke('capi-universal', {
         body: {
-          pixelId: '3319324491540889', // Using same pixel for now, or you can change it
+          pixelId: '3319324491540889', 
           eventName,
           userData: {
             email: userEmail,
@@ -375,221 +383,587 @@ export default function UangPanasLanding() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-red-500 selection:text-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white selection:bg-red-500 selection:text-white">
       <Toaster />
-      {selectedVideo && <VideoModal video={selectedVideo} onClose={() => setSelectedVideo(null)} />}
-
-      {/* Floating Sticky CTA Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gray-900/95 backdrop-blur-md border-t border-gray-800 md:hidden z-50">
-        <button 
-          onClick={scrollToCheckout}
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg animate-pulse"
-        >
-          AMBIL PROMO RP 100.000 SEKARANG
-        </button>
-      </div>
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-4 py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/30 via-gray-900 to-black"></div>
-        
-        <div className="relative z-10 max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-red-600/20 border border-red-500/50 text-red-400 px-4 py-1.5 rounded-full text-sm font-semibold mb-8">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-            </span>
-            EKONOMI SEDANG TIDAK BAIK-BAIK SAJA
+        <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 to-orange-900/20"></div>
+        <div className="relative z-10 max-w-6xl mx-auto text-center">
+          <div className="mb-8 inline-block bg-red-600 text-white px-6 py-2 rounded-full text-sm font-bold animate-pulse">
+            ⚠️ PROMO TERBATAS - HARGA NAIK DALAM {timeLeft.hours}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
           </div>
-
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight tracking-tight">
-            Ekonomi Lesu? Kena PHK? <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
-              Biaya Usaha & Pajak Mencekik?
-            </span>
+          
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            Ekonomi Lesu. Marketplace Cekik UMKM.<br />
+            Gaji Dipotong. PHK Dimana-Mana.
           </h1>
-
-          <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Kami membangun komunitas yang <strong>EFEKTIF & EFISIEN</strong>. Terbukti membantu ribuan orang menghasilkan uang dari rumah.
+          
+          <h2 className="text-2xl md:text-4xl mb-8 text-yellow-400 font-semibold">
+            Tapi Ada {memberCount.toLocaleString()} Orang Yang Justru Menghasilkan<br />
+            <span className="text-5xl md:text-6xl text-green-400">Rp500.000/Hari</span><br />
+            Dari Rumah—Tanpa Modal, Tanpa Jualan, Tanpa Ribet.
+          </h2>
+          
+          <p className="text-xl md:text-2xl mb-12 text-gray-300">
+            Rahasia <span className="text-red-500 font-bold">UANG PANAS</span>: Sistem Energi + Strategi Terbukti<br />
+            Yang Membuat Uang 'Mengejar' Anda—Bukan Sebaliknya.
           </p>
-
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-8 rounded-2xl mb-12 transform hover:scale-105 transition-transform duration-300">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              🔥 Apa Itu <span className="text-red-500">UANG PANAS?</span>
-            </h2>
-            <p className="text-lg text-gray-300 mb-6">
-              Artinya <strong>IMPULSIF</strong>. Kami menjual Ebook & Panduan cara menghasilkan 
-              <span className="bg-green-600/20 text-green-400 px-2 py-1 rounded mx-2 font-bold">Rp 500.000/HARI</span>
-              dengan diam di rumah.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <div className="bg-black/40 px-6 py-3 rounded-lg border border-gray-600 flex items-center gap-2">
-                <Check className="text-green-500" /> Tanpa Perlu Stok Barang
-              </div>
-              <div className="bg-black/40 px-6 py-3 rounded-lg border border-gray-600 flex items-center gap-2">
-                <Check className="text-green-500" /> Tanpa Pusing Marketplace
-              </div>
-            </div>
-          </div>
-
+          
           <button 
             onClick={scrollToCheckout}
-            className="group bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white text-xl md:text-2xl font-bold py-6 px-12 rounded-full shadow-[0_0_40px_-10px_rgba(220,38,38,0.5)] transition-all duration-300"
+            className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white text-xl md:text-2xl font-bold py-6 px-12 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse"
           >
-            SAYA MAU GABUNG SEKARANG
-            <span className="block text-sm font-normal mt-1 opacity-90">Hanya Rp 100.000 (Promo Terbatas)</span>
+            🔥 SAYA MAU AKSES SEKARANG - RP100RB SAJA
           </button>
+          
+          <p className="mt-6 text-sm text-gray-400">
+            🔒 Garansi 30 Hari Uang Kembali | ⚡ Akses Instant | 💳 Sekali Bayar
+          </p>
+        </div>
+        
+        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <ChevronDown size={48} className="text-gray-400" />
         </div>
       </section>
 
-      {/* Problem & Solution */}
-      <section className="py-20 px-4 bg-gray-900">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-8 leading-tight">
-              Kenapa Harus Gabung <span className="text-yellow-400">SEKARANG?</span>
-            </h2>
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="text-red-500" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-2">Ekonomi Makin Sulit</h3>
-                  <p className="text-gray-400">Banyak orang kehilangan pekerjaan. UMKM tercekik potongan admin marketplace yang besar, belum lagi pajak.</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Gift className="text-green-500" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-2">Solusi Lead Magnet</h3>
-                  <p className="text-gray-400">Kami berikan <strong>LEAD MAGNET</strong>: Tools canggih agar orang tertarik melihat dan membeli apa yang kamu jual.</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Zap className="text-blue-500" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-2">Metode Terukur</h3>
-                  <p className="text-gray-400">Bukan sekedar teori. Di agama disebut Syukur/Yakin, di sini kami buat <strong>TERUKUR</strong> dan bisa dibuktikan langsung.</p>
-                </div>
-              </div>
+      {/* The Enemy Section */}
+      <section className="py-20 px-4 bg-gradient-to-b from-black to-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+            Kenapa Kerja Keras Anda <span className="text-red-500">TIDAK</span> Menghasilkan Uang?
+          </h2>
+          
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <div className="bg-gray-800 p-8 rounded-xl border-2 border-red-500">
+              <div className="text-5xl mb-4">📉</div>
+              <h3 className="text-2xl font-bold mb-4 text-red-400">UMKM Tercekik</h3>
+              <ul className="space-y-2 text-gray-300">
+                <li>• Potongan marketplace 20-30%</li>
+                <li>• Ongkir mahal, margin tipis</li>
+                <li>• Pajak UMKM naik terus</li>
+              </ul>
+            </div>
+            
+            <div className="bg-gray-800 p-8 rounded-xl border-2 border-red-500">
+              <div className="text-5xl mb-4">💼</div>
+              <h3 className="text-2xl font-bold mb-4 text-red-400">Karyawan Terancam</h3>
+              <ul className="space-y-2 text-gray-300">
+                <li>• PHK gelombang 2025</li>
+                <li>• Gaji stagnan, inflasi naik</li>
+                <li>• Tabungan terkuras</li>
+              </ul>
+            </div>
+            
+            <div className="bg-gray-800 p-8 rounded-xl border-2 border-red-500">
+              <div className="text-5xl mb-4">🔄</div>
+              <h3 className="text-2xl font-bold mb-4 text-red-400">Sudah Coba Semua, Gagal Terus</h3>
+              <ul className="space-y-2 text-gray-300">
+                <li>• Belajar dropship → zonk</li>
+                <li>• Ikut MLM → rugi</li>
+                <li>• Jualan online → sepi</li>
+              </ul>
             </div>
           </div>
-          <div className="bg-gradient-to-br from-gray-800 to-black p-8 rounded-2xl border border-gray-700 relative">
-            <div className="absolute -top-4 -right-4 bg-yellow-500 text-black font-bold px-4 py-2 rounded-lg transform rotate-3 shadow-lg">
-              GARANSI WORK!
+          
+          <div className="bg-gradient-to-r from-orange-900/50 to-red-900/50 p-8 rounded-xl border-2 border-orange-500">
+            <p className="text-xl md:text-2xl text-center leading-relaxed">
+              Masalahnya BUKAN strategi Anda. Masalahnya adalah <span className="text-yellow-400 font-bold">ENERGI INTERNAL</span> Anda masih di frekuensi <span className="text-red-400 font-bold">SCARCITY (kekurangan).</span>
+              <br /><br />
+              Otak sadar bilang 'Saya mau sukses,' tapi 95% pikiran bawah sadar Anda BERTERIAK: <span className="italic">'Uang itu sulit. Saya tidak pantas.'</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Solution Section */}
+      <section className="py-20 px-4 bg-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-6">
+            Inilah Kenapa <span className="text-red-500">UANG PANAS</span> Berbeda:
+          </h2>
+          <p className="text-2xl text-center mb-16 text-gray-300">
+            Kami Tidak Jualan 'Strategi.' Kami Reset <span className="text-yellow-400 font-bold">SISTEM INTERNAL</span> Anda.
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-gray-800 p-8 rounded-xl border-2 border-gray-700">
+              <h3 className="text-2xl font-bold mb-6 text-red-400 flex items-center gap-2">
+                <X className="text-red-500" /> Metode Lain (Yang Gagal)
+              </h3>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <X className="text-red-500 flex-shrink-0 mt-1" />
+                  <span>Fokus di strategi/taktik saja</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <X className="text-red-500 flex-shrink-0 mt-1" />
+                  <span>Butuh modal besar</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <X className="text-red-500 flex-shrink-0 mt-1" />
+                  <span>Harus jago jualan</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <X className="text-red-500 flex-shrink-0 mt-1" />
+                  <span>Hasil tidak konsisten</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <X className="text-red-500 flex-shrink-0 mt-1" />
+                  <span>Bikin stres & burnout</span>
+                </li>
+              </ul>
             </div>
-            <h3 className="text-2xl font-bold mb-6 text-center">SYARAT BERHASIL YANG MUDAH</h3>
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 bg-gray-800 p-4 rounded-lg">
-                <div className="text-4xl">⏱️</div>
+            
+            <div className="bg-gradient-to-br from-green-900/50 to-emerald-900/50 p-8 rounded-xl border-2 border-green-500">
+              <h3 className="text-2xl font-bold mb-6 text-green-400 flex items-center gap-2">
+                <Check className="text-green-500" /> Metode UANG PANAS
+              </h3>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <Check className="text-green-500 flex-shrink-0 mt-1" />
+                  <span><strong>Kalibrasi Bio-Energetik</strong> (Metode eL Vision)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-green-500 flex-shrink-0 mt-1" />
+                  <span>Modal HANYA Rp100.000 (sekali bayar)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-green-500 flex-shrink-0 mt-1" />
+                  <span>Sistem sudah siap pakai (tinggal copy-paste)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-green-500 flex-shrink-0 mt-1" />
+                  <span>Komisi 50% otomatis (bukan rekrut-rekrutan)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-green-500 flex-shrink-0 mt-1" />
+                  <span><strong>2 jam/hari = Rp500rb/hari</strong></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 px-4 bg-black">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+            3 Langkah Sederhana Yang Akan Mengubah Hidup Anda<br />
+            <span className="text-yellow-400">Dalam 7 Hari</span>
+          </h2>
+          
+          <div className="space-y-12">
+            <div className="bg-gradient-to-r from-purple-900/50 to-indigo-900/50 p-8 rounded-xl border-2 border-purple-500">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-purple-600 text-white text-3xl font-bold rounded-full w-16 h-16 flex items-center justify-center">1</div>
+                <h3 className="text-3xl font-bold">RESET FREKUENSI REZEKI (1 Jam/Hari)</h3>
+              </div>
+              
+              <div className="flex items-start gap-4 mb-4">
+                <div className="text-4xl">🎧</div>
                 <div>
-                  <h4 className="font-bold text-lg">Hanya 2 Jam / Hari</h4>
-                  <p className="text-sm text-gray-400">Sisihkan waktu Anda, hasil maksimal.</p>
+                  <h4 className="text-2xl font-bold text-purple-300 mb-2">Audio Hipnosis Bio-Energetik eL Vision</h4>
+                  <ul className="space-y-2 text-lg text-gray-300">
+                    <li>• 30 menit pagi (saat bangun tidur)</li>
+                    <li>• 30 menit malam (sebelum tidur)</li>
+                    <li>• Akses gelombang Theta (4-7Hz) untuk reprogram pikiran bawah sadar</li>
+                  </ul>
                 </div>
               </div>
               
-              <div className="relative pl-8 border-l-2 border-gray-700 space-y-6">
-                <div className="relative">
-                  <div className="absolute -left-[39px] bg-purple-600 rounded-full p-1">
-                    <Check size={16} />
-                  </div>
-                  <h5 className="font-bold text-purple-400">1 JAM: Audio Hipnosis Rezeki</h5>
-                  <p className="text-gray-400 text-sm">30 menit saat bangun tidur & 30 menit saat mau tidur.</p>
-                </div>
-                
-                <div className="relative">
-                  <div className="absolute -left-[39px] bg-blue-600 rounded-full p-1">
-                    <Check size={16} />
-                  </div>
-                  <h5 className="font-bold text-blue-400">1 JAM: Belajar Modul</h5>
-                  <p className="text-gray-400 text-sm">Praktek mengiklankan produk dengan <strong>KOMISI 50%</strong>.</p>
-                </div>
-              </div>
-
-              <div className="bg-green-900/20 border border-green-500/30 p-4 rounded-lg text-center">
-                <p className="font-bold text-green-400 mb-2">KOMISI 50% — YA, 50%!</p>
-                <p className="text-sm text-gray-300">
-                  Gak perlu pusing jualan apa (kami buatkan). <br/>
-                  Gak perlu pusing jualan kemana (kami arahkan). <br/>
-                  Cukup ikuti modulnya.
-                </p>
+              <div className="bg-black/50 p-6 rounded-lg mt-4 italic text-gray-300 border-l-4 border-yellow-500">
+                "Di agama kita sebut SYUKUR, YAKIN, TAWAKAL. Tapi eL Vision membuatnya TERUKUR, TERPREDIKSI, dan TERBUKTI oleh 10.000+ pengguna."
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Share Section */}
-      <section className="py-20 px-4 bg-black text-center">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            "Kenapa Rahasia Ini Dibagikan?"
-          </h2>
-          <p className="text-xl text-gray-300 leading-relaxed mb-8">
-            Karena rezeki setiap orang tergantung energinya. Dengan menggunakan energi positif Anda, kami pun mendapat keuntungan dengan membantu Anda menghasilkan uang lebih cepat dan mudah.
-          </p>
-          <div className="inline-block bg-gray-800 px-8 py-4 rounded-full border border-gray-600">
-            <span className="text-yellow-400 font-bold">♻️ ENERGY SYNERGY:</span> Kami bantu Anda kaya, Kami ikut kaya.
-          </div>
-        </div>
-      </section>
-
-      {/* How it Works Flow */}
-      <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-16">
-            Alur Uang Masuk Ke Rekening Anda
-          </h2>
-          
-          <div className="grid md:grid-cols-4 gap-8">
-            {[
-              { icon: "🛒", title: "1. Beli Ebook", desc: "Investasi receh Rp 100.000 sekali seumur hidup." },
-              { icon: "🎧", title: "2. Baca & Dengar", desc: "Baca ebooknya, dengarkan audio hipnosisnya." },
-              { icon: "📋", title: "3. Copy Paste", desc: "Sebarkan Lead Magnet ke teman atau sosmed (TIktok/IG)." },
-              { icon: "💰", title: "4. Panen Komisi", desc: "Setiap penjualan = 50% komisi buat Anda. Enak kan?" }
-            ].map((step, idx) => (
-              <div key={idx} className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-red-500 transition-colors relative group">
-                <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform">{step.icon}</div>
-                <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                <p className="text-gray-400">{step.desc}</p>
-                {idx < 3 && (
-                  <div className="hidden md:block absolute -right-4 top-1/2 transform -translate-y-1/2 z-10">
-                    <ArrowRight className="text-gray-600" />
-                  </div>
-                )}
+            
+            <div className="bg-gradient-to-r from-blue-900/50 to-cyan-900/50 p-8 rounded-xl border-2 border-blue-500">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-blue-600 text-white text-3xl font-bold rounded-full w-16 h-16 flex items-center justify-center">2</div>
+                <h3 className="text-3xl font-bold">COPY-PASTE MODUL LEAD MAGNET (30 Menit/Hari)</h3>
               </div>
-            ))}
+              
+              <div className="flex items-start gap-4 mb-4">
+                <div className="text-4xl">📱</div>
+                <div>
+                  <h4 className="text-2xl font-bold text-blue-300 mb-2">Anda dapat:</h4>
+                  <ul className="space-y-2 text-lg text-gray-300">
+                    <li>• 7 Lead Magnet siap pakai (nilai Rp5 juta)</li>
+                    <li>• Script iklan yang sudah convert</li>
+                    <li>• Template posting organik (TikTok, IG, FB)</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="bg-black/50 p-6 rounded-lg mt-4 italic text-gray-300 border-l-4 border-cyan-500">
+                "Tidak perlu pusing jualan APA. Tidak perlu mikir jualan KEMANA. Tinggal IKUTI MODUL."
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 p-8 rounded-xl border-2 border-green-500">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-green-600 text-white text-3xl font-bold rounded-full w-16 h-16 flex items-center justify-center">3</div>
+                <h3 className="text-3xl font-bold">TERIMA KOMISI 50% SEUMUR HIDUP (Pasif)</h3>
+              </div>
+              
+              <div className="flex items-start gap-4 mb-4">
+                <div className="text-4xl">💰</div>
+                <div>
+                  <h4 className="text-2xl font-bold text-green-300 mb-2">Setiap orang yang beli lewat link Anda:</h4>
+                  <ul className="space-y-2 text-lg text-gray-300">
+                    <li>• Komisi 50% langsung masuk rekening</li>
+                    <li>• Sistem affiliate otomatis tracking</li>
+                    <li>• Withdraw setiap senin, minimal Rp50.000</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 px-4 bg-gray-900">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Dengar Review Yang <span className="text-red-500">Bukan Main</span>
+      <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-6">
+            Dengar Sendiri Buktinya:
           </h2>
-          <p className="text-gray-400 mb-12">Bukan rekayasa, ini kata mereka yang sudah praktek.</p>
+          <p className="text-xl md:text-2xl text-center mb-16 text-gray-300">
+            Mereka Yang Tadinya Skeptis, Sekarang Menghasilkan Hingga <span className="text-green-400 font-bold">Rp15 Juta/Bulan</span>
+          </p>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
-              <div key={i} className="bg-black p-6 rounded-xl border border-gray-800" onClick={() => setSelectedVideo(t.video)}>
-                <div className="relative mb-4 group cursor-pointer overflow-hidden rounded-lg">
-                  <img src={t.poster} alt={t.name} className="w-full h-48 object-cover transition-transform group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play fill="white" size={48} />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {testimonials.map((testimonial, idx) => (
+              <div key={idx} className="bg-gray-800 rounded-xl overflow-hidden border-2 border-gray-700 hover:border-yellow-500 transition-all cursor-pointer transform hover:scale-105" onClick={() => setSelectedVideo(testimonial.video)}>
+                <div className="relative group">
+                  <img src={testimonial.poster} alt={testimonial.name} className="w-full h-64 object-cover" />
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play size={64} className="text-white" />
+                  </div>
+                  <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    VIDEO
                   </div>
                 </div>
-                <p className="text-lg italic text-gray-300 mb-4">"{t.quote}"</p>
-                <div className="font-bold text-yellow-400">{t.name}</div>
-                <div className="text-sm text-gray-500">{t.title}</div>
+                <div className="p-6">
+                  <h4 className="text-xl font-bold mb-2">{testimonial.name}</h4>
+                  <p className="text-gray-400 mb-3">{testimonial.title}</p>
+                  <p className="text-gray-300 italic">"{testimonial.quote}"</p>
+                </div>
               </div>
             ))}
+          </div>
+          
+          <div className="mt-16 bg-gradient-to-r from-yellow-900/30 to-orange-900/30 p-8 rounded-xl border-2 border-yellow-600">
+            <p className="text-center text-xl text-gray-300">
+              <span className="text-yellow-400 font-bold">Ini bukan screenshot edit.</span> Ini REAL PEOPLE, REAL RESULTS.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Bonuses */}
+      <section className="py-20 px-4 bg-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-6">
+            Apa Yang Anda Dapat Hari Ini
+          </h2>
+          <p className="text-2xl text-center mb-16 text-yellow-400 font-bold">
+            (Total Nilai: Rp12.750.000)
+          </p>
+          
+          <div className="space-y-6 mb-12">
+            {[
+              { icon: "📚", title: 'Ebook "Sistem UANG PANAS"', value: "Rp500.000", desc: "Metode lengkap step-by-step" },
+              { icon: "🧲", title: "7 Lead Magnet Siap Pakai", value: "Rp5.000.000", desc: "Tinggal copy-paste, langsung jualan" },
+              { icon: "🎧", title: "Audio Hipnosis Bio-Energetik eL Vision", value: "Rp3.000.000", desc: "2 audio premium (Rezeki Pagi + Rezeki Malam) - Teknologi brainwave entrainment" },
+              { icon: "📱", title: "Modul Iklan Organik & Berbayar", value: "Rp2.000.000", desc: "Script Facebook Ads yang proven + Template konten viral TikTok & IG" },
+              { icon: "💬", title: "Grup Private Telegram 24/7", value: "Rp1.500.000", desc: "Support langsung dari mentor + Update strategi terbaru" },
+              { icon: "📊", title: "Akses Affiliate Dashboard Selamanya", value: "Rp750.000", desc: "Track komisi real-time + Withdraw otomatis" }
+            ].map((bonus, idx) => (
+              <div key={idx} className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-xl border-2 border-yellow-600 flex items-start gap-4">
+                <div className="text-5xl">{bonus.icon}</div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-2xl font-bold text-yellow-400">{bonus.title}</h3>
+                    <span className="text-green-400 font-bold text-xl">{bonus.value}</span>
+                  </div>
+                  <p className="text-gray-300">{bonus.desc}</p>
+                </div>
+                <Check className="text-green-500 flex-shrink-0" size={32} />
+              </div>
+            ))}
+          </div>
+          
+          <div className="bg-gradient-to-r from-yellow-600 to-orange-600 p-12 rounded-2xl text-center">
+            <p className="text-3xl mb-4">TOTAL NILAI: <span className="line-through">Rp12.750.000</span></p>
+            <p className="text-6xl font-bold mb-6">HARGA HARI INI: Rp100.000</p>
+            <p className="text-2xl font-semibold">Hemat 99% - Tapi Tidak Untuk Lama!</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Urgency */}
+      <section className="py-20 px-4 bg-red-900">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="mb-8">
+            <Clock size={64} className="mx-auto mb-4" />
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">⏰ PROMO INI BERAKHIR DALAM:</h2>
+            <div className="flex justify-center gap-4 text-center mb-8">
+              <div className="bg-black p-6 rounded-xl min-w-[100px]">
+                <div className="text-5xl font-bold">{String(timeLeft.hours).padStart(2, '0')}</div>
+                <div className="text-sm text-gray-400 mt-2">JAM</div>
+              </div>
+              <div className="text-5xl font-bold flex items-center">:</div>
+              <div className="bg-black p-6 rounded-xl min-w-[100px]">
+                <div className="text-5xl font-bold">{String(timeLeft.minutes).padStart(2, '0')}</div>
+                <div className="text-sm text-gray-400 mt-2">MENIT</div>
+              </div>
+              <div className="text-5xl font-bold flex items-center">:</div>
+              <div className="bg-black p-6 rounded-xl min-w-[100px]">
+                <div className="text-5xl font-bold">{String(timeLeft.seconds).padStart(2, '0')}</div>
+                <div className="text-sm text-gray-400 mt-2">DETIK</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-black p-8 rounded-xl border-4 border-yellow-500 mb-8">
+            <p className="text-2xl mb-4">⚠️ <strong>PERHATIAN:</strong></p>
+            <p className="text-xl mb-4">Harga akan NAIK menjadi Rp500.000 setelah timer habis.</p>
+            <p className="text-xl mb-4">Saat ini sudah <span className="text-green-400 font-bold">{memberCount.toLocaleString()} orang</span> bergabung.</p>
+            <p className="text-2xl font-bold text-red-400">Slot terbatas: {(10000 - memberCount)} orang lagi.</p>
+          </div>
+          
+          <div className="bg-gray-900 p-6 rounded-xl border-2 border-gray-700 italic">
+            <p className="text-lg text-gray-300">
+              "Kemarin ada yang chat: 'Mas, saya telat 2 jam. Harganya udah naik jadi 500rb. Bisa diskon ga?'
+              <br /><br />
+              Maaf, sistem otomatis. Kami tidak bisa kecualikan siapapun. <span className="text-yellow-400 font-bold">Jangan sampai Anda yang menyesal.</span>"
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Guarantee */}
+      <section className="py-20 px-4 bg-gradient-to-b from-black to-gray-900">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-12">
+            100% GARANSI UANG KEMBALI<br />
+            <span className="text-green-400">Tanpa Ribet, Tanpa Pertanyaan</span>
+          </h2>
+          
+          <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 p-10 rounded-2xl border-4 border-green-500">
+            <div className="flex items-start gap-6">
+              <Shield size={80} className="text-green-400 flex-shrink-0" />
+              <div>
+                <h3 className="text-3xl font-bold mb-6 text-green-400">🛡️ JAMINAN IRON-CLAD:</h3>
+                <p className="text-xl text-gray-200 mb-6 leading-relaxed">
+                  Coba sistem UANG PANAS selama 30 hari. Jika Anda tidak menghasilkan minimal Rp500.000, tunjukkan bukti Anda sudah ikuti 3 langkah kami—<span className="text-yellow-400 font-bold">UANG ANDA KEMBALI 100%.</span>
+                </p>
+                <p className="text-lg text-gray-300 leading-relaxed">
+                  Bahkan, Anda tetap boleh <strong>SIMPAN semua bonus & akses affiliate.</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-8 text-center">
+            <p className="text-2xl text-gray-300 italic">
+              "Karena kami YAKIN sistem ini work. Sudah {memberCount.toLocaleString()} orang buktikan.<br />
+              <span className="text-yellow-400 font-bold">Risiko ada di KAMI, bukan di Anda.</span>"
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-20 px-4 bg-gray-900">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+            Pertanyaan Yang Sering Ditanyakan
+          </h2>
+          
+          <div className="space-y-6">
+            {[
+              {
+                q: "Ini MLM / Skema Piramid?",
+                a: "BUKAN. Anda tidak perlu rekrut siapapun. Komisi dari penjualan produk REAL (ebook + audio), bukan dari rekrutan."
+              },
+              {
+                q: "Saya tidak punya skill jualan, bisa?",
+                a: "BISA. Semua script, template, lead magnet sudah kami siapkan. Anda tinggal copy-paste."
+              },
+              {
+                q: "Butuh modal besar untuk iklan?",
+                a: "TIDAK. Modul kami ada strategi ORGANIK (gratis) dan berbayar (mulai Rp20rb/hari)."
+              },
+              {
+                q: "Saya sudah coba banyak metode, gagal terus.",
+                a: "Karena metode lain hanya fokus di STRATEGI. UANG PANAS reset ENERGI INTERNAL Anda dulu (audio hipnosis). Tanpa ini, strategi apapun akan sabotase sendiri."
+              },
+              {
+                q: "Berapa lama baru menghasilkan?",
+                a: "Member tercepat: 4 jam. Rata-rata: 3-7 hari. Yang lambat: 14 hari. (Bergantung konsistensi Anda dengar audio + ikuti modul)."
+              },
+              {
+                q: "Audio hipnosis itu aman? Bukan sihir/klenik?",
+                a: "AMAN & ILMIAH. Teknologi brainwave entrainment (gelombang Theta 4-7Hz) sudah dipakai di dunia medis & terapi. Tidak ada unsur spiritual/klenik."
+              },
+              {
+                q: "Kalau tidak manfaat, gimana?",
+                a: "GARANSI 30 HARI UANG KEMBALI 100%. No drama."
+              },
+              {
+                q: "Kenapa harganya murah banget?",
+                a: "Karena misi kami BANTU SEBANYAK MUNGKIN ORANG di masa ekonomi sulit. Tapi harga ini TIDAK BERLAKU LAMA. Setelah 10.000 member, naik jadi Rp500rb."
+              }
+            ].map((faq, idx) => (
+              <div key={idx} className="bg-gray-800 p-6 rounded-xl border-2 border-gray-700 hover:border-yellow-500 transition-all">
+                <h3 className="text-xl font-bold mb-3 text-yellow-400">Q: {faq.q}</h3>
+                <p className="text-gray-300 text-lg">A: {faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-20 px-4 bg-gradient-to-b from-black to-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+            Pilihan Anda Hari Ini Akan Menentukan<br />
+            <span className="text-yellow-400">6 Bulan Ke Depan</span>
+          </h2>
+          
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            <div className="bg-gradient-to-br from-green-900/50 to-emerald-900/50 p-8 rounded-xl border-4 border-green-500">
+              <h3 className="text-3xl font-bold mb-6 text-green-400 flex items-center gap-3">
+                <Check size={40} /> JIKA ANDA KLIK "BELI SEKARANG":
+              </h3>
+              <ul className="space-y-4 text-lg">
+                <li className="flex items-start gap-3">
+                  <Check className="text-green-400 flex-shrink-0 mt-1" />
+                  <span>30 menit dari sekarang, Anda sudah download ebook & audio</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-green-400 flex-shrink-0 mt-1" />
+                  <span>2 jam dari sekarang, Anda sudah dengar audio pertama & mulai shift energi</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-green-400 flex-shrink-0 mt-1" />
+                  <span>3 hari dari sekarang, komisi pertama Rp50rb masuk rekening</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-green-400 flex-shrink-0 mt-1" />
+                  <span>30 hari dari sekarang, income Anda naik Rp5-15 juta/bulan</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-green-400 flex-shrink-0 mt-1" />
+                  <span className="font-bold">6 bulan dari sekarang, hidup Anda TOTALLY DIFFERENT</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="bg-gradient-to-br from-red-900/50 to-orange-900/50 p-8 rounded-xl border-4 border-red-500">
+              <h3 className="text-3xl font-bold mb-6 text-red-400 flex items-center gap-3">
+                <X size={40} /> JIKA ANDA KLIK "TUTUP HALAMAN":
+              </h3>
+              <ul className="space-y-4 text-lg">
+                <li className="flex items-start gap-3">
+                  <X className="text-red-400 flex-shrink-0 mt-1" />
+                  <span>Besok harga naik jadi Rp500rb (Anda rugi Rp400rb)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <X className="text-red-400 flex-shrink-0 mt-1" />
+                  <span>3 hari dari sekarang, Anda masih stress mikirin uang</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <X className="text-red-400 flex-shrink-0 mt-1" />
+                  <span>30 hari dari sekarang, tagihan menumpuk, tabungan makin tipis</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <X className="text-red-400 flex-shrink-0 mt-1" />
+                  <span className="font-bold italic">6 bulan dari sekarang, Anda menyesal: "Kenapa kemarin saya tidak ambil kesempatan itu?"</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <button 
+              onClick={scrollToCheckout}
+              className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white text-2xl md:text-3xl font-bold py-8 px-16 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 mb-6 animate-pulse"
+            >
+              🔥 YA, SAYA MAU AKSES SEKARANG - RP100RB SAJA
+            </button>
+            
+            <div className="flex flex-col items-center gap-2 text-gray-400">
+              <p className="flex items-center gap-2">
+                <Shield size={20} /> Pembayaran 100% aman (SSL Encrypted)
+              </p>
+              <p className="flex items-center gap-2">
+                💳 Terima: Transfer Bank, E-wallet, QRIS
+              </p>
+              <p className="flex items-center gap-2">
+                <Zap size={20} /> Akses langsung setelah pembayaran
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Founder Note */}
+      <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-10 rounded-2xl border-2 border-yellow-600">
+            <h3 className="text-3xl font-bold mb-6 text-yellow-400">Dari eL Reyzandra (Founder eL Vision):</h3>
+            
+            <div className="space-y-4 text-lg text-gray-200 leading-relaxed">
+              <p>
+                Saya dulu seorang motivator terkenal. Tapi saya BERHENTI karena sadar: motivasi itu sementara.
+              </p>
+              
+              <p>
+                2% klien saya gagal—bukan karena malas, tapi karena SISTEM INTERNAL mereka tidak support.
+              </p>
+              
+              <p>
+                Sejak itu, saya kembangkan metode Bio-Energetic Calibration yang sekarang jadi fondasi UANG PANAS.
+              </p>
+              
+              <p>
+                Ini bukan janji kosong. Ini SISTEM yang sudah terbukti di 10.000+ orang untuk kesehatan, hubungan, dan keuangan.
+              </p>
+              
+              <p>
+                Ekonomi 2025 memang berat. Tapi ada CARA keluar—tanpa kerja 18 jam/hari, tanpa modal besar, tanpa jadi sales dadakan.
+              </p>
+              
+              <p>
+                Saya beri Anda akses hari ini dengan harga Rp100rb, karena <span className="text-yellow-400 font-bold">REZEKI ANDA ADALAH REZEKI SAYA JUGA.</span>
+              </p>
+              
+              <p>
+                Ketika energi Anda naik, energi saya juga naik. Ini bukan charity. Ini SIMBIOSIS.
+              </p>
+              
+              <p className="text-2xl font-bold text-yellow-400 mt-6">
+                Saya tunggu Anda di dalam.
+              </p>
+              
+              <p className="text-xl italic mt-4">
+                — eL Reyzandra
+              </p>
+            </div>
+            <div className="mt-8 text-center">
+              <Button 
+                variant="outline" 
+                className="border-yellow-600 text-yellow-500 hover:bg-yellow-600 hover:text-black gap-2"
+                onClick={() => window.open('https://cirebon.inews.id/read/204537/ini-sosok-el-reyzandra-mentor-bisnis-yang-sukseskan-ratusan-pengusaha-muda/2', '_blank')}
+              >
+                Siapa eL Reyzandra? — Sudah bantu ratusan pengusaha dari 2022
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -722,10 +1096,37 @@ export default function UangPanasLanding() {
         </div>
       </section>
 
-      <footer className="py-12 text-center text-gray-600 text-sm border-t border-gray-900">
-        <p>&copy; {new Date().getFullYear()} eL Vision Group. All rights reserved.</p>
-        <p className="mt-2">Disclaimer: Hasil setiap individu bisa berbeda tergantung dedikasi dan praktik.</p>
-      </footer>
+      {/* Community Testimonials Grid */}
+      <section className="py-20 px-4 bg-black border-t border-gray-900">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">
+            Testimoni Komunitas
+          </h2>
+          <p className="text-gray-400 mb-12">
+            karena begitu banyak testimony, hanya sebagian kami selipkan disini
+          </p>
+          <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 text-left">
+            {communityTestimonials.map((img, idx) => (
+               <div key={idx} className="break-inside-avoid rounded-lg overflow-hidden border border-gray-800 hover:border-red-500 transition-colors bg-gray-900">
+                  <img src={img} alt={`Testimoni ${idx + 1}`} className="w-full h-auto object-cover" loading="lazy" />
+               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Sticky CTA */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-red-600 to-orange-600 p-4 shadow-2xl z-50 md:hidden">
+        <button 
+          onClick={scrollToCheckout}
+          className="w-full bg-white text-red-600 font-bold text-lg py-4 rounded-full hover:bg-gray-100 transition-all"
+        >
+          🔥 BELI SEKARANG - RP100RB
+        </button>
+      </div>
+
+      {/* Video Modal */}
+      {selectedVideo && <VideoModal video={selectedVideo} onClose={() => setSelectedVideo(null)} />}
     </div>
   );
 }
