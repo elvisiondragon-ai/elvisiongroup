@@ -192,35 +192,22 @@ serve(async (req)=>{
       // 3. Kirim email sukses (Opsional)
       try {
         console.log('3. 📧 Sending success email...');
-        const isEbookDiet = globalProductTx.product_name && globalProductTx.product_name.includes('Ebook Diet');
-        const isEbookElVision = globalProductTx.product_name && globalProductTx.product_name.includes('Ebook eL-Vision');
-        const isEbookHealth = globalProductTx.product_name && (globalProductTx.product_name.includes('Health Recovery') || globalProductTx.product_name.includes('ebook_health20'));
-        const isCoaching3000 = globalProductTx.product_name && globalProductTx.product_name.includes('3000 Coaching');
-        const isEbookPercayaDiri = globalProductTx.product_name && (globalProductTx.product_name.includes('ebook_percayadiri') || globalProductTx.product_name.includes('Ebook Percaya Diri'));
-        const isFitFactor = globalProductTx.product_name && globalProductTx.product_name.includes('Fitfactor');
-
-        let functionToInvoke;
-        if (isEbookDiet) {
-          functionToInvoke = 'ebook-diet-mail';
-        } else if (isEbookElVision) {
-          functionToInvoke = 'ebook-elvision-mail';
-        } else if (isEbookHealth) {
-          functionToInvoke = 'ebook-health20-email';
-        } else if (isEbookPercayaDiri) {
-          functionToInvoke = 'ebook-percayadiri-mail';
-        } else {
-          functionToInvoke = 'send-payment-email';
-        }
+        const pName = globalProductTx.product_name || '';
+        const isEbook = pName.toLowerCase().includes('ebook') || pName.toLowerCase().includes('diet') || pName.toLowerCase().includes('pria alpha') || pName.toLowerCase().includes('feminine') || pName.toLowerCase().includes('magnetism');
+        
+        let functionToInvoke = isEbook ? 'send-ebooks-email' : 'send-payment-email';
+        
+        console.log(`   - Invoking email function: ${functionToInvoke} for product: ${pName}`);
         await supabase.functions.invoke(functionToInvoke, {
           body: {
             userEmail: globalProductTx.email,
             amount: amount || globalProductTx.amount,
             currency: 'IDR',
             reference: tripayReference,
-            subscriptionType: globalProductTx.product_name,
+            subscriptionType: globalProductTx.product_name, // Pass original name, send-ebooks-email handles detection
             paymentMethod: paymentMethod,
             status: 'payment_completed',
-            userName: globalProductTx.name // Pass userName for email personalization
+            userName: globalProductTx.name 
           }
         });
         console.log('   - 📧 Email sent to:', globalProductTx.email);
@@ -230,11 +217,19 @@ serve(async (req)=>{
         let capiValue = 0;
         let capiCurrency = 'IDR';
 
+        const isEbookHealth = pName.includes('Health Recovery') || pName.includes('ebook_health20');
+        const isCoaching3000 = pName.includes('3000 Coaching');
+        const isEbookPercayaDiri = pName.includes('ebook_percayadiri') || pName.includes('Ebook Percaya Diri') || pName.includes('Ebook Pria Alpha') || pName.includes('Paket Pria Alpha');
+        const isEbookFeminine = pName.includes('ebook_feminine') || pName.includes('Feminine Magnetism');
+        const isFitFactor = pName.includes('Fitfactor');
+
+        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isFitFactor=${isFitFactor}`);
+
         if (isEbookHealth || isCoaching3000) {
             capiPixelId = '1393383179182528'; // Manifestation Pixel
             capiValue = isCoaching3000 ? 3000.00 : 20.00;
             capiCurrency = 'USD';
-        } else if (isEbookPercayaDiri) {
+        } else if (isEbookPercayaDiri || isEbookFeminine) {
             capiPixelId = '3319324491540889'; // EbookIndo Pixel
             capiValue = amount || globalProductTx.amount || 100000;
             capiCurrency = 'IDR';
@@ -243,6 +238,8 @@ serve(async (req)=>{
             capiValue = amount || globalProductTx.amount || 0;
             capiCurrency = 'IDR';
         }
+
+        console.log(`   - CAPI Pixel Selected: ${capiPixelId}`);
 
         if (capiPixelId) {
              try {

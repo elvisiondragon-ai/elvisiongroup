@@ -48,7 +48,7 @@ async function sendMailketingEmail(email, subject, htmlContent, name) {
     const params = new URLSearchParams({
       api_token: MAILKETING_API_KEY,
       email: 'support@elvisiongroup.com',
-      from_name: 'Support eL Vision Group',
+      from_name: 'eL Vision Group',
       from_email: 'support@elvisiongroup.com',
       recipient: email,
       subject: subject,
@@ -120,14 +120,14 @@ const handler = async (req) => {
 
     await addToMailketingList(recipientEmail, userName);
 
-    const subject = "🌿 DOWNLOAD ACCESS: Your Health Recovery Protocol";
+    const subject = "🌿 AKSES DOWNLOAD: Protokol Pemulihan Kesehatan Anda";
     
     const htmlContent = `<!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Health Protocol Access</title>
+    <title>Akses Protokol Kesehatan Anda</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f4f9; color: #333; line-height: 1.6; margin: 0; padding: 0; }
@@ -144,34 +144,34 @@ const handler = async (req) => {
 <body>
     <div class="container">
         <div class="header">
-            <h1>Start Your Healing Journey Today</h1>
+            <h1>Mulai Perjalanan Kesembuhan Anda Hari Ini</h1>
         </div>
         <div class="content">
-            <h2>Hello ${userName},</h2>
-            <p>Thank you for trusting us. You have successfully purchased the <strong>Health Recovery Protocol</strong>.</p>
-            <p>This folder contains the Ebook and the Audio Therapy files necessary for your reprogramming.</p>
+            <h2>Halo ${userName},</h2>
+            <p>Terima kasih atas kepercayaan Anda. Anda telah berhasil membeli <strong>Protokol Pemulihan Kesehatan (Health Recovery Protocol)</strong>.</p>
+            <p>Folder ini berisi Ebook dan file Terapi Audio yang diperlukan untuk pemrograman ulang bawah sadar Anda.</p>
             
             <div style="text-align: center;">
                 <a href="https://drive.google.com/drive/folders/1E2iYI6JLtZ73F3jggHEHkke6IniRWaxB?usp=sharing" class="btn">
-                    Access Your Files Here
+                    Akses File Anda Di Sini
                 </a>
             </div>
 
-            <p><strong>Instructions:</strong></p>
+            <p><strong>Instruksi Penggunaan:</strong></p>
             <ul>
-                <li>Listen to the audio every night before sleep.</li>
-                <li>Read the ebook to understand the diet protocol.</li>
-                <li>Be consistent for at least 21 days.</li>
+                <li>Dengarkan audio setiap malam sebelum tidur menggunakan earphone.</li>
+                <li>Baca ebook untuk memahami protokol diet yang disarankan.</li>
+                <li>Lakukan secara konsisten selama minimal 21 hari untuk hasil maksimal.</li>
             </ul>
 
             <div class="details">
-                <p><strong>Order Reference:</strong> ${safeReference}</p>
-                <p><strong>Amount Paid:</strong> ${displayAmount}</p>
+                <p><strong>Referensi Order:</strong> ${safeReference}</p>
+                <p><strong>Jumlah Dibayar:</strong> ${displayAmount}</p>
             </div>
         </div>
         <div class="footer">
-            <p>&copy; 2026 eL Vision Group. All rights reserved.</p>
-            <p>Need help? Reply to this email or chat us on WhatsApp.</p>
+            <p>&copy; 2026 eL Vision Group. Hak Cipta Dilindungi.</p>
+            <p>Butuh bantuan? Balas email ini atau hubungi kami via WhatsApp.</p>
         </div>
     </div>
 </body>

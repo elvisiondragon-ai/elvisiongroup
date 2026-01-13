@@ -77,6 +77,12 @@ const productCatalog = {
     requiresAuth: false,
     physical: true
   },
+  'ebook_feminine': {
+    name: 'Feminine Magnetism',
+    price: 100000,
+    requiresAuth: false,
+    physical: true
+  },
   'ebook_health20': {
     name: 'Ebook Health Recovery (Promo)',
     price: 300000,
@@ -128,6 +134,28 @@ serve(async (req)=>{
     const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef } = body;
     
     console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod}`);
+
+    // --- AUTO-ADD TO MAILKETING LIST ---
+    try {
+        const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
+        if (MAILKETING_API_KEY && userEmail) {
+            console.log(`📋 Adding ${userEmail} to Mailketing Lead List (pre-payment)...`);
+            const params = new URLSearchParams({
+              api_token: MAILKETING_API_KEY,
+              list_id: '80713',
+              email: userEmail,
+              first_name: userName ? userName.split(' ')[0] : userEmail.split('@')[0],
+              last_name: userName ? userName.split(' ').slice(1).join(' ') : ''
+            });
+            fetch(`https://api.mailketing.co.id/api/v1/addsubtolist`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: params
+            }).then(r => r.json()).then(res => console.log('Mailketing lead res:', res)).catch(e => console.error('Mailketing lead error:', e));
+        }
+    } catch(e) {
+        console.error('Mailketing pre-registration failed:', e);
+    }
 
     const product = productCatalog[subscriptionType];
     if (!product) {

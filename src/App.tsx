@@ -29,6 +29,7 @@ import ArifAffiliate from "./pages/arifaffiliate"; // Import the ArifAffiliate c
 import EbookElvisionPaymentPage from "./pages/ebookelvision"; // Import the EbookElvisionPaymentPage component
 import EbookHealthLP from "./pages/ebookhealthlp"; // Import the EbookHealthLP component
 import EbookPercayaDiriLP from "./pages/ebookpercayadirilp"; // Import the EbookPercayaDiriLP component
+import EbookFeminineLanding from "./pages/ebookfeminine"; // Import the EbookFeminineLanding component
 import PayPalFinish from "./pages/PayPalFinish"; // Import the PayPalFinish component
 import FitFactorLP from "./pages/fitfactorlp";
 import NotFound from "./pages/NotFound";
@@ -194,6 +195,7 @@ const AppContent = () => {
                 <Route path="/fitfactorlp" element={<FitFactorLP />} />
                 <Route path="/ebookhealthlp" element={<EbookHealthLP />} />
                 <Route path="/ebookpercayadiri" element={<EbookPercayaDiriLP />} />
+                <Route path="/ebookfeminine" element={<EbookFeminineLanding />} />
                 <Route path="/payment/paypal-finish" element={<PayPalFinish />} />
                 <Route path="/income" element={<IncomeDashboard />} />
                 <Route path="/intro" element={<Intro />} />
