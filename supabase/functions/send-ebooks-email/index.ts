@@ -73,6 +73,19 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Dengarkan 'Goddess Awakening' setiap malam sebelum tidur.",
       "Dengarkan 'Morning Radiance' untuk memulai hari dengan energi feminin."
     ]
+  },
+  'ebook_uangpanas': {
+    subject: "🔥 AKSES DOWNLOAD: Sistem Uang Panas (Lead Magnet + Audio)",
+    downloadLink: "https://drive.google.com/drive/folders/1T0lK_GZ4lq-7kX_XjXjXjXjXjXjXjXj?usp=sharing", // Placeholder link, please update
+    color: "#b91c1c", // Red 700
+    accentColor: "#facc15", // Yellow 400
+    title: "Sistem Uang Panas Diaktifkan!",
+    description: "Terima kasih! Anda telah mengambil langkah cerdas. Berikut adalah akses ke 'senjata' rahasia Anda.",
+    instructions: [
+      "Download Ebook & Lead Magnet Pack segera.",
+      "Dengarkan Audio 'Money Magnet' setiap pagi dan malam.",
+      "Pelajari modul Affiliate untuk mulai hasilkan komisi 50%."
+    ]
   }
 };
 
@@ -85,6 +98,7 @@ function getProductKey(productName: string): string {
   if (lower.includes('health') || lower.includes('pemulihan')) return 'ebook_health20';
   if (lower.includes('percayadiri') || lower.includes('pria alpha') || lower.includes('alpha')) return 'ebook_percayadiri';
   if (lower.includes('feminine') || lower.includes('magnetism')) return 'ebook_feminine';
+  if (lower.includes('uangpanas') || lower.includes('uang panas')) return 'ebook_uangpanas';
   
   return 'ebook_elvision';
 }

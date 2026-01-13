@@ -193,7 +193,7 @@ serve(async (req)=>{
       try {
         console.log('3. 📧 Sending success email...');
         const pName = globalProductTx.product_name || '';
-        const isEbook = pName.toLowerCase().includes('ebook') || pName.toLowerCase().includes('diet') || pName.toLowerCase().includes('pria alpha') || pName.toLowerCase().includes('feminine') || pName.toLowerCase().includes('magnetism');
+        const isEbook = pName.toLowerCase().includes('ebook') || pName.toLowerCase().includes('diet') || pName.toLowerCase().includes('pria alpha') || pName.toLowerCase().includes('feminine') || pName.toLowerCase().includes('magnetism') || pName.toLowerCase().includes('uang') || pName.toLowerCase().includes('panas');
         
         let functionToInvoke = isEbook ? 'send-ebooks-email' : 'send-payment-email';
         
@@ -221,15 +221,16 @@ serve(async (req)=>{
         const isCoaching3000 = pName.includes('3000 Coaching');
         const isEbookPercayaDiri = pName.includes('ebook_percayadiri') || pName.includes('Ebook Percaya Diri') || pName.includes('Ebook Pria Alpha') || pName.includes('Paket Pria Alpha');
         const isEbookFeminine = pName.includes('ebook_feminine') || pName.includes('Feminine Magnetism');
+        const isUangPanas = pName.includes('ebook_uangpanas') || pName.includes('Uang Panas') || pName.includes('Sistem Uang Panas');
         const isFitFactor = pName.includes('Fitfactor');
 
-        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isFitFactor=${isFitFactor}`);
+        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}`);
 
         if (isEbookHealth || isCoaching3000) {
             capiPixelId = '1393383179182528'; // Manifestation Pixel
             capiValue = isCoaching3000 ? 3000.00 : 20.00;
             capiCurrency = 'USD';
-        } else if (isEbookPercayaDiri || isEbookFeminine) {
+        } else if (isEbookPercayaDiri || isEbookFeminine || isUangPanas) {
             capiPixelId = '3319324491540889'; // EbookIndo Pixel
             capiValue = amount || globalProductTx.amount || 100000;
             capiCurrency = 'IDR';

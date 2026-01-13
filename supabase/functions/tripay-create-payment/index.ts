@@ -71,6 +71,12 @@ const productCatalog = {
     requiresAuth: false,
     physical: false
   }, // New Ebook Product
+  'ebook_uangpanas': {
+    name: 'Sistem Uang Panas: Ebook + Audio + Lead Magnet',
+    price: 100000,
+    requiresAuth: false,
+    physical: true
+  },
   'ebook_percayadiri': {
     name: 'Ebook Pria Alpha',
     price: 100000,

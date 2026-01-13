@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Link, CreditCard, Share2, DollarSign, CalendarDays, ArrowRight, Landmark, Wallet, History } from 'lucide-react';
+import { Link, CreditCard, Share2, DollarSign, CalendarDays, ArrowRight, Landmark, Wallet, History, ExternalLink } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +39,7 @@ const productOptions = [
   { name: 'Drelf', url: 'https://app.elvisiongroup.com/drelf' },
   { name: 'Hungry Later Diet', url: 'https://app.elvisiongroup.com/diet' },
   { name: 'Ebook eL Vision', url: 'https://app.elvisiongroup.com/ebook_elvision' },
+  { name: 'Sistem Uang Panas (Komisi 50%)', url: 'https://app.elvisiongroup.com/uangpanas' },
 ];
 
 export default function AffiliatePage() {
@@ -310,6 +311,29 @@ export default function AffiliatePage() {
                 </Button>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Affiliate Marketing Tools */}
+        <div className="bg-gradient-to-br from-gray-900 to-black border border-blue-900/30 rounded-lg p-6 mb-8 shadow-lg">
+          <h2 className="text-2xl font-semibold text-blue-400 mb-4 flex items-center gap-2">
+            <Share2 className="w-6 h-6" /> Affiliate Marketing Tools
+          </h2>
+          <p className="text-gray-400 mb-6 text-sm">
+            Gunakan materi promosi di bawah ini untuk membantu Anda mendapatkan penjualan lebih cepat.
+          </p>
+          <div className="grid grid-cols-1 gap-4">
+            <Button
+              variant="outline"
+              className="bg-gray-800 border-gray-700 hover:bg-gray-700 text-white flex items-center justify-between h-auto py-4 px-6"
+              onClick={() => window.open('https://drive.google.com/drive/folders/184nCdZgEMj61JLUXyXt6pPU-7XOMMljd?usp=share_link', '_blank')}
+            >
+              <div className="flex flex-col items-start text-left">
+                <span className="font-bold text-red-400">Lead Magnet Konten Uang Panas</span>
+                <span className="text-xs text-gray-400">Strategi 7 Lead Magnet & Script</span>
+              </div>
+              <ExternalLink className="w-5 h-5 text-red-400" />
+            </Button>
           </div>
         </div>
 
