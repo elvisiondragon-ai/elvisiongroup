@@ -125,6 +125,50 @@ export default function UangPanasLanding() {
     };
   }, []);
 
+  // Realtime Payment Listener
+  useEffect(() => {
+    if (!showPaymentInstructions || !paymentData?.tripay_reference) return;
+    
+    const channel = supabase
+      .channel(`payment-${paymentData.tripay_reference}`)
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'global_product', 
+        filter: `tripay_reference=eq.${paymentData.tripay_reference}`
+      }, (payload) => {
+        if (payload.new?.status === 'PAID') {
+          toast({
+              title: "LUNAS! Akses Dikirim.",
+              description: "Pembayaran berhasil. Cek email Anda sekarang untuk akses Audio & Ebook.",
+              duration: 5000, 
+              variant: "default"
+          });
+          
+          if (typeof window !== 'undefined' && (window as any).fbq) {
+            (window as any).fbq('track', 'Purchase', {
+              content_ids: [productNameBackend],
+              content_type: 'product',
+              value: totalAmount,
+              currency: 'IDR'
+            });
+          }
+          
+          // Send CAPI Purchase
+          sendCapiEvent('Purchase', {
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'IDR'
+          });
+          
+          // Optional: redirect to a thank you page or just show success state
+        }
+      }).subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [showPaymentInstructions, paymentData]);
+
   const testimonials = [
     {
       name: "Habib Umar",
@@ -221,6 +265,24 @@ export default function UangPanasLanding() {
     }
 
     setLoading(true);
+
+    // Track AddToCart
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'AddToCart', {
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: totalAmount,
+        currency: 'IDR'
+      });
+    }
+    
+    sendCapiEvent('AddToCart', {
+      content_ids: [productNameBackend],
+      content_type: 'product',
+      value: totalAmount,
+      currency: 'IDR'
+    });
+
     let currentUserId = user?.id;
 
     // AUTO AUTH LOGIC
