@@ -59,7 +59,7 @@ export default function UangPanasLanding() {
 
   // Payment State
   const productNameBackend = 'ebook_uangpanas';
-  const displayProductName = 'Sistem Uang Panas: Ebook + Audio + Lead Magnet';
+  const displayProductName = 'Ebook Uang Panas';
   const originalPrice = 500000;
   const productPrice = 100000;
   const totalQuantity = 1;

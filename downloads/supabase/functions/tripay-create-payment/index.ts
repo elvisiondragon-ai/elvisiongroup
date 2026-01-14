@@ -71,6 +71,12 @@ const productCatalog = {
     requiresAuth: false,
     physical: false
   }, // New Ebook Product
+  'ebook_uangpanas': {
+    name: 'Ebook Uang Panas',
+    price: 100000,
+    requiresAuth: false,
+    physical: true
+  },
   'ebook_percayadiri': {
     name: 'Ebook Pria Alpha',
     price: 100000,
@@ -86,6 +92,12 @@ const productCatalog = {
   'ebook_health20': {
     name: 'Ebook Health Recovery (Promo)',
     price: 300000,
+    requiresAuth: false,
+    physical: true
+  },
+  'VIP6WEEK': {
+    name: 'VIP SESSION 6 Week',
+    price: 24000000, // 1500 USD * 16000 IDR
     requiresAuth: false,
     physical: true
   },
@@ -302,7 +314,9 @@ serve(async (req)=>{
         // Note: We hardcode $20.00 USD for ebook_health20, otherwise convert IDR to USD approx (or use fixed mapping)
         // For safety, let's use a fixed USD price map for now or default to simple conversion
         let usdAmount = "20.00"; 
-        if (subscriptionType !== 'ebook_health20') {
+        if (subscriptionType === 'VIP6WEEK') {
+            usdAmount = "1500.00";
+        } else if (subscriptionType !== 'ebook_health20') {
             // Fallback for other products if someone tries to pay via PayPal (Simple /15000 approx)
              usdAmount = (amount / 16000).toFixed(2);
         }

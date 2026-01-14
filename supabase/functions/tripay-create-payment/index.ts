@@ -72,7 +72,7 @@ const productCatalog = {
     physical: false
   }, // New Ebook Product
   'ebook_uangpanas': {
-    name: 'Sistem Uang Panas: Ebook + Audio + Lead Magnet',
+    name: 'Ebook Uang Panas',
     price: 100000,
     requiresAuth: false,
     physical: true

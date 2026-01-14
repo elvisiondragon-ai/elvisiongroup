@@ -109,71 +109,110 @@ const handler = async (req)=>{
     const safeAmount = amount || 0;
     const safeSubscriptionType = subscriptionType || 'Pro';
     const safePaymentMethod = paymentMethod || 'Transfer Bank';
+
+    // Format amount based on currency
+    const formattedAmount = currency === 'USD' 
+        ? `$${safeAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}` 
+        : `Rp ${safeAmount.toLocaleString('id-ID')}`;
+
     // Add user to mailing list first
     await addToMailketingList(recipientEmail, userName);
     let subject;
     let htmlContent;
+    
+    // Check for VIP 6 Week Program
+    const isVIP = safeSubscriptionType.includes('VIP') || safeSubscriptionType.includes('3000') || safeSubscriptionType === 'VIP6WEEK';
+
     if (type === 'payment_created' || type === 'created') {
-      subject = "Pembayaran Menunggu - ElVision Group Pro";
+      subject = isVIP ? "Payment Pending - eL Vision VIP Session" : "Pembayaran Menunggu - ElVision Group Pro";
       htmlContent = `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px 15px 0 0; text-align: center; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);">
-            <h1 style="margin: 0; font-size: 28px; font-weight: 700;">🔔 Pembayaran Menunggu</h1>
-            <p style="margin: 15px 0 0 0; opacity: 0.9; font-size: 16px;">Terima kasih telah memilih ElVision Group Pro!</p>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 700;">${isVIP ? '🔔 Payment Pending' : '🔔 Pembayaran Menunggu'}</h1>
+            <p style="margin: 15px 0 0 0; opacity: 0.9; font-size: 16px;">${isVIP ? 'Thank you for choosing eL Vision VIP!' : 'Terima kasih telah memilih ElVision Group Pro!'}</p>
           </div>
           
           <div style="background: white; padding: 40px; border-radius: 0 0 15px 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-            <h2 style="color: #333; margin-bottom: 25px; font-size: 22px;">Halo ${userName}! 👋</h2>
+            <h2 style="color: #333; margin-bottom: 25px; font-size: 22px;">Hello ${userName}! 👋</h2>
             
             <p style="color: #666; line-height: 1.7; margin-bottom: 25px; font-size: 16px;">
-              Pembayaran Anda telah dibuat dan sedang menunggu konfirmasi. Berikut adalah detail pembayaran:
+              ${isVIP ? 'Your payment has been created and is awaiting confirmation. Here are the details:' : 'Pembayaran Anda telah dibuat dan sedang menunggu konfirmasi. Berikut adalah detail pembayaran:'}
             </p>
             
             <div style="background: #f8f9ff; padding: 25px; border-radius: 12px; border-left: 5px solid #667eea; margin: 25px 0;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center;">
-                <span style="color: #666; font-weight: 500;">📦 Paket:</span>
+                <span style="color: #666; font-weight: 500;">📦 ${isVIP ? 'Package' : 'Paket'}:</span>
                 <span style="font-weight: bold; color: #333; background: #e8f0fe; padding: 5px 12px; border-radius: 20px;">${safeSubscriptionType}</span>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center;">
-                <span style="color: #666; font-weight: 500;">💰 Jumlah:</span>
-                <span style="font-weight: bold; color: #00c851; font-size: 18px;">Rp ${safeAmount.toLocaleString('id-ID')}</span>
+                <span style="color: #666; font-weight: 500;">💰 ${isVIP ? 'Amount' : 'Jumlah'}:</span>
+                <span style="font-weight: bold; color: #00c851; font-size: 18px;">${formattedAmount}</span>
               </div>
               <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center;">
-                <span style="color: #666; font-weight: 500;">🔍 Referensi:</span>
+                <span style="color: #666; font-weight: 500;">🔍 ${isVIP ? 'Reference' : 'Referensi'}:</span>
                 <span style="font-weight: bold; color: #333; font-family: 'Courier New', monospace; background: #fff; padding: 5px 10px; border: 1px solid #ddd; border-radius: 5px;">${safeReference}</span>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #666; font-weight: 500;">💳 Metode:</span>
+                <span style="color: #666; font-weight: 500;">💳 ${isVIP ? 'Method' : 'Metode'}:</span>
                 <span style="font-weight: bold; color: #333;">${safePaymentMethod}</span>
               </div>
             </div>
             
             <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border: 2px solid #ffeaa7; padding: 20px; border-radius: 12px; margin: 25px 0;">
               <p style="margin: 0; color: #856404; text-align: center; font-weight: 500;">
-                <strong>⏰ Penting:</strong> Pembayaran akan otomatis diproses setelah kami menerima konfirmasi dari bank. Pastikan nominal transfer sesuai dengan yang tertera.
+                <strong>⏰ ${isVIP ? 'Important' : 'Penting'}:</strong> ${isVIP ? 'Payment will be automatically processed once we receive confirmation.' : 'Pembayaran akan otomatis diproses setelah kami menerima konfirmasi dari bank.'}
               </p>
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
               <a href="https://app.elvisiongroup.com" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s ease;">
-                🚀 Cek Status Pembayaran
+                🚀 ${isVIP ? 'Check Status' : 'Cek Status Pembayaran'}
               </a>
-            </div>
-            
-            <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px; text-align: center;">
-              <p style="color: #999; font-size: 14px; margin: 0;">
-                Butuh bantuan? Hubungi kami di <a href="mailto:support@elvisiongroup.com" style="color: #667eea;">support@elvisiongroup.com</a>
-              </p>
             </div>
           </div>
         </div>
       `;
     } else {
       // payment_completed or success
-      subject = "🎉 Selamat! Pembayaran Berhasil - ElVision Group Pro";
+      subject = isVIP ? "🎉 Payment Successful - eL Vision VIP Session" : "🎉 Selamat! Pembayaran Berhasil - ElVision Group Pro";
       
-      // Special handling for ebook_diet
-      if (safeSubscriptionType === 'Program Diet eL-Vision' || safeSubscriptionType === 'ebook_diet' || safeSubscriptionType === 'Ebook Diet' || safeSubscriptionType === 'Ebook_diet' || safeSubscriptionType === 'Ebook Diet PAID') {
+      if (isVIP) {
+        htmlContent = `
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px 15px 0 0; text-align: center;">
+              <h1 style="margin: 0; font-size: 28px;">🎉 PAYMENT SUCCESSFUL!</h1>
+              <p style="margin: 15px 0 0 0; font-size: 16px;">Thank you for your payment!</p>
+            </div>
+            <div style="background: white; padding: 40px; border-radius: 0 0 15px 15px;">
+              <h2 style="color: #333; margin-bottom: 25px;">Hello ${userName}! 👋</h2>
+              <p style="color: #666; line-height: 1.7; margin-bottom: 25px; font-size: 18px; font-weight: bold; text-align: center;">
+                Thank you for your payment, please contact our customer service for custom plan 62895325633487
+              </p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="https://wa.me/62895325633487?text=Hi%2C%20I%20have%20paid%20for%20the%20VIP%20Session" style="background: #25D366; color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);">
+                  💬 Contact Customer Service
+                </a>
+              </div>
+
+               <div style="background: #f8f9ff; padding: 25px; border-radius: 12px; border-left: 5px solid #667eea; margin: 25px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                  <span style="color: #666;">Product:</span>
+                  <span style="font-weight: bold; color: #333;">${safeSubscriptionType}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                  <span style="color: #666;">Amount:</span>
+                  <span style="font-weight: bold; color: #00c851;">${formattedAmount}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #666;">Reference:</span>
+                  <span style="font-weight: bold; color: #333;">${safeReference}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (safeSubscriptionType === 'Program Diet eL-Vision' || safeSubscriptionType === 'ebook_diet' || safeSubscriptionType === 'Ebook Diet' || safeSubscriptionType === 'Ebook_diet' || safeSubscriptionType === 'Ebook Diet PAID') {
         subject = "🎉 Pembayaran Berhasil! Link Ebook Diet Anda";
         htmlContent = `
           <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">

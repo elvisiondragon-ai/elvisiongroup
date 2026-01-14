@@ -73,6 +73,32 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Dengarkan 'Goddess Awakening' setiap malam sebelum tidur.",
       "Dengarkan 'Morning Radiance' untuk memulai hari dengan energi feminin."
     ]
+  },
+  'ebook_uangpanas': {
+    subject: "🔥 AKSES DOWNLOAD: Sistem Uang Panas (Lead Magnet + Audio)",
+    downloadLink: "https://drive.google.com/file/d/1R_AEFpjaxBwYnxLGevVPKHf548pMn9gE/view?usp=sharing", // Placeholder link, please update
+    color: "#b91c1c", // Red 700
+    accentColor: "#facc15", // Yellow 400
+    title: "Sistem Uang Panas Diaktifkan!",
+    description: "Terima kasih! Anda telah mengambil langkah cerdas. Berikut adalah akses ke 'senjata' rahasia Anda.",
+    instructions: [
+      "Download Ebook & Lead Magnet Pack segera.",
+      "Dengarkan Audio 'Money Magnet' setiap pagi dan malam.",
+      "Pelajari modul Affiliate untuk mulai hasilkan komisi 50%."
+    ]
+  },
+  'vip_coaching': {
+    subject: "💎 VIP CONFIRMATION: 6 Weeks eL Vision Program",
+    downloadLink: "https://wa.me/62895325633487?text=HI%20I%20have%20paid%20for%20VIP%206%20weeks",
+    color: "#004d40", // Teal/Dark Green
+    title: "Welcome to the VIP Program",
+    description: "Your payment has been received. The next step is to confirm your 1:1 session schedule.",
+    instructions: [
+      "Click the button below to connect with our WhatsApp Admin.",
+      "Send the pre-filled confirmation message.",
+      "Our admin will arrange your first session schedule."
+    ],
+    btnText: "WHATSAPP CONFIRMATION"
   }
 };
 
@@ -85,6 +111,8 @@ function getProductKey(productName: string): string {
   if (lower.includes('health') || lower.includes('pemulihan')) return 'ebook_health20';
   if (lower.includes('percayadiri') || lower.includes('pria alpha') || lower.includes('alpha')) return 'ebook_percayadiri';
   if (lower.includes('feminine') || lower.includes('magnetism')) return 'ebook_feminine';
+  if (lower.includes('uangpanas') || lower.includes('uang panas')) return 'ebook_uangpanas';
+  if (lower.includes('vip') || lower.includes('3000') || lower.includes('coaching')) return 'vip_coaching';
   
   return 'ebook_elvision';
 }
@@ -210,7 +238,7 @@ const handler = async (req: Request) => {
             
             <div style="text-align: center;">
                 <a href="${template.downloadLink}" class="btn">
-                    AKSES FILE SEKARANG
+                    ${template.btnText || 'CLICK ME'}
                 </a>
             </div>
 

@@ -193,7 +193,21 @@ serve(async (req)=>{
       try {
         console.log('3. 📧 Sending success email...');
         const pName = globalProductTx.product_name || '';
-        const isEbook = pName.toLowerCase().includes('ebook') || pName.toLowerCase().includes('diet') || pName.toLowerCase().includes('pria alpha') || pName.toLowerCase().includes('feminine') || pName.toLowerCase().includes('magnetism') || pName.toLowerCase().includes('uang') || pName.toLowerCase().includes('panas');
+        const lowerPName = pName.toLowerCase();
+        
+        // Specific keywords based on Product Catalog names to route to send-ebooks-email
+        const ebookSpecificKeywords = [
+            'program diet el-vision',
+            'ebook el vision',
+            'ebook uang panas',
+            'ebook pria alpha',
+            'feminine magnetism',
+            'ebook health recovery',
+            'vip session 6 week',
+            '3000 coaching'
+        ];
+
+        const isEbook = ebookSpecificKeywords.some(key => lowerPName.includes(key));
         
         let functionToInvoke = isEbook ? 'send-ebooks-email' : 'send-payment-email';
         

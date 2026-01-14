@@ -193,7 +193,21 @@ serve(async (req)=>{
       try {
         console.log('3. 📧 Sending success email...');
         const pName = globalProductTx.product_name || '';
-        const isEbook = pName.toLowerCase().includes('ebook') || pName.toLowerCase().includes('diet') || pName.toLowerCase().includes('pria alpha') || pName.toLowerCase().includes('feminine') || pName.toLowerCase().includes('magnetism');
+        const lowerPName = pName.toLowerCase();
+        
+        // Specific keywords based on Product Catalog names to route to send-ebooks-email
+        const ebookSpecificKeywords = [
+            'program diet el-vision',
+            'ebook el vision',
+            'ebook uang panas',
+            'ebook pria alpha',
+            'feminine magnetism',
+            'ebook health recovery',
+            'vip session 6 week',
+            '3000 coaching'
+        ];
+
+        const isEbook = ebookSpecificKeywords.some(key => lowerPName.includes(key));
         
         let functionToInvoke = isEbook ? 'send-ebooks-email' : 'send-payment-email';
         
@@ -219,17 +233,22 @@ serve(async (req)=>{
 
         const isEbookHealth = pName.includes('Health Recovery') || pName.includes('ebook_health20');
         const isCoaching3000 = pName.includes('3000 Coaching');
+        const isVIP6Week = pName.includes('VIP SESSION 6 Week') || pName.includes('VIP6WEEK');
         const isEbookPercayaDiri = pName.includes('ebook_percayadiri') || pName.includes('Ebook Percaya Diri') || pName.includes('Ebook Pria Alpha') || pName.includes('Paket Pria Alpha');
         const isEbookFeminine = pName.includes('ebook_feminine') || pName.includes('Feminine Magnetism');
+        const isUangPanas = pName.includes('ebook_uangpanas') || pName.includes('Uang Panas') || pName.includes('Sistem Uang Panas');
         const isFitFactor = pName.includes('Fitfactor');
 
-        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isFitFactor=${isFitFactor}`);
+        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}`);
 
-        if (isEbookHealth || isCoaching3000) {
+        if (isEbookHealth || isCoaching3000 || isVIP6Week) {
             capiPixelId = '1393383179182528'; // Manifestation Pixel
-            capiValue = isCoaching3000 ? 3000.00 : 20.00;
+            if (isCoaching3000) capiValue = 3000.00;
+            else if (isVIP6Week) capiValue = 1500.00;
+            else capiValue = 20.00;
+            
             capiCurrency = 'USD';
-        } else if (isEbookPercayaDiri || isEbookFeminine) {
+        } else if (isEbookPercayaDiri || isEbookFeminine || isUangPanas) {
             capiPixelId = '3319324491540889'; // EbookIndo Pixel
             capiValue = amount || globalProductTx.amount || 100000;
             capiCurrency = 'IDR';
@@ -273,7 +292,9 @@ serve(async (req)=>{
       // RETURN HERE: Tidak melanjutkan ke FALLBACK
       return logAndRespond('Global Product purchase processed successfully and global_product updated.', 200, {
         success: true,
-        action: 'global_product_activated'
+        action: 'global_product_activated',
+        product_name: globalProductTx.product_name,
+        amount: amount || globalProductTx.amount
       });
     }
         // --- OLD FLOW: Fallback ke waiting_payment (Hanya dijalankan jika global_product tidak ditemukan) ---
