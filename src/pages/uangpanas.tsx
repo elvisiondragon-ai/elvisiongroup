@@ -109,14 +109,26 @@ export default function UangPanasLanding() {
       }
 
       (window as any).fbq('init', '3319324491540889');
-      (window as any).fbq('track', 'PageView');
+      
+      const pageEventId = `pageview-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      (window as any).fbq('track', 'PageView', {}, { eventID: pageEventId });
+      sendCapiEvent('PageView', {}, pageEventId);
+
+      const viewContentEventId = `viewcontent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       (window as any).fbq('track', 'ViewContent', {
         content_name: 'Sistem Uang Panas',
         content_ids: ['ebook_uangpanas'],
         content_type: 'product',
         value: 100000,
         currency: 'IDR'
-      });
+      }, { eventID: viewContentEventId });
+      sendCapiEvent('ViewContent', {
+        content_name: 'Sistem Uang Panas',
+        content_ids: ['ebook_uangpanas'],
+        content_type: 'product',
+        value: 100000,
+        currency: 'IDR'
+      }, viewContentEventId);
     }
 
     return () => {
@@ -145,13 +157,15 @@ export default function UangPanasLanding() {
               variant: "default"
           });
           
+          const eventId = `purchase-${paymentData.tripay_reference}`;
+
           if (typeof window !== 'undefined' && (window as any).fbq) {
             (window as any).fbq('track', 'Purchase', {
               content_ids: [productNameBackend],
               content_type: 'product',
               value: totalAmount,
               currency: 'IDR'
-            });
+            }, { eventID: eventId });
           }
           
           // Send CAPI Purchase
@@ -160,7 +174,7 @@ export default function UangPanasLanding() {
             content_type: 'product',
             value: totalAmount,
             currency: 'IDR'
-          });
+          }, eventId);
           
           // Optional: redirect to a thank you page or just show success state
         }
@@ -225,7 +239,7 @@ export default function UangPanasLanding() {
     }
   };
 
-  const sendCapiEvent = async (eventName: string, eventData: any) => {
+  const sendCapiEvent = async (eventName: string, eventData: any, eventId?: string) => {
     try {
       await supabase.functions.invoke('capi-universal', {
         body: {
@@ -237,7 +251,7 @@ export default function UangPanasLanding() {
             client_user_agent: navigator.userAgent,
           },
           customData: eventData,
-          eventId: paymentData?.tripay_reference ? `${eventName}-${paymentData.tripay_reference}` : undefined
+          eventId: eventId
         }
       });
     } catch (err) {
@@ -266,6 +280,8 @@ export default function UangPanasLanding() {
 
     setLoading(true);
 
+    const eventId = `atc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
     // Track AddToCart
     if (typeof window !== 'undefined' && (window as any).fbq) {
       (window as any).fbq('track', 'AddToCart', {
@@ -273,7 +289,7 @@ export default function UangPanasLanding() {
         content_type: 'product',
         value: totalAmount,
         currency: 'IDR'
-      });
+      }, { eventID: eventId });
     }
     
     sendCapiEvent('AddToCart', {
@@ -281,7 +297,7 @@ export default function UangPanasLanding() {
       content_type: 'product',
       value: totalAmount,
       currency: 'IDR'
-    });
+    }, eventId);
 
     let currentUserId = user?.id;
 
@@ -1023,7 +1039,7 @@ export default function UangPanasLanding() {
                 className="border-yellow-600 text-yellow-500 hover:bg-yellow-600 hover:text-black gap-2"
                 onClick={() => window.open('https://cirebon.inews.id/read/204537/ini-sosok-el-reyzandra-mentor-bisnis-yang-sukseskan-ratusan-pengusaha-muda/2', '_blank')}
               >
-                Siapa eL Reyzandra? — Sudah bantu ratusan pengusaha dari 2022
+                Klik Mengetahui Founder
               </Button>
             </div>
           </div>
