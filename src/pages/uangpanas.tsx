@@ -493,7 +493,7 @@ export default function UangPanasLanding() {
           
           <div className="text-2xl md:text-4xl mb-8 text-yellow-400 font-semibold space-y-4">
             <p>❌ Tidak Punya Konten? <span className="text-white">Semua Sudah Disiapkan & Disuapin!</span></p>
-            <p>❌ Tidak Bisa Bikin Video? <span className="text-white">Audio Rezeki Sudah Tersedia!</span></p>
+            <p>❌ Rezeki anda seret terus? <span className="text-white">Audio REZEKI Terbukti Narik Rezeki!</span></p>
             <p>✅ Tugas Anda: <span className="text-green-400">Copy-Paste Video/Foto Lalu Sebar ke Sosmed</span></p>
             <p>💰 Dapatkan <span className="text-white font-bold">50% Komisi</span> — Mudah Kan!?</p>
           </div>

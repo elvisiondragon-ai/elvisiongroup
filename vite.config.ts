@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
     react(),
 
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       strategies: 'generateSW',
       devOptions: {
         enabled: false,
