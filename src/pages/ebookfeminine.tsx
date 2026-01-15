@@ -73,19 +73,29 @@ export default function EbookFeminineLanding() {
   // Helper to send CAPI events
   const sendCapiEvent = async (eventName: string, eventData: any) => {
     try {
-      await supabase.functions.invoke('capi-universal', {
-        body: {
-          pixelId: '3319324491540889', // EbookIndo Pixel
-          eventName,
-          userData: {
-            email: userEmail,
-            phone: phoneNumber,
-            client_user_agent: navigator.userAgent,
-          },
-          customData: eventData,
-          eventId: paymentData?.tripay_reference ? `${eventName}-${paymentData.tripay_reference}` : undefined
-        }
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      const body: any = {
+        pixelId: '3319324491540889', // EbookIndo Pixel
+        eventName,
+        customData: eventData,
+        eventId: paymentData?.tripay_reference ? `${eventName}-${paymentData.tripay_reference}` : undefined
+      };
+
+      if (session) {
+        body.auth = session;
+      } else {
+        body.is_anonymous = true;
+      }
+
+      if (userEmail) {
+        body.userData = {
+          email: userEmail,
+          phone: phoneNumber,
+          client_user_agent: navigator.userAgent,
+        };
+      }
+
+      await supabase.functions.invoke('capi-universal', { body });
     } catch (err) {
       console.error('Failed to send CAPI event:', err);
     }
@@ -104,9 +114,9 @@ export default function EbookFeminineLanding() {
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
+        (window as any).fbq('init', '3319324491540889'); // EbookIndo Pixel
       }
 
-      (window as any).fbq('init', '3319324491540889'); // EbookIndo Pixel
       (window as any).fbq('track', 'PageView');
 
       (window as any).fbq('track', 'ViewContent', {
@@ -577,6 +587,7 @@ export default function EbookFeminineLanding() {
                                 <Label htmlFor="name" className="text-slate-700 font-semibold mb-1 block">Nama Lengkap</Label>
                                 <Input 
                                     id="name" 
+                                    autoComplete="name"
                                     placeholder="Contoh: Sarah Wijaya" 
                                     value={userName} 
                                     onChange={(e) => setUserName(e.target.value)} 
@@ -589,6 +600,7 @@ export default function EbookFeminineLanding() {
                                     <Input 
                                         id="email" 
                                         type="email" 
+                                        autoComplete="email"
                                         placeholder="Untuk kirim akses produk" 
                                         value={userEmail} 
                                         onChange={(e) => setUserEmail(e.target.value)} 
@@ -600,6 +612,7 @@ export default function EbookFeminineLanding() {
                                     <Input 
                                         id="phone" 
                                         type="tel" 
+                                        autoComplete="tel"
                                         placeholder="0812xxxx" 
                                         value={phoneNumber} 
                                         onChange={(e) => setPhoneNumber(e.target.value)} 

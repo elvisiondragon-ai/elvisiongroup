@@ -17,6 +17,18 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
+  // First, clone the request so we can read the body twice
+  const reqClone = req.clone();
+  
+  // Log the raw body for debugging
+  try {
+    const rawBody = await reqClone.text();
+    console.log('--- CAPI-UNIVERSAL Raw Request Body ---');
+    console.log(rawBody);
+  } catch (e) {
+    console.error('Error reading raw request body:', e);
+  }
+
   console.log('--- CAPI-UNIVERSAL Edge Function Start ---');
   
   // Handle CORS preflight requests
@@ -72,26 +84,48 @@ Deno.serve(async (req) => {
       if (userData.zp) processedUserData.zp = await hashSha256(userData.zp);
       if (userData.country) processedUserData.country = await hashSha256(userData.country);
       
-      // Unhashed fields
+      // Unhashed fields from client
       if (userData.fbp) processedUserData.fbp = userData.fbp;
       if (userData.fbc) processedUserData.fbc = userData.fbc;
+    }
+    
+    // Always try to get IP and User Agent from headers as a fallback
+    const clientIpAddressHeader = userData?.client_ip_address || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+    if (clientIpAddressHeader) {
+      // The x-forwarded-for header can be a comma-separated list of IPs.
+      // We take the first one, which is the most likely to be the client's IP.
+      const firstIp = clientIpAddressHeader.split(',')[0].trim();
       
-      const clientIpAddress = userData.client_ip_address || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
-      if (clientIpAddress) processedUserData.client_ip_address = clientIpAddress;
+      // Basic validation: A real IP address must contain a dot.
+      // This prevents sending invalid values like "localhost".
+      if (firstIp && firstIp.includes('.')) {
+        console.log(`Valid IP detected: ${firstIp}`);
+        processedUserData.client_ip_address = firstIp;
+      } else {
+        console.log(`Invalid or localhost IP detected and skipped: ${firstIp}`);
+      }
+    }
 
-      const clientUserAgent = userData.client_user_agent || req.headers.get('user-agent');
-      if (clientUserAgent) processedUserData.client_user_agent = clientUserAgent;
+    const clientUserAgent = userData?.client_user_agent || req.headers.get('user-agent');
+    if (clientUserAgent) {
+      processedUserData.client_user_agent = clientUserAgent;
     }
 
     // Construct the event payload
-    const events = [{
+    const event: any = {
       event_name: eventName,
       event_time: Math.floor(Date.now() / 1000),
       action_source: 'website',
-      user_data: processedUserData,
       custom_data: customData, 
       event_id: eventId || undefined, 
-    }];
+    };
+    
+    // Only include user_data if it's not empty
+    if (Object.keys(processedUserData).length > 0) {
+      event.user_data = processedUserData;
+    }
+
+    const events = [event];
 
     // Add test_event_code if provided (for testing in Events Manager)
     const payload: any = { data: events };

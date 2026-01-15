@@ -95,20 +95,25 @@ export default function UangPanasLanding() {
     }, 45000);
 
     if (typeof window !== 'undefined') {
-      // Initialize Pixel
-      if (!(window as any).fbq) {
-        // @ts-ignore
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-      }
+      const pixelId = '3319324491540889';
+      const pixelInitializedFlag = `_pixel_${pixelId}_initialized`;
 
-      (window as any).fbq('init', '3319324491540889');
+      // Initialize Pixel only if it hasn't been initialized for this specific ID
+      if (!(window as any)[pixelInitializedFlag]) {
+        if (!(window as any).fbq) {
+          // @ts-ignore
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          (window as any).fbq('init', pixelId);
+        }
+        (window as any)[pixelInitializedFlag] = true;
+      }
       
       const pageEventId = `pageview-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       (window as any).fbq('track', 'PageView', {}, { eventID: pageEventId });
@@ -241,19 +246,29 @@ export default function UangPanasLanding() {
 
   const sendCapiEvent = async (eventName: string, eventData: any, eventId?: string) => {
     try {
-      await supabase.functions.invoke('capi-universal', {
-        body: {
-          pixelId: '3319324491540889', 
-          eventName,
-          userData: {
-            email: userEmail,
-            phone: phoneNumber,
-            client_user_agent: navigator.userAgent,
-          },
-          customData: eventData,
-          eventId: eventId
-        }
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      const body: any = {
+        pixelId: '3319324491540889',
+        eventName,
+        customData: eventData,
+        eventId: eventId,
+      };
+
+      if (session) {
+        body.auth = session;
+      } else {
+        body.is_anonymous = true;
+      }
+
+      if (userEmail) {
+        body.userData = {
+          email: userEmail,
+          phone: phoneNumber,
+          client_user_agent: navigator.userAgent,
+        };
+      }
+
+      await supabase.functions.invoke('capi-universal', { body });
     } catch (err) {
       console.error('Failed to send CAPI event:', err);
     }
@@ -280,24 +295,24 @@ export default function UangPanasLanding() {
 
     setLoading(true);
 
-    const eventId = `atc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const addPaymentInfoEventId = `addpaymentinfo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    // Track AddToCart
+    // Track AddPaymentInfo
     if (typeof window !== 'undefined' && (window as any).fbq) {
-      (window as any).fbq('track', 'AddToCart', {
+      (window as any).fbq('track', 'AddPaymentInfo', {
         content_ids: [productNameBackend],
         content_type: 'product',
         value: totalAmount,
         currency: 'IDR'
-      }, { eventID: eventId });
+      }, { eventID: addPaymentInfoEventId });
     }
     
-    sendCapiEvent('AddToCart', {
+    sendCapiEvent('AddPaymentInfo', {
       content_ids: [productNameBackend],
       content_type: 'product',
       value: totalAmount,
       currency: 'IDR'
-    }, eventId);
+    }, addPaymentInfoEventId);
 
     let currentUserId = user?.id;
 
@@ -473,19 +488,18 @@ export default function UangPanasLanding() {
           </div>
           
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            Ekonomi Lesu. Marketplace Cekik UMKM.<br />
-            Gaji Dipotong. PHK Dimana-Mana.
+            Bayangkan Modal <span className="text-5xl md:text-7xl lg:text-8xl text-green-400 animate-pulse">100 RIBU</span>, Raih Ratusan Ribu Per Hari
           </h1>
           
-          <h2 className="text-2xl md:text-4xl mb-8 text-yellow-400 font-semibold">
-            Tapi Ada {memberCount.toLocaleString()} Orang Yang Justru Menghasilkan<br />
-            <span className="text-5xl md:text-6xl text-green-400">Rp500.000/Hari</span><br />
-            Dari Rumah—Tanpa Modal, Tanpa Jualan, Tanpa Ribet.
-          </h2>
+          <div className="text-2xl md:text-4xl mb-8 text-yellow-400 font-semibold space-y-4">
+            <p>❌ Tidak Punya Konten? <span className="text-white">Semua Sudah Disiapkan & Disuapin!</span></p>
+            <p>❌ Tidak Bisa Bikin Video? <span className="text-white">Audio Rezeki Sudah Tersedia!</span></p>
+            <p>✅ Tugas Anda: <span className="text-green-400">Copy-Paste Video/Foto Lalu Sebar ke Sosmed</span></p>
+            <p>💰 Dapatkan <span className="text-white font-bold">50% Komisi</span> — Mudah Kan!?</p>
+          </div>
           
-          <p className="text-xl md:text-2xl mb-12 text-gray-300">
-            Rahasia <span className="text-red-500 font-bold">UANG PANAS</span>: Sistem Energi + Strategi Terbukti<br />
-            Yang Membuat Uang 'Mengejar' Anda—Bukan Sebaliknya.
+          <p className="text-xl md:text-2xl mb-12 text-gray-300 leading-relaxed">
+            ❌ SCAM? Lihat Anggota Kami Sudah <span className="text-green-400 font-bold">3.800++</span> Target <span className="text-yellow-400 font-bold">10.000</span> — Semua Orang Nyata & Terkenal di Dalamnya. Ini Adalah Gerakan Masyarakat dari Founder Kami!
           </p>
           
           <button 
@@ -1082,6 +1096,7 @@ export default function UangPanasLanding() {
                                 <Label htmlFor="name" className="text-gray-300 font-semibold mb-1 block">Nama Lengkap</Label>
                                 <Input 
                                     id="name" 
+                                    autoComplete="name"
                                     placeholder="Nama Anda" 
                                     value={userName} 
                                     onChange={(e) => setUserName(e.target.value)} 
@@ -1094,6 +1109,7 @@ export default function UangPanasLanding() {
                                     <Input 
                                         id="email" 
                                         type="email" 
+                                        autoComplete="email"
                                         placeholder="email@anda.com" 
                                         value={userEmail} 
                                         onChange={(e) => setUserEmail(e.target.value)} 
@@ -1105,6 +1121,7 @@ export default function UangPanasLanding() {
                                     <Input 
                                         id="phone" 
                                         type="tel" 
+                                        autoComplete="tel"
                                         placeholder="0812..." 
                                         value={phoneNumber} 
                                         onChange={(e) => setPhoneNumber(e.target.value)} 
