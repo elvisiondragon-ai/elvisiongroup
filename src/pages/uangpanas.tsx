@@ -481,9 +481,9 @@ export default function UangPanasLanding() {
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-4 py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 to-orange-900/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-black/20"></div>
         <div className="relative z-10 max-w-6xl mx-auto text-center">
-          <div className="mb-8 inline-block bg-red-600 text-white px-6 py-2 rounded-full text-sm font-bold animate-pulse">
+          <div className="mb-8 inline-block bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-bold animate-pulse">
             ⚠️ PROMO TERBATAS - HARGA NAIK DALAM {timeLeft.hours}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
           </div>
           
@@ -504,7 +504,7 @@ export default function UangPanasLanding() {
           
           <button 
             onClick={scrollToCheckout}
-            className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white text-xl md:text-2xl font-bold py-6 px-12 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse"
+            className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white text-xl md:text-2xl font-bold py-6 px-12 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse"
           >
             🔥 SAYA MAU AKSES SEKARANG - RP100RB SAJA
           </button>
@@ -522,14 +522,13 @@ export default function UangPanasLanding() {
       {/* The Enemy Section */}
       <section className="py-20 px-4 bg-gradient-to-b from-black to-gray-900">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
-            Kenapa Kerja Keras Anda <span className="text-red-500">TIDAK</span> Menghasilkan Uang?
-          </h2>
+                      <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+                      Kenapa Kerja Keras Anda <span className="text-purple-500">TIDAK</span> Menghasilkan Uang?          </h2>
           
           <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <div className="bg-gray-800 p-8 rounded-xl border-2 border-red-500">
+            <div className="bg-gray-800 p-8 rounded-xl border-2 border-purple-500">
               <div className="text-5xl mb-4">📉</div>
-              <h3 className="text-2xl font-bold mb-4 text-red-400">UMKM Tercekik</h3>
+              <h3 className="text-2xl font-bold mb-4 text-purple-400">UMKM Tercekik</h3>
               <ul className="space-y-2 text-gray-300">
                 <li>• Potongan marketplace 20-30%</li>
                 <li>• Ongkir mahal, margin tipis</li>
@@ -537,9 +536,9 @@ export default function UangPanasLanding() {
               </ul>
             </div>
             
-            <div className="bg-gray-800 p-8 rounded-xl border-2 border-red-500">
+            <div className="bg-gray-800 p-8 rounded-xl border-2 border-purple-500">
               <div className="text-5xl mb-4">💼</div>
-              <h3 className="text-2xl font-bold mb-4 text-red-400">Karyawan Terancam</h3>
+              <h3 className="text-2xl font-bold mb-4 text-purple-400">Karyawan Terancam</h3>
               <ul className="space-y-2 text-gray-300">
                 <li>• PHK gelombang 2025</li>
                 <li>• Gaji stagnan, inflasi naik</li>
@@ -547,9 +546,9 @@ export default function UangPanasLanding() {
               </ul>
             </div>
             
-            <div className="bg-gray-800 p-8 rounded-xl border-2 border-red-500">
+            <div className="bg-gray-800 p-8 rounded-xl border-2 border-purple-500">
               <div className="text-5xl mb-4">🔄</div>
-              <h3 className="text-2xl font-bold mb-4 text-red-400">Sudah Coba Semua, Gagal Terus</h3>
+              <h3 className="text-2xl font-bold mb-4 text-purple-400">Sudah Coba Semua, Gagal Terus</h3>
               <ul className="space-y-2 text-gray-300">
                 <li>• Belajar dropship → zonk</li>
                 <li>• Ikut MLM → rugi</li>
@@ -558,9 +557,9 @@ export default function UangPanasLanding() {
             </div>
           </div>
           
-          <div className="bg-gradient-to-r from-orange-900/50 to-red-900/50 p-8 rounded-xl border-2 border-orange-500">
+          <div className="bg-gradient-to-r from-purple-900/50 to-black/50 p-8 rounded-xl border-2 border-purple-500">
             <p className="text-xl md:text-2xl text-center leading-relaxed">
-              Masalahnya BUKAN strategi Anda. Masalahnya adalah <span className="text-yellow-400 font-bold">ENERGI INTERNAL</span> Anda masih di frekuensi <span className="text-red-400 font-bold">SCARCITY (kekurangan).</span>
+              Masalahnya BUKAN strategi Anda. Masalahnya adalah <span className="text-yellow-400 font-bold">ENERGI INTERNAL</span> Anda masih di frekuensi <span className="text-purple-400 font-bold">SCARCITY (kekurangan).</span>
               <br /><br />
               Otak sadar bilang 'Saya mau sukses,' tapi 95% pikiran bawah sadar Anda BERTERIAK: <span className="italic">'Uang itu sulit. Saya tidak pantas.'</span>
             </p>
@@ -572,7 +571,7 @@ export default function UangPanasLanding() {
       <section className="py-20 px-4 bg-gray-900">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-6">
-            Inilah Kenapa <span className="text-red-500">UANG PANAS</span> Berbeda:
+            Inilah Kenapa <span className="text-purple-500">UANG PANAS</span> Berbeda:
           </h2>
           <p className="text-2xl text-center mb-16 text-gray-300">
             Kami Tidak Jualan 'Strategi.' Kami Reset <span className="text-yellow-400 font-bold">SISTEM INTERNAL</span> Anda.
@@ -580,12 +579,12 @@ export default function UangPanasLanding() {
           
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-gray-800 p-8 rounded-xl border-2 border-gray-700">
-              <h3 className="text-2xl font-bold mb-6 text-red-400 flex items-center gap-2">
-                <X className="text-red-500" /> Metode Lain (Yang Gagal)
+              <h3 className="text-2xl font-bold mb-6 text-purple-400 flex items-center gap-2">
+                <X className="text-purple-500" /> Metode Lain (Yang Gagal)
               </h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
-                  <X className="text-red-500 flex-shrink-0 mt-1" />
+                  <X className="text-purple-500 flex-shrink-0 mt-1" />
                   <span>Fokus di strategi/taktik saja</span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -607,13 +606,13 @@ export default function UangPanasLanding() {
               </ul>
             </div>
             
-            <div className="bg-gradient-to-br from-green-900/50 to-emerald-900/50 p-8 rounded-xl border-2 border-green-500">
-              <h3 className="text-2xl font-bold mb-6 text-green-400 flex items-center gap-2">
-                <Check className="text-green-500" /> Metode UANG PANAS
+            <div className="bg-gradient-to-br from-purple-900/50 to-black/50 p-8 rounded-xl border-2 border-purple-500">
+              <h3 className="text-2xl font-bold mb-6 text-purple-400 flex items-center gap-2">
+                <Check className="text-purple-500" /> Metode UANG PANAS
               </h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
-                  <Check className="text-green-500 flex-shrink-0 mt-1" />
+                  <Check className="text-purple-500 flex-shrink-0 mt-1" />
                   <span><strong>Kalibrasi Bio-Energetik</strong> (Metode eL Vision)</span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -670,16 +669,16 @@ export default function UangPanasLanding() {
               </div>
             </div>
             
-            <div className="bg-gradient-to-r from-blue-900/50 to-cyan-900/50 p-8 rounded-xl border-2 border-blue-500">
+            <div className="bg-gradient-to-r from-purple-900/50 to-black/50 p-8 rounded-xl border-2 border-purple-500">
               <div className="flex items-center gap-4 mb-6">
-                <div className="bg-blue-600 text-white text-3xl font-bold rounded-full w-16 h-16 flex items-center justify-center">2</div>
+                <div className="bg-purple-600 text-white text-3xl font-bold rounded-full w-16 h-16 flex items-center justify-center">2</div>
                 <h3 className="text-3xl font-bold">COPY-PASTE MODUL LEAD MAGNET (30 Menit/Hari)</h3>
               </div>
               
               <div className="flex items-start gap-4 mb-4">
                 <div className="text-4xl">📱</div>
                 <div>
-                  <h4 className="text-2xl font-bold text-blue-300 mb-2">Anda dapat:</h4>
+                  <h4 className="text-2xl font-bold text-purple-300 mb-2">Anda dapat:</h4>
                   <ul className="space-y-2 text-lg text-gray-300">
                     <li>• 7 Lead Magnet siap pakai (nilai Rp5 juta)</li>
                     <li>• Script iklan yang sudah convert</li>
@@ -688,21 +687,21 @@ export default function UangPanasLanding() {
                 </div>
               </div>
               
-              <div className="bg-black/50 p-6 rounded-lg mt-4 italic text-gray-300 border-l-4 border-cyan-500">
+              <div className="bg-black/50 p-6 rounded-lg mt-4 italic text-gray-300 border-l-4 border-purple-500">
                 "Tidak perlu pusing jualan APA. Tidak perlu mikir jualan KEMANA. Tinggal IKUTI MODUL."
               </div>
             </div>
             
-            <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 p-8 rounded-xl border-2 border-green-500">
+            <div className="bg-gradient-to-r from-purple-900/50 to-black/50 p-8 rounded-xl border-2 border-purple-500">
               <div className="flex items-center gap-4 mb-6">
-                <div className="bg-green-600 text-white text-3xl font-bold rounded-full w-16 h-16 flex items-center justify-center">3</div>
+                <div className="bg-purple-600 text-white text-3xl font-bold rounded-full w-16 h-16 flex items-center justify-center">3</div>
                 <h3 className="text-3xl font-bold">TERIMA KOMISI 50% SEUMUR HIDUP (Pasif)</h3>
               </div>
               
               <div className="flex items-start gap-4 mb-4">
                 <div className="text-4xl">💰</div>
                 <div>
-                  <h4 className="text-2xl font-bold text-green-300 mb-2">Setiap orang yang beli lewat link Anda:</h4>
+                  <h4 className="text-2xl font-bold text-purple-300 mb-2">Setiap orang yang beli lewat link Anda:</h4>
                   <ul className="space-y-2 text-lg text-gray-300">
                     <li>• Komisi 50% langsung masuk rekening</li>
                     <li>• Sistem affiliate otomatis tracking</li>
@@ -733,7 +732,7 @@ export default function UangPanasLanding() {
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Play size={64} className="text-white" />
                   </div>
-                  <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                  <div className="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold">
                     VIDEO
                   </div>
                 </div>
@@ -778,25 +777,25 @@ export default function UangPanasLanding() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-2xl font-bold text-yellow-400">{bonus.title}</h3>
-                    <span className="text-green-400 font-bold text-xl">{bonus.value}</span>
+                    <span className="text-purple-400 font-bold text-xl">{bonus.value}</span>
                   </div>
                   <p className="text-gray-300">{bonus.desc}</p>
                 </div>
-                <Check className="text-green-500 flex-shrink-0" size={32} />
+                <Check className="text-purple-500 flex-shrink-0" size={32} />
               </div>
             ))}
           </div>
           
-          <div className="bg-gradient-to-r from-yellow-600 to-orange-600 p-12 rounded-2xl text-center">
+          <div className="bg-gradient-to-r from-purple-600 to-purple-800 p-12 rounded-2xl text-center">
             <p className="text-3xl mb-4">TOTAL NILAI: <span className="line-through">Rp12.750.000</span></p>
-            <p className="text-6xl font-bold mb-6">HARGA HARI INI: Rp100.000</p>
+            <p className="text-6xl font-bold mb-6">HARGA HARI INI: Rp100RB</p>
             <p className="text-2xl font-semibold">Hemat 99% - Tapi Tidak Untuk Lama!</p>
           </div>
         </div>
       </section>
 
       {/* Urgency */}
-      <section className="py-20 px-4 bg-red-900">
+      <section className="py-20 px-4 bg-purple-900">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8">
             <Clock size={64} className="mx-auto mb-4" />
@@ -823,7 +822,7 @@ export default function UangPanasLanding() {
             <p className="text-2xl mb-4">⚠️ <strong>PERHATIAN:</strong></p>
             <p className="text-xl mb-4">Harga akan NAIK menjadi Rp500.000 setelah timer habis.</p>
             <p className="text-xl mb-4">Saat ini sudah <span className="text-green-400 font-bold">{memberCount.toLocaleString()} orang</span> bergabung.</p>
-            <p className="text-2xl font-bold text-red-400">Slot terbatas: {(10000 - memberCount)} orang lagi.</p>
+            <p className="text-2xl font-bold text-purple-400">Slot terbatas: {(10000 - memberCount)} orang lagi.</p>
           </div>
           
           <div className="bg-gray-900 p-6 rounded-xl border-2 border-gray-700 italic">
@@ -841,14 +840,14 @@ export default function UangPanasLanding() {
         <div className="max-w-5xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-12">
             100% GARANSI UANG KEMBALI<br />
-            <span className="text-green-400">Tanpa Ribet, Tanpa Pertanyaan</span>
+            <span className="text-purple-400">Tanpa Ribet, Tanpa Pertanyaan</span>
           </h2>
           
-          <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 p-10 rounded-2xl border-4 border-green-500">
-            <div className="flex items-start gap-6">
-              <Shield size={80} className="text-green-400 flex-shrink-0" />
-              <div>
-                <h3 className="text-3xl font-bold mb-6 text-green-400">🛡️ JAMINAN IRON-CLAD:</h3>
+          <div className="bg-gradient-to-r from-purple-900/50 to-black/50 p-10 rounded-2xl border-4 border-purple-500">
+            <div className="flex flex-col items-center md:flex-row md:items-start gap-6">
+              <Shield size={80} className="text-purple-400 flex-shrink-0" />
+              <div className="text-center md:text-left">
+                <h3 className="text-3xl font-bold mb-6 text-purple-400">🛡️ JAMINAN IRON-CLAD:</h3>
                 <p className="text-xl text-gray-200 mb-6 leading-relaxed">
                   Coba sistem UANG PANAS selama 30 hari. Jika Anda tidak menghasilkan minimal Rp500.000, tunjukkan bukti Anda sudah ikuti 3 langkah kami—<span className="text-yellow-400 font-bold">UANG ANDA KEMBALI 100%.</span>
                 </p>
@@ -928,8 +927,8 @@ export default function UangPanasLanding() {
           </h2>
           
           <div className="grid md:grid-cols-2 gap-8 mb-16">
-            <div className="bg-gradient-to-br from-green-900/50 to-emerald-900/50 p-8 rounded-xl border-4 border-green-500">
-              <h3 className="text-3xl font-bold mb-6 text-green-400 flex items-center gap-3">
+            <div className="bg-gradient-to-br from-purple-900/50 to-emerald-900/50 p-8 rounded-xl border-4 border-green-500">
+              <h3 className="text-3xl font-bold mb-6 text-purple-400 flex items-center gap-3">
                 <Check size={40} /> JIKA ANDA KLIK "BELI SEKARANG":
               </h3>
               <ul className="space-y-4 text-lg">
@@ -984,7 +983,7 @@ export default function UangPanasLanding() {
           <div className="text-center">
             <button 
               onClick={scrollToCheckout}
-              className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white text-2xl md:text-3xl font-bold py-8 px-16 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 mb-6 animate-pulse"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-purple-700 text-white text-2xl md:text-3xl font-bold py-8 px-16 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 mb-6 animate-pulse"
             >
               🔥 YA, SAYA MAU AKSES SEKARANG - RP100RB SAJA
             </button>
@@ -1064,10 +1063,10 @@ export default function UangPanasLanding() {
       <section id="checkout-section" className="py-20 px-4 md:px-8 bg-black">
         <div className="max-w-3xl mx-auto">
             <Card className="border-2 border-red-900 shadow-2xl overflow-hidden rounded-2xl bg-gray-900 text-white">
-                <div className="bg-red-600 text-white p-3 text-center font-bold animate-pulse">
+                <div className="bg-purple-600 text-white p-3 text-center font-bold animate-pulse">
                     🔥 PROMO BERAKHIR DALAM: {timeLeft.hours}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
                 </div>
-                <div className="bg-gradient-to-r from-red-800 to-black text-white p-8 text-center">
+                <div className="bg-gradient-to-r from-purple-800 to-black text-white p-8 text-center">
                     <h2 className="text-3xl font-bold mb-2">FORMULIR PEMESANAN</h2>
                     <p className="opacity-90 text-lg">Lengkapi data di bawah untuk akses instan</p>
                 </div>
@@ -1089,45 +1088,44 @@ export default function UangPanasLanding() {
 
                     <div className="space-y-4">
                         <h3 className="font-bold text-lg flex items-center gap-2 text-white">
-                            <User className="w-5 h-5 text-red-500" /> Data Diri
+                            <User className="w-5 h-5 text-purple-500" /> Data Diri
                         </h3>
                         <div className="grid gap-4">
                             <div>
                                 <Label htmlFor="name" className="text-gray-300 font-semibold mb-1 block">Nama Lengkap</Label>
-                                <Input 
-                                    id="name" 
-                                    autoComplete="name"
-                                    placeholder="Nama Anda" 
-                                    value={userName} 
-                                    onChange={(e) => setUserName(e.target.value)} 
-                                    className="bg-black text-white border-gray-700 focus:border-red-500 h-12"
-                                />
+                                <Input
+                                                                    id="name"
+                                                                    autoComplete="name"
+                                                                    placeholder="Nama Anda"
+                                                                    value={userName}
+                                                                    onChange={(e) => setUserName(e.target.value)}
+                                                                    className={`text-white border-gray-700 focus:border-red-500 h-12 ${userName ? 'bg-purple-700 placeholder:text-yellow-400' : 'bg-black placeholder:text-gray-500'}`}
+                                                                />
                             </div>
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <Label htmlFor="email" className="text-gray-300 font-semibold mb-1 block">Email</Label>
-                                    <Input 
-                                        id="email" 
-                                        type="email" 
-                                        autoComplete="email"
-                                        placeholder="email@anda.com" 
-                                        value={userEmail} 
-                                        onChange={(e) => setUserEmail(e.target.value)} 
-                                        className="bg-black text-white border-gray-700 focus:border-red-500 h-12"
-                                    />
+                                    <Input
+                                                                            id="email"
+                                                                            type="email"
+                                                                            autoComplete="email"
+                                                                            placeholder="email@anda.com"
+                                                                            value={userEmail}
+                                                                            onChange={(e) => setUserEmail(e.target.value)}
+                                                                    className={`text-white border-gray-700 focus:border-red-500 h-12 ${userName ? 'bg-purple-700 placeholder:text-yellow-400' : 'bg-black placeholder:text-gray-500'}`}
+                                                                        />
                                 </div>
                                 <div>
                                     <Label htmlFor="phone" className="text-gray-300 font-semibold mb-1 block">WhatsApp</Label>
-                                    <Input 
-                                        id="phone" 
-                                        type="tel" 
-                                        autoComplete="tel"
-                                        placeholder="0812..." 
-                                        value={phoneNumber} 
-                                        onChange={(e) => setPhoneNumber(e.target.value)} 
-                                        className="bg-black text-white border-gray-700 focus:border-red-500 h-12"
-                                    />
-                                </div>
+                                    <Input
+                                                                            id="phone"
+                                                                            type="tel"
+                                                                            autoComplete="tel"
+                                                                            placeholder="0812..."
+                                                                            value={phoneNumber}
+                                                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                                                    className={`text-white border-gray-700 focus:border-red-500 h-12 ${userName ? 'bg-purple-700 placeholder:text-yellow-400' : 'bg-black placeholder:text-gray-500'}`}
+                                                                        />                                </div>
                             </div>
                             <div>
                                 <Label htmlFor="password" className="text-gray-300 font-semibold mb-1 block">Password (Untuk Login Member Area)</Label>
@@ -1137,7 +1135,7 @@ export default function UangPanasLanding() {
                                     placeholder="Buat password rahasia..." 
                                     value={password} 
                                     onChange={(e) => setPassword(e.target.value)} 
-                                    className="bg-black text-white border-gray-700 focus:border-red-500 h-12"
+                                                                    className={`text-white border-gray-700 focus:border-red-500 h-12 ${userName ? 'bg-purple-700 placeholder:text-yellow-400' : 'bg-black placeholder:text-gray-500'}`}
                                 />
                             </div>
                             <div>
@@ -1148,7 +1146,7 @@ export default function UangPanasLanding() {
                                     placeholder="Ulangi password rahasia..." 
                                     value={confirmPassword} 
                                     onChange={(e) => setConfirmPassword(e.target.value)} 
-                                    className="bg-black text-white border-gray-700 focus:border-red-500 h-12"
+                                                                    className={`text-white border-gray-700 focus:border-red-500 h-12 ${userName ? 'bg-purple-700 placeholder:text-yellow-400' : 'bg-black placeholder:text-gray-500'}`}
                                 />
                             </div>
                         </div>
@@ -1211,10 +1209,10 @@ export default function UangPanasLanding() {
       </section>
 
       {/* Sticky CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-red-600 to-orange-600 p-4 shadow-2xl z-50 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-purple-600 to-purple-800 p-4 shadow-2xl z-50 md:hidden">
         <button 
           onClick={scrollToCheckout}
-          className="w-full bg-white text-red-600 font-bold text-lg py-4 rounded-full hover:bg-gray-100 transition-all"
+          className="w-full bg-white text-purple-600 font-bold text-lg py-4 rounded-full hover:bg-gray-100 transition-all"
         >
           🔥 BELI SEKARANG - RP100RB
         </button>

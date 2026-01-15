@@ -1176,10 +1176,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     detail: { reason: 'idle-wake', timestamp: Date.now(), isPWA }
                   }));
                 } else {
-                  // No session available - redirect to login
-                  console.log('❌ No session available, setting expired flag');
-                  localStorage.setItem('session-expired', 'true');
-                  window.location.href = '/';
+                  // No session available, do nothing. This prevents redirection for non-authenticated users.
+                  console.log('Auth session missing, but allowing user to stay on page.');
                 }
               }
             });
