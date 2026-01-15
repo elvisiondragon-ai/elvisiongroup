@@ -201,7 +201,7 @@ export default function AffiliatePage() {
     <div className="min-h-screen bg-black text-white p-6 pb-20">
       <div className="max-w-4xl mx-auto py-12 space-y-8">
         <h1 className="text-5xl font-bold text-center mb-10 bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
-          Dashboard Afiliasi
+          Dashboard Afiliasi eL Vision Group
         </h1>
 
         {/* Finance Grid */}

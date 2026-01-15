@@ -89,8 +89,7 @@ Caranya aneh tapi masuk akal. Cek sendiri deh sebelum dihapus:
           <Card className="bg-gray-900 border-gray-800">
             <CardContent className="p-6 md:p-8">
               <p className="text-lg text-gray-300 mb-6">
-                Ambil video official dari eL Vision (YouTube/TikTok/Instagram). Tidak perlu ambil semuanya.
-                Fokus cari bagian yang <strong className="text-white">paling menohok (hook)</strong> atau kontroversial.
+                Ambil Video dari Folder ini, boleh langsung atau kamu edit dipotong potong, lalu tambahkan text yang kreatif ikuti prompt di bawah dan mulai sebarkan dengan Link affiliate kamu Ke Whatsapp, Sosmed Kamu, Cara kedua Buat Video kamu sendiri merasakan manfaat dari Audio ini dan mulai Sebarkan video tersebut. Metode ini GRATIS. Namun Jika ingin yang berbayar dan lebih cepat meta ads, tunggu sampai kamu untung terlebih dahulu. Baru pertimbangkan untuk menggunakan iklan
               </p>
               <ul className="space-y-4 mb-6">
                 <li className="flex items-start gap-3">
@@ -108,6 +107,14 @@ Caranya aneh tapi masuk akal. Cek sendiri deh sebelum dihapus:
               </ul>
               <div className="bg-black/50 p-4 rounded-lg border-l-4 border-yellow-500 text-gray-400 italic">
                 Tips: Video pendek dengan retensi tinggi akan lebih cepat viral (FYP).
+              </div>
+              <div className="mt-6">
+                <Button
+                  onClick={() => window.open('https://drive.google.com/drive/folders/1rBPeEBplwklIVMXC5gZ92zYaP65CXQA9?usp=sharing', '_blank')}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-md text-base"
+                >
+                  <Video className="mr-2" size={20} /> LEAD MAGNET VIDEO
+                </Button>
               </div>
             </CardContent>
           </Card>
