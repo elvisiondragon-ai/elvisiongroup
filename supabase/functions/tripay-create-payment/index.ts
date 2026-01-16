@@ -69,7 +69,7 @@ const productCatalog = {
     name: 'Ebook eL Vision',
     price: 200000,
     requiresAuth: false,
-    physical: false
+    physical: true
   }, // New Ebook Product
   'ebook_uangpanas': {
     name: 'Ebook Uang Panas',

@@ -13,6 +13,17 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/toaster';
 
+const getCookie = (name: string) => {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for(let i=0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0)===' ') c = c.substring(1,c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length,c.length);
+  }
+  return null;
+}
+
 const communityTestimonials = Object.values(
   import.meta.glob('../assets/TESTI_KOMUNITAS/*.{png,jpg,jpeg,PNG,JPG,JPEG}', { 
     eager: true, 
@@ -254,19 +265,41 @@ export default function UangPanasLanding() {
         eventId: eventId,
       };
 
-      if (session) {
-        body.auth = session;
-      } else {
-        body.is_anonymous = true;
+      // Get FBC and FBP from cookies
+      const fbc = getCookie('_fbc');
+      const fbp = getCookie('_fbp');
+
+      const userData: any = {
+        client_user_agent: navigator.userAgent,
+      };
+
+      // Prioritize form input email/phone, then authenticated user email/phone
+      if (userEmail) {
+        userData.email = userEmail;
+      } else if (session?.user?.email) {
+        userData.email = session.user.email;
+      }
+      if (phoneNumber) {
+        userData.phone = phoneNumber;
+      } else if (session?.user?.user_metadata?.phone) {
+        userData.phone = session.user.user_metadata.phone;
       }
 
-      if (userEmail) {
-        body.userData = {
-          email: userEmail,
-          phone: phoneNumber,
-          client_user_agent: navigator.userAgent,
-        };
+      // External ID from authenticated user (Supabase user ID)
+      if (session?.user?.id) {
+        userData.external_id = session.user.id;
+      } else if (user?.id) { // Fallback if session is not available but user from useAuth is
+        userData.external_id = user.id;
       }
+
+      if (fbc) {
+        userData.fbc = fbc;
+      }
+      if (fbp) {
+        userData.fbp = fbp;
+      }
+      
+      body.userData = userData;
 
       await supabase.functions.invoke('capi-universal', { body });
     } catch (err) {
