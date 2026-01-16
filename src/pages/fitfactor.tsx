@@ -157,7 +157,7 @@ export default function FitfactorPaymentPage() {
   const productName = 'Fitfactor';
   const price = 150000;
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(3);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -179,9 +179,25 @@ export default function FitfactorPaymentPage() {
     }
   }, [user]);
 
-  const handleIncrement = () => setQuantity(prev => prev + 1);
-  const handleDecrement = () => setQuantity(prev => Math.max(1, prev - 1));
-  const totalAmount = price * quantity;
+  const handleIncrement = () => setQuantity(prev => prev + 3);
+  const handleDecrement = () => setQuantity(prev => Math.max(3, prev - 3));
+
+  const getTieredPrice = (qty: number) => {
+    switch (qty) {
+      case 3:
+        return 450000;
+      case 6:
+        return 800000;
+      case 9:
+        return 1200000;
+      default:
+        // For quantities > 9 and multiples of 3, assume a base price per unit.
+        // Assuming 'price' (150000) is the base price per unit.
+        return 150000 * qty;
+    }
+  };
+
+  const totalAmount = getTieredPrice(quantity);
 
   useEffect(() => {
     if (totalAmount > 5000000) {
@@ -652,7 +668,14 @@ export default function FitfactorPaymentPage() {
                 </Button>
               </div>
             </div>
-
+            <div className="text-sm text-gray-500 mt-2 space-y-1 text-center">
+              <p>Harga Normal 1 Box (isi 3): <span className="line-through">{formatCurrency(900000)}</span></p>
+              {quantity === 3 && <p className="text-green-600 font-bold">Anda pilih: Paket 1 Box (isi 3) seharga {formatCurrency(450000)} - Hemat 50%!</p>}
+              {quantity === 6 && <p className="text-green-600 font-bold">Anda pilih: Paket 2 Box (isi 6) seharga {formatCurrency(800000)} - Lebih hemat, hanya {formatCurrency(400000)}/box!</p>}
+              {quantity === 9 && <p className="text-green-600 font-bold">Anda pilih: Paket 3 Box (isi 9) seharga {formatCurrency(1200000)} - Paling hemat, hanya {formatCurrency(400000)}/box!</p>}
+              {quantity > 9 && quantity % 3 === 0 && <p className="text-green-600 font-bold">Paket {quantity/3} Box (isi {quantity}): {formatCurrency(getTieredPrice(quantity))}</p>}
+            </div>
+            
             <Separator/>
             
             <div className="flex justify-between items-center">
