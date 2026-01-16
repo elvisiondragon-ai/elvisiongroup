@@ -60,6 +60,8 @@ import Intro from "./pages/intro";
 import DisplayPage from "./pages/display";
 import WatchlistPage from "./pages/watchlist";
 import ReportSales from "./pages/reportsales";
+import AbsenHidupPage from "./pages/absenhidup";
+import DrelfLpPage from "./pages/drelflp";
 
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -209,6 +211,8 @@ const AppContent = () => {
                 <Route path="/display" element={<DisplayPage />} />
                 <Route path="/watchlist" element={<WatchlistPage />} />
                 <Route path="/reportsales" element={<ReportSales />} />
+                <Route path="/absenhidup" element={<AbsenHidupPage />} />
+                <Route path="/drelflp" element={<DrelfLpPage />} />
                 
                 {/* Auth routes */}
                 <Route
