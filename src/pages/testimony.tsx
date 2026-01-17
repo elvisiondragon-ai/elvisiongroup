@@ -221,7 +221,7 @@ const TestimonyPage = () => {
             <div className="space-y-24 relative z-10">
               {/* Stage 1: Kalibrasi */}
               <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div className="order-2 md:order-1 text-right space-y-4">
+                <div className="order-1 md:order-1 text-right space-y-4">
                   <div className="inline-flex items-center gap-2 bg-blue-900/30 border border-blue-500/30 px-4 py-2 rounded-full text-blue-400 font-semibold mb-2">
                     <Target className="w-5 h-5" /> Tahap 1
                   </div>
@@ -237,7 +237,7 @@ const TestimonyPage = () => {
                     <p className="text-xs text-gray-500">/ jam (estimasi)</p>
                   </div>
                 </div>
-                <div className="order-1 md:order-2 flex justify-start md:justify-center">
+                <div className="order-2 md:order-2 flex justify-start md:justify-center">
                   <div className="relative w-full max-w-sm aspect-square">
                     <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
                     <div className="relative bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-500/30 rounded-2xl p-8 h-full flex flex-col items-center justify-center text-center hover:scale-105 transition-transform duration-500">
@@ -253,7 +253,7 @@ const TestimonyPage = () => {
 
               {/* Stage 2: Membentuk Visi Mentah */}
               <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div className="order-1 flex justify-end md:justify-center">
+                <div className="order-2 md:order-1 flex justify-end md:justify-center">
                    <div className="relative w-full max-w-md">
                     <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-3xl"></div>
                     <div className="relative bg-slate-900/80 border border-purple-500/30 rounded-2xl p-6 backdrop-blur-sm">
@@ -312,7 +312,7 @@ const TestimonyPage = () => {
                     </div>
                    </div>
                 </div>
-                <div className="order-2 space-y-4">
+                <div className="order-1 md:order-2 space-y-4">
                   <div className="inline-flex items-center gap-2 bg-purple-900/30 border border-purple-500/30 px-4 py-2 rounded-full text-purple-400 font-semibold mb-2">
                     <Eye className="w-5 h-5" /> Tahap 2
                   </div>
@@ -330,7 +330,7 @@ const TestimonyPage = () => {
 
               {/* Stage 3: Aktivasi */}
               <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div className="order-2 md:order-1 text-right space-y-4">
+                <div className="order-1 md:order-1 text-right space-y-4">
                   <div className="inline-flex items-center gap-2 bg-pink-900/30 border border-pink-500/30 px-4 py-2 rounded-full text-pink-400 font-semibold mb-2">
                     <Sparkles className="w-5 h-5" /> Tahap 3
                   </div>
@@ -342,7 +342,7 @@ const TestimonyPage = () => {
                     eL Triangle
                   </h4>
                 </div>
-                <div className="order-1 md:order-2 flex justify-start md:justify-center">
+                <div className="order-2 md:order-2 flex justify-start md:justify-center">
                   <div className="relative w-full max-w-sm aspect-square flex items-center justify-center">
                     <div className="absolute inset-0 bg-pink-500/20 rounded-full blur-3xl animate-pulse"></div>
                      <div className="relative w-48 h-48">
