@@ -163,8 +163,11 @@ const TestimonyPage = () => {
                 </div>
               </div>
               <div className="space-y-2">
+                <p className="text-sm text-yellow-400 font-semibold mb-2">
+                  TAPI YANG TERJADI MESKI MENDAPATKAN 1 Miliar, juga
+                </p>
                 <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
-                  <p className="text-sm">❌ Cara mendapatkan penuh tekanan</p>
+                  <p className="text-sm">❌ Mendapatkan tekanan dari berbagai arah</p>
                 </div>
                 <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
                   <p className="text-sm">❌ Konflik relasi & keluarga</p>
