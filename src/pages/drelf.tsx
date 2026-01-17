@@ -525,18 +525,7 @@ export default function DrelfPaymentPage() {
               </div>
             </div>
 
-            <div className="text-center my-4">
-              <Button
-                onClick={() => navigate('/whatispro')}
-                className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black p-3 rounded-md text-center w-full h-auto mt-2"
-              >
-                <p className="font-bold whitespace-normal">
-                  {proStatus.isPro
-                    ? `Your Pro Plan until ${proStatus.expiresAt ? new Date(proStatus.expiresAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown'}`
-                    : 'eL Vision Subscription diskon 30-50% sepanjang tahun'}
-                </p>
-              </Button>
-            </div>
+
 
             <Separator/>
             

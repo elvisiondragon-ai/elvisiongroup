@@ -62,6 +62,7 @@ import WatchlistPage from "./pages/watchlist";
 import ReportSales from "./pages/reportsales";
 import AbsenHidupPage from "./pages/absenhidup";
 import DrelfLpPage from "./pages/drelflp";
+import Testimony from "./pages/testimony"; // Import the new Testimony component
 
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -213,6 +214,7 @@ const AppContent = () => {
                 <Route path="/reportsales" element={<ReportSales />} />
                 <Route path="/absenhidup" element={<AbsenHidupPage />} />
                 <Route path="/drelflp" element={<DrelfLpPage />} />
+                <Route path="/testimony" element={<Testimony />} />
                 
                 {/* Auth routes */}
                 <Route
