@@ -7,6 +7,17 @@ const NotFound = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    // Check if we've already tried to refresh for this path
+    // This helps handle cases where a new route was added but the user has an old cached version
+    const hasRetried = sessionStorage.getItem(`retry-${location.pathname}`);
+    
+    if (!hasRetried) {
+      sessionStorage.setItem(`retry-${location.pathname}`, "true");
+      console.log("404 encountered, attempting one-time refresh to check for updates...");
+      window.location.reload();
+      return;
+    }
+
     console.error(
       "404 Error: User attempted to access non-existent route:",
       location.pathname
