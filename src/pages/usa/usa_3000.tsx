@@ -393,7 +393,7 @@ export default function ELVision3000() {
     <div className="min-h-screen bg-black text-white">
       {/* Promo Card */}
       <div 
-        onClick={() => window.location.href = '/usa/usa_pay3000'}
+        onClick={() => window.location.href = 'https://app.elvisiongroup.com/usa/usa_pay3000.tsx'}
         className="cursor-pointer bg-gradient-to-r from-red-600 to-red-800 text-white py-4 px-6 text-center sticky top-0 z-50 shadow-lg animate-pulse hover:from-red-500 hover:to-red-700 transition-all"
       >
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-center gap-4">
@@ -1505,7 +1505,7 @@ export default function ELVision3000() {
 
             <div className="flex flex-col items-center gap-4 mb-8 max-w-md mx-auto">
               <button
-                onClick={() => window.location.href = '/usa/usa_pay3000'}
+                onClick={() => window.location.href = 'https://app.elvisiongroup.com/usa/usa_pay3000.tsx'}
                 className="w-full group bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white font-bold text-xl px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-blue-500/50 flex items-center justify-center gap-4"
               >
                 CLAIM 50% DISCOUNT
