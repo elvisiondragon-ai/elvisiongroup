@@ -119,7 +119,7 @@ const PayPalFinish = () => {
             <Button onClick={() => window.location.href = "https://wa.me/62895325633487"} variant="default" className="w-full mb-3">
               Contact Support
             </Button>
-             <Button variant="ghost" onClick={() => navigate('/ebookhealthlp')} className="w-full flex items-center gap-2">
+             <Button variant="ghost" onClick={() => navigate('/usa/usa_ebookhealth')} className="w-full flex items-center gap-2">
               <ArrowLeft size={16} /> Try Again
             </Button>
           </div>

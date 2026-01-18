@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '@/components/ui/select'; // Import Select components
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '@/components/ui/select';
 import Adress from '@/components/adress';
-import fitfactorImage from '@/assets/fitfactor.jpg';
+import jewelImage from '@/assets/jewel.jpg';
 import qrisBcaImage from '@/assets/qrisbca.jpeg';
 import { ArrowLeft, Copy, CreditCard, User, Mail, Phone, Home, Plus, Minus } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -30,134 +30,24 @@ const WhatsAppButton = () => (
   </a>
 );
 
-// URL of the deployed Supabase Edge Function for CAPI
-const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-fitfactor';
-
-// Helper to extract _fbp and _fbc cookies
-const getFBCookies = () => {
-  const cookies = document.cookie.split(';');
-  let fbp, fbc;
-  for (const cookie of cookies) {
-    const trimmedCookie = cookie.trim();
-    if (trimmedCookie.startsWith('_fbp=')) {
-      fbp = trimmedCookie.substring('_fbp='.length);
-    } else if (trimmedCookie.startsWith('_fbc=')) {
-      fbc = trimmedCookie.substring('_fbc='.length);
-    }
-  }
-  return { fbp, fbc };
-};
-
-// Helper function to send events to the CAPI Edge Function
-const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
-  const { fbp, fbc } = getFBCookies();
-
-  try {
-    const response = await fetch(CAPI_EDGE_FUNCTION_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        eventName,
-        userData: {
-          ...userData,
-          fbp,
-          fbc,
-          client_ip_address: null, // Edge function will extract
-          client_user_agent: navigator.userAgent,
-        },
-        customData,
-        eventId, // Pass eventId for deduplication
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error(`Error sending CAPI event ${eventName}:`, errorData);
-    } else {
-      console.log(`CAPI event ${eventName} sent successfully.`);
-    }
-  } catch (error) {
-    console.error(`Network error sending CAPI event ${eventName}:`, error);
-  }
-};
-
-export default function FitfactorPaymentPage() {
+export default function JewelryPaymentPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const affiliateRef = searchParams.get('ref');
   const { toast } = useToast();
   const { user, signOut, cleanupSupabase } = useAuth();
   const { proStatus } = usePro();
   const whatsappLink = "https://wa.me/62895325633487";
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
-
-  useEffect(() => {
-    // Initialize Facebook Pixel
-    fbq("init", "1797660474333865"); // Replace with your actual Pixel ID
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      localStorage.setItem('manual-logout-flag', 'true');
-      if (isIOS && isIOSStandalone) {
-        if ('serviceWorker' in navigator) {
-          const registrations = await navigator.serviceWorker.getRegistrations();
-          for (const registration of registrations) {
-            await registration.unregister();
-            console.log('Service worker unregistered for iOS PWA logout');
-          }
-        }
-        if ('caches' in window) {
-          const cacheNames = await caches.keys();
-          await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
-          console.log('All caches cleared for iOS PWA logout');
-        }
-      }
-      await cleanupSupabase();
-      const { error } = await supabase.auth.signOut({ scope: 'local' });
-      if (error) {
-        console.error('Logout error:', error);
-        toast({
-          title: "Logout Error - Refreshing",
-          description: "Refreshing page to complete logout...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.replace('/auth');
-        }, 1000);
-        return;
-      }
-      toast({
-        title: "Berhasil Logout",
-        description: "Anda berhasil keluar dari akun.",
-      });
-      setTimeout(() => {
-        window.location.reload();
-        window.location.replace('/auth');
-      }, 1000);
-    } catch (error: any) {
-      console.error('Unexpected logout error:', error);
-      toast({
-        title: "Logout Error - Refreshing",
-        description: "Refreshing page to complete logout...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
+  const baseProductName = 'Jewelry';
+  const variants = {
+    'Silver': 3500000,
+    'Gold': 7000000
   };
 
+  const [quantities, setQuantities] = useState({
+    'Silver': 1,
+    'Gold': 0,
+  });
 
-  const productId = 'fitfactor_450k';
-  const productName = 'Fitfactor';
-  const price = 150000;
-
-  const [quantity, setQuantity] = useState(1);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -172,16 +62,25 @@ export default function FitfactorPaymentPage() {
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      setUserName(user.user_metadata.full_name || '');
-      setUserEmail(user.email || '');
-    }
-  }, [user]);
+  const handleQuantityChange = (variant, change) => {
+    setQuantities(prev => ({
+      ...prev,
+      [variant]: Math.max(0, prev[variant] + change)
+    }));
+  };
 
-  const handleIncrement = () => setQuantity(prev => prev + 1);
-  const handleDecrement = () => setQuantity(prev => Math.max(1, prev - 1));
-  const totalAmount = price * quantity;
+  let calculatedTotalAmount = Object.entries(quantities).reduce((acc, [variant, quantity]) => {
+    return acc + (variants[variant] * quantity);
+  }, 0);
+
+  const totalAmount = calculatedTotalAmount;
+
+  const totalQuantity = Object.values(quantities).reduce((acc, quantity) => acc + quantity, 0);
+
+  const productName = Object.entries(quantities)
+    .filter(([, quantity]) => quantity > 0)
+    .map(([variant, quantity]) => `${baseProductName} - ${variant} (x${quantity})`)
+    .join(', ');
 
   useEffect(() => {
     if (totalAmount > 5000000) {
@@ -193,6 +92,7 @@ export default function FitfactorPaymentPage() {
       });
     }
   }, [totalAmount, toast]);
+
 
   const paymentMethods = [
     { code: 'BCA_MANUAL', name: 'Manual Transfer BCA', description: '' },
@@ -232,39 +132,12 @@ export default function FitfactorPaymentPage() {
     }
 
     const fullAddress = `${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}`;
-    const initiateCheckoutEventId = crypto.randomUUID(); // Unique ID for InitiateCheckout
 
     setLoading(true);
     try {
-      // Facebook Pixel: InitiateCheckout
-      fbq('track', 'InitiateCheckout', {
-        content_ids: [productId],
-        content_name: productName,
-        value: totalAmount,
-        currency: 'IDR',
-        num_items: quantity,
-      }, { eventID: initiateCheckoutEventId });
-
-      // CAPI: InitiateCheckout
-      await sendCAPIEvent('InitiateCheckout', {
-        em: userEmail,
-        ph: phoneNumber,
-        fn: userName.split(' ')[0], // Assuming first name
-        ct: kota, // City
-        zp: kodePos, // Zip code
-        country: 'ID' // Assuming Indonesia
-      }, {
-        value: totalAmount,
-        currency: 'IDR',
-        content_ids: [productId],
-        content_type: 'product',
-        num_items: quantity,
-      }, initiateCheckoutEventId);
-
-
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
-          subscriptionType: 'fitfactor',
+          subscriptionType: 'jewelry',
           paymentMethod: selectedPaymentMethod,
           userName: userName,
           userEmail: userEmail,
@@ -275,12 +148,9 @@ export default function FitfactorPaymentPage() {
           kecamatan: kecamatan,
           kodePos: kodePos,
           amount: totalAmount,
-          quantity: quantity,
+          quantity: totalQuantity,
           productName: productName,
-          userId: user?.id,
-          affiliateRef: affiliateRef, // Pass affiliate reference
-          // Optionally pass the event ID to the backend if you want to store it with the payment
-          // initiateCheckoutEventId: initiateCheckoutEventId,
+          merchant_ref: 'EVG_' + Date.now().toString() + '_jewelry'
         }
       });
 
@@ -315,10 +185,6 @@ export default function FitfactorPaymentPage() {
           title: "Pembayaran Berhasil Dibuat",
           description: "Silakan selesaikan pembayaran.",
         });
-        // Store the initiateCheckoutEventId temporarily if needed for later purchase event,
-        // or ensure the backend can pass a common ID. For simplicity, we'll generate a new one
-        // for the final purchase confirmation if not persisted.
-        localStorage.setItem('lastInitiateCheckoutEventId', initiateCheckoutEventId);
       }
     } catch (error: any) {
       console.error('Tripay payment error:', error);
@@ -351,54 +217,22 @@ export default function FitfactorPaymentPage() {
     
     const tableName = 'global_product';
     const channel = supabase
-      .channel(`payment-status-fitfactor-${paymentData.tripay_reference}`)
+      .channel(`payment-status-jewelry-${paymentData.tripay_reference}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter: `tripay_reference=eq.${paymentData.tripay_reference}`},
-        async (payload) => { // Made async to await sendCAPIEvent
+        (payload) => {
           if (payload.new?.status === 'PAID') {
-            const purchaseEventId = crypto.randomUUID(); // Unique ID for Purchase
-            const initiateCheckoutEventId = localStorage.getItem('lastInitiateCheckoutEventId'); // Get ID from InitiateCheckout
-
-            // User Data for Purchase
-            const purchaseUserData = {
-              em: userEmail,
-              ph: phoneNumber,
-              fn: userName.split(' ')[0],
-              ct: kota,
-              zp: kodePos,
-              country: 'ID'
-            };
-
-            // Custom Data for Purchase
-            const purchaseCustomData = {
-              value: totalAmount,
-              currency: 'IDR',
-              content_ids: [productId],
-              content_name: productName,
-              content_type: 'product',
-              num_items: quantity,
-              transaction_id: payload.new?.tripay_reference,
-            };
-
-            // Facebook Pixel: Purchase event
-            fbq('track', 'Purchase', purchaseCustomData, { 
-                eventID: initiateCheckoutEventId || purchaseEventId // Reuse initiate ID if available, otherwise new ID
-            });
-
-            // CAPI: Purchase event
-            await sendCAPIEvent('Purchase', purchaseUserData, purchaseCustomData, initiateCheckoutEventId || purchaseEventId);
-
             toast({
                 title: "🎉 Pembayaran Berhasil!",
                 description: "Terima kasih, pembayaran Anda telah kami terima. Silakan hubungi CS untuk konfirmasi.",
                 duration: 0, 
                 action: (() => {
-                      const message = `Halo kak, saya sudah bayar untuk pesanan Fitfactor.\n\n` + 
+                      const message = `Halo kak, saya sudah bayar untuk pesanan Jewelry.\n\n` + 
                                       `Detail Pembayaran:\n` + 
                                       `- Nama: ${userName}\n` + 
                                       `- Email: ${userEmail}\n` + 
                                       `- Telepon: ${phoneNumber}\n` + 
                                       `- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}\n` + 
-                                      `- Produk: ${productName} (${quantity} unit)\n` + 
+                                      `- Produk: ${productName} (${totalQuantity} unit)\n` + 
                                       `- Total: ${formatCurrency(totalAmount)}\n` + 
                                       `- Metode: ${selectedPaymentMethod}\n` + 
                                       `- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}\n` + 
@@ -418,7 +252,6 @@ export default function FitfactorPaymentPage() {
                       );
                     })(),
             });
-            localStorage.removeItem('lastInitiateCheckoutEventId'); // Clean up
           }
         }
       ).subscribe();
@@ -426,7 +259,7 @@ export default function FitfactorPaymentPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast, userName, userEmail, phoneNumber, userAddress, selectedProvince, productName, quantity, totalAmount, selectedPaymentMethod, kota, kodePos]); // Added kota, kodePos to dependencies
+  }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast, userName, userEmail, phoneNumber, userAddress, selectedProvince, productName, totalQuantity, totalAmount, selectedPaymentMethod]);
 
   if (showPaymentInstructions && paymentData) {
     return (
@@ -443,14 +276,9 @@ export default function FitfactorPaymentPage() {
           </div>
         </div>
 
-              <div className="px-6 space-y-6">
-                <div className="text-center my-4">
-                  <h3 className="text-lg font-semibold">Gabung Subscription dan dapatkan diskon 30%++</h3>
-                  <Card className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black p-3 rounded-md text-center cursor-pointer" onClick={() => navigate('/whatispro')}>
-                        <p className="font-bold">eL Vision Subscription diskon 30-50% sepanjang tahun</p>
-                  </Card>
-                </div>
-                <Card>            <CardHeader>
+        <div className="px-6 space-y-6">
+          <Card>
+            <CardHeader>
               <CardTitle>Detail Pembayaran</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -514,21 +342,20 @@ export default function FitfactorPaymentPage() {
                 {paymentData.paymentMethod === 'BCA_MANUAL' && paymentData.status === 'UNPAID' && (
                   <div className="my-12">
                     <a
-                      href={`https://wa.me/62895325633487?text=${encodeURIComponent(`Halo kak, saya sudah melakukan transfer manual BCA untuk pesanan Fitfactor.<br/><br/>` + 
+                      href={`https://wa.me/62895325633487?text=${encodeURIComponent(`Halo kak, saya sudah melakukan transfer manual BCA untuk pesanan Jewelry.<br/><br/>` + 
 `Detail Pembayaran:<br/>` + 
 `- Nama: ${userName}<br/>` + 
 `- Email: ${userEmail}<br/>` + 
 `- Telepon: ${phoneNumber}<br/>` + 
 `- Alamat: ${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}<br/>` + 
-`- Produk: ${productName} (${quantity} unit)<br/>` + 
+`- Produk: ${productName} (${totalQuantity} unit)<br/>` + 
 `- Total: ${formatCurrency(totalAmount)}<br/>` + 
 `- Metode: Manual Transfer BCA<br/>` + 
 `- Ref TriPay: ${paymentData?.tripay_reference || 'N/A'}<br/>` + 
 `- Status: UNPAID (Menunggu Konfirmasi)<br/>` + 
 `${paymentData?.payCode ? `- VA/Kode Bayar: ${paymentData.payCode}<br/>` : ''}` + 
 `${paymentData?.qrUrl ? `- QR Code: ${paymentData.qrUrl}<br/>` : ''}` + 
-`Mohon konfirmasi pesanan saya. Terima kasih.`)}
-`}
+`Mohon konfirmasi pesanan saya. Terima kasih.`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full"
@@ -613,13 +440,13 @@ export default function FitfactorPaymentPage() {
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
-                    Checkout Fitfactor
+                    Checkout Jewelry
                 </h1>
             </div>
             {user ? (
-                <Button variant="outline" onClick={handleLogout}>Logout</Button>
+                <Button variant="outline" onClick={signOut}>Logout</Button>
             ) : (
-                <Button variant="outline" onClick={() => navigate('/auth?redirect=/fitfactor')}>Login</Button>
+                <Button variant="outline" onClick={() => navigate('/auth?redirect=/elroyaljewelry')}>Login</Button>
             )}
         </div>
       </div>
@@ -630,27 +457,30 @@ export default function FitfactorPaymentPage() {
             <CardTitle>1. Rangkuman Pesanan</CardTitle>
             </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <Label className="text-muted-foreground">Produk</Label>
-              <span className="font-medium">{productName}</span>
-            </div>
             <div className="flex justify-center my-4">
-              <img src={fitfactorImage} alt="Fitfactor Product" className="w-48 h-48 object-contain" />
+              <img src={jewelImage} alt="Jewelry Product" className="w-48 h-48 object-contain" />
             </div>
 
             <Separator/>
             
-            <div className="flex justify-between items-center">
-              <Label htmlFor="quantity" className="text-muted-foreground">Kuantitas</Label>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleDecrement}>
-                    <Minus className="h-4 w-4" />
-                </Button>
-                <span className="font-bold text-lg w-10 text-center">{quantity}</span>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleIncrement}>
-                    <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+            <div className="space-y-4">
+              {Object.entries(variants).map(([variantName, variantPrice]) => (
+                <div key={variantName} className="flex justify-between items-center">
+                  <div>
+                    <Label htmlFor={`quantity-${variantName}`} className="text-muted-foreground">{variantName}</Label>
+                    <p className="text-xs text-muted-foreground">{formatCurrency(variantPrice)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(variantName, -1)}>
+                        <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="font-bold text-lg w-10 text-center">{quantities[variantName]}</span>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(variantName, 1)}>
+                        <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
 
             <Separator/>

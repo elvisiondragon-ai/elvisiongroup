@@ -1,3 +1,6 @@
-This is a help file created for the `assist_code` folder.
-It can contain information about the various scripts, their purpose, and how to use them.
-This is just a placeholder and can be updated with more relevant information.
+The task has been completed successfully.
+- Renamed src/pages/3000.tsx to src/pages/usa_3000.tsx
+- Renamed src/pages/3000survey.tsx to src/pages/usa_3000survey.tsx
+- Updated src/App.tsx to reflect the new file names and route paths.
+- Deleted src/pages/osdiet.tsx, src/pages/formai.tsx, src/pages/1rule.tsx, and src/pages/IgnisQuest.tsx
+- Updated src/App.tsx to remove imports and routes for the deleted files.

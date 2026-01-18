@@ -1,3 +1,24 @@
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { 
+  TrendingDown, Frown, RotateCcw, Brain, Lightbulb, Heart, 
+  Sparkles, Target, Dumbbell, Award, AlertCircle, 
+  BookOpen, Star, Quote, Zap, Clock, Shield, Check, HelpCircle, 
+  Mail, CheckCircle, ArrowRight
+} from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -7,89 +28,258 @@ declare global {
   }
 }
 
-const PIXEL_ID = '3319324491540889';
+const PIXEL_ID = '1393383179182528'; // Updated PIXEL_ID from Pay3000.tsx
 
-/**
- * Initializes the Facebook Pixel and tracks a 'ViewContent' event.
- * This function should be called once per page load/route change.
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-export const initAndTrackPixel = () => {
-  if (typeof window === 'undefined') {
-    return;
-  }
+// Helper to send CAPI events - needs to be outside the component
+const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
 
-  // Standard Facebook Pixel initialization script
-  if (!window._fbq) {
-    (function(f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function() {
-        // eslint-disable-next-line prefer-spread, prefer-rest-params
-        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = !0;
-      n.version = '2.0';
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = !0;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    })(
-      window,
-      document,
-      'script',
-      'https://connect.facebook.net/en_US/fbevents.js'
-    );
-
-    window.fbq('init', PIXEL_ID);
-  }
-
-  // Track 'ViewContent' for entire pages as requested
-  window.fbq('track', 'ViewContent');
+// Simple cookie helper
+const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return undefined;
 };
 
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  ArrowRight,
-  Sparkles,
-  AlertCircle,
-  TrendingDown,
-  Frown,
-  RotateCcw,
-  Brain,
-  Heart,
-  Lightbulb,
-  BookOpen,
-  Dumbbell,
-  Target,
-  Award,
-  Play,
-  Headphones,
-  Quote,
-  Star,
-  Mail,
-  Shield,
-  Check,
-  Clock,
-  Zap,
-  HelpCircle,
-} from "lucide-react";
+// Helper to send CAPI events
+const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
+  try {
+    await fetch(CAPI_EDGE_FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pixelId: PIXEL_ID,
+        eventName,
+        userData: {
+          ...userData,
+          fbp: getCookie('_fbp'),
+          fbc: getCookie('_fbc'),
+          client_user_agent: navigator.userAgent
+        },
+        customData,
+        eventId
+      }),
+    });
+  } catch (e) {
+    console.error('CAPI Error:', e);
+  }
+};
+
+// Facebook Pixel functions (simplified to directly use window.fbq for now)
+const trackPageViewEvent = (customData: any, eventId: string, pixelId: string) => {
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', 'PageView', customData, { eventID: eventId });
+  }
+};
+
+const trackAddToCartEvent = (customData: any, eventId: string, pixelId: string) => {
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', 'AddToCart', customData, { eventID: eventId });
+  }
+};
+
+const trackCustomEvent = (eventName: string, customData: any, eventId: string, pixelId: string, userData: any = {}) => {
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('trackSingleCustom', pixelId, eventName, customData, { eventID: eventId });
+  }
+};
+
+const trackAddPaymentInfoEvent = (customData: any, eventId: string, pixelId: string, userData: any = {}) => {
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', 'AddPaymentInfo', customData, { eventID: eventId });
+  }
+};
+
+// Removed unused initFacebookPixelWithLogging
+
+const CountdownTimer = () => {
+    const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 15, seconds: 0 });
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
+                if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+                if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
+                return { hours: 0, minutes: 15, seconds: 0 }; // Reset loop
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    return (
+        <div className="bg-red-600 text-white p-3 text-center font-bold text-sm md:text-base animate-pulse">
+            🔥 Offer Ends In: {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
+        </div>
+    );
+};
+
+const WhatsAppButton = () => (
+  <a
+    href="https://wa.me/62895325633487"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="fixed bottom-24 right-5 z-50 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-transform transform hover:scale-110"
+    aria-label="Contact via WhatsApp"
+  >
+    <FaWhatsapp size={28} />
+  </a>
+);
 
 const SlimPage = () => {
-  // Hero component logic
-  const scrollToPricing = () => {
-    document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const affiliateRef = searchParams.get('ref');
+  const { toast } = useToast();
+  const { user, cleanupSupabase } = useAuth();
+
+  // Payment State
+  const productNameBackend = 'usa_ebookslim';
+  const displayProductName = 'Slim Without Suffering: Ebook Program';
+  const originalPrice = 30; // Assuming USD
+  const productPrice = 20; // Assuming USD
+  const totalQuantity = 1;
+  const totalAmount = productPrice;
+
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('PAYPAL'); // Default payment method
+  const [loading, setLoading] = useState(false);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
+  const purchaseFiredRef = useRef(false);
+
+  const paymentMethods = [
+    { code: 'PAYPAL', name: 'PayPal', description: 'Pay securely with PayPal' },
+  ];
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', { // Changed to en-US for USD display
+      style: 'currency',
+      currency: 'USD', // Assuming USD
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied Successfully",
+      description: "Text has been copied to clipboard.",
+    });
+  };
+
+  const scrollToCheckout = () => {
+    const checkoutSection = document.getElementById('checkout-section');
+    if (checkoutSection) {
+      checkoutSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const sendCapiEvent = async (eventName: string, eventData: any, overrideEventId?: string) => {
+    try {
+      // Re-using the global sendCAPIEvent, which already has pixelId
+      await sendCAPIEvent(eventName, { email: userEmail, phone: phoneNumber }, eventData, overrideEventId);
+    } catch (err) {
+      console.error('Failed to send CAPI event:', err);
+    }
+  };
+
+  const handleCreatePayment = async () => {
+    if (!userEmail || !userEmail.includes('@')) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address to receive your files.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const currentUserId = user?.id;
+    const derivedUserName = userEmail.split('@')[0];
+
+    setLoading(true);
+    try {
+      const eventId = crypto.randomUUID();
+      const userData = { em: userEmail };
+
+      const eventData = {
+        content_name: displayProductName,
+        value: totalAmount,
+        currency: 'USD'
+      };
+
+      // 1. Track AddToCart
+      trackAddToCartEvent(eventData, eventId, PIXEL_ID);
+      sendCapiEvent('AddToCart', eventData);
+
+      // 2. Track AddPaymentInfo
+      trackAddPaymentInfoEvent(eventData, eventId, PIXEL_ID, userData);
+      sendCapiEvent('AddPaymentInfo', eventData);
+
+      // 3. Track InitiateCheckout
+      trackCustomEvent('InitiateCheckout', eventData, eventId, PIXEL_ID, userData);
+      sendCapiEvent('InitiateCheckout', eventData);
+
+      // Create Payment via Supabase function
+      const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
+        body: {
+          subscriptionType: productNameBackend,
+          paymentMethod: selectedPaymentMethod, 
+          userName: derivedUserName,
+          userEmail: userEmail,
+          phoneNumber: '0000000000', // Placeholder as it might be required by backend
+          amount: totalAmount,
+          quantity: totalQuantity,
+          productName: displayProductName,
+          userId: currentUserId,
+          affiliateRef: affiliateRef,
+        }
+      });
+
+      if (error || !data?.success) {
+        toast({
+          title: "Failed to Process",
+          description: data?.error || error?.message || "System error occurred.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (data?.success && data?.checkoutUrl) {
+        // For PayPal, we expect a redirect URL
+        window.location.href = data.checkoutUrl;
+      } else {
+        toast({
+          title: "Payment Initialization Failed",
+          description: "Could not get checkout URL from payment gateway.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('Payment Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to contact payment server.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Removed Realtime Payment Listener as it's not applicable for PayPal redirect flow
+  // (User will be redirected to PayPal, and upon completion, redirected back, where
+  // a success page or webhook will handle the final status update).
+
+  // Hero component logic
+  // const scrollToPricing = () => {
+  //   document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+  // };
 
   // Problem component logic
   const problems = [
@@ -129,12 +319,6 @@ const SlimPage = () => {
     }
   ];
 
-  // AudioTeaser component logic
-  const [isPlaying, setIsPlaying] = useState(false);
-  const handlePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
-
   // Contents component logic
   const chapters = [
     {
@@ -163,32 +347,31 @@ const SlimPage = () => {
       number: "CHAPTER 4",
       title: "Joyful Movement - Movement Without Force",
       description: "Forget torturous gym sessions. Find movements you enjoy and activate the 'Abundance Loop' - the more you enjoy, the more consistent, the slimmer you get.",
-      highlights: ["Intuitive Eating principles", "Movements that release dopamine", "Avoiding the over-exercise trap"]
+      highlights: []
     },
     {
       icon: Award,
       number: "CHAPTER 5",
       title: "Permanent Consistency & Anna's Success Story",
       description: "A real case study: How Anna (35, mother of 2) lost 18 kg without a strict diet and even got a promotion thanks to her new confidence.",
-      highlights: ["Anna's transformation timeline", "Anti-self-sabotage strategies", "Long-term maintenance"]
+      highlights: []
     }
   ];
 
-  // Pricing component logic
+  // Pricing component logic - this will be replaced with the checkout form
   const features = [
     "5 Comprehensive Chapters (120+ pages)",
-    "Subconscious Mind Therapy Audio",
     "Case Study (Complete Timeline)",
     "Lifetime Access",
     "30-Day Money-Back Guarantee"
   ];
-  const handleCTA = () => {
-    window.location.href = '/slim/co';
-  };
+  // const handleCTA = () => {
+  //   window.location.href = '/slim/co'; // This will be removed
+  // };
 
-  useEffect(() => {
-    initAndTrackPixel();
-  }, []);
+  // useEffect(() => {
+  //   initAndTrackPixel(); // This will be replaced by the more detailed pixel tracking
+  // }, []);
 
   // FAQ component logic
   const faqs = [
@@ -201,16 +384,12 @@ const SlimPage = () => {
       answer: "Everyone is different, but most users report a mindset change in the first 2-3 weeks (calmer, no food cravings), and visible weight loss in the 2nd month. Anna in the case study lost 18 kg in 8 months consistently without a yo-yo effect."
     },
     {
-      question: "Do I have to listen to the audio every day?",
-      answer: "For optimal results, listen to the audio 3-5 times a week during sleep or meditation. The key is consistency, not intensity. The audio is designed to be listened to while sleeping (planting suggestions into the subconscious)."
-    },
-    {
       question: "Does this include a diet plan or meal menu?",
       answer: "No. This is a mental reprogramming method. We don't provide a diet menu because our philosophy is 'Intuitive Eating' - eat what your body asks for, but from a changed mental identity. You will naturally choose healthier foods."
     },
     {
       question: "How do I access the e-book after purchase?",
-      answer: "After successful payment, you will immediately receive an email with a download link for the e-book (PDF) and all audio files (MP3). Lifetime access, downloadable to any device."
+      answer: "After successful payment, you will immediately receive an email with a download link for the e-book (PDF). Lifetime access, downloadable to any device."
     },
     {
       question: "Are there any special requirements? Age? Health conditions?",
@@ -262,7 +441,7 @@ const SlimPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
                             <Button
                               size="lg"
-                              onClick={scrollToPricing}
+                              onClick={scrollToCheckout}
                               className="bg-emerald-500 text-white px-8 py-6"
                             >
                               Get It Now
@@ -405,77 +584,6 @@ const SlimPage = () => {
         </div>
       </section>
 
-      {/* Audio Teaser Section */}
-      <section className="py-20 bg-[var(--gradient-section)]">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            {/* Main Audio Card */}
-            <div className="bg-card border border-primary/30 rounded-2xl p-8 md:p-12 shadow-[var(--shadow-card)] space-y-6 relative overflow-hidden">
-              {/* Decorative Elements */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl" />
-              
-              <div className="relative z-10 space-y-6">
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full border border-accent/20">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="text-sm font-medium">Exclusive Bonus</span>
-                </div>
-
-                {/* Heading */}
-                <div className="space-y-3">
-                  <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                    Listen to a Subconscious Therapy Excerpt
-                  </h2>
-                  <p className="text-lg text-muted-foreground">
-                    Feel the difference in just 2 minutes. This guided audio will help you reprogram your brain while you sleep.
-                  </p>
-                </div>
-
-                {/* Audio Player UI */}
-                <div className="text-center space-y-4">
-                  <h3 className="text-2xl font-bold text-foreground">Sample Diet Affirmation</h3>
-                  <audio controls autoPlay>
-                    <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/diet/samplediet.MP3" type="audio/mpeg" />
-                    Your browser does not support the audio element.
-                  </audio>
-                </div>
-
-                {/* Benefits */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Headphones className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground text-sm">Binaural Beats Technology</h4>
-                      <p className="text-sm text-muted-foreground">Special frequencies for deep relaxation</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="w-4 h-4 text-accent" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground text-sm">Embedded Affirmations</h4>
-                      <p className="text-sm text-muted-foreground">Positive suggestions enter the subconscious</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Note */}
-                <div className="bg-primary/5 border-l-4 border-primary rounded-r-lg p-4">
-                  <p className="text-sm text-foreground">
-                    <span className="font-semibold">💡 Tip:</span> Listen with headphones in a quiet room for maximum results. 
-                    The full ebook contains 5+ different audios for various scenarios.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Contents Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
@@ -493,7 +601,7 @@ const SlimPage = () => {
               </h2>
               
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                5 comprehensive chapters with a total of 120+ practical pages, complete with guided audio and worksheets.
+                5 comprehensive chapters with a total of 120+ practical pages, complete with worksheets.
               </p>
             </div>
 
@@ -524,7 +632,7 @@ const SlimPage = () => {
 
                       {/* Highlights */}
                       <ul className="space-y-2 pt-2">
-                        {chapter.highlights.map((highlight, idx) => (
+                        {chapter.highlights?.map((highlight, idx) => (
                           <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
                             <span className="text-primary mt-0.5">✓</span>
                             <span>{highlight}</span>
@@ -546,10 +654,6 @@ const SlimPage = () => {
                 <h3 className="text-2xl font-bold text-foreground">Exclusive Bonuses</h3>
               </div>
               <ul className="space-y-3 text-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-accent font-bold">+</span>
-                  <span><strong>Therapy Audio</strong> for various scenarios (sleep, meditation, workout)</span>
-                </li>
                 <li className="flex items-start gap-2">
                   <span className="text-accent font-bold">+</span>
                   <span><strong>EBOOK</strong> for tracking progress and journaling</span>
@@ -640,7 +744,7 @@ const SlimPage = () => {
                   </p>
                   
                   <p className="leading-relaxed">
-                    With the subconscious therapy audio she listened to every night before bed, 
+                    With the Mental Abundance Method, 
                     Anna began to plant new suggestions: <em className="text-primary">"I am a woman who is naturally healthy and ideal."</em>
                   </p>
 
@@ -734,7 +838,11 @@ const SlimPage = () => {
             <div className="bg-card border-2 border-primary/30 rounded-2xl shadow-[var(--shadow-card)] overflow-hidden max-w-2xl mx-auto">
               {/* Header */}
               <div className="bg-[var(--gradient-hero)] p-8 text-center text-black space-y-4">
-                <h3 className="text-2xl font-bold text-white">Complete E-book + Audio Package</h3>
+                <div className="flex flex-wrap justify-center gap-2 mb-2">
+                  <span className="bg-black/10 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">$3000 VIP</span>
+                  <span className="bg-black/10 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">$20 EBOOK HEALTH</span>
+                </div>
+                <h3 className="text-2xl font-bold text-white">usa_ebookslim: Complete Package</h3>
                 <div className="space-y-2">
                   <div className="text-white/80 text-lg line-through">$30</div>
                   <div className="text-white md:text-6xl font-bold">$20</div>
@@ -776,18 +884,30 @@ const SlimPage = () => {
 
 
                 {/* Guarantee */}
-                <div className="bg-muted/50 rounded-xl p-4 text-center">
-                  <p className="text-sm text-foreground">
+                <div className="bg-muted/50 rounded-xl p-4 text-center space-y-4">
+                  <div className="space-y-2 text-left">
+                    <label htmlFor="userEmail" className="text-sm font-medium text-foreground ml-1">Email Address</label>
+                    <Input
+                      id="userEmail"
+                      type="email"
+                      placeholder="Enter your email to receive files..."
+                      value={userEmail}
+                      onChange={(e) => setUserEmail(e.target.value)}
+                      className="bg-background px-6 py-6 rounded-full border-2 border-primary/20 focus:border-primary transition-all text-center"
+                    />
+                  </div>
+
+                  <p className="text-sm text-foreground pt-2">
                     <strong className="text-primary">💯 100% Risk-Free Guarantee:</strong>
                     {" "}If within 30 days you feel this method is useless after trying it, 
                     we will refund your money without questions.
                   </p>
                   <Button
                     size="lg"
-                    onClick={handleCTA}
-                    className="mt-4 w-full bg-emerald-500 text-white text-lg py-4"
+                    onClick={handleCreatePayment}
+                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xl font-bold py-8 rounded-full shadow-lg transition-all transform hover:scale-[1.02]"
                   >
-                    Pay Now
+                    Pay with Paypal now
                   </Button>
                 </div>
               </div>
@@ -884,7 +1004,7 @@ const SlimPage = () => {
               </p>
                             <Button
                               size="lg"
-                              onClick={scrollToPricing}
+                              onClick={scrollToCheckout}
                               className="bg-emerald-500 text-white px-8 py-6"
                             >
                               Start Your Transformation Now
@@ -912,7 +1032,7 @@ const SlimPage = () => {
               <h4 className="font-semibold text-background/90">Information</h4>
               <ul className="space-y-2 text-sm text-background/70">
                 <li>
-                  <a href="#pricing" className="hover:text-background transition-colors">
+                  <a href="#checkout-section" className="hover:text-background transition-colors">
                     Pricing & Packages
                   </a>
                 </li>

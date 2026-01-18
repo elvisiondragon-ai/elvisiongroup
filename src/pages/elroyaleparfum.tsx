@@ -454,7 +454,7 @@ export default function ParfumPaymentPage() {
             {user ? (
                 <Button variant="outline" onClick={signOut}>Logout</Button>
             ) : (
-                <Button variant="outline" onClick={() => navigate('/auth?redirect=/parfum')}>Login</Button>
+                <Button variant="outline" onClick={() => navigate('/auth?redirect=/elroyaleparfum')}>Login</Button>
             )}
         </div>
       </div>

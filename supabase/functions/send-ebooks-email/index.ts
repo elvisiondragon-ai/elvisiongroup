@@ -22,7 +22,8 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Baca panduan pola makan dengan teliti.",
       "Siapkan bahan makanan sesuai daftar belanja.",
       "Mulai jurnal harian Anda besok pagi."
-    ]
+    ],
+    lang: "id"
   },
   'ebook_elvision': {
     subject: "📘 DOWNLOAD: Ebook eL Vision Premium",
@@ -34,7 +35,8 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Unduh ebook ke perangkat Anda.",
       "Pelajari materi dasar terlebih dahulu.",
       "Gabung komunitas Telegram jika tersedia."
-    ]
+    ],
+    lang: "id"
   },
   'ebook_health20': {
     subject: "🌿 AKSES DOWNLOAD: Protokol Pemulihan Kesehatan Anda",
@@ -46,7 +48,8 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Dengarkan audio setiap malam sebelum tidur (wajib earphone).",
       "Baca ebook untuk protokol diet.",
       "Lakukan konsisten minimal 21 hari."
-    ]
+    ],
+    lang: "id"
   },
   'ebook_percayadiri': {
     subject: "🔥 AKSES DOWNLOAD: Paket Pria Alpha Anda",
@@ -59,7 +62,8 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Gunakan earphone untuk Audio Therapy.",
       "Dengarkan 'Deep Alpha Reset' saat akan tidur.",
       "Dengarkan 'Morning Glory' saat bangun pagi."
-    ]
+    ],
+    lang: "id"
   },
   'ebook_feminine': {
     subject: "✨ AKSES DOWNLOAD: Paket Feminine Magnetism Anda",
@@ -72,7 +76,8 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Gunakan earphone agar gelombang Theta bekerja maksimal.",
       "Dengarkan 'Goddess Awakening' setiap malam sebelum tidur.",
       "Dengarkan 'Morning Radiance' untuk memulai hari dengan energi feminin."
-    ]
+    ],
+    lang: "id"
   },
   'ebook_uangpanas': {
     subject: "🔥 AKSES DOWNLOAD: Sistem Uang Panas (Lead Magnet + Audio)",
@@ -85,7 +90,8 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Download Ebook & Lead Magnet Pack segera.",
       "Dengarkan Audio 'Money Magnet' setiap pagi dan malam.",
       "Pelajari modul Affiliate untuk mulai hasilkan komisi 50%."
-    ]
+    ],
+    lang: "id"
   },
   'vip_coaching': {
     subject: "💎 VIP CONFIRMATION: 6 Weeks eL Vision Program",
@@ -98,7 +104,49 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Send the pre-filled confirmation message.",
       "Our admin will arrange your first session schedule."
     ],
-    btnText: "WHATSAPP CONFIRMATION"
+    btnText: "WHATSAPP CONFIRMATION",
+    lang: "en"
+  },
+  // --- USA PRODUCTS (ENGLISH) ---
+  'usa_ebookhealth': {
+    subject: "🌿 DOWNLOAD ACCESS: Your Health Recovery Protocol",
+    downloadLink: "https://drive.google.com/drive/folders/1E2iYI6JLtZ73F3jggHEHkke6IniRWaxB?usp=sharing",
+    color: "#004d40", // Teal/Dark Green
+    title: "Start Your Healing Journey",
+    description: "Thank you for your trust. This folder contains your Recovery Ebook and Audio Therapy.",
+    instructions: [
+      "Listen to the audio every night before sleep (earphones mandatory).",
+      "Read the ebook for the diet protocol.",
+      "Be consistent for at least 21 days."
+    ],
+    lang: "en"
+  },
+  'usa_ebookslim': {
+    subject: "🥗 DOWNLOAD ACCESS: Slim Without Suffering Program",
+    downloadLink: "https://docs.google.com/document/d/1Xy--tVqilrJ-YNeQXXc9OjiDvmDCC_4l/edit?usp=sharing&ouid=105986209873893322274&rtpof=true&sd=true", // Using existing diet link placeholder
+    color: "#4CAF50", // Green
+    title: "Your Slimming Journey Begins!",
+    description: "Thank you for joining. Your complete diet guide is ready to access.",
+    instructions: [
+      "Read the meal plan guide carefully.",
+      "Prepare your groceries according to the shopping list.",
+      "Start your daily journal tomorrow morning."
+    ],
+    lang: "en"
+  },
+  'usa_3000': {
+    subject: "💎 VIP CONFIRMATION: 6 Weeks eL Vision Program",
+    downloadLink: "https://wa.me/62895325633487?text=HI%20I%20have%20paid%20for%20VIP%206%20weeks",
+    color: "#004d40",
+    title: "Welcome to the VIP Program",
+    description: "Your payment has been received. The next step is to confirm your 1:1 session schedule.",
+    instructions: [
+      "Click the button below to connect with our WhatsApp Admin.",
+      "Send the pre-filled confirmation message.",
+      "Our admin will arrange your first session schedule."
+    ],
+    btnText: "WHATSAPP CONFIRMATION",
+    lang: "en"
   }
 };
 
@@ -107,6 +155,10 @@ function getProductKey(productName: string): string {
   if (!productName) return 'ebook_elvision'; // Default fallback
   const lower = productName.toLowerCase();
   
+  if (lower.includes('usa_ebookhealth') || lower.includes('ebookhealthlp')) return 'usa_ebookhealth';
+  if (lower.includes('usa_ebookslim')) return 'usa_ebookslim';
+  if (lower.includes('usa_3000')) return 'usa_3000';
+
   if (lower.includes('diet')) return 'ebook_diet';
   if (lower.includes('health') || lower.includes('pemulihan')) return 'ebook_health20';
   if (lower.includes('percayadiri') || lower.includes('pria alpha') || lower.includes('alpha')) return 'ebook_percayadiri';
@@ -187,6 +239,7 @@ const handler = async (req: Request) => {
     const reference = body.reference || 'N/A';
     const productNameInput = body.subscriptionType || body.productName || 'Unknown Product';
     const userName = body.userName || recipientEmail.split('@')[0];
+    const currency = body.currency || 'IDR';
 
     // Determine Product Template
     const productKey = getProductKey(productNameInput);
@@ -194,9 +247,17 @@ const handler = async (req: Request) => {
     
     console.log(`📊 Processing email for: ${recipientEmail} | Product: ${productNameInput} -> Key: ${productKey}`);
 
-    const displayAmount = amount < 1000 
-        ? `$${Number(amount).toFixed(2)} USD` 
-        : `Rp ${Number(amount).toLocaleString('id-ID')}`;
+    let displayAmount = '';
+    if (currency === 'USD') {
+        displayAmount = `$${Number(amount).toFixed(2)} USD`;
+    } else if (currency === 'IDR') {
+        displayAmount = `Rp ${Number(amount).toLocaleString('id-ID')}`;
+    } else {
+        // Fallback detection if currency not explicitly sent
+        displayAmount = amount < 1000 
+            ? `$${Number(amount).toFixed(2)} USD` 
+            : `Rp ${Number(amount).toLocaleString('id-ID')}`;
+    }
 
     // Add to list first
     await addToMailketingList(recipientEmail, userName);
@@ -205,8 +266,19 @@ const handler = async (req: Request) => {
     const mainColor = template.color || '#333';
     const accentColor = template.accentColor || '#ffffff';
     
+    const htmlLang = template.lang || 'id';
+    const greeting = htmlLang === 'en' ? 'Hello' : 'Halo';
+    const instructionLabel = htmlLang === 'en' ? 'Instructions:' : 'Instruksi:';
+    const productLabel = htmlLang === 'en' ? 'Product:' : 'Produk:';
+    const referenceLabel = htmlLang === 'en' ? 'Reference:' : 'Referensi:';
+    const totalLabel = htmlLang === 'en' ? 'Total:' : 'Total:';
+    const helpText = htmlLang === 'en' 
+        ? 'Need help? Reply to this email or contact us via WhatsApp.' 
+        : 'Butuh bantuan? Balas email ini atau hubungi kami via WhatsApp.';
+    const btnText = template.btnText || (htmlLang === 'en' ? 'DOWNLOAD NOW' : 'DOWNLOAD SEKARANG');
+
     const htmlContent = `<!DOCTYPE html>
-<html lang="id">
+<html lang="${htmlLang}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -233,31 +305,31 @@ const handler = async (req: Request) => {
             <h1>${template.title}</h1>
         </div>
         <div class="content">
-            <h2>Halo ${userName},</h2>
+            <h2>${greeting} ${userName},</h2>
             <p>${template.description}</p>
             
             <div style="text-align: center;">
                 <a href="${template.downloadLink}" class="btn">
-                    ${template.btnText || 'CLICK ME'}
+                    ${btnText}
                 </a>
             </div>
 
             <div class="instruction-list">
-                <p style="font-weight: bold; margin-top: 0; color: ${mainColor};">Instruksi:</p>
+                <p style="font-weight: bold; margin-top: 0; color: ${mainColor};">${instructionLabel}</p>
                 <ul>
                     ${template.instructions.map((inst: string) => `<li>${inst}</li>`).join('')}
                 </ul>
             </div>
 
             <div class="details">
-                <p><strong>Produk:</strong> ${productNameInput}</p>
-                <p><strong>Referensi:</strong> ${reference}</p>
-                <p><strong>Total:</strong> ${displayAmount}</p>
+                <p><strong>${productLabel}</strong> ${productNameInput}</p>
+                <p><strong>${referenceLabel}</strong> ${reference}</p>
+                <p><strong>${totalLabel}</strong> ${displayAmount}</p>
             </div>
         </div>
         <div class="footer">
             <p>&copy; 2026 eL Vision Group. All Rights Reserved.</p>
-            <p>Butuh bantuan? Balas email ini atau hubungi kami via WhatsApp.</p>
+            <p>${helpText}</p>
         </div>
     </div>
 </body>

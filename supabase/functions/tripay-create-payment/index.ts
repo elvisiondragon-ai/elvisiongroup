@@ -95,9 +95,27 @@ const productCatalog = {
     requiresAuth: false,
     physical: true
   },
+  'ebookhealthlp': {
+    name: 'Ebook Health Recovery Protocol',
+    price: 300000,
+    requiresAuth: false,
+    physical: true
+  },
+  'usa_ebookslim': {
+    name: 'Slim Without Suffering Ebook',
+    price: 300000,
+    requiresAuth: false,
+    physical: true
+  },
   'VIP6WEEK': {
     name: 'VIP SESSION 6 Week',
     price: 24000000, // 1500 USD * 16000 IDR
+    requiresAuth: false,
+    physical: true
+  },
+  'usa_3000': {
+    name: 'EL Vision 3000 Coaching',
+    price: 48000000, // 3000 USD * 16000 IDR
     requiresAuth: false,
     physical: true
   },
@@ -311,13 +329,15 @@ serve(async (req)=>{
         const accessToken = tokenData.access_token;
 
         // 5b. Create Order
-        // Note: We hardcode $20.00 USD for ebook_health20, otherwise convert IDR to USD approx (or use fixed mapping)
-        // For safety, let's use a fixed USD price map for now or default to simple conversion
+        // Note: We hardcode USD for specific products, otherwise convert IDR to USD approx
         let usdAmount = "20.00"; 
         if (subscriptionType === 'VIP6WEEK') {
             usdAmount = "1500.00";
-        } else if (subscriptionType !== 'ebook_health20') {
-            // Fallback for other products if someone tries to pay via PayPal (Simple /15000 approx)
+        } else if (subscriptionType === 'usa_3000') {
+            usdAmount = "3000.00";
+        } else if (subscriptionType === 'ebookhealthlp' || subscriptionType === 'ebook_health20' || subscriptionType === 'usa_ebookslim') {
+            usdAmount = "20.00";
+        } else {
              usdAmount = (amount / 16000).toFixed(2);
         }
 
@@ -332,8 +352,8 @@ serve(async (req)=>{
                 description: formattedProductName
             }],
             application_context: {
-                return_url: "https://app.elvisiongroup.com/payment/paypal-finish",
-                cancel_url: "https://app.elvisiongroup.com/ebookhealthlp",
+                return_url: "https://app.elvisiongroup.com/usa/usa_paypal_finish",
+                cancel_url: "https://app.elvisiongroup.com/usa/usa_ebookhealth",
                 user_action: "PAY_NOW",
                 landing_page: "BILLING"
             }

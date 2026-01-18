@@ -432,7 +432,7 @@ export default function IntroLanding() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <button 
-              onClick={() => window.location.href = 'https://app.elvisiongroup.com/ebookhealthlp'}
+              onClick={() => window.location.href = '/usa/usa_ebookhealth'}
               className="px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl font-bold text-xl hover:scale-105 transition-transform shadow-2xl shadow-blue-500/50"
             >
               Begin Your Transformation

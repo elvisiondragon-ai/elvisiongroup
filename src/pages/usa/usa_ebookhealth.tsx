@@ -114,7 +114,7 @@ const EbookHealthLP = () => {
       // 1. Create Order using Supabase Client (Handles Auth automatically)
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
-          subscriptionType: "ebook_health20",
+          subscriptionType: "ebookhealthlp",
           paymentMethod: "PAYPAL",
           userEmail: email, // Use the user's input email
           userName: email.split('@')[0], // Default name from email

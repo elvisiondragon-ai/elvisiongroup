@@ -8,7 +8,7 @@ const DisplayPage = () => {
   const links = [
     {
       title: "Ebook Health",
-      url: "https://app.elvisiongroup.com/ebookhealthlp",
+      url: "/usa/usa_ebookhealth",
       icon: BookOpen,
       description: "Optimize your health with eL Vision",
       color: "from-emerald-500 to-teal-600",

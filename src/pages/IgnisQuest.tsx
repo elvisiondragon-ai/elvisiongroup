@@ -160,7 +160,7 @@ export function IgnisQuest({ onNavigate }: IgnisQuestProps) {
                 Mulai Meditasi
               </Button>
               <Button 
-                variant="outline"
+                variant="outline" 
                 onClick={() => onNavigate("audio-therapy")}
                 className="border-orange-500 text-orange-500 hover:bg-orange-500/10 shadow-lg hover:shadow-orange-500/20"
               >

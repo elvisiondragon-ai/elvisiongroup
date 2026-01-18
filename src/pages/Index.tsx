@@ -8,8 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { AudioTherapy } from "./AudioTherapy";
 import { SpiritualJournal } from "./SpiritualJournal";
 import { MeditationSessions } from "./MeditationSessions";
-
 import { IgnisQuest } from "./IgnisQuest";
+
+
 import { Payment } from "./Payment";
 import { JournalAnalytics } from "@/components/JournalAnalytics";
 import { EliteHabit } from "@/components/EliteHabit";
@@ -199,6 +200,7 @@ const Index = () => {
 
       case "ignis-quest":
         return <IgnisQuest onNavigate={setActiveTab} />;
+        
       case "payment":
         return <Payment onNavigate={setActiveTab} />;
       case "blood-circulation":

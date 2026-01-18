@@ -34,10 +34,10 @@ interface Withdrawal {
 
 const productOptions = [
   { name: 'Fitfactor', url: 'https://app.elvisiongroup.com/fitfactor' },
-  { name: 'eL Royale Parfum', url: 'https://app.elvisiongroup.com/parfum' },
-  { name: 'eL Royale Jewelry', url: 'https://app.elvisiongroup.com/jewelry' },
+  { name: 'eL Royale Parfum', url: 'https://app.elvisiongroup.com/elroyaleparfum' },
+  { name: 'eL Royale Jewelry', url: 'https://app.elvisiongroup.com/elroyaljewelry' },
   { name: 'Drelf', url: 'https://app.elvisiongroup.com/drelf' },
-  { name: 'Hungry Later Diet', url: 'https://app.elvisiongroup.com/diet' },
+  { name: 'Hungry Later Diet', url: 'https://app.elvisiongroup.com/ebook_langsing' },
   { name: 'Ebook eL Vision', url: 'https://app.elvisiongroup.com/ebook_elvision' },
   { name: 'Sistem Uang Panas (Komisi 50%)', url: 'https://app.elvisiongroup.com/uangpanas' },
 ];

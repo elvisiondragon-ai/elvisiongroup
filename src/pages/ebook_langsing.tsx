@@ -552,7 +552,7 @@ export default function DietPaymentPage() {
             {user ? (
                 <Button variant="outline" onClick={handleLogout}>Logout</Button>
             ) : (
-                <Button variant="outline" onClick={() => navigate('/auth?redirect=/diet')}>Login</Button>
+                <Button variant="outline" onClick={() => navigate('/auth?redirect=/ebook_langsing')}>Login</Button>
             )}
         </div>
       </div>
