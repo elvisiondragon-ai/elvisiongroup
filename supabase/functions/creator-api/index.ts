@@ -57,12 +57,13 @@ Deno.serve(async (req) => {
     const productFile = formData.get('product') as File;
     const avatarFile = formData.get('avatar') as File | null;
     const userPrompt = formData.get('prompt') as string || 'Make it beautiful';
+    const model = formData.get('model') as string || 'google/gemini-2.5-flash-image';
 
     if (!productFile) {
       throw new Error('Product image is required');
     }
 
-    console.log(`Processing request: ${userPrompt}`);
+    console.log(`Processing request: ${userPrompt} using model: ${model}`);
 
     // 2. Upload Input Images
     const productExt = productFile.type.split('/')[1] || 'jpg';
@@ -87,7 +88,7 @@ Deno.serve(async (req) => {
     }
 
     // 3. Generate Image with Gemini 2.5 Flash Image (Direct Img2Img)
-    console.log('Generating image with google/gemini-2.5-flash-image...');
+    console.log(`Generating image with ${model}...`);
     
     const messages = [
       {
@@ -115,7 +116,7 @@ Deno.serve(async (req) => {
         'X-Title': 'eL Vision Creator',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image', 
+        model: model, 
         messages: messages,
         // Optional: specific parameters if needed, but standard chat often suffices
       })

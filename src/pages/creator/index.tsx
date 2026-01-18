@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, Upload, Sparkles, Download, Image as ImageIcon, User, X } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Loader2, Upload, Sparkles, Download, Image as ImageIcon, User, X, Zap, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,6 +16,7 @@ export default function CreatorPage() {
   const [loading, setLoading] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
+  const [model, setModel] = useState("standard");
 
   const handleProductChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -54,6 +57,9 @@ export default function CreatorPage() {
         formData.append('avatar', avatarImage);
       }
       formData.append('prompt', prompt || "Make it look professional and aesthetic");
+      
+      const selectedModel = model === 'pro' ? 'google/gemini-3-pro-image-preview' : 'google/gemini-2.5-flash-image';
+      formData.append('model', selectedModel);
 
       const { data, error } = await supabase.functions.invoke('creator-api', {
         body: formData,
@@ -211,6 +217,39 @@ export default function CreatorPage() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Model Selection */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-300">Model Selection</Label>
+                <RadioGroup defaultValue="standard" value={model} onValueChange={setModel} className="grid grid-cols-2 gap-4">
+                  <div>
+                    <RadioGroupItem value="standard" id="standard" className="peer sr-only" />
+                    <Label
+                      htmlFor="standard"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-gray-600 bg-gray-900 p-4 hover:bg-gray-800 hover:text-white peer-data-[state=checked]:border-purple-500 peer-data-[state=checked]:bg-purple-950/20 [&:has([data-state=checked])]:border-purple-500 cursor-pointer transition-all"
+                    >
+                      <Zap className="mb-3 h-6 w-6 text-yellow-400" />
+                      <div className="text-center">
+                        <div className="font-semibold text-white">Standard</div>
+                        <div className="text-xs text-gray-400 mt-1">Fast Generation</div>
+                      </div>
+                    </Label>
+                  </div>
+                  <div>
+                    <RadioGroupItem value="pro" id="pro" className="peer sr-only" />
+                    <Label
+                      htmlFor="pro"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-gray-600 bg-gray-900 p-4 hover:bg-gray-800 hover:text-white peer-data-[state=checked]:border-pink-500 peer-data-[state=checked]:bg-pink-950/20 [&:has([data-state=checked])]:border-pink-500 cursor-pointer transition-all"
+                    >
+                      <Crown className="mb-3 h-6 w-6 text-pink-400" />
+                      <div className="text-center">
+                        <div className="font-semibold text-white">Pro</div>
+                        <div className="text-xs text-gray-400 mt-1">High Quality</div>
+                      </div>
+                    </Label>
+                  </div>
+                </RadioGroup>
               </div>
 
               {/* Prompt */}
