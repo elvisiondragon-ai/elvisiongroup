@@ -44,7 +44,20 @@ Deno.serve(async (req) => {
   }
 
   // --- Configuration ---
-  const FACEBOOK_ACCESS_TOKEN = Deno.env.get('METACAPI');
+  const { pixelId, eventName, userData, customData, eventId, testCode } = await req.json();
+
+  let FACEBOOK_ACCESS_TOKEN = Deno.env.get('METACAPI');
+  
+  // Specific Token for 3000 Coaching Pixel
+  if (pixelId === '1393383179182528') {
+      const token3000 = Deno.env.get('METACAPI_3000');
+      if (token3000) {
+          console.log('Using specific Access Token for Pixel 3000');
+          FACEBOOK_ACCESS_TOKEN = token3000;
+      } else {
+          console.warn('⚠️ Warning: Pixel 1393... requested but METACAPI_3000 not found. Falling back to default.');
+      }
+  }
 
   if (!FACEBOOK_ACCESS_TOKEN) {
     console.error('Configuration Error: METACAPI Access Token not configured.');
@@ -55,8 +68,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { pixelId, eventName, userData, customData, eventId, testCode } = await req.json();
-
     console.log('Incoming Universal Event:', { pixelId, eventName, email: userData?.email, eventId });
 
     if (!pixelId) {
