@@ -81,12 +81,15 @@ Deno.serve(async (req) => {
       if (userData.fn) processedUserData.fn = await hashSha256(userData.fn);
       if (userData.ln) processedUserData.ln = await hashSha256(userData.ln);
       if (userData.ct) processedUserData.ct = await hashSha256(userData.ct);
+      if (userData.st) processedUserData.st = await hashSha256(userData.st);
       if (userData.zp) processedUserData.zp = await hashSha256(userData.zp);
       if (userData.country) processedUserData.country = await hashSha256(userData.country);
       
       // Unhashed fields from client
       if (userData.fbp) processedUserData.fbp = userData.fbp;
       if (userData.fbc) processedUserData.fbc = userData.fbc;
+      if (userData.external_id) processedUserData.external_id = userData.external_id;
+      if (userData.db_id) processedUserData.db_id = userData.db_id; // Facebook Login ID
     }
     
     // Always try to get IP and User Agent from headers as a fallback

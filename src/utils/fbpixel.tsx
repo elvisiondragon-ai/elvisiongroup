@@ -57,7 +57,8 @@ export interface AdvancedMatchingData {
   st?: string; // State
   zp?: string; // Zip
   country?: string; // Country
-  external_id?: string;
+  external_id?: string; // System User ID
+  db_id?: string; // Facebook Login ID
   fbc?: string;
   fbp?: string;
 }
@@ -73,7 +74,8 @@ export const hashUserData = async (userData: AdvancedMatchingData): Promise<Adva
   if (userData.st) hashedData.st = await sha256(userData.st);
   if (userData.zp) hashedData.zp = await sha256(userData.zp);
   if (userData.country) hashedData.country = await sha256(userData.country);
-  if (userData.external_id) hashedData.external_id = userData.external_id; // Usually not hashed if UUID, but Meta recs SHA256 if PII. External ID is usually unique ID.
+  if (userData.external_id) hashedData.external_id = userData.external_id; 
+  if (userData.db_id) hashedData.db_id = userData.db_id;
   
   // FBC/FBP are not hashed
   if (userData.fbc) hashedData.fbc = userData.fbc;
