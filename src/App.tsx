@@ -123,6 +123,17 @@ const AppContent = () => {
       // Always cleanup stale workers on boot
       await cleanupStaleServiceWorkers();
 
+      // Clear workbox precache if it exists (aggressive cleanup)
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        for (const cacheName of cacheNames) {
+          if (cacheName.includes('workbox-precache')) {
+            await caches.delete(cacheName);
+            console.log(`Deleted stale cache: ${cacheName}`);
+          }
+        }
+      }
+
       const cacheCleared = localStorage.getItem('audioCacheCleared_v1');
       if (!cacheCleared) {
         console.log('Attempting to clear old audio cache...');
