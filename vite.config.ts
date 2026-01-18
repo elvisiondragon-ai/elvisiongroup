@@ -83,6 +83,8 @@ export default defineConfig(({ mode }) => ({
         ],
         // Automatically update when files change
         cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/]
       },

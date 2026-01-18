@@ -67,6 +67,7 @@ import { MeditativeProvider } from "@/contexts/MeditativeContext";
 import { supabase } from "@/integrations/supabase/client";
 import { setupDebugTools } from "@/utils/debugTools";
 import ServiceWorkerUpdater from "@/components/ServiceWorkerUpdater";
+import { cleanupStaleServiceWorkers } from "@/utils/cleanupStaleSW";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +120,9 @@ const AppContent = () => {
 
   useEffect(() => {
     const clearAudioCache = async () => {
+      // Always cleanup stale workers on boot
+      await cleanupStaleServiceWorkers();
+
       const cacheCleared = localStorage.getItem('audioCacheCleared_v1');
       if (!cacheCleared) {
         console.log('Attempting to clear old audio cache...');

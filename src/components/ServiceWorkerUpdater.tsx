@@ -8,6 +8,11 @@ function ServiceWorkerUpdater() {
   } = useRegisterSW({
     onRegistered(r) {
       console.log('SW Registered:', r);
+      if (r) {
+        setInterval(() => {
+          r.update();
+        }, 60 * 1000); // Check every minute
+      }
     },
     onRegisterError(error) {
       console.log('SW registration error:', error);
