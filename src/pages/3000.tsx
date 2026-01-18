@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRight, Sparkles, Shield, Check, Play, Pause } from 'lucide-react';
+import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRight, Sparkles, Shield, Check, Play, Pause, ExternalLink } from 'lucide-react';
 
 export default function ELVision3000() {
   // CAPI Configuration
@@ -512,11 +512,19 @@ export default function ELVision3000() {
       </div>
 
           <button 
-            className="group bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-black font-bold text-xl px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-xl shadow-purple-500/50 flex items-center gap-4 mx-auto mb-16"
+            className="group bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-black font-bold text-xl px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-xl shadow-purple-500/50 flex items-center gap-4 mx-auto mb-4"
             onClick={() => window.open('https://instagram.com/elreyzandra', '_blank')}
           >
             <ArrowRight className="w-6 h-6" />
             FOLLOW OUR FOUNDER AT INSTAGRAM
+          </button>
+
+          <button 
+            className="group bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-black font-bold text-xl px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-xl shadow-blue-500/50 flex items-center gap-4 mx-auto mb-16"
+            onClick={() => window.open('https://cirebon.inews.id/read/204537/ini-sosok-el-reyzandra-mentor-bisnis-yang-sukseskan-ratusan-pengusaha-muda/2', '_blank')}
+          >
+            <ExternalLink className="w-6 h-6" />
+            ABOUT FOUNDER
           </button>
         
         {/* eL Reyzandra's Video Testimonial */}

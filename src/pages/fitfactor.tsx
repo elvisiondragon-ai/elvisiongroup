@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -91,6 +91,7 @@ export default function FitfactorPaymentPage() {
   const { user, signOut, cleanupSupabase } = useAuth();
   const { proStatus } = usePro();
   const whatsappLink = "https://wa.me/62895325633487";
+  const purchaseFiredRef = useRef(false);
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
@@ -371,8 +372,11 @@ export default function FitfactorPaymentPage() {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter: `tripay_reference=eq.${paymentData.tripay_reference}`},
         async (payload) => { // Made async to await sendCAPIEvent
           if (payload.new?.status === 'PAID') {
-            const purchaseEventId = crypto.randomUUID(); // Unique ID for Purchase
-            const initiateCheckoutEventId = localStorage.getItem('lastInitiateCheckoutEventId'); // Get ID from InitiateCheckout
+            if (purchaseFiredRef.current) return;
+            purchaseFiredRef.current = true;
+            
+            // Use Tripay Reference as Event ID to match backend
+            const purchaseEventId = paymentData.tripay_reference;
 
             // User Data for Purchase
             const purchaseUserData = {
@@ -397,11 +401,11 @@ export default function FitfactorPaymentPage() {
 
             // Facebook Pixel: Purchase event
             fbq('track', 'Purchase', purchaseCustomData, { 
-                eventID: initiateCheckoutEventId || purchaseEventId // Reuse initiate ID if available, otherwise new ID
+                eventID: purchaseEventId
             });
 
             // CAPI: Purchase event
-            await sendCAPIEvent('Purchase', purchaseUserData, purchaseCustomData, initiateCheckoutEventId || purchaseEventId);
+            await sendCAPIEvent('Purchase', purchaseUserData, purchaseCustomData, purchaseEventId);
 
             toast({
                 title: "🎉 Pembayaran Berhasil!",

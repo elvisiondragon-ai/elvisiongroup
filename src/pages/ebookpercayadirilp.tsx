@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -77,6 +77,7 @@ export default function EbookPercayaDiriLP() {
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
+  const purchaseFiredRef = useRef(false);
 
   // Pixel Tracking
   useEffect(() => {
@@ -141,7 +142,7 @@ export default function EbookPercayaDiriLP() {
   };
 
   // Helper to send CAPI events
-  const sendCapiEvent = async (eventName: string, eventData: any) => {
+  const sendCapiEvent = async (eventName: string, eventData: any, overrideEventId?: string) => {
     try {
       await supabase.functions.invoke('capi-universal', {
         body: {
@@ -153,7 +154,7 @@ export default function EbookPercayaDiriLP() {
             client_user_agent: navigator.userAgent,
           },
           customData: eventData,
-          eventId: paymentData?.tripay_reference ? `${eventName}-${paymentData.tripay_reference}` : undefined // Simple deduplication ID if available
+          eventId: overrideEventId || (paymentData?.tripay_reference ? `${eventName}-${paymentData.tripay_reference}` : undefined) // Simple deduplication ID if available
         }
       });
     } catch (err) {
@@ -252,6 +253,9 @@ export default function EbookPercayaDiriLP() {
         filter: `tripay_reference=eq.${paymentData.tripay_reference}`
       }, (payload) => {
         if (payload.new?.status === 'PAID') {
+          if (purchaseFiredRef.current) return;
+          purchaseFiredRef.current = true;
+
           toast({
               title: "LUNAS! Akses Dikirim.",
               description: "Pembayaran berhasil. Cek email Anda sekarang untuk akses Audio & Ebook.",
@@ -265,7 +269,7 @@ export default function EbookPercayaDiriLP() {
               content_type: 'product',
               value: totalAmount,
               currency: 'IDR'
-            });
+            }, { eventID: paymentData.tripay_reference });
           }
           
           // Send CAPI Purchase
@@ -274,7 +278,7 @@ export default function EbookPercayaDiriLP() {
             content_type: 'product',
             value: totalAmount,
             currency: 'IDR'
-          });
+          }, paymentData.tripay_reference);
           
           // Optional: redirect to a thank you page or just show success state
         }

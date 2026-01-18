@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +35,7 @@ export default function EbookElvisionPaymentPage() {
   const { toast } = useToast();
   const { user, signOut, cleanupSupabase } = useAuth();
   const { proStatus } = usePro();
+  const purchaseFiredRef = useRef(false);
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
@@ -140,7 +141,7 @@ export default function EbookElvisionPaymentPage() {
     { code: 'QRIS', name: 'QRIS', description: 'Bayar ke Semua Bank, DANA, OVO, SHOPEEPAY' },
     { code: 'BCAVA', name: 'BCA Virtual Account', description: 'Transfer via BCA Virtual Account' },
     { code: 'PERMATAVA', name: 'Permata Virtual Account', description: 'Transfer via Permata Virtual Account' },
-    { code: 'BNIVA', name: 'BNI Virtual Account', description: 'Transfer via BNI Virtual Account' },
+    { code: 'BNIVA', name: 'BNI Virtual Account', description: 'Transfer otomatis via BNI' },
     { code: 'BRIVA', name: 'BRI Virtual Account', description: 'Transfer via BRI Virtual Account' },
     { code: 'MANDIRIVA', name: 'Mandiri Virtual Account', description: 'Transfer via Mandiri Virtual Account' },
   ];
@@ -326,6 +327,9 @@ export default function EbookElvisionPaymentPage() {
         (payload) => {
           console.log('[EbookElvisionPaymentPage] Realtime payload received:', payload);
           if (payload.new?.status === 'PAID') {
+            if (purchaseFiredRef.current) return;
+            purchaseFiredRef.current = true;
+
             console.log('[EbookElvisionPaymentPage] Payment status is PAID, showing toast.');
             toast({
                 title: "🎉 Pembayaran Berhasil!",
@@ -342,7 +346,7 @@ export default function EbookElvisionPaymentPage() {
                 value: payload.new?.amount || totalAmount, // Use amount from payload if available, fallback to local state
                 currency: 'IDR',
                 pixel_id: '3319324491540889'
-              });
+              }, { eventID: paymentData.tripay_reference });
             }
             // Optionally navigate after showing toast
             // navigate('/success-page'); 

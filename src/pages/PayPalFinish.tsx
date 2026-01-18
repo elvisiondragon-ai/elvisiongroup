@@ -70,9 +70,8 @@ const PayPalFinish = () => {
           fbq('track', 'Purchase', {
             value: amount,
             currency: 'USD',
-            content_name: productName,
-            order_id: token
-          });
+            content_name: productName
+          }, { eventID: token });
         }
 
       } catch (err: any) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +35,8 @@ export default function DietPaymentPage() {
   const { toast } = useToast();
   const { user, signOut, cleanupSupabase } = useAuth();
   const { proStatus } = usePro();
+  
+  const purchaseFiredRef = useRef(false);
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
@@ -326,6 +328,9 @@ export default function DietPaymentPage() {
         (payload) => {
           console.log('[DietPaymentPage] Realtime payload received:', payload);
           if (payload.new?.status === 'PAID') {
+            if (purchaseFiredRef.current) return;
+            purchaseFiredRef.current = true;
+
             console.log('[DietPaymentPage] Payment status is PAID, showing toast.');
             toast({
                 title: "🎉 Pembayaran Berhasil!",
@@ -342,7 +347,7 @@ export default function DietPaymentPage() {
                 value: payload.new?.amount || totalAmount, // Use amount from payload if available, fallback to local state
                 currency: 'IDR',
                 pixel_id: '3319324491540889'
-              });
+              }, { eventID: paymentData.tripay_reference });
             }
             // Optionally navigate after showing toast
             // navigate('/success-page'); 

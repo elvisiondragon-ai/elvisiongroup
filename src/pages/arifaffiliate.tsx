@@ -644,6 +644,14 @@ const ArifEbookLanding = () => {
                 — Syarifudin Arif
               </p>
             </div>
+            <a
+              href="https://app.elvisiongroup.com/testimony"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-8 w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xl font-bold py-4 px-8 rounded-full hover:from-blue-600 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-xl"
+            >
+              Testimony dan Cara Kerja <ArrowRight className="w-5 h-5" />
+            </a>
           </div>
         </div>
       </section>

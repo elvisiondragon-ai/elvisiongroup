@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,6 +32,8 @@ export default function SlimcoPaymentPage() {
   const { toast } = useToast();
   const { user, signOut, cleanupSupabase } = useAuth();
   const { proStatus } = usePro();
+  
+  const purchaseFiredRef = useRef(false);
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
@@ -268,6 +270,9 @@ export default function SlimcoPaymentPage() {
         (payload) => {
           console.log('[SlimcoPaymentPage] Realtime payload received:', payload);
           if (payload.new?.status === 'PAID') {
+            if (purchaseFiredRef.current) return;
+            purchaseFiredRef.current = true;
+
             console.log('[SlimcoPaymentPage] Payment status is PAID, showing toast.');
             toast({
                 title: "🎉 Payment Successful!",
@@ -284,7 +289,7 @@ export default function SlimcoPaymentPage() {
                 value: payload.new?.amount || totalAmount, // Use amount from payload if available, fallback to local state
                 currency: 'USD',
                 pixel_id: '3319324491540889'
-              });
+              }, { eventID: paymentData.reference });
             }
             // Optionally navigate after showing toast
             // navigate('/success-page'); 

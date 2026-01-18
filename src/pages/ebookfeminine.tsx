@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -69,16 +69,17 @@ export default function EbookFeminineLanding() {
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
+  const purchaseFiredRef = useRef(false);
 
   // Helper to send CAPI events
-  const sendCapiEvent = async (eventName: string, eventData: any) => {
+  const sendCapiEvent = async (eventName: string, eventData: any, overrideEventId?: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const body: any = {
         pixelId: '3319324491540889', // EbookIndo Pixel
         eventName,
         customData: eventData,
-        eventId: paymentData?.tripay_reference ? `${eventName}-${paymentData.tripay_reference}` : undefined
+        eventId: overrideEventId || (paymentData?.tripay_reference ? `${eventName}-${paymentData.tripay_reference}` : undefined)
       };
 
       if (session) {
@@ -250,6 +251,9 @@ export default function EbookFeminineLanding() {
         filter: `tripay_reference=eq.${paymentData.tripay_reference}`
       }, (payload) => {
         if (payload.new?.status === 'PAID') {
+          if (purchaseFiredRef.current) return;
+          purchaseFiredRef.current = true;
+
           toast({
               title: "LUNAS! Akses Dikirim.",
               description: "Pembayaran berhasil. Cek email Anda sekarang untuk akses Audio & Ebook.",
@@ -263,7 +267,7 @@ export default function EbookFeminineLanding() {
               content_type: 'product',
               value: totalAmount,
               currency: 'IDR'
-            });
+            }, { eventID: paymentData.tripay_reference });
           }
           
           // Send CAPI Purchase
@@ -272,7 +276,7 @@ export default function EbookFeminineLanding() {
             content_type: 'product',
             value: totalAmount,
             currency: 'IDR'
-          });
+          }, paymentData.tripay_reference);
         }
       }).subscribe();
 

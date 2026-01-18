@@ -153,6 +153,8 @@ export default function UangPanasLanding() {
     };
   }, []);
 
+  const purchaseFiredRef = React.useRef(false);
+
   // Realtime Payment Listener
   useEffect(() => {
     if (!showPaymentInstructions || !paymentData?.tripay_reference) return;
@@ -166,6 +168,9 @@ export default function UangPanasLanding() {
         filter: `tripay_reference=eq.${paymentData.tripay_reference}`
       }, (payload) => {
         if (payload.new?.status === 'PAID') {
+          if (purchaseFiredRef.current) return;
+          purchaseFiredRef.current = true;
+
           toast({
               title: "LUNAS! Akses Dikirim.",
               description: "Pembayaran berhasil. Cek email Anda sekarang untuk akses Audio & Ebook.",
@@ -173,7 +178,8 @@ export default function UangPanasLanding() {
               variant: "default"
           });
           
-          const eventId = `purchase-${paymentData.tripay_reference}`;
+          // Use exact tripay_reference to match Backend CAPI event_id for deduplication
+          const eventId = paymentData.tripay_reference;
 
           if (typeof window !== 'undefined' && (window as any).fbq) {
             (window as any).fbq('track', 'Purchase', {
