@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRight, Sparkles, Shield, Check, Play, Pause, ExternalLink } from 'lucide-react';
+import { 
+  initFacebookPixelWithLogging, 
+  trackPageViewEvent, 
+  trackAddToCartEvent, 
+  trackCustomEvent 
+} from '@/utils/fbpixel';
 
 export default function ELVision3000() {
   // CAPI Configuration
@@ -39,33 +45,10 @@ export default function ELVision3000() {
 
   // Facebook Pixel Code
   useEffect(() => {
-    (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-      if (f.fbq) return;
-      n = f.fbq = function () {
-        n.callMethod
-          ? n.callMethod.apply(n, arguments)
-          : n.queue.push(arguments);
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = !0;
-      n.version = '2.0';
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = !0;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    })(
-      window,
-      document,
-      'script',
-      'https://connect.facebook.net/en_US/fbevents.js'
-    );
+    initFacebookPixelWithLogging(PIXEL_ID);
     
     const eventId = crypto.randomUUID();
-    fbq('init', '1393383179182528');
-    fbq('track', 'PageView', {}, { eventID: eventId });
+    trackPageViewEvent({}, eventId, PIXEL_ID);
     
     // Send Server-Side Event
     sendCAPIEvent('PageView', {}, {}, eventId);
@@ -371,13 +354,9 @@ export default function ELVision3000() {
         audioRef.current.play();
         setIsPlaying(true);
         // Track custom event for audio playback
-        // @ts-ignore
-        if (typeof fbq === 'function') {
-          // @ts-ignore
-          fbq('trackCustom', 'AudioPlayed', {
+        trackCustomEvent('AudioPlayed', {
             audio_src: audioRef.current.src,
-          });
-        }
+        }, undefined, PIXEL_ID);
       } else {
         audioRef.current.pause();
         setIsPlaying(false);
@@ -486,15 +465,13 @@ export default function ELVision3000() {
                         className="group bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center gap-4 mx-auto mb-8"
                         onClick={() => {
                           const eventId = crypto.randomUUID();
-                          // @ts-ignore
-                          if (typeof fbq === 'function') {
-                            // @ts-ignore
-                            fbq('track', 'AddToCart', {
-                              content_name: 'EL Vision 3000 Coaching',
-                              value: 3000,
-                              currency: 'USD'
-                            }, { eventID: eventId });
-                          }
+                          
+                          trackAddToCartEvent({
+                            content_name: 'EL Vision 3000 Coaching',
+                            value: 3000,
+                            currency: 'USD'
+                          }, eventId, PIXEL_ID);
+                          
                           // Send Server-Side Event
                           sendCAPIEvent('AddToCart', {}, {
                               content_name: 'EL Vision 3000 Coaching',

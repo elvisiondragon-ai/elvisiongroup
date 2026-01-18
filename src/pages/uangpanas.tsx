@@ -12,6 +12,14 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/toaster';
+import { 
+  initFacebookPixelWithLogging, 
+  trackPageViewEvent, 
+  trackViewContentEvent, 
+  trackAddPaymentInfoEvent, 
+  trackPurchaseEvent,
+  AdvancedMatchingData
+} from '@/utils/fbpixel';
 
 const getCookie = (name: string) => {
   const nameEQ = name + "=";
@@ -107,37 +115,22 @@ export default function UangPanasLanding() {
 
     if (typeof window !== 'undefined') {
       const pixelId = '3319324491540889';
-      const pixelInitializedFlag = `_pixel_${pixelId}_initialized`;
-
-      // Initialize Pixel only if it hasn't been initialized for this specific ID
-      if (!(window as any)[pixelInitializedFlag]) {
-        if (!(window as any).fbq) {
-          // @ts-ignore
-          !function(f,b,e,v,n,t,s)
-          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-          n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t,s)}(window, document,'script',
-          'https://connect.facebook.net/en_US/fbevents.js');
-          (window as any).fbq('init', pixelId);
-        }
-        (window as any)[pixelInitializedFlag] = true;
-      }
+      
+      initFacebookPixelWithLogging(pixelId);
       
       const pageEventId = `pageview-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      (window as any).fbq('track', 'PageView', {}, { eventID: pageEventId });
+      trackPageViewEvent({}, pageEventId, pixelId);
       sendCapiEvent('PageView', {}, pageEventId);
 
       const viewContentEventId = `viewcontent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      (window as any).fbq('track', 'ViewContent', {
+      trackViewContentEvent({
         content_name: 'Sistem Uang Panas',
         content_ids: ['ebook_uangpanas'],
         content_type: 'product',
         value: 100000,
         currency: 'IDR'
-      }, { eventID: viewContentEventId });
+      }, viewContentEventId, pixelId);
+      
       sendCapiEvent('ViewContent', {
         content_name: 'Sistem Uang Panas',
         content_ids: ['ebook_uangpanas'],
@@ -181,14 +174,22 @@ export default function UangPanasLanding() {
           // Use exact tripay_reference to match Backend CAPI event_id for deduplication
           const eventId = paymentData.tripay_reference;
 
-          if (typeof window !== 'undefined' && (window as any).fbq) {
-            (window as any).fbq('track', 'Purchase', {
-              content_ids: [productNameBackend],
-              content_type: 'product',
-              value: totalAmount,
-              currency: 'IDR'
-            }, { eventID: eventId });
-          }
+          // Prepare User Data for Advanced Matching
+          const pixelId = '3319324491540889';
+          const userData: AdvancedMatchingData = {
+            em: userEmail,
+            ph: phoneNumber,
+            fn: userName, // Assuming name is full name, but using it as FN for simplicity or split if needed
+            external_id: user?.id
+          };
+          
+          // Track Purchase with Advanced Matching and Deduplication
+          trackPurchaseEvent({
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'IDR'
+          }, eventId, pixelId, userData);
           
           // Send CAPI Purchase
           sendCapiEvent('Purchase', {
@@ -203,7 +204,7 @@ export default function UangPanasLanding() {
       }).subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [showPaymentInstructions, paymentData]);
+  }, [showPaymentInstructions, paymentData, userEmail, phoneNumber, userName, user]); // Added dependencies
 
   const testimonials = [
     {
@@ -336,15 +337,21 @@ export default function UangPanasLanding() {
 
     const addPaymentInfoEventId = `addpaymentinfo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
+    const pixelId = '3319324491540889';
+    const userData: AdvancedMatchingData = {
+      em: userEmail,
+      ph: phoneNumber,
+      fn: userName,
+      external_id: user?.id
+    };
+
     // Track AddPaymentInfo
-    if (typeof window !== 'undefined' && (window as any).fbq) {
-      (window as any).fbq('track', 'AddPaymentInfo', {
-        content_ids: [productNameBackend],
-        content_type: 'product',
-        value: totalAmount,
-        currency: 'IDR'
-      }, { eventID: addPaymentInfoEventId });
-    }
+    trackAddPaymentInfoEvent({
+      content_ids: [productNameBackend],
+      content_type: 'product',
+      value: totalAmount,
+      currency: 'IDR'
+    }, addPaymentInfoEventId, pixelId, userData);
     
     sendCapiEvent('AddPaymentInfo', {
       content_ids: [productNameBackend],

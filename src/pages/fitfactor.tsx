@@ -17,6 +17,12 @@ import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePro } from '@/hooks/usePro';
+import { 
+  initFacebookPixelWithLogging, 
+  trackCustomEvent, 
+  trackPurchaseEvent,
+  AdvancedMatchingData
+} from '@/utils/fbpixel';
 
 const WhatsAppButton = () => (
   <a
@@ -92,13 +98,14 @@ export default function FitfactorPaymentPage() {
   const { proStatus } = usePro();
   const whatsappLink = "https://wa.me/62895325633487";
   const purchaseFiredRef = useRef(false);
+  const pixelId = "1797660474333865";
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
 
   useEffect(() => {
     // Initialize Facebook Pixel
-    fbq("init", "1797660474333865"); // Replace with your actual Pixel ID
+    initFacebookPixelWithLogging(pixelId);
   }, []);
 
   const handleLogout = async () => {
@@ -253,14 +260,23 @@ export default function FitfactorPaymentPage() {
 
     setLoading(true);
     try {
+      const userData: AdvancedMatchingData = {
+        em: userEmail,
+        ph: phoneNumber,
+        fn: userName.split(' ')[0],
+        ct: kota,
+        zp: kodePos,
+        country: 'ID'
+      };
+
       // Facebook Pixel: InitiateCheckout
-      fbq('track', 'InitiateCheckout', {
+      trackCustomEvent('InitiateCheckout', {
         content_ids: [productId],
         content_name: productName,
         value: totalAmount,
         currency: 'IDR',
         num_items: quantity,
-      }, { eventID: initiateCheckoutEventId });
+      }, initiateCheckoutEventId, pixelId, userData);
 
       // CAPI: InitiateCheckout
       await sendCAPIEvent('InitiateCheckout', {
@@ -379,7 +395,7 @@ export default function FitfactorPaymentPage() {
             const purchaseEventId = paymentData.tripay_reference;
 
             // User Data for Purchase
-            const purchaseUserData = {
+            const purchaseUserData: AdvancedMatchingData = {
               em: userEmail,
               ph: phoneNumber,
               fn: userName.split(' ')[0],
@@ -400,9 +416,7 @@ export default function FitfactorPaymentPage() {
             };
 
             // Facebook Pixel: Purchase event
-            fbq('track', 'Purchase', purchaseCustomData, { 
-                eventID: purchaseEventId
-            });
+            trackPurchaseEvent(purchaseCustomData, purchaseEventId, pixelId, purchaseUserData);
 
             // CAPI: Purchase event
             await sendCAPIEvent('Purchase', purchaseUserData, purchaseCustomData, purchaseEventId);
@@ -449,6 +463,7 @@ export default function FitfactorPaymentPage() {
   }, [showPaymentInstructions, paymentData?.tripay_reference, navigate, toast, userName, userEmail, phoneNumber, userAddress, selectedProvince, productName, quantity, totalAmount, selectedPaymentMethod, kota, kodePos]); // Added kota, kodePos to dependencies
 
   if (showPaymentInstructions && paymentData) {
+
     return (
       <div className="min-h-screen bg-background pb-32">
         <Toaster />

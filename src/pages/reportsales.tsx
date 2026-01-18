@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, DollarSign, ShoppingCart, Users, Calendar, Filter, Download, Search } from 'lucide-react';
+import { TrendingUp, Banknote, ShoppingCart, Users, Calendar, Filter, Download, Search } from 'lucide-react';
 
 const ReportSales = () => {
   const navigate = useNavigate();
@@ -59,17 +59,32 @@ const ReportSales = () => {
 
     // Date filter
     const now = new Date();
+    now.setHours(0, 0, 0, 0); // Normalize 'now' to start of today
+
     if (dateFilter === 'today') {
       filtered = filtered.filter(sale => {
         const saleDate = new Date(sale.created_at);
-        return saleDate.toDateString() === now.toDateString();
+        saleDate.setHours(0, 0, 0, 0); // Normalize 'saleDate' to start of its day
+        return saleDate.getTime() === now.getTime(); // Compare timestamps
       });
     } else if (dateFilter === 'week') {
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      filtered = filtered.filter(sale => new Date(sale.created_at) >= weekAgo);
+      const weekAgo = new Date(); // Use a new Date object to avoid modifying 'now'
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      weekAgo.setHours(0, 0, 0, 0); // Normalize to start of day
+      filtered = filtered.filter(sale => {
+        const saleDate = new Date(sale.created_at);
+        saleDate.setHours(0, 0, 0, 0);
+        return saleDate.getTime() >= weekAgo.getTime();
+      });
     } else if (dateFilter === 'month') {
-      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      filtered = filtered.filter(sale => new Date(sale.created_at) >= monthAgo);
+      const monthAgo = new Date(); // Use a new Date object to avoid modifying 'now'
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      monthAgo.setHours(0, 0, 0, 0); // Normalize to start of day
+      filtered = filtered.filter(sale => {
+        const saleDate = new Date(sale.created_at);
+        saleDate.setHours(0, 0, 0, 0);
+        return saleDate.getTime() >= monthAgo.getTime();
+      });
     }
 
     // Search filter
@@ -192,13 +207,18 @@ const ReportSales = () => {
               </select>
             </div>
           </div>
+          {dateFilter === 'today' && (
+            <div className="mt-4 p-4 rounded-lg shadow-lg bg-gradient-to-r from-purple-600 to-indigo-700 text-white text-center text-xl font-bold">
+              Today: {new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()}
+            </div>
+          )}
         </div>
 
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-lg rounded-2xl p-6 border border-emerald-500/30">
             <div className="flex items-center justify-between mb-4">
-              <DollarSign className="w-10 h-10 text-emerald-400" />
+              <Banknote className="w-10 h-10 text-emerald-400" />
               <span className="text-emerald-400 text-sm font-semibold">Revenue</span>
             </div>
             <div className="text-3xl font-bold text-white mb-1">

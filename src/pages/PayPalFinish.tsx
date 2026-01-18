@@ -3,28 +3,19 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { initFacebookPixelWithLogging, trackPurchaseEvent, trackPageViewEvent } from '@/utils/fbpixel';
 
 const PayPalFinish = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState("Finalizing your secure payment...");
+  const PIXEL_ID = '1393383179182528';
 
   // Facebook Pixel Init
   useEffect(() => {
-    // @ts-ignore
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    // @ts-ignore
-    fbq('init', '1393383179182528');
-    // @ts-ignore
-    fbq('track', 'PageView');
+    initFacebookPixelWithLogging(PIXEL_ID);
+    trackPageViewEvent({}, undefined, PIXEL_ID);
   }, []);
 
   useEffect(() => {
@@ -64,15 +55,11 @@ const PayPalFinish = () => {
         }
 
         // Track Purchase Event
-        // @ts-ignore
-        if (typeof fbq === 'function') {
-          // @ts-ignore
-          fbq('track', 'Purchase', {
+        trackPurchaseEvent({
             value: amount,
             currency: 'USD',
             content_name: productName
-          }, { eventID: token });
-        }
+        }, token, PIXEL_ID);
 
       } catch (err: any) {
         console.error("Capture Error:", err);

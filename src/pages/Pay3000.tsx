@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import { ArrowRight, CheckCircle, Shield, Sparkles } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
+import { 
+  initFacebookPixelWithLogging, 
+  trackCustomEvent, 
+  trackAddPaymentInfoEvent,
+  AdvancedMatchingData 
+} from '@/utils/fbpixel';
 
 export default function Pay3000() {
   const [loading, setLoading] = useState(false);
@@ -43,38 +49,10 @@ export default function Pay3000() {
 
   // Facebook Pixel Code
   useEffect(() => {
-    (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-      if (f.fbq) return;
-      n = f.fbq = function () {
-        n.callMethod
-          ? n.callMethod.apply(n, arguments)
-          : n.queue.push(arguments);
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = !0;
-      n.version = '2.0';
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = !0;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    })(
-      window,
-      document,
-      'script',
-      'https://connect.facebook.net/en_US/fbevents.js'
-    );
+    initFacebookPixelWithLogging(PIXEL_ID);
     
     const eventId = crypto.randomUUID();
-    // @ts-ignore
-    if (typeof fbq === 'function') {
-        // @ts-ignore
-        fbq('init', '1393383179182528');
-        // @ts-ignore
-        fbq('track', 'PageView', {}, { eventID: eventId });
-    }
+    trackCustomEvent('PageView', {}, eventId, PIXEL_ID);
     
     // Send Server-Side Event
     sendCAPIEvent('PageView', {}, {}, eventId);
@@ -92,24 +70,26 @@ export default function Pay3000() {
       setLoading(true);
       
       const eventId = crypto.randomUUID();
-      // Track InitiateCheckout
-      // @ts-ignore
-      if (typeof fbq === 'function') {
-        // @ts-ignore
-        fbq('track', 'InitiateCheckout', {
-          content_name: 'VIP SESSION 6 Week',
-          value: 1500.00,
-          currency: 'USD'
-        }, { eventID: eventId });
-      }
+      const userData: AdvancedMatchingData = {
+        em: email
+      };
 
-      sendCAPIEvent('InitiateCheckout', {
-        email: email
-      }, {
+      const eventData = {
         content_name: 'VIP SESSION 6 Week',
         value: 1500.00,
         currency: 'USD'
-      }, eventId);
+      };
+
+      // 1. Track AddPaymentInfo (User provided email and intent)
+      trackAddPaymentInfoEvent(eventData, eventId, PIXEL_ID, userData);
+
+      // 2. Track InitiateCheckout
+      trackCustomEvent('InitiateCheckout', eventData, eventId, PIXEL_ID, userData);
+
+      // 3. Send CAPI (InitiateCheckout)
+      sendCAPIEvent('InitiateCheckout', {
+        email: email
+      }, eventData, eventId);
 
       // Create Payment
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {

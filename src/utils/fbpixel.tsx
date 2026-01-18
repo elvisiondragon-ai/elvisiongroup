@@ -1,5 +1,15 @@
 // 🎯 Facebook Pixel FBC/FBP Enhanced Tracking System
 
+// 🔐 SHA-256 Hash Helper
+export const sha256 = async (message: string): Promise<string> => {
+  if (!message) return "";
+  const msgBuffer = new TextEncoder().encode(message.trim().toLowerCase());
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+};
+
 // 🍪 FBC Cookie Helper - Get browser cookie value
 export const getFbcCookieHelper = (name: string): string | null => {
   if (typeof document === 'undefined') return null;
@@ -35,180 +45,134 @@ export const handleFbcCookieManager = (): void => {
     const formattedFbc = formatFbcCookieValue(fbclid);
     const expires = new Date(Date.now() + 90*24*60*60*1000).toUTCString();
     document.cookie = `_fbc=${formattedFbc}; expires=${expires}; path=/`;
-    // console.log('🔗 FBC Cookie Manager - Click ID stored:', formattedFbc);
   }
 };
 
-// 🔐 Email Hash Generator - Hash email for privacy compliance
-export const hashEmailForPixel = (email: string): string => {
-  if (!email) return '';
-  // Simple SHA-256 hash simulation for email (Meta requires hashed emails)
-  return btoa(email.toLowerCase().trim()).replace(/[^a-zA-Z0-9]/g, '');
-};
+export interface AdvancedMatchingData {
+  em?: string; // Email
+  ph?: string; // Phone
+  fn?: string; // First Name
+  ln?: string; // Last Name
+  ct?: string; // City
+  st?: string; // State
+  zp?: string; // Zip
+  country?: string; // Country
+  external_id?: string;
+  fbc?: string;
+  fbp?: string;
+}
 
-// 👤 First Name Hash Generator - Hash first name for privacy compliance  
-export const hashFirstNameForPixel = (firstName: string): string => {
-  if (!firstName) return '';
-  // Simple hash for first name (Meta requires hashed names)
-  return btoa(firstName.toLowerCase().trim()).replace(/[^a-zA-Z0-9]/g, '');
-};
-
-// 📊 Enhanced Tracking Parameters - Get FBC/FBP + user data
-export const getEnhancedTrackingParams = (email?: string, firstName?: string): { 
-  fbc?: string; 
-  fbp?: string; 
-  em?: string; 
-  fn?: string; 
-} => {
-  const fbc = getFbcCookieHelper('_fbc');
-  const fbp = getFbcCookieHelper('_fbp');
+// 🔐 Hash User Data for Pixel
+export const hashUserData = async (userData: AdvancedMatchingData): Promise<AdvancedMatchingData> => {
+  const hashedData: AdvancedMatchingData = {};
+  if (userData.em) hashedData.em = await sha256(userData.em);
+  if (userData.ph) hashedData.ph = await sha256(userData.ph);
+  if (userData.fn) hashedData.fn = await sha256(userData.fn);
+  if (userData.ln) hashedData.ln = await sha256(userData.ln);
+  if (userData.ct) hashedData.ct = await sha256(userData.ct);
+  if (userData.st) hashedData.st = await sha256(userData.st);
+  if (userData.zp) hashedData.zp = await sha256(userData.zp);
+  if (userData.country) hashedData.country = await sha256(userData.country);
+  if (userData.external_id) hashedData.external_id = userData.external_id; // Usually not hashed if UUID, but Meta recs SHA256 if PII. External ID is usually unique ID.
   
-  const params: { fbc?: string; fbp?: string; em?: string; fn?: string } = {};
-  
-  if (fbc) {
-    params.fbc = fbc;
-    // console.log('📊 FBC Click ID Parameter - Found:', fbc);
-  }
-  if (fbp) {
-    params.fbp = fbp;
-    // console.log('📊 FBP Browser Parameter - Found:', fbp);
-  }
-  if (email) {
-    params.em = hashEmailForPixel(email);
-    // console.log('📧 Email Parameter - Hashed and added');
-  }
-  if (firstName) {
-    params.fn = hashFirstNameForPixel(firstName);
-    // console.log('👤 First Name Parameter - Hashed and added');
-  }
-  
-  return params;
-};
+  // FBC/FBP are not hashed
+  if (userData.fbc) hashedData.fbc = userData.fbc;
+  if (userData.fbp) hashedData.fbp = userData.fbp;
 
-// 📊 FBC/FBP Tracking Parameters - Get basic tracking data (backward compatibility)
-export const getFbcFbpTrackingParams = (): { fbc?: string; fbp?: string } => {
-  const enhanced = getEnhancedTrackingParams();
-  return { fbc: enhanced.fbc, fbp: enhanced.fbp };
+  return hashedData;
 };
 
 // 🚀 Pixel Initializer - Initialize Facebook Pixel with enhanced logging and error handling
-export const initFacebookPixelWithLogging = (pixelId: string): void => {
-  if (typeof window === 'undefined' || window.fbq) return;
+export const initFacebookPixelWithLogging = (pixelId: string, userData?: AdvancedMatchingData): void => {
+  if (typeof window === 'undefined') return;
 
-  // console.log('🚀 Pixel Initializer - Starting Facebook Pixel setup');
-  
+  // Initialize FBC/FBP cookies
+  handleFbcCookieManager();
+
   try {
-    (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-      if (f.fbq) return; 
-      n = f.fbq = function() { 
-        try {
+    if (!(window as any).fbq) {
+      (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
+        if (f.fbq) return; 
+        n = f.fbq = function() { 
           n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-        } catch (error) {
-          console.log('FB Pixel method call failed, continuing:', error);
-        }
-      };
-      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
-      t = b.createElement(e); t.async = !0; t.src = v; 
-      
-      // Add error handler for script load failure
-      t.onerror = function() {
-        // Silent fail - no console logs
-        // Create a dummy fbq function to prevent errors
-        window.fbq = function() {
-          // Silent - no tracking logs
         };
-      };
-      
-      s = b.getElementsByTagName(e)[0]; 
-      // Wrap insertion in try-catch to handle blocked requests silently
-      try {
-        s.parentNode.insertBefore(t, s);
-      } catch (e) {
-        // Silent fail if blocked by client/ad blocker
-      }
-    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
+        t = b.createElement(e); t.async = !0; t.src = v; 
+        t.onerror = function() { window.fbq = function() {}; };
+        s = b.getElementsByTagName(e)[0]; 
+        try { s.parentNode.insertBefore(t, s); } catch (e) {}
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    }
     
-    // Wrap init call in try-catch
-    setTimeout(() => {
-      try {
-        window.fbq('init', pixelId);
-        // console.log('🚀 Pixel Initializer - Facebook Pixel ready with ID:', pixelId);
-      } catch (error) {
-        console.log('FB Pixel init failed, continuing:', error);
-      }
-    }, 100);
+    // If userData provided, hash it (async) then init
+    // But init is usually immediate. We can fire init without data, then init again with data?
+    // Or we handle async here.
+    if (userData) {
+      hashUserData(userData).then(hashed => {
+        (window as any).fbq('init', pixelId, hashed);
+      });
+    } else {
+      (window as any).fbq('init', pixelId);
+    }
   } catch (error) {
     console.log('FB Pixel initialization failed, app continues:', error);
-    // Create fallback function to prevent future errors
-    window.fbq = function() {
-      console.log('FB Pixel unavailable, tracking skipped');
-    };
   }
 };
 
-// ⭐ View Content Tracker - Track ViewContent events with enhanced data
-export const trackViewContentEvent = (eventData: any = {}, email?: string, firstName?: string): void => {
-  if (typeof window === 'undefined' || !window.fbq) return;
-  
+// 🔄 Update Pixel User Data (Manual Advanced Matching)
+export const updatePixelUserData = async (pixelId: string, userData: AdvancedMatchingData): Promise<void> => {
+  if (typeof window === 'undefined' || !(window as any).fbq) return;
+  const hashed = await hashUserData(userData);
+  (window as any).fbq('init', pixelId, hashed);
+};
+
+// ⭐ Generic Track Helper
+const trackEvent = async (eventName: string, eventData: any = {}, options: { eventID?: string, pixelId?: string, userData?: AdvancedMatchingData } = {}) => {
+  if (typeof window === 'undefined' || !(window as any).fbq) return;
+
   try {
-    const trackingParams = getEnhancedTrackingParams(email, firstName);
-    // console.log('⭐ View Content Tracker - Tracking ViewContent event');
-    window.fbq('track', 'ViewContent', eventData, trackingParams);
+    // If userData and pixelId are present, update user data first
+    if (options.userData && options.pixelId) {
+      await updatePixelUserData(options.pixelId, options.userData);
+    }
+
+    const trackOptions: any = {};
+    if (options.eventID) {
+      trackOptions.eventID = options.eventID;
+    }
+
+    (window as any).fbq('track', eventName, eventData, trackOptions);
   } catch (error) {
-    console.log('FB Pixel ViewContent tracking failed, continuing:', error);
+    console.log(`FB Pixel ${eventName} tracking failed:`, error);
   }
 };
 
-// 📄 Page View Tracker - Track PageView events with enhanced data
-export const trackPageViewEvent = (eventData: any = {}, email?: string, firstName?: string): void => {
-  if (typeof window === 'undefined' || !window.fbq) return;
-  
-  try {
-    const trackingParams = getEnhancedTrackingParams(email, firstName);
-    // console.log('📄 Page View Tracker - Tracking PageView event');
-    window.fbq('track', 'PageView', eventData, trackingParams);
-  } catch (error) {
-    console.log('FB Pixel PageView tracking failed, continuing:', error);
-  }
+// ⭐ View Content Tracker
+export const trackViewContentEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
+  await trackEvent('ViewContent', eventData, { eventID, pixelId, userData });
 };
 
-// 🛒 Add to Cart Tracker - Track AddToCart events with enhanced data
-export const trackAddToCartEvent = (eventData: any = {}, email?: string, firstName?: string): void => {
-  if (typeof window === 'undefined' || !window.fbq) return;
-  
-  try {
-    const trackingParams = getEnhancedTrackingParams(email, firstName);
-    // console.log('🛒 Add to Cart Tracker - Tracking AddToCart event');
-    window.fbq('track', 'AddToCart', eventData, trackingParams);
-  } catch (error) {
-    console.log('FB Pixel AddToCart tracking failed, continuing:', error);
-  }
+// 📄 Page View Tracker
+export const trackPageViewEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
+  await trackEvent('PageView', eventData, { eventID, pixelId, userData });
 };
 
-// 💰 Purchase Tracker - Track Purchase events with enhanced data
-export const trackPurchaseEvent = (eventData: any = {}, email?: string, firstName?: string): void => {
-  if (typeof window === 'undefined' || !window.fbq) return;
-  
-  try {
-    const trackingParams = getEnhancedTrackingParams(email, firstName);
-    // console.log('💰 Purchase Tracker - Tracking Purchase event');
-    // console.log('💰 Purchase Data:', eventData);
-    window.fbq('track', 'Purchase', eventData, trackingParams);
-  } catch (error) {
-    console.log('FB Pixel Purchase tracking failed, continuing:', error);
-  }
+// 🛒 Add to Cart Tracker
+export const trackAddToCartEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
+  await trackEvent('AddToCart', eventData, { eventID, pixelId, userData });
 };
 
-// 🎯 Generic Event Tracker - Track any custom events with FBC/FBP
-export const trackGenericPixelEvent = (eventName: string, eventData: any = {}, customData: any = {}): void => {
-  if (typeof window === 'undefined' || !window.fbq) return;
-  
-  try {
-    const trackingParams = getFbcFbpTrackingParams();
-    const enhancedCustomData = { ...customData, ...trackingParams };
-    // console.log(`🎯 Generic Event Tracker - Tracking ${eventName} event`);
-    window.fbq('track', eventName, eventData, enhancedCustomData);
-  } catch (error) {
-    console.log(`FB Pixel ${eventName} tracking failed, continuing:`, error);
-  }
+// 💰 Purchase Tracker
+export const trackPurchaseEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
+  await trackEvent('Purchase', eventData, { eventID, pixelId, userData });
+};
+
+// 💳 Add Payment Info Tracker
+export const trackAddPaymentInfoEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
+  await trackEvent('AddPaymentInfo', eventData, { eventID, pixelId, userData });
+};
+
+// 🎯 Custom Event Tracker
+export const trackCustomEvent = async (eventName: string, eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
+  await trackEvent(eventName, eventData, { eventID, pixelId, userData });
 };
