@@ -260,10 +260,13 @@ const ArifEbookLanding = () => {
             <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
             <p className="text-lg font-semibold text-red-300 mb-3">SAYA AKAN JUJUR DENGAN ANDA:</p>
             <p className="text-gray-200 leading-relaxed">
-              Saya memerlukan uang. Setelah pemulihan dari kanker dengan biaya yang tidak sedikit, saya memutuskan bergabung eL Vision untuk mendedikasikan diri saya menolong orang lain—sebagaimana All Father menolong saya.
+              Saya akan jujur. Saya ingin mendedikasikan diri setelah terbantu oleh program eL Vision ini untuk menolong yang lain.
+            </p>
+            <p className="text-gray-200 leading-relaxed">
+              Tapi lebih dari itu, saya ingin memberikan harapan—seperti yang diberikan kepada saya.
             </p>
             <p className="text-yellow-400 font-bold mt-4">
-              Setiap pembelian buku ini SANGAT berarti bagi saya. Terima kasih. Saya doakan kesehatan Anda dan keluarga.
+              Saya akan Jujur, Bahwa saya tertolong setelah mengikuti eL Vision ini, dari no Hope menjadi terang, tenang, damai sungguh penuh ketenangan, dan saya sudah bernazar akan membantu orang mendedikasikan diri membantu orang orang di titik gelap sebagai mana saya dulu melalui eL Vision ini, ini adalah Movement, bahwa harapan selalu ada, bahwa kekuatan kedamaian bekerja melampaui pengetahuan yang terbatas saat ini.
             </p>
           </div>
         
@@ -623,7 +626,7 @@ const ArifEbookLanding = () => {
             <h3 className="text-3xl font-bold text-yellow-400 mb-6 text-center">Pesan Terakhir dari Saya</h3>
             <div className="space-y-4 text-lg text-gray-200 leading-relaxed">
               <p>
-                Saya tidak akan berbohong kepada Anda. Saya membutuhkan dukungan finansial setelah perjuangan melawan kanker.
+                Saya tidak akan berbohong kepada Anda. Saya Ingin membuka mata anda bahwa pengetahuan saat ini terbatas dan kekuatan kedamaian ini bekerja.
               </p>
               <p>
                 Tapi lebih dari itu, <span className="text-yellow-400 font-bold">saya ingin memberikan harapan</span>—seperti yang diberikan kepada saya.
