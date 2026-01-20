@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Link, CreditCard, Share2, DollarSign, CalendarDays, ArrowRight, Landmark, Wallet, History, ExternalLink } from 'lucide-react';
+import { Link, CreditCard, Share2, Coins, CalendarDays, ArrowRight, Landmark, Wallet, History, ExternalLink, Users } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -33,13 +33,13 @@ interface Withdrawal {
 }
 
 const productOptions = [
-  { name: 'Fitfactor', url: 'https://app.elvisiongroup.com/fitfactor' },
-  { name: 'eL Royale Parfum', url: 'https://app.elvisiongroup.com/elroyaleparfum' },
-  { name: 'eL Royale Jewelry', url: 'https://app.elvisiongroup.com/elroyaljewelry' },
-  { name: 'Drelf', url: 'https://app.elvisiongroup.com/drelf' },
-  { name: 'Hungry Later Diet', url: 'https://app.elvisiongroup.com/ebook_langsing' },
-  { name: 'Ebook eL Vision', url: 'https://app.elvisiongroup.com/ebook_elvision' },
-  { name: 'Sistem Uang Panas (Komisi 50%)', url: 'https://app.elvisiongroup.com/uangpanas' },
+  { name: 'Fitfactor', url: 'https://app.elvisiongroup.com/fitfactor', commission: '30%' },
+  { name: 'eL Royale Parfum', url: 'https://app.elvisiongroup.com/elroyaleparfum', commission: '30%' },
+  { name: 'eL Royale Jewelry', url: 'https://app.elvisiongroup.com/elroyaljewelry', commission: '30%' },
+  { name: 'Drelf', url: 'https://app.elvisiongroup.com/drelf', commission: '30%' },
+  { name: 'Hungry Later Diet', url: 'https://app.elvisiongroup.com/ebook_langsing', commission: '30%' },
+  { name: 'Ebook eL Vision', url: 'https://app.elvisiongroup.com/ebook_elvision', commission: '30%' },
+  { name: 'Sistem Uang Panas', url: 'https://app.elvisiongroup.com/uangpanas', commission: '50%' },
 ];
 
 export default function AffiliatePage() {
@@ -59,6 +59,7 @@ export default function AffiliatePage() {
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountHolder, setAccountHolder] = useState('');
+  const [displayName, setDisplayName] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAffiliateData = async () => {
@@ -81,10 +82,10 @@ export default function AffiliatePage() {
         if (commissionError) throw commissionError;
         setCommissions(commissionData || []);
 
-        // Fetch bank details from profile
+        // Fetch bank details and display name from profile
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('bank_name, account_number, account_holder')
+          .select('bank_name, account_number, account_holder, display_name')
           .eq('user_id', user.id)
           .single();
 
@@ -93,6 +94,7 @@ export default function AffiliatePage() {
           setBankName(profileData.bank_name || '');
           setAccountNumber(profileData.account_number || '');
           setAccountHolder(profileData.account_holder || '');
+          setDisplayName(profileData.display_name);
         }
 
         // Fetch withdrawals
@@ -200,6 +202,26 @@ export default function AffiliatePage() {
   return (
     <div className="min-h-screen bg-black text-white p-6 pb-20">
       <div className="max-w-4xl mx-auto py-12 space-y-8">
+        {displayName && (
+          <Card className="bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-transparent border-yellow-500/30 overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Users size={80} className="text-yellow-500" />
+            </div>
+            <CardContent className="p-6 flex items-center gap-4 relative z-10">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-yellow-400 to-amber-600 flex items-center justify-center shadow-lg shadow-yellow-500/20">
+                <span className="text-black font-bold text-xl">
+                  {displayName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <p className="text-yellow-400/80 text-sm font-medium uppercase tracking-wider">Selamat Datang</p>
+                <h2 className="text-2xl font-bold text-white tracking-tight">
+                  <span className="text-yellow-400">{displayName}</span>
+                </h2>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <h1 className="text-5xl font-bold text-center mb-10 bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
           Dashboard Afiliasi eL Vision Group
         </h1>
@@ -209,7 +231,7 @@ export default function AffiliatePage() {
           <Card className="bg-gray-900 border-yellow-900/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium text-gray-400">Total Pendapatan</CardTitle>
-              <DollarSign className="w-4 h-4 text-yellow-400" />
+              <Coins className="w-4 h-4 text-yellow-400" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">{totalCommission.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</div>
@@ -283,7 +305,7 @@ export default function AffiliatePage() {
                 <SelectContent className="bg-gray-800 border-gray-700 text-white">
                   {productOptions.map((option) => (
                     <SelectItem key={option.url} value={option.url}>
-                      {option.name}
+                      {option.name} ({option.commission})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -334,6 +356,38 @@ export default function AffiliatePage() {
               </div>
               <ExternalLink className="w-5 h-5 text-red-400" />
             </Button>
+          </div>
+        </div>
+
+        {/* Commission Structure */}
+        <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-900/30 rounded-lg p-6 mb-8 shadow-lg">
+          <h2 className="text-2xl font-semibold text-yellow-400 mb-4 flex items-center gap-2">
+            <Coins className="w-6 h-6" /> Struktur Komisi
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto text-left">
+              <thead>
+                <tr className="border-b border-gray-700 text-gray-300">
+                  <th className="py-2 px-4">Nama Produk</th>
+                  <th className="py-2 px-4 text-right">Besar Komisi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {productOptions.map((product) => (
+                  <tr key={product.url} className="border-b border-gray-800 last:border-b-0 hover:bg-gray-800/50 transition-colors">
+                    <td className="py-3 px-4 text-gray-300 font-medium">{product.name}</td>
+                    <td className="py-3 px-4 text-right">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        product.commission === '50%' ? 'bg-yellow-900/50 text-yellow-400 border border-yellow-500/30' : 
+                        'bg-blue-900/50 text-blue-400 border border-blue-500/30'
+                      }`}>
+                        {product.commission}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 

@@ -13,7 +13,7 @@ const LIST_ID = '80713'; // Default List ID
 // --- PRODUCT CONFIGURATION ---
 const PRODUCT_TEMPLATES: Record<string, any> = {
   'ebook_diet': {
-    subject: "🥗 AKSES DIET: Program Diet eL-Vision Anda",
+    subject: "🥗 Akses Diet: Program Diet eL-Vision Anda",
     downloadLink: "https://docs.google.com/document/d/1Xy--tVqilrJ-YNeQXXc9OjiDvmDCC_4l/edit?usp=sharing&ouid=105986209873893322274&rtpof=true&sd=true",
     color: "#4CAF50", // Green
     title: "Program Diet Dimulai!",
@@ -26,7 +26,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_elvision': {
-    subject: "📘 DOWNLOAD: Ebook eL Vision Premium",
+    subject: "📘 Download: Ebook eL Vision Premium",
     downloadLink: "https://drive.google.com/drive/folders/17yvGGDVqT4BbymvKsTXZhoU_XKM4qD3S?usp=sharing",
     color: "#2196F3", // Blue
     title: "Akses Ebook Terbuka",
@@ -39,7 +39,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_health20': {
-    subject: "🌿 AKSES DOWNLOAD: Protokol Pemulihan Kesehatan Anda",
+    subject: "🌿 Akses Download: Protokol Pemulihan Kesehatan Anda",
     downloadLink: "https://drive.google.com/drive/folders/1E2iYI6JLtZ73F3jggHEHkke6IniRWaxB?usp=sharing",
     color: "#004d40", // Teal/Dark Green
     title: "Mulai Perjalanan Kesembuhan",
@@ -52,7 +52,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_percayadiri': {
-    subject: "🔥 AKSES DOWNLOAD: Paket Pria Alpha Anda",
+    subject: "🔥 Akses Download: Paket Pria Alpha Anda",
     downloadLink: "https://drive.google.com/drive/folders/1P4wdc44vaPquxw6vL2OpmQcENZeUIuNO?usp=sharing",
     color: "#1a2a3a", // Dark Navy
     accentColor: "#c5a059", // Gold
@@ -66,7 +66,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_feminine': {
-    subject: "✨ AKSES DOWNLOAD: Paket Feminine Magnetism Anda",
+    subject: "✨ Akses Download: Paket Feminine Magnetism Anda",
     downloadLink: "https://drive.google.com/drive/folders/1B_SmtekAodf5G8fWF3tVjgcenjjVtbTZ?usp=sharing", // Update link if needed
     color: "#e11d48", // Rose 600
     accentColor: "#ffffff",
@@ -80,7 +80,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_uangpanas': {
-    subject: "🔥 AKSES DOWNLOAD: Sistem Uang Panas (Lead Magnet + Audio)",
+    subject: "🔥 Akses Download: Sistem Uang Panas (Lead Magnet + Audio)",
     downloadLink: "https://drive.google.com/file/d/1R_AEFpjaxBwYnxLGevVPKHf548pMn9gE/view?usp=sharing", // Placeholder link, please update
     color: "#b91c1c", // Red 700
     accentColor: "#facc15", // Yellow 400
@@ -94,7 +94,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'vip_coaching': {
-    subject: "💎 VIP CONFIRMATION: 6 Weeks eL Vision Program",
+    subject: "💎 VIP Confirmation: 6 Weeks eL Vision Program",
     downloadLink: "https://wa.me/62895325633487?text=HI%20I%20have%20paid%20for%20VIP%206%20weeks",
     color: "#004d40", // Teal/Dark Green
     title: "Welcome to the VIP Program",
@@ -109,7 +109,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
   },
   // --- USA PRODUCTS (ENGLISH) ---
   'usa_ebookhealth': {
-    subject: "🌿 DOWNLOAD ACCESS: Your Health Recovery Protocol",
+    subject: "🌿 Download Access: Your Health Recovery Protocol",
     downloadLink: "https://drive.google.com/drive/folders/1E2iYI6JLtZ73F3jggHEHkke6IniRWaxB?usp=sharing",
     color: "#004d40", // Teal/Dark Green
     title: "Start Your Healing Journey",
@@ -122,7 +122,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "en"
   },
   'usa_ebookslim': {
-    subject: "🥗 DOWNLOAD ACCESS: Slim Without Suffering Program",
+    subject: "🥗 Download Access: Slim Without Suffering Program",
     downloadLink: "https://docs.google.com/document/d/1Xy--tVqilrJ-YNeQXXc9OjiDvmDCC_4l/edit?usp=sharing&ouid=105986209873893322274&rtpof=true&sd=true", // Using existing diet link placeholder
     color: "#4CAF50", // Green
     title: "Your Slimming Journey Begins!",
@@ -135,7 +135,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "en"
   },
   'usa_3000': {
-    subject: "💎 VIP CONFIRMATION: 6 Weeks eL Vision Program",
+    subject: "💎 VIP Confirmation: 6 Weeks eL Vision Program",
     downloadLink: "https://wa.me/62895325633487?text=HI%20I%20have%20paid%20for%20VIP%206%20weeks",
     color: "#004d40",
     title: "Welcome to the VIP Program",
@@ -335,15 +335,20 @@ const handler = async (req: Request) => {
 </body>
 </html>`;
 
-    // Send Email
+    // Send Email to Buyer
     const emailResult = await sendMailketingEmail(recipientEmail, template.subject, htmlContent);
-    console.log("✅ Email sent successfully");
+    console.log("✅ Email sent successfully to buyer");
 
-    // BCC to Admin
-    try {
-        await sendMailketingEmail('support@elvisiongroup.com', `[ADMIN] SENT: ${template.subject}`, htmlContent);
-    } catch(e) {
-        console.error("⚠️ BCC Failed");
+    // BCC to Admins (send separate emails as BCC simulation)
+    const admins = ['support@elvisiongroup.com', 'elreyzandra@gmail.com', 'elvisiondragon@gmail.com'];
+    
+    for (const adminEmail of admins) {
+        try {
+            await sendMailketingEmail(adminEmail, `[ADMIN BCC] ${template.subject}`, htmlContent);
+            console.log(`✅ BCC sent to ${adminEmail}`);
+        } catch(e) {
+            console.error(`⚠️ BCC Failed for ${adminEmail}:`, e);
+        }
     }
 
     return new Response(JSON.stringify({ 
