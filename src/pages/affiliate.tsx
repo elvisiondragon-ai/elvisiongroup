@@ -34,7 +34,7 @@ interface Withdrawal {
 }
 
 const productOptions = [
-  { name: 'Fitfactor', url: 'https://app.elvisiongroup.com/fitfactor', commission: '30%' },
+  { name: 'Fitfactor LP', url: 'https://app.elvisiongroup.com/fitfactorlp', commission: '30%' },
   { name: 'eL Royale Parfum', url: 'https://app.elvisiongroup.com/elroyaleparfum', commission: '30%' },
   { name: 'eL Royale Jewelry', url: 'https://app.elvisiongroup.com/elroyaljewelry', commission: '30%' },
   { name: 'Drelf', url: 'https://app.elvisiongroup.com/drelf', commission: '30%' },

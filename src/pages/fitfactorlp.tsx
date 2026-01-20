@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,8 @@ import {
 } from "lucide-react";
 
 const FitFactorLP = () => {
+  const [searchParams] = useSearchParams();
+  const affiliateRef = searchParams.get('ref');
   const [quantity, setQuantity] = useState(1);
   const pricePerBottle = 450000;
 
@@ -221,7 +224,11 @@ const FitFactorLP = () => {
   ];
 
   const handlePay = () => {
-    window.location.href = "https://app.elvisiongroup.com/fitfactor";
+    const url = new URL("https://app.elvisiongroup.com/fitfactor");
+    if (affiliateRef) {
+      url.searchParams.set('ref', affiliateRef);
+    }
+    window.location.href = url.toString();
   };
 
   return (
