@@ -163,7 +163,7 @@ export default function FitfactorPaymentPage() {
 
   const productId = 'fitfactor_450k';
   const productName = 'Fitfactor';
-  const price = 150000;
+  const price = 250000;
 
   const [quantity, setQuantity] = useState(3);
   const [userName, setUserName] = useState('');
@@ -308,12 +308,10 @@ export default function FitfactorPaymentPage() {
           kecamatan: kecamatan,
           kodePos: kodePos,
           amount: totalAmount,
-          quantity: quantity,
-          productName: productName,
+          quantity: 1, // Use 1 to ensure unit price is an integer (totalAmount / 1)
+          productName: `${productName} (x${quantity})`, // Include quantity in name
           userId: user?.id,
           affiliateRef: affiliateRef, // Pass affiliate reference
-          // Optionally pass the event ID to the backend if you want to store it with the payment
-          // initiateCheckoutEventId: initiateCheckoutEventId,
         }
       });
 
@@ -687,12 +685,16 @@ export default function FitfactorPaymentPage() {
                 </Button>
               </div>
             </div>
-            <div className="text-sm text-gray-500 mt-2 space-y-1 text-center">
-              <p>Harga Normal 1 Box (isi 3): <span className="line-through">{formatCurrency(900000)}</span></p>
-              {quantity === 3 && <p className="text-green-600 font-bold">Anda pilih: Paket 1 Box (isi 3) seharga {formatCurrency(450000)} - Hemat 50%!</p>}
-              {quantity === 6 && <p className="text-green-600 font-bold">Anda pilih: Paket 2 Box (isi 6) seharga {formatCurrency(800000)} - Lebih hemat, hanya {formatCurrency(400000)}/box!</p>}
-              {quantity === 9 && <p className="text-green-600 font-bold">Anda pilih: Paket 3 Box (isi 9) seharga {formatCurrency(1200000)} - Paling hemat, hanya {formatCurrency(400000)}/box!</p>}
-              {quantity > 9 && quantity % 3 === 0 && <p className="text-green-600 font-bold">Paket {quantity/3} Box (isi {quantity}): {formatCurrency(getTieredPrice(quantity))}</p>}
+            <div className="text-sm text-gray-500 mt-2 space-y-1 text-center bg-secondary/30 p-3 rounded-lg">
+              <p>Harga Normal: <span className="line-through">{formatCurrency(quantity * 250000)}</span></p>
+              {quantity === 3 && <p className="text-green-600 font-bold">Anda pilih: Paket 3 box seharga {formatCurrency(450000)} - Hemat 300.000</p>}
+              {quantity === 6 && (
+                <p className="text-green-600 font-bold">Anda pilih: Paket 6 box seharga {formatCurrency(800000)} - Hemat 700.000</p>
+              )}
+              {quantity === 9 && (
+                <p className="text-green-600 font-bold">Anda pilih: Paket 9 box seharga {formatCurrency(1200000)} - Hemat 1.050.000</p>
+              )}
+              {quantity > 9 && <p className="text-green-600 font-bold">Paket {quantity} box: {formatCurrency(getTieredPrice(quantity))}</p>}
             </div>
             
             <Separator/>
