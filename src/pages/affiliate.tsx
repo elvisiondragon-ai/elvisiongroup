@@ -405,17 +405,10 @@ export default function AffiliatePage() {
             Gunakan materi promosi di bawah ini untuk membantu Anda mendapatkan penjualan lebih cepat.
           </p>
           <div className="grid grid-cols-1 gap-4">
-            <Button
-              variant="outline"
-              className="bg-gray-800 border-gray-700 hover:bg-gray-700 text-white flex items-center justify-between h-auto py-4 px-6"
-              onClick={() => window.open('https://drive.google.com/drive/folders/184nCdZgEMj61JLUXyXt6pPU-7XOMMljd?usp=share_link', '_blank')}
-            >
-              <div className="flex flex-col items-start text-left">
-                <span className="font-bold text-red-400">Lead Magnet Konten Uang Panas</span>
-                <span className="text-xs text-gray-400">Strategi 7 Lead Magnet & Script</span>
-              </div>
-              <ExternalLink className="w-5 h-5 text-red-400" />
-            </Button>
+            <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 text-center">
+              <span className="font-bold text-red-400 block">Check Lead magnet di link ebook anda</span>
+              <span className="text-xs text-gray-400">Ambil Url di ebook anda</span>
+            </div>
           </div>
         </div>
 
