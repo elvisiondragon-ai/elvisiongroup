@@ -101,36 +101,36 @@ export default function ELVision3000() {
     {
       name: "Vio",
       title: "eL Vision Client",
-      type: "video",
-      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/vio2.mp4",
-      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/vio2.jpg" // Placeholder thumbnail
+      type: "image",
+      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/vio2.jpg",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/vio2.jpg"
     },
     {
       name: "Arif",
       title: "eL Vision Client",
-      type: "video",
-      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.mp4",
-      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.jpg" // Placeholder thumbnail
+      type: "image",
+      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.jpg",
+      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.jpg"
     },
     {
       name: "Jacob",
       title: "eL Vision Client",
-      type: "video",
-      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/jacob.mp4",
-      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/jacob.jpg"
+      type: "image",
+      imageUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/jacob.jpg",
+      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/jacob.jpg"
     },
     {
       name: "Wiliam",
       title: "eL Vision Client",
-      type: "video",
-      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/wiliam.mp4",
+      type: "image",
+      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/wiliam.jpg",
       thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/wiliam.jpg"
     },
     {
       name: "Ana",
       title: "eL Vision Client",
-      type: "video",
-      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/ana.mp4",
+      type: "image",
+      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/ana.jpg",
       thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/ana.jpg"
     }
   ];
@@ -139,8 +139,8 @@ export default function ELVision3000() {
       name: "eL Reyzandra (Founder)",
       title: "eL Vision Founder",
       type: "video",
-      videoUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/founder.mp4",
-      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/founder.jpg"
+      videoUrl: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/usa_el01.mp4",
+      thumbnail: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/usa_el01.jpg"
     };
 
   const testimonials = [
@@ -320,7 +320,7 @@ export default function ELVision3000() {
         {testimonial.type === "video" && (
           <video
             ref={videoRef}
-            className="w-full rounded-lg"
+            className="w-full max-w-[320px] mx-auto rounded-lg"
             controls
             preload="metadata"
             playsInline
@@ -677,13 +677,13 @@ export default function ELVision3000() {
               </div>
               
               <video 
-                className="w-full rounded-lg mb-6"
+                className="w-full max-w-[320px] mx-auto rounded-lg mb-6"
                 controls
                 preload="metadata"
                 playsInline
-                poster="https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.jpg"
+                poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/usa_arif1.jpg"
               >
-                <source src="https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.mp4" type="video/mp4" />
+                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/usa_arif1.mp4" type="video/mp4" />
                 Your browser does not support video playback.
               </video>
 
@@ -1269,6 +1269,19 @@ export default function ELVision3000() {
                 Our Method
               </span>
             </h2>
+
+            <div className="mb-12">
+              <video 
+                className="w-full max-w-[320px] mx-auto rounded-lg shadow-2xl border border-yellow-500/30"
+                controls
+                preload="metadata"
+                playsInline
+                poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/usa_arif1.jpg"
+              >
+                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/usa_methods.mp4" type="video/mp4" />
+                Your browser does not support video playback.
+              </video>
+            </div>
 
             <div className="max-w-4xl mx-auto space-y-6 text-gray-300 leading-relaxed text-lg">
               <p>
