@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Link, CreditCard, Share2, Coins, CalendarDays, ArrowRight, Landmark, Wallet, History, ExternalLink, Users } from 'lucide-react';
+import { Link, CreditCard, Share2, Coins, CalendarDays, ArrowRight, Landmark, Wallet, History, ExternalLink, Users, Filter } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { subDays, isAfter, parseISO, isSameDay } from 'date-fns';
 
 interface Commission {
   id: string;
@@ -42,6 +43,8 @@ const productOptions = [
   { name: 'Sistem Uang Panas', url: 'https://app.elvisiongroup.com/uangpanas', commission: '50%' },
 ];
 
+type TimeFilter = 'today' | 'last7' | 'last30' | 'all';
+
 export default function AffiliatePage() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -54,6 +57,7 @@ export default function AffiliatePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('today');
 
   // Bank details state
   const [bankName, setBankName] = useState('');
@@ -172,10 +176,37 @@ export default function AffiliatePage() {
     }
   };
 
-  const totalCommission = commissions.reduce((sum, c) => sum + c.commission_amount, 0);
-  const paidOut = withdrawals.filter(w => w.status === 'approved').reduce((sum, w) => sum + w.amount, 0);
-  const pendingPayout = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + w.amount, 0);
-  const currentBalance = totalCommission - paidOut - pendingPayout;
+  // Filter Logic
+  const filterByDate = (dateString: string) => {
+    const date = parseISO(dateString);
+    const now = new Date();
+    
+    switch (timeFilter) {
+      case 'today':
+        return isSameDay(date, now);
+      case 'last7':
+        return isAfter(date, subDays(now, 7));
+      case 'last30':
+        return isAfter(date, subDays(now, 30));
+      case 'all':
+        return true;
+      default:
+        return true;
+    }
+  };
+
+  const filteredCommissions = commissions.filter(c => filterByDate(c.sale_date));
+  const filteredWithdrawals = withdrawals.filter(w => filterByDate(w.created_at));
+
+  // Display Stats (Filtered)
+  const displayTotalCommission = filteredCommissions.reduce((sum, c) => sum + c.commission_amount, 0);
+  const displayPaidOut = filteredWithdrawals.filter(w => w.status === 'approved').reduce((sum, w) => sum + w.amount, 0);
+
+  // Wallet Balance (Always All Time)
+  const allTimeCommission = commissions.reduce((sum, c) => sum + c.commission_amount, 0);
+  const allTimePaidOut = withdrawals.filter(w => w.status === 'approved').reduce((sum, w) => sum + w.amount, 0);
+  const allTimePending = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + w.amount, 0);
+  const currentBalance = allTimeCommission - allTimePaidOut - allTimePending;
 
   const generateAffiliateLink = () => {
     if (!affiliateCode) return;
@@ -222,33 +253,62 @@ export default function AffiliatePage() {
             </CardContent>
           </Card>
         )}
-        <h1 className="text-5xl font-bold text-center mb-10 bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
-          Dashboard Afiliasi eL Vision Group
-        </h1>
+        {/* Header & Filter Card */}
+        <Card className="bg-gradient-to-br from-yellow-900/20 via-black to-black border-yellow-500/20 overflow-hidden relative shadow-xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+          <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+            <div className="text-center md:text-left space-y-2">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-600 bg-clip-text text-transparent tracking-tight">
+                Dashboard Afiliasi
+              </h1>
+              <p className="text-gray-400 font-medium tracking-wide text-sm uppercase">eL Vision Group</p>
+            </div>
+            
+            <div className="flex items-center gap-3 bg-gray-900/50 p-1.5 rounded-lg border border-white/5 backdrop-blur-sm">
+              <div className="pl-3 flex items-center gap-2 text-gray-400">
+                <Filter className="w-4 h-4 text-yellow-500" />
+                <span className="text-xs font-medium uppercase tracking-wider hidden sm:inline-block">Filter Waktu</span>
+              </div>
+              <div className="w-[180px]">
+                <Select onValueChange={(value) => setTimeFilter(value as TimeFilter)} defaultValue={timeFilter}>
+                  <SelectTrigger className="w-full bg-black/40 border-0 focus:ring-1 focus:ring-yellow-500/50 text-white h-9 text-sm font-medium">
+                    <SelectValue placeholder="Pilih Waktu" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900 border-gray-800 text-white">
+                    <SelectItem value="today">Hari Ini</SelectItem>
+                    <SelectItem value="last7">7 Hari Terakhir</SelectItem>
+                    <SelectItem value="last30">30 Hari Terakhir</SelectItem>
+                    <SelectItem value="all">Semua Waktu</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Finance Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="bg-gray-900 border-yellow-900/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-gray-400">Total Pendapatan</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-400">Pendapatan ({timeFilter === 'today' ? 'Hari Ini' : timeFilter === 'last7' ? '7 Hari' : timeFilter === 'last30' ? '30 Hari' : 'Total'})</CardTitle>
               <Coins className="w-4 h-4 text-yellow-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{totalCommission.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</div>
+              <div className="text-2xl font-bold text-white">{displayTotalCommission.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</div>
             </CardContent>
           </Card>
           <Card className="bg-gray-900 border-green-900/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-gray-400">Sudah Dicairkan</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-400">Dicairkan ({timeFilter === 'today' ? 'Hari Ini' : timeFilter === 'last7' ? '7 Hari' : timeFilter === 'last30' ? '30 Hari' : 'Total'})</CardTitle>
               <History className="w-4 h-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{paidOut.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</div>
+              <div className="text-2xl font-bold text-white">{displayPaidOut.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</div>
             </CardContent>
           </Card>
           <Card className="bg-gray-900 border-blue-900/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-gray-400">Saldo Aktif</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-400">Saldo Aktif (Real-time)</CardTitle>
               <Wallet className="w-4 h-4 text-blue-400" />
             </CardHeader>
             <CardContent>
@@ -396,8 +456,8 @@ export default function AffiliatePage() {
           <h2 className="text-2xl font-semibold text-yellow-400 mb-4 flex items-center gap-2">
             <CalendarDays className="w-6 h-6" /> Riwayat Komisi
           </h2>
-          {commissions.length === 0 ? (
-            <p className="text-gray-400">Belum ada komisi tercatat.</p>
+          {filteredCommissions.length === 0 ? (
+            <p className="text-gray-400">Belum ada komisi tercatat untuk periode ini.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto text-left">
@@ -410,7 +470,7 @@ export default function AffiliatePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {commissions.map((commission) => (
+                  {filteredCommissions.map((commission) => (
                     <tr key={commission.id} className="border-b border-gray-800 last:border-b-0">
                       <td className="py-2 px-4 text-gray-300">{commission.product_name}</td>
                       <td className="py-2 px-4 text-gray-400">{new Date(commission.sale_date).toLocaleDateString('id-ID')}</td>
@@ -429,8 +489,8 @@ export default function AffiliatePage() {
           <h2 className="text-2xl font-semibold text-blue-400 mb-4 flex items-center gap-2">
             <History className="w-6 h-6" /> Riwayat Penarikan
           </h2>
-          {withdrawals.length === 0 ? (
-            <p className="text-gray-400">Belum ada penarikan.</p>
+          {filteredWithdrawals.length === 0 ? (
+            <p className="text-gray-400">Belum ada penarikan untuk periode ini.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto text-left">
@@ -442,7 +502,7 @@ export default function AffiliatePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {withdrawals.map((w) => (
+                  {filteredWithdrawals.map((w) => (
                     <tr key={w.id} className="border-b border-gray-800 last:border-b-0">
                       <td className="py-2 px-4 text-gray-300">{new Date(w.created_at).toLocaleDateString('id-ID')}</td>
                       <td className="py-2 px-4 text-gray-300">{w.amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
