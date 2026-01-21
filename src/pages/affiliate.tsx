@@ -328,9 +328,12 @@ export default function AffiliatePage() {
 
         {/* Bank Details */}
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-          <h2 className="text-2xl font-semibold text-yellow-400 mb-4 flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-yellow-400 mb-2 flex items-center gap-2">
             <Landmark className="w-6 h-6" /> Informasi Rekening Bank
           </h2>
+          <p className="text-xs text-gray-400 mb-4 bg-yellow-900/20 border border-yellow-500/20 p-2 rounded">
+            ⚠️ <strong>Perhatian:</strong> Selain Bank BCA akan dikenakan biaya admin <strong>Rp 6.500</strong> per transaksi karena dana ditransfer dari Bank BCA.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm text-gray-400">Nama Bank</label>

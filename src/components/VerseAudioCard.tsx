@@ -1,4 +1,4 @@
-import { Lock, Music, Crown, Zap, Download, Check, X, FileText } from 'lucide-react';
+import { Lock, Music, Crown, Zap, Check, X, FileText } from 'lucide-react';
 import { useProtectedAudio } from '@/contexts/AudioContext';
 import { useXPSystem } from '@/hooks/useXPSystem';
 import { useState, useEffect, useRef } from 'react';
@@ -48,7 +48,6 @@ export function VerseAudioCard({
   const [audioDuration, setAudioDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
   
   const isPlaying = currentPlayingVerse === verse.id;
   const attachedAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -274,38 +273,6 @@ export function VerseAudioCard({
 
   const progress = audioDuration ? (currentTime / audioDuration) * 100 : 0;
 
-  const handleDownloadClick = async () => {
-    if (!verse.unlocked || !verse.audioPath || isDownloading) return;
-
-    setIsDownloading(true);
-    toast({ title: "Starting Download... 📥", description: "Your download will begin shortly.", duration: 5000, className: "bg-blue-100 border-blue-400 text-blue-800" });
-
-    try {
-      const response = await fetch(verse.audioPath);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      // Extract filename from path
-      const filename = verse.audioPath.split('/').pop() || 'audio.mp3';
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast({ title: "Download Started! 🎉", description: "Check your browser downloads.", duration: 3000, className: "bg-green-100 border-green-400 text-green-800" });
-    } catch (error) {
-      console.error('Download failed:', error);
-      toast({ title: "Download Failed", description: "Please try again later.", duration: 3000, className: "bg-red-100 border-red-400 text-red-800" });
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   return (
     <div className="relative group cursor-pointer" data-verse-title={verse.title}>
       {verse.unlocked && verse.artwork ? (
@@ -326,21 +293,6 @@ export function VerseAudioCard({
             </div>
           </div>
           
-          {canPlay && (
-            <div className="absolute -top-6 -right-[14px] flex items-center gap-2">
-              <div className="text-[10px] text-white/90 font-medium bg-black/70 px-1.5 py-0.5 rounded backdrop-blur-sm">Download Verses</div>
-              <button onClick={(e) => { e.stopPropagation(); handleDownloadClick(); }} disabled={isDownloading} className={`w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform transition-all duration-300 ${isDownloading ? 'bg-gradient-to-r from-gray-600 to-gray-700 cursor-not-allowed' : 'bg-gradient-to-r from-gray-800 via-gray-900 to-black hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 hover:scale-110 active:scale-95 hover:shadow-2xl hover:shadow-gray-500/50'}`} title={isDownloading ? 'Downloading...' : 'Download for offline'}>
-                {isDownloading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <Download className="w-4 h-4 text-white" />
-                )}
-              </button>
-            </div>
-          )}
-          
-
-
           {audioDuration && (currentPlayingVerse === verse.id || currentPlayingVerse === -verse.id) && (
             <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-48 bg-black/80 backdrop-blur-lg rounded-lg p-2 border border-primary/20">
               <Progress value={progress} className="h-1 cursor-pointer bg-white/10" onClick={(e) => { const rect = e.currentTarget.getBoundingClientRect(); const percent = ((e.clientX - rect.left) / rect.width) * 100; handleSeek([Math.max(0, Math.min(100, percent))]); }} />
