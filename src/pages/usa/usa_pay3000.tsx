@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowRight, CheckCircle, Shield, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle, Shield, Sparkles, MessageCircle } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { 
   initFacebookPixelWithLogging, 
@@ -199,6 +199,76 @@ export default function Pay3000() {
                     </>
                     )}
                 </button>
+
+                {/* Crypto Payment Options */}
+                <div className="w-full mt-6 pt-6 border-t border-gray-800">
+                    <h4 className="text-gray-400 text-sm font-semibold mb-4 uppercase tracking-wider text-center">Or Pay via Crypto</h4>
+                    
+                    <div className="space-y-4">
+                        {/* Bitcoin */}
+                        <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold text-xs">₿</div>
+                                    <span className="font-bold text-white">Bitcoin (BTC)</span>
+                                </div>
+                                <button 
+                                    onClick={() => {
+                                        navigator.clipboard.writeText("1HkjTQ1tV619v1b3K9s49T8GNkKxjhoCTb");
+                                        alert("Bitcoin Wallet Copied!");
+                                    }}
+                                    className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded-full transition-colors border border-gray-600"
+                                >
+                                    Copy Address
+                                </button>
+                            </div>
+                            <code className="block w-full bg-black/50 p-3 rounded text-xs text-gray-400 font-mono break-all border border-gray-800">
+                                1HkjTQ1tV619v1b3K9s49T8GNkKxjhoCTb
+                            </code>
+                        </div>
+
+                        {/* USDT */}
+                        <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-xs">₮</div>
+                                    <span className="font-bold text-white">USDT (BEP20/ERC20)</span>
+                                </div>
+                                <button 
+                                    onClick={() => {
+                                        navigator.clipboard.writeText("0x900e0c82489accf05ec95a184169191bb5928df7");
+                                        alert("USDT Wallet Copied!");
+                                    }}
+                                    className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded-full transition-colors border border-gray-600"
+                                >
+                                    Copy Address
+                                </button>
+                            </div>
+                            <code className="block w-full bg-black/50 p-3 rounded text-xs text-gray-400 font-mono break-all border border-gray-800">
+                                0x900e0c82489accf05ec95a184169191bb5928df7
+                            </code>
+                        </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-4 text-center">
+                        After crypto payment, please contact support with transaction hash/screenshot for manual verification.
+                    </p>
+
+                    <button
+                        onClick={() => {
+                            if (!email || !email.includes('@')) {
+                                alert("Please enter your email address first so we can identify your payment.");
+                                document.getElementById('email-input-final')?.focus();
+                                return;
+                            }
+                            const message = encodeURIComponent(`Hello, I have paid the $1500 VIP 6 Weeks coaching via Crypto.\n\nEmail: ${email}\n\nPlease verify my payment.`);
+                            window.open(`https://wa.me/62895325633487?text=${message}`, '_blank');
+                        }}
+                        className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg hover:scale-[1.02]"
+                    >
+                        <MessageCircle className="w-6 h-6" />
+                        I HAVE PAID (CONFIRM VIA WHATSAPP)
+                    </button>
+                </div>
                </div>
             </div>
 
