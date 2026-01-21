@@ -656,6 +656,39 @@ const ArifEbookLanding = () => {
         </div>
       </section>
 
+      {/* FAQ SECTION */}
+      <section className="py-16 px-6 bg-gray-900">
+        <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-10 text-white">Pertanyaan Yang Sering Diajukan</h2>
+            <div className="space-y-4">
+                <div className="bg-gray-800 px-4 py-4 rounded-lg border border-gray-700">
+                    <h3 className="text-white font-semibold mb-2">Berapa lama sampai terlihat hasilnya?</h3>
+                    <p className="text-gray-400">
+                        Sebagian besar pengguna merasakan perubahan mental (lebih tenang & damai) dalam 3-7 hari pertama. Perubahan kesehatan fisik biasanya terjadi setelah 21 hari rutin mendengarkan.
+                    </p>
+                </div>
+                <div className="bg-gray-800 px-4 py-4 rounded-lg border border-gray-700">
+                    <h3 className="text-white font-semibold mb-2">Apakah ini hipnotis? Apakah aman?</h3>
+                    <p className="text-gray-400">
+                        Ini adalah terapi frekuensi gelombang otak (brainwave entrainment) yang dikombinasikan dengan sugesti positif, bukan hipnotis panggung. Anda tetap sadar dan memiliki kontrol penuh. Audio ini hanya membantu Anda masuk ke gelombang otak rileks (Theta) untuk mengaktifkan sistem penyembuhan alami tubuh. 100% Aman.
+                    </p>
+                </div>
+                <div className="bg-gray-800 px-4 py-4 rounded-lg border border-gray-700">
+                    <h3 className="text-white font-semibold mb-2">Bisa didengar sambil kerja atau menyetir?</h3>
+                    <p className="text-red-400 font-bold">
+                        TIDAK BOLEH. Audio ini menyebabkan kantuk dan relaksasi dalam. Hanya dengarkan saat Anda dalam posisi istirahat atau sebelum tidur.
+                    </p>
+                </div>
+                <div className="bg-gray-800 px-4 py-4 rounded-lg border border-gray-700">
+                    <h3 className="text-white font-semibold mb-2">Saya gaptek, cara pakainya gimana?</h3>
+                    <p className="text-gray-400">
+                        Sangat mudah. Setelah bayar, link download dikirim ke email. Tinggal klik, download ke HP, dan putar pakai earphone. Ada panduan lengkapnya juga di dalam.
+                    </p>
+                </div>
+            </div>
+        </div>
+      </section>
+
       {/* Checkout Section */}
       <section id="checkout" className="py-20 px-4 bg-gray-900">
         <div className="max-w-2xl mx-auto">

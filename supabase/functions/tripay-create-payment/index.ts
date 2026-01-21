@@ -161,9 +161,9 @@ serve(async (req)=>{
   try {
     // --- 1. INITIALIZE & VALIDATE INPUT ---
     const body = await req.json();
-    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef } = body;
+    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate } = body;
     
-    console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod}`);
+    console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod} (Commission: ${commissionRate || 'Default'})`);
 
     // --- AUTO-ADD TO MAILKETING LIST ---
     try {
@@ -266,6 +266,22 @@ serve(async (req)=>{
     // Validate affiliateRef is a valid UUID if present (basic check)
     const validAffiliateId = affiliateRef && affiliateRef.length > 20 ? affiliateRef : null;
 
+    // --- FETCH AFFILIATE EMAIL IF APPLICABLE ---
+    let affiliateEmail = null;
+    if (validAffiliateId) {
+        try {
+            const { data: affiliateUser, error: affiliateError } = await supabase.auth.admin.getUserById(validAffiliateId);
+            if (!affiliateError && affiliateUser?.user) {
+                affiliateEmail = affiliateUser.user.email;
+                console.log(`🔗 Affiliate linked: ${affiliateEmail} (${validAffiliateId})`);
+            } else {
+                console.warn(`⚠️ Could not fetch affiliate user for ID: ${validAffiliateId}`, affiliateError);
+            }
+        } catch (e) {
+            console.error(`⚠️ Error fetching affiliate email:`, e);
+        }
+    }
+
     if (product.physical) {
       console.log('Inserting into global_product (UNPAID)');
       const { data, error } = await supabase.from('global_product').insert({
@@ -278,7 +294,9 @@ serve(async (req)=>{
         status: 'UNPAID',
         merchant_ref: merchantRef,
         user_id: userId,
-        affiliate_id: validAffiliateId // Save affiliate ID
+        affiliate_id: validAffiliateId, // Save affiliate ID
+        affiliate_email: affiliateEmail, // Save affiliate Email
+        commission_rate: commissionRate || 0.30 // Use provided rate or default to 0.30
       }).select('id').single();
       if (error) throw new Error(`Database insert (global_product) failed: ${error.message}`);
       dbRecordId = data.id;
@@ -295,7 +313,9 @@ serve(async (req)=>{
         status: 'pending',
         tripay_reference: null,
         ip_address: ipAddress,
-        affiliate_id: validAffiliateId // Save affiliate ID
+        affiliate_id: validAffiliateId, // Save affiliate ID
+        affiliate_email: affiliateEmail, // Save affiliate Email
+        commission_rate: commissionRate || 0.30 // Use provided rate or default to 0.30
       }).select('id').single();
       if (error) throw new Error(`Database insert (waiting_payment) failed: ${error.message}`);
       dbRecordId = data.id;

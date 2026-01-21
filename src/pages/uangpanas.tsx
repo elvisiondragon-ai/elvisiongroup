@@ -429,6 +429,7 @@ export default function UangPanasLanding() {
           productName: displayProductName,
           userId: currentUserId, // Use the verified user ID
           affiliateRef: affiliateRef,
+          commissionRate: 0.50 // Set commission rate to 50% for Uang Panas
         }
       });
 
