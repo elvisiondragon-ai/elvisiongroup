@@ -61,6 +61,7 @@ import AbsenHidupPage from "./pages/absenhidup";
 import DrelfLpPage from "./pages/drelflp";
 import Testimony from "./pages/testimony"; // Import the new Testimony component
 import CreatorPage from "./pages/creator_api";
+import ResellerLanding from "./pages/reseller";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";
@@ -225,6 +226,7 @@ const AppContent = () => {
                 <Route path="/drelflp" element={<DrelfLpPage />} />
                 <Route path="/testimony" element={<Testimony />} />
                 <Route path="/creator_api" element={<CreatorPage />} />
+                <Route path="/reseller" element={<ResellerLanding />} />
                 
                 {/* Auth routes */}
                 <Route
