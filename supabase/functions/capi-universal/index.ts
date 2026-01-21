@@ -110,10 +110,27 @@ Deno.serve(async (req) => {
       // We take the first one, which is the most likely to be the client's IP.
       const firstIp = clientIpAddressHeader.split(',')[0].trim();
       
-      // Basic validation: A real IP address must contain a dot.
+      // Basic validation: A real IP address must contain a dot (IPv4) or colon (IPv6).
       // This prevents sending invalid values like "localhost".
-      if (firstIp && firstIp.includes('.')) {
+      if (firstIp && (firstIp.includes('.') || firstIp.includes(':'))) {
         console.log(`Valid IP detected: ${firstIp}`);
+        
+        // 🛑 IP BLOCKING LOGIC
+        const ignoredIps = Deno.env.get('IGNORED_IPS');
+        if (ignoredIps) {
+            const ipList = ignoredIps.split(',').map(ip => ip.trim());
+            if (ipList.includes(firstIp)) {
+                console.log(`🚫 IP ${firstIp} is in IGNORED_IPS list. Blocking event.`);
+                return new Response(JSON.stringify({ 
+                    message: 'Event blocked by IP filter (Success response to client)', 
+                    skipped: true 
+                }), {
+                    status: 200,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                });
+            }
+        }
+
         processedUserData.client_ip_address = firstIp;
       } else {
         console.log(`Invalid or localhost IP detected and skipped: ${firstIp}`);

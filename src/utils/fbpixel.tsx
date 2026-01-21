@@ -96,6 +96,12 @@ export const hashUserData = async (userData: AdvancedMatchingData): Promise<Adva
 export const initFacebookPixelWithLogging = (pixelId: string, userData?: AdvancedMatchingData): void => {
   if (typeof window === 'undefined') return;
 
+  // 🛑 BLOCK INTERNAL TRAFFIC
+  if (localStorage.getItem('DISABLE_FB_PIXEL')) {
+    console.log('🚫 FB Pixel Initialized BLOCKED (DISABLE_FB_PIXEL flag found)');
+    return;
+  }
+
   // Initialize FBC/FBP cookies
   handleFbcCookieManager();
 
@@ -139,6 +145,12 @@ export const updatePixelUserData = async (pixelId: string, userData: AdvancedMat
 // ⭐ Generic Track Helper
 const trackEvent = async (eventName: string, eventData: any = {}, options: { eventID?: string, pixelId?: string, userData?: AdvancedMatchingData } = {}) => {
   if (typeof window === 'undefined' || !(window as any).fbq) return;
+
+  // 🛑 BLOCK INTERNAL TRAFFIC
+  if (localStorage.getItem('DISABLE_FB_PIXEL')) {
+    console.log(`🚫 FB Pixel Event '${eventName}' BLOCKED (DISABLE_FB_PIXEL flag found)`);
+    return;
+  }
 
   try {
     // If userData and pixelId are present, update user data first
