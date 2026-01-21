@@ -147,7 +147,7 @@ serve(async (req)=>{
       
             // FIX: Search by tripay_reference OR merchant_ref to handle cases where the update missed
             let query = supabase.from('global_product')
-              .select('id, name, email, product_name, amount, status, tripay_reference, affiliate_id') // Added affiliate_id
+              .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, fbc, fbp') // Added affiliate_id, phone, fbc, fbp
               .neq('status', 'PAID');
       
             if (merchantRef) {
@@ -269,6 +269,9 @@ serve(async (req)=>{
                     eventName: 'Purchase',
                     userData: {
                       email: globalProductTx.email,
+                      ph: globalProductTx.phone,
+                      fbc: globalProductTx.fbc,
+                      fbp: globalProductTx.fbp,
                       client_ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip')
                     },
                     customData: {

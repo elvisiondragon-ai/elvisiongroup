@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Send } from 'lucide-react';
+import { initFacebookPixelWithLogging, trackCustomEvent } from '@/utils/fbpixel';
 
 export default function Survey3000() {
   const navigate = useNavigate();
@@ -16,26 +17,9 @@ export default function Survey3000() {
 
   useEffect(() => {
     // Facebook Pixel Code
-    !(function(f: any, b: any, e: any, v: any, n: any, t: any, s: any) {
-      if (f.fbq) return;
-      n = f.fbq = function() {
-        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = !0;
-      n.version = '2.0';
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = !0;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-
-    (window as any).fbq('init', '1393383179182528');
-    (window as any).fbq('init', 'EAAGuZBVYmBugBQXvt52SiECtanczI1jMngHkCHWLWDQOIQGZBnkLipg0poGZBZBaJ7RNxa2fcesMH8mtyizKHSG9nZARKg622a8q3jcZCcKLGXXST9pNg26RZBFZBFrtSWT5C23oJBONslIQeOyTirGDjJp6gbrbGExxCF1D7VsdmrOoswXdy1UPomLrM8nJ4ih9MQZDZD');
-    (window as any).fbq('track', 'Survey Form');
+    const pixelId = '1393383179182528';
+    initFacebookPixelWithLogging(pixelId);
+    trackCustomEvent('Survey Form', {}, undefined, pixelId);
   }, []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);

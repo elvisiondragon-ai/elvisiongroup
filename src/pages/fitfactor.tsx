@@ -21,6 +21,7 @@ import {
   initFacebookPixelWithLogging, 
   trackCustomEvent, 
   trackPurchaseEvent,
+  getFbcFbpCookies,
   AdvancedMatchingData
 } from '@/utils/fbpixel';
 
@@ -294,6 +295,7 @@ export default function FitfactorPaymentPage() {
         num_items: quantity,
       }, initiateCheckoutEventId);
 
+      const { fbc, fbp } = getFbcFbpCookies();
 
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
@@ -312,6 +314,8 @@ export default function FitfactorPaymentPage() {
           productName: `${productName} (x${quantity})`, // Include quantity in name
           userId: user?.id,
           affiliateRef: affiliateRef, // Pass affiliate reference
+          fbc,
+          fbp,
         }
       });
 

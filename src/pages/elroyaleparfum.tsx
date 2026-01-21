@@ -17,6 +17,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePro } from '@/hooks/usePro';
+import { getFbcFbpCookies } from '@/utils/fbpixel';
 
 const WhatsAppButton = () => (
   <a
@@ -143,6 +144,8 @@ export default function ParfumPaymentPage() {
     const fullAddress = `${userAddress}, ${kecamatan}, ${kota}, ${selectedProvince}, ${kodePos}`;
 
     setLoading(true);
+    const { fbc, fbp } = getFbcFbpCookies();
+
     try {
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
@@ -161,6 +164,8 @@ export default function ParfumPaymentPage() {
           productName: productName, // Send full product name with variant
           userId: user?.id,
           affiliateRef: affiliateRef,
+          fbc,
+          fbp
         }
       });
 

@@ -5,7 +5,8 @@ import {
   initFacebookPixelWithLogging, 
   trackCustomEvent, 
   trackAddPaymentInfoEvent,
-  AdvancedMatchingData 
+  AdvancedMatchingData,
+  getFbcFbpCookies
 } from '@/utils/fbpixel';
 
 export default function Pay3000() {
@@ -19,12 +20,7 @@ export default function Pay3000() {
   // Helper to send CAPI events
   const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
     try {
-       // Simple cookie helper
-       const getCookie = (name: string) => {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) return parts.pop()?.split(';').shift();
-       };
+      const { fbc, fbp } = getFbcFbpCookies();
 
       await fetch(CAPI_EDGE_FUNCTION_URL, {
         method: 'POST',
@@ -34,8 +30,8 @@ export default function Pay3000() {
           eventName,
           userData: {
              ...userData,
-             fbp: getCookie('_fbp'),
-             fbc: getCookie('_fbc'),
+             fbp,
+             fbc,
              client_user_agent: navigator.userAgent
           },
           customData,
@@ -91,6 +87,8 @@ export default function Pay3000() {
         email: email
       }, eventData, eventId);
 
+      const { fbc, fbp } = getFbcFbpCookies();
+
       // Create Payment
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
@@ -98,7 +96,9 @@ export default function Pay3000() {
           paymentMethod: "PAYPAL",
           userEmail: email,
           userName: email.split('@')[0],
-          quantity: 1
+          quantity: 1,
+          fbc,
+          fbp
         }
       });
 

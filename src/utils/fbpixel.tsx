@@ -48,6 +48,14 @@ export const handleFbcCookieManager = (): void => {
   }
 };
 
+// 🍪 Get Both FBC and FBP Cookies
+export const getFbcFbpCookies = (): { fbc: string | null; fbp: string | null } => {
+  return {
+    fbc: getFbcCookieHelper('_fbc'),
+    fbp: getFbcCookieHelper('_fbp')
+  };
+};
+
 export interface AdvancedMatchingData {
   em?: string; // Email
   ph?: string; // Phone

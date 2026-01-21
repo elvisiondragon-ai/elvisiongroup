@@ -4,7 +4,8 @@ import {
   initFacebookPixelWithLogging, 
   trackPageViewEvent, 
   trackAddToCartEvent, 
-  trackCustomEvent 
+  trackCustomEvent,
+  getFbcFbpCookies
 } from '@/utils/fbpixel';
 
 export default function ELVision3000() {
@@ -15,12 +16,7 @@ export default function ELVision3000() {
   // Helper to send CAPI events
   const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
     try {
-       // Simple cookie helper
-       const getCookie = (name: string) => {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) return parts.pop()?.split(';').shift();
-       };
+      const { fbc, fbp } = getFbcFbpCookies();
 
       await fetch(CAPI_EDGE_FUNCTION_URL, {
         method: 'POST',
@@ -30,8 +26,8 @@ export default function ELVision3000() {
           eventName,
           userData: {
              ...userData,
-             fbp: getCookie('_fbp'),
-             fbc: getCookie('_fbc'),
+             fbp,
+             fbc,
              client_user_agent: navigator.userAgent
           },
           customData,

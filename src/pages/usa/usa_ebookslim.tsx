@@ -30,20 +30,23 @@ declare global {
 
 const PIXEL_ID = '1393383179182528'; // Updated PIXEL_ID from Pay3000.tsx
 
+import {
+  initFacebookPixelWithLogging, 
+  trackCustomEvent, 
+  trackAddPaymentInfoEvent,
+  AdvancedMatchingData,
+  getFbcFbpCookies
+} from '@/utils/fbpixel';
+
 // Helper to send CAPI events - needs to be outside the component
 const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
 
-// Simple cookie helper
-const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-  return undefined;
-};
-
 // Helper to send CAPI events
 const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
+
   try {
+    const { fbc, fbp } = getFbcFbpCookies();
+
     await fetch(CAPI_EDGE_FUNCTION_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -52,8 +55,8 @@ const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: 
         eventName,
         userData: {
           ...userData,
-          fbp: getCookie('_fbp'),
-          fbc: getCookie('_fbc'),
+          fbp,
+          fbc,
           client_user_agent: navigator.userAgent
         },
         customData,
@@ -224,6 +227,8 @@ const SlimPage = () => {
       trackCustomEvent('InitiateCheckout', eventData, eventId, PIXEL_ID, userData);
       sendCapiEvent('InitiateCheckout', eventData);
 
+      const { fbc, fbp } = getFbcFbpCookies();
+
       // Create Payment via Supabase function
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
@@ -237,6 +242,8 @@ const SlimPage = () => {
           productName: displayProductName,
           userId: currentUserId,
           affiliateRef: affiliateRef,
+          fbc,
+          fbp
         }
       });
 

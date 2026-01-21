@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
-import { handleFbcCookieManager, trackPageViewEvent, trackAddToCartEvent, trackPurchaseEvent, initFacebookPixelWithLogging } from '@/utils/fbpixel';
+import { handleFbcCookieManager, trackPageViewEvent, trackAddToCartEvent, trackPurchaseEvent, initFacebookPixelWithLogging, getFbcFbpCookies } from '@/utils/fbpixel';
 
 interface PaymentProps {
   onNavigate: (tab: string) => void;
@@ -373,6 +373,8 @@ export function Payment({ onNavigate }: PaymentProps) {
         amount: plan.price
       });
 
+      const { fbc, fbp } = getFbcFbpCookies();
+
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: plan.id,
@@ -380,7 +382,9 @@ export function Payment({ onNavigate }: PaymentProps) {
           userName: finalDisplayName,
           userEmail: currentUserEmail,
           phoneNumber: finalPhoneNumber,
-          amount: plan.price
+          amount: plan.price,
+          fbc,
+          fbp
         }
       });
 

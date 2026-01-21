@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Star, Check, Shield, Clock, PlayCircle, MessageCircle, ArrowRight, Instagram, Globe, HeartHandshake, ShieldCheck } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
+import { getFbcFbpCookies } from "@/utils/fbpixel";
 
 const EbookHealthLP = () => {
   const [loading, setLoading] = React.useState(false);
@@ -13,11 +14,7 @@ const EbookHealthLP = () => {
   // Helper to send CAPI events
   const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
     try {
-      const getCookie = (name: string) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(';').shift();
-      };
+      const { fbc, fbp } = getFbcFbpCookies();
 
       await fetch(CAPI_EDGE_FUNCTION_URL, {
         method: 'POST',
@@ -27,8 +24,8 @@ const EbookHealthLP = () => {
           eventName,
           userData: {
             ...userData,
-            fbp: getCookie('_fbp'),
-            fbc: getCookie('_fbc'),
+            fbp,
+            fbc,
             client_user_agent: navigator.userAgent
           },
           customData,
@@ -111,6 +108,8 @@ const EbookHealthLP = () => {
         currency: 'USD'
       }, eventId);
 
+      const { fbc, fbp } = getFbcFbpCookies();
+
       // 1. Create Order using Supabase Client (Handles Auth automatically)
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
@@ -118,7 +117,9 @@ const EbookHealthLP = () => {
           paymentMethod: "PAYPAL",
           userEmail: email, // Use the user's input email
           userName: email.split('@')[0], // Default name from email
-          quantity: 1
+          quantity: 1,
+          fbc,
+          fbp
         }
       });
 

@@ -6,6 +6,13 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
+import { 
+  initFacebookPixelWithLogging, 
+  trackPageViewEvent, 
+  trackPurchaseEvent, 
+  getFbcFbpCookies,
+  AdvancedMatchingData
+} from '@/utils/fbpixel';
 
 const ArifEbookLanding = () => {
   const [timeLeft, setTimeLeft] = useState({ hours: 11, minutes: 47, seconds: 23 });
@@ -28,9 +35,12 @@ const ArifEbookLanding = () => {
   const productPrice = 200000;
   const totalQuantity = 1;
   const totalAmount = productPrice;
-
+  const pixelId = '3319324491540889'; // Using EbookIndo Pixel ID
 
   useEffect(() => {
+    initFacebookPixelWithLogging(pixelId);
+    trackPageViewEvent({}, undefined, pixelId);
+
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
@@ -84,6 +94,24 @@ const ArifEbookLanding = () => {
               duration: 5000, 
               variant: "default"
           });
+
+          // Track Client-Side Purchase Event
+          const purchaseUserData: AdvancedMatchingData = {
+            em: userEmail,
+            ph: phoneNumber,
+            fn: userName,
+            external_id: user?.id
+          };
+
+          trackPurchaseEvent({
+            content_name: displayProductName,
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'IDR',
+            transaction_id: paymentData.tripay_reference
+          }, paymentData.tripay_reference, pixelId, purchaseUserData);
+
           // Optional: redirect to a thank you page or just show success state
         }
       }).subscribe();
@@ -111,6 +139,7 @@ const ArifEbookLanding = () => {
 
     setLoading(true);
     const currentUserId = user?.id;
+    const { fbc, fbp } = getFbcFbpCookies();
 
     try {
       const payload: any = {
@@ -123,6 +152,8 @@ const ArifEbookLanding = () => {
         quantity: totalQuantity,
         productName: displayProductName,
         affiliateRef: affiliateRef,
+        fbc,
+        fbp
       };
 
       if (currentUserId) {
@@ -294,7 +325,7 @@ const ArifEbookLanding = () => {
               </h2>
             </div>
 
-            {/* Arif's Video Testimonial */}
+            {/* Arif's Video Testimonials */}
             <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-green-500/50 rounded-2xl p-10 mb-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="text-5xl">🏥</div>
@@ -305,16 +336,31 @@ const ArifEbookLanding = () => {
                 </div>
               </div>
               
-              <video 
-                className="w-full rounded-lg mb-6"
-                controls
-                preload="metadata"
-                playsInline
-                webkit-playsinline="true"
-              >
-                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4" type="video/mp4" />
-                Browser Anda tidak mendukung pemutaran video.
-              </video>
+              <div className="mb-8 max-w-sm mx-auto">
+                <video 
+                  className="w-full rounded-lg shadow-xl border border-gray-800"
+                  controls
+                  preload="metadata"
+                  playsInline
+                  webkit-playsinline="true"
+                  poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/arifweb/arif2.jpeg"
+                >
+                  <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/arifweb/arif2.mp4" type="video/mp4" />
+                  Browser Anda tidak mendukung pemutaran video.
+                </video>
+              </div>
+
+              {/* Additional Testimonial Images */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                {[3, 4, 5, 6].map((num) => (
+                  <img 
+                    key={num}
+                    src={`https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/arifweb/arif${num}.jpeg`}
+                    alt={`Testimonial ${num}`}
+                    className="w-full h-auto rounded-lg shadow-md border border-gray-800 hover:scale-105 transition-transform cursor-pointer"
+                  />
+                ))}
+              </div>
 
               <div className="bg-gradient-to-r from-red-900/30 to-green-900/30 border border-green-500/30 rounded-xl p-6 mb-6">
                 <div className="grid md:grid-cols-2 gap-6">
@@ -652,6 +698,30 @@ const ArifEbookLanding = () => {
             >
               Testimony dan Cara Kerja <ArrowRight className="w-5 h-5" />
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Additional Video Section - Before FAQ */}
+      <section className="py-10 px-4 bg-black">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-green-500/50 rounded-2xl p-8 shadow-2xl">
+            <h3 className="text-2xl font-bold text-center mb-6 text-green-400">
+              Perjalanan Kesembuhan Saya (Bagian 1)
+            </h3>
+            <div className="max-w-sm mx-auto">
+              <video 
+                className="w-full rounded-lg shadow-xl border border-gray-800"
+                controls
+                preload="metadata"
+                playsInline
+                webkit-playsinline="true"
+                poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/arifweb/arif1.jpeg"
+              >
+                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/arifweb/arif1.mp4" type="video/mp4" />
+                Browser Anda tidak mendukung pemutaran video.
+              </video>
+            </div>
           </div>
         </div>
       </section>

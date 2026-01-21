@@ -15,6 +15,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Toaster } from '@/components/ui/toaster';
+import { getFbcFbpCookies } from '@/utils/fbpixel';
 
 // Countdown Timer Component
 const CountdownTimer = () => {
@@ -193,6 +194,8 @@ export default function EbookFeminineLanding() {
         currency: 'IDR'
       });
 
+      const { fbc, fbp } = getFbcFbpCookies();
+
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: productNameBackend,
@@ -204,6 +207,8 @@ export default function EbookFeminineLanding() {
           quantity: totalQuantity,
           productName: displayProductName,
           userId: null, // No auth required
+          fbc,
+          fbp
         }
       });
 

@@ -18,7 +18,8 @@ import {
   trackViewContentEvent, 
   trackAddPaymentInfoEvent, 
   trackPurchaseEvent,
-  AdvancedMatchingData
+  AdvancedMatchingData,
+  getFbcFbpCookies
 } from '@/utils/fbpixel';
 
 const getCookie = (name: string) => {
@@ -416,6 +417,8 @@ export default function UangPanasLanding() {
       }
     }
 
+    const { fbc, fbp } = getFbcFbpCookies();
+
     try {
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
@@ -429,7 +432,9 @@ export default function UangPanasLanding() {
           productName: displayProductName,
           userId: currentUserId, // Use the verified user ID
           affiliateRef: affiliateRef,
-          commissionRate: 0.50 // Set commission rate to 50% for Uang Panas
+          commissionRate: 0.50, // Set commission rate to 50% for Uang Panas
+          fbc,
+          fbp
         }
       });
 

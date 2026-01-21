@@ -161,7 +161,7 @@ serve(async (req)=>{
   try {
     // --- 1. INITIALIZE & VALIDATE INPUT ---
     const body = await req.json();
-    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate } = body;
+    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate, fbc, fbp } = body;
     
     console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod} (Commission: ${commissionRate || 'Default'})`);
 
@@ -278,7 +278,9 @@ serve(async (req)=>{
         status: 'UNPAID',
         merchant_ref: merchantRef,
         user_id: userId,
-        affiliate_id: validAffiliateId // Save affiliate ID
+        affiliate_id: validAffiliateId, // Save affiliate ID
+        fbc: fbc || null,
+        fbp: fbp || null
       }).select('id').single();
       if (error) throw new Error(`Database insert (global_product) failed: ${error.message}`);
       dbRecordId = data.id;

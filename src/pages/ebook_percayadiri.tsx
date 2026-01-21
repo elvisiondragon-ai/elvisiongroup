@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
+import { getFbcFbpCookies } from '@/utils/fbpixel';
 import {
   Accordion,
   AccordionContent,
@@ -194,6 +195,8 @@ export default function EbookPercayaDiriLP() {
         currency: 'IDR'
       });
 
+      const { fbc, fbp } = getFbcFbpCookies();
+
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: productNameBackend,
@@ -206,6 +209,8 @@ export default function EbookPercayaDiriLP() {
           productName: displayProductName,
           userId: currentUserId,
           affiliateRef: affiliateRef,
+          fbc,
+          fbp
         }
       });
 
