@@ -387,26 +387,6 @@ export default function ELVision3000() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Promo Card */}
-      <div 
-        onClick={() => window.location.href = 'https://app.elvisiongroup.com/usa/usa_pay3000.tsx'}
-        className="cursor-pointer bg-gradient-to-r from-red-600 to-red-800 text-white py-4 px-6 text-center sticky top-0 z-50 shadow-lg animate-pulse hover:from-red-500 hover:to-red-700 transition-all"
-      >
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-center gap-4">
-          <span className="text-2xl md:text-3xl font-extrabold uppercase tracking-wider">
-            🚨 Get your 50% Discount VIP NOW!
-          </span>
-          <div className="flex items-center gap-3 bg-black/30 px-4 py-2 rounded-lg">
-             <span className="text-xl text-gray-300 line-through font-bold">$3,000</span>
-             <ArrowRight className="w-6 h-6 text-white" />
-             <span className="text-3xl font-black text-yellow-400">$1,500</span>
-          </div>
-          <span className="text-sm md:text-base font-semibold underline decoration-2 decoration-yellow-400">
-            Click here to claim via PayPal
-          </span>
-        </div>
-      </div>
-
       {/* Hero Section */}
       <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Static Background */}
@@ -1511,16 +1491,6 @@ export default function ELVision3000() {
               BOOK A CALL NOW
               <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
             </button>
-
-            <div className="flex flex-col items-center gap-4 mb-8 max-w-md mx-auto">
-              <button
-                onClick={() => window.location.href = 'https://app.elvisiongroup.com/usa/usa_pay3000.tsx'}
-                className="w-full group bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 text-white font-bold text-xl px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-blue-500/50 flex items-center justify-center gap-4"
-              >
-                CLAIM 50% DISCOUNT
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-              </button>
-            </div>
 
             <p className="text-gray-500 text-sm">
               Limited slots. We only work with those serious about deep transformation.
