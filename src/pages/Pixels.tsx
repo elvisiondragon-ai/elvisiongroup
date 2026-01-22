@@ -11,20 +11,29 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Loader2, RefreshCcw } from "lucide-react";
 import { JsonView } from '@/components/ui/json-view'; // Assuming you might have one, or I'll use pre
 
 export default function Pixels() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchInput] = useState('');
 
-  const fetchLogs = async () => {
+  const fetchLogs = async (search?: string) => {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('pixel_events')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(50);
+      .limit(100);
+
+    if (search) {
+        // Simple search logic for Email, FBP or FBC inside JSONB or columns
+        query = query.or(`user_data->>email.ilike.%${search}%,user_data->>fbp.ilike.%${search}%,user_data->>fbc.ilike.%${search}%,pixel_id.ilike.%${search}%`);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching pixel logs:', error);
@@ -35,8 +44,11 @@ export default function Pixels() {
   };
 
   useEffect(() => {
-    fetchLogs();
+    fetchLogs(searchTerm);
+    // ... realtime remains same
+  }, [searchTerm]);
     
+  useEffect(() => {
     // Subscribe to realtime updates
     const channel = supabase
       .channel('pixel_events_changes')
@@ -60,9 +72,17 @@ export default function Pixels() {
 
   return (
     <div className="container mx-auto py-10 space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center gap-4">
         <h1 className="text-3xl font-bold">Pixel Event Logs</h1>
-        <Button onClick={fetchLogs} disabled={loading}>
+        <div className="flex flex-1 max-w-sm gap-2">
+            <Input 
+                placeholder="Search Email, FBP, or FBC..." 
+                value={searchTerm}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="bg-white"
+            />
+        </div>
+        <Button onClick={() => fetchLogs(searchTerm)} disabled={loading}>
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
           Refresh
         </Button>
@@ -80,6 +100,8 @@ export default function Pixels() {
                 <TableHead>Event</TableHead>
                 <TableHead>Pixel ID</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>FBC (Ad Click)</TableHead>
+                <TableHead>FBP (Browser)</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>URL / Product</TableHead>
                 <TableHead>Meta Response</TableHead>
@@ -89,12 +111,18 @@ export default function Pixels() {
               {logs.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="whitespace-nowrap">
-                    {new Date(log.created_at).toLocaleTimeString()}
+                    {new Date(log.created_at).toLocaleString()}
                   </TableCell>
                   <TableCell className="font-medium">{log.event_name}</TableCell>
                   <TableCell>{log.pixel_id}</TableCell>
                   <TableCell className="max-w-[200px] truncate" title={log.user_data?.email}>
                     {log.user_data?.email || '-'}
+                  </TableCell>
+                  <TableCell className="max-w-[150px] truncate font-mono text-[10px]" title={log.user_data?.fbc}>
+                    {log.user_data?.fbc || '-'}
+                  </TableCell>
+                  <TableCell className="max-w-[150px] truncate font-mono text-[10px]" title={log.user_data?.fbp}>
+                    {log.user_data?.fbp || '-'}
                   </TableCell>
                   <TableCell>
                     <Badge variant={log.status === 'sent' ? 'default' : 'destructive'}>
@@ -119,7 +147,7 @@ export default function Pixels() {
               ))}
               {logs.length === 0 && !loading && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                  <TableCell colSpan={9} className="text-center py-10 text-gray-500">
                     No pixel events found. Trigger some events to see them here.
                   </TableCell>
                 </TableRow>
