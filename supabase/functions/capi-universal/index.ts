@@ -71,8 +71,7 @@ Deno.serve(async (req) => {
         event_id: eventId,
         user_data: userData, // Log raw user data passed to function (be careful with PII in prod logs, maybe mask?)
         custom_data: customData,
-        status: 'processing',
-        created_at: new Date().toISOString()
+        status: 'processing'
     };
 
     // Attempt to log immediately

@@ -79,6 +79,7 @@ export default function Pixels() {
                 <TableHead>Time</TableHead>
                 <TableHead>Event</TableHead>
                 <TableHead>Pixel ID</TableHead>
+                <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>URL / Product</TableHead>
                 <TableHead>Meta Response</TableHead>
@@ -92,6 +93,9 @@ export default function Pixels() {
                   </TableCell>
                   <TableCell className="font-medium">{log.event_name}</TableCell>
                   <TableCell>{log.pixel_id}</TableCell>
+                  <TableCell className="max-w-[200px] truncate" title={log.user_data?.email}>
+                    {log.user_data?.email || '-'}
+                  </TableCell>
                   <TableCell>
                     <Badge variant={log.status === 'sent' ? 'default' : 'destructive'}>
                       {log.status}
@@ -100,7 +104,7 @@ export default function Pixels() {
                   <TableCell className="max-w-[300px] truncate">
                     <div className="text-xs">
                         {log.custom_data ? (
-                            <pre className="overflow-auto bg-gray-100 p-1 rounded">
+                            <pre className="overflow-auto whitespace-pre-wrap font-mono">
                                 {JSON.stringify(log.custom_data, null, 2)}
                             </pre>
                         ) : 'No custom data'}
@@ -115,7 +119,7 @@ export default function Pixels() {
               ))}
               {logs.length === 0 && !loading && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-gray-500">
+                  <TableCell colSpan={7} className="text-center py-10 text-gray-500">
                     No pixel events found. Trigger some events to see them here.
                   </TableCell>
                 </TableRow>
