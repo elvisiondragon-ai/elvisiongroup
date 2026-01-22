@@ -46,18 +46,12 @@ Deno.serve(async (req) => {
   // --- Configuration ---
   const { pixelId, eventName, userData, customData, eventId, testCode } = await req.json();
 
+  // Initialize Supabase Client for Logging
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
   let FACEBOOK_ACCESS_TOKEN = Deno.env.get('METACAPI');
-  
-  // Specific Token for 3000 Coaching Pixel
-  if (pixelId === '1393383179182528') {
-      const token3000 = Deno.env.get('METACAPI_3000');
-      if (token3000) {
-          console.log('Using specific Access Token for Pixel 3000');
-          FACEBOOK_ACCESS_TOKEN = token3000;
-      } else {
-          console.warn('⚠️ Warning: Pixel 1393... requested but METACAPI_3000 not found. Falling back to default.');
-      }
-  }
 
   if (!FACEBOOK_ACCESS_TOKEN) {
     console.error('Configuration Error: METACAPI Access Token not configured.');
@@ -69,6 +63,26 @@ Deno.serve(async (req) => {
 
   try {
     console.log('Incoming Universal Event:', { pixelId, eventName, email: userData?.email, eventId });
+
+    // Prepare DB Log Object
+    const dbLog: any = {
+        pixel_id: pixelId,
+        event_name: eventName,
+        event_id: eventId,
+        user_data: userData, // Log raw user data passed to function (be careful with PII in prod logs, maybe mask?)
+        custom_data: customData,
+        status: 'processing',
+        created_at: new Date().toISOString()
+    };
+
+    // Attempt to log immediately
+    const { data: logData, error: logError } = await supabase
+        .from('pixel_events')
+        .insert(dbLog)
+        .select()
+        .single();
+
+    if (logError) console.error('Failed to insert pixel_event log:', logError);
 
     if (!pixelId) {
       return new Response(JSON.stringify({ error: 'pixelId is required' }), {
@@ -174,6 +188,17 @@ Deno.serve(async (req) => {
     });
 
     const result = await response.json();
+
+    // Update the log with the result
+    if (logData) {
+        await supabase
+            .from('pixel_events')
+            .update({ 
+                status: response.ok ? 'sent' : 'failed',
+                meta_response: result 
+            })
+            .eq('id', logData.id);
+    }
 
     if (!response.ok) {
       console.error('Meta CAPI Error:', result);

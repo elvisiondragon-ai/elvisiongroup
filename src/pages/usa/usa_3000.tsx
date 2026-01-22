@@ -1164,6 +1164,64 @@ export default function ELVision3000() {
         </div>
       </div>
 
+      {/* ROI Comparison Section */}
+      <div className="py-20 bg-gradient-to-b from-gray-900 to-black">
+        <div className="container mx-auto px-6">
+          <h2 className="text-5xl font-bold text-center mb-16">
+            <span className="bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
+              The Real Math
+            </span>
+          </h2>
+
+          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
+            {/* The Cost */}
+            <div className="bg-gray-900 border border-gray-800 rounded-3xl p-10 flex flex-col justify-center items-center text-center">
+              <div className="text-2xl text-gray-400 mb-2">You Pay</div>
+              <div className="text-6xl font-bold text-white mb-4">$3,000</div>
+              <div className="text-sm text-gray-500">One-time investment</div>
+            </div>
+
+            {/* The Value */}
+            <div className="bg-gradient-to-br from-yellow-900/20 to-amber-900/20 border border-yellow-500/30 rounded-3xl p-10 relative overflow-hidden">
+               <div className="absolute top-0 right-0 bg-yellow-500 text-black font-bold px-4 py-1 rounded-bl-xl">
+                 WHAT YOU SAVE
+               </div>
+               <div className="space-y-6">
+                 <div className="flex items-start gap-4">
+                   <div className="bg-yellow-500/20 p-3 rounded-lg">
+                     <span className="text-2xl">⏳</span>
+                   </div>
+                   <div>
+                     <h4 className="text-xl font-bold text-yellow-400">Save 3-5 Years</h4>
+                     <p className="text-gray-300">Stop wasting years finding clarity. Collapse timelines by accessing the root cause immediately.</p>
+                   </div>
+                 </div>
+
+                 <div className="flex items-start gap-4">
+                   <div className="bg-yellow-500/20 p-3 rounded-lg">
+                     <span className="text-2xl">🧠</span>
+                   </div>
+                   <div>
+                     <h4 className="text-xl font-bold text-yellow-400">End Mental Exhaustion</h4>
+                     <p className="text-gray-300">No more looping mistakes. The cost of decision fatigue and anxiety is higher than you think.</p>
+                   </div>
+                 </div>
+
+                 <div className="flex items-start gap-4">
+                   <div className="bg-yellow-500/20 p-3 rounded-lg">
+                     <span className="text-2xl">💰</span>
+                   </div>
+                   <div>
+                     <h4 className="text-xl font-bold text-yellow-400">Save $100,000+</h4>
+                     <p className="text-gray-300">In prevented health costs, bad business decisions, and stress-related losses.</p>
+                   </div>
+                 </div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Video Testimonials Section */}
       <div className="py-20 bg-gradient-to-b from-gray-900 to-black">
         <div className="container mx-auto px-6">
