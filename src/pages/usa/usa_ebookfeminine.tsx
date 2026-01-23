@@ -229,17 +229,19 @@ export default function USAEbookFeminineLanding() {
 
       {/* PAIN AGITATION SECTION - ENHANCED */}
       <section className="py-24 px-6 max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <div className="inline-block p-3 bg-rose-100 rounded-2xl mb-4">
-            <AlertCircle className="w-10 h-10 text-rose-600" />
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-[#2c1a32] font-serif mb-6 leading-tight">
-            Does This Sound Like You?
-          </h2>
-          <p className="text-xl text-rose-600 font-medium max-w-3xl mx-auto leading-relaxed">
-            You keep attracting the wrong men, repeating the same painful patterns—<span className="text-slate-900">because your conscious effort can't override your subconscious programming.</span>
-          </p>
-        </div>
+        <Card className="border-4 border-rose-50 bg-white mb-16 shadow-none overflow-hidden rounded-[2rem]">
+          <CardContent className="p-10 md:p-16 text-center">
+            <div className="inline-block p-3 bg-rose-100 rounded-2xl mb-4">
+              <AlertCircle className="w-10 h-10 text-rose-600" />
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-[#2c1a32] font-serif mb-6 leading-tight">
+              Does This Sound Like You?
+            </h2>
+            <p className="text-xl text-rose-600 font-medium max-w-3xl mx-auto leading-relaxed">
+              You keep attracting the wrong men, repeating the same painful patterns—<span className="text-slate-900">because your conscious effort can't override your subconscious programming.</span>
+            </p>
+          </CardContent>
+        </Card>
 
         <div className="grid md:grid-cols-2 gap-8 mb-16">
             {[
@@ -281,13 +283,14 @@ export default function USAEbookFeminineLanding() {
             ))}
         </div>
 
-        <div className="bg-[#2c1a32] text-white p-10 md:p-16 rounded-[2rem] text-center border-b-8 border-rose-500">
-            <Brain className="w-16 h-16 mx-auto mb-6 text-rose-400" />
-            <h3 className="text-3xl md:text-4xl font-bold mb-6 font-serif">Here's the Truth Most People Won't Tell You:</h3>
-            <p className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto font-light text-slate-200">
-              Your problem isn't that you're "not good enough." It's not even your behavior. <span className="text-white font-bold">It's your subconscious programming.</span> You can read 1,000 books, attend every workshop—but if your subconscious still believes "I'm unlovable," <span className="text-rose-400 font-bold underline decoration-2 underline-offset-4">your behavior will sabotage you every single time.</span>
+        <div className="bg-white rounded-[2rem] text-center border-4 border-rose-100 p-10 md:p-16 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-500 to-rose-500"></div>
+            <Brain className="w-16 h-16 mx-auto mb-6 text-rose-500" />
+            <h3 className="text-3xl md:text-4xl font-bold mb-6 font-serif text-[#2c1a32]">Here's the Truth Most People Won't Tell You:</h3>
+            <p className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto font-light text-slate-600">
+              Your problem isn't that you're "not good enough." It's not even your behavior. <span className="text-rose-600 font-bold">It's your subconscious programming.</span> You can read 1,000 books, attend every workshop—but if your subconscious still believes "I'm unlovable," <span className="text-rose-500 font-bold underline decoration-2 underline-offset-4">your behavior will sabotage you every single time.</span>
             </p>
-            <div className="mt-10 flex items-center justify-center gap-3 text-rose-300 bg-white/5 py-4 px-6 rounded-full inline-flex mx-auto">
+            <div className="mt-10 flex items-center justify-center gap-3 text-rose-600 bg-rose-50 py-4 px-8 rounded-full inline-flex mx-auto border border-rose-100">
               <Lock className="w-5 h-5" />
               <span className="font-bold tracking-wide uppercase text-xs md:text-sm">Your subconscious runs 95% of your life. Willpower is only 5%.</span>
             </div>
@@ -451,6 +454,63 @@ export default function USAEbookFeminineLanding() {
         </div>
       </section>
 
+      {/* AFTER PURCHASE STEPS */}
+      <section className="py-24 px-6 max-w-6xl mx-auto">
+        <Card className="border-4 border-rose-50 bg-white mb-16 shadow-none overflow-hidden rounded-[2rem]">
+          <CardContent className="p-10 md:p-16 text-center">
+            <h2 className="text-3xl md:text-5xl font-bold text-[#2c1a32] font-serif mb-6 leading-tight">Your 6-Step Transformation Path</h2>
+            <p className="text-xl text-gray-500 max-w-3xl mx-auto leading-relaxed">Here is exactly what happens from the moment you get access:</p>
+          </CardContent>
+        </Card>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[
+            {
+              step: "01",
+              title: "Read the Siren's Secret",
+              desc: "You'll finally understand why you've been attracting the wrong men. You'll learn the 'Frequency of Rejection' and how to turn it off instantly."
+            },
+            {
+              step: "02",
+              title: "Define Your Daily Practice",
+              desc: "Follow the simple roadmap. You'll know exactly what small actions to take daily to stay in your feminine power without effort."
+            },
+            {
+              step: "03",
+              title: "The 15-Minute Protocol",
+              desc: "Listen to the Morning and Night audios (15 mins each). This is the 'Heavy Lifting'—your subconscious does the work while you relax."
+            },
+            {
+              step: "04",
+              title: "The 7-Day Shift",
+              desc: "After just one week of consistency, your subconscious begins to accept your new reality. You'll wake up feeling 'great' for no logical reason."
+            },
+            {
+              step: "05",
+              title: "Emotional Detox",
+              desc: "The old negative 'pull' is gone. Anxiety, overthinking, and the need to chase simply disappear. You feel calm, centered, and worthy."
+            },
+            {
+              step: "06",
+              title: "Magnetic Manifestation",
+              desc: "Suddenly, 'the one' appears. Whether it's a new high-quality man or a total shift in your current partner—the closer your frequency, the faster they arrive."
+            }
+          ].map((item, i) => (
+            <Card key={i} className="border-2 border-rose-50 bg-white hover:border-rose-200 transition-all shadow-none relative pt-8">
+              <div className="absolute -top-4 left-8 bg-rose-500 text-white font-black px-4 py-1 rounded-full text-sm">
+                STEP {item.step}
+              </div>
+              <CardHeader>
+                <CardTitle className="text-xl text-slate-900 font-serif font-bold">{item.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 leading-relaxed font-light">{item.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
       {/* TESTIMONIALS - DETAILED */}
       <section className="bg-gradient-to-b from-white to-pink-50 py-20 px-6 border-y border-gray-100">
         <div className="max-w-7xl mx-auto">
@@ -570,6 +630,34 @@ export default function USAEbookFeminineLanding() {
 
           <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-10 rounded-2xl text-center shadow-2xl">
             <h3 className="text-3xl font-bold mb-6">A Simple Question For You:</h3>
+            
+            <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-10">
+               <div className="w-full max-w-[300px] aspect-square rounded-3xl overflow-hidden border-4 border-white/20 shadow-2xl bg-black">
+                  <video 
+                    src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/ugc1.mp4" 
+                    poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/ugc1.jpg" 
+                    className="w-full h-full object-cover"
+                    controls
+                    playsInline
+                    preload="metadata"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+               </div>
+               <div className="w-full max-w-[300px] aspect-square rounded-3xl overflow-hidden border-4 border-white/20 shadow-2xl bg-black">
+                  <video 
+                    src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/ugc2.mp4" 
+                    poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/ugc2.jpg" 
+                    className="w-full h-full object-cover"
+                    controls
+                    playsInline
+                    preload="metadata"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+               </div>
+            </div>
+
             <p className="text-2xl mb-8 leading-relaxed">
               Is your heart, your future of love, your peace of mind worth <strong className="underline decoration-4">less than a lunch?</strong>
             </p>

@@ -441,10 +441,15 @@ export default function EbookFeminineLanding() {
       </section>
 
       {/* PAIN SECTION */}
-      <section className="py-20 px-6 max-w-5xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[#2c1a32] font-serif leading-tight">
-            Sudah Mencoba 1000 Cara, Tapi Hati Masih Sering Patah?
-        </h2>
+      <section className="py-24 px-6 max-w-5xl mx-auto">
+        <Card className="border-4 border-rose-50 bg-white mb-12 shadow-none overflow-hidden rounded-[2rem]">
+          <CardContent className="p-10 md:p-16 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#2c1a32] font-serif leading-tight">
+                Sudah Mencoba 1000 Cara, Tapi Hati Masih Sering Patah?
+            </h2>
+          </CardContent>
+        </Card>
+        
         <div className="space-y-8 mb-16">
              <div className="bg-red-50 p-8 rounded-2xl border-l-8 border-red-500 shadow-md">
                 <h3 className="text-xl font-bold text-red-800 mb-4 flex items-center gap-2">
@@ -565,8 +570,13 @@ export default function EbookFeminineLanding() {
       </section>
 
       {/* WHAT YOU GET */}
-      <section className="py-20 px-6 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-12 text-[#2c1a32] font-serif">Apa Yang Kamu Dapatkan?</h2>
+      <section className="py-24 px-6 max-w-5xl mx-auto">
+        <Card className="border-4 border-rose-50 bg-white mb-16 shadow-none overflow-hidden rounded-[2rem]">
+          <CardContent className="p-10 md:p-16 text-center">
+            <h2 className="text-3xl md:text-5xl font-bold text-[#2c1a32] font-serif leading-tight">Apa Yang Kamu Dapatkan?</h2>
+          </CardContent>
+        </Card>
+        
         <div className="space-y-6">
             <div className="flex gap-4 items-start p-6 bg-white rounded-xl shadow-sm border border-pink-100 hover:border-pink-300 transition-colors">
                 <div className="bg-pink-100 p-3 rounded-lg text-pink-600">
@@ -598,15 +608,89 @@ export default function EbookFeminineLanding() {
         </div>
       </section>
 
+      {/* AFTER PURCHASE STEPS */}
+      <section className="py-24 px-6 max-w-6xl mx-auto">
+        <Card className="border-4 border-rose-50 bg-white mb-16 shadow-none overflow-hidden rounded-[2rem]">
+          <CardContent className="p-10 md:p-16 text-center">
+            <h2 className="text-3xl md:text-5xl font-bold text-[#2c1a32] font-serif mb-6 leading-tight">6 Langkah Transformasi Kamu</h2>
+            <p className="text-xl text-gray-500 max-w-3xl mx-auto leading-relaxed">Inilah yang akan terjadi tepat setelah kamu mendapatkan akses:</p>
+          </CardContent>
+        </Card>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[
+            {
+              step: "01",
+              title: "Baca Ebook Siren's Secret",
+              desc: "Kamu akhirnya akan paham kenapa selama ini selalu menarik pria yang salah. Kamu akan mengerti 'Frekuensi Penolakan' dan cara mematikannya seketika."
+            },
+            {
+              step: "02",
+              title: "Tentukan Praktik Harian",
+              desc: "Ikuti peta jalan yang sederhana. Kamu akan tahu persis tindakan kecil apa yang harus dilakukan setiap hari untuk tetap berada dalam energi feminin tanpa usaha keras."
+            },
+            {
+              step: "03",
+              title: "Protokol 15 Menit",
+              desc: "Dengarkan audio Pagi dan Malam (masing-masing 15 menit). Inilah bagian 'Kerja Beratnya'—biarkan alam bawah sadar kamu yang bekerja sementara kamu bersantai."
+            },
+            {
+              step: "04",
+              title: "Perubahan 7 Hari Pertama",
+              desc: "Setelah hanya satu minggu konsisten, alam bawah sadar kamu mulai menerima realita baru. Kamu akan bangun dengan perasaan 'luar biasa' tanpa alasan logika yang jelas."
+            },
+            {
+              step: "05",
+              title: "Detoks Emosional",
+              desc: "Tarikan negatif masa lalu akan hilang. Kecemasan, overthinking, dan keinginan untuk 'mengejar' akan lenyap begitu saja. Kamu merasa tenang, terpusat, dan berharga."
+            },
+            {
+              step: "06",
+              title: "Manifestasi Magnetis",
+              desc: "Tiba-tiba, 'dia' akan muncul. Apakah itu pria berkualitas baru atau perubahan total pada pasanganmu saat ini—semakin dekat frekuensi kamu, semakin cepat mereka datang."
+            }
+          ].map((item, i) => (
+            <Card key={i} className="border-2 border-rose-50 bg-white hover:border-rose-200 transition-all shadow-none relative pt-8">
+              <div className="absolute -top-4 left-8 bg-rose-500 text-white font-black px-4 py-1 rounded-full text-sm">
+                LANGKAH {item.step}
+              </div>
+              <CardHeader>
+                <CardTitle className="text-xl text-slate-900 font-serif font-bold">{item.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 leading-relaxed font-light">{item.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
       {/* WHY BUY NOW - LOGIC SECTION */}
       <section className="bg-gradient-to-br from-amber-50 to-orange-50 py-20 px-6">
          <div className="max-w-4xl mx-auto text-center">
              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-amber-900 font-serif">
                 Pertanyaan Sederhana untuk Masa Depan Cintamu
              </h2>
+
+             {/* Direct Video Player */}
+             <div className="flex justify-center mb-12">
+                <div className="w-full max-w-[320px] aspect-square rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl bg-black flex items-center justify-center">
+                    <video 
+                      src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/ugc1_id.mp4" 
+                      poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/ugc1_id.jpg" 
+                      className="w-full h-full object-cover"
+                      controls
+                      playsInline
+                      preload="metadata"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                </div>
+             </div>
+
              <div className="bg-white p-8 rounded-2xl shadow-xl border border-amber-200">
                 <p className="text-xl text-slate-700 mb-8 leading-relaxed">
-                   Apakah hati, mental health, dan masa depan percintaanmu <strong>lebih murah daripada harga makan siang ($20)?</strong>
+                   Apakah hati, mental health, dan masa depan percintaanmu <strong>lebih murah daripada harga makan siang ?</strong>
                 </p>
                 <div className="grid md:grid-cols-2 gap-8 text-left mb-8">
                    <div className="space-y-4">
@@ -643,15 +727,15 @@ export default function EbookFeminineLanding() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[
                     {
-                        name: "Sarah, 29th", role: "Manager & Single",
+                        name: "Sarah M., 29th", role: "Manager & Single",
                         title: "Dulu Aku 'Doormat', Sekarang Ratu.",
-                        text: "Aku selalu jadi pihak yang 'ngemis' perhatian. Chat gak dibales, aku bombardir. Dia selingkuh, aku maafin. Aku pikir itu cinta, ternyata itu trauma. Setelah 7 hari denger audio Goddess Awakening, tiba-tiba aku ngerasa... jijik sama kelakuanku dulu. Aku putusin pacarku yang toxic. Seminggu kemudian, aku ketemu pria (sekarang tunanganku) yang memperlakukan aku seperti putri raja tanpa aku minta. Gila, cuma karena subconscious aku berubah, realitaku berubah 180 derajat.",
+                        text: "Aku selalu jadi pihak yang 'ngemis' perhatian. Chat gak dibales, aku bombardir. Dia selingkuh, aku maafin. Aku pikir itu cinta, ternyata itu trauma. Setelah 7 hari denger audio Goddess Awakening, tiba-tiba aku ngerasa... jijik sama kelakuanku dulu. Aku putusin pacarku yang toxic. Seminggu kemudian, aku ketemu pria yang memperlakukan aku seperti putri raja tanpa aku minta. Gila, cuma karena subconscious aku berubah, realitaku berubah 180 derajat.",
                         avatar: "S"
                     },
                     {
                         name: "Amanda, 34th", role: "Ibu Rumah Tangga",
                         title: "Suami Kembali Pulang.",
-                        text: "Pernikahanku di ujung tanduk. Suami dingin, sering lembur (alasan klasik). Aku capek marah-marah dan nagih waktu. Iseng beli ebook + audio ini karena putus asa. Aku berhenti ngomel, fokus dengerin audio dan praktek 'The Art of Receiving'. Ajaibnya, suami mulai notice. 'Kamu kok beda ya, lebih adem liatnya'. Sekarang dia yang ngejar-ngejar aku buat date night. Makasih eL Vision, 100rb ini nyelametin rumah tanggaku.",
+                        text: "Pernikahanku di ujung tanduk. Suami dingin, sering lembur. Aku capek marah-marah dan nagih waktu. Iseng beli ebook + audio ini karena putus asa. Aku berhenti ngomel, fokus dengerin audio dan praktek 'The Art of Receiving'. Ajaibnya, suami mulai notice. 'Kamu kok beda ya, lebih adem liatnya'. Sekarang dia yang ngejar-ngejar aku buat date night. Makasih eL Vision, 100rb ini nyelametin rumah tanggaku.",
                         avatar: "A"
                     },
                     {
@@ -659,6 +743,24 @@ export default function EbookFeminineLanding() {
                         title: "Bukan Sulap, Ini Sains.",
                         text: "Awalnya skeptis. Masa dengerin audio bisa bikin enteng jodoh? Tapi karena eL Vision bilang ini riset 16 tahun, aku coba. Bener dong, mindset 'Saya Butuh Pria' hilang, ganti jadi 'Pria Beruntung Dapetin Saya'. Energinya beda banget! Temen-temen cowokku bilang auraku beda, lebih 'mahal' dan bikin penasaran. Sekarang aku yang milih, bukan dipilih.",
                         avatar: "J"
+                    },
+                    {
+                        name: "Dinda K., 31th", role: "Entrepreneur",
+                        title: "Terlalu Independen Jadi Lembut.",
+                        text: "Sebagai CEO, aku terbiasa kontrol segalanya. Tapi di asmara, itu malah bikin cowok mundur. Audio ini bantu aku untuk 'lean back' dan rileks. Hasilnya? Pacarku sekarang jadi jauh lebih inisiatif dan protektif. Aku tetap hebat di kantor, tapi jadi 'ratu' di rumah.",
+                        avatar: "D"
+                    },
+                    {
+                        name: "Bella R., 25th", role: "Content Creator",
+                        title: "Bypass Trauma Masa Kecil.",
+                        text: "Aku baru sadar kenapa selalu dapet fuckboy. Ternyata subconscious-ku 'nyari' luka yang familiar. Audio Theta Wave ini bener-bener nge-delete pola itu. Sekarang aku lagi deket sama cowok yang stabil dan mature. Gak ada lagi drama nangis tengah malem.",
+                        avatar: "B"
+                    },
+                    {
+                        name: "Emily, 32th", role: "Designer",
+                        title: "Investasi Terbaik Tahun Ini.",
+                        text: "Udah habis jutaan buat coaching dan terapi. Tapi ebook 100rb + audio ini malah yang paling ngefek. Karena dia langsung ke akar (bawah sadar). Aku bangun tidur ngerasa beda aja, lebih tenang dan magnetis. Rekomendasi banget!",
+                        avatar: "E"
                     }
                 ].map((testi, i) => (
                     <Card key={i} className="bg-white border border-rose-100 shadow-xl hover:shadow-2xl transition-all duration-300 p-6 rounded-2xl relative overflow-hidden">
@@ -704,6 +806,24 @@ export default function EbookFeminineLanding() {
                     <AccordionTrigger className="text-slate-900 font-semibold">Apakah ini akan membuat saya jadi 'jahat'?</AccordionTrigger>
                     <AccordionContent className="text-slate-700">
                         TIDAK. Menjadi "High Value" bukan berarti sombong atau jual mahal. Itu berarti kamu menghargai dirimu sendiri, sehingga orang lain pun otomatis menghargaimu. Kamu tetap menjadi dirimu yang baik, tapi dengan standar yang lebih sehat.
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-4" className="bg-white px-4 rounded-lg border border-gray-200">
+                    <AccordionTrigger className="text-slate-900 font-semibold">Bagaimana jika saya sedang jomblo?</AccordionTrigger>
+                    <AccordionContent className="text-slate-700">
+                        Justru ini saat terbaik! Kamu bisa membersihkan 'program lama' di subconscious-mu SEBELUM menarik pria baru. Dengan begitu, kamu akan langsung menarik pria berkualitas tinggi, bukan mengulangi pola toxic yang lama.
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-5" className="bg-white px-4 rounded-lg border border-gray-200">
+                    <AccordionTrigger className="text-slate-900 font-semibold">Apa bedanya dengan program motivasi lain?</AccordionTrigger>
+                    <AccordionContent className="text-slate-700">
+                        Program lain biasanya fokus pada pikiran sadar (tips, trik, strategi). Pikiran sadar hanya mengontrol 5% hidupmu. Program kami langsung menyasar SUBCONSCIOUS (95% kontrol) menggunakan gelombang Theta. Itulah kenapa perubahannya terasa otomatis dan permanen.
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-6" className="bg-white px-4 rounded-lg border border-gray-200">
+                    <AccordionTrigger className="text-slate-900 font-semibold">Kapan waktu terbaik mendengarkan audio?</AccordionTrigger>
+                    <AccordionContent className="text-slate-700">
+                        Audio 'Goddess Awakening' paling efektif didengarkan tepat sebelum tidur saat otak masuk ke kondisi rileks total. Audio 'Morning Radiance' didengarkan saat bangun tidur untuk menyetel frekuensi positifmu sepanjang hari.
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
