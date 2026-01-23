@@ -91,16 +91,6 @@ const PayPalFinish = () => {
             content_name: productName
         }, token, PIXEL_ID);
 
-        // Track Purchase Event (CAPI)
-        sendCAPIEvent('Purchase', {
-            email: data.email || undefined,
-            external_id: data.user_id || undefined
-        }, {
-            value: amount,
-            currency: 'USD',
-            content_name: productName
-        }, token);
-
       } catch (err: any) {
         console.error("Capture Error:", err);
         setStatus('error');

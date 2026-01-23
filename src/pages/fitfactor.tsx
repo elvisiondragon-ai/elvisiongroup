@@ -420,9 +420,6 @@ export default function FitfactorPaymentPage() {
             // Facebook Pixel: Purchase event
             trackPurchaseEvent(purchaseCustomData, purchaseEventId, pixelId, purchaseUserData);
 
-            // CAPI: Purchase event
-            await sendCAPIEvent('Purchase', purchaseUserData, purchaseCustomData, purchaseEventId);
-
             toast({
                 title: "🎉 Pembayaran Berhasil!",
                 description: "Terima kasih, pembayaran Anda telah kami terima. Silakan hubungi CS untuk konfirmasi.",

@@ -336,14 +336,6 @@ export default function EbookPercayaDiriLP() {
             currency: 'IDR'
           }, eventId, pixelId, userData);
           
-          // Send CAPI Purchase
-          sendCapiEvent('Purchase', {
-            content_ids: [productNameBackend],
-            content_type: 'product',
-            value: totalAmount,
-            currency: 'IDR'
-          }, eventId);
-          
           // Optional: redirect to a thank you page or just show success state
         }
       }).subscribe();

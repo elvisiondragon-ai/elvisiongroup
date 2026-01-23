@@ -169,8 +169,6 @@ const EbookHealthLP = () => {
             // @ts-ignore
             fbq('track', 'Purchase', eventData, { eventID: eventId });
           }
-          
-          sendCAPIEvent('Purchase', { email }, eventData, eventId);
         }
       }).subscribe();
 
