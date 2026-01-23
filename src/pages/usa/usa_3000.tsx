@@ -456,7 +456,7 @@ export default function ELVision3000() {
                               currency: 'USD'
                           }, eventId);
             
-                          window.location.href = '/usa/usa_3000survey';
+                          window.location.href = '/usa_pay3000';
                         }}
                       >            <Phone className="w-8 h-8" />
             BOOK A CALL NOW
@@ -1544,7 +1544,7 @@ export default function ELVision3000() {
                                 currency: 'USD'
                             }, eventId);
               
-                            window.location.href = '/usa/usa_3000survey';
+                            window.location.href = '/usa_pay3000';
                           }}
                         >              <Phone className="w-8 h-8" />
               BOOK A CALL NOW

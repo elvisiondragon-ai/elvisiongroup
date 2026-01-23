@@ -107,6 +107,12 @@ const productCatalog = {
     requiresAuth: false,
     physical: true
   },
+  'usa_ebookfeminine': {
+    name: 'Feminine Magnetism (USA)',
+    price: 300000,
+    requiresAuth: false,
+    physical: true
+  },
   'VIP6WEEK': {
     name: 'VIP SESSION 6 Week',
     price: 24000000, // 1500 USD * 16000 IDR
@@ -337,7 +343,7 @@ serve(async (req)=>{
             usdAmount = "1500.00";
         } else if (subscriptionType === 'usa_3000') {
             usdAmount = "3000.00";
-        } else if (subscriptionType === 'ebookhealthlp' || subscriptionType === 'ebook_health20' || subscriptionType === 'usa_ebookslim') {
+        } else if (subscriptionType === 'ebookhealthlp' || subscriptionType === 'ebook_health20' || subscriptionType === 'usa_ebookslim' || subscriptionType === 'usa_ebookfeminine') {
             usdAmount = "20.00";
         } else {
              usdAmount = (amount / 16000).toFixed(2);

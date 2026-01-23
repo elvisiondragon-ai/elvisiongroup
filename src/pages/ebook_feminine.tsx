@@ -442,33 +442,89 @@ export default function EbookFeminineLanding() {
 
       {/* PAIN SECTION */}
       <section className="py-20 px-6 max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-12 text-[#2c1a32] font-serif">
-            Apakah Kamu Sering Merasa...
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[#2c1a32] font-serif leading-tight">
+            Sudah Mencoba 1000 Cara, Tapi Hati Masih Sering Patah?
         </h2>
+        <div className="space-y-8 mb-16">
+             <div className="bg-red-50 p-8 rounded-2xl border-l-8 border-red-500 shadow-md">
+                <h3 className="text-xl font-bold text-red-800 mb-4 flex items-center gap-2">
+                   <span className="text-3xl">🛑</span> Masalahnya BUKAN Kamu Kurang Cantik.
+                </h3>
+                <p className="text-red-900 text-lg leading-relaxed">
+                   Kamu bisa diet mati-matian, beli skincare mahal, dan belajar teknik dating tercanggih. 
+                   Tapi jika <strong>ALAM BAWAH SADAR (Subconscious)</strong> kamu masih menyimpan program "Saya Tidak Layak Dicintai" atau "Semua Pria Akan Menyakiti Saya", maka kamu akan TERUS menarik pria yang salah.
+                </p>
+                <p className="mt-4 text-red-900 font-semibold italic">
+                   Ini seperti menginjak pedal gas (keinginan sadar) sambil menarik rem tangan (ketakutan bawah sadar). Mobil tidak akan jalan, mesin justru rusak.
+                </p>
+             </div>
+        </div>
+
         <div className="grid md:grid-cols-3 gap-8">
             {[
-                { title: "Selalu 'Memberi' Lebih", desc: "Kamu yang selalu chat duluan, merencanakan kencan, dan berkorban, tapi dia malah semakin cuek." },
-                { title: "Merasa Tidak Terlihat", desc: "Diabaikan, tidak dianggap prioritas, atau hanya dijadikan 'pilihan kedua' saat dia bosan." },
-                { title: "Lelah Menjadi Kuat", desc: "Terjebak dalam energi maskulin (bekerja keras, memimpin) sehingga kehilangan sisi lembut yang menarik pria." }
+                { title: "Lelah Menjadi 'Ibu' Bagi Pasangan", desc: "Kamu lelah harus selalu mengatur, mengingatkan, dan memimpin hubungan. Bukannya jadi ratu, kamu malah jadi 'ibu asuh' bagi pria dewasa yang tidak mandiri." },
+                { title: "Trauma Diselingkuhi Berulang", desc: "Kenapa polanya selalu sama? Ganti orang, tapi rasa sakitnya sama. Kamu mulai percaya 'semua pria brengsek', padahal subconscious-mu yang menarik tipe ini." },
+                { title: "Berusaha Keras Tapi Tidak Dihargai", desc: "Semakin kamu berkorban, semakin dia menjauh. Kamu memberi 100%, dia memberi 10%. Kamu merasa kosong, lelah, dan tidak diinginkan." }
             ].map((item, i) => (
-                <Card key={i} className="border-none shadow-lg bg-white hover:shadow-xl transition-all">
+                <Card key={i} className="border-none shadow-lg bg-white hover:shadow-xl transition-all transform hover:-translate-y-2 duration-300">
                     <CardHeader>
-                        <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 mb-4">
-                            <Heart className="w-6 h-6" />
+                        <div className="w-14 h-14 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 mb-4 shadow-sm">
+                            <Heart className="w-7 h-7" />
                         </div>
-                        <CardTitle className="text-xl text-slate-900 font-serif">{item.title}</CardTitle>
+                        <CardTitle className="text-xl text-slate-900 font-serif font-bold">{item.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-slate-600 leading-relaxed">{item.desc}</p>
+                        <p className="text-slate-600 leading-relaxed text-base">{item.desc}</p>
                     </CardContent>
                 </Card>
             ))}
         </div>
-        <div className="mt-12 p-6 bg-rose-50 border-l-4 border-rose-400 rounded-r-lg text-center">
-            <p className="text-lg font-medium text-rose-800">
-                Masalahnya BUKAN kamu kurang cantik atau kurang baik. Masalahnya adalah <strong>Polaritas Energi</strong>. Saat kamu terlalu "Maskulin" (mengejar/mengontrol), pria secara alami akan mundur.
+      </section>
+
+      {/* SCIENCE SECTION - THE SUBCONSCIOUS SECRET */}
+      <section className="bg-slate-900 text-white py-24 px-6 relative overflow-hidden">
+         <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+         <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+         
+         <div className="max-w-4xl mx-auto relative z-10 text-center">
+            <h2 className="text-3xl md:text-5xl font-bold mb-8 font-serif bg-clip-text text-transparent bg-gradient-to-r from-pink-300 to-purple-300">
+               Kenapa Usaha Sadar Kamu GAGAL?
+            </h2>
+            <p className="text-xl text-gray-300 mb-12 leading-relaxed">
+               Pikiran sadar (logika) hanya mengendalikan 5% hidupmu. Sisanya, <strong>95% dikendalikan oleh Bawah Sadar</strong>.
+               Itulah kenapa afirmasi positif di depan cermin sering gagal. Kamu mencoba melawan gajah (bawah sadar) dengan semut (pikiran sadar).
             </p>
-        </div>
+            
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl shadow-2xl">
+               <h3 className="text-2xl font-bold text-pink-300 mb-6 flex items-center justify-center gap-3">
+                  <Sparkles className="w-6 h-6" /> Solusi Plug & Play eL Vision
+               </h3>
+               <p className="text-lg mb-6">
+                  Kami telah meriset metode ini selama <strong>16 Tahun</strong> dan terbukti sukses membantu ribuan wanita selama <strong>7 Tahun terakhir</strong>.
+               </p>
+               <p className="text-gray-200 mb-8">
+                  Teknologi Audio Hipnoterapi kami dirancang untuk <strong>BYPASS (menembus) filter kritis pikiran sadar</strong> dan langsung meng-install program baru ke dalam "mesin" bawah sadar kamu saat kamu tidur atau rileks.
+               </p>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                  <div className="flex items-start gap-3">
+                     <CheckCircle className="text-green-400 w-6 h-6 mt-1 flex-shrink-0" />
+                     <p>Tidak perlu "berusaha" keras. Cukup dengarkan.</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                     <CheckCircle className="text-green-400 w-6 h-6 mt-1 flex-shrink-0" />
+                     <p>Mengubah self-image dari "Pengemis Cinta" menjadi "Dewi Cinta".</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                     <CheckCircle className="text-green-400 w-6 h-6 mt-1 flex-shrink-0" />
+                     <p>Otomatis memancarkan aura High Value tanpa dibuat-buat.</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                     <CheckCircle className="text-green-400 w-6 h-6 mt-1 flex-shrink-0" />
+                     <p>Hasil permanen karena akarnya yang diperbaiki.</p>
+                  </div>
+               </div>
+            </div>
+         </div>
       </section>
 
       {/* SOLUTION SECTION */}
@@ -542,40 +598,85 @@ export default function EbookFeminineLanding() {
         </div>
       </section>
 
+      {/* WHY BUY NOW - LOGIC SECTION */}
+      <section className="bg-gradient-to-br from-amber-50 to-orange-50 py-20 px-6">
+         <div className="max-w-4xl mx-auto text-center">
+             <h2 className="text-3xl md:text-4xl font-bold mb-8 text-amber-900 font-serif">
+                Pertanyaan Sederhana untuk Masa Depan Cintamu
+             </h2>
+             <div className="bg-white p-8 rounded-2xl shadow-xl border border-amber-200">
+                <p className="text-xl text-slate-700 mb-8 leading-relaxed">
+                   Apakah hati, mental health, dan masa depan percintaanmu <strong>lebih murah daripada harga makan siang ($20)?</strong>
+                </p>
+                <div className="grid md:grid-cols-2 gap-8 text-left mb-8">
+                   <div className="space-y-4">
+                      <h4 className="font-bold text-red-600 text-lg border-b pb-2">JIKA TIDAK BERTINDAK:</h4>
+                      <ul className="space-y-2 text-slate-600">
+                         <li className="flex gap-2">❌ Membuang waktu bertahun-tahun mencari akar masalah sendiri.</li>
+                         <li className="flex gap-2">❌ Mental hancur karena terus disakiti pria yang salah.</li>
+                         <li className="flex gap-2">❌ Stress, insecure, dan merasa tidak berharga seumur hidup.</li>
+                      </ul>
+                   </div>
+                   <div className="space-y-4">
+                      <h4 className="font-bold text-green-600 text-lg border-b pb-2">INVESTASI 100 RIBU HARI INI:</h4>
+                      <ul className="space-y-2 text-slate-600">
+                         <li className="flex gap-2">✅ <strong>Plug & Play Technology:</strong> Tinggal dengar, subconscious berubah.</li>
+                         <li className="flex gap-2">✅ Hemat biaya konseling jutaan rupiah.</li>
+                         <li className="flex gap-2">✅ Jalan pintas pengalaman riset 16 tahun kami.</li>
+                         <li className="flex gap-2">✅ Garansi Uang Kembali jika tidak ada perubahan.</li>
+                      </ul>
+                   </div>
+                </div>
+                <Button size="lg" className="w-full md:w-auto bg-amber-600 hover:bg-amber-700 text-white font-bold text-xl px-12 py-6 rounded-full shadow-lg animate-pulse" onClick={scrollToCheckout}>
+                   AMBIL JALAN PINTAS SEKARANG
+                </Button>
+             </div>
+         </div>
+      </section>
+
       {/* TESTIMONIALS */}
       <section className="bg-white py-20 px-6 border-y border-gray-100">
         <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[#2c1a32] font-serif">Transformasi Wanita Indonesia</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-[#2c1a32] font-serif">Kisah Nyata Dari Mereka Yang "Bangun"</h2>
+            <p className="text-center text-gray-500 mb-12 max-w-2xl mx-auto">Ini bukan sekadar testimoni "produk bagus". Ini adalah cerita hidup yang berubah arah.</p>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[
                     {
-                        name: "Sarah, 28th", role: "Karyawan Swasta",
-                        text: "Dulu aku yang ngejar-ngejar mantan sampai harga diri hancur. Setelah dengerin audio ini, entah kenapa aku jadi tenang banget. Tiba-tiba mantan yang dulu cuek malah reach out dan minta balikan. Tapi sekarang aku yang mikir-mikir haha!",
+                        name: "Sarah, 29th", role: "Manager & Single",
+                        title: "Dulu Aku 'Doormat', Sekarang Ratu.",
+                        text: "Aku selalu jadi pihak yang 'ngemis' perhatian. Chat gak dibales, aku bombardir. Dia selingkuh, aku maafin. Aku pikir itu cinta, ternyata itu trauma. Setelah 7 hari denger audio Goddess Awakening, tiba-tiba aku ngerasa... jijik sama kelakuanku dulu. Aku putusin pacarku yang toxic. Seminggu kemudian, aku ketemu pria (sekarang tunanganku) yang memperlakukan aku seperti putri raja tanpa aku minta. Gila, cuma karena subconscious aku berubah, realitaku berubah 180 derajat.",
                         avatar: "S"
                     },
                     {
-                        name: "Dinda, 31th", role: "Entrepreneur",
-                        text: "Sering banget dibilang 'terlalu mandiri' sama cowok. Ternyata aku emang terlalu maskulin energinya. Audio ini bantu aku untuk 'lean back' dan rileks. Sekarang pasangan jadi lebih inisiatif dan romantis.",
-                        avatar: "D"
+                        name: "Amanda, 34th", role: "Ibu Rumah Tangga",
+                        title: "Suami Kembali Pulang.",
+                        text: "Pernikahanku di ujung tanduk. Suami dingin, sering lembur (alasan klasik). Aku capek marah-marah dan nagih waktu. Iseng beli ebook + audio ini karena putus asa. Aku berhenti ngomel, fokus dengerin audio dan praktek 'The Art of Receiving'. Ajaibnya, suami mulai notice. 'Kamu kok beda ya, lebih adem liatnya'. Sekarang dia yang ngejar-ngejar aku buat date night. Makasih eL Vision, 100rb ini nyelametin rumah tanggaku.",
+                        avatar: "A"
                     },
                     {
-                        name: "Bella, 25th", role: "Content Creator",
-                        text: "Inner work is real! Pas self-worth aku naik karena audio ini, cowok-cowok yang deketin kualitasnya beda. Bukan lagi fuckboy, tapi pria yang mature dan siap komitmen.",
-                        avatar: "B"
+                        name: "Jessica, 26th", role: "Mahasiswi S2",
+                        title: "Bukan Sulap, Ini Sains.",
+                        text: "Awalnya skeptis. Masa dengerin audio bisa bikin enteng jodoh? Tapi karena eL Vision bilang ini riset 16 tahun, aku coba. Bener dong, mindset 'Saya Butuh Pria' hilang, ganti jadi 'Pria Beruntung Dapetin Saya'. Energinya beda banget! Temen-temen cowokku bilang auraku beda, lebih 'mahal' dan bikin penasaran. Sekarang aku yang milih, bukan dipilih.",
+                        avatar: "J"
                     }
                 ].map((testi, i) => (
-                    <Card key={i} className="bg-rose-50/50 border-none shadow-sm p-6">
+                    <Card key={i} className="bg-white border border-rose-100 shadow-xl hover:shadow-2xl transition-all duration-300 p-6 rounded-2xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-pink-400 to-rose-600"></div>
                         <div className="flex items-center gap-4 mb-4">
-                            <div className="w-10 h-10 bg-pink-200 rounded-full flex items-center justify-center font-bold text-pink-700">
+                            <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center font-bold text-white text-xl shadow-lg">
                                 {testi.avatar}
                             </div>
                             <div>
-                                <h4 className="font-bold text-slate-900">{testi.name}</h4>
-                                <p className="text-xs text-slate-500">{testi.role}</p>
+                                <h4 className="font-bold text-slate-900 text-lg">{testi.name}</h4>
+                                <p className="text-xs text-rose-600 font-medium uppercase tracking-wide">{testi.role}</p>
                             </div>
                         </div>
-                        <p className="text-slate-700 italic">"{testi.text}"</p>
+                        <h5 className="font-bold text-slate-800 mb-3 text-lg border-b border-rose-50 pb-2">"{testi.title}"</h5>
+                        <p className="text-slate-600 text-sm leading-relaxed">"{testi.text}"</p>
+                        <div className="mt-4 flex text-yellow-400 gap-1">
+                            {[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 fill-current" />)}
+                        </div>
                     </Card>
                 ))}
             </div>

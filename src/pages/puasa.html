@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Diet Keto & Terapi Metabolik</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Open+Sans:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e67e22;
+            --bg-color: #fcfcfc;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background: white;
+        }
+
+        /* Cover Page Styling */
+        .cover-page {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 90vh;
+            border: 5px double var(--primary-color);
+            padding: 20px;
+            margin-bottom: 50px;
+        }
+
+        .cover-title {
+            font-family: 'Merriweather', serif;
+            font-size: 3em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .cover-subtitle {
+            font-size: 1.5em;
+            color: #555;
+            margin-bottom: 40px;
+        }
+
+        .author-contact {
+            margin-top: auto;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        /* Chapter Styling */
+        h1, h2, h3 {
+            font-family: 'Merriweather', serif;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .chapter {
+            margin-bottom: 40px;
+            text-align: justify;
+        }
+
+        /* Specific Elements */
+        .highlight-box {
+            background-color: #f0f8ff;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background-color: #fff0f0;
+            border-left: 5px solid #e74c3c;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .recipe-box {
+            background-color: #f9fff0;
+            border: 1px dashed #7cb342;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        blockquote {
+            font-style: italic;
+            border-left: 4px solid #ccc;
+            margin: 20px 0;
+            padding-left: 20px;
+            color: #666;
+        }
+
+        a {
+            color: #2980b9;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: #eee;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 50px;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .toc ul {
+            list-style-type: none;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .toc li {
+            border-bottom: 1px solid #ddd;
+            padding: 5px 0;
+        }
+
+        /* Print Specifics */
+        @media print {
+            body { 
+                background: white; 
+                font-size: 12pt;
+            }
+            .container {
+                width: 100%;
+                max-width: none;
+                padding: 0;
+                margin: 0;
+            }
+            .page-break { 
+                page-break-before: always; 
+            }
+            a {
+                text-decoration: none;
+                color: black;
+            }
+            /* Show URL after link for printed version if needed, currently disabled for neatness */
+            /* a::after { content: " (" attr(href) ")"; font-size: 0.8em; } */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="cover-page">
+        <h1 class="cover-title">Panduan Diet Keto &<br>Terapi Metabolik</h1>
+        <div class="cover-subtitle">Protokol Kesehatan untuk Pasien Kanker & Autoimun</div>
+        <p>Versi 2025/IX/01</p>
+        <div class="author-contact">
+            <p>drmanhattan308@gmail.com</p>
+            <p>Instagram: @drmanhattan308</p>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="toc">
+        <h3>Daftar Isi</h3>
+        <ul>
+            <li><a href="#bab1">Bab 1: Sejarah Diet Keto</a></li>
+            <li><a href="#bab2">Bab 2: Puasa dan Target GKI</a></li>
+            <li><a href="#bab3">Bab 3: Enam Tahapan Puasa</a></li>
+            <li><a href="#bab4">Bab 4: GKI & Perisai Sel Kanker</a></li>
+            <li><a href="#bab5">Bab 5: Puasa Terapi Metabolik</a></li>
+            <li><a href="#bab6">Bab 6: Supplemen Pasien Kanker</a></li>
+            <li><a href="#bab7">Bab 7: Diet Pasien Kanker (DPK)</a></li>
+            <li><a href="#bab8">Bab 8: Minuman Isotonik DIY</a></li>
+            <li><a href="#bab9">Bab 9: Home Marker - Protokol Lanjutan</a></li>
+            <li><a href="#bab10">Bab 10: Testimoni Pasien Ca Otak</a></li>
+            <li><a href="#bab11">Bab 11: Dua Kelompok Dokter</a></li>
+            <li><a href="#bab12">Bab 12: Dokter Pengobatan Fungsional</a></li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab1">
+        <h2>Bab 1: Sejarah Diet Keto 🐣 🥦🫐</h2>
+        <p>Diet Keto bermula dari seorang anak bernama <strong>Charlie Abrahams</strong> yang menderita Penyakit Epilepsi. Setelah gagal disembuhkan dengan pelbagai obat-obatan, akhirnya orangtuanya memberikan Diet Keto yang berhasil menyembuhkan penyakit Epilepsinya (suka tiba-tiba kejang).</p>
+        
+        <p>Kemudian orangtua tersebut mendirikan Yayasan "Charlie Foundation for Ketogenic Therapies" pada tahun 1994. <br>
+        Website: <a href="https://charliefoundation.org/" target="_blank">charliefoundation.org</a></p>
+
+        <p>Kisah anak tersebut dibuat film yang dimainkan oleh Meryl Streep pada tahun 1997 dengan judul <strong>"First Do No Harm"</strong>.</p>
+        <ul>
+            <li>Trailer Film: <a href="https://www.youtube.com/watch?v=sWkDP633kd8" target="_blank">Tonton di YouTube</a></li>
+            <li>Perkenalan Diet Keto oleh Meryl Streep: <a href="https://www.youtube.com/watch?v=2_8D1hH7mzo" target="_blank">Tonton Video</a></li>
+        </ul>
+
+        <blockquote>
+            Motto "First Do No Harm" dikutip dari filsuf Yunani bernama Hippocrates yang dijadikan Sumpah Para Dokter, namun sayangnya mayoritas dokter mengabaikan sumpah tersebut 😔
+        </blockquote>
+
+        <p>Sebuah video memperlihatkan seorang anak perempuan penderita Epilepsi yang hanya diberikan makanan/minuman berupa minyak sebagai obat alaminya. Liatlah betapa nurutnya anak tersebut menjalani diet ketat: <a href="https://www.youtube.com/watch?v=cbzd7m-rFI4" target="_blank">Tonton Video</a></p>
+
+        <h3>Jenis-Jenis Diet Keto</h3>
+        <ol>
+            <li>Diet Keto Klasik (Diet Anti Epilepsi)</li>
+            <li>Diet Keto Modifikasi</li>
+            <li>Diet Keto MCT Oil</li>
+            <li>Diet Keto Indeks Glykemik</li>
+            <li>Diet Keto Modifikasi Atkins</li>
+        </ol>
+
+        <div class="highlight-box">
+            <p><strong>Catatan Penting:</strong> Yang digunakan pada umumnya adalah yang kelima yaitu <strong>Diet Keto Modifikasi Atkins</strong>. Diet Pasien Kanker (DPK) termasuk jenis kelima ini.</p>
+        </div>
+
+        <p>Perbedaan kelima jenis Diet Keto terletak pada komposisi persentase Lemak berbanding Protein dan Karbohidrat. Yang paling ketat adalah nomor satu (Diet Keto Klasik).</p>
+
+        <p><strong>Prof. Dr. Adrienne Scheck</strong> berkata: <em>"Diet Keto bukan sekedar Makanan tetapi sekaligus Terapi Metabolik bagi Pasien Kanker."</em></p>
+        <p><strong>Prof. Dr. Thomas Seyfried</strong> berkata: <em>"Diet Keto bisa membuat sel-sel Kanker 🦀 kelaparan."</em></p>
+
+        <p>Diet Keto Modifikasi Atkins / Diet Pasien Kanker (DPK) bisa diterapkan pada semua jenis Kanker <strong>kecuali Kanker Otak dengan gejala berat Epilepsi/Kejang</strong>, maka harus menjalankan Diet Keto Klasik yang lebih ketat.</p>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab2">
+        <h2>Bab 2: Puasa dan Target GKI</h2>
+        <p>Tujuan dari Diet Keto 🥦 dan Puasa 🤐 adalah menyetop pasokan glukosa & glutamin yang adalah sumber makanan kanker 🦀.</p>
+        
+        <p>Bagaimana kita mengukurnya? Kita gunakan indeks gula darah berbanding terhadap keton => <strong>GKI (Glucose Ketone Index)</strong>.</p>
+
+        <div class="highlight-box">
+            <h3>Target GKI</h3>
+            <ul>
+                <li><strong>Target Pasien Kanker:</strong> Di bawah angka 2,0 (makin rendah makin baik).</li>
+                <li><strong>GKI < 1,0:</strong> Kanker tidak dapat hidup. Pasien memegang kendali atas sel kanker.</li>
+            </ul>
+        </div>
+
+        <h3>Cara Mengukur GKI</h3>
+        <p>Diperlukan alat ukur gula darah yang juga dapat mengukur keton darah (Contoh: MULTISURE). <br>
+        Video cara menggunakan alat: <a href="https://www.youtube.com/watch?v=dvdri0mpzJc" target="_blank">Tonton Tutorial</a></p>
+
+        <div class="recipe-box">
+            <h4>Rumus Perhitungan GKI</h4>
+            <ol>
+                <li>Ukur Gula Darah Puasa (mg/dL), bagi dengan 18 untuk konversi ke mmol/L.</li>
+                <li>Ukur Keton Darah Puasa (mmol/L).</li>
+                <li><strong>Rumus:</strong> (Gula Darah mmol/L) ÷ (Keton Darah mmol/L) = GKI</li>
+            </ol>
+            <p><strong>Contoh:</strong><br>
+            GDP = 80 mg/dL (80 / 18 = 4,4 mmol/L)<br>
+            Keton = 6 mmol/L<br>
+            <strong>GKI = 4,4 / 6 = 0,74 👍</strong> (Target tercapai, kanker kelaparan)</p>
+        </div>
+        
+        <p><strong>Kesimpulan:</strong> Angka GKI di bawah 1,0 biasanya hanya bisa tercapai lewat minimal 72-120 jam puasa.</p>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab3">
+        <h2>Bab 3: Enam Tahapan Puasa 🧐</h2>
+        <ul>
+            <li><strong>Puasa 14 jam:</strong> Menstabilkan gula darah.</li>
+            <li><strong>Puasa 24 jam:</strong> Masuk ketosis, meningkatkan energi 💪 dan daya pikir.</li>
+            <li><strong>Puasa 36 jam:</strong> Ketosis penuh, menambah sel-sel otak 😁.</li>
+            <li><strong>Puasa 48 jam:</strong> Autophagy, mulai mematikan sel-sel kanker 👊🦀.</li>
+            <li><strong>Puasa 60 jam:</strong> Meningkatkan 📈 sensitifitas insulin, lebih banyak autophagy.</li>
+            <li><strong>Puasa 72 jam:</strong> Regenerasi sistem imun 🫧🫧, memproduksi sel induk/punca (stem cells).</li>
+        </ul>
+        <div class="highlight-box">
+            <p><strong>Revolusi Kanker ✊:</strong> Puasa 120 jam ke atas membuat kanker mati kelaparan dan dimakan oleh sel darah putih.</p>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab4">
+        <h2>Bab 4: GKI & Perisai Sel Kanker</h2>
+        <p>Dalam kondisi terapi ketosis penuh (GKI < 1), pertahanan kanker hilang. Kanker 🦀 tinggal pasrah dilumat habis oleh sel-sel darah putih 🫧🫧.</p>
+        
+        <p>Dulunya sel kanker bisa mengeluarkan asam laktat menciptakan lingkungan yang tidak bisa dimasuki sel darah putih, sekarang jalannya terbuka lebar. Dulunya mempunyai perisai dari glukosa (dikemo pun susah mati), sekarang pelindung glukosanya tidak ada.</p>
+        
+        <p><strong>Pertanyaannya bukan APAKAH kanker akan mati, melainkan KAPAN mereka akan musnah?</strong></p>
+        
+        <p>Misalnya kanker stadium IV dibutuhkan Puasa Panjang 30 hari (akumulatif/bertahap). Hitungan kasarnya bila sudah menjalani minimal 120 jam puasa maka kanker yang sudah berhasil dimakan habis adalah sekitar 16%.</p>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab5">
+        <h2>Bab 5: Puasa Terapi Metabolik (Versi 2025/IX/01)</h2>
+        
+        <h3>Protokol Bertahap</h3>
+        <ol>
+            <li><strong>Pemula:</strong> Bagi yang sudah minimal 2 minggu puasa 18 jam/hari tanpa keluhan, boleh 1x seminggu puasa 24 jam (Dry Fasting).</li>
+            <li><strong>Menengah:</strong> Bagi yang sudah minimal 4x puasa 24 jam tanpa keluhan, tingkatkan menjadi 48-72 jam 1x sebulan.
+                <ul>
+                    <li>Boleh minum air, kopi hitam, matcha (Water Fasting).</li>
+                    <li>Bantu dengan minuman Isotonik DIY.</li>
+                    <li>Puasa 72 jam = Mencegah Kanker & Regenerasi sel imun.</li>
+                </ul>
+            </li>
+            <li><strong>Lanjut (Therapeutic):</strong> Bagi yang sudah pernah 3x puasa 72 jam, boleh puasa 120 jam atau lebih 1x sebulan.
+                <ul>
+                    <li><strong>Wajib:</strong> Isotonik DIY, Vit B1, Magnesium Glycinate.</li>
+                    <li>Tujuan: Mematikan kanker dan infeksi bakteri/virus ganas.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <div class="warning-box">
+            <h3>⚠️ Protokol Buka Puasa (Refeeding)</h3>
+            <p>Buka puasa 72 jam atau lebih harus sangat hati-hati. <strong>Risiko overfeeding bisa berakibat fatal.</strong></p>
+            <ul>
+                <li><strong>Hari Pertama:</strong> 4 telor ayam kampung. Makan 1 butir, tunggu 1 jam. Makan 1 lagi, tunggu 1 jam. Makan 2 sisanya.</li>
+                <li><strong>Hari Kedua:</strong> 4 telor ayam kampung + 100gr daging/ikan. Makan bertahap dengan jeda 1 jam.</li>
+                <li><strong>Hari Ketiga:</strong> Makan seperti biasa (menu Keto).</li>
+            </ul>
+        </div>
+        
+        <p><strong>Logika Terapi:</strong> Puasa 72 jam menghabiskan glikogen. Puasa 14-21 hari (336-504 jam) menghabiskan glutamin. Kanker dijamin mati kelaparan.</p>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab6">
+        <h2>Bab 6: Supplemen Pasien Kanker 💊 (SPK)</h2>
+        <p><em>Versi 2025/VII/01</em></p>
+        
+        <ol>
+            <li><strong>Vitamin C:</strong> Mempercepat gerakan sel Darah Putih. Sumber: Lemon 🍋, fermentasi kol, paprika. Tidak butuh suplemen pil.</li>
+            <li><strong>Vitamin D3 & K2:</strong> Menguatkan sel Darah Putih.
+                <ul>
+                    <li>D3 harus diminum bareng K2 setelah makan (larut lemak).</li>
+                    <li>Dosis Terapi: D3 50.000 IU + K2 500 mcg (3-6 minggu awal).</li>
+                    <li>Dosis Maintenance: D3 10.000 IU + K2 100 mcg.</li>
+                    <li>Target serum vit D 25OH: 100-150 ng/mL untuk mematikan kanker.</li>
+                </ul>
+            </li>
+            <li><strong>Zinc:</strong> Meningkatkan jumlah sel Darah Putih. Pilih <em>Zinc Bisglycinate</em> (25-50 mg/hari).</li>
+            <li><strong>Magnesium Glycinate:</strong> (200-300 mg/hari). Membantu penyerapan D3 dan Zinc.</li>
+            <li><strong>Fish Oil (Omega 3):</strong> (2000-3000 mg Omega 3 per hari). Anti inflamasi.</li>
+        </ol>
+        
+        <p>Semua suplemen dapat dibeli online. Pilih toko kredibel (Official/Pro/Star Seller).</p>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab7">
+        <h2>Bab 7: Diet Pasien Kanker 🦀 (DPK)</h2>
+        <p><em>Versi 2025/VII/02</em></p>
+
+        <h3>Makanan yang Dianjurkan ✅</h3>
+        <ol>
+            <li><strong>Bumbu Medis:</strong> Bawang putih 🧄, jahe, kunyit (anti kanker). Kunyah 1 cengkeh per hari.</li>
+            <li><strong>Minuman:</strong> Matcha Green Tea (EGCG mematikan sel kanker). Cuka Apel (ACV) + Lemon + Garam Himalaya setiap pagi.</li>
+            <li><strong>Sayuran (Organic):</strong> Keluarga kubis (Brokoli, Kol, Kale, Pokcoy). Paling bagus makan mentah kecambah brokoli (Sulforaphane tinggi).</li>
+            <li><strong>Buah (Terbatas):</strong> Hanya Lemon, Alpukat, dan Berries (rendah gula).</li>
+            <li><strong>Protein Hewani:</strong> Telor ayam kampung (rebus/steam), Daging sapi, Hati sapi, Ikan (Salmon), Kaldu Tulang (Bone Broth).</li>
+            <li><strong>Lemak Sehat:</strong> Minyak Kelapa (VCO), Minyak Zaitun (EVOO), Butter (Grass fed).</li>
+        </ol>
+
+        <div class="warning-box">
+            <h3>⛔ DILARANG KERAS (STOP TOTAL)</h3>
+            <ul>
+                <li>Nasi, Jagung, Kentang, Ubi, Roti, Mie, Tepung.</li>
+                <li>Gula pasir, Madu, Susu Hewani, Buah manis (Kurma, Air Kelapa).</li>
+                <li>Minyak Sayur (Sawit, Kedelai, Canola, Jagung) -> Penyebab Inflamasi.</li>
+                <li>Makanan olahan pabrik (Sosis, Bakso, Makanan kaleng).</li>
+            </ul>
+        </div>
+
+        <h3>Aturan Makan</h3>
+        <ul>
+            <li><strong>Jam Makan:</strong> Maksimal 2x sehari (Jam 12 siang & sebelum jam 6 sore).</li>
+            <li><strong>Intermittent Fasting:</strong> Tidak sarapan, tidak ngemil.</li>
+            <li><strong>Pengolahan:</strong> Steam/Kukus adalah yang terbaik. Hindari menggoreng terlalu lama (Deep fry) karena memicu AGEs.</li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab8">
+        <h2>Bab 8: Minuman Isotonik DIY 🤩</h2>
+        <p>Minuman ini wajib saat Puasa Panjang (48 jam++) untuk mencegah dehidrasi mineral.</p>
+
+        <div class="recipe-box">
+            <h3>Resep Isotonik Alami</h3>
+            <ul>
+                <li>Air: 1 Liter</li>
+                <li>Lemon: 1 buah (peras)</li>
+                <li>Garam Kalium (Potassium Chloride): 1 sdt</li>
+                <li>Garam Himalaya: 1/2 sdt</li>
+            </ul>
+            <p><strong>Aturan Minum:</strong> Minum bertahap sepanjang hari. Stop minum di atas jam 6 sore. Total target 2 liter per hari saat puasa.</p>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab9">
+        <h2>Bab 9: Home Marker - Protokol Lanjutan</h2>
+        <p><em>Catatan: Bab ini berisi penegasan kembali protokol puasa dari Bab 5 sebagai "Home Marker" atau panduan utama di rumah.</em></p>
+        
+        <ul>
+            <li><strong>Target Utama:</strong> Mencapai GKI < 1,0.</li>
+            <li><strong>Formula Sukses:</strong> Pola Makan Super Sehat (Keto/Carnivore) + Puasa Intensitas Tinggi = Kematian bagi Kanker.</li>
+            <li>Untuk kombinasi dengan Terapi Hiperbarik Oksigen atau Kemo, konsultasikan via email penulis.</li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab10">
+        <h2>Bab 10: Testimoni Pasien Ca Otak Stadium 4</h2>
+        <p>Pasien Ca Otak (jenis yang sangat ganas) divonis dokter tinggal 1% harapan hidup. Pasien berjuang tanpa kemo dan radiasi, melainkan menggunakan protokol metabolik.</p>
+        
+        <p><strong>Hasilnya?</strong> Tumor hilang. Dokter pun terheran-heran.</p>
+        
+        <div class="highlight-box">
+            <p><strong>Rahasia Tambahan:</strong> IVERMECTIN + Paket Terapi Metabolik.<br>
+            Mengapa? Karena obat ini diklaim bisa mematikan <strong>CSC (Cancer Stem Cell)</strong> atau induk kanker yang seringkali gagal dibunuh oleh kemoterapi.</p>
+        </div>
+        
+        <p><strong>Mindset:</strong> Tangani Kanker ibarat kena Diabetes yang juga Cacingan. Dilarang makan manis (stop gula/karbo) dan minum obat anti-parasit.</p>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="chapter" id="bab11">
+        <h2>Bab 11: Dua Kelompok Dokter (Era 2026)</h2>
+        <ol>
+            <li><strong>Pengobatan Tradisional:</strong> Mengandalkan obat seumur hidup, operasi, dll.</li>
+            <li><strong>Pengobatan Fungsional:</strong> Mengajarkan gaya hidup, puasa, olahraga, vitamin, dan herbal.</li>
+        </ol>
+        <p>Pilihlah dokter yang memahami akar masalah kesehatan Anda.</p>
+    </div>
+
+    <div class="chapter" id="bab12">
+        <h2>Bab 12: Dokter Pengobatan Fungsional</h2>
+        <ul>
+            <li><strong>Dr. Pradip Jamnadas, Sp. Jantung:</strong> Mengajarkan Puasa Panjang (Prolonged Fasting). <a href="https://youtube.com/shorts/VEUXepE1mIQ" target="_blank">[Lihat Video]</a></li>
+            <li><strong>Dr. David:</strong> Dokter fungsional yang aktif berolahraga dan bertubuh atletis. <a href="https://youtube.com/shorts/gzxihnN7tv0" target="_blank">[Lihat Video]</a></li>
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>

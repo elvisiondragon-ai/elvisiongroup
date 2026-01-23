@@ -237,7 +237,6 @@ const SlimPage = () => {
           userName: derivedUserName,
           userEmail: userEmail,
           phoneNumber: '0000000000', // Placeholder as it might be required by backend
-          amount: totalAmount,
           quantity: totalQuantity,
           productName: displayProductName,
           userId: currentUserId,

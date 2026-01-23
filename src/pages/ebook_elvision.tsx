@@ -15,7 +15,15 @@ import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePro } from '@/hooks/usePro';
-import { getFbcFbpCookies } from '@/utils/fbpixel';
+import { 
+  initFacebookPixelWithLogging, 
+  trackPageViewEvent, 
+  trackViewContentEvent, 
+  trackAddPaymentInfoEvent, 
+  trackPurchaseEvent,
+  AdvancedMatchingData,
+  getFbcFbpCookies
+} from '@/utils/fbpixel';
 
 const WhatsAppButton = () => (
   <a
@@ -40,6 +48,59 @@ export default function EbookElvisionPaymentPage() {
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isIOSStandalone = ('standalone' in window.navigator) && (window.navigator as any).standalone;
+
+  // Helper to send CAPI events
+  const sendCapiEvent = async (eventName: string, eventData: any, eventId?: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const body: any = {
+        pixelId: '3319324491540889',
+        eventName,
+        customData: eventData,
+        eventId: eventId,
+        eventSourceUrl: window.location.href,
+      };
+
+      // Get FBC and FBP from cookies using the utility function
+      const { fbc, fbp } = getFbcFbpCookies();
+
+      const userData: any = {
+        client_user_agent: navigator.userAgent,
+      };
+
+      // Prioritize form input email/phone, then authenticated user email/phone
+      if (userEmail) {
+        userData.email = userEmail;
+      } else if (session?.user?.email) {
+        userData.email = session.user.email;
+      }
+      if (phoneNumber) {
+        userData.phone = phoneNumber;
+      } else if (session?.user?.user_metadata?.phone) {
+        userData.phone = session.user.user_metadata.phone;
+      }
+
+      // External ID from authenticated user (Supabase user ID)
+      if (session?.user?.id) {
+        userData.external_id = session.user.id;
+      } else if (user?.id) { // Fallback if session is not available but user from useAuth is
+        userData.external_id = user.id;
+      }
+
+      if (fbc) {
+        userData.fbc = fbc;
+      }
+      if (fbp) {
+        userData.fbp = fbp;
+      }
+      
+      body.userData = userData;
+
+      await supabase.functions.invoke('capi-universal', { body });
+    } catch (err) {
+      console.error('Failed to send CAPI event:', err);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -111,19 +172,36 @@ export default function EbookElvisionPaymentPage() {
   
   const totalAmount = productPrice;
 
-  // Facebook Pixel - AddToCart event on page load
+  // Facebook Pixel Initialization
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).fbq) {
-      console.log('FB Pixel: Firing AddToCart for Ebook eL Vision');
-      (window as any).fbq('track', 'AddToCart', {
-        content_ids: ['ebook_elvision'],
+    if (typeof window !== 'undefined') {
+      const pixelId = '3319324491540889';
+      const productNameBackend = 'ebook_elvision';
+      
+      initFacebookPixelWithLogging(pixelId);
+      
+      const pageEventId = `pageview-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      trackPageViewEvent({}, pageEventId, pixelId);
+      sendCapiEvent('PageView', {}, pageEventId);
+
+      const viewContentEventId = `viewcontent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      trackViewContentEvent({
+        content_name: productName,
+        content_ids: [productNameBackend],
         content_type: 'product',
         value: productPrice,
-        currency: 'IDR',
-        pixel_id: '3319324491540889'
-      });
+        currency: 'IDR'
+      }, viewContentEventId, pixelId);
+      
+      sendCapiEvent('ViewContent', {
+        content_name: productName,
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: productPrice,
+        currency: 'IDR'
+      }, viewContentEventId);
     }
-  }, [productPrice]);
+  }, [productPrice, productName]);
 
   useEffect(() => {
     if (totalAmount > 5000000) {
@@ -235,6 +313,33 @@ export default function EbookElvisionPaymentPage() {
     }
 
     setLoading(true);
+
+    const addPaymentInfoEventId = `addpaymentinfo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const pixelId = '3319324491540889';
+    const productNameBackend = 'ebook_elvision';
+
+    const userDataPixel: AdvancedMatchingData = {
+      em: userEmail,
+      ph: phoneNumber,
+      fn: userName,
+      external_id: user?.id || currentUserId
+    };
+
+    // Track AddPaymentInfo
+    trackAddPaymentInfoEvent({
+      content_ids: [productNameBackend],
+      content_type: 'product',
+      value: totalAmount,
+      currency: 'IDR'
+    }, addPaymentInfoEventId, pixelId, userDataPixel);
+    
+    sendCapiEvent('AddPaymentInfo', {
+      content_ids: [productNameBackend],
+      content_type: 'product',
+      value: totalAmount,
+      currency: 'IDR'
+    }, addPaymentInfoEventId);
+
     const { fbc, fbp } = getFbcFbpCookies();
 
     try {
@@ -343,16 +448,30 @@ export default function EbookElvisionPaymentPage() {
             });
 
             // Facebook Pixel - Purchase event
-            if (typeof window !== 'undefined' && (window as any).fbq) {
-              console.log('FB Pixel: Firing Purchase for Ebook eL Vision');
-              (window as any).fbq('track', 'Purchase', {
-                content_ids: ['ebook_elvision'],
-                content_type: 'product',
-                value: payload.new?.amount || totalAmount, // Use amount from payload if available, fallback to local state
-                currency: 'IDR',
-                pixel_id: '3319324491540889'
-              }, { eventID: paymentData.tripay_reference });
-            }
+            const eventId = paymentData.tripay_reference;
+            const pixelId = '3319324491540889';
+            const productNameBackend = 'ebook_elvision';
+            
+            const userDataPixel: AdvancedMatchingData = {
+              em: userEmail,
+              ph: phoneNumber,
+              fn: userName,
+              external_id: user?.id
+            };
+
+            trackPurchaseEvent({
+              content_ids: [productNameBackend],
+              content_type: 'product',
+              value: payload.new?.amount || totalAmount,
+              currency: 'IDR'
+            }, eventId, pixelId, userDataPixel);
+
+            sendCapiEvent('Purchase', {
+              content_ids: [productNameBackend],
+              content_type: 'product',
+              value: payload.new?.amount || totalAmount,
+              currency: 'IDR'
+            }, eventId);
             // Optionally navigate after showing toast
             // navigate('/success-page'); 
           } else {
@@ -370,7 +489,7 @@ export default function EbookElvisionPaymentPage() {
       console.log(`[EbookElvisionPaymentPage] Unsubscribing from channel: ${channelName}`);
       supabase.removeChannel(channel);
     };
-  }, [showPaymentInstructions, paymentData?.tripay_reference, paymentData?.merchant_ref, navigate, toast]);
+  }, [showPaymentInstructions, paymentData?.tripay_reference, paymentData?.merchant_ref, navigate, toast, userEmail, phoneNumber, userName, user]);
 
   if (showPaymentInstructions && paymentData) {
     return (

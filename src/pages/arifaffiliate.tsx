@@ -9,6 +9,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { 
   initFacebookPixelWithLogging, 
   trackPageViewEvent, 
+  trackViewContentEvent,
+  trackAddPaymentInfoEvent,
   trackPurchaseEvent, 
   getFbcFbpCookies,
   AdvancedMatchingData
@@ -38,8 +40,30 @@ const ArifEbookLanding = () => {
   const pixelId = '3319324491540889'; // Using EbookIndo Pixel ID
 
   useEffect(() => {
-    initFacebookPixelWithLogging(pixelId);
-    trackPageViewEvent({}, undefined, pixelId);
+    if (typeof window !== 'undefined') {
+      initFacebookPixelWithLogging(pixelId);
+      
+      const pageEventId = `pageview-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      trackPageViewEvent({}, pageEventId, pixelId);
+      sendCapiEvent('PageView', {}, pageEventId);
+
+      const viewContentEventId = `viewcontent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      trackViewContentEvent({
+        content_name: displayProductName,
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: totalAmount,
+        currency: 'IDR'
+      }, viewContentEventId, pixelId);
+      
+      sendCapiEvent('ViewContent', {
+        content_name: displayProductName,
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: totalAmount,
+        currency: 'IDR'
+      }, viewContentEventId);
+    }
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -73,7 +97,55 @@ const ArifEbookLanding = () => {
   };
 
   const sendCapiEvent = async (eventName: string, eventData: any, eventId?: string) => {
-    // This function can be implemented if needed, similar to uangpanas.tsx
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const body: any = {
+        pixelId: '3319324491540889',
+        eventName,
+        customData: eventData,
+        eventId: eventId,
+        eventSourceUrl: window.location.href,
+      };
+
+      // Get FBC and FBP from cookies using the utility function
+      const { fbc, fbp } = getFbcFbpCookies();
+
+      const userData: any = {
+        client_user_agent: navigator.userAgent,
+      };
+
+      // Prioritize form input email/phone, then authenticated user email/phone
+      if (userEmail) {
+        userData.email = userEmail;
+      } else if (session?.user?.email) {
+        userData.email = session.user.email;
+      }
+      if (phoneNumber) {
+        userData.phone = phoneNumber;
+      } else if (session?.user?.user_metadata?.phone) {
+        userData.phone = session.user.user_metadata.phone;
+      }
+
+      // External ID from authenticated user (Supabase user ID)
+      if (session?.user?.id) {
+        userData.external_id = session.user.id;
+      } else if (user?.id) { // Fallback if session is not available but user from useAuth is
+        userData.external_id = user.id;
+      }
+
+      if (fbc) {
+        userData.fbc = fbc;
+      }
+      if (fbp) {
+        userData.fbp = fbp;
+      }
+      
+      body.userData = userData;
+
+      await supabase.functions.invoke('capi-universal', { body });
+    } catch (err) {
+      console.error('Failed to send CAPI event:', err);
+    }
   };
 
   useEffect(() => {
@@ -96,6 +168,7 @@ const ArifEbookLanding = () => {
           });
 
           // Track Client-Side Purchase Event
+          const eventId = paymentData.tripay_reference;
           const purchaseUserData: AdvancedMatchingData = {
             em: userEmail,
             ph: phoneNumber,
@@ -109,8 +182,16 @@ const ArifEbookLanding = () => {
             content_type: 'product',
             value: totalAmount,
             currency: 'IDR',
-            transaction_id: paymentData.tripay_reference
-          }, paymentData.tripay_reference, pixelId, purchaseUserData);
+            transaction_id: eventId
+          }, eventId, pixelId, purchaseUserData);
+
+          // Send CAPI Purchase
+          sendCapiEvent('Purchase', {
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'IDR'
+          }, eventId);
 
           // Optional: redirect to a thank you page or just show success state
         }
@@ -138,6 +219,30 @@ const ArifEbookLanding = () => {
     }
 
     setLoading(true);
+
+    const addPaymentInfoEventId = `addpaymentinfo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const userDataPixel: AdvancedMatchingData = {
+      em: userEmail,
+      ph: phoneNumber,
+      fn: userName,
+      external_id: user?.id
+    };
+
+    // Track AddPaymentInfo
+    trackAddPaymentInfoEvent({
+      content_ids: [productNameBackend],
+      content_type: 'product',
+      value: totalAmount,
+      currency: 'IDR'
+    }, addPaymentInfoEventId, pixelId, userDataPixel);
+    
+    sendCapiEvent('AddPaymentInfo', {
+      content_ids: [productNameBackend],
+      content_type: 'product',
+      value: totalAmount,
+      currency: 'IDR'
+    }, addPaymentInfoEventId);
+
     const currentUserId = user?.id;
     const { fbc, fbp } = getFbcFbpCookies();
 

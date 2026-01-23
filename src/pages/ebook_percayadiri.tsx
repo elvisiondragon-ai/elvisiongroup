@@ -12,7 +12,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
-import { getFbcFbpCookies } from '@/utils/fbpixel';
+import { 
+  initFacebookPixelWithLogging, 
+  trackPageViewEvent, 
+  trackViewContentEvent, 
+  trackAddPaymentInfoEvent, 
+  trackPurchaseEvent,
+  AdvancedMatchingData,
+  getFbcFbpCookies
+} from '@/utils/fbpixel';
 import {
   Accordion,
   AccordionContent,
@@ -83,29 +91,30 @@ export default function EbookPercayaDiriLP() {
   // Pixel Tracking
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Initialize Pixel
-      if (!(window as any).fbq) {
-        // @ts-ignore
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-      }
+      const pixelId = '3319324491540889';
+      
+      initFacebookPixelWithLogging(pixelId);
+      
+      const pageEventId = `pageview-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      trackPageViewEvent({}, pageEventId, pixelId);
+      sendCapiEvent('PageView', {}, pageEventId);
 
-      (window as any).fbq('init', '3319324491540889');
-      (window as any).fbq('track', 'PageView');
-
-      (window as any).fbq('track', 'ViewContent', {
+      const viewContentEventId = `viewcontent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      trackViewContentEvent({
         content_name: displayProductName,
         content_ids: [productNameBackend],
         content_type: 'product',
         value: productPrice,
         currency: 'IDR'
-      });
+      }, viewContentEventId, pixelId);
+      
+      sendCapiEvent('ViewContent', {
+        content_name: displayProductName,
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: productPrice,
+        currency: 'IDR'
+      }, viewContentEventId);
     }
   }, []);
 
@@ -143,21 +152,53 @@ export default function EbookPercayaDiriLP() {
   };
 
   // Helper to send CAPI events
-  const sendCapiEvent = async (eventName: string, eventData: any, overrideEventId?: string) => {
+  const sendCapiEvent = async (eventName: string, eventData: any, eventId?: string) => {
     try {
-      await supabase.functions.invoke('capi-universal', {
-        body: {
-          pixelId: '3319324491540889',
-          eventName,
-          userData: {
-            email: userEmail,
-            phone: phoneNumber,
-            client_user_agent: navigator.userAgent,
-          },
-          customData: eventData,
-          eventId: overrideEventId || (paymentData?.tripay_reference ? `${eventName}-${paymentData.tripay_reference}` : undefined) // Simple deduplication ID if available
-        }
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      const body: any = {
+        pixelId: '3319324491540889',
+        eventName,
+        customData: eventData,
+        eventId: eventId,
+        eventSourceUrl: window.location.href,
+      };
+
+      // Get FBC and FBP from cookies using the utility function
+      const { fbc, fbp } = getFbcFbpCookies();
+
+      const userData: any = {
+        client_user_agent: navigator.userAgent,
+      };
+
+      // Prioritize form input email/phone, then authenticated user email/phone
+      if (userEmail) {
+        userData.email = userEmail;
+      } else if (session?.user?.email) {
+        userData.email = session.user.email;
+      }
+      if (phoneNumber) {
+        userData.phone = phoneNumber;
+      } else if (session?.user?.user_metadata?.phone) {
+        userData.phone = session.user.user_metadata.phone;
+      }
+
+      // External ID from authenticated user (Supabase user ID)
+      if (session?.user?.id) {
+        userData.external_id = session.user.id;
+      } else if (user?.id) { // Fallback if session is not available but user from useAuth is
+        userData.external_id = user.id;
+      }
+
+      if (fbc) {
+        userData.fbc = fbc;
+      }
+      if (fbp) {
+        userData.fbp = fbp;
+      }
+      
+      body.userData = userData;
+
+      await supabase.functions.invoke('capi-universal', { body });
     } catch (err) {
       console.error('Failed to send CAPI event:', err);
     }
@@ -177,23 +218,30 @@ export default function EbookPercayaDiriLP() {
 
     setLoading(true);
     try {
-      // FB Pixel AddToCart
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        (window as any).fbq('track', 'AddToCart', {
-          content_ids: [productNameBackend],
-          content_type: 'product',
-          value: totalAmount,
-          currency: 'IDR'
-        });
-      }
-      
-      // Send CAPI AddToCart
-      sendCapiEvent('AddToCart', {
+      const addPaymentInfoEventId = `addpaymentinfo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+      const pixelId = '3319324491540889';
+      const userData: AdvancedMatchingData = {
+        em: userEmail,
+        ph: phoneNumber,
+        fn: userName,
+        external_id: user?.id
+      };
+
+      // Track AddPaymentInfo
+      trackAddPaymentInfoEvent({
         content_ids: [productNameBackend],
         content_type: 'product',
         value: totalAmount,
         currency: 'IDR'
-      });
+      }, addPaymentInfoEventId, pixelId, userData);
+      
+      sendCapiEvent('AddPaymentInfo', {
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: totalAmount,
+        currency: 'IDR'
+      }, addPaymentInfoEventId);
 
       const { fbc, fbp } = getFbcFbpCookies();
 
@@ -268,14 +316,25 @@ export default function EbookPercayaDiriLP() {
               variant: "default"
           });
           
-          if (typeof window !== 'undefined' && (window as any).fbq) {
-            (window as any).fbq('track', 'Purchase', {
-              content_ids: [productNameBackend],
-              content_type: 'product',
-              value: totalAmount,
-              currency: 'IDR'
-            }, { eventID: paymentData.tripay_reference });
-          }
+          // Use exact tripay_reference to match Backend CAPI event_id for deduplication
+          const eventId = paymentData.tripay_reference;
+
+          // Prepare User Data for Advanced Matching
+          const pixelId = '3319324491540889';
+          const userData: AdvancedMatchingData = {
+            em: userEmail,
+            ph: phoneNumber,
+            fn: userName,
+            external_id: user?.id
+          };
+          
+          // Track Purchase with Advanced Matching and Deduplication
+          trackPurchaseEvent({
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'IDR'
+          }, eventId, pixelId, userData);
           
           // Send CAPI Purchase
           sendCapiEvent('Purchase', {
@@ -283,7 +342,7 @@ export default function EbookPercayaDiriLP() {
             content_type: 'product',
             value: totalAmount,
             currency: 'IDR'
-          }, paymentData.tripay_reference);
+          }, eventId);
           
           // Optional: redirect to a thank you page or just show success state
         }

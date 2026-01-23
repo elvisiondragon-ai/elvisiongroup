@@ -30,9 +30,11 @@ import EbookElvisionPaymentPage from "./pages/ebook_elvision"; // Import the Ebo
 import EbookHealthLP from "./pages/usa/usa_ebookhealth"; // Import the EbookHealthLP component
 import EbookPercayaDiriLP from "./pages/ebook_percayadiri"; // Import the EbookPercayaDiriLP component
 import EbookFeminineLanding from "./pages/ebook_feminine"; // Import the EbookFeminineLanding component
+import UsaEbookFeminine from "./pages/usa/usa_ebookfeminine"; // Import the UsaEbookFeminine component
 import UangPanasLanding from "./pages/uangpanas"; // Import the UangPanasLanding component
 import LeadMagnet from "./pages/LeadMagnet"; // Import the LeadMagnet component
 import PayPalFinish from "./pages/usa/usa_paypal_finish"; // Import the PayPalFinish component
+import EbookGrief from "./ebook_grief";
 import FitFactorLP from "./pages/fitfactorlp";
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -63,6 +65,7 @@ import Testimony from "./pages/testimony"; // Import the new Testimony component
 import CreatorPage from "./pages/creator_api";
 import ResellerLanding from "./pages/reseller";
 import Pixels from "./pages/Pixels";
+import RisetPage from "./pages/riset";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";
@@ -205,8 +208,8 @@ const AppContent = () => {
                 <Route path="/levelpasrah" element={<LevelPasrahPage />} />
 
                 <Route path="/vip_15jt" element={<Page15jt />} />
-                <Route path="/usa/usa_3000" element={<ELVision3000 />} />
-                <Route path="/usa/usa_pay3000" element={<Pay3000 />} />
+                <Route path="/usa_3000" element={<ELVision3000 />} />
+                <Route path="/usa_pay3000" element={<Pay3000 />} />
                 <Route path="/usa/usa_3000survey" element={<Survey3000 />} />
                 <Route path="/usa/usa_paypal" element={<PaypalPaymentPage />} />
                 <Route path="/affiliate" element={<AffiliatePage />} />
@@ -215,9 +218,11 @@ const AppContent = () => {
                 <Route path="/usa/usa_ebookhealth" element={<EbookHealthLP />} />
                 <Route path="/ebook_percayadiri" element={<EbookPercayaDiriLP />} />
                 <Route path="/ebook_feminine" element={<EbookFeminineLanding />} />
+                <Route path="/usa_ebookfeminine" element={<UsaEbookFeminine />} />
                 <Route path="/uangpanas" element={<UangPanasLanding />} />
                 <Route path="/leadmagnet" element={<LeadMagnet />} />
                 <Route path="/usa/usa_paypal_finish" element={<PayPalFinish />} />
+                <Route path="/ebook_grief" element={<EbookGrief />} />
 
                 <Route path="/intro" element={<Intro />} />
                 <Route path="/display" element={<DisplayPage />} />
@@ -229,6 +234,7 @@ const AppContent = () => {
                 <Route path="/creator_api" element={<CreatorPage />} />
                 <Route path="/reseller" element={<ResellerLanding />} />
                 <Route path="/pixels" element={<Pixels />} />
+                <Route path="/riset" element={<RisetPage />} />
                 
                 {/* Auth routes */}
                 <Route

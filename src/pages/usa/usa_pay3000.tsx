@@ -71,8 +71,8 @@ export default function Pay3000() {
       };
 
       const eventData = {
-        content_name: 'VIP SESSION 6 Week',
-        value: 1500.00,
+        content_name: 'EL Vision 3000 Coaching',
+        value: 3000.00,
         currency: 'USD'
       };
 
@@ -92,7 +92,7 @@ export default function Pay3000() {
       // Create Payment
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
-          subscriptionType: "VIP6WEEK",
+          subscriptionType: "usa_3000",
           paymentMethod: "PAYPAL",
           userEmail: email,
           userName: email.split('@')[0],
@@ -162,9 +162,8 @@ export default function Pay3000() {
             </div>
 
             <div className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border border-yellow-500/30 rounded-2xl p-10 backdrop-blur-sm mb-12">
-              <div className="text-5xl font-bold text-yellow-400 mb-3">$1,500</div>
-              <div className="text-xl text-gray-300 mb-2 line-through opacity-50">$3,000</div>
-              <div className="text-sm text-yellow-500 font-bold mb-6 uppercase tracking-wider">50% Discount Applied</div>
+              <div className="text-5xl font-bold text-yellow-400 mb-3">$3,000</div>
+              <div className="text-sm text-yellow-500 font-bold mb-6 uppercase tracking-wider">Premium 1:1 Coaching Enrollment</div>
 
               <div className="flex items-center gap-4 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
                 <Shield className="w-8 h-8 text-blue-400 flex-shrink-0" />
@@ -194,7 +193,7 @@ export default function Pay3000() {
                     ) : (
                     <>
                         <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-mark-color.svg" alt="PayPal" className="w-6 h-6" />
-                        PAY VIP 6 WEEKS ($1500)
+                        PAY COACHING ($3000)
                         <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                     </>
                     )}
