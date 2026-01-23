@@ -240,6 +240,7 @@ const handler = async (req: Request) => {
     const productNameInput = body.subscriptionType || body.productName || 'Unknown Product';
     const userName = body.userName || recipientEmail.split('@')[0];
     const currency = body.currency || 'IDR';
+    const affiliateEmail = body.affiliateEmail;
 
     // Determine Product Template
     const productKey = getProductKey(productNameInput);
@@ -340,14 +341,20 @@ const handler = async (req: Request) => {
     console.log("✅ Email sent successfully to buyer");
 
     // BCC to Admins (send separate emails as BCC simulation)
-    const admins = ['support@elvisiongroup.com', 'elreyzandra@gmail.com', 'elvisiondragon@gmail.com'];
+    const bccList = ['support@elvisiongroup.com', 'elreyzandra@gmail.com', 'elvisiondragon@gmail.com'];
     
-    for (const adminEmail of admins) {
+    // Add affiliate to BCC if exists
+    if (affiliateEmail) {
+        bccList.push(affiliateEmail);
+        console.log(`📎 Adding affiliate ${affiliateEmail} to notification list.`);
+    }
+    
+    for (const bccEmail of bccList) {
         try {
-            await sendMailketingEmail(adminEmail, `[ADMIN BCC] ${template.subject}`, htmlContent);
-            console.log(`✅ BCC sent to ${adminEmail}`);
+            await sendMailketingEmail(bccEmail, `[NOTIF] ${template.subject}`, htmlContent);
+            console.log(`✅ BCC/Notif sent to ${bccEmail}`);
         } catch(e) {
-            console.error(`⚠️ BCC Failed for ${adminEmail}:`, e);
+            console.error(`⚠️ Notification Failed for ${bccEmail}:`, e);
         }
     }
 

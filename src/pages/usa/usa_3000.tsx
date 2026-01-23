@@ -31,7 +31,8 @@ export default function ELVision3000() {
              client_user_agent: navigator.userAgent
           },
           customData,
-          eventId
+          eventId,
+          eventSourceUrl: window.location.href
         }),
       });
     } catch (e) {

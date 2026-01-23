@@ -22,17 +22,6 @@ import {
   getFbcFbpCookies
 } from '@/utils/fbpixel';
 
-const getCookie = (name: string) => {
-  const nameEQ = name + "=";
-  const ca = document.cookie.split(';');
-  for(let i=0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0)===' ') c = c.substring(1,c.length);
-    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length,c.length);
-  }
-  return null;
-}
-
 const communityTestimonials = Object.values(
   import.meta.glob('../assets/TESTI_KOMUNITAS/*.{png,jpg,jpeg,PNG,JPG,JPEG}', { 
     eager: true, 
@@ -271,11 +260,11 @@ export default function UangPanasLanding() {
         eventName,
         customData: eventData,
         eventId: eventId,
+        eventSourceUrl: window.location.href,
       };
 
-      // Get FBC and FBP from cookies
-      const fbc = getCookie('_fbc');
-      const fbp = getCookie('_fbp');
+      // Get FBC and FBP from cookies using the utility function
+      const { fbc, fbp } = getFbcFbpCookies();
 
       const userData: any = {
         client_user_agent: navigator.userAgent,

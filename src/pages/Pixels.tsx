@@ -20,6 +20,12 @@ export default function Pixels() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchInput] = useState('');
 
+  const PIXEL_NAMES: Record<string, string> = {
+    '1393383179182528': 'USA KAYA PIXEL',
+    '1797660474333865': 'Fit Factor PIXEL',
+    '3319324491540889': 'GENESIS200 PIXEL'
+  };
+
   const fetchLogs = async (search?: string) => {
     setLoading(true);
     let query = supabase
@@ -114,7 +120,14 @@ export default function Pixels() {
                     {new Date(log.created_at).toLocaleString()}
                   </TableCell>
                   <TableCell className="font-medium">{log.event_name}</TableCell>
-                  <TableCell>{log.pixel_id}</TableCell>
+                  <TableCell>
+                    <div className="font-bold text-blue-600">
+                        {PIXEL_NAMES[log.pixel_id] || 'Unknown Pixel'}
+                    </div>
+                    <div className="text-[10px] text-gray-400 font-mono">
+                        {log.pixel_id}
+                    </div>
+                  </TableCell>
                   <TableCell className="max-w-[200px] truncate" title={log.user_data?.email}>
                     {log.user_data?.email || '-'}
                   </TableCell>
@@ -130,12 +143,17 @@ export default function Pixels() {
                     </Badge>
                   </TableCell>
                   <TableCell className="max-w-[300px] truncate">
-                    <div className="text-xs">
+                    <div className="text-xs space-y-1">
+                        {log.page_url && (
+                            <div className="text-blue-500 font-semibold truncate" title={log.page_url}>
+                                {log.page_url}
+                            </div>
+                        )}
                         {log.custom_data ? (
-                            <pre className="overflow-auto whitespace-pre-wrap font-mono">
+                            <pre className="overflow-auto whitespace-pre-wrap font-mono text-gray-600">
                                 {JSON.stringify(log.custom_data, null, 2)}
                             </pre>
-                        ) : 'No custom data'}
+                        ) : <span className="text-gray-400">No custom data</span>}
                     </div>
                   </TableCell>
                   <TableCell className="max-w-[300px]">

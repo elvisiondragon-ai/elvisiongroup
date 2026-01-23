@@ -14,8 +14,17 @@ import {
 } from "@/components/ui/accordion";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
-import { getFbcFbpCookies } from '@/utils/fbpixel';
+import { 
+  initFacebookPixelWithLogging, 
+  trackPageViewEvent, 
+  trackViewContentEvent, 
+  trackAddPaymentInfoEvent, 
+  trackPurchaseEvent,
+  AdvancedMatchingData,
+  getFbcFbpCookies
+} from '@/utils/fbpixel';
 
 // Countdown Timer Component
 const CountdownTimer = () => {
@@ -56,6 +65,7 @@ const WhatsAppButton = () => (
 
 export default function EbookFeminineLanding() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const productNameBackend = 'ebook_feminine';
   const displayProductName = 'Feminine Magnetism: Audio Hipnoterapi + Ebook';
   const originalPrice = 300000;
@@ -73,29 +83,51 @@ export default function EbookFeminineLanding() {
   const purchaseFiredRef = useRef(false);
 
   // Helper to send CAPI events
-  const sendCapiEvent = async (eventName: string, eventData: any, overrideEventId?: string) => {
+  const sendCapiEvent = async (eventName: string, eventData: any, eventId?: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const body: any = {
         pixelId: '3319324491540889', // EbookIndo Pixel
         eventName,
         customData: eventData,
-        eventId: overrideEventId || (paymentData?.tripay_reference ? `${eventName}-${paymentData.tripay_reference}` : undefined)
+        eventId: eventId,
+        eventSourceUrl: window.location.href,
       };
 
-      if (session) {
-        body.auth = session;
-      } else {
-        body.is_anonymous = true;
+      // Get FBC and FBP from cookies using the utility function
+      const { fbc, fbp } = getFbcFbpCookies();
+
+      const userData: any = {
+        client_user_agent: navigator.userAgent,
+      };
+
+      // Prioritize form input email/phone, then authenticated user email/phone
+      if (userEmail) {
+        userData.email = userEmail;
+      } else if (session?.user?.email) {
+        userData.email = session.user.email;
+      }
+      if (phoneNumber) {
+        userData.phone = phoneNumber;
+      } else if (session?.user?.user_metadata?.phone) {
+        userData.phone = session.user.user_metadata.phone;
       }
 
-      if (userEmail) {
-        body.userData = {
-          email: userEmail,
-          phone: phoneNumber,
-          client_user_agent: navigator.userAgent,
-        };
+      // External ID from authenticated user (Supabase user ID)
+      if (session?.user?.id) {
+        userData.external_id = session.user.id;
+      } else if (user?.id) { // Fallback if session is not available but user from useAuth is
+        userData.external_id = user.id;
       }
+
+      if (fbc) {
+        userData.fbc = fbc;
+      }
+      if (fbp) {
+        userData.fbp = fbp;
+      }
+      
+      body.userData = userData;
 
       await supabase.functions.invoke('capi-universal', { body });
     } catch (err) {
@@ -106,28 +138,30 @@ export default function EbookFeminineLanding() {
   // Pixel Tracking
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      if (!(window as any).fbq) {
-        // @ts-ignore
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        (window as any).fbq('init', '3319324491540889'); // EbookIndo Pixel
-      }
+      const pixelId = '3319324491540889';
+      
+      initFacebookPixelWithLogging(pixelId);
+      
+      const pageEventId = `pageview-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      trackPageViewEvent({}, pageEventId, pixelId);
+      sendCapiEvent('PageView', {}, pageEventId);
 
-      (window as any).fbq('track', 'PageView');
-
-      (window as any).fbq('track', 'ViewContent', {
+      const viewContentEventId = `viewcontent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      trackViewContentEvent({
         content_name: displayProductName,
         content_ids: [productNameBackend],
         content_type: 'product',
         value: productPrice,
         currency: 'IDR'
-      });
+      }, viewContentEventId, pixelId);
+      
+      sendCapiEvent('ViewContent', {
+        content_name: displayProductName,
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: productPrice,
+        currency: 'IDR'
+      }, viewContentEventId);
     }
   }, []);
 
@@ -176,23 +210,30 @@ export default function EbookFeminineLanding() {
 
     setLoading(true);
     try {
-      // FB Pixel AddToCart
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        (window as any).fbq('track', 'AddToCart', {
-          content_ids: [productNameBackend],
-          content_type: 'product',
-          value: totalAmount,
-          currency: 'IDR'
-        });
-      }
-      
-      // Send CAPI AddToCart
-      sendCapiEvent('AddToCart', {
+      const addPaymentInfoEventId = `addpaymentinfo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+      const pixelId = '3319324491540889';
+      const userData: AdvancedMatchingData = {
+        em: userEmail,
+        ph: phoneNumber,
+        fn: userName,
+        external_id: user?.id
+      };
+
+      // Track AddPaymentInfo
+      trackAddPaymentInfoEvent({
         content_ids: [productNameBackend],
         content_type: 'product',
         value: totalAmount,
         currency: 'IDR'
-      });
+      }, addPaymentInfoEventId, pixelId, userData);
+      
+      sendCapiEvent('AddPaymentInfo', {
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: totalAmount,
+        currency: 'IDR'
+      }, addPaymentInfoEventId);
 
       const { fbc, fbp } = getFbcFbpCookies();
 
@@ -266,14 +307,25 @@ export default function EbookFeminineLanding() {
               variant: "default"
           });
           
-          if (typeof window !== 'undefined' && (window as any).fbq) {
-            (window as any).fbq('track', 'Purchase', {
-              content_ids: [productNameBackend],
-              content_type: 'product',
-              value: totalAmount,
-              currency: 'IDR'
-            }, { eventID: paymentData.tripay_reference });
-          }
+          // Use exact tripay_reference to match Backend CAPI event_id for deduplication
+          const eventId = paymentData.tripay_reference;
+
+          // Prepare User Data for Advanced Matching
+          const pixelId = '3319324491540889';
+          const userData: AdvancedMatchingData = {
+            em: userEmail,
+            ph: phoneNumber,
+            fn: userName,
+            external_id: user?.id
+          };
+          
+          // Track Purchase with Advanced Matching and Deduplication
+          trackPurchaseEvent({
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'IDR'
+          }, eventId, pixelId, userData);
           
           // Send CAPI Purchase
           sendCapiEvent('Purchase', {
@@ -281,7 +333,7 @@ export default function EbookFeminineLanding() {
             content_type: 'product',
             value: totalAmount,
             currency: 'IDR'
-          }, paymentData.tripay_reference);
+          }, eventId);
         }
       }).subscribe();
 

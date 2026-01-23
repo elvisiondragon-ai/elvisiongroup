@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
   }
 
   // --- Configuration ---
-  const { pixelId, eventName, userData, customData, eventId, testCode } = await req.json();
+  const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl } = await req.json();
 
   // Initialize Supabase Client for Logging
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
         event_id: eventId,
         user_data: userData, // Log raw user data passed to function (be careful with PII in prod logs, maybe mask?)
         custom_data: customData,
+        page_url: eventSourceUrl || req.headers.get('referer'),
         status: 'processing'
     };
 
@@ -113,7 +114,7 @@ Deno.serve(async (req) => {
       if (userData.fbp) processedUserData.fbp = userData.fbp;
       if (userData.fbc) processedUserData.fbc = userData.fbc;
       if (userData.external_id) processedUserData.external_id = userData.external_id;
-      if (userData.db_id) processedUserData.db_id = userData.db_id; // Facebook Login ID
+      if (userData.db_id) processedUserData.facebook_login_id = userData.db_id; // Map db_id to facebook_login_id
     }
     
     // Always try to get IP and User Agent from headers as a fallback
@@ -160,6 +161,7 @@ Deno.serve(async (req) => {
       event_name: eventName,
       event_time: Math.floor(Date.now() / 1000),
       action_source: 'website',
+      event_source_url: eventSourceUrl || req.headers.get('referer'), // Add URL tracking
       custom_data: customData, 
       event_id: eventId || undefined, 
     };

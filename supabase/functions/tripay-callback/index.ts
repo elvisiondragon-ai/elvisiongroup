@@ -147,7 +147,7 @@ serve(async (req)=>{
       
             // FIX: Search by tripay_reference OR merchant_ref to handle cases where the update missed
             let query = supabase.from('global_product')
-              .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, fbc, fbp') // Added affiliate_id, phone, fbc, fbp
+              .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, affiliate_email, fbc, fbp') // Added affiliate_email
               .neq('status', 'PAID');
       
             if (merchantRef) {
@@ -221,7 +221,8 @@ serve(async (req)=>{
             subscriptionType: globalProductTx.product_name, // Pass original name, send-ebooks-email handles detection
             paymentMethod: paymentMethod,
             status: 'payment_completed',
-            userName: globalProductTx.name 
+            userName: globalProductTx.name,
+            affiliateEmail: globalProductTx.affiliate_email
           }
         });
         console.log('   - 📧 Email sent to:', globalProductTx.email);
