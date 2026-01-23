@@ -150,8 +150,8 @@
 
         @media print {
             body {
-                background-color: white;
-                padding: 0;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             .ebook-container {
                 box-shadow: none;
@@ -179,6 +179,8 @@
             margin-top: 40px;
             border-radius: 4px;
             font-family: 'Merriweather', serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         .next-step-box {
@@ -189,6 +191,8 @@
             text-align: center;
             margin-top: 40px;
             border: 2px solid #27ae60;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         .next-step-button {

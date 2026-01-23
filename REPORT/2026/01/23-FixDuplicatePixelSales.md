@@ -4,19 +4,19 @@
 **Task:** Investigate and fix issue where "ads have sales 3, but pixel sales is 14".
 
 ## Root Cause Analysis
-The discrepancy was caused by **redundant CAPI (Conversions API) Purchase events** being fired from the frontend in addition to the backend.
+The discrepancy was caused by **redundant CAPI (Conversions API) Purchase events** being fired from multiple sources.
 
-1.  **Backend (`tripay-callback`):** When a payment is confirmed (webhook received), the server sends a CAPI `Purchase` event to Meta. This is the correct, reliable source of truth.
-2.  **Frontend (Sales Pages):** The frontend components (`uangpanas.tsx`, `fitfactor.tsx`, etc.) were listening for the payment status update via Supabase Realtime. Upon receiving `status: 'PAID'`, they were firing:
-    *   **Facebook Pixel `trackPurchaseEvent`:** (Correct, for browser tracking and cookie matching).
-    *   **CAPI `sendCapiEvent`:** (Redundant and harmful).
+1.  **Backend (`tripay-callback`):** When a payment is confirmed (webhook received or PayPal captured), the server sends a CAPI `Purchase` event to Meta. This is the correct, reliable source of truth.
+2.  **Frontend (Sales Pages):** The frontend components (`uangpanas.tsx`, `fitfactor.tsx`, `ebook_*.tsx`) were listening for the payment status update via Supabase Realtime and firing a **redundant** CAPI event.
+3.  **Frontend (PayPal Finish Page):** `usa_paypal_finish.tsx` was also firing a **redundant** CAPI event upon successful capture.
 
-This resulted in **three** events being sent for every single purchase if the user kept the browser open:
-1.  Backend CAPI (Purchase)
-2.  Frontend Pixel (Purchase)
-3.  Frontend CAPI (Purchase)
+**Why "3 from Server"?**
+The user reported seeing "1 from browser, 3 from server". This was likely caused by:
+1.  **Backend Event:** The `tripay-callback` function sending the valid Server Event.
+2.  **Frontend-initiated Server Event (Page):** The sales page (e.g., `usa_ebookhealth.tsx`) sending a CAPI event via `capi-universal`.
+3.  **Frontend-initiated Server Event (Finish):** The finish page (`usa_paypal_finish.tsx`) sending *another* CAPI event via `capi-universal`.
 
-While Meta attempts to deduplicate events with the same `eventID`, sending two CAPI events is bad practice and prone to failure (e.g., timing issues, slight data mismatches), leading to inflated sales counts in Events Manager.
+This resulted in 3 Server Events + 1 Browser Pixel Event = 4 Events total per sale (or more if retries occurred).
 
 ## Actions Taken
 
@@ -33,21 +33,22 @@ I have removed the redundant **Frontend CAPI `sendCapiEvent('Purchase', ...)`** 
 
 Now, for every purchase:
 
-1.  **Backend (`tripay-callback`):** Sends **CAPI Purchase** event.
+1.  **Backend (`tripay-callback`):** Sends **ONE CAPI Purchase** event.
     *   Uses `eventID` = `tripay_reference` (or PayPal Order ID).
     *   Includes hashed user data (Email, Phone) and FBC/FBP cookies from the database.
+    *   Includes Idempotency check (`neq('status', 'PAID')`) to prevent double-firing if both Capture and IPN occur.
 
 2.  **Frontend (Browser):** Fires **Pixel Purchase** event.
     *   Uses `eventID` = `tripay_reference` (matching the backend).
-    *   This allows Meta to match the Browser event with the Server event and deduplicate them effectively, counting it as **1 Purchase**.
+    *   This allows Meta to match the Browser event with the Server event and deduplicate them effectively.
 
 This setup ensures:
-*   **Accuracy:** No more triple-counting.
-*   **Reliability:** Backend CAPI captures sales even if ad-blockers are on or the user closes the browser immediately.
+*   **Accuracy:** Eliminates triple-counting from server side.
+*   **Reliability:** Backend CAPI captures sales even if ad-blockers are on.
 *   **Match Quality:** Frontend Pixel provides browser cookies, and Backend CAPI provides secure server data.
 
 ## Verification
 *   **InitiateCheckout:** Frontend CAPI events for `InitiateCheckout` were **retained** in `usa_pay3000.tsx` etc., as the backend does not send these.
 *   **Event IDs:** Verified that Frontend Pixel uses the same `tripay_reference` or `token` as the Backend CAPI.
 
-The sales count in Meta Ads Manager should now align with actual sales.
+The sales count in Meta Ads Manager should now align with actual sales (1 event per sale after deduplication).

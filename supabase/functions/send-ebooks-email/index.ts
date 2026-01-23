@@ -147,6 +147,20 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     ],
     btnText: "WHATSAPP CONFIRMATION",
     lang: "en"
+  },
+  'usa_ebookfeminine': {
+    subject: "✨ Download Access: Feminine Magnetism (USA)",
+    downloadLink: "https://drive.google.com/drive/folders/1Pxz5nYxblo-rzllG6SsYUQq4039Kbd9C?usp=share_link",
+    color: "#e11d48", // Rose 600
+    accentColor: "#ffffff",
+    title: "Access Granted: Feminine Magnetism",
+    description: "Congratulations! You now have full access to the Feminine Magnetism Package (Audio & Ebook).",
+    instructions: [
+      "Use earphones for the best experience with Theta waves.",
+      "Listen to 'Goddess Awakening' every night before sleep.",
+      "Listen to 'Morning Radiance' to start your day with feminine energy."
+    ],
+    lang: "en"
   }
 };
 
@@ -157,6 +171,7 @@ function getProductKey(productName: string): string {
   
   if (lower.includes('usa_ebookhealth') || lower.includes('ebookhealthlp')) return 'usa_ebookhealth';
   if (lower.includes('usa_ebookslim')) return 'usa_ebookslim';
+  if (lower.includes('usa_ebookfeminine')) return 'usa_ebookfeminine';
   if (lower.includes('usa_3000')) return 'usa_3000';
 
   if (lower.includes('diet')) return 'ebook_diet';

@@ -34,7 +34,6 @@ import UsaEbookFeminine from "./pages/usa/usa_ebookfeminine"; // Import the UsaE
 import UangPanasLanding from "./pages/uangpanas"; // Import the UangPanasLanding component
 import LeadMagnet from "./pages/LeadMagnet"; // Import the LeadMagnet component
 import PayPalFinish from "./pages/usa/usa_paypal_finish"; // Import the PayPalFinish component
-import EbookGrief from "./ebook_grief";
 import FitFactorLP from "./pages/fitfactorlp";
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
@@ -222,7 +221,6 @@ const AppContent = () => {
                 <Route path="/uangpanas" element={<UangPanasLanding />} />
                 <Route path="/leadmagnet" element={<LeadMagnet />} />
                 <Route path="/usa/usa_paypal_finish" element={<PayPalFinish />} />
-                <Route path="/ebook_grief" element={<EbookGrief />} />
 
                 <Route path="/intro" element={<Intro />} />
                 <Route path="/display" element={<DisplayPage />} />
