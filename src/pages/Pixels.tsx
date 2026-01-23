@@ -35,8 +35,8 @@ export default function Pixels() {
       .limit(100);
 
     if (search) {
-        // Simple search logic for Email, FBP or FBC inside JSONB or columns
-        query = query.or(`user_data->>email.ilike.%${search}%,user_data->>fbp.ilike.%${search}%,user_data->>fbc.ilike.%${search}%,pixel_id.ilike.%${search}%`);
+        // Simple search logic for Event Name, Email, FBP or FBC inside JSONB or columns
+        query = query.or(`event_name.ilike.%${search}%,user_data->>email.ilike.%${search}%,user_data->>fbp.ilike.%${search}%,user_data->>fbc.ilike.%${search}%,pixel_id.ilike.%${search}%`);
     }
 
     const { data, error } = await query;
@@ -82,10 +82,10 @@ export default function Pixels() {
         <h1 className="text-3xl font-bold">Pixel Event Logs</h1>
         <div className="flex flex-1 max-w-sm gap-2">
             <Input 
-                placeholder="Search Email, FBP, or FBC..." 
+                placeholder="Search Event, Email, FBP, or FBC..." 
                 value={searchTerm}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="bg-white"
+                className="bg-white text-black font-bold"
             />
         </div>
         <Button onClick={() => fetchLogs(searchTerm)} disabled={loading}>

@@ -10,6 +10,31 @@ export const sha256 = async (message: string): Promise<string> => {
   return hashHex;
 };
 
+// 🍪 Cookie Helper - Set cookie with domain handling
+export const setCookieHelper = (name: string, value: string, days: number = 90) => {
+    if (typeof document === 'undefined') return;
+    
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = `expires=${date.toUTCString()}`;
+    
+    // Attempt to set on root domain for better persistence
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+    let domain = hostname;
+    
+    // If we have at least 2 parts (e.g. example.com), try to set on .example.com
+    // This covers subdomains like app.example.com -> .example.com
+    if (parts.length >= 2 && !hostname.includes('localhost') && !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
+        domain = '.' + parts.slice(-2).join('.');
+    }
+
+    document.cookie = `${name}=${value}; ${expires}; path=/; domain=${domain}; SameSite=Lax`;
+    
+    // Fallback: Set on current domain if the above fails or just to be safe
+    document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Lax`;
+};
+
 // 🍪 FBC Cookie Helper - Get browser cookie value
 export const getFbcCookieHelper = (name: string): string | null => {
   if (typeof document === 'undefined') return null;
@@ -19,41 +44,94 @@ export const getFbcCookieHelper = (name: string): string | null => {
   return null;
 };
 
-// 🔗 FBC URL Extractor - Get fbclid from URL parameters
+// 🔗 FBC URL Extractor - Get fbclid from URL parameters (Search OR Hash)
 export const getFbcClickIdFromUrl = (): string | null => {
   if (typeof window === 'undefined') return null;
+  
+  // Check Search Query (?fbclid=...)
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('fbclid');
+  const fromSearch = urlParams.get('fbclid');
+  if (fromSearch) return fromSearch;
+
+  // Check Hash (#...?fbclid=... or #/page?fbclid=...)
+  if (window.location.hash) {
+     const hashString = window.location.hash.includes('?') 
+        ? window.location.hash.split('?')[1] 
+        : '';
+     const hashParams = new URLSearchParams(hashString);
+     const fromHash = hashParams.get('fbclid');
+     if (fromHash) return fromHash;
+  }
+
+  return null;
 };
 
 // 🔧 FBC Formatter - Format FBC cookie according to Meta standards
 export const formatFbcCookieValue = (fbclid: string): string => {
   const timestamp = Date.now();
-  const hostname = window.location.hostname;
-  let subdomainIndex = 1; // Default for most domains
-  if (hostname === 'com') subdomainIndex = 0;
-  else if (hostname.includes('www.')) subdomainIndex = 2;
-  return `fb.${subdomainIndex}.${timestamp}.${fbclid}`;
+  // fb.1 is standard for top-level domain cookies
+  // fb.2 is often used for www. subdomains
+  // We'll stick to 'fb.1' as a safe default for root-domain cookies which we prefer
+  const version = 'fb';
+  const subdomainIndex = 1; 
+  return `${version}.${subdomainIndex}.${timestamp}.${fbclid}`;
+};
+
+// 💾 Save FBC Data to Cookie & LocalStorage
+export const setFbcData = (fbclid: string) => {
+    if (!fbclid) return;
+
+    const formattedFbc = formatFbcCookieValue(fbclid);
+    
+    // 1. Set Cookie
+    setCookieHelper('_fbc', formattedFbc, 90);
+    
+    // 2. Set LocalStorage (Backup)
+    if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('_fbc_backup', formattedFbc);
+        localStorage.setItem('_fbc_timestamp', Date.now().toString());
+    }
 };
 
 // 🔗 FBC Cookie Manager - Handle FBC cookie creation and storage
 export const handleFbcCookieManager = (): void => {
-  if (typeof window === 'undefined' || typeof document === 'undefined') return;
-  
   const fbclid = getFbcClickIdFromUrl();
   if (fbclid) {
-    const formattedFbc = formatFbcCookieValue(fbclid);
-    const expires = new Date(Date.now() + 90*24*60*60*1000).toUTCString();
-    document.cookie = `_fbc=${formattedFbc}; expires=${expires}; path=/`;
+    setFbcData(fbclid);
   }
 };
 
-// 🍪 Get Both FBC and FBP Cookies
+// 🍪 Get Both FBC and FBP Cookies (with LocalStorage & URL Fallback)
 export const getFbcFbpCookies = (): { fbc: string | null; fbp: string | null } => {
-  return {
-    fbc: getFbcCookieHelper('_fbc'),
-    fbp: getFbcCookieHelper('_fbp')
-  };
+  let fbc = getFbcCookieHelper('_fbc');
+  let fbp = getFbcCookieHelper('_fbp');
+
+  // FBC Fallback 1: LocalStorage
+  if (!fbc && typeof window !== 'undefined' && window.localStorage) {
+      const backup = localStorage.getItem('_fbc_backup');
+      if (backup) {
+          // Check if backup is not too old (90 days)
+          const ts = localStorage.getItem('_fbc_timestamp');
+          const maxAge = 90 * 24 * 60 * 60 * 1000;
+          if (ts && (Date.now() - parseInt(ts)) < maxAge) {
+             fbc = backup;
+             // Try to revive cookie
+             setCookieHelper('_fbc', backup, 90);
+          }
+      }
+  }
+
+  // FBC Fallback 2: URL Direct
+  if (!fbc) {
+      const currentFbclid = getFbcClickIdFromUrl();
+      if (currentFbclid) {
+          fbc = formatFbcCookieValue(currentFbclid);
+          // Save it now that we found it
+          setFbcData(currentFbclid);
+      }
+  }
+
+  return { fbc, fbp };
 };
 
 export interface AdvancedMatchingData {
