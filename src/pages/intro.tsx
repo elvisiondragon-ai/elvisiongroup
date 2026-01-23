@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Brain, Target, Heart, TrendingUp, Users, Award, ChevronDown, Zap, Shield, Compass } from 'lucide-react';
 
 export default function IntroLanding() {
+  const navigate = useNavigate();
   const [scrollY, setScrollY] = useState(0);
   const [activeProof, setActiveProof] = useState(0);
 
@@ -100,7 +102,7 @@ export default function IntroLanding() {
               Start Your Transformation
             </button>
             <button 
-              onClick={() => window.location.href = 'https://display.elvisiongroup.com'}
+              onClick={() => navigate('/display')}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm rounded-lg font-bold text-lg hover:bg-white/20 transition-all border border-white/20"
             >
               Watch Proof →
@@ -432,7 +434,7 @@ export default function IntroLanding() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <button 
-              onClick={() => window.location.href = '/usa/usa_ebookhealth'}
+              onClick={() => navigate('/usa_ebookhealth')}
               className="px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl font-bold text-xl hover:scale-105 transition-transform shadow-2xl shadow-blue-500/50"
             >
               Begin Your Transformation

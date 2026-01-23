@@ -1,14 +1,16 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { ExternalLink, BookOpen, Users, Crown, Sparkles, ArrowRight, MessageCircle, Instagram } from "lucide-react";
 
 const DisplayPage = () => {
+  const navigate = useNavigate();
   const links = [
     {
       title: "Ebook Health",
-      url: "/usa/usa_ebookhealth",
+      url: "/usa_ebookhealth",
       icon: BookOpen,
       description: "Optimize your health with eL Vision",
       color: "from-emerald-500 to-teal-600",
@@ -89,7 +91,13 @@ const DisplayPage = () => {
               <Button
                 variant="ghost"
                 className="w-full h-auto p-0 rounded-none overflow-hidden"
-                onClick={() => window.open(link.url, "_blank")}
+                onClick={() => {
+                  if (link.url.startsWith('/')) {
+                    navigate(link.url);
+                  } else {
+                    window.open(link.url, "_blank");
+                  }
+                }}
               >
                 <div className="w-full flex items-center p-5 gap-4">
                   <div className={`p-4 rounded-2xl bg-gradient-to-br ${link.color} shadow-lg shadow-black/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>

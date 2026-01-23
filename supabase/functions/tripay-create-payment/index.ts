@@ -267,6 +267,7 @@ serve(async (req)=>{
     // --- 4. PRE-PAYMENT DATABASE INSERTION ---
     const supabase = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
     const ipAddress = req.headers.get('x-forwarded-for') ?? req.headers.get('remote-addr');
+    const userAgent = req.headers.get('user-agent');
     let dbRecordId = null;
 
     // Validate affiliateRef is a valid UUID if present (basic check)
@@ -286,7 +287,9 @@ serve(async (req)=>{
         user_id: userId,
         affiliate_id: validAffiliateId, // Save affiliate ID
         fbc: fbc || null,
-        fbp: fbp || null
+        fbp: fbp || null,
+        ip_address: ipAddress,
+        user_agent: userAgent
       }).select('id').single();
       if (error) throw new Error(`Database insert (global_product) failed: ${error.message}`);
       dbRecordId = data.id;
@@ -303,6 +306,7 @@ serve(async (req)=>{
         status: 'pending',
         tripay_reference: null,
         ip_address: ipAddress,
+        user_agent: userAgent,
         affiliate_id: validAffiliateId // Save affiliate ID
       }).select('id').single();
       if (error) throw new Error(`Database insert (waiting_payment) failed: ${error.message}`);

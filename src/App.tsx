@@ -14,27 +14,25 @@ import { Signup } from "./pages/Signup";
 import { ResetPassword } from "./pages/ResetPassword";
 import Index from "./pages/Index";
 
-import DietPage from "./pages/ebook_langsing";
+import DietPage from "./pages/ebook_indo/ebook_langsing";
 import SlimPage from "./pages/usa/usa_ebookslim";
-import SlimcoPaymentPage from "./pages/slimco";
-import LevelPasrahPage from "./pages/levelpasrah";
 
-import Page15jt from "./pages/vip_15jt";
+import Page15jt from "./pages/ebook_indo/vip_15jt";
 import ELVision3000 from "./pages/usa/usa_3000";
 import Pay3000 from "./pages/usa/usa_pay3000";
 import Survey3000 from "./pages/usa/usa_3000survey";
 import PaypalPaymentPage from "./pages/usa/usa_paypal"; // Import the new PaypalPaymentPage component
-import AffiliatePage from "./pages/affiliate"; // Import the new AffiliatePage component
-import ArifAffiliate from "./pages/arifaffiliate"; // Import the ArifAffiliate component
-import EbookElvisionPaymentPage from "./pages/ebook_elvision"; // Import the EbookElvisionPaymentPage component
+import AffiliatePage from "./pages/tools_pages/affiliate"; // Import the new AffiliatePage component
+import ArifAffiliate from "./pages/ebook_indo/arifaffiliate"; // Import the ArifAffiliate component
+import EbookElvisionPaymentPage from "./pages/ebook_indo/ebook_elvision"; // Import the EbookElvisionPaymentPage component
 import EbookHealthLP from "./pages/usa/usa_ebookhealth"; // Import the EbookHealthLP component
-import EbookPercayaDiriLP from "./pages/ebook_percayadiri"; // Import the EbookPercayaDiriLP component
-import EbookFeminineLanding from "./pages/ebook_feminine"; // Import the EbookFeminineLanding component
+import EbookPercayaDiriLP from "./pages/ebook_indo/ebook_percayadiri"; // Import the EbookPercayaDiriLP component
+import EbookFeminineLanding from "./pages/ebook_indo/ebook_feminine"; // Import the EbookFeminineLanding component
 import UsaEbookFeminine from "./pages/usa/usa_ebookfeminine"; // Import the UsaEbookFeminine component
-import UangPanasLanding from "./pages/uangpanas"; // Import the UangPanasLanding component
-import LeadMagnet from "./pages/LeadMagnet"; // Import the LeadMagnet component
+import UangPanasLanding from "./pages/ebook_indo/uangpanas"; // Import the UangPanasLanding component
+import LeadMagnet from "./pages/tools_pages/leadmagnet"; // Import the LeadMagnet component
 import PayPalFinish from "./pages/usa/usa_paypal_finish"; // Import the PayPalFinish component
-import FitFactorLP from "./pages/fitfactorlp";
+import FitFactorLP from "./pages/brands/fitfactorlp";
 import NotFound from "./pages/NotFound";
 import { Terms } from "./pages/Terms";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
@@ -43,12 +41,12 @@ import { DeleteAccount } from "./pages/DeleteAccount";
 import Formid from "./pages/Formid";
 
 import Pricing from "./pages/Pricing";
-import DrelfPaymentPage from "./pages/drelf"; // Import the new DrelfPaymentPage component
-import FitfactorPaymentPage from "./pages/fitfactor";
-import HungrylaterPaymentPage from "./pages/hungrylater";
-import ParfumPaymentPage from "./pages/elroyaleparfum";
+import DrelfPaymentPage from "./pages/brands/drelf"; // Import the new DrelfPaymentPage component
+import FitfactorPaymentPage from "./pages/brands/fitfactor";
+import HungrylaterPaymentPage from "./pages/brands/hungrylater";
+import ParfumPaymentPage from "./pages/brands/elroyaleparfum";
 import DevPaymentPage from "./pages/dev";
-import JewelryPaymentPage from "./pages/elroyaljewelry";
+import JewelryPaymentPage from "./pages/brands/elroyaljewelry";
 import { WhatIsPro } from "./components/whatispro";
 import { Payment } from "./pages/Payment";
 import ProUpgradePage from "./pages/prostatus";
@@ -56,15 +54,13 @@ import { AudioProvider } from "@/contexts/AudioContext";
 import UpdateBanner from "./updatebanner";
 import Intro from "./pages/intro";
 import DisplayPage from "./pages/display";
-import WatchlistPage from "./pages/watchlist";
-import ReportSales from "./pages/reportsales";
-import AbsenHidupPage from "./pages/absenhidup";
-import DrelfLpPage from "./pages/drelflp";
+import ReportSales from "./pages/tools_pages/reportsales";
+import DrelfLpPage from "./pages/brands/drelflp";
 import Testimony from "./pages/testimony"; // Import the new Testimony component
-import CreatorPage from "./pages/creator_api";
-import ResellerLanding from "./pages/reseller";
-import Pixels from "./pages/Pixels";
-import RisetPage from "./pages/riset";
+import CreatorPage from "./pages/tools_pages/creator_api";
+import ResellerLanding from "./pages/tools_pages/reseller";
+import Pixels from "./pages/tools_pages/pixels";
+import RisetPage from "./pages/tools_pages/riset";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";
@@ -183,56 +179,55 @@ const AppContent = () => {
               v7_relativeSplatPath: true
             }}>
               <Routes>
-                {/* Public routes - accessible without authentication */}
+                {/* Public & Main routes */}
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-
                 <Route path="/delete" element={<DeleteAccount />} />
                 <Route path="/formid" element={<Formid />} />
-
                 <Route path="/pricing" element={<Pricing />} />
-                <Route path="/drelf" element={<DrelfPaymentPage />} />
-                <Route path="/fitfactor" element={<FitfactorPaymentPage />} />
-                <Route path="/hungrylater" element={<HungrylaterPaymentPage />} />
-                <Route path="/elroyaleparfum" element={<ParfumPaymentPage />} />
-                <Route path="/dev" element={<DevPaymentPage />} />
-                <Route path="/elroyaljewelry" element={<JewelryPaymentPage />} />
                 <Route path="/whatispro" element={<WhatIsPro />} />
                 <Route path="/payment" element={<Payment />} />
                 <Route path="/prostatus" element={<ProUpgradePage />} />
-                <Route path="/usa_ebookslim" element={<SlimPage />} />
-                <Route path="/slim/co" element={<SlimcoPaymentPage />} />
-                <Route path="/ebook_langsing" element={<DietPage />} />
-                <Route path="/ebook_elvision" element={<EbookElvisionPaymentPage />} />
-                <Route path="/levelpasrah" element={<LevelPasrahPage />} />
-
-                <Route path="/vip_15jt" element={<Page15jt />} />
-                <Route path="/usa_3000" element={<ELVision3000 />} />
-                <Route path="/usa_pay3000" element={<Pay3000 />} />
-                <Route path="/usa/usa_3000survey" element={<Survey3000 />} />
-                <Route path="/usa/usa_paypal" element={<PaypalPaymentPage />} />
-                <Route path="/affiliate" element={<AffiliatePage />} />
-                <Route path="/arif9" element={<ArifAffiliate />} />
-                <Route path="/fitfactorlp" element={<FitFactorLP />} />
-                <Route path="/usa_ebookhealth" element={<EbookHealthLP />} />
-                <Route path="/ebook_percayadiri" element={<EbookPercayaDiriLP />} />
-                <Route path="/ebook_feminine" element={<EbookFeminineLanding />} />
-                <Route path="/usa_ebookfeminine" element={<UsaEbookFeminine />} />
-                <Route path="/uangpanas" element={<UangPanasLanding />} />
-                <Route path="/leadmagnet" element={<LeadMagnet />} />
-                <Route path="/usa/usa_paypal_finish" element={<PayPalFinish />} />
-
                 <Route path="/intro" element={<Intro />} />
                 <Route path="/display" element={<DisplayPage />} />
-                <Route path="/watchlist" element={<WatchlistPage />} />
-                <Route path="/reportsales" element={<ReportSales />} />
-                <Route path="/absenhidup" element={<AbsenHidupPage />} />
-                <Route path="/drelflp" element={<DrelfLpPage />} />
                 <Route path="/testimony" element={<Testimony />} />
+
+                {/* // SEction Tools_pages */}
+                <Route path="/affiliate" element={<AffiliatePage />} />
+                <Route path="/reportsales" element={<ReportSales />} />
                 <Route path="/creator_api" element={<CreatorPage />} />
                 <Route path="/reseller" element={<ResellerLanding />} />
                 <Route path="/pixels" element={<Pixels />} />
                 <Route path="/riset" element={<RisetPage />} />
+                <Route path="/leadmagnet" element={<LeadMagnet />} />
+
+                {/* // Section Brands */}
+                <Route path="/drelf" element={<DrelfPaymentPage />} />
+                <Route path="/fitfactor" element={<FitfactorPaymentPage />} />
+                <Route path="/hungrylater" element={<HungrylaterPaymentPage />} />
+                <Route path="/elroyaleparfum" element={<ParfumPaymentPage />} />
+                <Route path="/elroyaljewelry" element={<JewelryPaymentPage />} />
+                <Route path="/fitfactorlp" element={<FitFactorLP />} />
+                <Route path="/drelflp" element={<DrelfLpPage />} />
+
+                {/* // Section ebook_indo */}
+                <Route path="/ebook_langsing" element={<DietPage />} />
+                <Route path="/ebook_elvision" element={<EbookElvisionPaymentPage />} />
+                <Route path="/vip_15jt" element={<Page15jt />} />
+                <Route path="/arif9" element={<ArifAffiliate />} />
+                <Route path="/ebook_percayadiri" element={<EbookPercayaDiriLP />} />
+                <Route path="/ebook_feminine" element={<EbookFeminineLanding />} />
+                <Route path="/uangpanas" element={<UangPanasLanding />} />
+
+                {/* // Section USA */}
+                <Route path="/usa_ebookslim" element={<SlimPage />} />
+                <Route path="/usa_3000" element={<ELVision3000 />} />
+                <Route path="/usa_pay3000" element={<Pay3000 />} />
+                <Route path="/usa/usa_3000survey" element={<Survey3000 />} />
+                <Route path="/usa/usa_paypal" element={<PaypalPaymentPage />} />
+                <Route path="/usa_ebookhealth" element={<EbookHealthLP />} />
+                <Route path="/usa_ebookfeminine" element={<UsaEbookFeminine />} />
+                <Route path="/usa/usa_paypal_finish" element={<PayPalFinish />} />
                 
                 {/* Auth routes */}
                 <Route
