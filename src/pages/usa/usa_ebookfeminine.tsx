@@ -65,16 +65,72 @@ export default function USAEbookFeminineLanding() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('PAYPAL');
   const [loading, setLoading] = useState(false);
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const purchaseFiredRef = useRef(false);
+
+  // Helper to send CAPI events
+  const sendCapiEvent = async (eventName: string, eventData: any, eventId?: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const body: any = {
+        pixelId: '1393383179182528', // USA KAYA PIXEL
+        eventName,
+        customData: eventData,
+        eventId: eventId,
+        eventSourceUrl: window.location.href,
+      };
+
+      // Get FBC and FBP from cookies using the utility function
+      const { fbc, fbp } = getFbcFbpCookies();
+
+      const userData: any = {
+        client_user_agent: navigator.userAgent,
+      };
+
+      // Prioritize form input email/phone, then authenticated user email/phone
+      if (userEmail) {
+        userData.email = userEmail;
+      } else if (session?.user?.email) {
+        userData.email = session.user.email;
+      }
+      if (phoneNumber) {
+        userData.phone = phoneNumber;
+      } else if (session?.user?.user_metadata?.phone) {
+        userData.phone = session.user.user_metadata.phone;
+      }
+
+      // External ID from authenticated user (Supabase user ID)
+      if (session?.user?.id) {
+        userData.external_id = session.user.id;
+      } else if (user?.id) { // Fallback if session is not available but user from useAuth is
+        userData.external_id = user.id;
+      }
+
+      if (fbc) {
+        userData.fbc = fbc;
+      }
+      if (fbp) {
+        userData.fbp = fbp;
+      }
+      
+      body.userData = userData;
+
+      await supabase.functions.invoke('capi-universal', { body });
+    } catch (err) {
+      console.error('Failed to send CAPI event:', err);
+    }
+  };
 
   // Pixel Tracking
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const pixelId = '1393383179182528'; // USA KAYA PIXEL // Using pixel ID from usa_paypal.tsx or generic one
+      const pixelId = '1393383179182528'; // USA KAYA PIXEL
       
       initFacebookPixelWithLogging(pixelId);
       
       const pageEventId = `pageview-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       trackPageViewEvent({}, pageEventId, pixelId);
+      sendCapiEvent('PageView', {}, pageEventId);
 
       const viewContentEventId = `viewcontent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       trackViewContentEvent({
@@ -84,6 +140,14 @@ export default function USAEbookFeminineLanding() {
         value: productPrice,
         currency: 'USD'
       }, viewContentEventId, pixelId);
+      
+      sendCapiEvent('ViewContent', {
+        content_name: displayProductName,
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: productPrice,
+        currency: 'USD'
+      }, viewContentEventId);
     }
   }, []);
 
@@ -139,6 +203,13 @@ export default function USAEbookFeminineLanding() {
         value: totalAmount,
         currency: 'USD'
       }, addPaymentInfoEventId, pixelId, userData);
+      
+      sendCapiEvent('AddPaymentInfo', {
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: totalAmount,
+        currency: 'USD'
+      }, addPaymentInfoEventId);
 
       const { fbc, fbp } = getFbcFbpCookies();
 
@@ -167,6 +238,7 @@ export default function USAEbookFeminineLanding() {
       }
 
       if (data?.success && data?.checkoutUrl) {
+        setPaymentData(data);
         // Redirect to PayPal via the URL returned by the backend API
         window.location.href = data.checkoutUrl;
       } else {
@@ -188,6 +260,61 @@ export default function USAEbookFeminineLanding() {
       setLoading(false);
     }
   };
+
+  // Realtime Payment Listener
+  useEffect(() => {
+    if (!paymentData?.merchantRef) return;
+    
+    const channel = supabase
+      .channel(`payment-${paymentData.merchantRef}`)
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'global_product', 
+        filter: `merchant_ref=eq.${paymentData.merchantRef}`
+      }, (payload) => {
+        if (payload.new?.status === 'PAID') {
+          if (purchaseFiredRef.current) return;
+          purchaseFiredRef.current = true;
+
+          toast({
+              title: "SUCCESS! Access Sent.",
+              description: "Payment successful. Check your email for access to Audio & Ebook.",
+              duration: 5000, 
+              variant: "default"
+          });
+          
+          // Use PayPal Order ID or Merchant Ref for deduplication
+          const eventId = payload.new.tripay_reference || paymentData.merchantRef;
+
+          // Prepare User Data for Advanced Matching
+          const pixelId = '1393383179182528';
+          const userData: AdvancedMatchingData = {
+            em: userEmail,
+            fn: userName,
+            external_id: user?.id
+          };
+          
+          // Track Purchase with Advanced Matching and Deduplication
+          trackPurchaseEvent({
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'USD'
+          }, eventId, pixelId, userData);
+          
+          // Send CAPI Purchase
+          sendCapiEvent('Purchase', {
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'USD'
+          }, eventId);
+        }
+      }).subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [paymentData, userEmail, userName, user]);
 
   return (
     <div className="min-h-screen bg-rose-50/30 font-sans text-slate-800">

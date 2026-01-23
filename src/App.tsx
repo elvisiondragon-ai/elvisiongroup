@@ -201,7 +201,7 @@ const AppContent = () => {
                 <Route path="/whatispro" element={<WhatIsPro />} />
                 <Route path="/payment" element={<Payment />} />
                 <Route path="/prostatus" element={<ProUpgradePage />} />
-                <Route path="/usa/usa_ebookslim" element={<SlimPage />} />
+                <Route path="/usa_ebookslim" element={<SlimPage />} />
                 <Route path="/slim/co" element={<SlimcoPaymentPage />} />
                 <Route path="/ebook_langsing" element={<DietPage />} />
                 <Route path="/ebook_elvision" element={<EbookElvisionPaymentPage />} />
@@ -215,7 +215,7 @@ const AppContent = () => {
                 <Route path="/affiliate" element={<AffiliatePage />} />
                 <Route path="/arif9" element={<ArifAffiliate />} />
                 <Route path="/fitfactorlp" element={<FitFactorLP />} />
-                <Route path="/usa/usa_ebookhealth" element={<EbookHealthLP />} />
+                <Route path="/usa_ebookhealth" element={<EbookHealthLP />} />
                 <Route path="/ebook_percayadiri" element={<EbookPercayaDiriLP />} />
                 <Route path="/ebook_feminine" element={<EbookFeminineLanding />} />
                 <Route path="/usa_ebookfeminine" element={<UsaEbookFeminine />} />

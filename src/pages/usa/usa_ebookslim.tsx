@@ -154,6 +154,65 @@ const SlimPage = () => {
   const [showPaymentInstructions, setShowPaymentInstructions] = useState(false);
   const purchaseFiredRef = useRef(false);
 
+  // Helper to send CAPI events
+  const sendCapiEvent = async (eventName: string, eventData: any, eventId?: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const body: any = {
+        pixelId: PIXEL_ID,
+        eventName,
+        customData: eventData,
+        eventId: eventId,
+        eventSourceUrl: window.location.href,
+      };
+
+      const { fbc, fbp } = getFbcFbpCookies();
+      const userData: any = { client_user_agent: navigator.userAgent };
+
+      if (userEmail) userData.email = userEmail;
+      else if (session?.user?.email) userData.email = session.user.email;
+
+      if (session?.user?.id) userData.external_id = session.user.id;
+      else if (user?.id) userData.external_id = user.id;
+
+      if (fbc) userData.fbc = fbc;
+      if (fbp) userData.fbp = fbp;
+      
+      body.userData = userData;
+      await supabase.functions.invoke('capi-universal', { body });
+    } catch (err) {
+      console.error('Failed to send CAPI event:', err);
+    }
+  };
+
+  // Pixel Tracking
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      initFacebookPixelWithLogging(PIXEL_ID);
+      
+      const pageEventId = `pageview-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      trackPageViewEvent({}, pageEventId, PIXEL_ID);
+      sendCapiEvent('PageView', {}, pageEventId);
+
+      const viewContentEventId = `viewcontent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      trackViewContentEvent({
+        content_name: displayProductName,
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: productPrice,
+        currency: 'USD'
+      }, viewContentEventId, PIXEL_ID);
+      
+      sendCapiEvent('ViewContent', {
+        content_name: displayProductName,
+        content_ids: [productNameBackend],
+        content_type: 'product',
+        value: productPrice,
+        currency: 'USD'
+      }, viewContentEventId);
+    }
+  }, []);
+
   const paymentMethods = [
     { code: 'PAYPAL', name: 'PayPal', description: 'Pay securely with PayPal' },
   ];
@@ -182,15 +241,6 @@ const SlimPage = () => {
     }
   };
 
-  const sendCapiEvent = async (eventName: string, eventData: any, overrideEventId?: string) => {
-    try {
-      // Re-using the global sendCAPIEvent, which already has pixelId
-      await sendCAPIEvent(eventName, { email: userEmail, phone: phoneNumber }, eventData, overrideEventId);
-    } catch (err) {
-      console.error('Failed to send CAPI event:', err);
-    }
-  };
-
   const handleCreatePayment = async () => {
     if (!userEmail || !userEmail.includes('@')) {
       toast({
@@ -206,26 +256,19 @@ const SlimPage = () => {
 
     setLoading(true);
     try {
-      const eventId = crypto.randomUUID();
-      const userData = { em: userEmail };
+      const addPaymentInfoEventId = `addpaymentinfo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const userData = { em: userEmail, external_id: currentUserId };
 
       const eventData = {
-        content_name: displayProductName,
+        content_ids: [productNameBackend],
+        content_type: 'product',
         value: totalAmount,
         currency: 'USD'
       };
 
-      // 1. Track AddToCart
-      trackAddToCartEvent(eventData, eventId, PIXEL_ID);
-      sendCapiEvent('AddToCart', eventData);
-
-      // 2. Track AddPaymentInfo
-      trackAddPaymentInfoEvent(eventData, eventId, PIXEL_ID, userData);
-      sendCapiEvent('AddPaymentInfo', eventData);
-
-      // 3. Track InitiateCheckout
-      trackCustomEvent('InitiateCheckout', eventData, eventId, PIXEL_ID, userData);
-      sendCapiEvent('InitiateCheckout', eventData);
+      // Track AddPaymentInfo
+      trackAddPaymentInfoEvent(eventData, addPaymentInfoEventId, PIXEL_ID, userData);
+      sendCapiEvent('AddPaymentInfo', eventData, addPaymentInfoEventId);
 
       const { fbc, fbp } = getFbcFbpCookies();
 
@@ -236,7 +279,7 @@ const SlimPage = () => {
           paymentMethod: selectedPaymentMethod, 
           userName: derivedUserName,
           userEmail: userEmail,
-          phoneNumber: '0000000000', // Placeholder as it might be required by backend
+          phoneNumber: '0000000000', // Placeholder
           quantity: totalQuantity,
           productName: displayProductName,
           userId: currentUserId,
@@ -252,11 +295,11 @@ const SlimPage = () => {
           description: data?.error || error?.message || "System error occurred.",
           variant: "destructive",
         });
-        setLoading(false);
         return;
       }
 
       if (data?.success && data?.checkoutUrl) {
+        setPaymentData(data);
         // For PayPal, we expect a redirect URL
         window.location.href = data.checkoutUrl;
       } else {
@@ -278,9 +321,50 @@ const SlimPage = () => {
     }
   };
 
-  // Removed Realtime Payment Listener as it's not applicable for PayPal redirect flow
-  // (User will be redirected to PayPal, and upon completion, redirected back, where
-  // a success page or webhook will handle the final status update).
+  // Realtime Payment Listener
+  useEffect(() => {
+    if (!paymentData?.merchantRef) return;
+    
+    const channel = supabase
+      .channel(`payment-${paymentData.merchantRef}`)
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'global_product', 
+        filter: `merchant_ref=eq.${paymentData.merchantRef}`
+      }, (payload) => {
+        if (payload.new?.status === 'PAID') {
+          if (purchaseFiredRef.current) return;
+          purchaseFiredRef.current = true;
+
+          toast({
+              title: "SUCCESS! Access Sent.",
+              description: "Payment successful. Check your email for access to your Ebook.",
+              duration: 5000, 
+              variant: "default"
+          });
+          
+          const eventId = payload.new.tripay_reference || paymentData.merchantRef;
+          const userData: AdvancedMatchingData = { em: userEmail, external_id: user?.id };
+          
+          trackPurchaseEvent({
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'USD'
+          }, eventId, PIXEL_ID, userData);
+          
+          sendCapiEvent('Purchase', {
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'USD'
+          }, eventId);
+        }
+      }).subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [paymentData, userEmail, user]);
 
   // Hero component logic
   // const scrollToPricing = () => {

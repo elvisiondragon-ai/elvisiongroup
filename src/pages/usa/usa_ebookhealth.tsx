@@ -6,6 +6,8 @@ import { getFbcFbpCookies } from "@/utils/fbpixel";
 const EbookHealthLP = () => {
   const [loading, setLoading] = React.useState(false);
   const [email, setEmail] = React.useState("");
+  const [paymentData, setPaymentData] = React.useState<any>(null);
+  const purchaseFiredRef = React.useRef(false);
 
   // CAPI Configuration
   const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
@@ -29,7 +31,8 @@ const EbookHealthLP = () => {
             client_user_agent: navigator.userAgent
           },
           customData,
-          eventId
+          eventId,
+          eventSourceUrl: window.location.href
         }),
       });
     } catch (e) {
@@ -49,9 +52,9 @@ const EbookHealthLP = () => {
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     
-    const eventId = crypto.randomUUID();
+    const eventId = `pageview-${Date.now()}`;
     // @ts-ignore
-    fbq('init', '1393383179182528');
+    fbq('init', PIXEL_ID);
     // @ts-ignore
     fbq('track', 'PageView', {}, { eventID: eventId });
 
@@ -63,6 +66,7 @@ const EbookHealthLP = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
       element.focus();
+      const eventId = `addtocart-${Date.now()}`;
       // @ts-ignore
       if (typeof fbq === 'function') {
         // @ts-ignore
@@ -70,14 +74,19 @@ const EbookHealthLP = () => {
           content_name: 'Ebook Health Recovery Protocol',
           value: 20.00,
           currency: 'USD'
-        });
+        }, { eventID: eventId });
       }
+      sendCAPIEvent('AddToCart', {}, {
+        content_name: 'Ebook Health Recovery Protocol',
+        value: 20.00,
+        currency: 'USD'
+      }, eventId);
     }
   };
 
   const handlePurchase = async () => {
     if (!email || !email.includes('@')) {
-      alert("Please enter a valid email address first to receive your files.");
+      alert("Please enter a valid email address first to proceed.");
       const emailInput = document.getElementById('email-input');
       if (emailInput) emailInput.focus();
       return;
@@ -88,35 +97,29 @@ const EbookHealthLP = () => {
       const btn = document.getElementById('buy-btn');
       if(btn) btn.innerText = "Processing...";
 
-      const eventId = crypto.randomUUID();
-      // Track InitiateCheckout on Facebook
-      // @ts-ignore
-      if (typeof fbq === 'function') {
-        // @ts-ignore
-        fbq('track', 'InitiateCheckout', {
-          content_name: 'Ebook Health Recovery Protocol',
-          value: 20.00,
-          currency: 'USD'
-        }, { eventID: eventId });
-      }
-
-      sendCAPIEvent('InitiateCheckout', {
-        email: email
-      }, {
+      const eventId = `checkout-${Date.now()}`;
+      const eventData = {
         content_name: 'Ebook Health Recovery Protocol',
         value: 20.00,
         currency: 'USD'
-      }, eventId);
+      };
+
+      // @ts-ignore
+      if (typeof fbq === 'function') {
+        // @ts-ignore
+        fbq('track', 'InitiateCheckout', eventData, { eventID: eventId });
+      }
+
+      sendCAPIEvent('InitiateCheckout', { email }, eventData, eventId);
 
       const { fbc, fbp } = getFbcFbpCookies();
 
-      // 1. Create Order using Supabase Client (Handles Auth automatically)
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: "ebookhealthlp",
           paymentMethod: "PAYPAL",
-          userEmail: email, // Use the user's input email
-          userName: email.split('@')[0], // Default name from email
+          userEmail: email,
+          userName: email.split('@')[0],
           quantity: 1,
           fbc,
           fbp
@@ -126,7 +129,7 @@ const EbookHealthLP = () => {
       if (error) throw new Error(error.message || "Connection failed");
       if (!data || !data.success) throw new Error("Failed to init payment");
 
-      // 2. Redirect to PayPal using the URL provided by the server
+      setPaymentData(data);
       window.location.href = data.checkoutUrl;
 
     } catch (err) {
@@ -136,6 +139,43 @@ const EbookHealthLP = () => {
       if(btn) btn.innerText = "Download The Cure Now - $20";
     }
   };
+
+  // Realtime Payment Listener
+  useEffect(() => {
+    if (!paymentData?.merchantRef) return;
+    
+    const channel = supabase
+      .channel(`payment-health-${paymentData.merchantRef}`)
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'global_product', 
+        filter: `merchant_ref=eq.${paymentData.merchantRef}`
+      }, (payload) => {
+        if (payload.new?.status === 'PAID') {
+          if (purchaseFiredRef.current) return;
+          purchaseFiredRef.current = true;
+
+          const eventId = payload.new.tripay_reference || paymentData.merchantRef;
+          const eventData = {
+            content_name: 'Ebook Health Recovery Protocol',
+            value: 20.00,
+            currency: 'USD'
+          };
+
+          // Track Purchase
+          // @ts-ignore
+          if (typeof fbq === 'function') {
+            // @ts-ignore
+            fbq('track', 'Purchase', eventData, { eventID: eventId });
+          }
+          
+          sendCAPIEvent('Purchase', { email }, eventData, eventId);
+        }
+      }).subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [paymentData, email]);
 
   const handleWhatsapp = () => {
     window.location.href = "https://wa.me/62895325633487?text=hi%20i%20have%20paid%20the%20ebook%20for%20recovery%20audio";

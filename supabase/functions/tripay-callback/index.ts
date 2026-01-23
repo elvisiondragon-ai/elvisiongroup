@@ -232,8 +232,8 @@ serve(async (req)=>{
         let capiValue = 0;
         let capiCurrency = 'IDR';
 
-        const isEbookHealth = pName.includes('Health Recovery') || pName.includes('ebook_health20');
-        const isCoaching3000 = pName.includes('3000 Coaching');
+        const isEbookHealth = pName.includes('Health Recovery') || pName.includes('ebook_health20') || pName.includes('usa_ebookslim') || pName.includes('Slim Without Suffering');
+        const isCoaching3000 = pName.includes('3000 Coaching') || pName.includes('usa_3000');
         const isVIP6Week = pName.includes('VIP SESSION 6 Week') || pName.includes('VIP6WEEK');
         const isEbookPercayaDiri = pName.includes('ebook_percayadiri') || pName.includes('Ebook Percaya Diri') || pName.includes('Ebook Pria Alpha') || pName.includes('Paket Pria Alpha');
         const isEbookFeminine = pName.includes('ebook_feminine') || pName.includes('Feminine Magnetism');
@@ -242,8 +242,8 @@ serve(async (req)=>{
 
         console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}`);
 
-        if (isEbookHealth || isCoaching3000 || isVIP6Week) {
-            capiPixelId = '1393383179182528'; // Manifestation Pixel
+        if (isEbookHealth || isCoaching3000 || isVIP6Week || pName.includes('usa_ebookfeminine')) {
+            capiPixelId = '1393383179182528'; // Manifestation Pixel (USA)
             if (isCoaching3000) capiValue = 3000.00;
             else if (isVIP6Week) capiValue = 1500.00;
             else capiValue = 20.00;

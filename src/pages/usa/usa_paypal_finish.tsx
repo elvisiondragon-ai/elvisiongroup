@@ -12,10 +12,40 @@ const PayPalFinish = () => {
   const [message, setMessage] = useState("Finalizing your secure payment...");
   const PIXEL_ID = '1393383179182528';
 
+  // Helper to send CAPI events
+  const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
+    try {
+      const { fbc, fbp } = getFbcFbpCookies();
+      const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
+
+      await fetch(CAPI_EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pixelId: PIXEL_ID,
+          eventName,
+          userData: {
+            ...userData,
+            fbp,
+            fbc,
+            client_user_agent: navigator.userAgent
+          },
+          customData,
+          eventId,
+          eventSourceUrl: window.location.href
+        }),
+      });
+    } catch (e) {
+      console.error('CAPI Error:', e);
+    }
+  };
+
   // Facebook Pixel Init
   useEffect(() => {
     initFacebookPixelWithLogging(PIXEL_ID);
-    trackPageViewEvent({}, undefined, PIXEL_ID);
+    const eventId = `pageview-${Date.now()}`;
+    trackPageViewEvent({}, eventId, PIXEL_ID);
+    sendCAPIEvent('PageView', {}, {}, eventId);
   }, []);
 
   useEffect(() => {
@@ -54,12 +84,22 @@ const PayPalFinish = () => {
              setMessage("Payment successful! Please check your Email Inbox (and Spam/Important folder). Your Ebook & Audio download links have been sent.");
         }
 
-        // Track Purchase Event
+        // Track Purchase Event (Browser)
         trackPurchaseEvent({
             value: amount,
             currency: 'USD',
             content_name: productName
         }, token, PIXEL_ID);
+
+        // Track Purchase Event (CAPI)
+        sendCAPIEvent('Purchase', {
+            email: data.email || undefined,
+            external_id: data.user_id || undefined
+        }, {
+            value: amount,
+            currency: 'USD',
+            content_name: productName
+        }, token);
 
       } catch (err: any) {
         console.error("Capture Error:", err);
