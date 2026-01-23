@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Star, CheckCircle, TrendingUp, Heart, Crown, DollarSign, Phone, ArrowRight, Sparkles, Shield, Check, Play, Pause, ExternalLink } from 'lucide-react';
 import { 
   initFacebookPixelWithLogging, 
@@ -9,6 +10,7 @@ import {
 } from '@/utils/fbpixel';
 
 export default function ELVision3000() {
+  const navigate = useNavigate();
   // CAPI Configuration
   const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
   const PIXEL_ID = '1393383179182528';
@@ -101,13 +103,6 @@ export default function ELVision3000() {
       type: "image",
       imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/vio2.jpg",
       thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/vio2.jpg"
-    },
-    {
-      name: "Arif",
-      title: "eL Vision Client",
-      type: "image",
-      imageUrl: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.jpg",
-      thumbnail: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.jpg"
     },
     {
       name: "Jacob",
@@ -427,6 +422,31 @@ export default function ELVision3000() {
             <div className="text-sm text-gray-400">1 Session per Week</div>
           </div>
 
+          <button 
+            className="group bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold text-2xl px-16 py-6 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-green-500/30 flex items-center gap-4 mx-auto mb-12"
+            onClick={async () => {
+              const eventId = crypto.randomUUID();
+              
+              await trackAddToCartEvent({
+                content_name: 'EL Vision 3000 Coaching',
+                value: 3000,
+                currency: 'USD'
+              }, eventId, PIXEL_ID);
+              
+              await sendCAPIEvent('AddToCart', {}, {
+                  content_name: 'EL Vision 3000 Coaching',
+                  value: 3000,
+                  currency: 'USD'
+              }, eventId);
+
+              window.location.href = 'https://app.elvisiongroup.com/usa_pay3000';
+            }}
+          >
+            <Crown className="w-8 h-8" />
+            PAY NOW ($3,000)
+            <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+          </button>
+
           {/* Money Back Guarantee Box */}
           <div className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-500/30 rounded-2xl p-6 max-w-2xl mx-auto backdrop-blur-sm mb-8">
             <div className="flex items-center gap-4">
@@ -437,31 +457,6 @@ export default function ELVision3000() {
               </div>
             </div>
           </div>
-
-          <button 
-                        className="group bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center gap-4 mx-auto mb-8"
-                        onClick={() => {
-                          const eventId = crypto.randomUUID();
-                          
-                          trackAddToCartEvent({
-                            content_name: 'EL Vision 3000 Coaching',
-                            value: 3000,
-                            currency: 'USD'
-                          }, eventId, PIXEL_ID);
-                          
-                          // Send Server-Side Event
-                          sendCAPIEvent('AddToCart', {}, {
-                              content_name: 'EL Vision 3000 Coaching',
-                              value: 3000,
-                              currency: 'USD'
-                          }, eventId);
-            
-                          window.location.href = '/usa_pay3000';
-                        }}
-                      >            <Phone className="w-8 h-8" />
-            BOOK A CALL NOW
-            <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
-          </button>
         </div>
       </div>
 
@@ -1305,17 +1300,43 @@ export default function ELVision3000() {
               </span>
             </h2>
 
-            <div className="mb-12">
-              <video 
-                className="w-full max-w-[320px] mx-auto rounded-lg shadow-2xl border border-yellow-500/30"
-                controls
-                preload="metadata"
-                playsInline
-                poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/usa_arif1.jpg"
-              >
-                <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/usa_methods.mp4" type="video/mp4" />
-                Your browser does not support video playback.
-              </video>
+            {/* Video Container - Dedicated Grid */}
+            <div className="w-full grid md:grid-cols-2 gap-12 mb-16 items-start">
+              {/* Video 1: Explaining the Method */}
+              <div className="flex flex-col items-center">
+                <div className="mb-4 text-center">
+                  <h3 className="text-2xl font-bold text-yellow-400">The eL Vision Method</h3>
+                  <p className="text-gray-400 text-sm">Explaining the System Alignment</p>
+                </div>
+                <video 
+                  className="w-full max-w-[320px] rounded-lg shadow-2xl border border-yellow-500/30"
+                  controls
+                  preload="metadata"
+                  playsInline
+                  poster="https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif2.jpg"
+                >
+                  <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/usa_methods.mp4" type="video/mp4" />
+                  Your browser does not support video playback.
+                </video>
+              </div>
+
+              {/* Video 2: Client Interview */}
+              <div className="flex flex-col items-center">
+                <div className="mb-4 text-center">
+                  <h3 className="text-2xl font-bold text-yellow-400">Deep Transformation</h3>
+                  <p className="text-gray-400 text-sm">Client Interview & Result Proof</p>
+                </div>
+                <video 
+                  className="w-full max-w-[320px] rounded-lg shadow-2xl border border-yellow-500/30"
+                  controls
+                  preload="metadata"
+                  playsInline
+                  poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/arif_interview_en.jpg"
+                >
+                  <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/arif_interview_en.mp4" type="video/mp4" />
+                  Your browser does not support video playback.
+                </video>
+              </div>
             </div>
 
             <div className="max-w-4xl mx-auto space-y-6 text-gray-300 leading-relaxed text-lg">
@@ -1525,29 +1546,28 @@ export default function ELVision3000() {
             </div>
 
             <button 
-                          className="group bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center gap-4 mx-auto mb-8"
-                          onClick={() => {
-                            const eventId = crypto.randomUUID();
-                            // @ts-ignore
-                            if (typeof fbq === 'function') {
-                              // @ts-ignore
-                              fbq('track', 'AddToCart', {
-                                content_name: 'EL Vision 3000 Coaching',
-                                value: 3000,
-                                currency: 'USD'
-                              }, { eventID: eventId });
-                            }
-                            // Send Server-Side Event
-                            sendCAPIEvent('AddToCart', {}, {
-                                content_name: 'EL Vision 3000 Coaching',
-                                value: 3000,
-                                currency: 'USD'
-                            }, eventId);
-              
-                            window.location.href = '/usa_pay3000';
-                          }}
-                        >              <Phone className="w-8 h-8" />
-              BOOK A CALL NOW
+              className="group bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-green-500/30 flex items-center gap-4 mx-auto mb-8"
+              onClick={async () => {
+                const eventId = crypto.randomUUID();
+                
+                await trackAddToCartEvent({
+                  content_name: 'EL Vision 3000 Coaching',
+                  value: 3000,
+                  currency: 'USD'
+                }, eventId, PIXEL_ID);
+                
+                // Send Server-Side Event
+                await sendCAPIEvent('AddToCart', {}, {
+                    content_name: 'EL Vision 3000 Coaching',
+                    value: 3000,
+                    currency: 'USD'
+                }, eventId);
+  
+                window.location.href = 'https://app.elvisiongroup.com/usa_pay3000';
+              }}
+            >
+              <Crown className="w-8 h-8" />
+              PAY NOW ($3,000)
               <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
             </button>
 
