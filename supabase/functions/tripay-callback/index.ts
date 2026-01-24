@@ -285,14 +285,20 @@ serve(async (req)=>{
         // We check capi_purchase_sent to ensure we only send ONCE (Winner-Takes-All between Frontend and Backend)
         if (capiPixelId && !globalProductTx.capi_purchase_sent) {
              try {
-                console.log(`   - 🎯 Sending CAPI Purchase event via capi-universal to Pixel ${capiPixelId}...`);
+                // TEST MODE CHECK
+                const isTestUser = globalProductTx.email === 'elvisiondragon@gmail.com';
+                const eventName = isTestUser ? 'Test_Purchase' : 'Purchase';
+                if (isTestUser) console.log('   - 🧪 TEST MODE: Sending Test_Purchase event');
+
+                console.log(`   - 🎯 Sending CAPI ${eventName} event via capi-universal to Pixel ${capiPixelId}...`);
                 await supabase.functions.invoke('capi-universal', {
                   body: {
                     pixelId: capiPixelId,
-                    eventName: 'Purchase',
+                    eventName: eventName,
                     userData: {
                       email: globalProductTx.email,
                       ph: globalProductTx.phone,
+                      fn: globalProductTx.name ? globalProductTx.name.split(' ')[0] : undefined, // Added FN
                       fbc: globalProductTx.fbc,
                       fbp: globalProductTx.fbp,
                       client_ip_address: globalProductTx.ip_address || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),

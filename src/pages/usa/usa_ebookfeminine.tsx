@@ -92,7 +92,7 @@ export default function USAEbookFeminineLanding() {
         client_user_agent: navigator.userAgent,
       };
 
-      // Prioritize form input email/phone, then authenticated user email/phone
+      // Prioritize form input email/phone/name, then authenticated user email/phone/name
       if (userEmail) {
         userData.email = userEmail;
       } else if (session?.user?.email) {
@@ -102,6 +102,11 @@ export default function USAEbookFeminineLanding() {
         userData.phone = phoneNumber;
       } else if (session?.user?.user_metadata?.phone) {
         userData.phone = session.user.user_metadata.phone;
+      }
+      if (userName) {
+        userData.fn = userName;
+      } else if (session?.user?.user_metadata?.full_name) {
+        userData.fn = session.user.user_metadata.full_name;
       }
 
       // External ID from authenticated user (Supabase user ID)

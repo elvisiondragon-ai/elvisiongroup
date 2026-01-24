@@ -69,6 +69,7 @@ const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: 
         eventName,
         userData: {
           ...userData,
+          fn: userData.fn || userData.email?.split('@')[0], // Ensure fn is sent
           fbp,
           fbc,
           client_ip_address: null, // Edge function will extract

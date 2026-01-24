@@ -151,8 +151,13 @@ const SlimPage = () => {
       const { fbc, fbp } = getFbcFbpCookies();
       const userData: any = { client_user_agent: navigator.userAgent };
 
-      if (userEmail) userData.email = userEmail;
-      else if (session?.user?.email) userData.email = session.user.email;
+      if (userEmail) {
+        userData.email = userEmail;
+        userData.fn = userEmail.split('@')[0]; // Derived name from email
+      } else if (session?.user?.email) {
+        userData.email = session.user.email;
+        userData.fn = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+      }
 
       if (session?.user?.id) userData.external_id = session.user.id;
       else if (user?.id) userData.external_id = user.id;

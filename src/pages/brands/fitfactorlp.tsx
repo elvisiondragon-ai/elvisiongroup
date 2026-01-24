@@ -62,6 +62,7 @@ const FitFactorLP = () => {
           eventName,
           userData: {
             ...userData,
+            fn: userData.fn || userData.email?.split('@')[0], // Ensure fn is sent
             fbp,
             fbc,
             client_user_agent: navigator.userAgent,

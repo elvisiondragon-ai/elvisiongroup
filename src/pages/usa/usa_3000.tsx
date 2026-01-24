@@ -32,6 +32,7 @@ export default function ELVision3000() {
           eventName,
           userData: {
              ...userData,
+             fn: userData.email ? userData.email.split('@')[0] : undefined,
              fbp,
              fbc,
              client_user_agent: navigator.userAgent

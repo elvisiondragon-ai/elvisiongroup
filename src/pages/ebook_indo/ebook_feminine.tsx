@@ -22,6 +22,7 @@ import {
   trackViewContentEvent, 
   trackAddPaymentInfoEvent, 
   trackPurchaseEvent,
+  trackCustomEvent,
   AdvancedMatchingData,
   getFbcFbpCookies,
   waitForFbp
@@ -364,23 +365,38 @@ export default function EbookFeminineLanding() {
             external_id: user?.id
           };
           
-          // Track Purchase with Advanced Matching and Deduplication
-          trackPurchaseEvent({
-            content_ids: [productNameBackend],
-            content_type: 'product',
-            value: totalAmount,
-            currency: 'IDR'
-          }, eventId, pixelId, userData);
+          // TEST MODE CHECK
+          const isTestUser = userEmail === 'elvisiondragon@gmail.com';
+          const finalEventName = isTestUser ? 'Test_Purchase' : 'Purchase';
+
+          if (isTestUser) {
+              console.log('🧪 TEST MODE DETECTED: Firing Test_Purchase instead of Purchase');
+              // Track Custom Event for Test
+              trackCustomEvent(finalEventName, {
+                content_ids: [productNameBackend],
+                content_type: 'product',
+                value: totalAmount,
+                currency: 'IDR'
+              }, eventId, pixelId, userData);
+          } else {
+              // Track Standard Purchase
+              trackPurchaseEvent({
+                content_ids: [productNameBackend],
+                content_type: 'product',
+                value: totalAmount,
+                currency: 'IDR'
+              }, eventId, pixelId, userData);
+          }
 
           // FIRST-WIN DEDUPLICATION CHECK
           // If Backend already sent CAPI (capi_purchase_sent = true), Frontend skips it.
           const isBackendCapiSent = payload.new?.capi_purchase_sent === true;
           
           if (isBackendCapiSent) {
-             console.log(`⏭️ CAPI Purchase Skipped (Backend already sent)`);
+             console.log(`⏭️ CAPI ${finalEventName} Skipped (Backend already sent)`);
           } else {
-             // Send CAPI Purchase (Frontend wins)
-             sendCapiEvent('Purchase', {
+             // Send CAPI (Frontend wins)
+             sendCapiEvent(finalEventName, {
                content_ids: [productNameBackend],
                content_type: 'product',
                value: totalAmount,
