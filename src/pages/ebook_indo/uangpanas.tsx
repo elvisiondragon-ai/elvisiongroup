@@ -370,8 +370,8 @@ export default function UangPanasLanding() {
           password: password,
           options: {
             data: {
-              full_name: userName,
-              phone: phoneNumber,
+              display_name: userName,
+              phone_number: phoneNumber,
             },
           },
         });
