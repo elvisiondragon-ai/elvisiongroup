@@ -17,20 +17,6 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
-  // First, clone the request so we can read the body twice
-  const reqClone = req.clone();
-  
-  // Log the raw body for debugging
-  try {
-    const rawBody = await reqClone.text();
-    console.log('--- CAPI-UNIVERSAL Raw Request Body ---');
-    console.log(rawBody);
-  } catch (e) {
-    console.error('Error reading raw request body:', e);
-  }
-
-  console.log('--- CAPI-UNIVERSAL Edge Function Start ---');
-  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -43,10 +29,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Debugging: Log before parsing request body
-  console.log('CAPI-UNIVERSAL: Attempting to parse request body...');
   const body = await req.json();
-  console.log('CAPI-UNIVERSAL: Request body parsed successfully.');
   
   // --- Configuration ---
   const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl } = body;
@@ -60,8 +43,6 @@ Deno.serve(async (req) => {
   // Determine which secret to use
   const secretName = PIXEL_CONFIG[pixelId] || 'METACAPI';
   let FACEBOOK_ACCESS_TOKEN = Deno.env.get(secretName);
-
-  console.log(`🔑 Using Secret: ${secretName} for Pixel: ${pixelId}`);
 
   // Initialize Supabase Client for Logging
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -77,8 +58,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Incoming Universal Event:', { pixelId, eventName, email: userData?.email, eventId });
-
     // Prepare DB Log Object
     const dbLog: any = {
         pixel_id: pixelId,
@@ -178,8 +157,7 @@ Deno.serve(async (req) => {
     }
 
     const facebookApiUrl = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
-    console.log(`🚀 Sending event '${eventName}' to Pixel ID: ${pixelId} using ${secretName}`);
-
+    
     const response = await fetch(facebookApiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -200,14 +178,16 @@ Deno.serve(async (req) => {
     }
 
     if (!response.ok) {
-      console.error('Meta CAPI Error:', result);
+      // FAILURE LOG
+      console.log(`❌ CAPI Failed | Event: ${eventName} | Pixel: ${pixelId} | Error: ${JSON.stringify(result)}`);
       return new Response(JSON.stringify({ error: 'Failed to send event to Facebook CAPI', details: result }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log(`✅ Meta CAPI Success for '${eventName}'`);
+    // SUCCESS LOG (One single line)
+    console.log(`✅ CAPI Success | Event: ${eventName} | Pixel: ${pixelId} | ID: ${eventId || 'N/A'}`);
     return new Response(JSON.stringify({ message: `Event '${eventName}' sent successfully`, result }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

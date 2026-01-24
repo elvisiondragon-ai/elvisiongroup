@@ -1,3 +1,16 @@
+// 🌐 IP Address Helper - Fetch client IP (IPv6 preferred)
+export const getClientIp = async (): Promise<string | null> => {
+  try {
+    const response = await fetch('https://api64.ipify.org?format=json');
+    if (!response.ok) throw new Error('IP fetch failed');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.warn('Failed to fetch client IP:', error);
+    return null;
+  }
+};
+
 // 🎯 Facebook Pixel FBC/FBP Enhanced Tracking System
 
 // ⏳ Wait for FBP Cookie Helper

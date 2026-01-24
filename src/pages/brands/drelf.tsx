@@ -17,7 +17,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePro } from '@/hooks/usePro';
-import { getFbcFbpCookies } from '@/utils/fbpixel';
+import { getFbcFbpCookies, getClientIp } from '@/utils/fbpixel';
 
 
 const WhatsAppButton = () => (
@@ -218,6 +218,7 @@ export default function DrelfPaymentPage() {
 
     setLoading(true);
     const { fbc, fbp } = getFbcFbpCookies();
+    const clientIp = await getClientIp();
 
     // Override Affiliate if Promo is Applied
     const finalAffiliateRef = isPromoApplied ? null : affiliateRef;
@@ -241,7 +242,8 @@ export default function DrelfPaymentPage() {
           userId: user?.id,
           affiliateRef: finalAffiliateRef, // Pass null if promo active
           fbc,
-          fbp
+          fbp,
+          clientIp // Pass IPv6/IPv4 address
         }
       });
 

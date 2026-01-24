@@ -112,10 +112,7 @@ export default function Pixels() {
   return (
     <div className="container mx-auto py-10 space-y-8 min-h-screen flex flex-col font-sans">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 sticky top-0 z-50 rounded-xl shadow-sm border border-slate-200">
-        <div className="flex items-center gap-3">
-             <img src="/assets/logo.jpeg" alt="eL Vision Logo" className="h-10 w-10 rounded-full object-cover border border-slate-200" />
-             <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Pixel Logs eL Vision Group</h1>
-        </div>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Pixel Logs eL Vision Group</h1>
         <div className="flex flex-1 w-full md:max-w-md gap-2">
             <div className="relative flex-1">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
@@ -126,8 +123,13 @@ export default function Pixels() {
                     className="pl-9 bg-slate-100 border-slate-300 focus:bg-white text-slate-900 transition-colors font-medium placeholder:text-slate-500"
                 />
             </div>
-            <Button onClick={handleRefresh} variant="outline" size="icon" title="Refresh" className="border-slate-300 hover:bg-slate-100 text-slate-900">
-             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+            <Button 
+              onClick={handleRefresh} 
+              size="icon" 
+              title="Refresh" 
+              className="bg-white hover:bg-white text-slate-900 border border-slate-300 shadow-sm active:scale-95 transition-transform"
+            >
+             {loading ? <Loader2 className="h-4 w-4 animate-spin text-slate-900" /> : <RefreshCcw className="h-4 w-4 text-slate-900" />}
             </Button>
         </div>
       </div>

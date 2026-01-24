@@ -167,10 +167,10 @@ serve(async (req)=>{
   try {
     // --- 1. INITIALIZE & VALIDATE INPUT ---
     const body = await req.json();
-    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate, fbc, fbp, userId: bodyUserId } = body;
+    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate, fbc, fbp, userId: bodyUserId, clientIp } = body;
     
     console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod}`);
-    console.log(`🕵️ Tracking Data - FBC: ${fbc}, FBP: ${fbp}`);
+    console.log(`🕵️ Tracking Data - FBC: ${fbc}, FBP: ${fbp}, IP: ${clientIp || 'Auto'}`);
 
     // --- AUTO-ADD TO MAILKETING LIST ---
     try {
@@ -267,7 +267,7 @@ serve(async (req)=>{
     ];
     // --- 4. PRE-PAYMENT DATABASE INSERTION ---
     const supabase = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
-    const ipAddress = req.headers.get('x-forwarded-for') ?? req.headers.get('remote-addr');
+    const ipAddress = clientIp || req.headers.get('x-forwarded-for') || req.headers.get('remote-addr');
     const userAgent = req.headers.get('user-agent');
     let dbRecordId = null;
 
