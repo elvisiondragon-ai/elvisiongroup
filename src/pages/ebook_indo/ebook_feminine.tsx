@@ -366,6 +366,14 @@ export default function EbookFeminineLanding() {
             value: totalAmount,
             currency: 'IDR'
           }, eventId, pixelId, userData);
+
+          // Send CAPI Purchase
+          sendCapiEvent('Purchase', {
+            content_ids: [productNameBackend],
+            content_type: 'product',
+            value: totalAmount,
+            currency: 'IDR'
+          }, eventId);
         }
       }).subscribe();
 

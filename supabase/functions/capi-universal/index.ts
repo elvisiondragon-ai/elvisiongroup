@@ -214,8 +214,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log('✅ Meta CAPI Success:', result);
-    return new Response(JSON.stringify({ message: 'Event sent successfully', result }), {
+    console.log(`✅ Meta CAPI Success for '${eventName}':`, result);
+    return new Response(JSON.stringify({ message: `Event '${eventName}' sent successfully`, result }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
