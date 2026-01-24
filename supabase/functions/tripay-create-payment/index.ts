@@ -287,6 +287,7 @@ serve(async (req)=>{
         merchant_ref: merchantRef,
         user_id: userId,
         affiliate_id: validAffiliateId, // Save affiliate ID
+        commission_rate: commissionRate || 0.30, // Default to 30% if not provided
         fbc: fbc || null,
         fbp: fbp || null,
         ip_address: ipAddress,
@@ -308,7 +309,8 @@ serve(async (req)=>{
         tripay_reference: null,
         ip_address: ipAddress,
         user_agent: userAgent,
-        affiliate_id: validAffiliateId // Save affiliate ID
+        affiliate_id: validAffiliateId, // Save affiliate ID
+        commission_rate: commissionRate || 0.30 // Default to 30%
       }).select('id').single();
       if (error) throw new Error(`Database insert (waiting_payment) failed: ${error.message}`);
       dbRecordId = data.id;
