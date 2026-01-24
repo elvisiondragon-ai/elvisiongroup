@@ -278,6 +278,10 @@ serve(async (req)=>{
 
         console.log(`   - CAPI Pixel Selected: ${capiPixelId}`);
 
+        /* 
+        // --- CAPI DISABLED (OPTION B REMOVED) ---
+        // Relying on Frontend CAPI (Option A) to avoid race conditions and simplify cookie handling.
+        
         if (capiPixelId) {
              try {
                 console.log(`   - 🎯 Sending CAPI Purchase event via capi-universal to Pixel ${capiPixelId}...`);
@@ -300,13 +304,14 @@ serve(async (req)=>{
                       order_id: tripayReference
                     },
                     eventId: tripayReference,
-                    testCode: 'TEST9597' // Send Test Code for Verification
+                    testCode: (globalProductTx.product_name.includes('ebook_feminine') || globalProductTx.product_name.includes('Feminine Magnetism')) ? 'TEST9597' : undefined // Only for feminine ebook
                   }
                 });
              } catch (capiError) {
                 console.error('   - ⚠️ CAPI Universal Error (non-critical):', capiError);
              }
         }
+        */
       } catch (emailError) {
         console.log('   - ⚠️ Email failed (non-critical):', emailError);
       }

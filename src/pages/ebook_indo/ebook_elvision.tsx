@@ -63,7 +63,6 @@ export default function EbookElvisionPaymentPage() {
         customData: eventData,
         eventId: eventId,
         eventSourceUrl: window.location.href,
-        testCode: 'TEST9597' // ADDED FOR VISUAL VERIFICATION
       };
 
       // Get FBC and FBP from cookies using the utility function
