@@ -391,27 +391,14 @@ export default function UangPanasLanding() {
             currentUserId = signInData.user.id;
             console.log("User auto-logged in:", currentUserId);
           } else {
-            // Login failed (wrong password?)
-            toast({
-              title: "Gagal Login Otomatis",
-              description: "Email sudah terdaftar tapi password salah. Silakan gunakan password yang benar atau email lain.",
-              variant: "destructive",
-            });
-            setLoading(false);
-            return;
+            // Login failed (wrong password?) - Proceed as guest
+            console.log("Login failed, proceeding as guest...");
           }
         } else if (signUpError) {
            throw signUpError;
         }
       } catch (authErr: any) {
-        console.error("Auto-auth failed:", authErr);
-        toast({
-          title: "Gagal Registrasi",
-          description: authErr.message || "Gagal membuat akun otomatis.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
+        console.error("Auto-auth failed, proceeding as guest:", authErr);
       }
     }
 
