@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useUpdateToast } from "@/hooks/UpdateToast";
 import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
 import { VerseToast } from "@/components/VerseToast";
@@ -249,6 +250,7 @@ const AppContent = () => {
                 {/* 404 catch-all */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <SpeedInsights />
             </BrowserRouter>
 
         </MeditativeProvider>
