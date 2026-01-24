@@ -23,7 +23,8 @@ import {
   trackAddPaymentInfoEvent, 
   trackPurchaseEvent,
   AdvancedMatchingData,
-  getFbcFbpCookies
+  getFbcFbpCookies,
+  getFbcCookieHelper
 } from '@/utils/fbpixel';
 
 // Countdown Timer Component
@@ -47,6 +48,17 @@ const CountdownTimer = () => {
             ✨ Penawaran Berakhir Dalam: {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
         </div>
     );
+};
+
+// Helper to wait for FBP cookie availability
+const waitForFbp = async (timeout = 2000): Promise<string | null> => {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    const fbp = getFbcCookieHelper('_fbp'); 
+    if (fbp) return fbp;
+    await new Promise(r => setTimeout(r, 100)); // Wait 100ms
+  }
+  return null;
 };
 
 const WhatsAppButton = () => (
@@ -96,7 +108,13 @@ export default function EbookFeminineLanding() {
       };
 
       // Get FBC and FBP from cookies using the utility function
-      const { fbc, fbp } = getFbcFbpCookies();
+      let { fbc, fbp } = getFbcFbpCookies();
+
+      // 1. WAIT FOR FBP (Crucial Fix)
+      // Try to get fbp, if missing, wait up to 2 seconds for FB script to generate it
+      if (!fbp) {
+         fbp = await waitForFbp();
+      }
 
       const userData: any = {
         client_user_agent: navigator.userAgent,
