@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
+import { VideoFacade } from '@/components/ui/video-facade';
 import { 
   initFacebookPixelWithLogging, 
   trackPageViewEvent, 
@@ -744,28 +745,18 @@ export default function EbookFeminineLanding() {
              {/* Direct Video Player */}
              <div className="flex flex-col md:flex-row justify-center gap-6 mb-12">
                 <div className="w-full max-w-[320px] aspect-square rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl bg-black flex items-center justify-center">
-                    <video 
+                    <VideoFacade 
                       src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/ebook_indo/ugc1_id.mp4" 
                       poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/ebook_indo/ugc1_id.jpg" 
                       className="w-full h-full object-cover"
-                      controls
-                      playsInline
-                      preload="metadata"
-                    >
-                      Your browser does not support the video tag.
-                    </video>
+                    />
                 </div>
                 <div className="w-full max-w-[320px] aspect-square rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl bg-black flex items-center justify-center">
-                    <video 
+                    <VideoFacade 
                       src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/ebook_indo/ugc2_id.mp4" 
                       poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/ebook_indo/ugc2_id.jpg" 
                       className="w-full h-full object-cover"
-                      controls
-                      playsInline
-                      preload="metadata"
-                    >
-                      Your browser does not support the video tag.
-                    </video>
+                    />
                 </div>
              </div>
 
