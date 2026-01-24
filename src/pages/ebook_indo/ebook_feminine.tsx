@@ -92,6 +92,7 @@ export default function EbookFeminineLanding() {
         customData: eventData,
         eventId: eventId,
         eventSourceUrl: window.location.href,
+        testCode: 'TEST9597' // ADDED FOR VISUAL VERIFICATION
       };
 
       // Get FBC and FBP from cookies using the utility function
@@ -129,9 +130,17 @@ export default function EbookFeminineLanding() {
       
       body.userData = userData;
 
-      await supabase.functions.invoke('capi-universal', { body });
+      console.log(`🚀 Sending CAPI Event: ${eventName}`, body); // DEBUG LOG
+
+      const { data, error } = await supabase.functions.invoke('capi-universal', { body });
+      
+      if (error) {
+          console.error(`❌ CAPI Error for ${eventName}:`, error);
+      } else {
+          console.log(`✅ CAPI Success for ${eventName}:`, data);
+      }
     } catch (err) {
-      console.error('Failed to send CAPI event:', err);
+      console.error('Failed to send CAPI event (Critical):', err);
     }
   };
 
@@ -692,11 +701,23 @@ export default function EbookFeminineLanding() {
              </h2>
 
              {/* Direct Video Player */}
-             <div className="flex justify-center mb-12">
+             <div className="flex flex-col md:flex-row justify-center gap-6 mb-12">
                 <div className="w-full max-w-[320px] aspect-square rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl bg-black flex items-center justify-center">
                     <video 
-                      src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/ugc1_id.mp4" 
-                      poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/usa/ugc1_id.jpg" 
+                      src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/ebook_indo/ugc1_id.mp4" 
+                      poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/ebook_indo/ugc1_id.jpg" 
+                      className="w-full h-full object-cover"
+                      controls
+                      playsInline
+                      preload="metadata"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div className="w-full max-w-[320px] aspect-square rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl bg-black flex items-center justify-center">
+                    <video 
+                      src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/ebook_indo/ugc2_id.mp4" 
+                      poster="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/ebook_indo/ugc2_id.jpg" 
                       className="w-full h-full object-cover"
                       controls
                       playsInline

@@ -299,7 +299,8 @@ serve(async (req)=>{
                       content_name: globalProductTx.product_name,
                       order_id: tripayReference
                     },
-                    eventId: tripayReference
+                    eventId: tripayReference,
+                    testCode: 'TEST9597' // Send Test Code for Verification
                   }
                 });
              } catch (capiError) {
