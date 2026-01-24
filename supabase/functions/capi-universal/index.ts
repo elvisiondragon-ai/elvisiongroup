@@ -57,6 +57,18 @@ Deno.serve(async (req) => {
 
   let FACEBOOK_ACCESS_TOKEN = Deno.env.get('METACAPI');
 
+  // 🔀 DYNAMIC TOKEN SWITCHING
+  // Fix for Pixel 1393... (USA/3000 Coaching) which requires a separate token
+  if (pixelId === '1393383179182528') {
+      const tokenUSA = Deno.env.get('CAPI_USA');
+      if (tokenUSA) {
+          console.log('🔀 Switching to CAPI_USA for USA Pixel');
+          FACEBOOK_ACCESS_TOKEN = tokenUSA;
+      } else {
+          console.warn('⚠️ USA Pixel detected but CAPI_USA not set! Using default.');
+      }
+  }
+
   if (!FACEBOOK_ACCESS_TOKEN) {
     console.error('Configuration Error: METACAPI Access Token not configured.');
     return new Response(JSON.stringify({ error: 'METACAPI Access Token not configured in environment variables.' }), {

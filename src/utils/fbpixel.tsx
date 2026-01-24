@@ -305,7 +305,13 @@ const trackEvent = async (eventName: string, eventData: any = {}, options: { eve
       trackOptions.eventID = options.eventID;
     }
 
-    (window as any).fbq('track', eventName, eventData, trackOptions);
+    if (options.pixelId) {
+       // 🎯 Target SPECIFIC Pixel ID (Prevents cross-firing in SPA)
+       (window as any).fbq('trackSingle', options.pixelId, eventName, eventData, trackOptions);
+    } else {
+       // 📢 Broadcast to ALL initialized pixels (Fallback)
+       (window as any).fbq('track', eventName, eventData, trackOptions);
+    }
   } catch (error) {
     console.log(`FB Pixel ${eventName} tracking failed:`, error);
   }
