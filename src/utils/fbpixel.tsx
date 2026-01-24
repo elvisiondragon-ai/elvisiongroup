@@ -78,9 +78,13 @@ export const getFbcClickIdFromUrl = (): string | null => {
 
   if (fbclid) {
     // Real fbclids are mixed case. If it's long and ONLY lowercase/numbers, it's likely invalid/modified (manual test).
-    const isSuspicious = /^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20;
+    // ALSO REJECT: Any value containing "TEST" (case-insensitive)
+    const isSuspicious = 
+        (/^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20) ||
+        /test/i.test(fbclid);
+
     if (isSuspicious) {
-      console.warn("⚠️ Ignoring suspicious lowercase fbclid from URL:", fbclid);
+      console.warn("⚠️ Ignoring suspicious fbclid from URL:", fbclid);
       return null;
     }
     return fbclid;
@@ -136,10 +140,13 @@ export const getFbcFbpCookies = (): { fbc: string | null; fbp: string | null } =
     if (parts.length >= 4) {
       const fbclid = parts.slice(3).join('.');
       // Real fbclids are mixed case. If it's long and ONLY lowercase/numbers, it's likely invalid.
-      const isSuspicious = /^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20;
+      // ALSO REJECT: Any value containing "TEST" (case-insensitive)
+      const isSuspicious = 
+        (/^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20) ||
+        /test/i.test(fbclid);
       
       if (isSuspicious) {
-        console.warn("⚠️ Discarding invalid (lowercased) FBC cookie:", fbc);
+        console.warn("⚠️ Discarding invalid (suspicious) FBC cookie:", fbc);
         fbc = null; 
       }
     }
@@ -158,7 +165,9 @@ export const getFbcFbpCookies = (): { fbc: string | null; fbp: string | null } =
              let isBackupSuspicious = false;
              if (parts.length >= 4) {
                const fbclid = parts.slice(3).join('.');
-               isBackupSuspicious = /^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20;
+               isBackupSuspicious = 
+                (/^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20) ||
+                /test/i.test(fbclid);
              }
 
              if (!isBackupSuspicious) {
