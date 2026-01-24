@@ -147,7 +147,7 @@ serve(async (req)=>{
       
             // FIX: Search by tripay_reference OR merchant_ref to handle cases where the update missed
             let query = supabase.from('global_product')
-              .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, affiliate_email, fbc, fbp, ip_address, user_agent') // Added affiliate_email, ip_address, user_agent
+              .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, affiliate_email, fbc, fbp, ip_address, user_agent, capi_purchase_sent') // Added affiliate_email, ip_address, user_agent, capi_purchase_sent
               .neq('status', 'PAID');
       
             if (merchantRef) {
@@ -173,7 +173,10 @@ serve(async (req)=>{
               console.log(`   - ✅ Found Global Product ID: ${globalProductTx.id}. Attempting atomic update to PAID.`);
               
               // Update object
-              const updatePayload: any = { status: 'PAID' };
+              const updatePayload: any = { 
+                  status: 'PAID',
+                  capi_purchase_sent: true // OPTIMISTIC LOCK: Claim CAPI responsibility immediately to prevent Frontend double-fire
+              };
               // Ensure tripay_reference is synced if it was missing
               if (!globalProductTx.tripay_reference && tripayReference) {
                   updatePayload.tripay_reference = tripayReference;
@@ -278,11 +281,9 @@ serve(async (req)=>{
 
         console.log(`   - CAPI Pixel Selected: ${capiPixelId}`);
 
-        /* 
-        // --- CAPI DISABLED (OPTION B REMOVED) ---
-        // Relying on Frontend CAPI (Option A) to avoid race conditions and simplify cookie handling.
-        
-        if (capiPixelId) {
+        // --- CAPI RE-ENABLED WITH FIRST-WIN DEDUPLICATION ---
+        // We check capi_purchase_sent to ensure we only send ONCE (Winner-Takes-All between Frontend and Backend)
+        if (capiPixelId && !globalProductTx.capi_purchase_sent) {
              try {
                 console.log(`   - 🎯 Sending CAPI Purchase event via capi-universal to Pixel ${capiPixelId}...`);
                 await supabase.functions.invoke('capi-universal', {
@@ -307,11 +308,17 @@ serve(async (req)=>{
                     testCode: (globalProductTx.product_name.includes('ebook_feminine') || globalProductTx.product_name.includes('Feminine Magnetism')) ? 'TEST9597' : undefined // Only for feminine ebook
                   }
                 });
+                
+                // Mark as sent in DB - REDUNDANT (Moved to initial update)
+                // await supabase.from('global_product').update({ capi_purchase_sent: true }).eq('id', globalProductTx.id);
+                console.log('   - ✅ CAPI sent (Lock was claimed in initial update)');
+
              } catch (capiError) {
                 console.error('   - ⚠️ CAPI Universal Error (non-critical):', capiError);
              }
+        } else {
+             console.log(`   - ⏭️ CAPI Skipped: PixelId=${capiPixelId}, SentFlag=${globalProductTx.capi_purchase_sent}`);
         }
-        */
       } catch (emailError) {
         console.log('   - ⚠️ Email failed (non-critical):', emailError);
       }
