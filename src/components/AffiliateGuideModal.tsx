@@ -70,7 +70,7 @@ export function AffiliateGuideModal({ isOpen, onClose }: AffiliateGuideModalProp
              <div className="relative rounded-2xl overflow-hidden bg-black/80 border border-white/10 shadow-2xl group ring-1 ring-purple-500/20">
                 <video 
                    ref={videoRef}
-                   src="https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/0120.mp4" 
+                   src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/affiliate/Tutor_affiliate.mp4" 
                    className="w-full h-auto aspect-video sm:aspect-auto"
                    controls={isPlaying}
                    playsInline
