@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Table, 
@@ -8,17 +8,20 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, RefreshCcw } from "lucide-react";
-import { JsonView } from '@/components/ui/json-view'; // Assuming you might have one, or I'll use pre
+import { Loader2, RefreshCcw, Search } from "lucide-react";
 
 export default function Pixels() {
   const [logs, setLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const PAGE_SIZE = 50;
 
   const PIXEL_NAMES: Record<string, string> = {
     '1393383179182528': 'USA KAYA PIXEL',
@@ -26,36 +29,61 @@ export default function Pixels() {
     '3319324491540889': 'GENESIS200 PIXEL'
   };
 
-  const fetchLogs = async (search?: string) => {
+  const lastLogElementRef = useCallback((node: HTMLTableRowElement) => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prevPage => prevPage + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore]);
+
+  const fetchLogs = async (currentPage: number, search: string, isRefresh = false) => {
     setLoading(true);
-    let query = supabase
-      .from('pixel_events')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(100);
+    try {
+      let query = supabase
+        .from('pixel_events')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE - 1);
 
-    if (search) {
-        // Simple search logic for Event Name, Email, FBP or FBC inside JSONB or columns
-        query = query.or(`event_name.ilike.%${search}%,user_data->>email.ilike.%${search}%,user_data->>fbp.ilike.%${search}%,user_data->>fbc.ilike.%${search}%,pixel_id.ilike.%${search}%`);
+      if (search) {
+          query = query.or(`event_name.ilike.%${search}%,user_data->>email.ilike.%${search}%,event_id.ilike.%${search}%,custom_data->>tripay_reference.ilike.%${search}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching pixel logs:', error);
+      } else {
+        if (isRefresh || currentPage === 0) {
+          setLogs(data || []);
+        } else {
+          setLogs(prev => [...prev, ...(data || [])]);
+        }
+        setHasMore((data?.length || 0) === PAGE_SIZE);
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      setLoading(false);
     }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching pixel logs:', error);
-    } else {
-      setLogs(data || []);
-    }
-    setLoading(false);
   };
 
   useEffect(() => {
-    fetchLogs(searchTerm);
-    // ... realtime remains same
+    setPage(0);
+    fetchLogs(0, searchTerm, true);
   }, [searchTerm]);
-    
+
   useEffect(() => {
-    // Subscribe to realtime updates
+    if (page > 0) {
+      fetchLogs(page, searchTerm);
+    }
+  }, [page]);
+
+  useEffect(() => {
     const channel = supabase
       .channel('pixel_events_changes')
       .on(
@@ -76,102 +104,152 @@ export default function Pixels() {
     };
   }, []);
 
+  const handleRefresh = () => {
+    setPage(0);
+    fetchLogs(0, searchTerm, true);
+  };
+
   return (
-    <div className="container mx-auto py-10 space-y-8">
-      <div className="flex justify-between items-center gap-4">
-        <h1 className="text-3xl font-bold">Pixel Event Logs</h1>
-        <div className="flex flex-1 max-w-sm gap-2">
-            <Input 
-                placeholder="Search Event, Email, FBP, or FBC..." 
-                value={searchTerm}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="bg-white text-black font-bold"
-            />
+    <div className="container mx-auto py-10 space-y-8 min-h-screen flex flex-col font-sans">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 sticky top-0 z-50 rounded-xl shadow-sm border border-slate-200">
+        <div className="flex items-center gap-3">
+             <img src="/assets/logo.jpeg" alt="eL Vision Logo" className="h-10 w-10 rounded-full object-cover border border-slate-200" />
+             <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Pixel Logs eL Vision Group</h1>
         </div>
-        <Button onClick={() => fetchLogs(searchTerm)} disabled={loading}>
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
-          Refresh
-        </Button>
+        <div className="flex flex-1 w-full md:max-w-md gap-2">
+            <div className="relative flex-1">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+                <Input 
+                    placeholder="Search Ref, Email, Event..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 bg-slate-100 border-slate-300 focus:bg-white text-slate-900 transition-colors font-medium placeholder:text-slate-500"
+                />
+            </div>
+            <Button onClick={handleRefresh} variant="outline" size="icon" title="Refresh" className="border-slate-300 hover:bg-slate-100 text-slate-900">
+             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+            </Button>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Events (Realtime)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Time</TableHead>
-                <TableHead>Event</TableHead>
-                <TableHead>Pixel ID</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>FBC (Ad Click)</TableHead>
-                <TableHead>FBP (Browser)</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>URL / Product</TableHead>
-                <TableHead>Meta Response</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {logs.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell className="whitespace-nowrap">
-                    {new Date(log.created_at).toLocaleString()}
-                  </TableCell>
-                  <TableCell className="font-medium">{log.event_name}</TableCell>
-                  <TableCell>
-                    <div className="font-bold text-blue-600">
-                        {PIXEL_NAMES[log.pixel_id] || 'Unknown Pixel'}
-                    </div>
-                    <div className="text-[10px] text-gray-400 font-mono">
-                        {log.pixel_id}
-                    </div>
-                  </TableCell>
-                  <TableCell className="max-w-[200px] truncate" title={log.user_data?.email}>
-                    {log.user_data?.email || '-'}
-                  </TableCell>
-                  <TableCell className="max-w-[150px] truncate font-mono text-[10px]" title={log.user_data?.fbc}>
-                    {log.user_data?.fbc || '-'}
-                  </TableCell>
-                  <TableCell className="max-w-[150px] truncate font-mono text-[10px]" title={log.user_data?.fbp}>
-                    {log.user_data?.fbp || '-'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={log.status === 'sent' ? 'default' : 'destructive'}>
-                      {log.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="max-w-[300px] truncate">
-                    <div className="text-xs space-y-1">
-                        {log.page_url && (
-                            <div className="text-blue-500 font-semibold truncate" title={log.page_url}>
-                                {log.page_url}
-                            </div>
+      <Card className="flex-1 border-slate-200 shadow-lg bg-white">
+        <CardContent className="p-0">
+          <div className="rounded-md border border-slate-200 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-slate-900">
+                <TableRow className="hover:bg-slate-900/90">
+                  <TableHead className="w-[180px] text-slate-200 font-bold">Time</TableHead>
+                  <TableHead className="w-[150px] text-slate-200 font-bold">Ref / Event</TableHead>
+                  <TableHead className="text-slate-200 font-bold">Pixel / Status</TableHead>
+                  <TableHead className="text-slate-200 font-bold">User Data</TableHead>
+                  <TableHead className="text-slate-200 font-bold">Event Data</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="bg-white">
+                {logs.map((log, index) => {
+                  const isLastElement = logs.length === index + 1;
+                  return (
+                    <TableRow 
+                        key={log.id + index} 
+                        ref={isLastElement ? lastLogElementRef : null}
+                        className="hover:bg-slate-50 transition-colors border-b border-slate-100"
+                    >
+                      <TableCell className="align-top">
+                        <div className="font-medium text-xs text-slate-500">
+                            {new Date(log.created_at).toLocaleDateString()}
+                        </div>
+                        <div className="font-bold text-sm text-slate-900">
+                            {new Date(log.created_at).toLocaleTimeString()}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="align-top">
+                        <div className="font-extrabold text-black truncate max-w-[200px]" title={log.event_name}>
+                            {log.event_name}
+                        </div>
+                        {log.event_id && (
+                             <div className="mt-1 flex items-center gap-1">
+                                <Badge variant="outline" className="font-mono text-[10px] truncate max-w-[150px] bg-slate-100 text-slate-800 border-slate-300 font-bold" title="Tripay Reference / Event ID">
+                                    {log.event_id}
+                                </Badge>
+                             </div>
                         )}
-                        {log.custom_data ? (
-                            <pre className="overflow-auto whitespace-pre-wrap font-mono text-gray-600">
-                                {JSON.stringify(log.custom_data, null, 2)}
-                            </pre>
-                        ) : <span className="text-gray-400">No custom data</span>}
-                    </div>
-                  </TableCell>
-                  <TableCell className="max-w-[300px]">
-                     <div className="text-xs text-gray-500 truncate">
-                        {log.meta_response ? JSON.stringify(log.meta_response) : '-'}
-                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {logs.length === 0 && !loading && (
-                <TableRow>
-                  <TableCell colSpan={9} className="text-center py-10 text-gray-500">
-                    No pixel events found. Trigger some events to see them here.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                      </TableCell>
+
+                      <TableCell className="align-top">
+                         <div className="flex flex-col gap-1">
+                            <Badge className={`w-fit font-bold ${log.status === 'sent' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}>
+                                {log.status}
+                            </Badge>
+                            <span className="text-[10px] text-slate-600 font-mono font-semibold" title={log.pixel_id}>
+                                {PIXEL_NAMES[log.pixel_id] ? (
+                                    <span className="text-indigo-900">{PIXEL_NAMES[log.pixel_id]}</span>
+                                ) : log.pixel_id}
+                            </span>
+                         </div>
+                      </TableCell>
+
+                      <TableCell className="align-top max-w-[250px]">
+                        <div className="space-y-1 text-xs">
+                            {log.user_data?.email && (
+                                <div className="flex items-center gap-1 text-slate-900 font-medium truncate" title={log.user_data.email}>
+                                    <span className="font-bold text-slate-400">@</span> {log.user_data.email}
+                                </div>
+                            )}
+                            {log.user_data?.fbc && (
+                                <div className="font-mono text-[10px] text-slate-500 truncate" title={`FBC: ${log.user_data.fbc}`}>
+                                    FBC: {log.user_data.fbc}
+                                </div>
+                            )}
+                             {log.user_data?.fbp && (
+                                <div className="font-mono text-[10px] text-slate-500 truncate" title={`FBP: ${log.user_data.fbp}`}>
+                                    FBP: {log.user_data.fbp}
+                                </div>
+                            )}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="align-top">
+                         <div className="text-xs space-y-2">
+                             {/* Product Info from Custom Data */}
+                             {log.custom_data && (
+                                 <div className="bg-slate-50 p-2 rounded border border-slate-200 font-mono text-[10px] text-slate-800 max-h-[100px] overflow-auto">
+                                     {Object.entries(log.custom_data).map(([key, val]: [string, any]) => (
+                                         <div key={key} className="truncate">
+                                             <span className="font-bold text-slate-500">{key}:</span> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
+                                         </div>
+                                     ))}
+                                 </div>
+                             )}
+                             
+                             {/* Page URL */}
+                             {log.page_url && (
+                                 <div className="text-[10px] text-blue-600 font-semibold truncate max-w-[300px]" title={log.page_url}>
+                                     {log.page_url}
+                                 </div>
+                             )}
+                         </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {logs.length === 0 && !loading && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-20 text-slate-400 font-medium">
+                      No events found matching your search.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {loading && (
+                    <TableRow>
+                        <TableCell colSpan={5} className="text-center py-4">
+                            <Loader2 className="h-6 w-6 animate-spin mx-auto text-slate-900" />
+                        </TableCell>
+                    </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

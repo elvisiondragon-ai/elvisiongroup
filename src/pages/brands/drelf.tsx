@@ -110,6 +110,11 @@ export default function DrelfPaymentPage() {
   const [kota, setKota] = useState('');
   const [kecamatan, setKecamatan] = useState('');
   const [kodePos, setKodePos] = useState('');
+  
+  // PROMO CODE STATE
+  const [promoCode, setPromoCode] = useState('');
+  const [discountPercentage, setDiscountPercentage] = useState(0);
+  const [isPromoApplied, setIsPromoApplied] = useState(false);
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('QRIS');
   const [loading, setLoading] = useState(false);
@@ -125,8 +130,41 @@ export default function DrelfPaymentPage() {
 
 
   const handleIncrement = () => setQuantity(prev => prev + 1);
-  const handleDecrement = () => setQuantity(prev => Math.max(1, prev - 1));
-  const totalAmount = price * quantity;
+  const handleDecrement = () => setQuantity(prev => Math.max(isPromoApplied ? 3 : 1, prev - 1));
+  
+  const originalTotalAmount = price * quantity;
+  const discountAmount = isPromoApplied ? originalTotalAmount * discountPercentage : 0;
+  const totalAmount = originalTotalAmount - discountAmount;
+
+  const handleApplyPromo = () => {
+      if (promoCode.trim().toUpperCase() === 'FEMININE') {
+          setDiscountPercentage(0.7); // 70% Discount
+          setIsPromoApplied(true);
+          
+          if (quantity < 3) {
+              setQuantity(3);
+              toast({
+                  title: "Kode Promo Berhasil!",
+                  description: "Diskon 70% diterapkan. Minimal order otomatis diubah menjadi 3 paket.",
+                  variant: "default",
+              });
+          } else {
+              toast({
+                  title: "Kode Promo Berhasil!",
+                  description: "Diskon 70% diterapkan. (Affiliate dinonaktifkan)",
+                  variant: "default",
+              });
+          }
+      } else {
+          setDiscountPercentage(0);
+          setIsPromoApplied(false);
+          toast({
+              title: "Kode Promo Tidak Valid",
+              description: "Silakan periksa kembali kode Anda.",
+              variant: "destructive",
+          });
+      }
+  };
 
   useEffect(() => {
     if (totalAmount > 5000000) {
@@ -181,6 +219,9 @@ export default function DrelfPaymentPage() {
     setLoading(true);
     const { fbc, fbp } = getFbcFbpCookies();
 
+    // Override Affiliate if Promo is Applied
+    const finalAffiliateRef = isPromoApplied ? null : affiliateRef;
+
     try {
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
@@ -194,11 +235,11 @@ export default function DrelfPaymentPage() {
           kota: kota,
           kecamatan: kecamatan,
           kodePos: kodePos,
-          amount: totalAmount,
+          amount: totalAmount, // Send discounted amount
           quantity: quantity,
-          productName: productName,
+          productName: productName + (isPromoApplied ? ' (Promo FEMININE)' : ''),
           userId: user?.id,
-          affiliateRef: affiliateRef, // Pass affiliate reference
+          affiliateRef: finalAffiliateRef, // Pass null if promo active
           fbc,
           fbp
         }
@@ -533,10 +574,46 @@ export default function DrelfPaymentPage() {
 
 
             <Separator/>
+
+            {/* PROMO CODE SECTION */}
+            <div>
+               <Label htmlFor="promoCode" className="text-muted-foreground mb-1 block">Kode Promo</Label>
+               <div className="flex gap-2">
+                   <Input 
+                       id="promoCode" 
+                       placeholder="Masukkan kode promo" 
+                       value={promoCode}
+                       onChange={(e) => setPromoCode(e.target.value)}
+                       disabled={isPromoApplied}
+                   />
+                   {isPromoApplied ? (
+                       <Button variant="outline" className="text-red-500 hover:text-red-600 border-red-200" onClick={() => {
+                           setIsPromoApplied(false);
+                           setDiscountPercentage(0);
+                           setPromoCode('');
+                           toast({ title: "Promo Dihapus" });
+                       }}>
+                           Hapus
+                       </Button>
+                   ) : (
+                       <Button variant="secondary" onClick={handleApplyPromo}>Terapkan</Button>
+                   )}
+               </div>
+               {isPromoApplied && (
+                   <p className="text-green-600 text-sm mt-1 font-medium">✨ Diskon 70% aktif! (Min. 3 Paket)</p>
+               )}
+            </div>
+            
+            <Separator/>
             
             <div className="flex justify-between items-center">
               <Label className="text-muted-foreground">Total Harga</Label>
-              <span className="font-bold text-lg text-primary">{formatCurrency(totalAmount)}</span>
+              <div className="text-right">
+                  {isPromoApplied && (
+                      <span className="text-muted-foreground line-through text-sm mr-2">{formatCurrency(originalTotalAmount)}</span>
+                  )}
+                  <span className={`font-bold text-lg ${isPromoApplied ? 'text-green-600' : 'text-primary'}`}>{formatCurrency(totalAmount)}</span>
+              </div>
             </div>
             <div className="flex justify-between items-center text-green-600 font-bold">
               <Label className="text-green-600">Ongkos Kirim</Label>
