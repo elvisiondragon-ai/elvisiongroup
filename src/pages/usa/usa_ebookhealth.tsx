@@ -1,7 +1,14 @@
 import React, { useEffect } from 'react';
 import { Star, Check, Shield, Clock, PlayCircle, MessageCircle, ArrowRight, Instagram, Globe, HeartHandshake, ShieldCheck } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
-import { getFbcFbpCookies } from "@/utils/fbpixel";
+import { 
+  initFacebookPixelWithLogging, 
+  trackPageViewEvent, 
+  trackAddToCartEvent,
+  trackCustomEvent,
+  getFbcFbpCookies,
+  waitForFbp
+} from "@/utils/fbpixel";
 
 const EbookHealthLP = () => {
   const [loading, setLoading] = React.useState(false);
@@ -10,31 +17,32 @@ const EbookHealthLP = () => {
   const purchaseFiredRef = React.useRef(false);
 
   // CAPI Configuration
-  const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
   const PIXEL_ID = '1393383179182528';
 
   // Helper to send CAPI events
   const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
     try {
+      // ⏳ Wait for FBP
+      await waitForFbp();
+
       const { fbc, fbp } = getFbcFbpCookies();
 
-      await fetch(CAPI_EDGE_FUNCTION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pixelId: PIXEL_ID,
-          eventName,
-          userData: {
-            ...userData,
-            fbp,
-            fbc,
-            client_user_agent: navigator.userAgent
-          },
-          customData,
-          eventId,
-          eventSourceUrl: window.location.href
-        }),
-      });
+      const body: any = {
+        pixelId: PIXEL_ID,
+        eventName,
+        userData: {
+          ...userData,
+          fbp,
+          fbc,
+          client_user_agent: navigator.userAgent
+        },
+        customData,
+        eventId,
+        eventSourceUrl: window.location.href,
+        testCode: 'TEST15337'
+      };
+
+      await supabase.functions.invoke('capi-universal', { body });
     } catch (e) {
       console.error('CAPI Error:', e);
     }
@@ -42,22 +50,10 @@ const EbookHealthLP = () => {
 
   // Facebook Pixel
   useEffect(() => {
-    // @ts-ignore
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
+    initFacebookPixelWithLogging(PIXEL_ID);
     
     const eventId = `pageview-${Date.now()}`;
-    // @ts-ignore
-    fbq('init', PIXEL_ID);
-    // @ts-ignore
-    fbq('track', 'PageView', {}, { eventID: eventId });
-
+    trackPageViewEvent({}, eventId, PIXEL_ID);
     sendCAPIEvent('PageView', {}, {}, eventId);
   }, []);
 
@@ -67,20 +63,15 @@ const EbookHealthLP = () => {
       element.scrollIntoView({ behavior: 'smooth' });
       element.focus();
       const eventId = `addtocart-${Date.now()}`;
-      // @ts-ignore
-      if (typeof fbq === 'function') {
-        // @ts-ignore
-        fbq('track', 'AddToCart', {
-          content_name: 'Ebook Health Recovery Protocol',
-          value: 20.00,
-          currency: 'USD'
-        }, { eventID: eventId });
-      }
-      sendCAPIEvent('AddToCart', {}, {
+      
+      const eventData = {
         content_name: 'Ebook Health Recovery Protocol',
         value: 20.00,
         currency: 'USD'
-      }, eventId);
+      };
+
+      trackAddToCartEvent(eventData, eventId, PIXEL_ID);
+      sendCAPIEvent('AddToCart', {}, eventData, eventId);
     }
   };
 
@@ -104,12 +95,7 @@ const EbookHealthLP = () => {
         currency: 'USD'
       };
 
-      // @ts-ignore
-      if (typeof fbq === 'function') {
-        // @ts-ignore
-        fbq('track', 'InitiateCheckout', eventData, { eventID: eventId });
-      }
-
+      trackCustomEvent('InitiateCheckout', eventData, eventId, PIXEL_ID, { em: email });
       sendCAPIEvent('InitiateCheckout', { email }, eventData, eventId);
 
       const { fbc, fbp } = getFbcFbpCookies();
@@ -132,7 +118,7 @@ const EbookHealthLP = () => {
       setPaymentData(data);
       window.location.href = data.checkoutUrl;
 
-    } catch (err) {
+    } catch (err: any) {
       alert("Payment Error: " + err.message);
       setLoading(false);
       const btn = document.getElementById('buy-btn');
@@ -163,12 +149,9 @@ const EbookHealthLP = () => {
             currency: 'USD'
           };
 
-          // Track Purchase
-          // @ts-ignore
-          if (typeof fbq === 'function') {
-            // @ts-ignore
-            fbq('track', 'Purchase', eventData, { eventID: eventId });
-          }
+          // Use Purchase tracker from utility
+          trackCustomEvent('Purchase', eventData, eventId, PIXEL_ID, { em: email });
+          sendCAPIEvent('Purchase', { email }, eventData, eventId);
         }
       }).subscribe();
 

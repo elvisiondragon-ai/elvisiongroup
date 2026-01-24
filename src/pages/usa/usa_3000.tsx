@@ -6,7 +6,8 @@ import {
   trackPageViewEvent, 
   trackAddToCartEvent, 
   trackCustomEvent,
-  getFbcFbpCookies
+  getFbcFbpCookies,
+  waitForFbp
 } from '@/utils/fbpixel';
 
 export default function ELVision3000() {
@@ -18,6 +19,9 @@ export default function ELVision3000() {
   // Helper to send CAPI events
   const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
     try {
+      // ⏳ Wait for FBP
+      await waitForFbp();
+
       const { fbc, fbp } = getFbcFbpCookies();
 
       await fetch(CAPI_EDGE_FUNCTION_URL, {
@@ -34,7 +38,8 @@ export default function ELVision3000() {
           },
           customData,
           eventId,
-          eventSourceUrl: window.location.href
+          eventSourceUrl: window.location.href,
+          testCode: 'TEST15337'
         }),
       });
     } catch (e) {

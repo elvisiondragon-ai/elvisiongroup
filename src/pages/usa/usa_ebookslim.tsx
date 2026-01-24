@@ -31,11 +31,14 @@ declare global {
 const PIXEL_ID = '1393383179182528'; // Updated PIXEL_ID from Pay3000.tsx
 
 import {
-  initFacebookPixelWithLogging, 
-  trackCustomEvent, 
+  initFacebookPixelWithLogging,
+  trackPageViewEvent,
+  trackViewContentEvent,
   trackAddPaymentInfoEvent,
+  trackPurchaseEvent,
   AdvancedMatchingData,
-  getFbcFbpCookies
+  getFbcFbpCookies,
+  waitForFbp
 } from '@/utils/fbpixel';
 
 // Helper to send CAPI events - needs to be outside the component
@@ -68,32 +71,7 @@ const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: 
   }
 };
 
-// Facebook Pixel functions (simplified to directly use window.fbq for now)
-const trackPageViewEvent = (customData: any, eventId: string, pixelId: string) => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', 'PageView', customData, { eventID: eventId });
-  }
-};
 
-const trackAddToCartEvent = (customData: any, eventId: string, pixelId: string) => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', 'AddToCart', customData, { eventID: eventId });
-  }
-};
-
-const trackCustomEvent = (eventName: string, customData: any, eventId: string, pixelId: string, userData: any = {}) => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('trackSingleCustom', pixelId, eventName, customData, { eventID: eventId });
-  }
-};
-
-const trackAddPaymentInfoEvent = (customData: any, eventId: string, pixelId: string, userData: any = {}) => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', 'AddPaymentInfo', customData, { eventID: eventId });
-  }
-};
-
-// Removed unused initFacebookPixelWithLogging
 
 const CountdownTimer = () => {
     const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 15, seconds: 0 });
@@ -157,6 +135,9 @@ const SlimPage = () => {
   // Helper to send CAPI events
   const sendCapiEvent = async (eventName: string, eventData: any, eventId?: string) => {
     try {
+      // ⏳ Wait for FBP
+      await waitForFbp();
+
       const { data: { session } } = await supabase.auth.getSession();
       const body: any = {
         pixelId: PIXEL_ID,
@@ -164,6 +145,7 @@ const SlimPage = () => {
         customData: eventData,
         eventId: eventId,
         eventSourceUrl: window.location.href,
+        testCode: 'TEST15337'
       };
 
       const { fbc, fbp } = getFbcFbpCookies();

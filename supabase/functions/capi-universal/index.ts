@@ -47,31 +47,30 @@ Deno.serve(async (req) => {
   console.log('CAPI-UNIVERSAL: Attempting to parse request body...');
   const body = await req.json();
   console.log('CAPI-UNIVERSAL: Request body parsed successfully.');
+  
   // --- Configuration ---
   const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl } = body;
+
+  // 🎯 HARDCODED PIXEL CONFIGURATION (Non-Confidential Mapping)
+  const PIXEL_CONFIG: Record<string, string> = {
+    '3319324491540889': 'METACAPI', // EbookIndo Pixel
+    '1393383179182528': 'CAPI_USA',  // USA KAYA Pixel
+  };
+
+  // Determine which secret to use
+  const secretName = PIXEL_CONFIG[pixelId] || 'METACAPI';
+  let FACEBOOK_ACCESS_TOKEN = Deno.env.get(secretName);
+
+  console.log(`🔑 Using Secret: ${secretName} for Pixel: ${pixelId}`);
 
   // Initialize Supabase Client for Logging
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '';
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  let FACEBOOK_ACCESS_TOKEN = Deno.env.get('METACAPI');
-
-  // 🔀 DYNAMIC TOKEN SWITCHING
-  // Fix for Pixel 1393... (USA/3000 Coaching) which requires a separate token
-  if (pixelId === '1393383179182528') {
-      const tokenUSA = Deno.env.get('CAPI_USA');
-      if (tokenUSA) {
-          console.log('🔀 Switching to CAPI_USA for USA Pixel');
-          FACEBOOK_ACCESS_TOKEN = tokenUSA;
-      } else {
-          console.warn('⚠️ USA Pixel detected but CAPI_USA not set! Using default.');
-      }
-  }
-
   if (!FACEBOOK_ACCESS_TOKEN) {
-    console.error('Configuration Error: METACAPI Access Token not configured.');
-    return new Response(JSON.stringify({ error: 'METACAPI Access Token not configured in environment variables.' }), {
+    console.error(`Configuration Error: ${secretName} Access Token not configured.`);
+    return new Response(JSON.stringify({ error: `${secretName} Access Token not configured in environment variables.` }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -79,14 +78,13 @@ Deno.serve(async (req) => {
 
   try {
     console.log('Incoming Universal Event:', { pixelId, eventName, email: userData?.email, eventId });
-    console.log('Raw userData received:', userData); // Log raw userData before hashing
 
     // Prepare DB Log Object
     const dbLog: any = {
         pixel_id: pixelId,
         event_name: eventName,
         event_id: eventId,
-        user_data: userData, // Log raw user data passed to function (be careful with PII in prod logs, maybe mask?)
+        user_data: userData,
         custom_data: customData,
         page_url: eventSourceUrl || req.headers.get('referer'),
         status: 'processing'
@@ -131,40 +129,26 @@ Deno.serve(async (req) => {
       if (userData.fbp) processedUserData.fbp = userData.fbp;
       if (userData.fbc) processedUserData.fbc = userData.fbc;
       if (userData.external_id) processedUserData.external_id = userData.external_id;
-      if (userData.db_id) processedUserData.facebook_login_id = userData.db_id; // Map db_id to facebook_login_id
+      if (userData.db_id) processedUserData.facebook_login_id = userData.db_id;
     }
     
-    // Always try to get IP and User Agent from headers as a fallback
+    // IP and User Agent handling
     const clientIpAddressHeader = userData?.client_ip_address || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
     if (clientIpAddressHeader) {
-      // The x-forwarded-for header can be a comma-separated list of IPs.
-      // We take the first one, which is the most likely to be the client's IP.
       const firstIp = clientIpAddressHeader.split(',')[0].trim();
-      
-      // Basic validation: A real IP address must contain a dot (IPv4) or colon (IPv6).
-      // This prevents sending invalid values like "localhost".
       if (firstIp && (firstIp.includes('.') || firstIp.includes(':'))) {
-        console.log(`Valid IP detected: ${firstIp}`);
-        
-        // 🛑 IP BLOCKING LOGIC
+        // IP BLOCKING LOGIC
         const ignoredIps = Deno.env.get('IGNORED_IPS');
         if (ignoredIps) {
             const ipList = ignoredIps.split(',').map(ip => ip.trim());
             if (ipList.includes(firstIp)) {
-                console.log(`🚫 IP ${firstIp} is in IGNORED_IPS list. Blocking event.`);
-                return new Response(JSON.stringify({ 
-                    message: 'Event blocked by IP filter (Success response to client)', 
-                    skipped: true 
-                }), {
+                return new Response(JSON.stringify({ message: 'Event blocked by IP filter', skipped: true }), {
                     status: 200,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 });
             }
         }
-
         processedUserData.client_ip_address = firstIp;
-      } else {
-        console.log(`Invalid or localhost IP detected and skipped: ${firstIp}`);
       }
     }
 
@@ -178,26 +162,23 @@ Deno.serve(async (req) => {
       event_name: eventName,
       event_time: Math.floor(Date.now() / 1000),
       action_source: 'website',
-      event_source_url: eventSourceUrl || req.headers.get('referer'), // Add URL tracking
+      event_source_url: eventSourceUrl || req.headers.get('referer'),
       custom_data: customData, 
       event_id: eventId || undefined, 
     };
     
-    // Only include user_data if it's not empty
     if (Object.keys(processedUserData).length > 0) {
       event.user_data = processedUserData;
     }
 
     const events = [event];
-
-    // Add test_event_code if provided (for testing in Events Manager)
     const payload: any = { data: events };
     if (testCode) {
         payload.test_event_code = testCode;
     }
 
     const facebookApiUrl = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
-    console.log(`Sending event '${eventName}' to Pixel ID: ${pixelId}`);
+    console.log(`🚀 Sending event '${eventName}' to Pixel ID: ${pixelId} using ${secretName}`);
 
     const response = await fetch(facebookApiUrl, {
       method: 'POST',
@@ -207,7 +188,7 @@ Deno.serve(async (req) => {
 
     const result = await response.json();
 
-    // Update the log with the result
+    // Update the log
     if (logData) {
         await supabase
             .from('pixel_events')
@@ -226,7 +207,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`✅ Meta CAPI Success for '${eventName}':`, result);
+    console.log(`✅ Meta CAPI Success for '${eventName}'`);
     return new Response(JSON.stringify({ message: `Event '${eventName}' sent successfully`, result }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -20,4 +20,4 @@ Meta Events Manager was not showing server event deduplication for the USA pixel
 ## Verification Required
 1.  Ensure the `CAPI_USA` secret is set in Supabase with the correct USA Access Token.
 2.  Deploy the updated Edge Function: `supabase functions deploy capi-universal --no-verify-jwt`.
-3.  Test in Meta Events Manager using the `TEST9597` code.
+3.  Test in Meta Events Manager using the `TEST15337` code for USA.
