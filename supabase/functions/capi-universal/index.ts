@@ -43,8 +43,12 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Debugging: Log before parsing request body
+  console.log('CAPI-UNIVERSAL: Attempting to parse request body...');
+  const body = await req.json();
+  console.log('CAPI-UNIVERSAL: Request body parsed successfully.');
   // --- Configuration ---
-  const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl } = await req.json();
+  const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl } = body;
 
   // Initialize Supabase Client for Logging
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -63,6 +67,7 @@ Deno.serve(async (req) => {
 
   try {
     console.log('Incoming Universal Event:', { pixelId, eventName, email: userData?.email, eventId });
+    console.log('Raw userData received:', userData); // Log raw userData before hashing
 
     // Prepare DB Log Object
     const dbLog: any = {

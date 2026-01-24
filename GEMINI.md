@@ -11,7 +11,8 @@ To ending task that success write on folder report with timestamp date/mm/yy exa
 ### Core Mandates
 
 1.  **Context is Supreme:** Before any modification, thoroughly analyze the existing codebase. Your primary tools for this are `read_file`, `search_file_content`, `glob`, and `codebase_investigator`. Match existing style, conventions, libraries, and architecture. Do not introduce new patterns or libraries without explicit user consent or clear precedent in the project.
-2.  **Verify, Never Assume:**
+2.  **Learn from History:** Always check the `REPORT/` folder and read the most recent reports before starting a task. This helps identify previous related fixes, ongoing issues, and established patterns for specific features (like CAPI/Pixel).
+3.  **Verify, Never Assume:**
     *   Do not assume a file's contents. **Read it first.**
     *   Do not assume a library/framework is installed or appropriate. **Check configuration (`package.json`, `build.gradle`, etc.) and surrounding files first.**
     *   Do not assume your code works. **Verify it with the project's specific testing, linting, and build commands.** Find these commands in `README.md`, `package.json` scripts, or infer them from the project structure.

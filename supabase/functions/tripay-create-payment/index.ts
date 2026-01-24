@@ -169,7 +169,8 @@ serve(async (req)=>{
     const body = await req.json();
     const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate, fbc, fbp, userId: bodyUserId } = body;
     
-    console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod} (Commission: ${commissionRate || 'Default'})`);
+    console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod}`);
+    console.log(`🕵️ Tracking Data - FBC: ${fbc}, FBP: ${fbp}`);
 
     // --- AUTO-ADD TO MAILKETING LIST ---
     try {

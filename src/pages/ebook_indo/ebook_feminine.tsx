@@ -208,6 +208,17 @@ export default function EbookFeminineLanding() {
       return;
     }
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userEmail)) {
+      toast({
+        title: "Email Tidak Valid",
+        description: "Mohon masukkan alamat email yang benar (contoh: nama@email.com).",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const addPaymentInfoEventId = `addpaymentinfo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -237,6 +248,9 @@ export default function EbookFeminineLanding() {
 
       const { fbc, fbp } = getFbcFbpCookies();
 
+      console.log('FBC from getFbcFbpCookies():', fbc);
+      console.log('FBP from getFbcFbpCookies():', fbp);
+
       const { data, error } = await supabase.functions.invoke('tripay-create-payment', {
         body: {
           subscriptionType: productNameBackend,
@@ -254,9 +268,22 @@ export default function EbookFeminineLanding() {
       });
 
       if (error || !data?.success) {
+        // Extract specific error message from nested details if available
+        let errorMessage = data?.error || error?.message || "Terjadi kesalahan sistem.";
+        
+        if (data?.details?.message) {
+             errorMessage = data.details.message;
+             // Translate common Tripay errors
+             if (errorMessage.includes("Invalid customer email")) {
+                 errorMessage = "Format email tidak valid. Mohon periksa kembali penulisan email Anda.";
+             } else if (errorMessage.includes("Invalid customer phone")) {
+                 errorMessage = "Format nomor HP tidak valid. Gunakan awalan 08...";
+             }
+        }
+
         toast({
           title: "Gagal Memproses",
-          description: data?.error || error?.message || "Terjadi kesalahan sistem.",
+          description: errorMessage,
           variant: "destructive",
         });
         return;

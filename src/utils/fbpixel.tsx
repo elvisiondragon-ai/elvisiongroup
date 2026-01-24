@@ -117,6 +117,7 @@ export const getFbcFbpCookies = (): { fbc: string | null; fbp: string | null } =
              fbc = backup;
              // Try to revive cookie
              setCookieHelper('_fbc', backup, 90);
+             console.log('♻️ FBC revived from LocalStorage:', fbc);
           }
       }
   }
@@ -128,9 +129,11 @@ export const getFbcFbpCookies = (): { fbc: string | null; fbp: string | null } =
           fbc = formatFbcCookieValue(currentFbclid);
           // Save it now that we found it
           setFbcData(currentFbclid);
+          console.log('🔗 FBC extracted from URL:', fbc);
       }
   }
 
+  console.log(`🍪 getFbcFbpCookies result - FBC: ${fbc}, FBP: ${fbp}`);
   return { fbc, fbp };
 };
 

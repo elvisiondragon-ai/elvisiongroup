@@ -170,7 +170,7 @@ serve(async (req)=>{
             const globalProductTx = globalProductTxData ? globalProductTxData[0] : null;
       
             if (globalProductTx) {
-              console.log(`   - ✅ Found Global Product ID: ${globalProductTx.id}. Updating status to PAID.`);
+              console.log(`   - ✅ Found Global Product ID: ${globalProductTx.id}. Attempting atomic update to PAID.`);
               
               // Update object
               const updatePayload: any = { status: 'PAID' };
@@ -179,8 +179,15 @@ serve(async (req)=>{
                   updatePayload.tripay_reference = tripayReference;
               }
       
-        // 2. Update Status di global_product
-        const { error: updateError } = await supabase.from('global_product').update(updatePayload).eq('id', globalProductTx.id);
+        // 2. ATOMIC UPDATE (Optimistic Locking)
+        // Only update if the current status is NOT 'PAID'. This prevents race conditions.
+        const { data: updatedRows, error: updateError } = await supabase
+            .from('global_product')
+            .update(updatePayload)
+            .eq('id', globalProductTx.id)
+            .neq('status', 'PAID') // CRITICAL: Only update if it's NOT ALREADY PAID
+            .select();
+
       if (updateError) {
         console.error('   - ❌ FAILED to update global_product status:', updateError.message);
         return logAndRespond('Failed to update global_product status', 500, {
@@ -188,7 +195,17 @@ serve(async (req)=>{
           error: updateError.message
         }, true);
       }
-      console.log('   - ✅ Successfully updated global_product to PAID.');
+
+      // CHECK IF WE WON THE RACE
+      if (!updatedRows || updatedRows.length === 0) {
+          console.log(`   - ⚠️ RACE CONDITION: Transaction ${globalProductTx.id} was already PAID by another process. Skipping CAPI & Email.`);
+          return logAndRespond('Transaction already processed by another worker.', 200, {
+            success: true,
+            info: 'Duplicate webhook handled gracefully.'
+          });
+      }
+
+      console.log('   - ✅ Successfully updated global_product to PAID (Winner of race condition).');
       // 3. Kirim email sukses (Opsional)
       try {
         console.log('3. 📧 Sending success email...');
