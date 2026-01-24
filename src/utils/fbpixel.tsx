@@ -1,5 +1,19 @@
 // 🎯 Facebook Pixel FBC/FBP Enhanced Tracking System
 
+// ⏳ Wait for FBP Cookie Helper
+export const waitForFbp = async (timeout = 2000): Promise<string | null> => {
+  const start = Date.now();
+  // Poll every 100ms
+  while (Date.now() - start < timeout) {
+    if (typeof document !== 'undefined') {
+      const match = document.cookie.match(/(^|;\s*)_fbp=([^;]+)/);
+      if (match) return match[2];
+    }
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  return null;
+};
+
 // 🔐 SHA-256 Hash Helper
 export const sha256 = async (message: string): Promise<string> => {
   if (!message) return "";
@@ -51,16 +65,25 @@ export const getFbcClickIdFromUrl = (): string | null => {
   // Check Search Query (?fbclid=...)
   const urlParams = new URLSearchParams(window.location.search);
   const fromSearch = urlParams.get('fbclid');
-  if (fromSearch) return fromSearch;
-
+  
   // Check Hash (#...?fbclid=... or #/page?fbclid=...)
-  if (window.location.hash) {
+  let fbclid = fromSearch;
+  if (!fbclid && window.location.hash) {
      const hashString = window.location.hash.includes('?') 
         ? window.location.hash.split('?')[1] 
         : '';
      const hashParams = new URLSearchParams(hashString);
-     const fromHash = hashParams.get('fbclid');
-     if (fromHash) return fromHash;
+     fbclid = hashParams.get('fbclid');
+  }
+
+  if (fbclid) {
+    // Real fbclids are mixed case. If it's long and ONLY lowercase/numbers, it's likely invalid/modified (manual test).
+    const isSuspicious = /^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20;
+    if (isSuspicious) {
+      console.warn("⚠️ Ignoring suspicious lowercase fbclid from URL:", fbclid);
+      return null;
+    }
+    return fbclid;
   }
 
   return null;
@@ -106,6 +129,22 @@ export const getFbcFbpCookies = (): { fbc: string | null; fbp: string | null } =
   let fbc = getFbcCookieHelper('_fbc');
   let fbp = getFbcCookieHelper('_fbp');
 
+  // --- 🛡️ SAFETY CHECK: Discard suspicious lowercase FBC cookies ---
+  if (fbc) {
+    const parts = fbc.split('.');
+    // Structure: fb.1.timestamp.fbclid
+    if (parts.length >= 4) {
+      const fbclid = parts.slice(3).join('.');
+      // Real fbclids are mixed case. If it's long and ONLY lowercase/numbers, it's likely invalid.
+      const isSuspicious = /^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20;
+      
+      if (isSuspicious) {
+        console.warn("⚠️ Discarding invalid (lowercased) FBC cookie:", fbc);
+        fbc = null; 
+      }
+    }
+  }
+
   // FBC Fallback 1: LocalStorage
   if (!fbc && typeof window !== 'undefined' && window.localStorage) {
       const backup = localStorage.getItem('_fbc_backup');
@@ -114,10 +153,23 @@ export const getFbcFbpCookies = (): { fbc: string | null; fbp: string | null } =
           const ts = localStorage.getItem('_fbc_timestamp');
           const maxAge = 90 * 24 * 60 * 60 * 1000;
           if (ts && (Date.now() - parseInt(ts)) < maxAge) {
-             fbc = backup;
-             // Try to revive cookie
-             setCookieHelper('_fbc', backup, 90);
-             console.log('♻️ FBC revived from LocalStorage:', fbc);
+             // Verify backup value isn't also suspicious
+             const parts = backup.split('.');
+             let isBackupSuspicious = false;
+             if (parts.length >= 4) {
+               const fbclid = parts.slice(3).join('.');
+               isBackupSuspicious = /^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20;
+             }
+
+             if (!isBackupSuspicious) {
+               fbc = backup;
+               // Try to revive cookie
+               setCookieHelper('_fbc', backup, 90);
+               console.log('♻️ FBC revived from LocalStorage:', fbc);
+             } else {
+               localStorage.removeItem('_fbc_backup');
+               localStorage.removeItem('_fbc_timestamp');
+             }
           }
       }
   }
