@@ -6,7 +6,7 @@
 ## 1. THE ISSUE: Triple-Firing & Data Inconsistency
 Previously, the system was sending up to 3 conflicting signals for a single Purchase:
 1.  **Meta Automatic Matching:** Meta trying to guess the conversion.
-2.  **Backend Webhook (`tripay-callback`):** Fired the moment payment was successful. **Problem:** It was "too fast" and often failed to sync browser cookies (`fbc`, `fbp`) from the database in time, leading to low match quality.
+2.  **Backend Webhook (`tripay-callback`):** Fired the moment payment was successful. **Problem:** It was "too fast" and often failed to sync browser cookies (`fbc`, `fbp`) from the database in time, leading to low match quality, must key is Imported `waitForFbp` 
 3.  **Frontend Listener:** Also firing a CAPI event.
 
 This created a "Race Condition" and messy deduplication in the Meta Events Manager.
@@ -25,7 +25,7 @@ We have moved to **"Option A" (Frontend-Driven CAPI)** to ensure 100% accuracy o
 ## 3. NEW WORKFLOW (The "Only Truth")
 1.  **User Pays** -> Tripay/PayPal confirms.
 2.  **Backend Updates DB** -> `global_product` status becomes `PAID`.
-3.  **Frontend Realtime Triggers** -> Detects the change.
+3.  **Frontend Realtime Triggers** -> Imported `waitForFbp` Detects the change. 
 4.  **Frontend Sends CAPI** -> Command sent to `capi-universal` with full browser cookies attached.
 5.  **Deduplication** -> Meta receives both signals with matching `eventID` (`tripay_reference`) and merges them perfectly.
 
