@@ -12,55 +12,55 @@ import { AppLoader } from "@/components/AppLoader";
 import { Auth } from "./pages/Auth";
 import { Signup } from "./pages/Signup";
 import { ResetPassword } from "./pages/ResetPassword";
-import Index from "./pages/Index";
+const Index = React.lazy(() => import("./pages/Index"));
 
-import DietPage from "./pages/ebook_indo/ebook_langsing";
-import SlimPage from "./pages/usa/usa_ebookslim";
+const DietPage = React.lazy(() => import("./pages/ebook_indo/ebook_langsing"));
+const SlimPage = React.lazy(() => import("./pages/usa/usa_ebookslim"));
 
-import Page15jt from "./pages/ebook_indo/vip_15jt";
-import ELVision3000 from "./pages/usa/usa_3000";
-import Pay3000 from "./pages/usa/usa_pay3000";
-import Survey3000 from "./pages/usa/usa_3000survey";
-import PaypalPaymentPage from "./pages/usa/usa_paypal"; // Import the new PaypalPaymentPage component
-import AffiliatePage from "./pages/tools_pages/affiliate"; // Import the new AffiliatePage component
-import ArifAffiliate from "./pages/ebook_indo/arifaffiliate"; // Import the ArifAffiliate component
-import EbookElvisionPaymentPage from "./pages/ebook_indo/ebook_elvision"; // Import the EbookElvisionPaymentPage component
-import EbookHealthLP from "./pages/usa/usa_ebookhealth"; // Import the EbookHealthLP component
-import EbookPercayaDiriLP from "./pages/ebook_indo/ebook_percayadiri"; // Import the EbookPercayaDiriLP component
-import EbookFeminineLanding from "./pages/ebook_indo/ebook_feminine"; // Import the EbookFeminineLanding component
-import UsaEbookFeminine from "./pages/usa/usa_ebookfeminine"; // Import the UsaEbookFeminine component
-import UangPanasLanding from "./pages/ebook_indo/uangpanas"; // Import the UangPanasLanding component
-import LeadMagnet from "./pages/tools_pages/leadmagnet"; // Import the LeadMagnet component
-import PayPalFinish from "./pages/usa/usa_paypal_finish"; // Import the PayPalFinish component
-import FitFactorLP from "./pages/brands/fitfactorlp";
-import NotFound from "./pages/NotFound";
+const Page15jt = React.lazy(() => import("./pages/ebook_indo/vip_15jt"));
+const ELVision3000 = React.lazy(() => import("./pages/usa/usa_3000"));
+const Pay3000 = React.lazy(() => import("./pages/usa/usa_pay3000"));
+const Survey3000 = React.lazy(() => import("./pages/usa/usa_3000survey"));
+const PaypalPaymentPage = React.lazy(() => import("./pages/usa/usa_paypal"));
+const AffiliatePage = React.lazy(() => import("./pages/tools_pages/affiliate"));
+const ArifAffiliate = React.lazy(() => import("./pages/ebook_indo/arifaffiliate"));
+const EbookElvisionPaymentPage = React.lazy(() => import("./pages/ebook_indo/ebook_elvision"));
+const EbookHealthLP = React.lazy(() => import("./pages/usa/usa_ebookhealth"));
+const EbookPercayaDiriLP = React.lazy(() => import("./pages/ebook_indo/ebook_percayadiri"));
+const EbookFeminineLanding = React.lazy(() => import("./pages/ebook_indo/ebook_feminine"));
+const UsaEbookFeminine = React.lazy(() => import("./pages/usa/usa_ebookfeminine"));
+const UangPanasLanding = React.lazy(() => import("./pages/ebook_indo/uangpanas"));
+const LeadMagnet = React.lazy(() => import("./pages/tools_pages/leadmagnet"));
+const PayPalFinish = React.lazy(() => import("./pages/usa/usa_paypal_finish"));
+const FitFactorLP = React.lazy(() => import("./pages/brands/fitfactorlp"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
 import { Terms } from "./pages/Terms";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 
-import { DeleteAccount } from "./pages/DeleteAccount";
-import Formid from "./pages/Formid";
+const DeleteAccount = React.lazy(() => import("./pages/DeleteAccount").then(module => ({ default: module.DeleteAccount })));
+const Formid = React.lazy(() => import("./pages/Formid"));
 
 import Pricing from "./pages/Pricing";
-import DrelfPaymentPage from "./pages/brands/drelf"; // Import the new DrelfPaymentPage component
-import FitfactorPaymentPage from "./pages/brands/fitfactor";
-import HungrylaterPaymentPage from "./pages/brands/hungrylater";
-import ParfumPaymentPage from "./pages/brands/elroyaleparfum";
-import DevPaymentPage from "./pages/dev";
-import JewelryPaymentPage from "./pages/brands/elroyaljewelry";
-import { WhatIsPro } from "./components/whatispro";
+const DrelfPaymentPage = React.lazy(() => import("./pages/brands/drelf"));
+const FitfactorPaymentPage = React.lazy(() => import("./pages/brands/fitfactor"));
+const HungrylaterPaymentPage = React.lazy(() => import("./pages/brands/hungrylater"));
+const ParfumPaymentPage = React.lazy(() => import("./pages/brands/elroyaleparfum"));
+const DevPaymentPage = React.lazy(() => import("./pages/dev"));
+const JewelryPaymentPage = React.lazy(() => import("./pages/brands/elroyaljewelry"));
+const WhatIsPro = React.lazy(() => import("./components/whatispro").then(module => ({ default: module.WhatIsPro })));
 const Payment = React.lazy(() => import("./pages/Payment").then(module => ({ default: module.Payment })));
-import ProUpgradePage from "./pages/prostatus";
+const ProUpgradePage = React.lazy(() => import("./pages/prostatus"));
 import { AudioProvider } from "@/contexts/AudioContext";
 import UpdateBanner from "./updatebanner";
-import Intro from "./pages/intro";
-import DisplayPage from "./pages/display";
-import ReportSales from "./pages/tools_pages/reportsales";
-import DrelfLpPage from "./pages/brands/drelflp";
-import Testimony from "./pages/testimony"; // Import the new Testimony component
-import CreatorPage from "./pages/tools_pages/creator_api";
-import ResellerLanding from "./pages/tools_pages/reseller";
-import Pixels from "./pages/tools_pages/pixels";
-import RisetPage from "./pages/tools_pages/riset";
+const Intro = React.lazy(() => import("./pages/intro"));
+const DisplayPage = React.lazy(() => import("./pages/display"));
+const ReportSales = React.lazy(() => import("./pages/tools_pages/reportsales"));
+const DrelfLpPage = React.lazy(() => import("./pages/brands/drelflp"));
+const Testimony = React.lazy(() => import("./pages/testimony"));
+const CreatorPage = React.lazy(() => import("./pages/tools_pages/creator_api"));
+const ResellerLanding = React.lazy(() => import("./pages/tools_pages/reseller"));
+const Pixels = React.lazy(() => import("./pages/tools_pages/pixels"));
+const RisetPage = React.lazy(() => import("./pages/tools_pages/riset"));
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";

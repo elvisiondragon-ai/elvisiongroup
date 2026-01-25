@@ -1,8 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { Home } from "./Home";
 
 // Heavy components loaded lazily
+const Home = lazy(() => import("./Home").then(module => ({ default: module.Home })));
 const Chat = lazy(() => import("./Chat").then(module => ({ default: module.Chat })));
 const Leaderboard = lazy(() => import("./Leaderboard").then(module => ({ default: module.Leaderboard })));
 const Profile = lazy(() => import("./Profile").then(module => ({ default: module.Profile })));

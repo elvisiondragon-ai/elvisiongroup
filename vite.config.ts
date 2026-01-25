@@ -125,10 +125,11 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'supabase-vendor': ['@supabase/supabase-js'],
-          'ui-vendor': ['@radix-ui/react-toast', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          'ui-vendor': ['@radix-ui/react-toast', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', 'vaul', 'cmdk'],
           'animation-vendor': ['framer-motion'],
           'chart-vendor': ['recharts'],
           'icons-vendor': ['lucide-react', 'react-icons'],
+          'utils-vendor': ['date-fns', 'i18next', 'i18next-browser-languagedetector', 'i18next-http-backend', 'embla-carousel-react'],
         },
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.');
