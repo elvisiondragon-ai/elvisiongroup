@@ -38,58 +38,69 @@ const WhatsAppButton = () => (
 );
 
 // URL of the deployed Supabase Edge Function for CAPI
-const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-fitfactor';
+const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
+const PIXEL_ID = '1797660474333865';
 
-// Helper to extract _fbp and _fbc cookies
-const getFBCookies = () => {
-  const cookies = document.cookie.split(';');
-  let fbp, fbc;
-  for (const cookie of cookies) {
-    const trimmedCookie = cookie.trim();
-    if (trimmedCookie.startsWith('_fbp=')) {
-      fbp = trimmedCookie.substring('_fbp='.length);
-    } else if (trimmedCookie.startsWith('_fbc=')) {
-      fbc = trimmedCookie.substring('_fbc='.length);
-    }
-  }
-  return { fbp, fbc };
-};
-
-// Helper function to send events to the CAPI Edge Function
+// Helper to send CAPI events
 const sendCAPIEvent = async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
-  const { fbp, fbc } = getFBCookies();
+  const { fbc, fbp } = getFbcFbpCookies();
 
   try {
-    const response = await fetch(CAPI_EDGE_FUNCTION_URL, {
+    // 🧠 NAME SPLITTING LOGIC
+    let fn = userData.fn;
+    let ln = userData.ln;
+    
+    // If we don't have explicit fn/ln, try to derive from name or email
+    let rawName = userData.fn || (userData.email ? userData.email.split('@')[0] : undefined);
+    
+    if (rawName && !ln && rawName.includes(' ')) {
+      const parts = rawName.trim().split(/\s+/);
+      fn = parts[0];
+      ln = parts.slice(1).join(' ');
+    } else if (!fn && rawName) {
+      fn = rawName;
+    }
+
+    // 🎯 FACEBOOK LOGIN ID EXTRACTION
+    const { data: { session } } = await supabase.auth.getSession();
+    let db_id = userData.db_id;
+    
+    const fbIdentity = session?.user?.identities?.find(id => id.provider === 'facebook');
+    if (fbIdentity) {
+      db_id = fbIdentity.id;
+    }
+
+    const payload = {
+      pixelId: PIXEL_ID,
+      eventName: eventName,
+      userData: {
+        ...userData,
+        fn,
+        ln,
+        db_id,
+        fbp: fbp,
+        fbc: fbc,
+        client_user_agent: navigator.userAgent
+      },
+      customData: customData,
+      eventId: eventId,
+      eventSourceUrl: window.location.href,
+    };
+
+    console.log(`📤 Sending CAPI Event (Universal): ${eventName}`, payload);
+
+    await fetch(CAPI_EDGE_FUNCTION_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        eventName,
-        userData: {
-          ...userData,
-          fn: userData.fn || userData.email?.split('@')[0], // Ensure fn is sent
-          fbp,
-          fbc,
-          client_ip_address: null, // Edge function will extract
-          client_user_agent: navigator.userAgent,
-        },
-        customData,
-        eventId, // Pass eventId for deduplication
-      }),
+      body: JSON.stringify(payload),
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error(`Error sending CAPI event ${eventName}:`, errorData);
-    } else {
-      console.log(`CAPI event ${eventName} sent successfully.`);
-    }
   } catch (error) {
-    console.error(`Network error sending CAPI event ${eventName}:`, error);
+    console.error(`❌ Failed to send CAPI event (${eventName}):`, error);
   }
 };
+
 
 export default function FitfactorPaymentPage() {
   const navigate = useNavigate();

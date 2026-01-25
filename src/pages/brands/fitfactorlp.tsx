@@ -32,26 +32,29 @@ const FitFactorLP = () => {
   const CAPI_EDGE_FUNCTION_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal';
   const PIXEL_ID = '1797660474333865';
 
-  // Helper to extract _fbp and _fbc cookies
-  const getFBCookies = () => {
-    const cookies = document.cookie.split(';');
-    let fbp, fbc;
-    for (const cookie of cookies) {
-      const trimmedCookie = cookie.trim();
-      if (trimmedCookie.startsWith('_fbp=')) {
-        fbp = trimmedCookie.substring('_fbp='.length);
-      } else if (trimmedCookie.startsWith('_fbc=')) {
-        fbc = trimmedCookie.substring('_fbc='.length);
-      }
-    }
-    return { fbp, fbc };
-  };
-
   // Helper function to send events to the CAPI Edge Function
   const sendCAPIEvent = useCallback(async (eventName: string, userData: any = {}, customData: any = {}, eventId?: string) => {
-    const { fbp, fbc } = getFBCookies();
+    const { fbp, fbc } = getFbcFbpCookies();
 
     try {
+      // 🧠 NAME SPLITTING LOGIC
+      let fn = userData.fn;
+      let ln = userData.ln;
+      let rawName = userData.fn || (userData.email ? userData.email.split('@')[0] : undefined);
+      if (rawName && !ln && rawName.includes(' ')) {
+        const parts = rawName.trim().split(/\s+/);
+        fn = parts[0];
+        ln = parts.slice(1).join(' ');
+      } else if (!fn && rawName) {
+        fn = rawName;
+      }
+
+      // 🎯 FACEBOOK LOGIN ID EXTRACTION
+      const { data: { session } } = await supabase.auth.getSession();
+      let db_id = userData.db_id;
+      const fbIdentity = session?.user?.identities?.find(id => id.provider === 'facebook');
+      if (fbIdentity) db_id = fbIdentity.id;
+
       const response = await fetch(CAPI_EDGE_FUNCTION_URL, {
         method: 'POST',
         headers: {
@@ -62,13 +65,15 @@ const FitFactorLP = () => {
           eventName,
           userData: {
             ...userData,
-            fn: userData.fn || userData.email?.split('@')[0], // Ensure fn is sent
+            fn,
+            ln,
+            db_id,
             fbp,
             fbc,
             client_user_agent: navigator.userAgent,
           },
           customData,
-          eventId, // Pass eventId to the Edge Function
+          eventId, 
         }),
       });
 

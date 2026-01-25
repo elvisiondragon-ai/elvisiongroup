@@ -26,12 +26,39 @@ const EbookHealthLP = () => {
 
       const { fbc, fbp } = getFbcFbpCookies();
 
+      // 🧠 NAME SPLITTING LOGIC (For Surname/LN support)
+      let fn = userData.fn;
+      let ln = userData.ln;
+      
+      // Try to get name from userData, or state, or session
+      let rawName = userData.fn || (email ? email.split('@')[0] : undefined);
+      
+      // If we have a full name in rawName but no last name, split it
+      if (rawName && !ln && rawName.includes(' ')) {
+        const parts = rawName.trim().split(/\s+/);
+        fn = parts[0];
+        ln = parts.slice(1).join(' ');
+      } else if (!fn && rawName) {
+        fn = rawName;
+      }
+
+      // 🎯 FACEBOOK LOGIN ID EXTRACTION
+      const { data: { session } } = await supabase.auth.getSession();
+      let db_id = userData.db_id;
+      
+      const fbIdentity = session?.user?.identities?.find(id => id.provider === 'facebook');
+      if (fbIdentity) {
+        db_id = fbIdentity.id;
+      }
+
       const body: any = {
         pixelId: PIXEL_ID,
         eventName,
         userData: {
           ...userData,
-          fn: userData.email ? userData.email.split('@')[0] : (email ? email.split('@')[0] : undefined),
+          fn,
+          ln,
+          db_id, // Map to facebook_login_id
           fbp,
           fbc,
           client_user_agent: navigator.userAgent

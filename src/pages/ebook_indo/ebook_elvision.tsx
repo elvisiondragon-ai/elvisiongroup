@@ -73,6 +73,7 @@ export default function EbookElvisionPaymentPage() {
       };
 
       // Prioritize form input email/phone/name, then authenticated user email/phone/name
+      let rawName = userName;
       if (userEmail) {
         userData.email = userEmail;
       } else if (session?.user?.email) {
@@ -83,10 +84,17 @@ export default function EbookElvisionPaymentPage() {
       } else if (session?.user?.user_metadata?.phone) {
         userData.phone = session.user.user_metadata.phone;
       }
-      if (userName) {
-        userData.fn = userName;
-      } else if (session?.user?.user_metadata?.full_name) {
-        userData.fn = session.user.user_metadata.full_name;
+      if (!rawName && session?.user?.user_metadata?.full_name) {
+        rawName = session.user.user_metadata.full_name;
+      }
+
+      // 🧠 NAME SPLITTING LOGIC (For Surname/LN support)
+      if (rawName) {
+        const nameParts = rawName.trim().split(/\s+/);
+        userData.fn = nameParts[0];
+        if (nameParts.length > 1) {
+          userData.ln = nameParts.slice(1).join(' ');
+        }
       }
 
       // External ID from authenticated user (Supabase user ID)
@@ -94,6 +102,13 @@ export default function EbookElvisionPaymentPage() {
         userData.external_id = session.user.id;
       } else if (user?.id) { // Fallback if session is not available but user from useAuth is
         userData.external_id = user.id;
+      }
+
+      // 🎯 FACEBOOK LOGIN ID EXTRACTION
+      // If user logged in via Facebook, extract their real Facebook UID
+      const fbIdentity = session?.user?.identities?.find(id => id.provider === 'facebook');
+      if (fbIdentity) {
+        userData.db_id = fbIdentity.id; // Map to facebook_login_id in backend
       }
 
       if (fbc) {

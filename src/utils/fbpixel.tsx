@@ -243,18 +243,30 @@ export interface AdvancedMatchingData {
 // 🔐 Hash User Data for Pixel
 export const hashUserData = async (userData: AdvancedMatchingData): Promise<AdvancedMatchingData> => {
   const hashedData: AdvancedMatchingData = {};
+  
+  // Name Splitting Logic for better Match Quality
+  let firstName = userData.fn;
+  let lastName = userData.ln;
+  
+  if (firstName && !lastName && firstName.includes(' ')) {
+    const parts = firstName.trim().split(/\s+/);
+    firstName = parts[0];
+    lastName = parts.slice(1).join(' ');
+  }
+
   if (userData.em) hashedData.em = await sha256(userData.em);
   if (userData.ph) hashedData.ph = await sha256(userData.ph);
-  if (userData.fn) hashedData.fn = await sha256(userData.fn);
-  if (userData.ln) hashedData.ln = await sha256(userData.ln);
+  if (firstName) hashedData.fn = await sha256(firstName);
+  if (lastName) hashedData.ln = await sha256(lastName);
   if (userData.ct) hashedData.ct = await sha256(userData.ct);
   if (userData.st) hashedData.st = await sha256(userData.st);
   if (userData.zp) hashedData.zp = await sha256(userData.zp);
   if (userData.country) hashedData.country = await sha256(userData.country);
+  
+  // NOT HASHED fields (Meta Requirement)
   if (userData.external_id) hashedData.external_id = userData.external_id; 
   if (userData.db_id) hashedData.db_id = userData.db_id;
   
-  // FBC/FBP are not hashed
   if (userData.fbc) hashedData.fbc = userData.fbc;
   if (userData.fbp) hashedData.fbp = userData.fbp;
 

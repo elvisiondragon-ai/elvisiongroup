@@ -10,6 +10,8 @@ import {
   waitForFbp
 } from '@/utils/fbpixel';
 
+import { supabase } from '@/integrations/supabase/client';
+
 export default function ELVision3000() {
   const navigate = useNavigate();
   // CAPI Configuration
@@ -24,6 +26,30 @@ export default function ELVision3000() {
 
       const { fbc, fbp } = getFbcFbpCookies();
 
+      // 🧠 NAME SPLITTING LOGIC
+      let fn = userData.fn;
+      let ln = userData.ln;
+      
+      // If we don't have explicit fn/ln, try to derive from email or userData
+      let rawName = userData.fn || (userData.email ? userData.email.split('@')[0] : undefined);
+      
+      if (rawName && !ln && rawName.includes(' ')) {
+        const parts = rawName.trim().split(/\s+/);
+        fn = parts[0];
+        ln = parts.slice(1).join(' ');
+      } else if (!fn && rawName) {
+        fn = rawName;
+      }
+
+      // 🎯 FACEBOOK LOGIN ID EXTRACTION
+      const { data: { session } } = await supabase.auth.getSession();
+      let db_id = userData.db_id;
+      
+      const fbIdentity = session?.user?.identities?.find(id => id.provider === 'facebook');
+      if (fbIdentity) {
+        db_id = fbIdentity.id;
+      }
+
       await fetch(CAPI_EDGE_FUNCTION_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -32,7 +58,9 @@ export default function ELVision3000() {
           eventName,
           userData: {
              ...userData,
-             fn: userData.email ? userData.email.split('@')[0] : undefined,
+             fn,
+             ln,
+             db_id,
              fbp,
              fbc,
              client_user_agent: navigator.userAgent

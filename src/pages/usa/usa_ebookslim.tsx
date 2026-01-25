@@ -148,22 +148,43 @@ const SlimPage = () => {
         testCode: 'TEST15337'
       };
 
-      const { fbc, fbp } = getFbcFbpCookies();
-      const userData: any = { client_user_agent: navigator.userAgent };
+      // 🧠 NAME SPLITTING LOGIC
+      let fn = undefined;
+      let ln = undefined;
+      let rawName = undefined;
 
       if (userEmail) {
-        userData.email = userEmail;
-        userData.fn = userEmail.split('@')[0]; // Derived name from email
+        rawName = userEmail.split('@')[0];
       } else if (session?.user?.email) {
-        userData.email = session.user.email;
-        userData.fn = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+        rawName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
       }
+
+      if (rawName) {
+        const parts = rawName.trim().split(/\s+/);
+        fn = parts[0];
+        if (parts.length > 1) ln = parts.slice(1).join(' ');
+      }
+
+      const { fbc, fbp } = getFbcFbpCookies();
+      const userData: any = { 
+        client_user_agent: navigator.userAgent,
+        fn,
+        ln,
+        fbc,
+        fbp
+      };
+
+      if (userEmail) userData.email = userEmail;
+      else if (session?.user?.email) userData.email = session.user.email;
 
       if (session?.user?.id) userData.external_id = session.user.id;
       else if (user?.id) userData.external_id = user.id;
 
-      if (fbc) userData.fbc = fbc;
-      if (fbp) userData.fbp = fbp;
+      // 🎯 FACEBOOK LOGIN ID EXTRACTION
+      const fbIdentity = session?.user?.identities?.find(id => id.provider === 'facebook');
+      if (fbIdentity) {
+        userData.db_id = fbIdentity.id;
+      }
       
       body.userData = userData;
       await supabase.functions.invoke('capi-universal', { body });
