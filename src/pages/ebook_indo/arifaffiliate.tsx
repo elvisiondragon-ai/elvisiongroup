@@ -189,13 +189,20 @@ const ArifEbookLanding = () => {
             transaction_id: eventId
           }, eventId, pixelId, purchaseUserData);
 
-          // Send CAPI Purchase
-          sendCapiEvent('Purchase', {
-            content_ids: [productNameBackend],
-            content_type: 'product',
-            value: totalAmount,
-            currency: 'IDR'
-          }, eventId);
+          // FIRST-WIN DEDUPLICATION CHECK
+          const isBackendCapiSent = payload.new?.capi_purchase_sent === true;
+
+          if (isBackendCapiSent) {
+             console.log(`⏭️ CAPI Purchase Skipped (Backend already sent)`);
+          } else {
+             // Send CAPI Purchase (Frontend wins)
+             sendCapiEvent('Purchase', {
+               content_ids: [productNameBackend],
+               content_type: 'product',
+               value: totalAmount,
+               currency: 'IDR'
+             }, eventId);
+          }
 
           // Optional: redirect to a thank you page or just show success state
         }

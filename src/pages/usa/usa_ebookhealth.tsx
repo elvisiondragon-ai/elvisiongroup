@@ -152,7 +152,15 @@ const EbookHealthLP = () => {
 
           // Use Purchase tracker from utility
           trackCustomEvent('Purchase', eventData, eventId, PIXEL_ID, { em: email });
-          sendCAPIEvent('Purchase', { email }, eventData, eventId);
+
+          // FIRST-WIN DEDUPLICATION CHECK
+          const isBackendCapiSent = payload.new?.capi_purchase_sent === true;
+
+          if (isBackendCapiSent) {
+             console.log(`⏭️ CAPI Purchase Skipped (Backend already sent)`);
+          } else {
+             sendCAPIEvent('Purchase', { email }, eventData, eventId);
+          }
         }
       }).subscribe();
 

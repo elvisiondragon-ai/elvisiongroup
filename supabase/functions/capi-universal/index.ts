@@ -16,6 +16,17 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
 
+// 🎯 HARDCODED PIXEL CONFIGURATION (Non-Confidential Mapping)
+const PIXEL_CONFIG: Record<string, string> = {
+  '3319324491540889': 'METACAPI', // EbookIndo Pixel
+  '1393383179182528': 'CAPI_USA',  // USA KAYA Pixel
+};
+
+// Initialize Supabase Client for Logging (Global Scope for Warm Starts)
+const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -34,20 +45,9 @@ Deno.serve(async (req) => {
   // --- Configuration ---
   const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl } = body;
 
-  // 🎯 HARDCODED PIXEL CONFIGURATION (Non-Confidential Mapping)
-  const PIXEL_CONFIG: Record<string, string> = {
-    '3319324491540889': 'METACAPI', // EbookIndo Pixel
-    '1393383179182528': 'CAPI_USA',  // USA KAYA Pixel
-  };
-
   // Determine which secret to use
   const secretName = PIXEL_CONFIG[pixelId] || 'METACAPI';
   let FACEBOOK_ACCESS_TOKEN = Deno.env.get(secretName);
-
-  // Initialize Supabase Client for Logging
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-  const supabase = createClient(supabaseUrl, supabaseKey);
 
   if (!FACEBOOK_ACCESS_TOKEN) {
     console.error(`Configuration Error: ${secretName} Access Token not configured.`);

@@ -475,12 +475,19 @@ export default function EbookElvisionPaymentPage() {
               currency: 'IDR'
             }, eventId, pixelId, userDataPixel);
 
-            sendCapiEvent('Purchase', {
-              content_ids: [productNameBackend],
-              content_type: 'product',
-              value: payload.new?.amount || totalAmount,
-              currency: 'IDR'
-            }, eventId);
+            // FIRST-WIN DEDUPLICATION CHECK
+            const isBackendCapiSent = payload.new?.capi_purchase_sent === true;
+
+            if (isBackendCapiSent) {
+               console.log(`⏭️ CAPI Purchase Skipped (Backend already sent)`);
+            } else {
+               sendCapiEvent('Purchase', {
+                 content_ids: [productNameBackend],
+                 content_type: 'product',
+                 value: payload.new?.amount || totalAmount,
+                 currency: 'IDR'
+               }, eventId);
+            }
             // Optionally navigate after showing toast
             // navigate('/success-page'); 
           } else {

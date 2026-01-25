@@ -18,6 +18,7 @@ import {
   trackViewContentEvent, 
   trackAddPaymentInfoEvent, 
   trackPurchaseEvent,
+  trackCustomEvent,
   AdvancedMatchingData,
   getFbcFbpCookies,
   waitForFbp
@@ -170,25 +171,48 @@ export default function UangPanasLanding() {
           const userData: AdvancedMatchingData = {
             em: userEmail,
             ph: phoneNumber,
-            fn: userName, // Assuming name is full name, but using it as FN for simplicity or split if needed
+            fn: userName,
             external_id: user?.id
           };
           
-          // Track Purchase with Advanced Matching and Deduplication
-          trackPurchaseEvent({
-            content_ids: [productNameBackend],
-            content_type: 'product',
-            value: totalAmount,
-            currency: 'IDR'
-          }, eventId, pixelId, userData);
+          // TEST MODE CHECK
+          const isTestUser = userEmail === 'elvisiondragon@gmail.com';
+          const finalEventName = isTestUser ? 'Test_Purchase' : 'Purchase';
 
-          // Send CAPI Purchase
-          sendCapiEvent('Purchase', {
-            content_ids: [productNameBackend],
-            content_type: 'product',
-            value: totalAmount,
-            currency: 'IDR'
-          }, eventId);
+          if (isTestUser) {
+              console.log('🧪 TEST MODE DETECTED: Firing Test_Purchase instead of Purchase');
+              // Track Custom Event for Test
+              trackCustomEvent(finalEventName, {
+                content_ids: [productNameBackend],
+                content_type: 'product',
+                value: totalAmount,
+                currency: 'IDR'
+              }, eventId, pixelId, userData);
+          } else {
+              // Track Standard Purchase
+              trackPurchaseEvent({
+                content_ids: [productNameBackend],
+                content_type: 'product',
+                value: totalAmount,
+                currency: 'IDR'
+              }, eventId, pixelId, userData);
+          }
+
+          // FIRST-WIN DEDUPLICATION CHECK
+          // If Backend already sent CAPI (capi_purchase_sent = true), Frontend skips it.
+          const isBackendCapiSent = payload.new?.capi_purchase_sent === true;
+          
+          if (isBackendCapiSent) {
+             console.log(`⏭️ CAPI ${finalEventName} Skipped (Backend already sent)`);
+          } else {
+             // Send CAPI (Frontend wins)
+             sendCapiEvent(finalEventName, {
+               content_ids: [productNameBackend],
+               content_type: 'product',
+               value: totalAmount,
+               currency: 'IDR'
+             }, eventId);
+          }
           
           // Optional: redirect to a thank you page or just show success state
         }
@@ -265,11 +289,12 @@ export default function UangPanasLanding() {
         customData: eventData,
         eventId: eventId,
         eventSourceUrl: window.location.href,
+        testCode: 'TEST9597' // ADDED FOR VISUAL VERIFICATION
       };
 
       // Get FBC and FBP from cookies using the utility function
       const { fbc, fbp } = getFbcFbpCookies();
-
+      
       const userData: any = {
         client_user_agent: navigator.userAgent,
       };
@@ -307,9 +332,17 @@ export default function UangPanasLanding() {
       
       body.userData = userData;
 
-      await supabase.functions.invoke('capi-universal', { body });
+      console.log(`🚀 Sending CAPI Event: ${eventName}`, body); // DEBUG LOG
+
+      const { data, error } = await supabase.functions.invoke('capi-universal', { body });
+      
+      if (error) {
+          console.error(`❌ CAPI Error for ${eventName}:`, error);
+      } else {
+          console.log(`✅ CAPI Success for ${eventName}:`, data);
+      }
     } catch (err) {
-      console.error('Failed to send CAPI event:', err);
+      console.error('Failed to send CAPI event (Critical):', err);
     }
   };
 
