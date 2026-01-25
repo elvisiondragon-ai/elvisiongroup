@@ -90,14 +90,20 @@ export const getFbcClickIdFromUrl = (): string | null => {
   }
 
   if (fbclid) {
-    // Real fbclids are mixed case. If it's long and ONLY lowercase/numbers, it's likely invalid/modified (manual test).
-    // ALSO REJECT: Any value containing "TEST" (case-insensitive)
-    const isSuspicious = 
-        (/^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20) ||
-        /test/i.test(fbclid);
+    // 🛡️ SECURITY & QUALITY CHECK
+    // Real fbclids are mixed case and reasonably long.
+    // We reject if:
+    // 1. It contains "test" (case-insensitive)
+    // 2. It is too short (< 15 chars), likely truncated
+    // 3. It has NO uppercase letters (likely auto-lowercased by some tool/browser)
+    
+    const hasUppercase = /[A-Z]/.test(fbclid);
+    const isTooShort = fbclid.length < 15;
+    const isTest = /test/i.test(fbclid);
+    const isAllLowercase = !hasUppercase && /[a-z]/.test(fbclid); // It has letters but no uppercase
 
-    if (isSuspicious) {
-      console.warn("⚠️ Ignoring suspicious fbclid from URL:", fbclid);
+    if (isTest || isTooShort || isAllLowercase) {
+      console.warn("⚠️ Ignoring invalid/suspicious fbclid from URL:", fbclid);
       return null;
     }
     return fbclid;
@@ -152,13 +158,18 @@ export const getFbcFbpCookies = (): { fbc: string | null; fbp: string | null } =
     // Structure: fb.1.timestamp.fbclid
     if (parts.length >= 4) {
       const fbclid = parts.slice(3).join('.');
-      // Real fbclids are mixed case. If it's long and ONLY lowercase/numbers, it's likely invalid.
-      // ALSO REJECT: Any value containing "TEST" (case-insensitive)
-      const isSuspicious = 
-        (/^[a-z0-9_\-\.]+$/.test(fbclid) && /[a-z]/.test(fbclid) && fbclid.length > 20) ||
-        /test/i.test(fbclid);
       
-      if (isSuspicious) {
+      // 🛡️ STRICT VALIDATION (Updated)
+      // 1. Must have Uppercase (mixed case)
+      // 2. Must be >= 15 chars (not truncated)
+      // 3. No "test"
+      
+      const hasUppercase = /[A-Z]/.test(fbclid);
+      const isTooShort = fbclid.length < 15;
+      const isTest = /test/i.test(fbclid);
+      const isAllLowercase = !hasUppercase && /[a-z]/.test(fbclid);
+
+      if (isTest || isTooShort || isAllLowercase) {
         console.warn("⚠️ Discarding invalid (suspicious) FBC cookie:", fbc);
         fbc = null; 
       }
