@@ -25,7 +25,6 @@ import { AdminBadge } from "@/components/AdminBadge";
 import { TutorialButton } from "@/components/TutorialButton";
 import { AffiliateGuideModal } from "@/components/AffiliateGuideModal";
 import { cn } from "@/lib/utils";
-import heroImage from "@/assets/hero-meditation.jpg";
 // import faviconImage from "@/assets/favicon.png"; // No longer needed, using /favicon.png directly
 import { handleFbcCookieManager, trackPageViewEvent, initFacebookPixelWithLogging } from "@/utils/fbpixel";
 
@@ -469,9 +468,7 @@ export function Home({
   return <div className="min-h-screen bg-background pb-20">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="h-64 bg-cover bg-center bg-no-repeat" style={{
-        backgroundImage: `url(https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/bg-website.png)`
-      }}>
+        <div className="h-64 bg-gradient-to-br from-gray-900 via-slate-950 to-purple-950" >
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
           <div className="absolute top-4 right-4">
           </div>
@@ -486,7 +483,7 @@ export function Home({
                   </span>
                 </h1>
                 <p className="text-muted-foreground">
-                  Ecosystem eL Vision Group - Secret of Effortless Wealthy Life
+                  Ecosystem eL Vision Group <br /> Tujuan Hidup Hanya untuk Bahagia dan Bantu Sesama
                 </p>
               </div>
             </div>

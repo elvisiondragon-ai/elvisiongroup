@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { subDays, isAfter, parseISO, isSameDay } from 'date-fns';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Commission {
   id: string;
@@ -76,40 +77,41 @@ export default function AffiliatePage() {
       try {
         setAffiliateCode(user.id);
 
-        // Fetch commissions
-        const { data: commissionData, error: commissionError } = await supabase
-          .from('commissions')
-          .select('*')
-          .eq('affiliate_user_id', user.id)
-          .order('sale_date', { ascending: false });
+        // Parallel Fetching
+        const [commissionsResult, profileResult, withdrawalsResult] = await Promise.all([
+          supabase
+            .from('commissions')
+            .select('*')
+            .eq('affiliate_user_id', user.id)
+            .order('sale_date', { ascending: false }),
+          supabase
+            .from('profiles')
+            .select('bank_name, account_number, account_holder, display_name')
+            .eq('user_id', user.id)
+            .single(),
+          supabase
+            .from('withdrawals')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+        ]);
 
-        if (commissionError) throw commissionError;
-        setCommissions(commissionData || []);
+        // Process Commissions
+        if (commissionsResult.error) throw commissionsResult.error;
+        setCommissions(commissionsResult.data || []);
 
-        // Fetch bank details and display name from profile
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('bank_name, account_number, account_holder, display_name')
-          .eq('user_id', user.id)
-          .single();
-
-        if (profileError && profileError.code !== 'PGRST116') throw profileError;
-        if (profileData) {
-          setBankName(profileData.bank_name || '');
-          setAccountNumber(profileData.account_number || '');
-          setAccountHolder(profileData.account_holder || '');
-          setDisplayName(profileData.display_name);
+        // Process Profile
+        if (profileResult.error && profileResult.error.code !== 'PGRST116') throw profileResult.error;
+        if (profileResult.data) {
+          setBankName(profileResult.data.bank_name || '');
+          setAccountNumber(profileResult.data.account_number || '');
+          setAccountHolder(profileResult.data.account_holder || '');
+          setDisplayName(profileResult.data.display_name);
         }
 
-        // Fetch withdrawals
-        const { data: withdrawalData, error: withdrawalError } = await supabase
-          .from('withdrawals')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (withdrawalError) throw withdrawalError;
-        setWithdrawals(withdrawalData || []);
+        // Process Withdrawals
+        if (withdrawalsResult.error) throw withdrawalsResult.error;
+        setWithdrawals(withdrawalsResult.data || []);
 
       } catch (err: any) {
         console.error("Error fetching affiliate data:", err.message);
@@ -195,18 +197,18 @@ export default function AffiliatePage() {
     }
   };
 
-  const filteredCommissions = commissions.filter(c => filterByDate(c.sale_date));
-  const filteredWithdrawals = withdrawals.filter(w => filterByDate(w.created_at));
+  const filteredCommissions = React.useMemo(() => commissions.filter(c => filterByDate(c.sale_date)), [commissions, timeFilter]);
+  const filteredWithdrawals = React.useMemo(() => withdrawals.filter(w => filterByDate(w.created_at)), [withdrawals, timeFilter]);
 
   // Display Stats (Filtered)
-  const displayTotalCommission = filteredCommissions.reduce((sum, c) => sum + c.commission_amount, 0);
-  const displayPaidOut = filteredWithdrawals.filter(w => w.status === 'approved').reduce((sum, w) => sum + w.amount, 0);
+  const displayTotalCommission = React.useMemo(() => filteredCommissions.reduce((sum, c) => sum + c.commission_amount, 0), [filteredCommissions]);
+  const displayPaidOut = React.useMemo(() => filteredWithdrawals.filter(w => w.status === 'approved').reduce((sum, w) => sum + w.amount, 0), [filteredWithdrawals]);
 
   // Wallet Balance (Always All Time)
-  const allTimeCommission = commissions.reduce((sum, c) => sum + c.commission_amount, 0);
-  const allTimePaidOut = withdrawals.filter(w => w.status === 'approved').reduce((sum, w) => sum + w.amount, 0);
-  const allTimePending = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + w.amount, 0);
-  const currentBalance = allTimeCommission - allTimePaidOut - allTimePending;
+  const allTimeCommission = React.useMemo(() => commissions.reduce((sum, c) => sum + c.commission_amount, 0), [commissions]);
+  const allTimePaidOut = React.useMemo(() => withdrawals.filter(w => w.status === 'approved').reduce((sum, w) => sum + w.amount, 0), [withdrawals]);
+  const allTimePending = React.useMemo(() => withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + w.amount, 0), [withdrawals]);
+  const currentBalance = React.useMemo(() => allTimeCommission - allTimePaidOut - allTimePending, [allTimeCommission, allTimePaidOut, allTimePending]);
 
   const generateAffiliateLink = () => {
     if (!affiliateCode) return;
@@ -227,7 +229,40 @@ export default function AffiliatePage() {
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center"><p>Memuat...</p></div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white p-6 pb-20">
+        <div className="max-w-4xl mx-auto py-12 space-y-8">
+          {/* Skeleton Header */}
+          <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-8 h-40 animate-pulse">
+             <Skeleton className="h-8 w-64 mb-4 bg-gray-800" />
+             <Skeleton className="h-4 w-32 bg-gray-800" />
+          </div>
+
+          {/* Skeleton Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-xl border border-gray-800 bg-gray-900/50 p-6 h-32 animate-pulse">
+                <Skeleton className="h-4 w-24 mb-4 bg-gray-800" />
+                <Skeleton className="h-8 w-32 bg-gray-800" />
+              </div>
+            ))}
+          </div>
+
+          {/* Skeleton Bank Details */}
+          <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6 h-64 animate-pulse">
+             <Skeleton className="h-6 w-48 mb-6 bg-gray-800" />
+             <div className="grid grid-cols-3 gap-4">
+                <Skeleton className="h-10 w-full bg-gray-800" />
+                <Skeleton className="h-10 w-full bg-gray-800" />
+                <Skeleton className="h-10 w-full bg-gray-800" />
+             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) return <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center space-y-4"><Button onClick={() => navigate('/auth')}>Login</Button></div>;
 
   return (
@@ -530,4 +565,3 @@ export default function AffiliatePage() {
     </div>
   );
 }
-

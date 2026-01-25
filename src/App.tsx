@@ -23,7 +23,7 @@ const Pay3000 = React.lazy(() => import("./pages/usa/usa_pay3000"));
 const Survey3000 = React.lazy(() => import("./pages/usa/usa_3000survey"));
 const PaypalPaymentPage = React.lazy(() => import("./pages/usa/usa_paypal"));
 const AffiliatePage = React.lazy(() => import("./pages/tools_pages/affiliate"));
-const ArifAffiliate = React.lazy(() => import("./pages/ebook_indo/arifaffiliate"));
+const ArifAffiliate = React.lazy(() => import("./pages/ebook_indo/ebook_arif"));
 const EbookElvisionPaymentPage = React.lazy(() => import("./pages/ebook_indo/ebook_elvision"));
 const EbookHealthLP = React.lazy(() => import("./pages/usa/usa_ebookhealth"));
 const EbookPercayaDiriLP = React.lazy(() => import("./pages/ebook_indo/ebook_percayadiri"));
@@ -69,6 +69,7 @@ import { setupDebugTools } from "@/utils/debugTools";
 import ServiceWorkerUpdater from "@/components/ServiceWorkerUpdater";
 import { cleanupStaleServiceWorkers } from "@/utils/cleanupStaleSW";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 const queryClient = new QueryClient();
 
@@ -168,6 +169,7 @@ const AppContent = () => {
     <AppLoader>
       <ServiceWorkerUpdater />
       <SpeedInsights />
+      <Analytics />
       {/* <UpdateBanner /> */}
       <AudioProvider>
         <MeditativeProvider>
