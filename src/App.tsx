@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -48,7 +48,7 @@ import ParfumPaymentPage from "./pages/brands/elroyaleparfum";
 import DevPaymentPage from "./pages/dev";
 import JewelryPaymentPage from "./pages/brands/elroyaljewelry";
 import { WhatIsPro } from "./components/whatispro";
-import { Payment } from "./pages/Payment";
+const Payment = React.lazy(() => import("./pages/Payment").then(module => ({ default: module.Payment })));
 import ProUpgradePage from "./pages/prostatus";
 import { AudioProvider } from "@/contexts/AudioContext";
 import UpdateBanner from "./updatebanner";
@@ -68,6 +68,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { setupDebugTools } from "@/utils/debugTools";
 import ServiceWorkerUpdater from "@/components/ServiceWorkerUpdater";
 import { cleanupStaleServiceWorkers } from "@/utils/cleanupStaleSW";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const queryClient = new QueryClient();
 
@@ -166,6 +167,7 @@ const AppContent = () => {
   return (
     <AppLoader>
       <ServiceWorkerUpdater />
+      <SpeedInsights />
       {/* <UpdateBanner /> */}
       <AudioProvider>
         <MeditativeProvider>
@@ -178,7 +180,12 @@ const AppContent = () => {
               v7_startTransition: true,
               v7_relativeSplatPath: true
             }}>
-              <Routes>
+              <Suspense fallback={
+                <div className="flex items-center justify-center min-h-screen bg-background">
+                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <Routes>
                 {/* Public & Main routes */}
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -249,6 +256,7 @@ const AppContent = () => {
                 {/* 404 catch-all */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </Suspense>
             </BrowserRouter>
 
         </MeditativeProvider>

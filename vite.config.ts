@@ -123,9 +123,12 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          supabase: ['@supabase/supabase-js'],
-          ui: ['@radix-ui/react-toast', '@radix-ui/react-dialog']
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'supabase-vendor': ['@supabase/supabase-js'],
+          'ui-vendor': ['@radix-ui/react-toast', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          'animation-vendor': ['framer-motion'],
+          'chart-vendor': ['recharts'],
+          'icons-vendor': ['lucide-react', 'react-icons'],
         },
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.');

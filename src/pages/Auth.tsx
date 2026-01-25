@@ -13,7 +13,7 @@ import { Capacitor } from '@capacitor/core';
 import { iOSCacheCleaner } from "@/utils/iOSCacheCleaner";
 
 interface AuthProps {
-  onLogin: (user: User) => void;
+  onLogin?: (user: User) => void;
 }
 
 export function Auth({ onLogin }: AuthProps) {
@@ -68,7 +68,7 @@ export function Auth({ onLogin }: AuthProps) {
       await iOSCacheCleaner.verifyCleanState();
       
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
+      if (session?.user && onLogin) {
         onLogin(session.user);
       }
     };
@@ -454,7 +454,7 @@ export function Auth({ onLogin }: AuthProps) {
               title: "Login!",
               description: "Welcome to eL Vision.",
             });
-            onLogin(loginData.user);
+            if (onLogin) onLogin(loginData.user);
             return;
           }
         }
@@ -479,7 +479,7 @@ export function Auth({ onLogin }: AuthProps) {
           title: "Signup Successful!",
           description: "Welcome to eL Vision. You are now being logged in.",
         });
-        onLogin(data.user);
+        if (onLogin) onLogin(data.user);
       }
     } catch (error: any) {
       console.error('Signup error:', error);

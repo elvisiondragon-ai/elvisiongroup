@@ -90,8 +90,9 @@ export function Signup() {
             description: "🚀 Mengarahkan ke Ecosystem...",
           });
           
-          // Set flag for showing welcome toast after refresh
+          // Set flags for showing welcome toast AND redirecting to home after refresh
           localStorage.setItem('signup-welcome-pending', 'true');
+          localStorage.setItem('refresh-redirect-to-home', 'true');
           
           // Wait then redirect and force refresh
           setTimeout(() => {

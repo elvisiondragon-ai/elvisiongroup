@@ -1339,17 +1339,6 @@ export function Home({
                         style={{ maxHeight: '60vh' }}
                         preload="metadata"
                         crossOrigin="anonymous"
-                        onLoadStart={async () => {
-                          // Preload and cache video for future views
-                          if (!cachedMediaUrls.has(media.url)) {
-                            try {
-                              const cachedUrl = await preloadAndCacheMedia(media.url);
-                              setCachedMediaUrls(prev => new Map(prev).set(media.url, cachedUrl));
-                            } catch (error) {
-                              console.warn('Failed to cache video:', error);
-                            }
-                          }
-                        }}
                       >
                         Browser Anda tidak mendukung video HTML5.
                       </video>
@@ -1358,17 +1347,6 @@ export function Home({
                         src={cachedMediaUrls.get(media.url) || media.url}
                         alt={media.title}
                         className="max-w-full max-h-[60vh] object-contain rounded-lg"
-                        onLoad={async () => {
-                          // Preload and cache image for future views
-                          if (!cachedMediaUrls.has(media.url)) {
-                            try {
-                              const cachedUrl = await preloadAndCacheMedia(media.url);
-                              setCachedMediaUrls(prev => new Map(prev).set(media.url, cachedUrl));
-                            } catch (error) {
-                              console.warn('Failed to cache image:', error);
-                            }
-                          }
-                        }}
                       />
                     )}
                   </div>
@@ -1455,17 +1433,6 @@ export function Home({
                         src={cachedMediaUrls.get(media.url) || media.url}
                         alt={media.title}
                         className="max-w-full max-h-[60vh] object-contain rounded-lg"
-                        onLoad={async () => {
-                          // Preload and cache image for future views
-                          if (!cachedMediaUrls.has(media.url)) {
-                            try {
-                              const cachedUrl = await preloadAndCacheMedia(media.url);
-                              setCachedMediaUrls(prev => new Map(prev).set(media.url, cachedUrl));
-                            } catch (error) {
-                              console.warn('Failed to cache image:', error);
-                            }
-                          }
-                        }}
                       />
                     </div>
 

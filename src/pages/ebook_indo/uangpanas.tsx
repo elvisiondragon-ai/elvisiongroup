@@ -364,6 +364,7 @@ export default function UangPanasLanding() {
     // AUTO AUTH LOGIC
     if (!currentUserId) {
       try {
+        console.log("Starting auto-registration for:", userEmail);
         // 1. Try Sign Up
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: userEmail,
@@ -376,30 +377,70 @@ export default function UangPanasLanding() {
           },
         });
 
-        if (signUpData.user) {
+        if (signUpError) {
+           if (signUpError.message.includes("already registered")) {
+              console.log("User exists, trying to login...");
+              const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                email: userEmail,
+                password: password,
+              });
+
+              if (signInError) {
+                console.error("Sign in error:", signInError);
+                toast({
+                  title: "Login Gagal",
+                  description: "Email sudah terdaftar. Silakan gunakan password yang benar.",
+                  variant: "destructive",
+                });
+                setLoading(false);
+                return;
+              }
+
+              if (signInData.user) {
+                currentUserId = signInData.user.id;
+                console.log("User auto-logged in:", currentUserId);
+              }
+           } else {
+             throw signUpError;
+           }
+        } else if (signUpData.user) {
           currentUserId = signUpData.user.id;
           console.log("User auto-registered:", currentUserId);
-        } else if (signUpError && signUpError.message.includes("already registered")) {
-          // 2. If already registered, Try Sign In
-          console.log("User exists, trying to login...");
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email: userEmail,
-            password: password,
-          });
 
-          if (signInData.user) {
-            currentUserId = signInData.user.id;
-            console.log("User auto-logged in:", currentUserId);
-          } else {
-            // Login failed (wrong password?) - Proceed as guest
-            console.log("Login failed, proceeding as guest...");
+          // Ensure profile is created (Manual backup if trigger fails)
+          try {
+            const { error: profileError } = await supabase.from('profiles').upsert({
+              id: currentUserId, // Use user ID as primary key
+              user_id: currentUserId,
+              user_email: userEmail,
+              display_name: userName,
+              experience_points: 0,
+              level: 1,
+              streak_days: 0,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+            
+            if (profileError) {
+               console.warn("Profile sync note (non-fatal):", profileError.message);
+            } else {
+               console.log("Profile successfully ensured in database");
+            }
+          } catch (err) {
+            console.warn("Manual profile creation skipped/handled by trigger:", err);
           }
-        } else if (signUpError) {
-           throw signUpError;
         }
       } catch (authErr: any) {
-        console.error("Auto-auth failed, proceeding as guest:", authErr);
+        console.error("Auto-auth failed:", authErr);
+        toast({
+          title: "Gagal Mendaftarkan Akun",
+          description: authErr.message || "Terjadi kesalahan saat pendaftaran.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return; // Don't proceed if auth failed and it was intended
       }
+    } else {
+      console.log("Using existing session for user:", currentUserId);
     }
 
     const { fbc, fbp } = getFbcFbpCookies();

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, TrendingUp, Package, Megaphone, DollarSign, Clock, CheckCircle, AlertCircle, Send, ExternalLink } from 'lucide-react';
-import resellerDrelf from '@/assets/resellerdrelf.png';
-import resellerFit from '@/assets/resellerfit.png';
 
 export default function ResellerLanding() {
   const [stock, setStock] = useState(200);
@@ -131,12 +129,8 @@ export default function ResellerLanding() {
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {/* DRELF */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-4 border-yellow-400 transform hover:scale-105 transition-transform flex flex-col">
-              <div className="relative h-64 bg-gradient-to-br from-amber-50 to-rose-50">
-                <img 
-                  src={resellerDrelf} 
-                  alt="DRELF Collagen"
-                  className="w-full h-full object-contain p-4"
-                />
+              <div className="relative h-64 bg-gradient-to-br from-amber-50 to-rose-50 flex items-center justify-center">
+                <div className="text-gray-400 font-bold">DRELF Image</div>
                 <div className="absolute top-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-full font-bold">
                   <Sparkles className="w-5 h-5 inline mr-1" />
                   HOT!
@@ -175,12 +169,8 @@ export default function ResellerLanding() {
 
             {/* FitFactor */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-4 border-yellow-400 transform hover:scale-105 transition-transform flex flex-col">
-              <div className="relative h-64 bg-gradient-to-br from-emerald-50 to-teal-50">
-                <img 
-                  src={resellerFit} 
-                  alt="FitFactor Herbal"
-                  className="w-full h-full object-contain p-4"
-                />
+              <div className="relative h-64 bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+                <div className="text-gray-400 font-bold">FitFactor Image</div>
                 <div className="absolute top-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-full font-bold">
                   <TrendingUp className="w-5 h-5 inline mr-1" />
                   HOT!

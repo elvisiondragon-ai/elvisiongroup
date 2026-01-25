@@ -1,17 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Home } from "./Home";
-import { Chat } from "./Chat";
-import { Leaderboard } from "./Leaderboard";
-import { Profile } from "./Profile";
+
+// Heavy components loaded lazily
+const Chat = lazy(() => import("./Chat").then(module => ({ default: module.Chat })));
+const Leaderboard = lazy(() => import("./Leaderboard").then(module => ({ default: module.Leaderboard })));
+const Profile = lazy(() => import("./Profile").then(module => ({ default: module.Profile })));
+const AudioTherapy = lazy(() => import("./AudioTherapy").then(module => ({ default: module.AudioTherapy })));
+const SpiritualJournal = lazy(() => import("./SpiritualJournal").then(module => ({ default: module.SpiritualJournal })));
+const MeditationSessions = lazy(() => import("./MeditationSessions").then(module => ({ default: module.MeditationSessions })));
+const IgnisQuest = lazy(() => import("./IgnisQuest").then(module => ({ default: module.IgnisQuest })));
+const Payment = lazy(() => import("./Payment").then(module => ({ default: module.Payment })));
+
 import { useToast } from "@/hooks/use-toast";
-import { AudioTherapy } from "./AudioTherapy";
-import { SpiritualJournal } from "./SpiritualJournal";
-import { MeditationSessions } from "./MeditationSessions";
-import { IgnisQuest } from "./IgnisQuest";
-
-
-import { Payment } from "./Payment";
 import { JournalAnalytics } from "@/components/JournalAnalytics";
 import { EliteHabit } from "@/components/EliteHabit";
 import { BloodCirculation } from "@/components/BloodCirculation";
@@ -162,17 +163,17 @@ const Index = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "home":
-        return <Home onNavigate={setActiveTab} />;
+        return <Home onNavigate={handleTabChange} />;
       case "chat":
-        return <Chat onNavigate={setActiveTab} />;
+        return <Chat onNavigate={handleTabChange} />;
       case "leaderboard":
         return <Leaderboard />;
       case "profile":
-        return <Profile onNavigate={setActiveTab} />;
+        return <Profile onNavigate={handleTabChange} />;
       case "audio-therapy":
-        return <AudioTherapy onNavigate={setActiveTab} />;
+        return <AudioTherapy onNavigate={handleTabChange} />;
       case "spiritual-journal":
-        return <SpiritualJournal onNavigate={setActiveTab} />;
+        return <SpiritualJournal onNavigate={handleTabChange} />;
       case "personal-analytics":
         return (
           <div className="min-h-screen bg-background pb-20">
@@ -180,7 +181,7 @@ const Index = () => {
               <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Personal Analytics Algoritm
               </h1>
-              <JournalAnalytics onUpgradeClick={() => setActiveTab("payment")} />
+              <JournalAnalytics onUpgradeClick={() => handleTabChange("payment")} />
             </div>
           </div>
         );
@@ -196,13 +197,13 @@ const Index = () => {
           </div>
         );
       case "meditation-sessions":
-        return <MeditationSessions onNavigate={setActiveTab} />;
+        return <MeditationSessions onNavigate={handleTabChange} />;
 
       case "ignis-quest":
-        return <IgnisQuest onNavigate={setActiveTab} />;
+        return <IgnisQuest onNavigate={handleTabChange} />;
         
       case "payment":
-        return <Payment onNavigate={setActiveTab} />;
+        return <Payment onNavigate={handleTabChange} />;
       case "blood-circulation":
         console.log("Rendering Blood Circulation component");
         return (
@@ -211,7 +212,7 @@ const Index = () => {
               <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Peredaran Darah Optimal
               </h1>
-              <BloodCirculation onNavigate={setActiveTab} />
+              <BloodCirculation onNavigate={handleTabChange} />
             </div>
           </div>
         );
@@ -223,7 +224,7 @@ const Index = () => {
               <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Keuangan & Meditasi
               </h1>
-              <Finance onNavigate={setActiveTab} />
+              <Finance onNavigate={handleTabChange} />
             </div>
           </div>
         );
@@ -235,7 +236,7 @@ const Index = () => {
               <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Kecantikan Fisik Sejati
               </h1>
-              <KecantikanFisik onNavigate={setActiveTab} />
+              <KecantikanFisik onNavigate={handleTabChange} />
             </div>
           </div>
         );
@@ -247,7 +248,7 @@ const Index = () => {
               <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 True Diet: Diet Sejati
               </h1>
-              <TrueDiet onNavigate={setActiveTab} />
+              <TrueDiet onNavigate={handleTabChange} />
             </div>
           </div>
         );
@@ -259,7 +260,7 @@ const Index = () => {
               <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Perhiasan
               </h1>
-              <Perhiasan onNavigate={setActiveTab} />
+              <Perhiasan onNavigate={handleTabChange} />
             </div>
           </div>
         );
@@ -271,7 +272,7 @@ const Index = () => {
               <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Aroma
               </h1>
-              <Aroma onNavigate={setActiveTab} />
+              <Aroma onNavigate={handleTabChange} />
             </div>
           </div>
         );
@@ -284,12 +285,12 @@ const Index = () => {
               <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent mb-6">
                 Pasangan & Ketenangan Diri
               </h1>
-              <Pasangan onNavigate={setActiveTab} />
+              <Pasangan onNavigate={handleTabChange} />
             </div>
           </div>
         );
       default:
-        return <Home onNavigate={setActiveTab} />;
+        return <Home onNavigate={handleTabChange} />;
     }
   };
 
@@ -297,7 +298,13 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       
       <main className="relative">
-        {renderContent()}
+        <Suspense fallback={
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        }>
+          {renderContent()}
+        </Suspense>
       </main>
       <BottomNavigation activeTab={activeTab} onTabChange={handleTabChange} />
       
