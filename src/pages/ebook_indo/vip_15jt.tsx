@@ -1321,15 +1321,6 @@ export default function ELVision15K() {
             <button 
               className="group bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-2xl px-16 py-8 rounded-full transition-all transform hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center gap-4 mx-auto mb-8"
               onClick={() => {
-                // @ts-ignore
-                if (typeof fbq === 'function') {
-                  // @ts-ignore
-                  fbq('track', 'AddToCart', {
-                    content_name: 'EL Vision 15K Coaching',
-                    value: 15000000,
-                    currency: 'IDR'
-                  });
-                }
                 window.open('https://wa.me/62895325633487?text=Hi%20saya%20ingin%20mendaftar%20VIP%201%3A1%20%0ANama:%20%0ATujuan%20Spesifik:%20', '_blank');
               }}
             >

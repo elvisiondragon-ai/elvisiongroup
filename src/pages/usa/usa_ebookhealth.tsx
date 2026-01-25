@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { 
   initFacebookPixelWithLogging, 
   trackPageViewEvent, 
-  trackAddToCartEvent,
   trackCustomEvent,
   getFbcFbpCookies,
   waitForFbp
@@ -63,16 +62,6 @@ const EbookHealthLP = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
       element.focus();
-      const eventId = `addtocart-${Date.now()}`;
-      
-      const eventData = {
-        content_name: 'Ebook Health Recovery Protocol',
-        value: 20.00,
-        currency: 'USD'
-      };
-
-      trackAddToCartEvent(eventData, eventId, PIXEL_ID);
-      sendCAPIEvent('AddToCart', {}, eventData, eventId);
     }
   };
 

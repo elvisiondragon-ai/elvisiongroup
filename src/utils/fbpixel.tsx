@@ -124,10 +124,10 @@ export const formatFbcCookieValue = (fbclid: string): string => {
 };
 
 // 💾 Save FBC Data to Cookie & LocalStorage
-export const setFbcData = (fbclid: string) => {
+export const setFbcData = (fbclid: string, existingFormattedFbc?: string) => {
     if (!fbclid) return;
 
-    const formattedFbc = formatFbcCookieValue(fbclid);
+    const formattedFbc = existingFormattedFbc || formatFbcCookieValue(fbclid);
     
     // 1. Set Cookie
     setCookieHelper('_fbc', formattedFbc, 90);
@@ -211,9 +211,12 @@ export const getFbcFbpCookies = (): { fbc: string | null; fbp: string | null } =
   if (!fbc) {
       const currentFbclid = getFbcClickIdFromUrl();
       if (currentFbclid) {
+          // 🔧 GENERATE ONCE, USE EVERYWHERE
+          // This ensures the timestamp is identical for both the variable returned 
+          // and the cookie saved. Prevents "modified value" errors in Meta.
           fbc = formatFbcCookieValue(currentFbclid);
-          // Save it now that we found it
-          setFbcData(currentFbclid);
+          
+          setFbcData(currentFbclid, fbc);
           console.log('🔗 FBC extracted from URL:', fbc);
       }
   }

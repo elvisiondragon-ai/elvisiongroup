@@ -112,20 +112,6 @@ export default function DietPaymentPage() {
   
   const totalAmount = productPrice;
 
-  // Facebook Pixel - AddToCart event on page load
-  useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).fbq) {
-      console.log('FB Pixel: Firing AddToCart for Ebook Diet');
-      (window as any).fbq('track', 'AddToCart', {
-        content_ids: ['ebook_diet'],
-        content_type: 'product',
-        value: productPrice,
-        currency: 'IDR',
-        pixel_id: '3319324491540889'
-      });
-    }
-  }, [productPrice]);
-
   useEffect(() => {
     if (totalAmount > 5000000) {
       setSelectedPaymentMethod('BCA_MANUAL');
