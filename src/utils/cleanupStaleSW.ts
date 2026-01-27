@@ -1,7 +1,7 @@
 
 // Incremental version to force-clear stale service workers and caches on deployment
 // Update this string whenever you want to force a "nuke" of the client-side cache
-const CURRENT_APP_VERSION = '2026.01.25.02'; 
+const CURRENT_APP_VERSION = '2026.01.28.02'; 
 
 export const cleanupStaleServiceWorkers = async () => {
   if (typeof window === 'undefined') return;
