@@ -1,0 +1,94 @@
+{
+  "hash": "965fdadf",
+  "configHash": "32e591b9",
+  "lockfileHash": "0d4f06e0",
+  "browserHash": "6868df69",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "9094de0f",
+      "needsInterop": true
+    },
+    "lucide-react": {
+      "src": "../../node_modules/lucide-react/dist/esm/lucide-react.js",
+      "file": "lucide-react.js",
+      "fileHash": "25110987",
+      "needsInterop": false
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "7c0fe76f",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "42f66d98",
+      "needsInterop": true
+    },
+    "@tanstack/react-query": {
+      "src": "../../node_modules/@tanstack/react-query/build/modern/index.js",
+      "file": "@tanstack_react-query.js",
+      "fileHash": "d8aca07f",
+      "needsInterop": false
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.js",
+      "file": "react-router-dom.js",
+      "fileHash": "95eda648",
+      "needsInterop": false
+    },
+    "@vercel/speed-insights/react": {
+      "src": "../../node_modules/@vercel/speed-insights/dist/react/index.mjs",
+      "file": "@vercel_speed-insights_react.js",
+      "fileHash": "cd3210f5",
+      "needsInterop": false
+    },
+    "@vercel/analytics/react": {
+      "src": "../../node_modules/@vercel/analytics/dist/react/index.mjs",
+      "file": "@vercel_analytics_react.js",
+      "fileHash": "ca190c87",
+      "needsInterop": false
+    },
+    "i18next": {
+      "src": "../../node_modules/i18next/dist/esm/i18next.js",
+      "file": "i18next.js",
+      "fileHash": "0e5f5c46",
+      "needsInterop": false
+    },
+    "react-i18next": {
+      "src": "../../node_modules/react-i18next/dist/es/index.js",
+      "file": "react-i18next.js",
+      "fileHash": "4f106c5b",
+      "needsInterop": false
+    },
+    "i18next-http-backend": {
+      "src": "../../node_modules/i18next-http-backend/esm/index.js",
+      "file": "i18next-http-backend.js",
+      "fileHash": "1568d96e",
+      "needsInterop": false
+    },
+    "@capacitor/core": {
+      "src": "../../node_modules/@capacitor/core/dist/index.js",
+      "file": "@capacitor_core.js",
+      "fileHash": "3cf80837",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "browser-ponyfill-HCLGNPQI": {
+      "file": "browser-ponyfill-HCLGNPQI.js"
+    },
+    "chunk-I2MCD6RR": {
+      "file": "chunk-I2MCD6RR.js"
+    },
+    "chunk-E55NSNTN": {
+      "file": "chunk-E55NSNTN.js"
+    },
+    "chunk-4MBMRILA": {
+      "file": "chunk-4MBMRILA.js"
+    }
+  }
+}

@@ -61,6 +61,7 @@ const CreatorPage = React.lazy(() => import("./pages/tools_pages/creator_api"));
 const ResellerLanding = React.lazy(() => import("./pages/tools_pages/reseller"));
 const Pixels = React.lazy(() => import("./pages/tools_pages/pixels"));
 const RisetPage = React.lazy(() => import("./pages/tools_pages/riset"));
+const AdminWithdrawals = React.lazy(() => import("./pages/tools_pages/admin_withdrawals"));
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";
@@ -209,6 +210,7 @@ const AppContent = () => {
                 <Route path="/pixels" element={<Pixels />} />
                 <Route path="/riset" element={<RisetPage />} />
                 <Route path="/leadmagnet" element={<LeadMagnet />} />
+                <Route path="/admin/withdrawals" element={<AdminWithdrawals />} />
 
                 {/* // Section Brands */}
                 <Route path="/drelf" element={<DrelfPaymentPage />} />

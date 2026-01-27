@@ -46,6 +46,7 @@ export default function Pixels() {
       let query = supabase
         .from('pixel_events')
         .select('*')
+        .in('event_name', ['Purchase', 'Test_Purchase', 'AddToCart', 'AddPaymentInfo'])
         .order('created_at', { ascending: false })
         .range(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE - 1);
 
@@ -94,7 +95,10 @@ export default function Pixels() {
           table: 'pixel_events',
         },
         (payload) => {
-          setLogs((current) => [payload.new, ...current]);
+          const allowedEvents = ['Purchase', 'Test_Purchase', 'AddToCart', 'AddPaymentInfo'];
+          if (allowedEvents.includes(payload.new.event_name)) {
+            setLogs((current) => [payload.new, ...current]);
+          }
         }
       )
       .subscribe();

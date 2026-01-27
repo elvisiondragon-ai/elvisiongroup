@@ -45,6 +45,16 @@ Deno.serve(async (req) => {
   // --- Configuration ---
   const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl } = body;
 
+  // 🎯 RESTRICTED EVENTS FILTER
+  const allowedEvents = ['Purchase', 'Test_Purchase', 'AddToCart', 'AddPaymentInfo'];
+  if (!allowedEvents.includes(eventName)) {
+    console.log(`⚠️ Skipping event '${eventName}' (not in allowed list)`);
+    return new Response(JSON.stringify({ message: `Event '${eventName}' skipped (not in allowed list)` }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   // Determine which secret to use
   const secretName = PIXEL_CONFIG[pixelId] || 'METACAPI';
   let FACEBOOK_ACCESS_TOKEN = Deno.env.get(secretName);

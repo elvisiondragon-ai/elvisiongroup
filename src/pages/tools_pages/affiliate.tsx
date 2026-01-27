@@ -162,6 +162,7 @@ export default function AffiliatePage() {
       const { error } = await supabase.from('withdrawals').insert({
         user_id: user.id,
         amount: amount,
+        affiliate_email: user.email,
         bank_snapshot: { bankName, accountNumber, accountHolder }
       });
 
@@ -297,6 +298,14 @@ export default function AffiliatePage() {
                 Dashboard Afiliasi
               </h1>
               <p className="text-gray-400 font-medium tracking-wide text-sm uppercase">eL Vision Group</p>
+              {user?.email && ['elvisiondragon@gmail.com', 'dragon@yahoo.com', 'elreyzandra@gmail.com'].includes(user.email) && (
+                <Button 
+                  onClick={() => navigate('/admin/withdrawals')}
+                  className="mt-2 bg-yellow-600 hover:bg-yellow-700 text-black font-bold h-8 text-xs"
+                >
+                  Manage Payouts (Admin)
+                </Button>
+              )}
             </div>
             
             <div className="flex items-center gap-3 bg-gray-900/50 p-1.5 rounded-lg border border-white/5 backdrop-blur-sm">
