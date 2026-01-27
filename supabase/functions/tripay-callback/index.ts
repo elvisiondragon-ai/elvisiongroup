@@ -174,8 +174,7 @@ serve(async (req)=>{
               
               // Update object
               const updatePayload: any = { 
-                  status: 'PAID',
-                  capi_purchase_sent: true // OPTIMISTIC LOCK: Claim CAPI responsibility immediately to prevent Frontend double-fire
+                  status: 'PAID'
               };
               // Ensure tripay_reference is synced if it was missing
               if (!globalProductTx.tripay_reference && tripayReference) {
@@ -252,8 +251,8 @@ serve(async (req)=>{
         let capiValue = 0;
         let capiCurrency = 'IDR';
 
-        const isEbookHealth = pName.includes('Health Recovery') || pName.includes('ebook_health20') || pName.includes('usa_ebookslim') || pName.includes('Slim Without Suffering');
-        const isCoaching3000 = pName.includes('3000 Coaching') || pName.includes('usa_3000');
+        const isEbookHealth = pName.includes('Health Recovery') || pName.includes('ebook_health20') || pName.includes('usa_ebookslim') || pName.includes('Slim Without Suffering') || pName.includes('usa_ebookhealth');
+        const isCoaching3000 = pName.includes('3000 Coaching') || pName.includes('usa_3000') || pName.includes('usa_pay3000');
         const isVIP6Week = pName.includes('VIP SESSION 6 Week') || pName.includes('VIP6WEEK');
         const isEbookPercayaDiri = pName.includes('ebook_percayadiri') || pName.includes('Ebook Percaya Diri') || pName.includes('Ebook Pria Alpha') || pName.includes('Paket Pria Alpha');
         const isEbookFeminine = pName.includes('ebook_feminine') || pName.includes('Feminine Magnetism');
@@ -269,7 +268,7 @@ serve(async (req)=>{
             else capiValue = 20.00;
             
             capiCurrency = 'USD';
-        } else if (isEbookPercayaDiri || isEbookFeminine || isUangPanas) {
+        } else if (isEbookPercayaDiri || isEbookFeminine || isUangPanas || pName.includes('ebook_elvision') || pName.includes('ebook_adhd') || pName.includes('ebook_arif') || pName.includes('ebook_grief') || pName.includes('ebook_langsing') || pName.includes('ebook_tracker') || pName.includes('vip_15jt')) {
             capiPixelId = '3319324491540889'; // EbookIndo Pixel
             capiValue = amount || globalProductTx.amount || 100000;
             capiCurrency = 'IDR';
@@ -315,9 +314,9 @@ serve(async (req)=>{
                   }
                 });
                 
-                // Mark as sent in DB - REDUNDANT (Moved to initial update)
-                // await supabase.from('global_product').update({ capi_purchase_sent: true }).eq('id', globalProductTx.id);
-                console.log('   - ✅ CAPI sent (Lock was claimed in initial update)');
+                // Mark as sent in DB
+                await supabase.from('global_product').update({ capi_purchase_sent: true }).eq('id', globalProductTx.id);
+                console.log('   - ✅ CAPI sent (marked as sent in DB)');
 
              } catch (capiError) {
                 console.error('   - ⚠️ CAPI Universal Error (non-critical):', capiError);

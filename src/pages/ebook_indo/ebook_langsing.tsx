@@ -407,6 +407,7 @@ export default function DietPaymentPage() {
                   </span>
                 </div>
               )}
+
             </CardContent>
           </Card>
 
