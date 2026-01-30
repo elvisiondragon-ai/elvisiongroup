@@ -223,7 +223,8 @@ serve(async (req)=>{
             'feminine magnetism',
             'ebook health recovery',
             'vip session 6 week',
-            '3000 coaching'
+            '3000 coaching',
+            'webinar'
         ];
 
         const isEbook = ebookSpecificKeywords.some(key => lowerPName.includes(key));
@@ -258,8 +259,10 @@ serve(async (req)=>{
         const isEbookFeminine = pName.includes('ebook_feminine') || pName.includes('Feminine Magnetism');
         const isUangPanas = pName.includes('ebook_uangpanas') || pName.includes('Uang Panas') || pName.includes('Sistem Uang Panas');
         const isFitFactor = pName.includes('Fitfactor');
+        // Added 'webinar' to catch 'Elvision Webinar'
+        const isWebinar = pName.toLowerCase().includes('webinar');
 
-        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}`);
+        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}, isWebinar=${isWebinar}`);
 
         if (isEbookHealth || isCoaching3000 || isVIP6Week || pName.includes('usa_ebookfeminine')) {
             capiPixelId = '1393383179182528'; // Manifestation Pixel (USA)
@@ -268,7 +271,7 @@ serve(async (req)=>{
             else capiValue = 20.00;
             
             capiCurrency = 'USD';
-        } else if (isEbookPercayaDiri || isEbookFeminine || isUangPanas || pName.includes('ebook_elvision') || pName.includes('ebook_adhd') || pName.includes('ebook_arif') || pName.includes('ebook_grief') || pName.includes('ebook_langsing') || pName.includes('ebook_tracker') || pName.includes('vip_15jt')) {
+        } else if (isEbookPercayaDiri || isEbookFeminine || isUangPanas || isWebinar || pName.includes('ebook_elvision') || pName.includes('ebook_adhd') || pName.includes('ebook_arif') || pName.includes('ebook_grief') || pName.includes('ebook_langsing') || pName.includes('ebook_tracker') || pName.includes('vip_15jt') || pName.includes('webinar_el')) {
             capiPixelId = '3319324491540889'; // EbookIndo Pixel
             capiValue = amount || globalProductTx.amount || 100000;
             capiCurrency = 'IDR';

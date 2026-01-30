@@ -52,7 +52,14 @@ const productCatalog = {
     requiresAuth: true,
     physical: false
   },
+  
   // Physical/Public Products (do not require authentication)
+  'webinar_el': {
+    name: 'Elvision Webinar',
+    price: 200000,
+    requiresAuth: false,
+    physical: true
+  },
   'drelf': {
     name: 'Drelf Collagen',
     price: 600000,
@@ -213,6 +220,9 @@ serve(async (req)=>{
     // --- 2. AUTHENTICATION (IF REQUIRED) ---
     let userId = bodyUserId || null; // Use passed userId if available, otherwise null
     let user = null;
+
+    console.log(`Product: ${subscriptionType}, Requires Auth: ${product.requiresAuth}`);
+
     if (product.requiresAuth) {
       const authHeader = req.headers.get('authorization');
       if (!authHeader) {
@@ -224,8 +234,12 @@ serve(async (req)=>{
         });
       }
       const token = authHeader.replace('Bearer ', '');
+      
+
+
       const supabaseClient = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_ANON_KEY'));
       const { data: authData, error: authError } = await supabaseClient.auth.getUser(token);
+      
       if (authError || !authData.user) {
         console.error('Authentication error:', authError);
         return new Response(JSON.stringify({

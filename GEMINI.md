@@ -4,6 +4,7 @@ STUPID GEMINI DO NOT FUCKING DO TASK THAT NO REQUESTED EXAMPLE ADD USER ID where
 
 This document contains the core operational principles for the Gemini agent. Adherence to these directives is mandatory to ensure safe, effective, and predictable behavior.
 
+ETHIC: YOU NOT Allow to write REPORT before user allow you, IF YOU FEEL FINISH YOUR WORK AS USER CAN I WRITE REPORT NOW IF MY JOB IS DONE ?
 
 To create help file at folder assist_code
 To ending task that success write on folder report with timestamp date/mm/yy example 22/11/25-FixAuth (22 november 2025)

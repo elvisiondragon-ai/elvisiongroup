@@ -93,6 +93,21 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     ],
     lang: "id"
   },
+  'webinar_el': {
+    subject: "🎟️ Tiket Webinar: Rezeki Jalur Langit & Bonus Ebook",
+    downloadLink: "https://drive.google.com/drive/folders/1ZQ4LsWFnuuRJTNu1vfZc5-hJDfOGzJsU?usp=share_link",
+    color: "#b91c1c", // Red 700 (Same as uangpanas style requested)
+    accentColor: "#facc15", // Yellow 400
+    title: "Anda Terdaftar! + Bonus Akses",
+    description: "Terima kasih! Anda telah mengambil langkah cerdas. Berikut adalah akses ke Bonus Ebook dan Grup Telegram.",
+    instructions: [
+      "Download Bonus Ebook melalui tombol di atas.",
+      "WAJIB: Join Grup Telegram Waiting List di sini: <a href='https://t.me/elvision1' style='color:#b91c1c; font-weight:bold;'>Klik Untuk Join Telegram</a>",
+      "Catat Tanggal: Minggu, 22 Februari 2026 pukul 17:00 WIB."
+    ],
+    lang: "id",
+    btnText: "AMBIL BONUS EBOOK"
+  },
   'vip_coaching': {
     subject: "💎 VIP Confirmation: 6 Weeks eL Vision Program",
     downloadLink: "https://wa.me/62895325633487?text=HI%20I%20have%20paid%20for%20VIP%206%20weeks",
@@ -180,6 +195,7 @@ function getProductKey(productName: string): string {
   if (lower.includes('feminine') || lower.includes('magnetism')) return 'ebook_feminine';
   if (lower.includes('uangpanas') || lower.includes('uang panas')) return 'ebook_uangpanas';
   if (lower.includes('vip') || lower.includes('3000') || lower.includes('coaching')) return 'vip_coaching';
+  if (lower.includes('webinar_el') || lower.includes('jalur langit') || lower.includes('webinar')) return 'webinar_el';
   
   return 'ebook_elvision';
 }

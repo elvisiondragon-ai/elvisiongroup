@@ -43,7 +43,22 @@ Deno.serve(async (req) => {
   const body = await req.json();
   
   // --- Configuration ---
-  const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl } = body;
+  const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl, eventTime } = body;
+
+  let productName: string | null = null;
+  if (customData) {
+    if (customData.content_name) {
+      productName = customData.content_name;
+    } else if (customData.content_ids && Array.isArray(customData.content_ids) && customData.content_ids.length > 0) {
+      productName = customData.content_ids[0];
+    } else if (customData.contents && Array.isArray(customData.contents) && customData.contents.length > 0) {
+      if (customData.contents[0].title) {
+        productName = customData.contents[0].title;
+      } else if (customData.contents[0].product_id) {
+        productName = customData.contents[0].product_id;
+      }
+    }
+  }
 
   // 🎯 RESTRICTED EVENTS FILTER
   const allowedEvents = ['Purchase', 'Test_Purchase', 'AddToCart', 'AddPaymentInfo'];
@@ -53,6 +68,27 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+  }
+
+  // 1. ROBUST DEDUPLICATION CHECK
+  // Check if event exists with ANY status (sent, processing, or failed)
+  if (eventId) {
+    const { data: existingEvent } = await supabase
+      .from('pixel_events')
+      .select('status')
+      .eq('event_id', eventId)
+      .eq('pixel_id', pixelId) 
+      .maybeSingle();
+
+    // If we found ANY record, we stop immediately.
+    // Even if it failed before, we don't want to risk a double-send race condition without manual intervention.
+    if (existingEvent) {
+       console.log(`♻️ Deduplication: Event '${eventName}' (ID: ${eventId}) already exists (Status: ${existingEvent.status}). Skipping.`);
+       return new Response(JSON.stringify({ message: `Event skipped (duplicate ${existingEvent.status})` }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
   }
 
   // Determine which secret to use
@@ -68,7 +104,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Prepare DB Log Object
+    // 2. ATOMIC LOCKING via DB INSERT
     const dbLog: any = {
         pixel_id: pixelId,
         event_name: eventName,
@@ -76,17 +112,25 @@ Deno.serve(async (req) => {
         user_data: userData,
         custom_data: customData,
         page_url: eventSourceUrl || req.headers.get('referer'),
-        status: 'processing'
+        status: 'processing',
+        product_name: productName,
+        external_id: userData?.external_id
     };
 
-    // Attempt to log immediately
     const { data: logData, error: logError } = await supabase
         .from('pixel_events')
         .insert(dbLog)
         .select()
         .single();
 
-    if (logError) console.error('Failed to insert pixel_event log:', logError);
+    // CRITICAL FIX: Stop if insert fails (likely due to unique constraint race condition)
+    if (logError) {
+        console.warn('⚠️ Stopped: Failed to acquire event lock (likely duplicate):', logError.message);
+        return new Response(JSON.stringify({ message: 'Event skipped (race condition lock)' }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+    }
 
     if (!pixelId) {
       return new Response(JSON.stringify({ error: 'pixelId is required' }), {
@@ -149,7 +193,7 @@ Deno.serve(async (req) => {
     // Construct the event payload
     const event: any = {
       event_name: eventName,
-      event_time: Math.floor(Date.now() / 1000),
+      event_time: eventTime || Math.floor(Date.now() / 1000), // Use provided eventTime or current server time
       action_source: 'website',
       event_source_url: eventSourceUrl || req.headers.get('referer'),
       custom_data: customData, 
