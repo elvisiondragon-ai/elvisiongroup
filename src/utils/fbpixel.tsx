@@ -280,6 +280,7 @@ export const hashUserData = async (userData: AdvancedMatchingData): Promise<Adva
 // 🚀 Pixel Initializer - Initialize Facebook Pixel with enhanced logging and error handling
 // Global set to track initialized pixels and prevent duplicates
 const initializedPixels = new Set<string>();
+const userDataCache = new Map<string, string>(); // pixelId -> hashedUserData string
 
 export const initFacebookPixelWithLogging = (pixelId: string, userData?: AdvancedMatchingData): void => {
   if (typeof window === 'undefined') return;
@@ -308,21 +309,22 @@ export const initFacebookPixelWithLogging = (pixelId: string, userData?: Advance
       })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
     }
     
-    // Prevent duplicate initialization for the same Pixel ID
-    if (initializedPixels.has(pixelId)) {
-        console.log(`ℹ️ Meta Pixel ${pixelId} already initialized. Skipping duplicate init.`);
-        return;
-    }
-
     // If userData provided, hash it (async) then init
     if (userData) {
       hashUserData(userData).then(hashed => {
-        (window as any).fbq('init', pixelId, hashed);
-        initializedPixels.add(pixelId);
+        const hashedStr = JSON.stringify(hashed);
+        // Only init if never initialized OR if user data changed
+        if (!initializedPixels.has(pixelId) || userDataCache.get(pixelId) !== hashedStr) {
+            (window as any).fbq('init', pixelId, hashed);
+            initializedPixels.add(pixelId);
+            userDataCache.set(pixelId, hashedStr);
+        }
       });
     } else {
-      (window as any).fbq('init', pixelId);
-      initializedPixels.add(pixelId);
+      if (!initializedPixels.has(pixelId)) {
+        (window as any).fbq('init', pixelId);
+        initializedPixels.add(pixelId);
+      }
     }
   } catch (error) {
     console.log('FB Pixel initialization failed, app continues:', error);
@@ -333,7 +335,14 @@ export const initFacebookPixelWithLogging = (pixelId: string, userData?: Advance
 export const updatePixelUserData = async (pixelId: string, userData: AdvancedMatchingData): Promise<void> => {
   if (typeof window === 'undefined' || !(window as any).fbq) return;
   const hashed = await hashUserData(userData);
-  (window as any).fbq('init', pixelId, hashed);
+  const hashedStr = JSON.stringify(hashed);
+  
+  // Only re-init if user data is different from what we last sent
+  if (userDataCache.get(pixelId) !== hashedStr) {
+    (window as any).fbq('init', pixelId, hashed);
+    userDataCache.set(pixelId, hashedStr);
+    initializedPixels.add(pixelId);
+  }
 };
 
 // 🎯 TEST CODE MAPPING (Dynamic Source of Truth)
