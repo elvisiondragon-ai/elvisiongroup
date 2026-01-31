@@ -145,7 +145,7 @@ const SlimPage = () => {
         customData: eventData,
         eventId: eventId,
         eventSourceUrl: window.location.href,
-        testCode: 'TEST15337'
+        testCode: 'testcode_usa'
       };
 
       // 🧠 NAME SPLITTING LOGIC
@@ -275,7 +275,7 @@ const SlimPage = () => {
       };
 
       // Track AddPaymentInfo
-      trackAddPaymentInfoEvent(eventData, addPaymentInfoEventId, PIXEL_ID, userData);
+      trackAddPaymentInfoEvent(eventData, addPaymentInfoEventId, PIXEL_ID, userData, 'testcode_usa');
       sendCapiEvent('AddPaymentInfo', eventData, addPaymentInfoEventId);
 
       const { fbc, fbp } = getFbcFbpCookies();
@@ -360,7 +360,7 @@ const SlimPage = () => {
             content_type: 'product',
             value: totalAmount,
             currency: 'USD'
-          }, eventId, PIXEL_ID, userData);
+          }, eventId, PIXEL_ID, userData, 'testcode_usa');
           
           // FIRST-WIN DEDUPLICATION CHECK
           const isBackendCapiSent = payload.new?.capi_purchase_sent === true;

@@ -91,19 +91,23 @@ export const getFbcClickIdFromUrl = (): string | null => {
 
   if (fbclid) {
     // 🛡️ SECURITY & QUALITY CHECK
-    // Real fbclids are mixed case and reasonably long.
+    // Real fbclids are mixed case and reasonably long (usually 40+ chars).
     // We reject if:
     // 1. It contains "test" (case-insensitive)
-    // 2. It is too short (< 15 chars), likely truncated
-    // 3. It has NO uppercase letters (likely auto-lowercased by some tool/browser)
+    // 2. It is too short (< 20 chars), likely truncated
+    // 3. It has NO uppercase letters (Meta tokens MUST be mixed-case. 
+    //    If no uppercase, it was likely corrupted/lowercased by a tool).
     
     const hasUppercase = /[A-Z]/.test(fbclid);
-    const isTooShort = fbclid.length < 15;
+    const hasLowercase = /[a-z]/.test(fbclid);
+    const isTooShort = fbclid.length < 20;
     const isTest = /test/i.test(fbclid);
-    const isAllLowercase = !hasUppercase && /[a-z]/.test(fbclid); // It has letters but no uppercase
+    
+    // Valid Meta IDs are ALWAYS mixed case if they contain letters
+    const isCorruptedLowercase = !hasUppercase && hasLowercase;
 
-    if (isTest || isTooShort || isAllLowercase) {
-      console.warn("⚠️ Ignoring invalid/suspicious fbclid from URL:", fbclid);
+    if (isTest || isTooShort || isCorruptedLowercase) {
+      console.warn("⚠️ Meta Pixel: Ignoring invalid/corrupted fbclid:", fbclid);
       return null;
     }
     return fbclid;
@@ -274,6 +278,9 @@ export const hashUserData = async (userData: AdvancedMatchingData): Promise<Adva
 };
 
 // 🚀 Pixel Initializer - Initialize Facebook Pixel with enhanced logging and error handling
+// Global set to track initialized pixels and prevent duplicates
+const initializedPixels = new Set<string>();
+
 export const initFacebookPixelWithLogging = (pixelId: string, userData?: AdvancedMatchingData): void => {
   if (typeof window === 'undefined') return;
 
@@ -301,15 +308,21 @@ export const initFacebookPixelWithLogging = (pixelId: string, userData?: Advance
       })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
     }
     
+    // Prevent duplicate initialization for the same Pixel ID
+    if (initializedPixels.has(pixelId)) {
+        console.log(`ℹ️ Meta Pixel ${pixelId} already initialized. Skipping duplicate init.`);
+        return;
+    }
+
     // If userData provided, hash it (async) then init
-    // But init is usually immediate. We can fire init without data, then init again with data?
-    // Or we handle async here.
     if (userData) {
       hashUserData(userData).then(hashed => {
         (window as any).fbq('init', pixelId, hashed);
+        initializedPixels.add(pixelId);
       });
     } else {
       (window as any).fbq('init', pixelId);
+      initializedPixels.add(pixelId);
     }
   } catch (error) {
     console.log('FB Pixel initialization failed, app continues:', error);
@@ -323,8 +336,14 @@ export const updatePixelUserData = async (pixelId: string, userData: AdvancedMat
   (window as any).fbq('init', pixelId, hashed);
 };
 
+// 🎯 TEST CODE MAPPING (Dynamic Source of Truth)
+const TEST_CODE_MAPPING: Record<string, string> = {
+  'testcode_indo': 'TEST23224', 
+  'testcode_usa': 'TEST88049',
+};
+
 // ⭐ Generic Track Helper
-const trackEvent = async (eventName: string, eventData: any = {}, options: { eventID?: string, pixelId?: string, userData?: AdvancedMatchingData } = {}) => {
+const trackEvent = async (eventName: string, eventData: any = {}, options: { eventID?: string, pixelId?: string, userData?: AdvancedMatchingData, testCode?: string } = {}) => {
   if (typeof window === 'undefined' || !(window as any).fbq) return;
 
   // 🛑 BLOCK INTERNAL TRAFFIC
@@ -343,6 +362,11 @@ const trackEvent = async (eventName: string, eventData: any = {}, options: { eve
     if (options.eventID) {
       trackOptions.eventID = options.eventID;
     }
+    
+    // Resolve Test Code from Mapping
+    if (options.testCode) {
+        trackOptions.test_event_code = TEST_CODE_MAPPING[options.testCode] || options.testCode;
+    }
 
     if (options.pixelId) {
        // 🎯 Target SPECIFIC Pixel ID (Prevents cross-firing in SPA)
@@ -357,31 +381,31 @@ const trackEvent = async (eventName: string, eventData: any = {}, options: { eve
 };
 
 // ⭐ View Content Tracker
-export const trackViewContentEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
-  await trackEvent('ViewContent', eventData, { eventID, pixelId, userData });
+export const trackViewContentEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData, testCode?: string): Promise<void> => {
+  await trackEvent('ViewContent', eventData, { eventID, pixelId, userData, testCode });
 };
 
 // 📄 Page View Tracker
-export const trackPageViewEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
-  await trackEvent('PageView', eventData, { eventID, pixelId, userData });
+export const trackPageViewEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData, testCode?: string): Promise<void> => {
+  await trackEvent('PageView', eventData, { eventID, pixelId, userData, testCode });
 };
 
 // 🛒 Add to Cart Tracker
-export const trackAddToCartEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
-  await trackEvent('AddToCart', eventData, { eventID, pixelId, userData });
+export const trackAddToCartEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData, testCode?: string): Promise<void> => {
+  await trackEvent('AddToCart', eventData, { eventID, pixelId, userData, testCode });
 };
 
 // 💰 Purchase Tracker
-export const trackPurchaseEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
-  await trackEvent('Purchase', eventData, { eventID, pixelId, userData });
+export const trackPurchaseEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData, testCode?: string): Promise<void> => {
+  await trackEvent('Purchase', eventData, { eventID, pixelId, userData, testCode });
 };
 
 // 💳 Add Payment Info Tracker
-export const trackAddPaymentInfoEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
-  await trackEvent('AddPaymentInfo', eventData, { eventID, pixelId, userData });
+export const trackAddPaymentInfoEvent = async (eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData, testCode?: string): Promise<void> => {
+  await trackEvent('AddPaymentInfo', eventData, { eventID, pixelId, userData, testCode });
 };
 
 // 🎯 Custom Event Tracker
-export const trackCustomEvent = async (eventName: string, eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData): Promise<void> => {
-  await trackEvent(eventName, eventData, { eventID, pixelId, userData });
+export const trackCustomEvent = async (eventName: string, eventData: any = {}, eventID?: string, pixelId?: string, userData?: AdvancedMatchingData, testCode?: string): Promise<void> => {
+  await trackEvent(eventName, eventData, { eventID, pixelId, userData, testCode });
 };

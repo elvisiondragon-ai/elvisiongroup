@@ -66,7 +66,7 @@ const EbookHealthLP = () => {
         customData,
         eventId,
         eventSourceUrl: window.location.href,
-        testCode: 'TEST15337'
+        testCode: 'testcode_usa'
       };
 
       await supabase.functions.invoke('capi-universal', { body });

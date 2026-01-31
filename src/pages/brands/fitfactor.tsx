@@ -430,7 +430,7 @@ export default function FitfactorPaymentPage() {
             };
 
             // Facebook Pixel: Purchase event
-            trackPurchaseEvent(purchaseCustomData, purchaseEventId, pixelId, purchaseUserData);
+            trackPurchaseEvent(purchaseCustomData, purchaseEventId, pixelId, purchaseUserData, 'testcode_indo');
 
             toast({
                 title: "🎉 Pembayaran Berhasil!",

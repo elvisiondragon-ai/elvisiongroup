@@ -22,6 +22,12 @@ const PIXEL_CONFIG: Record<string, string> = {
   '1393383179182528': 'CAPI_USA',  // USA KAYA Pixel
 };
 
+// 🎯 TEST CODE MAPPING (Dynamic Source of Truth)
+const TEST_CODE_MAPPING: Record<string, string> = {
+  'testcode_indo': 'TEST23224', // Current Indo Test Code
+  'testcode_usa': 'TEST88049',  // Current USA Test Code
+};
+
 // Initialize Supabase Client for Logging (Global Scope for Warm Starts)
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '';
@@ -63,7 +69,7 @@ Deno.serve(async (req) => {
   // 🎯 RESTRICTED EVENTS FILTER
   const allowedEvents = ['Purchase', 'Test_Purchase', 'AddToCart', 'AddPaymentInfo'];
   if (!allowedEvents.includes(eventName)) {
-    console.log(`⚠️ Skipping event '${eventName}' (not in allowed list)`);
+    console.log(`⚠️ Skipping event '${eventName}' (not in allowed list) | Product: ${productName || 'N/A'} | URL: ${eventSourceUrl || 'N/A'}`);
     return new Response(JSON.stringify({ message: `Event '${eventName}' skipped (not in allowed list)` }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -158,9 +164,30 @@ Deno.serve(async (req) => {
       if (userData.zp) processedUserData.zp = await hashSha256(userData.zp);
       if (userData.country) processedUserData.country = await hashSha256(userData.country);
       
-      // Unhashed fields from client
+      // Unhashed fields from client (with strict FBC case-sensitivity check)
       if (userData.fbp) processedUserData.fbp = userData.fbp;
-      if (userData.fbc) processedUserData.fbc = userData.fbc;
+      
+      if (userData.fbc) {
+        // Validate fbclid case-sensitivity to prevent Meta warnings about modified/lowercased values
+        // Structure: fb.1.timestamp.fbclid
+        const fbcParts = userData.fbc.split('.');
+        if (fbcParts.length >= 4) {
+          const fbclidPart = fbcParts.slice(3).join('.');
+          const hasUpper = /[A-Z]/.test(fbclidPart);
+          const hasLower = /[a-z]/.test(fbclidPart);
+          
+          // Meta fbclids MUST be mixed-case if they contain letters.
+          // If it has letters but no uppercase, it is corrupted/lowercased.
+          if (!hasUpper && hasLower) {
+            console.warn(`⚠️ CAPI: Stripping corrupted (lowercased) FBC: ${userData.fbc}`);
+          } else {
+            processedUserData.fbc = userData.fbc;
+          }
+        } else {
+          processedUserData.fbc = userData.fbc;
+        }
+      }
+
       if (userData.external_id) processedUserData.external_id = userData.external_id;
       if (userData.db_id) processedUserData.facebook_login_id = userData.db_id;
     }
@@ -206,8 +233,10 @@ Deno.serve(async (req) => {
 
     const events = [event];
     const payload: any = { data: events };
+    
+    // Resolve Test Code (lookup in mapping or use direct value)
     if (testCode) {
-        payload.test_event_code = testCode;
+        payload.test_event_code = TEST_CODE_MAPPING[testCode] || testCode;
     }
 
     const facebookApiUrl = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;

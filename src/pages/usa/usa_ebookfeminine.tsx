@@ -82,7 +82,7 @@ export default function USAEbookFeminineLanding() {
         customData: eventData,
         eventId: eventId,
         eventSourceUrl: window.location.href,
-        testCode: 'TEST15337' // UPDATED FOR USA TESTING
+        testCode: 'testcode_usa' // UPDATED FOR USA TESTING
       };
 
       // Get FBC and FBP from cookies using the utility function
@@ -235,7 +235,7 @@ export default function USAEbookFeminineLanding() {
         content_type: 'product',
         value: totalAmount,
         currency: 'USD'
-      }, addPaymentInfoEventId, pixelId, userData);
+      }, addPaymentInfoEventId, pixelId, userData, 'testcode_usa');
       
       sendCapiEvent('AddPaymentInfo', {
         content_ids: [productNameBackend],
@@ -334,7 +334,7 @@ export default function USAEbookFeminineLanding() {
             content_type: 'product',
             value: totalAmount,
             currency: 'USD'
-          }, eventId, pixelId, userData);
+          }, eventId, pixelId, userData, 'testcode_usa');
           
           // FIRST-WIN DEDUPLICATION CHECK
           const isBackendCapiSent = payload.new?.capi_purchase_sent === true;

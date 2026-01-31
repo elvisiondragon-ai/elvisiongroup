@@ -104,10 +104,10 @@ export default function Pay3000() {
       };
 
       // 1. Track AddPaymentInfo (User provided email and intent)
-      trackAddPaymentInfoEvent(eventData, eventId, PIXEL_ID, userData);
+      trackAddPaymentInfoEvent(eventData, eventId, PIXEL_ID, userData, 'testcode_usa');
 
       // 2. Track InitiateCheckout
-      trackCustomEvent('InitiateCheckout', eventData, eventId, PIXEL_ID, userData);
+      trackCustomEvent('InitiateCheckout', eventData, eventId, PIXEL_ID, userData, 'testcode_usa');
 
       // 3. Send CAPI (InitiateCheckout)
       sendCAPIEvent('InitiateCheckout', {

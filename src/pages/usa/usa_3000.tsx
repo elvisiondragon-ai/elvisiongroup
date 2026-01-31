@@ -68,7 +68,7 @@ export default function ELVision3000() {
           customData,
           eventId,
           eventSourceUrl: window.location.href,
-          testCode: 'TEST15337'
+          testCode: 'testcode_usa'
         }),
       });
     } catch (e) {
