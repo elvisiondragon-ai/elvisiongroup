@@ -46,7 +46,6 @@ const FitfactorPaymentPage = React.lazy(() => import("./pages/brands/fitfactor")
 const HungrylaterPaymentPage = React.lazy(() => import("./pages/brands/hungrylater"));
 const ParfumPaymentPage = React.lazy(() => import("./pages/brands/elroyaleparfum"));
 const DevPaymentPage = React.lazy(() => import("./pages/dev"));
-const JewelryPaymentPage = React.lazy(() => import("./pages/brands/elroyaljewelry"));
 const WhatIsPro = React.lazy(() => import("./components/whatispro").then(module => ({ default: module.WhatIsPro })));
 const Payment = React.lazy(() => import("./pages/Payment").then(module => ({ default: module.Payment })));
 const ProUpgradePage = React.lazy(() => import("./pages/prostatus"));
@@ -217,7 +216,6 @@ const AppContent = () => {
                 <Route path="/fitfactor" element={<FitfactorPaymentPage />} />
                 <Route path="/hungrylater" element={<HungrylaterPaymentPage />} />
                 <Route path="/elroyaleparfum" element={<ParfumPaymentPage />} />
-                <Route path="/elroyaljewelry" element={<JewelryPaymentPage />} />
                 <Route path="/fitfactorlp" element={<FitFactorLP />} />
                 <Route path="/drelflp" element={<DrelfLpPage />} />
 

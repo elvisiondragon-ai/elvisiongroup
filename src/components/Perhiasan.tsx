@@ -129,13 +129,6 @@ export const Perhiasan = ({ onNavigate }: PerhiasanProps) => {
               >
                 Dengarkan Verse of eL Vision
                             </Button>
-                            <Button
-                              onClick={() => window.open('https://elroyaljewelry.com', '_blank')}
-                              className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white mt-2" // Added mt-2 and new colors
-                            >
-                              <Gem className="w-4 h-4 mr-2 flex-shrink-0" />
-                              <span className="truncate">Kunjungi El Royale Jewelry</span>
-                            </Button>
                           </CardContent>
                         </Card>
                       </div>

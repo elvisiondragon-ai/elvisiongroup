@@ -449,7 +449,7 @@ export default function JewelryPaymentPage() {
             {user ? (
                 <Button variant="outline" onClick={signOut}>Logout</Button>
             ) : (
-                <Button variant="outline" onClick={() => navigate('/auth?redirect=/elroyaljewelry')}>Login</Button>
+                <Button variant="outline" onClick={() => navigate('/auth')}>Login</Button>
             )}
         </div>
       </div>
