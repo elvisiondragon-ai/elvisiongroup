@@ -363,6 +363,22 @@ function PrimaryVisionBlock() {
         >
           Primary Vision
         </h2>
+        <div style={{ marginTop: 24, marginBottom: 24 }}>
+          <h3 style={{ 
+            fontSize: '2.2rem', 
+            fontWeight: 900, 
+            color: '#fff', 
+            textAlign: 'center', 
+            lineHeight: 1.2,
+            textTransform: 'uppercase',
+            background: 'linear-gradient(to right, #c084fc, #7c3aed)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            filter: 'drop-shadow(0 0 8px rgba(192, 132, 252, 0.3))'
+          }}>
+            Your Reality Must Perfect First <br/> before any goal executed
+          </h3>
+        </div>
         <p
           style={{
             margin: "10px 0 0",
