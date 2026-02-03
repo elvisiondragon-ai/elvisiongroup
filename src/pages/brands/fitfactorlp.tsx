@@ -114,23 +114,9 @@ const FitFactorLP = () => {
       "https://connect.facebook.net/en_US/fbevents.js"
     );
 
-    const pageViewEventId = crypto.randomUUID(); // Generate unique event ID for PageView
-
-    // Initialize and track PageView with Facebook Pixel, including event_id for deduplication
-    fbq("init", "1797660474333865"); // Replace with your actual Pixel ID
-    fbq("track", "PageView", {}, { eventID: pageViewEventId });
-
-    // Send PageView event to CAPI Edge Function
-    sendCAPIEvent('PageView', {}, {}, pageViewEventId);
-
-    const testCapiPageViewEventId = crypto.randomUUID();
-
-    // Track custom event with Facebook Pixel, including event_id for deduplication
-    fbq("trackCustom", "test_capi_page_view", {content_name: 'Custom Test CAPI PageView Event'}, { eventID: testCapiPageViewEventId });
-
-    // Send custom event to CAPI Edge Function
-    sendCAPIEvent('test_capi_page_view', {}, {content_name: 'Custom Test CAPI PageView Event'}, testCapiPageViewEventId);
-  }, [sendCAPIEvent]);
+    // Track PageView via standard Pixel
+    trackPageViewEvent({}, pageViewEventId, FITFACTOR_PIXEL_ID);
+  }, []);
 
   const benefits = [
     {
