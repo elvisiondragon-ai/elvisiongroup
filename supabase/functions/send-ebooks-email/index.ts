@@ -296,7 +296,10 @@ const handler = async (req: Request) => {
     console.log(`📊 Processing email for: ${recipientEmail} | Product: ${productNameInput} -> Key: ${productKey}`);
 
     let displayAmount = '';
-    if (currency === 'USD') {
+    // Force USD display for USA products regardless of incoming currency string
+    if (productKey.startsWith('usa_')) {
+        displayAmount = `$${Number(amount).toFixed(2)} USD`;
+    } else if (currency === 'USD') {
         displayAmount = `$${Number(amount).toFixed(2)} USD`;
     } else if (currency === 'IDR') {
         displayAmount = `Rp ${Number(amount).toLocaleString('id-ID')}`;

@@ -35,12 +35,8 @@ interface Withdrawal {
 }
 
 const productOptions = [
-  { name: 'Fitfactor LP', url: 'https://app.elvisiongroup.com/fitfactorlp', commission: '30%' },
-  { name: 'eL Royale Parfum', url: 'https://app.elvisiongroup.com/elroyaleparfum', commission: '30%' },
-  { name: 'Drelf', url: 'https://app.elvisiongroup.com/drelf', commission: '30%' },
-  { name: 'Hungry Later Diet', url: 'https://app.elvisiongroup.com/ebook_langsing', commission: '30%' },
-  { name: 'Ebook eL Vision', url: 'https://app.elvisiongroup.com/ebook_elvision', commission: '30%' },
-  { name: 'Sistem Uang Panas', url: 'https://app.elvisiongroup.com/uangpanas', commission: '50%' },
+  { name: 'Uang Panas (Lead Magnet)', url: 'https://ai.elvisiongroup.com/ebook_uangpanas', commission: '50%' },
+  { name: 'Feminine Magnetism Ebook', url: 'https://ai.elvisiongroup.com/ebook_feminine', commission: '30%' },
 ];
 
 type TimeFilter = 'today' | 'last7' | 'last30' | 'all';
