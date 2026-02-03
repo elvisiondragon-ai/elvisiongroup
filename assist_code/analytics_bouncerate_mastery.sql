@@ -39,6 +39,7 @@ CREATE INDEX IF NOT EXISTS idx_analytics_content_id ON public.analytics_events(c
 CREATE INDEX IF NOT EXISTS idx_analytics_created_at ON public.analytics_events(created_at);
 
 -- View for Bounce Rate Analysis
+DROP VIEW IF EXISTS public.view_bounce_rate_analytics;
 CREATE OR REPLACE VIEW public.view_bounce_rate_analytics AS
 WITH session_stats AS (
     SELECT
@@ -66,6 +67,7 @@ GROUP BY path
 ORDER BY total_sessions DESC;
 
 -- View for Content Impact on Bounce Rate (The "Mastery" View)
+DROP VIEW IF EXISTS public.view_content_bounce_impact;
 CREATE OR REPLACE VIEW public.view_content_bounce_impact AS
 WITH session_outcomes AS (
     -- Determine if each session bounced (Session < 10s or 1 event)
@@ -78,7 +80,7 @@ WITH session_outcomes AS (
 content_stats AS (
     SELECT 
         content_id,
-        COUNT(DISTINCT CASE WHEN event_type = 'impression' THEN session_id END) as total_impressions,
+        COUNT(DISTINCT CASE WHEN event_type = 'impression' AND (metadata->>'type' = 'video_view' OR metadata->>'type' = 'video_start' OR metadata IS NULL) THEN session_id END) as total_impressions,
         COUNT(DISTINCT CASE WHEN event_type = 'content_engagement' AND (metadata->>'duration')::int >= 15 THEN session_id END) as engaged_15s_users,
         COUNT(DISTINCT CASE WHEN event_type = 'content_engagement' AND (metadata->>'duration')::int >= 30 THEN session_id END) as engaged_30s_users,
         COUNT(DISTINCT CASE WHEN event_type = 'content_engagement' AND (metadata->>'duration')::int >= 60 THEN session_id END) as engaged_60s_users

@@ -94,19 +94,19 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'webinar_el': {
-    subject: "🎟️ Tiket Webinar: Rezeki Jalur Langit & Bonus Ebook",
+    subject: "🎟️ Webinar Ticket: eL Vision & Bonus Ebook",
     downloadLink: "https://drive.google.com/drive/folders/1ZQ4LsWFnuuRJTNu1vfZc5-hJDfOGzJsU?usp=share_link",
-    color: "#b91c1c", // Red 700 (Same as uangpanas style requested)
-    accentColor: "#facc15", // Yellow 400
-    title: "Anda Terdaftar! + Bonus Akses",
-    description: "Terima kasih! Anda telah mengambil langkah cerdas. Berikut adalah akses ke Bonus Ebook dan Grup Telegram.",
+    color: "#b91c1c",
+    accentColor: "#facc15",
+    title: "You are Registered! + Bonus Access",
+    description: "Thank you! You have taken a smart step. Below is your access to the Bonus Ebook and our Telegram Group.",
     instructions: [
-      "Download Bonus Ebook melalui tombol di atas.",
-      "WAJIB: Join Grup Telegram Waiting List di sini: <a href='https://t.me/elvision1' style='color:#b91c1c; font-weight:bold;'>Klik Untuk Join Telegram</a>",
-      "Catat Tanggal: Minggu, 22 Februari 2026 pukul 17:00 WIB."
+      "Download your Bonus Ebook via the button above.",
+      "MANDATORY: Join our Telegram Waiting List here: <a href='https://t.me/elvision1' style='color:#b91c1c; font-weight:bold;'>Click To Join Telegram</a>",
+      "Event Date: Sunday, February 22, 2026 at 17:00 WIB."
     ],
-    lang: "id",
-    btnText: "AMBIL BONUS EBOOK"
+    lang: "en",
+    btnText: "GET BONUS EBOOK"
   },
   'vip_coaching': {
     subject: "💎 VIP Confirmation: 6 Weeks eL Vision Program",
@@ -176,6 +176,21 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Listen to 'Morning Radiance' to start your day with feminine energy."
     ],
     lang: "en"
+  },
+  'usa_webinar20': {
+    subject: "🎟️ Webinar Access: eL Vision Webinar & Materials",
+    downloadLink: "https://chat.whatsapp.com/KxDQ29iKvAQBVvS3deckVC",
+    color: "#004d40",
+    title: "Welcome to the eL Vision Webinar",
+    description: "Thank you for joining our global webinar! Below is your access link and instructions to prepare for your transformation.",
+    instructions: [
+      "JOIN THE WEBINAR GROUP: https://chat.whatsapp.com/KxDQ29iKvAQBVvS3deckVC",
+      "Contact Customer Service in the group to confirm your attendance.",
+      "Access your preparation materials here: https://drive.google.com/drive/folders/1E2iYI6JLtZ73F3jggHEHkke6IniRWaxB?usp=sharing",
+      "Listen to your alignment audio every night before sleep (earphones mandatory)."
+    ],
+    btnText: "JOIN WEBINAR GROUP",
+    lang: "en"
   }
 };
 
@@ -185,6 +200,7 @@ function getProductKey(productName: string): string {
   const lower = productName.toLowerCase();
   
   if (lower.includes('usa_ebookhealth') || lower.includes('ebookhealthlp')) return 'usa_ebookhealth';
+  if (lower.includes('usa_webinar')) return 'usa_webinar20';
   if (lower.includes('usa_ebookslim')) return 'usa_ebookslim';
   if (lower.includes('usa_ebookfeminine')) return 'usa_ebookfeminine';
   if (lower.includes('usa_3000')) return 'usa_3000';

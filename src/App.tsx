@@ -15,23 +15,10 @@ import { ResetPassword } from "./pages/ResetPassword";
 const Index = React.lazy(() => import("./pages/Index"));
 
 
-const SlimPage = React.lazy(() => import("./pages/usa/usa_ebookslim"));
-
-
-const ELVision3000 = React.lazy(() => import("./pages/usa/usa_3000"));
-const Pay3000 = React.lazy(() => import("./pages/usa/usa_pay3000"));
-const Survey3000 = React.lazy(() => import("./pages/usa/usa_3000survey"));
-const PaypalPaymentPage = React.lazy(() => import("./pages/usa/usa_paypal"));
 const AffiliatePage = React.lazy(() => import("./pages/tools_pages/affiliate"));
 
 
-const EbookHealthLP = React.lazy(() => import("./pages/usa/usa_ebookhealth"));
-
-
-const UsaEbookFeminine = React.lazy(() => import("./pages/usa/usa_ebookfeminine"));
-
 const LeadMagnet = React.lazy(() => import("./pages/tools_pages/leadmagnet"));
-const PayPalFinish = React.lazy(() => import("./pages/usa/usa_paypal_finish"));
 const FitFactorLP = React.lazy(() => import("./pages/brands/fitfactorlp"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 import { Terms } from "./pages/Terms";
@@ -221,16 +208,6 @@ const AppContent = () => {
 
 
 
-                {/* // Section USA */}
-                <Route path="/usa_ebookslim" element={<SlimPage />} />
-                <Route path="/usa_3000" element={<ELVision3000 />} />
-                <Route path="/usa_pay3000" element={<Pay3000 />} />
-                <Route path="/usa/usa_3000survey" element={<Survey3000 />} />
-                <Route path="/usa/usa_paypal" element={<PaypalPaymentPage />} />
-                <Route path="/usa_ebookhealth" element={<EbookHealthLP />} />
-                <Route path="/usa_ebookfeminine" element={<UsaEbookFeminine />} />
-                <Route path="/usa/usa_paypal_finish" element={<PayPalFinish />} />
-                
                 {/* Auth routes */}
                 <Route
                   path="/auth"

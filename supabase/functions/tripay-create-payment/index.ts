@@ -132,6 +132,12 @@ const productCatalog = {
     requiresAuth: false,
     physical: true
   },
+  'usa_webinar20': {
+    name: 'usa_webinar20',
+    price: 320000, // 20 USD * 16000 IDR
+    requiresAuth: false,
+    physical: true
+  },
   'fitfactor': {
     name: 'Fitfactor',
     price: 0,
@@ -364,7 +370,7 @@ serve(async (req)=>{
             usdAmount = "1500.00";
         } else if (subscriptionType === 'usa_3000') {
             usdAmount = "3000.00";
-        } else if (subscriptionType === 'ebookhealthlp' || subscriptionType === 'ebook_health20' || subscriptionType === 'usa_ebookslim' || subscriptionType === 'usa_ebookfeminine') {
+        } else if (subscriptionType === 'usa_webinar20' || subscriptionType === 'ebookhealthlp' || subscriptionType === 'ebook_health20' || subscriptionType === 'usa_ebookslim' || subscriptionType === 'usa_ebookfeminine') {
             usdAmount = "20.00";
         } else {
              usdAmount = (amount / 16000).toFixed(2);
