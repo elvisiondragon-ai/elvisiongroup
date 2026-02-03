@@ -13,6 +13,7 @@ import { Auth } from "./pages/Auth";
 import { Signup } from "./pages/Signup";
 import { ResetPassword } from "./pages/ResetPassword";
 const Index = React.lazy(() => import("./pages/Index"));
+const VisionLibrary = React.lazy(() => import("./pages/elvisionlibrary"));
 
 
 const AffiliatePage = React.lazy(() => import("./pages/tools_pages/affiliate"));
@@ -187,6 +188,7 @@ const AppContent = () => {
                 <Route path="/intro" element={<Intro />} />
                 <Route path="/display" element={<DisplayPage />} />
                 <Route path="/testimony" element={<Testimony />} />
+                <Route path="/visionlibrary" element={<VisionLibrary />} />
 
                 {/* // SEction Tools_pages */}
                 <Route path="/affiliate" element={<AffiliatePage />} />
