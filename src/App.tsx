@@ -49,6 +49,7 @@ const ResellerLanding = React.lazy(() => import("./pages/tools_pages/reseller"))
 const Pixels = React.lazy(() => import("./pages/tools_pages/pixels"));
 const RisetPage = React.lazy(() => import("./pages/tools_pages/riset"));
 const AdminWithdrawals = React.lazy(() => import("./pages/tools_pages/admin_withdrawals"));
+const AdminWebinar = React.lazy(() => import("./pages/tools_pages/admin_webinar"));
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { MeditativeProvider } from "@/contexts/MeditativeContext";
@@ -199,6 +200,7 @@ const AppContent = () => {
                 <Route path="/riset" element={<RisetPage />} />
                 <Route path="/leadmagnet" element={<LeadMagnet />} />
                 <Route path="/admin/withdrawals" element={<AdminWithdrawals />} />
+                <Route path="/adminwebinar" element={<AdminWebinar />} />
 
                 {/* // Section Brands */}
                 <Route path="/drelf" element={<DrelfPaymentPage />} />

@@ -208,10 +208,29 @@ serve(async (req)=>{
       }
 
       console.log('   - ✅ Successfully updated global_product to PAID (Winner of race condition).');
+
+      const pName = globalProductTx.product_name || '';
+      
+      // --- 2.1 ADD TO USA WEBINAR TABLE ---
+      if (pName.toLowerCase().includes('usa_webinar')) {
+          console.log('   - 🎟️ USA Webinar detected. Inserting into usa_webinar table...');
+          try {
+              await supabase.from('usa_webinar').insert({
+                  email: globalProductTx.email,
+                  name: globalProductTx.name,
+                  phone_number: globalProductTx.phone,
+                  order_id: tripayReference,
+                  paid_at: new Date().toISOString()
+              });
+              console.log('   - ✅ Inserted into usa_webinar');
+          } catch (webinarError) {
+              console.error('   - ⚠️ Failed to insert into usa_webinar (non-critical):', webinarError);
+          }
+      }
+
       // 3. Kirim email sukses (Opsional)
       try {
         console.log('3. 📧 Sending success email...');
-        const pName = globalProductTx.product_name || '';
         const lowerPName = pName.toLowerCase();
         
         // Specific keywords based on Product Catalog names to route to send-ebooks-email
