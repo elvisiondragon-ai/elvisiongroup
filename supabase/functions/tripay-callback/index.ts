@@ -211,20 +211,25 @@ serve(async (req)=>{
 
       const pName = globalProductTx.product_name || '';
       
-      // --- 2.1 ADD TO USA WEBINAR TABLE ---
-      if (pName.toLowerCase().includes('usa_webinar')) {
-          console.log('   - 🎟️ USA Webinar detected. Inserting into usa_webinar table...');
+      // --- 2.1 ADD TO USER WEBINAR TABLE ---
+      // We check for 'webinar' to catch usa_webinar20, webinar_el, etc.
+      if (pName.toLowerCase().includes('webinar')) {
+          console.log(`   - 🎟️ Webinar detected (${pName}). Inserting into user_webinar table...`);
+          
+          const origin = pName.toLowerCase().includes('usa_webinar') ? 'USA' : 'Indonesia';
+          
           try {
-              await supabase.from('usa_webinar').insert({
+              await supabase.from('user_webinar').insert({
                   email: globalProductTx.email,
                   name: globalProductTx.name,
                   phone_number: globalProductTx.phone,
                   order_id: tripayReference,
-                  paid_at: new Date().toISOString()
+                  paid_at: new Date().toISOString(),
+                  origin: origin
               });
-              console.log('   - ✅ Inserted into usa_webinar');
+              console.log(`   - ✅ Inserted into user_webinar (Origin: ${origin})`);
           } catch (webinarError) {
-              console.error('   - ⚠️ Failed to insert into usa_webinar (non-critical):', webinarError);
+              console.error('   - ⚠️ Failed to insert into user_webinar (non-critical):', webinarError);
           }
       }
 

@@ -101,6 +101,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     title: "You are Registered! + Bonus Access",
     description: "Thank you! You have taken a smart step. Below is your access to the Bonus Ebook and our Telegram Group.",
     instructions: [
+      "Check your session time here: <a href='https://ai.elvisiongroup.com/webinarleft' style='color:#b91c1c; font-weight:bold;'>Check Session Status</a> (Enter your email)",
       "Download your Bonus Ebook via the button above.",
       "MANDATORY: Join our Telegram Waiting List here: <a href='https://t.me/elvision1' style='color:#b91c1c; font-weight:bold;'>Click To Join Telegram</a>",
       "Event Date: Sunday, February 22, 2026 at 17:00 WIB."
@@ -184,6 +185,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     title: "Welcome to the eL Vision Webinar",
     description: "Thank you for joining our global webinar! Below is your access link and instructions to prepare for your transformation.",
     instructions: [
+      "Check your session time here: <a href='https://ai.elvisiongroup.com/webinarleft' style='color:#004d40; font-weight:bold;'>Check Session Status</a> (Enter your email)",
       "JOIN THE WEBINAR GROUP: https://chat.whatsapp.com/KxDQ29iKvAQBVvS3deckVC",
       "Contact Customer Service in the group to confirm your attendance.",
       "Access your preparation materials here: https://drive.google.com/drive/folders/1E2iYI6JLtZ73F3jggHEHkke6IniRWaxB?usp=sharing",

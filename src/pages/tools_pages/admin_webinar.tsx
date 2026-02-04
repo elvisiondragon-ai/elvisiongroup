@@ -45,7 +45,7 @@ const AdminWebinar = () => {
     setLoading(true);
     try {
       const { data: webinarData, error } = await supabase
-        .from('usa_webinar')
+        .from('user_webinar')
         .select('*')
         .order('paid_at', { ascending: false });
 
@@ -103,9 +103,9 @@ const AdminWebinar = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Users className="text-primary" /> USA Webinar Admin
+            <Users className="text-primary" /> Webinar Admin
           </h1>
-          <p className="text-muted-foreground mt-1">Manage and monitor all USA webinar participants.</p>
+          <p className="text-muted-foreground mt-1">Manage and monitor all webinar participants.</p>
         </div>
         
         <div className="relative w-full md:w-72">
@@ -163,6 +163,7 @@ const AdminWebinar = () => {
                 <TableRow>
                   <TableHead className="font-bold">Participant</TableHead>
                   <TableHead className="font-bold">Order ID</TableHead>
+                  <TableHead className="font-bold">Origin</TableHead>
                   <TableHead className="font-bold">Paid At</TableHead>
                   <TableHead className="font-bold">Ends At</TableHead>
                   <TableHead className="font-bold">Status</TableHead>
@@ -180,6 +181,11 @@ const AdminWebinar = () => {
                         </div>
                       </TableCell>
                       <TableCell className="font-mono text-xs">{row.order_id}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={row.origin === 'USA' ? 'border-blue-500 text-blue-500' : 'border-red-500 text-red-500'}>
+                          {row.origin || 'N/A'}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-sm">{formatDate(row.paid_at)}</TableCell>
                       <TableCell className="text-sm">{formatDate(row.ends_at)}</TableCell>
                       <TableCell>
