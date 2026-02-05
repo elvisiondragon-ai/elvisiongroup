@@ -251,11 +251,7 @@ const ReportSalesAdmin = () => {
         {/* Header */}
         <div className="mb-8 flex justify-between items-end">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Sales Intelligence Report</h1>
-            <p className="text-purple-300">Live ecosystem performance tracking (Last 60 Days)</p>
-          </div>
-          <div className="bg-emerald-500/20 border border-emerald-500/50 px-4 py-2 rounded-full">
-             <span className="text-emerald-400 font-mono font-bold">STATUS: LIVE UPDATING</span>
+            <h1 className="text-4xl font-bold text-white mb-2">Revenue Ecosystem eL Vision</h1>
           </div>
         </div>
 
