@@ -42,6 +42,7 @@ import UpdateBanner from "./updatebanner";
 const Intro = React.lazy(() => import("./pages/intro"));
 const DisplayPage = React.lazy(() => import("./pages/display"));
 const ReportSales = React.lazy(() => import("./pages/tools_pages/reportsales"));
+const ReportSalesAdmin = React.lazy(() => import("./pages/tools_pages/reportsalesadmin"));
 const DrelfLpPage = React.lazy(() => import("./pages/brands/drelflp"));
 const Testimony = React.lazy(() => import("./pages/testimony"));
 const CreatorPage = React.lazy(() => import("./pages/tools_pages/creator_api"));
@@ -194,6 +195,7 @@ const AppContent = () => {
                 {/* // SEction Tools_pages */}
                 <Route path="/affiliate" element={<AffiliatePage />} />
                 <Route path="/reportsales" element={<ReportSales />} />
+                <Route path="/reportsalesadmin" element={<ReportSalesAdmin />} />
                 <Route path="/creator_api" element={<CreatorPage />} />
                 <Route path="/reseller" element={<ResellerLanding />} />
                 <Route path="/pixels" element={<Pixels />} />
