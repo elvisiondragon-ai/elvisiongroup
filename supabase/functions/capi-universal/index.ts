@@ -20,6 +20,7 @@ const corsHeaders = {
 const PIXEL_CONFIG: Record<string, string> = {
   '3319324491540889': 'METACAPI', // EbookIndo Pixel
   '1393383179182528': 'CAPI_USA',  // USA KAYA Pixel
+  '1749197952320359': 'CAPI_DRELF', // Drelf SG Pixel
 };
 
 // 🎯 TEST CODE MAPPING (Dynamic Source of Truth)

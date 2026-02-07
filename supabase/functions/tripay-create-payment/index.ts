@@ -266,6 +266,16 @@ serve(async (req)=>{
     } else if (product.physical) {
       amount = product.price * quantity;
     }
+
+    // --- CURRENCY LIQUIDITY & IDR ADJUSTMENT ---
+    // If currency is provided and not IDR, we adjust to IDR for database and TriPay
+    const currency = body.currency || 'IDR';
+    if (currency === 'USD') {
+      amount = amount * 16000; // Adjust USD to IDR
+    } else if (currency === 'SGD') {
+      amount = amount * 12000; // Adjust SGD to IDR
+    }
+
     if (amount < 0) {
       return new Response(JSON.stringify({
         error: 'Invalid amount or quantity for the selected product'
