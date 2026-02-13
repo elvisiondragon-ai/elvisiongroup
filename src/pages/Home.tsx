@@ -20,7 +20,7 @@ import { useAudioCache } from "@/hooks/useAudioCache";
 import { useToast } from "@/hooks/use-toast";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
-import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity, Heart, Smile, Apple, Gem, HelpCircle, Crown, CircleUser, Sun, DollarSign } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity, Heart, Smile, Apple, Gem, HelpCircle, Crown, CircleUser, Sun, DollarSign, Globe, ShoppingBag } from "lucide-react";
 import { AdminBadge } from "@/components/AdminBadge";
 import { TutorialButton } from "@/components/TutorialButton";
 import { AffiliateGuideModal } from "@/components/AffiliateGuideModal";
@@ -225,6 +225,13 @@ export function Home({
     icon: Activity,
     color: "text-emerald-500",
     key: "elite-habit",
+    isNew: true
+  }, {
+    title: "ShopAuto AI",
+    description: "Automate Store with AI and WA Forwarding",
+    icon: ShoppingBag,
+    color: "text-orange-500",
+    key: "shopauto",
     isNew: true
   }];
 
@@ -622,6 +629,38 @@ export function Home({
         </Card>
       </div>
 
+      {/* Export Global Section */}
+      <div className="px-6 space-y-4 mt-8">
+        <h2 className="text-xl font-semibold font-exo text-amber-500">EXPORT GLOBAL</h2>
+        
+        <Card
+          className="p-6 border-border transition-all duration-300 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-orange-500/10 hover:from-amber-500/20 hover:via-yellow-500/10 hover:to-orange-500/20 border-amber-500/20 hover:border-amber-400/40 cursor-pointer relative overflow-hidden group"
+          onClick={() => window.open('https://export.elvisiongroup.com', '_blank')}
+        >
+          {/* Background glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-600/5 via-yellow-600/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="relative p-3 rounded-full bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 shadow-lg shadow-amber-500/30 group-hover:shadow-amber-500/50 group-hover:scale-110 transition-all duration-300">
+              <Globe className="w-6 h-6 text-white animate-pulse" />
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                Sebaik baik dagang adalah bergadang ke seluruh dunia karena profit lebih tebal dan kita bisa membantu negara.
+              </p>
+            </div>
+            
+            <Button className="w-full bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 hover:from-amber-700 hover:via-yellow-700 hover:to-orange-700 text-white font-bold shadow-lg shadow-amber-500/30">
+              Gabung Export Global
+            </Button>
+          </div>
+
+          {/* Corner accent */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-amber-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
+        </Card>
+      </div>
+
       <div className="py-4"></div>
 
       {/* Quick Actions */}
@@ -710,7 +749,11 @@ export function Home({
               return; // Do nothing if locked
             }
             console.log("Feature clicked:", feature.key);
-            onNavigate(feature.key);
+            if (feature.key === 'shopauto') {
+              navigate('/shopauto');
+            } else {
+              onNavigate(feature.key);
+            }
           }}>
                 {feature.isNew}
                 
@@ -871,7 +914,11 @@ export function Home({
                       return; // Do nothing if locked
                     }
                     console.log("Feature clicked:", feature.key);
-                    onNavigate(feature.key);
+                    if (feature.key === 'shopauto') {
+                      navigate('/shopauto');
+                    } else {
+                      onNavigate(feature.key);
+                    }
                   }}>
                 {feature.isNew}
                 
@@ -1004,7 +1051,11 @@ export function Home({
               return; // Do nothing if locked
             }
             console.log("Feature clicked:", feature.key);
-            onNavigate(feature.key);
+            if (feature.key === 'shopauto') {
+              navigate('/shopauto');
+            } else {
+              onNavigate(feature.key);
+            }
           }}>
                 {feature.isNew}
                 

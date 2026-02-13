@@ -113,6 +113,8 @@ const handler = async (req)=>{
     // Format amount based on currency
     const formattedAmount = currency === 'USD' 
         ? `$${safeAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}` 
+        : currency === 'SGD'
+        ? `S$${safeAmount.toLocaleString('en-SG', { minimumFractionDigits: 2 })}`
         : `Rp ${safeAmount.toLocaleString('id-ID')}`;
 
     // Add user to mailing list first
@@ -122,6 +124,8 @@ const handler = async (req)=>{
     
     // Check for VIP 6 Week Program
     const isVIP = safeSubscriptionType.includes('VIP') || safeSubscriptionType.includes('3000') || safeSubscriptionType === 'VIP6WEEK';
+    const isDrelf = safeSubscriptionType.toLowerCase().includes('drelf');
+    const isJewelry = safeSubscriptionType.toLowerCase().includes('jewelry');
 
     if (type === 'payment_created' || type === 'created') {
       subject = isVIP ? "Payment Pending - eL Vision VIP Session" : "Pembayaran Menunggu - ElVision Group Pro";
@@ -174,9 +178,100 @@ const handler = async (req)=>{
       `;
     } else {
       // payment_completed or success
-      subject = isVIP ? "🎉 Payment Successful - eL Vision VIP Session" : "🎉 Selamat! Pembayaran Berhasil - ElVision Group Pro";
+      subject = isVIP ? "🎉 Payment Successful - eL Vision VIP Session" : 
+                isDrelf ? "🎉 Order Confirmed - Drelf Collagen Ritual" :
+                isJewelry ? "🎉 Order Confirmed - eL Royal Jewelry Masterpiece" :
+                "🎉 Selamat! Pembayaran Berhasil - ElVision Group Pro";
       
-      if (isVIP) {
+      if (isJewelry) {
+        htmlContent = `
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 50%, #B38728 100%); color: #4b3d1b; padding: 30px; border-radius: 15px 15px 0 0; text-align: center; border-bottom: 2px solid #BF953F;">
+              <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🎉 ORDER CONFIRMED!</h1>
+              <p style="margin: 15px 0 0 0; font-size: 16px;">Thank you for your trust, ${userName}!</p>
+            </div>
+            <div style="background: white; padding: 40px; border-radius: 0 0 15px 15px; border: 1px solid #e0e0e0; border-top: none;">
+              <h2 style="color: #333; margin-bottom: 20px;">Your Moment is Happening Now 💎</h2>
+              <p style="color: #666; line-height: 1.7; margin-bottom: 25px;">
+                We have received your payment for <strong>${safeSubscriptionType}</strong>. Our master craftsmen are now preparing your piece for rapid delivery.
+              </p>
+
+              <div style="background: #fffdf5; padding: 20px; border-radius: 12px; border: 1px solid #fcf6ba; margin-bottom: 25px;">
+                <h3 style="color: #856404; margin-top: 0; font-size: 16px;">📍 Shipping Information:</h3>
+                <p style="color: #333; margin-bottom: 5px; font-weight: bold;">Delivery Address:</p>
+                <p style="color: #555; margin-top: 0; font-style: italic;">${body.address || 'Address provided at checkout'}</p>
+                <p style="color: #333; margin-top: 15px; font-weight: bold;">Estimated Arrival:</p>
+                <p style="color: #555; margin-top: 0;">1 - 3 Working Days</p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <p style="color: #666; margin-bottom: 15px;">Want to track your shipment or discuss customization?</p>
+                <a href="https://wa.me/62895325633487?text=Hi%2C%20I%20have%20paid%20for%20Jewelry%20order%20${safeReference}" style="background: #25D366; color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);">
+                  💬 Chat with eL Royal Concierge
+                </a>
+              </div>
+
+               <div style="background: #f8f9ff; padding: 25px; border-radius: 12px; border-left: 5px solid #BF953F; margin: 25px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span style="color: #666;">Total Paid:</span>
+                  <span style="font-weight: bold; color: #333; font-size: 18px;">${formattedAmount}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #666;">Reference:</span>
+                  <span style="font-weight: bold; color: #333;">${safeReference}</span>
+                </div>
+              </div>
+            </div>
+            <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+              © 2026 eL Royal Jewelry. All Rights Reserved.
+            </div>
+          </div>
+        `;
+      } else if (isDrelf) {
+        htmlContent = `
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #BF953F 0%, #B38728 100%); color: white; padding: 30px; border-radius: 15px 15px 0 0; text-align: center;">
+              <h1 style="margin: 0; font-size: 28px;">🎉 ORDER CONFIRMED!</h1>
+              <p style="margin: 15px 0 0 0; font-size: 16px;">Thank you for your purchase, ${userName}!</p>
+            </div>
+            <div style="background: white; padding: 40px; border-radius: 0 0 15px 15px;">
+              <h2 style="color: #333; margin-bottom: 20px;">Your Ritual is on its Way! 🚚</h2>
+              <p style="color: #666; line-height: 1.7; margin-bottom: 25px;">
+                We have received your payment for <strong>${safeSubscriptionType}</strong>. Our team is now preparing your package for the fastest shipping to Singapore.
+              </p>
+
+              <div style="background: #fff8e1; padding: 20px; border-radius: 12px; border: 1px solid #ffe082; margin-bottom: 25px;">
+                <h3 style="color: #856404; margin-top: 0; font-size: 16px;">📍 Shipping Information:</h3>
+                <p style="color: #333; margin-bottom: 5px; font-weight: bold;">Delivery Address:</p>
+                <p style="color: #555; margin-top: 0; font-style: italic;">${body.address || 'Address provided at checkout'}</p>
+                <p style="color: #333; margin-top: 15px; font-weight: bold;">Estimated Arrival:</p>
+                <p style="color: #555; margin-top: 0;">3 - 5 Working Days</p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <p style="color: #666; margin-bottom: 15px;">Have questions about your order or dosage?</p>
+                <a href="https://wa.me/62895325633487?text=Hi%2C%20I%20have%20paid%20for%20Drelf%20order%20${safeReference}" style="background: #25D366; color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);">
+                  💬 Chat with Customer Service
+                </a>
+              </div>
+
+               <div style="background: #f8f9ff; padding: 25px; border-radius: 12px; border-left: 5px solid #BF953F; margin: 25px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span style="color: #666;">Total Paid:</span>
+                  <span style="font-weight: bold; color: #333;">${formattedAmount}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #666;">Reference:</span>
+                  <span style="font-weight: bold; color: #333;">${safeReference}</span>
+                </div>
+              </div>
+            </div>
+            <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+              © 2026 eL Vision Group. All Rights Reserved.
+            </div>
+          </div>
+        `;
+      } else if (isVIP) {
         htmlContent = `
           <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px 15px 0 0; text-align: center;">

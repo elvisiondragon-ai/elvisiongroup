@@ -1,16 +1,45 @@
 const express = require('express');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
+const qrcodeTerminal = require('qrcode-terminal');
+const cors = require('cors');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
-const port = process.env.PORT || 3000;
+const http = require('http');
+const { Server } = require('socket.io');
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: { origin: '*', methods: ['GET', 'POST'] }
+});
 
+app.use(cors({
+    origin: '*',
+    allowedHeaders: ['Content-Type', 'x-api-key']
+}));
 app.use(express.json());
 
-let qrCodeData = null;
-let isReady = false;
+// --- CONFIG ---
+const API_KEY = process.env.WA_API_KEY || "aae95e77d1e8af24574a433272785c9b";
+const GEMINI_KEY = process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY_HERE";
+const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+const aiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// Initialize WhatsApp Client
+let qrCodeData = null;
+let currentStatus = "INITIALIZING";
+
+// Auth Middleware
+const auth = (req, res, next) => {
+    const key = req.headers['x-api-key'];
+    if (key === API_KEY) {
+        next();
+    } else {
+        res.status(401).json({ error: 'Unauthorized' });
+    }
+};
+
+console.log('🚀 BOOTING SHOPAUTO ULTIMATE ENGINE...');
+
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
@@ -20,101 +49,113 @@ const client = new Client({
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
             '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process', 
-            '--disable-gpu'
+            '--disable-gpu',
+            '--enable-low-end-device-mode',
+            '--single-process',
+            '--no-zygote'
         ]
     }
 });
 
 client.on('qr', (qr) => {
-    console.log('QR RECEIVED', qr);
-    // Generate QR code as a Data URL for display in browser
-    qrcode.toDataURL(qr, (err, url) => {
-        if (err) {
-            console.error('Error generating QR code', err);
-            return;
-        }
-        qrCodeData = url;
+    console.log('✅ SCAN THIS QR:');
+    qrcodeTerminal.generate(qr, { small: true });
+    qrcode.toDataURL(qr, (err, url) => { 
+        if (!err) {
+            qrCodeData = url;
+            currentStatus = "QR_READY";
+            io.emit('qr-user', url);
+            io.emit('status-user', currentStatus);
+        } 
     });
 });
 
-client.on('ready', () => {
-    console.log('Client is ready!');
-    isReady = true;
-    qrCodeData = null; // Clear QR code when ready
-});
-
 client.on('authenticated', () => {
-    console.log('AUTHENTICATED');
+    currentStatus = "AUTHENTICATED";
+    io.emit('status-user', currentStatus);
 });
 
-client.on('auth_failure', msg => {
-    console.error('AUTHENTICATION FAILURE', msg);
+client.on('ready', () => {
+    console.log('✅ SYSTEM ONLINE');
+    currentStatus = "READY";
+    qrCodeData = null;
+    io.emit('status-user', currentStatus);
 });
 
 client.initialize();
 
-// --- API Endpoints ---
-
-// 1. Home / Status / QR Display
-app.get('/', (req, res) => {
-    if (isReady) {
-        res.send(`
-            <html>
-                <body style="font-family: sans-serif; text-align: center; padding: 50px;">
-                    <h1 style="color: green;">WhatsApp Client is Ready! ✅</h1>
-                    <p>You can now send messages via the API.</p>
-                </body>
-            </html>
-        `);
-    } else if (qrCodeData) {
-        res.send(`
-            <html>
-                <body style="font-family: sans-serif; text-align: center; padding: 50px;">
-                    <h1>Scan this QR Code</h1>
-                    <img src="${qrCodeData}" alt="QR Code" />
-                    <p>Refresh if you don't see the code yet.</p>
-                </body>
-            </html>
-        `);
-    } else {
-        res.send(`
-            <html>
-                <body style="font-family: sans-serif; text-align: center; padding: 50px;">
-                    <h1>Initializing...</h1>
-                    <p>Please wait and refresh this page in a few seconds to see the QR code.</p>
-                </body>
-            </html>
-        `);
-    }
+// API Endpoints
+app.get('/status', (req, res) => { 
+    res.json({ 
+        isReady: currentStatus === "READY", 
+        number: client.info ? client.info.wid.user : null,
+        qrCodeData, // legacy
+        user: {
+            status: currentStatus,
+            qr: qrCodeData
+        }
+    }); 
 });
 
-// 2. Send Message API
-app.post('/send-message', async (req, res) => {
-    if (!isReady) {
-        return res.status(503).json({ error: 'Client not ready. Please scan QR code first.' });
-    }
-
-    const { number, message } = req.body;
-
-    if (!number || !message) {
-        return res.status(400).json({ error: 'Missing "number" or "message" in body' });
-    }
-
+app.get('/groups', auth, async (req, res) => {
     try {
-        // Format number: remove '+' and ensure it ends with '@c.us'
-        const chatId = number.replace(/\+/g, '') + '@c.us';
-        
-        await client.sendMessage(chatId, message);
-        res.json({ success: true, message: 'Message sent successfully' });
+        if (currentStatus !== "READY") {
+            return res.status(503).json({ error: 'WhatsApp not connected' });
+        }
+        const chats = await client.getChats();
+        const groups = chats
+            .filter(chat => chat.isGroup)
+            .map(chat => ({
+                id: chat.id._serialized,
+                name: chat.name
+            }));
+        res.json(groups);
     } catch (error) {
-        console.error('Error sending message:', error);
-        res.status(500).json({ error: 'Failed to send message', details: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.post('/send-message', auth, async (req, res) => {
+    const { number, message, sender } = req.body;
+    console.log(`📩 INCOMING MESSAGE REQUEST: to ${number} (Sender: ${sender || 'default'})`);
+
+    // --- WHATSAPP SENDER LOGIC ---
+    if (currentStatus !== "READY" && sender !== 'admin') {
+        console.log('❌ FAILED: Custom Client not ready');
+        return res.status(503).json({ error: 'Not ready' });
+    }
+    
+    try {
+        const chatId = number.includes('@') ? number.trim() : `${number.replace(/[\s\+\-]/g, "")}@c.us`;
+        
+        // Note: Implement specific logic for 'sender: admin' if your bot handles multiple sessions
+        await client.sendMessage(chatId, message);
+        
+        console.log('✅ MESSAGE SENT');
+        res.json({ success: true });
+    } catch (error) { 
+        console.log(`❌ SEND ERROR: ${error.message}`);
+        res.status(500).json({ error: error.message }); 
+    }
 });
+
+// TEST AI ENDPOINT
+app.post('/ask-ai', auth, async (req, res) => {
+    try {
+        const result = await aiModel.generateContent(req.body.prompt);
+        const response = await result.response;
+        res.json({ reply: response.text() });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.post('/disconnect', auth, async (req, res) => {
+    try {
+        await client.logout();
+        currentStatus = "INITIALIZING";
+        qrCodeData = null;
+        io.emit('status-user', currentStatus);
+        res.json({ success: true });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+server.listen(3000, () => { console.log('Server running on port 3000'); });

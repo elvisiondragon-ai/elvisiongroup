@@ -193,6 +193,34 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     ],
     btnText: "JOIN WEBINAR GROUP",
     lang: "en"
+  },
+  'sg_elvision_en': {
+    subject: "📘 Download: eL Vision Ebook (English Edition)",
+    downloadLink: "https://drive.google.com/drive/folders/17yvGGDVqT4BbymvKsTXZhoU_XKM4qD3S?usp=sharing",
+    color: "#2196F3",
+    title: "Access Granted: eL Vision Ebook",
+    description: "Congratulations! You now have full access to the eL Vision Ebook + Audio Hypnosis (English Edition).",
+    instructions: [
+      "Download the ebook to your device.",
+      "Study the foundational materials first.",
+      "Use earphones for the Audio Hypnosis for maximum effect."
+    ],
+    btnText: "DOWNLOAD NOW",
+    lang: "en"
+  },
+  'sg_elvision_malay': {
+    subject: "📘 Muat Turun: Ebook eL Vision (Edisi Bahasa Melayu)",
+    downloadLink: "https://drive.google.com/drive/folders/17yvGGDVqT4BbymvKsTXZhoU_XKM4qD3S?usp=sharing",
+    color: "#2196F3",
+    title: "Akses Diberikan: Ebook eL Vision",
+    description: "Tahniah! Anda kini mempunyai akses penuh ke Ebook eL Vision + Hipnosis Audio (Edisi Bahasa Melayu).",
+    instructions: [
+      "Muat turun ebook ke peranti anda.",
+      "Pelajari bahan asas terlebih dahulu.",
+      "Gunakan fon telinga untuk Hipnosis Audio untuk kesan maksimum."
+    ],
+    btnText: "MUAT TURUN SEKARANG",
+    lang: "ms"
   }
 };
 
@@ -201,6 +229,9 @@ function getProductKey(productName: string): string {
   if (!productName) return 'ebook_elvision'; // Default fallback
   const lower = productName.toLowerCase();
   
+  if (lower.includes('sg_elvision_en')) return 'sg_elvision_en';
+  if (lower.includes('sg_elvision_malay')) return 'sg_elvision_malay';
+
   if (lower.includes('usa_ebookhealth') || lower.includes('ebookhealthlp')) return 'usa_ebookhealth';
   if (lower.includes('usa_webinar')) return 'usa_webinar20';
   if (lower.includes('usa_ebookslim')) return 'usa_ebookslim';
@@ -303,6 +334,10 @@ const handler = async (req: Request) => {
         displayAmount = `$${Number(amount).toFixed(2)} USD`;
     } else if (currency === 'USD') {
         displayAmount = `$${Number(amount).toFixed(2)} USD`;
+    } else if (currency === 'SGD') {
+        displayAmount = `S$${Number(amount).toFixed(2)} SGD`;
+    } else if (currency === 'MYR') {
+        displayAmount = `RM ${Number(amount).toFixed(2)} MYR`;
     } else if (currency === 'IDR') {
         displayAmount = `Rp ${Number(amount).toLocaleString('id-ID')}`;
     } else {

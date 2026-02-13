@@ -21,6 +21,7 @@ const PIXEL_CONFIG: Record<string, string> = {
   '3319324491540889': 'METACAPI', // EbookIndo Pixel
   '1393383179182528': 'CAPI_USA',  // USA KAYA Pixel
   '1749197952320359': 'CAPI_DRELF', // Drelf SG Pixel
+  'CAPI_JEWELRY': 'CAPI_JEWELRY', // Special mapping for Jewelry
 };
 
 // 🎯 TEST CODE MAPPING (Dynamic Source of Truth)
@@ -31,7 +32,7 @@ const TEST_CODE_MAPPING: Record<string, string> = {
 
 // Initialize Supabase Client for Logging (Global Scope for Warm Starts)
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 Deno.serve(async (req) => {
@@ -51,6 +52,19 @@ Deno.serve(async (req) => {
   
   // --- Configuration ---
   const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl, eventTime } = body;
+
+  // Resolution for Jewelry Pixel ID (must be in environment, not code)
+  let resolvedPixelId = pixelId;
+  if (pixelId === 'CAPI_JEWELRY') {
+    resolvedPixelId = Deno.env.get('JEWELRY_PIXEL_ID') || '';
+    if (!resolvedPixelId) {
+        console.error("Configuration Error: JEWELRY_PIXEL_ID not set in environment.");
+        return new Response(JSON.stringify({ error: "JEWELRY_PIXEL_ID not configured." }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+    }
+  }
 
   let productName: string | null = null;
   if (customData) {
@@ -84,7 +98,7 @@ Deno.serve(async (req) => {
       .from('pixel_events')
       .select('status')
       .eq('event_id', eventId)
-      .eq('pixel_id', pixelId) 
+      .eq('pixel_id', resolvedPixelId) 
       .maybeSingle();
 
     // If we found ANY record, we stop immediately.
@@ -113,7 +127,7 @@ Deno.serve(async (req) => {
   try {
     // 2. ATOMIC LOCKING via DB INSERT
     const dbLog: any = {
-        pixel_id: pixelId,
+        pixel_id: resolvedPixelId,
         event_name: eventName,
         event_id: eventId,
         user_data: userData,
@@ -240,7 +254,7 @@ Deno.serve(async (req) => {
         payload.test_event_code = TEST_CODE_MAPPING[testCode] || testCode;
     }
 
-    const facebookApiUrl = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
+    const facebookApiUrl = `https://graph.facebook.com/v19.0/${resolvedPixelId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
     
     const response = await fetch(facebookApiUrl, {
       method: 'POST',
@@ -263,7 +277,7 @@ Deno.serve(async (req) => {
 
     if (!response.ok) {
       // FAILURE LOG
-      console.log(`❌ CAPI Failed | Event: ${eventName} | Pixel: ${pixelId} | Error: ${JSON.stringify(result)}`);
+      console.log(`❌ CAPI Failed | Event: ${eventName} | Pixel: ${resolvedPixelId} | Error: ${JSON.stringify(result)}`);
       return new Response(JSON.stringify({ error: 'Failed to send event to Facebook CAPI', details: result }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -271,7 +285,7 @@ Deno.serve(async (req) => {
     }
 
     // SUCCESS LOG (One single line)
-    console.log(`✅ CAPI Success | Event: ${eventName} | Pixel: ${pixelId} | ID: ${eventId || 'N/A'}`);
+    console.log(`✅ CAPI Success | Event: ${eventName} | Pixel: ${resolvedPixelId} | ID: ${eventId || 'N/A'}`);
     return new Response(JSON.stringify({ message: `Event '${eventName}' sent successfully`, result }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -255,26 +255,12 @@ serve(async (req)=>{
         
         let functionToInvoke = isEbook ? 'send-ebooks-email' : 'send-payment-email';
         
-        console.log(`   - Invoking email function: ${functionToInvoke} for product: ${pName}`);
-        await supabase.functions.invoke(functionToInvoke, {
-          body: {
-            userEmail: globalProductTx.email,
-            amount: amount || globalProductTx.amount,
-            currency: 'IDR',
-            reference: tripayReference,
-            subscriptionType: globalProductTx.product_name, // Pass original name, send-ebooks-email handles detection
-            paymentMethod: paymentMethod,
-            status: 'payment_completed',
-            userName: globalProductTx.name,
-            affiliateEmail: globalProductTx.affiliate_email
-          }
-        });
-        console.log('   - 📧 Email sent to:', globalProductTx.email);
-
-        // --- UNIVERSAL CAPI TRACKING ---
+        // --- CAPI & EMAIL CONFIGURATION ---
         let capiPixelId = null;
         let capiValue = 0;
         let capiCurrency = 'IDR';
+        let emailCurrency = 'IDR';
+        let displayAmount = amount || globalProductTx.amount;
 
         const isEbookHealth = pName.includes('Health Recovery') || pName.includes('ebook_health20') || pName.includes('usa_ebookslim') || pName.includes('Slim Without Suffering') || pName.includes('usa_ebookhealth') || pName.includes('usa_webinar');
         const isCoaching3000 = pName.includes('3000 Coaching') || pName.includes('usa_3000') || pName.includes('usa_pay3000');
@@ -283,11 +269,15 @@ serve(async (req)=>{
         const isEbookFeminine = pName.includes('ebook_feminine') || pName.includes('Feminine Magnetism');
         const isUangPanas = pName.includes('ebook_uangpanas') || pName.includes('Uang Panas') || pName.includes('Sistem Uang Panas');
         const isFitFactor = pName.includes('Fitfactor');
+        const isJewelry = pName.toLowerCase().includes('jewelry');
         const isDrelf = pName.toLowerCase().includes('drelf');
-        // Added 'webinar' to catch 'Elvision Webinar'
         const isWebinar = pName.toLowerCase().includes('webinar');
+        
+        // SG/MY eL Vision Editions
+        const isSGElvision = pName.includes('sg_elvision_en') || pName.includes('English Edition');
+        const isMYElvision = pName.includes('sg_elvision_malay') || pName.includes('Malay Edition');
 
-        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}, isWebinar=${isWebinar}, isDrelf=${isDrelf}`);
+        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}, isWebinar=${isWebinar}, isDrelf=${isDrelf}, isJewelry=${isJewelry}, isSGElvision=${isSGElvision}, isMYElvision=${isMYElvision}`);
 
         if (isEbookHealth || isCoaching3000 || isVIP6Week || pName.includes('usa_ebookfeminine')) {
             capiPixelId = '1393383179182528'; // Manifestation Pixel (USA)
@@ -296,23 +286,69 @@ serve(async (req)=>{
             else capiValue = 20.00;
             
             capiCurrency = 'USD';
+            emailCurrency = 'USD';
+            displayAmount = capiValue;
+        } else if (isSGElvision) {
+            capiPixelId = '3319324491540889'; // EbookIndo Pixel
+            capiCurrency = 'SGD';
+            emailCurrency = 'SGD';
+            // Logic: if amount is 564000 IDR, convert back to 47 SGD
+            displayAmount = (amount || globalProductTx.amount) / 12000;
+            capiValue = displayAmount;
+        } else if (isMYElvision) {
+            capiPixelId = '3319324491540889'; // EbookIndo Pixel
+            capiCurrency = 'MYR';
+            emailCurrency = 'MYR';
+            // Logic: if amount is 311500 IDR, convert back to 89 MYR
+            displayAmount = (amount || globalProductTx.amount) / 3500;
+            capiValue = displayAmount;
         } else if (isDrelf) {
             capiPixelId = '1749197952320359'; // Drelf SG Pixel
-            capiValue = amount || globalProductTx.amount;
             capiCurrency = 'SGD';
+            emailCurrency = 'SGD';
+            displayAmount = (amount || globalProductTx.amount) / 12000; // Convert back to SGD
+            capiValue = displayAmount;
+        } else if (isJewelry) {
+            capiPixelId = 'CAPI_JEWELRY'; // Jewelry Pixel (Uses JEWELRY_PIXEL_ID env)
+            capiCurrency = 'SGD';
+            emailCurrency = 'SGD';
+            displayAmount = (amount || globalProductTx.amount) / 12000; // Convert back to SGD
+            capiValue = displayAmount;
         } else if (isEbookPercayaDiri || isEbookFeminine || isUangPanas || isWebinar || pName.includes('ebook_elvision') || pName.includes('ebook_adhd') || pName.includes('ebook_arif') || pName.includes('ebook_grief') || pName.includes('ebook_langsing') || pName.includes('ebook_tracker') || pName.includes('vip_15jt') || pName.includes('webinar_el')) {
             capiPixelId = '3319324491540889'; // EbookIndo Pixel
             capiValue = amount || globalProductTx.amount || 100000;
             capiCurrency = 'IDR';
+            emailCurrency = 'IDR';
+            displayAmount = capiValue;
         } else if (isFitFactor) {
             capiPixelId = '1797660474333865'; // Fit Factor Pixel
             capiValue = amount || globalProductTx.amount || 0;
             capiCurrency = 'IDR';
+            emailCurrency = 'IDR';
+            displayAmount = capiValue;
         }
 
         console.log(`   - CAPI Pixel Selected: ${capiPixelId}`);
 
-        // --- CAPI RE-ENABLED WITH FIRST-WIN DEDUPLICATION ---
+        // --- EMAIL INVOKE ---
+        console.log(`   - Invoking email function for product: ${pName} with currency ${emailCurrency}`);
+        await supabase.functions.invoke(functionToInvoke, {
+          body: {
+            userEmail: globalProductTx.email,
+            amount: displayAmount,
+            currency: emailCurrency,
+            reference: tripayReference,
+            subscriptionType: globalProductTx.product_name,
+            paymentMethod: paymentMethod,
+            status: 'payment_completed',
+            userName: globalProductTx.name,
+            affiliateEmail: globalProductTx.affiliate_email,
+            address: globalProductTx.address
+          }
+        });
+        console.log('   - 📧 Email sent to:', globalProductTx.email);
+
+        // --- UNIVERSAL CAPI TRACKING ---
         // We check capi_purchase_sent to ensure we only send ONCE (Winner-Takes-All between Frontend and Backend)
         if (capiPixelId && !globalProductTx.capi_purchase_sent) {
              try {
@@ -329,7 +365,7 @@ serve(async (req)=>{
                     userData: {
                       email: globalProductTx.email,
                       ph: globalProductTx.phone,
-                      fn: globalProductTx.name ? globalProductTx.name.split(' ')[0] : undefined, // Added FN
+                      fn: globalProductTx.name ? globalProductTx.name.split(' ')[0] : undefined,
                       fbc: globalProductTx.fbc,
                       fbp: globalProductTx.fbp,
                       client_ip_address: globalProductTx.ip_address || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
@@ -342,7 +378,7 @@ serve(async (req)=>{
                       order_id: tripayReference
                     },
                     eventId: tripayReference,
-                    testCode: (globalProductTx.product_name.includes('ebook_feminine') || globalProductTx.product_name.includes('Feminine Magnetism')) ? 'TEST9597' : undefined // Only for feminine ebook
+                    testCode: (globalProductTx.product_name.includes('ebook_feminine') || globalProductTx.product_name.includes('Feminine Magnetism')) ? 'TEST9597' : undefined
                   }
                 });
                 
@@ -357,7 +393,7 @@ serve(async (req)=>{
              console.log(`   - ⏭️ CAPI Skipped: PixelId=${capiPixelId}, SentFlag=${globalProductTx.capi_purchase_sent}`);
         }
       } catch (emailError) {
-        console.log('   - ⚠️ Email failed (non-critical):', emailError);
+        console.log('   - ⚠️ Process Error (Email/CAPI):', emailError);
       }
       // 4. Hapus dari waiting_payment (jika ada)
       await supabase.from('waiting_payment').delete().eq('tripay_reference', tripayReference);
@@ -402,7 +438,8 @@ serve(async (req)=>{
                 error: updateWaitingError.message
               }, true);
             }
-            // 4. Aksi berdasarkan subscription_type    let rpcResult;
+            // 4. Aksi berdasarkan subscription_type
+            let rpcResult;
     if (waitingTx.subscription_type === 'credit') {
       console.log('4. 💳 Executing update_credit_by_email RPC...');
       const { data, error } = await supabase.rpc('update_credit_by_email', {
@@ -411,12 +448,18 @@ serve(async (req)=>{
       });
       if (error) console.error('   - ❌ Credit RPC Error:', error.message);
       rpcResult = data;
-    } else if (waitingTx.subscription_type === 'subscription') {
-      console.log('4. 👑 Executing activate_pro_subscription RPC...');
+    } else {
+      // //note to next dev do not touch or edit this code this for app monthly subscription
+      // Handle all pro subscription types (subscription, 1_day, 1_month, etc.)
+      console.log(`4. 👑 Executing activate_pro_subscription RPC for type: ${waitingTx.subscription_type}...`);
       const { data, error } = await supabase.rpc('activate_pro_subscription', {
-        p_user_email: waitingTx.user_email
+        p_tripay_reference: tripayReference
       });
-      if (error) console.error('   - ❌ Subscription RPC Error:', error.message);
+      if (error) {
+        console.error('   - ❌ Subscription RPC Error:', error.message);
+      } else {
+        console.log('   - ✅ Subscription activated via RPC.');
+      }
       rpcResult = data;
     }
     // 5. Kirim Email (Logika lama)

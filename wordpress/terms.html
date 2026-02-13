@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - eL Vision Group | User Agreement & Legal Terms</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="eL Vision Group Terms of Service. Read our user agreement, acceptable use policies, and legal terms for using our AI-powered platform and services.">
+    <meta name="keywords" content="eL Vision Group terms of service, user agreement, terms and conditions, legal terms, service agreement, user policy">
+    <meta name="author" content="eL Vision Group">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://elvisiongroup.com/terms">
+    <meta property="og:title" content="Terms of Service - eL Vision Group">
+    <meta property="og:description" content="Read eL Vision Group's Terms of Service. Understand your rights and responsibilities when using our platform and services.">
+    <meta property="og:image" content="https://elvisiongroup.com/wp-content/uploads/2026/02/cropped-logo.jpeg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://elvisiongroup.com/terms">
+    <meta property="twitter:title" content="Terms of Service - eL Vision Group">
+    <meta property="twitter:description" content="Read eL Vision Group's Terms of Service. Understand your rights and responsibilities when using our platform and services.">
+    <meta property="twitter:image" content="https://elvisiongroup.com/wp-content/uploads/2026/02/cropped-logo.jpeg">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://elvisiongroup.com/terms">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="https://elvisiongroup.com/wp-content/uploads/2026/02/cropped-logo.jpeg">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            color: white;
+            background: #000;
+        }
+
+        /* Animated Stardust Background */
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000000 0%, #1a0033 50%, #000000 100%);
+            z-index: -1;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 10px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            height: 70px;
+        }
+
+        /* Language Switcher */
+        .language-switcher {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, #663366, #9933cc);
+            color: white;
+            border-color: rgba(153, 51, 204, 0.5);
+        }
+
+        /* Main Content */
+        .content {
+            max-width: 1000px;
+            margin: 120px auto 80px;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .page-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #ccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-subtitle {
+            font-size: 1.3rem;
+            color: #bbb;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .welcome-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(153, 51, 204, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        .welcome-section p {
+            font-size: 1.15rem;
+            line-height: 1.9;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .welcome-section p:last-child {
+            margin-bottom: 0;
+        }
+
+        .notice-box {
+            background: rgba(153, 51, 204, 0.15);
+            border: 2px solid rgba(153, 51, 204, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .notice-box p {
+            font-size: 1.05rem;
+            color: #ddd;
+            font-weight: 600;
+        }
+
+        .terms-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .terms-section:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(153, 51, 204, 0.4);
+        }
+
+        .terms-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #ddd;
+            background: linear-gradient(45deg, #fff, #9933cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .terms-section h3 {
+            font-size: 1.5rem;
+            margin: 25px 0 15px;
+            color: #ccc;
+        }
+
+        .terms-section p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #bbb;
+            margin-bottom: 15px;
+        }
+
+        .terms-section ul {
+            margin: 15px 0 15px 30px;
+        }
+
+        .terms-section li {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #bbb;
+            margin-bottom: 10px;
+        }
+
+        .terms-section strong {
+            color: #ddd;
+            font-weight: 600;
+        }
+
+        .contact-section {
+            background: rgba(153, 51, 204, 0.1);
+            border: 2px solid rgba(153, 51, 204, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .contact-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #9933cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .contact-section p {
+            font-size: 1.15rem;
+            color: #ccc;
+            line-height: 1.8;
+        }
+
+        .contact-section a {
+            color: #9933cc;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .contact-section a:hover {
+            color: #aa44dd;
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        footer p {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        footer a {
+            color: #d4af37;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        footer a:hover {
+            color: #f4d03f;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .last-updated {
+            font-size: 0.95rem;
+            color: #777;
+            text-align: center;
+            margin-top: 40px;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .logo-container {
+                position: relative;
+                left: 0;
+                transform: none;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .language-switcher {
+                margin-left: 0;
+            }
+
+            .content {
+                margin: 150px auto 60px;
+            }
+
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .page-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .welcome-section,
+            .terms-section,
+            .contact-section {
+                padding: 30px 20px;
+            }
+
+            .terms-section h2 {
+                font-size: 1.6rem;
+            }
+
+            .terms-section h3 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-container">
+        <div class="stars" id="stars"></div>
+    </div>
+
+    <nav>
+        <div class="language-switcher">
+            <button class="lang-btn active" onclick="switchLanguage('en')" id="lang-en">English</button>
+            <button class="lang-btn" onclick="switchLanguage('id')" id="lang-id">Indonesia</button>
+        </div>
+    </nav>
+
+    <div class="content">
+        <div class="page-header">
+            <h1 class="page-title" data-en="Terms of Service" data-id="Syarat Layanan">Terms of Service</h1>
+            <p class="page-subtitle" data-en="Please read these terms carefully before using eL Vision Group's services." data-id="Harap baca syarat-syarat ini dengan cermat sebelum menggunakan layanan eL Vision Group.">Please read these terms carefully before using eL Vision Group's services.</p>
+        </div>
+
+        <div class="welcome-section">
+            <p data-en="Welcome to eL Vision Group! We're excited to have you explore our AI-powered generation platform. These Terms of Service ('Terms') outline how you can enjoy and benefit from our services. By using eL Vision Group, you agree to these Terms, ensuring a seamless and creative experience for all." data-id="Selamat datang di eL Vision Group! Kami senang Anda menjelajahi platform generasi berbasis AI kami. Syarat Layanan ('Syarat') ini menguraikan bagaimana Anda dapat menikmati dan mendapat manfaat dari layanan kami. Dengan menggunakan eL Vision Group, Anda setuju dengan Syarat ini, memastikan pengalaman yang lancar dan kreatif untuk semua.">Welcome to eL Vision Group! We're excited to have you explore our AI-powered generation platform. These Terms of Service ("Terms") outline how you can enjoy and benefit from our services. By using eL Vision Group, you agree to these Terms, ensuring a seamless and creative experience for all.</p>
+        </div>
+
+        <div class="terms-section">
+            <h2 data-en="1. Acceptance of Terms" data-id="1. Penerimaan Syarat">1. Acceptance of Terms</h2>
+            <p data-en="By using eL Vision Group, you confirm that you are at least 18 years old or have obtained parental consent to use our services. Your continued use constitutes acceptance of these Terms." data-id="Dengan menggunakan eL Vision Group, Anda mengonfirmasi bahwa Anda berusia minimal 18 tahun atau telah mendapatkan persetujuan orang tua untuk menggunakan layanan kami. Penggunaan berkelanjutan Anda merupakan penerimaan terhadap Syarat ini.">By using eL Vision Group, you confirm that you are at least 18 years old or have obtained parental consent to use our services. Your continued use constitutes acceptance of these Terms.</p>
+            
+            <div class="notice-box">
+                <p data-en="NOTICE: THESE TERMS INCLUDE ADDITIONAL PROVISIONS REGARDING WARRANTY, LIMITED LIABILITY, INDEMNIFICATION AND ASSIGNMENT THAT YOU SHOULD CAREFULLY READ." data-id="PEMBERITAHUAN: SYARAT INI MENCAKUP KETENTUAN TAMBAHAN MENGENAI JAMINAN, TANGGUNG JAWAB TERBATAS, GANTI RUGI DAN PENGALIHAN YANG HARUS ANDA BACA DENGAN CERMAT.">NOTICE: THESE TERMS INCLUDE ADDITIONAL PROVISIONS REGARDING WARRANTY, LIMITED LIABILITY, INDEMNIFICATION AND ASSIGNMENT THAT YOU SHOULD CAREFULLY READ.</p>
+            </div>
+        </div>
+
+        <div class="terms-section">
+            <h2 data-en="2. Use of Services" data-id="2. Penggunaan Layanan">2. Use of Services</h2>
+            
+            <h3 data-en="a. Permitted Use" data-id="a. Penggunaan yang Diizinkan">a. Permitted Use</h3>
+            <p data-en="eL Vision Group grants you a limited, non-exclusive, non-transferable and revocable license to use our platform for personal and commercial content generation, subject to compliance with these Terms." data-id="eL Vision Group memberi Anda lisensi terbatas, non-eksklusif, tidak dapat dipindahtangankan dan dapat dicabut untuk menggunakan platform kami untuk generasi konten pribadi dan komersial, tunduk pada kepatuhan terhadap Syarat ini.">eL Vision Group grants you a limited, non-exclusive, non-transferable and revocable license to use our platform for personal and commercial content generation, subject to compliance with these Terms.</p>
+
+            <h3 data-en="b. Prohibited Activities" data-id="b. Aktivitas yang Dilarang">b. Prohibited Activities</h3>
+            <p data-en="You may not use eL Vision Group to:" data-id="Anda tidak boleh menggunakan eL Vision Group untuk:">You may not use eL Vision Group to:</p>
+            <ul>
+                <li data-en="Generate illegal, harmful, offensive content or content that violates any third-party rights" data-id="Menghasilkan konten ilegal, berbahaya, menyinggung atau konten yang melanggar hak pihak ketiga">Generate illegal, harmful, offensive content or content that violates any third-party rights</li>
+                <li data-en="Reverse engineer, decompile, or manipulate our technology and services" data-id="Merekayasa balik, mendekompilasi, atau memanipulasi teknologi dan layanan kami">Reverse engineer, decompile, or manipulate our technology and services</li>
+                <li data-en="Circumvent or bypass any security measures or access restrictions" data-id="Menghindari atau melewati langkah-langkah keamanan atau pembatasan akses apa pun">Circumvent or bypass any security measures or access restrictions</li>
+            </ul>
+        </div>
+
+        <div class="terms-section">
+            <h2 data-en="3. Account Registration" data-id="3. Pendaftaran Akun">3. Account Registration</h2>
+            <p data-en="To access premium features, you may need to create an account. You are responsible for maintaining the confidentiality of your login credentials and all activities under your account." data-id="Untuk mengakses fitur premium, Anda mungkin perlu membuat akun. Anda bertanggung jawab untuk menjaga kerahasiaan kredensial login Anda dan semua aktivitas di bawah akun Anda.">To access premium features, you may need to create an account. You are responsible for maintaining the confidentiality of your login credentials and all activities under your account.</p>
+        </div>
+
+        <div class="terms-section">
+            <h2 data-en="4. Intellectual Property Rights" data-id="4. Hak Kekayaan Intelektual">4. Intellectual Property Rights</h2>
+            
+            <h3 data-en="a. Ownership" data-id="a. Kepemilikan">a. Ownership</h3>
+            <p data-en="All content created using eL Vision Group remains the user's property, subject to our rights to use, reproduce, or display such content for service improvement and promotional purposes." data-id="Semua konten yang dibuat menggunakan eL Vision Group tetap menjadi milik pengguna, dengan tunduk pada hak kami untuk menggunakan, mereproduksi, atau menampilkan konten tersebut untuk tujuan peningkatan layanan dan promosi.">All content created using eL Vision Group remains the user's property, subject to our rights to use, reproduce, or display such content for service improvement and promotional purposes.</p>
+
+            <h3 data-en="b. License to eL Vision Group" data-id="b. Lisensi kepada eL Vision Group">b. License to eL Vision Group</h3>
+            <p data-en="By using our platform, you grant eL Vision Group a non-exclusive, royalty-free, worldwide license to display content for marketing, research, and service enhancement." data-id="Dengan menggunakan platform kami, Anda memberikan eL Vision Group lisensi non-eksklusif, bebas royalti, di seluruh dunia untuk menampilkan konten untuk tujuan pemasaran, penelitian, dan peningkatan layanan.">By using our platform, you grant eL Vision Group a non-exclusive, royalty-free, worldwide license to display content for marketing, research, and service enhancement.</p>
+        </div>
+
+        <div class="terms-section">
+            <h2 data-en="5. Payments & Subscription Plans" data-id="5. Pembayaran & Paket Berlangganan">5. Payments & Subscription Plans</h2>
+            <p data-en="Certain features require a paid subscription. By subscribing, you agree to our pricing, billing policies, and applicable taxes. Payments are non-refundable unless required by law." data-id="Fitur tertentu memerlukan langganan berbayar. Dengan berlangganan, Anda menyetujui harga, kebijakan penagihan, dan pajak yang berlaku. Pembayaran tidak dapat dikembalikan kecuali diwajibkan oleh hukum.">Certain features require a paid subscription. By subscribing, you agree to our pricing, billing policies, and applicable taxes. Payments are non-refundable unless required by law.</p>
+        </div>
+
+        <div class="terms-section">
+            <h2 data-en="6. Termination" data-id="6. Penghentian">6. Termination</h2>
+            <p data-en="We reserve the right to suspend or terminate accounts that violate our Terms or engage in fraudulent activities. Users may terminate their accounts at any time through the platform settings." data-id="Kami berhak untuk menangguhkan atau menghentikan akun yang melanggar Syarat kami atau terlibat dalam aktivitas penipuan. Pengguna dapat menghentikan akun mereka kapan saja melalui pengaturan platform.">We reserve the right to suspend or terminate accounts that violate our Terms or engage in fraudulent activities. Users may terminate their accounts at any time through the platform settings.</p>
+        </div>
+
+        <div class="terms-section">
+            <h2 data-en="7. Disclaimers & Limitation of Liability" data-id="7. Penafian & Batasan Tanggung Jawab">7. Disclaimers & Limitation of Liability</h2>
+            <p data-en="eL Vision Group is provided 'as is' without warranties of any kind. We do not guarantee error-free operation or uninterrupted access. To the fullest extent permitted by law, we are not liable for any direct, indirect, incidental, or consequential damages arising from your use of our services." data-id="eL Vision Group disediakan 'apa adanya' tanpa jaminan apa pun. Kami tidak menjamin operasi bebas kesalahan atau akses tanpa gangguan. Sejauh diizinkan oleh hukum, kami tidak bertanggung jawab atas kerusakan langsung, tidak langsung, insidental, atau konsekuensial yang timbul dari penggunaan layanan kami.">eL Vision Group is provided "as is" without warranties of any kind. We do not guarantee error-free operation or uninterrupted access. To the fullest extent permitted by law, we are not liable for any direct, indirect, incidental, or consequential damages arising from your use of our services.</p>
+        </div>
+
+        <div class="terms-section">
+            <h2 data-en="8. Privacy Policy" data-id="8. Kebijakan Privasi">8. Privacy Policy</h2>
+            <p data-en="Your privacy is important to us. Please refer to our Privacy Policy for details on how we collect, use, and protect your data." data-id="Privasi Anda penting bagi kami. Silakan lihat Kebijakan Privasi kami untuk detail tentang bagaimana kami mengumpulkan, menggunakan, dan melindungi data Anda.">Your privacy is important to us. Please refer to our <a href="/privacy-policy.html" style="color: #9933cc; text-decoration: none; font-weight: 600;">Privacy Policy</a> for details on how we collect, use, and protect your data.</p>
+        </div>
+
+        <div class="terms-section">
+            <h2 data-en="9. Modifications to Terms" data-id="9. Modifikasi Syarat">9. Modifications to Terms</h2>
+            <p data-en="eL Vision Group reserves the right to modify these Terms at any time. Continued use after changes implies acceptance. Users are encouraged to review these Terms periodically." data-id="eL Vision Group berhak untuk memodifikasi Syarat ini kapan saja. Penggunaan berkelanjutan setelah perubahan menyiratkan penerimaan. Pengguna didorong untuk meninjau Syarat ini secara berkala.">eL Vision Group reserves the right to modify these Terms at any time. Continued use after changes implies acceptance. Users are encouraged to review these Terms periodically.</p>
+        </div>
+
+        <div class="terms-section">
+            <h2 data-en="10. Governing Law" data-id="10. Hukum yang Mengatur">10. Governing Law</h2>
+            <p data-en="These Terms are governed by and construed in accordance with the laws of Indonesia. Disputes arising from these Terms shall be resolved in the courts of Indonesia." data-id="Syarat ini diatur oleh dan ditafsirkan sesuai dengan hukum Indonesia. Perselisihan yang timbul dari Syarat ini akan diselesaikan di pengadilan Indonesia.">These Terms are governed by and construed in accordance with the laws of Indonesia. Disputes arising from these Terms shall be resolved in the courts of Indonesia.</p>
+        </div>
+
+        <div class="contact-section">
+            <h2 data-en="Questions About Our Terms?" data-id="Pertanyaan Tentang Syarat Kami?">Questions About Our Terms?</h2>
+            <p data-en="If you have any questions or concerns about these Terms of Service, please contact us at:" data-id="Jika Anda memiliki pertanyaan atau kekhawatiran tentang Syarat Layanan ini, silakan hubungi kami di:">If you have any questions or concerns about these Terms of Service, please contact us at:</p>
+            <p><strong>eL Vision Group</strong><br>
+            <span data-en="Email:" data-id="Email:">Email:</span> <a href="mailto:support@elvisiongroup.com">support@elvisiongroup.com</a></p>
+        </div>
+
+        <p class="last-updated" data-en="Last Updated: February 2026" data-id="Terakhir Diperbarui: Februari 2026">Last Updated: February 2026</p>
+    </div>
+
+    <footer>
+        <p style="font-size: 1.1rem; margin-bottom: 15px;">
+            <a href="home.html" style="color: #d4af37; text-decoration: none; font-weight: 600;" data-en="Back to Home" data-id="Kembali ke Beranda">Back to Home</a>
+        </p>
+        <p>&copy; 2026 eL Vision Group. <span data-en="All rights reserved." data-id="Semua hak dilindungi.">All rights reserved.</span></p>
+    </footer>
+
+    <script>
+        // Create animated stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 200;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const size = Math.random() * 3 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Initialize stars and language
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            
+            // Load saved language preference
+            const savedLang = localStorage.getItem('language') || 'en';
+            if (savedLang === 'id') {
+                switchLanguage('id');
+            }
+        });
+
+        // Language switcher function
+        function switchLanguage(lang) {
+            // Update button states
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-id').classList.toggle('active', lang === 'id');
+            
+            // Update all elements with translation data
+            document.querySelectorAll('[data-en]').forEach(element => {
+                if (lang === 'en') {
+                    element.textContent = element.getAttribute('data-en');
+                } else {
+                    element.textContent = element.getAttribute('data-id');
+                }
+            });
+            
+            // Save language preference
+            localStorage.setItem('language', lang);
+        }
+    </script>
+
+    <!-- Structured Data Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Terms of Service",
+        "url": "https://elvisiongroup.com/terms",
+        "description": "eL Vision Group Terms of Service - User agreement and legal terms for using our platform",
+        "publisher": {
+            "@type": "Organization",
+            "name": "eL Vision Group",
+            "logo": "https://elvisiongroup.com/wp-content/uploads/2026/02/cropped-logo.jpeg"
+        },
+        "datePublished": "2026-02-01",
+        "dateModified": "2026-02-06"
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10x Reality Program - eL Vision Group | Transform Your Reality Through Gratitude & Alignment</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="The 10x Reality Program by eL Vision Group. While others chase 10x vision, we cultivate 10x reality. Transform your manifestation power through gratitude, alignment, and becoming who you need to be.">
+    <meta name="keywords" content="10x reality, manifestation, gratitude, alignment, consciousness, reality creation, personal transformation, abundance mindset, eL Vision Group">
+    <meta name="author" content="eL Vision Group">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="10x Reality Program - Transform Your Reality">
+    <meta property="og:description" content="The universe gives you who you are, not what you want. Master 10x Reality and manifest from alignment, not desperation.">
+    <meta property="og:image" content="https://elvisiongroup.com/wp-content/uploads/2026/02/transparent_logo.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="https://elvisiongroup.com/wp-content/uploads/2026/02/transparent_logo.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            color: white;
+            background: #000;
+        }
+
+        /* Quantum Field Background */
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1a0033 0%, #000000 70%);
+            z-index: -1;
+        }
+
+        .quantum-field {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(153, 51, 204, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(102, 51, 153, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(153, 51, 204, 0.05) 0%, transparent 70%);
+            animation: pulseField 8s ease-in-out infinite;
+        }
+
+        @keyframes pulseField {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8), transparent);
+            border-radius: 50%;
+            animation: float-particle 20s infinite ease-in-out;
+        }
+
+        @keyframes float-particle {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+            50% { transform: translate(100px, -100px) scale(1.5); opacity: 0.5; }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(153, 51, 204, 0.2);
+        }
+
+        /* Language Switcher */
+        .language-switcher {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: #bbb;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, #663366, #9933cc);
+            color: white;
+            border-color: rgba(153, 51, 204, 0.5);
+        }
+
+        .nav-cta {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #663366, #9933cc);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(153, 51, 204, 0.4);
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(153, 51, 204, 0.6);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px 20px 60px;
+            position: relative;
+        }
+
+        .hero-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+            animation: levitate 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(153, 51, 204, 0.6));
+        }
+
+        @keyframes levitate {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(153, 51, 204, 0.2);
+            border: 1px solid rgba(153, 51, 204, 0.5);
+            border-radius: 30px;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+            animation: glow-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(153, 51, 204, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(153, 51, 204, 0.6); }
+        }
+
+        h1 {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff 0%, #9933cc 50%, #fff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 4s linear infinite;
+            line-height: 1.2;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .hero-subtitle {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #ddd;
+            font-weight: 300;
+        }
+
+        .hero-tagline {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            color: #9933cc;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 900px;
+            margin: 0 auto 50px;
+            line-height: 1.8;
+            color: #ccc;
+        }
+
+        .cta-primary {
+            display: inline-block;
+            padding: 18px 50px;
+            background: linear-gradient(135deg, #663366, #9933cc, #cc33ff);
+            background-size: 200% auto;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.4s;
+            box-shadow: 0 8px 25px rgba(153, 51, 204, 0.5);
+            animation: pulse-button 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-button {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .cta-primary:hover {
+            background-position: 100% center;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(153, 51, 204, 0.7);
+        }
+
+        /* Philosophy Section */
+        .philosophy {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 60px;
+            background: linear-gradient(45deg, #9933cc, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+
+        .philosophy-card {
+            background: rgba(153, 51, 204, 0.05);
+            border: 1px solid rgba(153, 51, 204, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .philosophy-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(153, 51, 204, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .philosophy-card:hover::before {
+            left: 100%;
+        }
+
+        .philosophy-card:hover {
+            background: rgba(153, 51, 204, 0.1);
+            border-color: rgba(153, 51, 204, 0.5);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(153, 51, 204, 0.3);
+        }
+
+        .philosophy-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .philosophy-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #9933cc;
+        }
+
+        .philosophy-card p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #ccc;
+        }
+
+        /* Core Truth Section */
+        .core-truth {
+            padding: 100px 20px;
+            background: linear-gradient(135deg, rgba(26, 0, 51, 0.5), rgba(0, 0, 0, 0.5));
+            position: relative;
+        }
+
+        .truth-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .truth-statement {
+            font-size: 2.5rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            background: linear-gradient(45deg, #fff, #9933cc, #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 4s linear infinite;
+            font-weight: 300;
+        }
+
+        .truth-line {
+            display: inline;
+        }
+
+        .truth-highlight {
+            font-size: 3rem;
+            font-weight: 700;
+            display: block;
+            margin: 30px 0;
+            color: #9933cc;
+            text-shadow: 0 0 30px rgba(153, 51, 204, 0.6);
+        }
+
+        /* Comparison Section */
+        .comparison {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .comparison-card {
+            padding: 50px;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .comparison-card.vision {
+            background: rgba(255, 0, 0, 0.05);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .comparison-card.reality {
+            background: rgba(153, 51, 204, 0.1);
+            border: 2px solid rgba(153, 51, 204, 0.5);
+            box-shadow: 0 0 40px rgba(153, 51, 204, 0.3);
+        }
+
+        .comparison-card h3 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+
+        .comparison-card.vision h3 {
+            color: #ff6666;
+        }
+
+        .comparison-card.reality h3 {
+            color: #9933cc;
+        }
+
+        .comparison-list {
+            list-style: none;
+        }
+
+        .comparison-list li {
+            font-size: 1.2rem;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-list li:before {
+            content: "→ ";
+            color: #9933cc;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .comparison-card.vision .comparison-list li:before {
+            content: "✗ ";
+            color: #ff6666;
+        }
+
+        /* Program Features */
+        .program-features {
+            padding: 100px 20px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 60px auto 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(153, 51, 204, 0.1), rgba(102, 51, 153, 0.1));
+            border: 1px solid rgba(153, 51, 204, 0.3);
+            border-radius: 15px;
+            padding: 35px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            background: linear-gradient(135deg, rgba(153, 51, 204, 0.2), rgba(102, 51, 153, 0.2));
+            border-color: rgba(153, 51, 204, 0.6);
+            transform: translateY(-5px);
+        }
+
+        .feature-card h4 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #9933cc;
+        }
+
+        .feature-card p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #ccc;
+        }
+
+        /* CTA Section */
+        .final-cta {
+            padding: 120px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(26, 0, 51, 0.8), rgba(0, 0, 0, 0.8));
+            position: relative;
+        }
+
+        .final-cta h2 {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #fff, #9933cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .final-cta p {
+            font-size: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            color: #ddd;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 1px solid rgba(153, 51, 204, 0.3);
+        }
+
+        footer a {
+            color: #9933cc;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #cc33ff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.3rem;
+            }
+
+            .section-title {
+                font-size: 2.5rem;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .truth-statement {
+                font-size: 1.8rem;
+            }
+
+            .truth-highlight {
+                font-size: 2rem;
+            }
+
+            nav {
+                padding: 6px 15px;
+            }
+
+            .lang-btn {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
+
+            .final-cta h2 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-container">
+        <div class="quantum-field"></div>
+        <div id="particles"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="language-switcher">
+            <button class="lang-btn active" id="lang-en" onclick="switchLanguage('en')">English</button>
+            <button class="lang-btn" id="lang-id" onclick="switchLanguage('id')">Indonesia</button>
+        </div>
+    </nav>
+
+    <!-- Method Section -->
+    <section class="philosophy" style="padding-top: 120px; padding-bottom: 50px;">
+        <div class="truth-container">
+            <h2 class="section-title" data-en="Secret to Locking the Mind, Moving Reality: The 1-Point eL Vision Technique" data-id="Rahasia Mengunci Pikiran, Menggerakkan Realita: Teknik 1 Titik eL Vision">Secret to Locking the Mind, Moving Reality: The 1-Point eL Vision Technique</h2>
+            
+            <p class="hero-description" data-en="Many people fail to act not because they are incapable, but because they are trapped in a Mind Block. The fundamental truth is simple: You cannot act (Feeling/Action) purely while you are thinking at the same time." data-id="Banyak orang gagal bertindak bukan karena tidak mampu, tapi karena terjebak dalam Mind Block. Kebenaran fundamentalnya sederhana: Kamu tidak bisa bertindak (Rasa/Aksi) secara murni ketika kamu sedang berpikir di waktu yang sama.">Many people fail to act not because they are incapable, but because they are trapped in a Mind Block. The fundamental truth is simple: You cannot act (Feeling/Action) purely while you are thinking at the same time.</p>
+
+            <p class="hero-description" data-en="The mind often becomes a wall that blocks the flow of Feeling—even though Feeling is what moves our bodies to breathe, be healthy, feel happy, and release stress." data-id="Pikiran seringkali menjadi dinding yang memblokir aliran Rasa—padahal, Rasa-lah yang menggerakkan tubuh kita untuk bernapas, menjadi sehat, merasa bahagia, dan melepaskan stres.">The mind often becomes a wall that blocks the flow of Feeling—even though Feeling is what moves our bodies to breathe, be healthy, feel happy, and release stress.</p>
+
+            <h3 style="color: #9933cc; font-size: 2.2rem; margin: 40px 0 20px;" data-en="One Energy, Two Functions" data-id="Satu Energi, Dua Fungsi">One Energy, Two Functions</h3>
+            <p class="hero-description" data-en="The Mind and Feeling are powered by the same fuel: Concentration Energy. So far, your energy has been 'leaking' away on thinking about scenarios, fears, and logic (Mind). As a result, there is no energy left to power the human's main engine, which is Feeling." data-id="Pikiran dan Rasa digerakkan oleh bahan bakar yang sama: Energi Konsentrasi. Selama ini, energi kamu habis 'bocor' untuk memikirkan skenario, ketakutan, dan logika (Pikiran). Akibatnya, tidak ada energi tersisa untuk menggerakkan mesin utama manusia, yaitu Rasa.">The Mind and Feeling are powered by the same fuel: Concentration Energy. So far, your energy has been 'leaking' away on thinking about scenarios, fears, and logic (Mind). As a result, there is no energy left to power the human's main engine, which is Feeling.</p>
+
+            <div style="background: rgba(153, 51, 204, 0.1); border: 1px solid rgba(153, 51, 204, 0.3); padding: 35px; border-radius: 20px; margin: 40px auto; text-align: left; max-width: 850px;">
+                <h4 style="color: #9933cc; font-size: 1.5rem; margin-bottom: 15px;" data-en="The Unique Law of Mind & Feeling" data-id="Hukum Unik Pikiran & Rasa">The Unique Law of Mind & Feeling</h4>
+                <p style="font-size: 1.1rem; line-height: 1.7; color: #eee;" 
+                   data-en="Using Mind and Feeling is not like using your left and right hands; they are very different. Uniquely, moving the feeling is a phase that can only be done if the mind is already locked; as long as the mind is still moving freely, it is impossible to move the feeling." 
+                   data-id="Menggunakan Pikiran dan Rasa tidaklah sama seperti menggunakan tangan kiri dan tangan kanan; keduanya sangatlah berbeda. Uniknya, menggerakkan rasa adalah sebuah fase yang hanya bisa dilakukan jika pikiran sudah terkunci; selama pikiran masih bebas bergerak, mustahil bagi rasa untuk digerakkan.">
+                    Using Mind and Feeling is not like using your left and right hands; they are very different. Uniquely, moving the feeling is a phase that can only be done if the mind is already locked; as long as the mind is still moving freely, it is impossible to move the feeling.
+                </p>
+            </div>
+
+            <h3 style="color: #9933cc; font-size: 2.2rem; margin: 40px 0 20px;" data-en="The eL Vision Method: Locking the Mind with 1-Point Focus" data-id="Metode eL Vision: Mengunci Pikiran dengan Fokus 1 Titik">The eL Vision Method: Locking the Mind with 1-Point Focus</h3>
+            <p class="hero-description" data-en="To separate mental distractions from the movement of feeling, we use the 1-Point Focus technique as calmly as possible." data-id="Untuk memisahkan gangguan pikiran dari pergerakan rasa, kita menggunakan teknik Fokus 1 Titik setenang mungkin.">To separate mental distractions from the movement of feeling, we use the 1-Point Focus technique as calmly as possible.</p>
+
+            <div style="text-align: left; max-width: 850px; margin: 30px auto;">
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: #9933cc; font-size: 1.5rem; margin-bottom: 10px;" data-en="Lock the Mind:" data-id="Lock the Mind:">Lock the Mind:</h4>
+                    <p style="font-size: 1.1rem; color: #ccc;" data-en="Ensure the mind is locked in focus on one object/point. Do not resist it, but guide it gently." data-id="Pastikan pikiran terkunci fokus pada satu objek/titik. Jangan dilawan, tapi arahkan dengan lembut.">Ensure the mind is locked in focus on one object/point. Do not resist it, but guide it gently.</p>
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: #9933cc; font-size: 1.5rem; margin-bottom: 10px;" data-en="Identical Feeling:" data-id="Identical Feeling:">Identical Feeling:</h4>
+                    <p style="font-size: 1.1rem; color: #ccc;" data-en="Start 'feeling' in an identical way as you practice focusing. The more relaxed your brainwave state (Alpha to Delta), the easier it is to make the mind quiet and non-intrusive." data-id="Mulailah 'merasakan' dengan cara yang identik saat kamu berlatih fokus. Semakin rileks kondisi gelombang otakmu (Alpha ke Delta), semakin mudah pikiran dibuat diam dan tidak mengganggu.">Start 'feeling' in an identical way as you practice focusing. The more relaxed your brainwave state (Alpha to Delta), the easier it is to make the mind quiet and non-intrusive.</p>
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: #9933cc; font-size: 1.5rem; margin-bottom: 10px;" data-en="The Manifestation State:" data-id="The Manifestation State:">The Manifestation State:</h4>
+                    <p style="font-size: 1.1rem; color: #ccc;" data-en="When the mind is truly locked comfortably on one point due to total relaxation, that's where the magic happens. You no longer need to 'think' about your desires. Just Feel." data-id="Saat pikiran benar-benar terkunci nyaman pada satu titik karena relaksasi total, di situlah keajaiban terjadi. Kamu tidak perlu lagi 'memikirkan' keinginanmu. Cukup Rasakan.">When the mind is truly locked comfortably on one point due to total relaxation, that's where the magic happens. You no longer need to 'think' about your desires. Just Feel.</p>
+                </div>
+            </div>
+
+            <h3 style="color: #9933cc; font-size: 2.2rem; margin: 40px 0 20px;" data-en="The Impact: What Do You Get?" data-id="The Impact: Apa yang Kamu Dapatkan?">The Impact: What Do You Get?</h3>
+            <p class="hero-description" data-en="When the mind is 'locked' in the comfort of focus, you enter the true space of manifestation. Here, you can access:" data-id="Ketika pikiran sudah 'terkunci' dalam kenyamanan fokus, kamu masuk ke ruang manifestasi yang sebenarnya. Di sini, kamu bisa mengakses:">When the mind is 'locked' in the comfort of focus, you enter the true space of manifestation. Here, you can access:</p>
+            
+            <div style="text-align: left; max-width: 850px; margin: 30px auto;">
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 15px; font-size: 1.2rem;">
+                        <span style="color: #9933cc; font-weight: 700;" data-en="A Sense of Release & Relief:" data-id="Rasa Lepas & Plong:">A Sense of Release & Relief:</span>
+                        <span style="color: #ccc;" data-en="Stress evaporates instantly." data-id="Stres menguap seketika.">Stress evaporates instantly.</span>
+                    </li>
+                    <li style="margin-bottom: 15px; font-size: 1.2rem;">
+                        <span style="color: #9933cc; font-weight: 700;" data-en="A Sense of Certainty & Possession:" data-id="Rasa Yakin & Mendapatkan:">A Sense of Certainty & Possession:</span>
+                        <span style="color: #ccc;" data-en="No longer just 'hoping', but already 'having'." data-id="Bukan lagi sekadar 'berharap', tapi sudah 'memiliki'.">No longer just 'hoping', but already 'having'.</span>
+                    </li>
+                    <li style="margin-bottom: 15px; font-size: 1.2rem;">
+                        <span style="color: #9933cc; font-weight: 700;" data-en="A Sense of Prosperity:" data-id="Rasa Kemakmuran:">A Sense of Prosperity:</span>
+                        <span style="color: #ccc;" data-en="An internal signal that attracts external abundance." data-id="Sinyal internal yang menarik kelimpahan dari luar.">An internal signal that attracts external abundance.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(255, 0, 0, 0.1); border: 1px solid rgba(255, 0, 0, 0.3); padding: 35px; border-radius: 20px; margin: 40px auto; text-align: left; max-width: 850px;">
+                <h4 style="color: #ff6666; font-size: 1.5rem; margin-bottom: 15px;" data-en="Strict Warning (Polar Covenant):" data-id="Peringatan Keras (Polar Covenant):">Strict Warning (Polar Covenant):</h4>
+                <p style="font-size: 1.1rem; line-height: 1.7; color: #eee;" data-en="Be careful with your emotional state while practicing. If you perform 1-point focus based on anger or annoyance, the same energy will amplify those negative feelings. This is a long-term trap that ruins mentality and reality. Practice with calmness, or not at all." data-id="Hati-hati dengan kondisi emosionalmu saat berlatih. Jika kamu melakukan fokus 1 titik dengan dasar marah atau kesal, energi yang sama akan memperkuat rasa negatif tersebut. Ini adalah jebakan jangka panjang yang merusak mentalitas dan realita. Latih dengan ketenangan, atau tidak sama sekali.">Be careful with your emotional state while practicing. If you perform 1-point focus based on anger or annoyance, the same energy will amplify those negative feelings. This is a long-term trap that ruins mentality and reality. Practice with calmness, or not at all.</p>
+            </div>
+
+            <h3 style="color: #9933cc; font-size: 2.2rem; margin: 40px 0 20px;" data-en="What Is Lost Every Day Without This Technique?" data-id="Apa yang Hilang Setiap Hari Tanpa Teknik Ini?">What Is Lost Every Day Without This Technique?</h3>
+            <p class="hero-description" data-en="Every day you let your mind run wild, you lose control over your own destiny. You waste vital energy that could have been used to heal the body and attract prosperity, just to 'argue' with yourself inside your head." data-id="Setiap hari kamu membiarkan pikiranmu liar, kamu kehilangan kendali atas nasibmu sendiri. Kamu membuang energi vital yang seharusnya bisa digunakan untuk menyembuhkan tubuh dan menarik kemakmuran, hanya untuk 'berdebat' dengan diri sendiri di dalam kepala.">Every day you let your mind run wild, you lose control over your own destiny. You waste vital energy that could have been used to heal the body and attract prosperity, just to 'argue' with yourself inside your head.</p>
+            
+            <p style="font-size: 1.8rem; color: #9933cc; font-weight: 700; margin-top: 30px; text-shadow: 0 0 20px rgba(153, 51, 204, 0.4);" data-en="Don't let the mind become a prison for your happiness." data-id="Jangan biarkan pikiran menjadi penjara bagi rasa bahagiamu.">Don't let the mind become a prison for your happiness.</p>
+        </div>
+    </section>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <img src="https://elvisiongroup.com/wp-content/uploads/2026/02/transparent_logo.png" alt="10x Reality" class="hero-logo">
+        <div class="hero-badge" data-en="BY EL VISION GROUP" data-id="OLEH EL VISION GROUP">BY EL VISION GROUP</div>
+        <h1 data-en="10x REALITY" data-id="10x REALITAS">10x REALITY</h1>
+        <p class="hero-subtitle" data-en="Not Vision. Reality." data-id="Bukan Visi. Realitas.">Not Vision. Reality.</p>
+        <p class="hero-tagline" data-en="The Universe Gives You Who You ARE, Not What You WANT" data-id="Alam Semesta Memberi Anda SIAPA Anda, Bukan APA yang Anda INGINKAN">The Universe Gives You Who You ARE, Not What You WANT</p>
+        <p class="hero-description" data-en="While the world chases bigger visions, we focus on something more powerful: expanding your reality. The issue isn't lack of vision—it's lack of power to manifest it. And that power comes from who you ARE, not what you desire." data-id="Sementara dunia mengejar visi yang lebih besar, kami fokus pada sesuatu yang lebih kuat: memperluas realitas Anda. Masalahnya bukan kurangnya visi—tetapi kurangnya kekuatan untuk mewujudkannya. Dan kekuatan itu berasal dari SIAPA Anda, bukan apa yang Anda inginkan.">
+            While the world chases bigger visions, we focus on something more powerful: expanding your reality. 
+            The issue isn't lack of vision—it's lack of power to manifest it. And that power comes from who you ARE, 
+            not what you desire.
+        </p>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section class="philosophy">
+        <h2 class="section-title" data-en="The 10x Reality Philosophy" data-id="Filosofi 10x Realitas">The 10x Reality Philosophy</h2>
+        <div class="philosophy-grid">
+            <div class="philosophy-card">
+                <div class="philosophy-icon">🙏</div>
+                <h3 data-en="10x Gratitude" data-id="Rasa Syukur 10x">10x Gratitude</h3>
+                <p data-en="Be grateful for 10x more than you currently have. When you embody the gratitude of someone with $200M, manifesting $100M becomes natural, not forced." data-id="Bersyukurlah untuk 10x lebih banyak dari yang Anda miliki saat ini. Ketika Anda mewujudkan rasa syukur seseorang dengan $200 juta, memanifestasikan $100 juta menjadi alami, bukan dipaksakan.">Be grateful for 10x more than you currently have. When you embody the gratitude of someone with $200M, manifesting $100M becomes natural, not forced.</p>
+            </div>
+
+            <div class="philosophy-card">
+                <div class="philosophy-icon">⚡</div>
+                <h3 data-en="Massive Alignment" data-id="Keselarasan Masif">Massive Alignment</h3>
+                <p data-en="We believe in massive alignment over massive action. When you're aligned with abundance at your core, manifestation flows effortlessly." data-id="Kami percaya pada keselarasan masif daripada tindakan masif. Ketika Anda selaras dengan kelimpahan di inti Anda, manifestasi mengalir dengan mudah.">We believe in massive alignment over massive action. When you're aligned with abundance at your core, manifestation flows effortlessly.</p>
+            </div>
+
+            <div class="philosophy-card">
+                <div class="philosophy-icon">🌌</div>
+                <h3 data-en="Reality Over Vision" data-id="Realitas Atas Visi">Reality Over Vision</h3>
+                <p data-en="Vision without reality is daydreaming. If your reality is $10M but you want $100M, you're out of alignment. We fix your reality first." data-id="Visi tanpa realitas adalah lamunan. Jika realitas Anda $10 juta tetapi Anda ingin $100 juta, Anda tidak selaras. Kami memperbaiki realitas Anda terlebih dahulu.">Vision without reality is daydreaming. If your reality is $10M but you want $100M, you're out of alignment. We fix your reality first.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Truth -->
+    <section class="core-truth">
+        <div class="truth-container">
+            <h2 class="section-title" data-en="The Core Truth" data-id="Kebenaran Inti">The Core Truth</h2>
+            <p class="truth-statement">
+                <span class="truth-line" data-en="The problem isn't your vision." data-id="Masalahnya bukan visi Anda.">The problem isn't your vision.</span><br>
+                <span class="truth-line" data-en="The problem isn't your goals." data-id="Masalahnya bukan tujuan Anda.">The problem isn't your goals.</span><br>
+                <span class="truth-line" data-en="The problem isn't even your action." data-id="Masalahnya bahkan bukan tindakan Anda.">The problem isn't even your action.</span>
+            </p>
+            <span class="truth-highlight" data-en="The problem is WHO YOU ARE." data-id="Masalahnya adalah SIAPA ANDA.">The problem is WHO YOU ARE.</span>
+            <p class="truth-statement">
+                <span class="truth-line" data-en="The universe responds to your energetic signature, your internal reality, your state of being—not your wishlist." data-id="Alam semesta merespons tanda energi Anda, realitas internal Anda, keadaan keberadaan Anda—bukan daftar keinginan Anda.">The universe responds to your energetic signature, your internal reality, your state of being—not your wishlist.</span>
+            </p>
+            <p class="truth-statement">
+                <span class="truth-line" data-en="When you become someone who operates at $200M consciousness, achieving $100M is inevitable." data-id="Ketika Anda menjadi seseorang yang beroperasi pada kesadaran $200 juta, mencapai $100 juta tidak dapat dihindari.">When you become someone who operates at $200M consciousness, achieving $100M is inevitable.</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="comparison">
+        <h2 class="section-title" data-en="10x Vision vs 10x Reality" data-id="Visi 10x vs Realitas 10x">10x Vision vs 10x Reality</h2>
+        <div class="comparison-grid">
+            <div class="comparison-card vision">
+                <h3 data-en="10x Vision" data-id="Visi 10x">10x Vision</h3>
+                <ul class="comparison-list">
+                    <li data-en="Set bigger goals" data-id="Tetapkan tujuan yang lebih besar">Set bigger goals</li>
+                    <li data-en="Take massive action" data-id="Ambil tindakan masif">Take massive action</li>
+                    <li data-en="Push harder when stuck" data-id="Dorong lebih keras saat terjebak">Push harder when stuck</li>
+                    <li data-en="Focus on what you want" data-id="Fokus pada apa yang Anda inginkan">Focus on what you want</li>
+                    <li data-en="Hustle from scarcity" data-id="Berjuang dari kekurangan">Hustle from scarcity</li>
+                    <li data-en="Force outcomes" data-id="Paksa hasil">Force outcomes</li>
+                    <li data-en="Chase external validation" data-id="Kejar validasi eksternal">Chase external validation</li>
+                </ul>
+            </div>
+
+            <div class="comparison-card reality">
+                <h3 data-en="10x Reality ✨" data-id="Realitas 10x ✨">10x Reality ✨</h3>
+                <ul class="comparison-list">
+                    <li data-en="Elevate your state of being" data-id="Tingkatkan keadaan keberadaan Anda">Elevate your state of being</li>
+                    <li data-en="Embody gratitude 10x beyond current reality" data-id="Wujudkan rasa syukur 10x melampaui realitas saat ini">Embody gratitude 10x beyond current reality</li>
+                    <li data-en="Align energetically first" data-id="Selaraskan energi terlebih dahulu">Align energetically first</li>
+                    <li data-en="Become who you need to be" data-id="Menjadi siapa Anda perlu">Become who you need to be</li>
+                    <li data-en="Create from abundance" data-id="Ciptakan dari kelimpahan">Create from abundance</li>
+                    <li data-en="Allow natural flow" data-id="Biarkan aliran alami">Allow natural flow</li>
+                    <li data-en="Operate from internal power" data-id="Beroperasi dari kekuatan internal">Operate from internal power</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Program Features -->
+    <section class="program-features">
+        <div class="truth-container">
+            <h2 class="section-title" data-en="What You'll Master" data-id="Apa yang Akan Anda Kuasai">What You'll Master</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h4 data-en="Gratitude Amplification" data-id="Amplifikasi Rasa Syukur">Gratitude Amplification</h4>
+                    <p data-en="Learn to embody gratitude for 10x more than you currently have, shifting your energetic set-point to abundance." data-id="Pelajari cara mewujudkan rasa syukur untuk 10x lebih banyak dari yang Anda miliki saat ini, menggeser titik energi Anda ke kelimpahan.">Learn to embody gratitude for 10x more than you currently have, shifting your energetic set-point to abundance.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4 data-en="Reality Recalibration" data-id="Rekalibrasi Realitas">Reality Recalibration</h4>
+                    <p data-en="Transform your internal reality to match your external desires, eliminating the resistance that blocks manifestation." data-id="Transformasikan realitas internal Anda agar sesuai dengan keinginan eksternal Anda, menghilangkan resistensi yang menghalangi manifestasi.">Transform your internal reality to match your external desires, eliminating the resistance that blocks manifestation.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4 data-en="Alignment Mastery" data-id="Penguasaan Keselarasan">Alignment Mastery</h4>
+                    <p data-en="Discover how to achieve massive alignment—the state where manifestation becomes effortless and natural." data-id="Temukan cara mencapai keselarasan masif—keadaan di mana manifestasi menjadi mudah dan alami.">Discover how to achieve massive alignment—the state where manifestation becomes effortless and natural.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4 data-en="Identity Transformation" data-id="Transformasi Identitas">Identity Transformation</h4>
+                    <p data-en="Become the version of yourself that naturally attracts and creates your desired reality." data-id="Menjadi versi diri Anda yang secara alami menarik dan menciptakan realitas yang Anda inginkan.">Become the version of yourself that naturally attracts and creates your desired reality.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4 data-en="Energetic Signature" data-id="Tanda Tangan Energetik">Energetic Signature</h4>
+                    <p data-en="Understand and shift your energetic frequency to match the reality you wish to create." data-id="Pahami dan ubah frekuensi energi Anda agar sesuai dengan realitas yang ingin Anda ciptakan.">Understand and shift your energetic frequency to match the reality you wish to create.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4 data-en="Flow State Creation" data-id="Penciptaan Aliran">Flow State Creation</h4>
+                    <p data-en="Move from forcing outcomes to allowing natural manifestation through perfect alignment." data-id="Beralih dari memaksa hasil ke membiarkan manifestasi alami melalui keselarasan sempurna.">Move from forcing outcomes to allowing natural manifestation through perfect alignment.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta" id="apply">
+        <h2 data-en="Ready to Shift Your Reality?" data-id="Siap Mengubah Realitas Anda?">Ready to Shift Your Reality?</h2>
+        <p data-en="Stop chasing 10x vision from a 1x reality. Join the 10x Reality Program and become the person who naturally creates extraordinary results." data-id="Berhenti mengejar visi 10x dari realitas 1x. Bergabunglah dengan Program 10x Realitas dan menjadi orang yang secara alami menciptakan hasil luar biasa.">
+            Stop chasing 10x vision from a 1x reality. Join the 10x Reality Program and become 
+            the person who naturally creates extraordinary results.
+        </p>
+        <p style="font-size: 1.2rem; margin-bottom: 20px; color: #9933cc; font-weight: 700;">
+            <span data-en="The universe gives you who you are, not what you want." data-id="Alam semesta memberi Anda siapa Anda, bukan apa yang Anda inginkan.">The universe gives you who you are, not what you want.</span>
+        </p>
+        <p style="font-size: 1.2rem; margin-bottom: 40px; color: #9933cc;">
+            <span data-en="It's time to become who you need to be." data-id="Saatnya menjadi siapa Anda perlu.">It's time to become who you need to be.</span>
+        </p>
+        <a href="https://ai.elvisiongroup.com/usa_3000survey" class="cta-primary" data-en="Partner With Us" data-id="Bermitra Dengan Kami">Partner With Us</a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p style="font-size: 1.1rem; margin-bottom: 15px;">
+            <a href="https://elvisiongroup.com/privacy-policy" data-en="Privacy Policy" data-id="Kebijakan Privasi">Privacy Policy</a>
+            <span style="color: #9933cc; margin: 0 10px;">|</span>
+            <a href="https://elvisiongroup.com/terms" data-en="Terms" data-id="Syarat">Terms</a>
+        </p>
+        <p>&copy; 2026 eL Vision Group. <span data-en="All rights reserved." data-id="Semua hak dilindungi.">All rights reserved.</span></p>
+        <p style="margin-top: 20px; font-size: 0.9rem; color: #888;">
+            <a href="https://elvisiongroup.com" style="color: #9933cc;" data-en="Visit eL Vision Group" data-id="Kunjungi eL Vision Group">Visit eL Vision Group</a>
+        </p>
+    </footer>
+
+    <script>
+        // Create quantum particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 15 + 15) + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+
+            // Add blocker to CTA buttons
+            document.querySelectorAll('.cta-primary').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    alert('Maaf Slot saat ini Penuh / Sorry, current slot is full');
+                    e.preventDefault();
+                    return false;
+                });
+            });
+
+            // Load saved language preference
+            const savedLang = localStorage.getItem('language') || 'en';
+            if (savedLang === 'id') {
+                switchLanguage('id');
+            }
+
+            // Scroll animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.philosophy-card, .feature-card, .comparison-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.6s ease-out';
+                observer.observe(card);
+            });
+        });
+
+        // Language switcher function
+        function switchLanguage(lang) {
+            // Update button states
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-id').classList.toggle('active', lang === 'id');
+            
+            // Update all elements with translation data
+            document.querySelectorAll('[data-en]').forEach(element => {
+                if (lang === 'en') {
+                    element.textContent = element.getAttribute('data-en');
+                } else {
+                    element.textContent = element.getAttribute('data-id');
+                }
+            });
+            
+            // Save language preference
+            localStorage.setItem('language', lang);
+        }
+
+        // Parallax effect for quantum field
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const quantumField = document.querySelector('.quantum-field');
+            quantumField.style.transform = `translateY(${scrolled * 0.5}px)`;
+        });
+    </script>
+
+    <!-- Schema Markup -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": "10x Reality Program",
+        "description": "Transform your manifestation power through gratitude, alignment, and identity transformation. The universe gives you who you are, not what you want.",
+        "provider": {
+            "@type": "Organization",
+            "name": "eL Vision Group",
+            "url": "https://elvisiongroup.com"
+        },
+        "courseCode": "10xReality",
+        "hasCourseInstance": {
+            "@type": "CourseInstance",
+            "courseMode": "online"
+        }
+    }
+    </script>
+</body>
+</html>

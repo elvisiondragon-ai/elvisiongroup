@@ -72,6 +72,7 @@ interface UserProfile {
   created_at: string;
   avatar_url?: string;
   is_admin?: boolean;
+  shopauto_settings?: any;
 }
 
 interface AuthContextType {

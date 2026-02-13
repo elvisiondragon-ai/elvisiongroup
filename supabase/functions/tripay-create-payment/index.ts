@@ -120,6 +120,18 @@ const productCatalog = {
     requiresAuth: false,
     physical: true
   },
+  'sg_elvision_en': {
+    name: 'Ebook eL Vision (English Edition)',
+    price: 564000, // 47 SGD * 12000 IDR
+    requiresAuth: false,
+    physical: true
+  },
+  'sg_elvision_malay': {
+    name: 'Ebook eL Vision (Malay Edition)',
+    price: 311500, // 89 MYR * 3500 IDR
+    requiresAuth: false,
+    physical: true
+  },
   'VIP6WEEK': {
     name: 'VIP SESSION 6 Week',
     price: 24000000, // 1500 USD * 16000 IDR
@@ -260,11 +272,12 @@ serve(async (req)=>{
       console.log(`✅ Authenticated user: ${userId}`);
     }
     // --- 3. CALCULATE AMOUNT & GENERATE ORDER DETAILS ---
-    let amount = product.price;
-    if (product.physical && body.amount) {
+    // Dynamic Pricing: Priority is given to amount sent from frontend
+    let amount = product.price * quantity;
+    
+    if (body.amount !== undefined && body.amount !== null) {
+      console.log(`💰 Using dynamic price from frontend: ${body.amount}`);
       amount = body.amount;
-    } else if (product.physical) {
-      amount = product.price * quantity;
     }
 
     // --- CURRENCY LIQUIDITY & IDR ADJUSTMENT ---
@@ -274,6 +287,8 @@ serve(async (req)=>{
       amount = amount * 16000; // Adjust USD to IDR
     } else if (currency === 'SGD') {
       amount = amount * 12000; // Adjust SGD to IDR
+    } else if (currency === 'MYR') {
+      amount = amount * 3500; // Adjust MYR to IDR
     }
 
     if (amount < 0) {
