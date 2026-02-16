@@ -598,36 +598,38 @@ export function Home({
         </div>
       </div>
 
-      {/* Affiliate Guide Section */}
-      <div className="px-6 space-y-4 mt-8">
-        <h2 className="text-xl font-semibold font-exo">CARA KERJA AFFILIATE</h2>
-        
-        <Card
-          className="p-4 border-border transition-all duration-300 bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-sky-500/10 hover:from-blue-500/20 hover:via-cyan-500/10 hover:to-sky-500/20 border-blue-500/20 hover:border-blue-400/40 cursor-pointer relative overflow-hidden group"
-          onClick={() => setShowAffiliateGuide(true)}
-        >
-          {/* Background glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-cyan-600/5 to-sky-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      {/* Affiliate Guide Section - Hidden */}
+      {false && (
+        <div className="px-6 space-y-4 mt-8">
+          <h2 className="text-xl font-semibold font-exo">CARA KERJA AFFILIATE</h2>
+          
+          <Card
+            className="p-4 border-border transition-all duration-300 bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-sky-500/10 hover:from-blue-500/20 hover:via-cyan-500/10 hover:to-sky-500/20 border-blue-500/20 hover:border-blue-400/40 cursor-pointer relative overflow-hidden group"
+            onClick={() => setShowAffiliateGuide(true)}
+          >
+            {/* Background glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-cyan-600/5 to-sky-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-          <div className="flex flex-col items-center text-center space-y-3">
-            <div className="relative p-3 rounded-full bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 group-hover:scale-110 transition-all duration-300">
-              <DollarSign className="w-6 h-6 text-white animate-pulse" />
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="relative p-3 rounded-full bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 group-hover:scale-110 transition-all duration-300">
+                <DollarSign className="w-6 h-6 text-white animate-pulse" />
+              </div>
+
+              <div>
+                <h3 className="font-medium text-foreground mb-1">
+                  Panduan Affiliate
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Cara mendapatkan penghasilan dari eL Vision Group
+                </p>
+              </div>
             </div>
 
-            <div>
-              <h3 className="font-medium text-foreground mb-1">
-                Panduan Affiliate
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Cara mendapatkan penghasilan dari eL Vision Group
-              </p>
-            </div>
-          </div>
-
-          {/* Corner accent */}
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-blue-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
-        </Card>
-      </div>
+            {/* Corner accent */}
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-blue-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
+          </Card>
+        </div>
+      )}
 
       {/* Export Global Section */}
       <div className="px-6 space-y-4 mt-8">

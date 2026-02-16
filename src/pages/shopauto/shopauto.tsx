@@ -375,8 +375,7 @@ export default function ShopAuto() {
       const resp = await fetch(targetUrl, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'x-api-key': import.meta.env.VITE_WA_API_KEY || 'aae95e77d1e8af24574a433272785c9b'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
       });
@@ -417,8 +416,7 @@ export default function ShopAuto() {
   const disconnectWa = async () => {
     try {
       await fetch(waBackendUrl + "/disconnect", { 
-        method: 'POST',
-        headers: { 'x-api-key': import.meta.env.VITE_WA_API_KEY || 'aae95e77d1e8af24574a433272785c9b' }
+        method: 'POST'
       });
       setIsWaConnected(false); setWaStatus("disconnected"); setWaAccount(""); setWaQrCode(null);
       handleToggle("isWaConnected", false);

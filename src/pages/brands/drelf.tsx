@@ -133,7 +133,15 @@ export default function DrelfPaymentPage() {
   const handleDecrement = () => setQuantity(prev => Math.max(isPromoApplied ? 3 : 1, prev - 1));
   
   const originalTotalAmount = price * quantity;
-  const discountAmount = isPromoApplied ? originalTotalAmount * discountPercentage : 0;
+  
+  // Automatic volume discount: 50% if quantity is 3 or 6
+  const autoDiscountPercentage = (quantity === 3 || quantity === 6) ? 0.5 : 0;
+  
+  // Use promo discount if applied, otherwise use auto discount
+  const activeDiscountPercentage = isPromoApplied ? discountPercentage : autoDiscountPercentage;
+  const isAnyDiscountApplied = activeDiscountPercentage > 0;
+
+  const discountAmount = originalTotalAmount * activeDiscountPercentage;
   const totalAmount = originalTotalAmount - discountAmount;
 
   const handleApplyPromo = () => {
@@ -238,7 +246,7 @@ export default function DrelfPaymentPage() {
           kodePos: kodePos,
           amount: totalAmount, // Send discounted amount
           quantity: quantity,
-          productName: productName + (isPromoApplied ? ' (Promo FEMININE)' : ''),
+          productName: productName + (isPromoApplied ? ' (Promo FEMININE)' : (autoDiscountPercentage > 0 ? ' (Promo 50%)' : '')),
           userId: user?.id,
           affiliateRef: finalAffiliateRef, // Pass null if promo active
           fbc,
@@ -550,6 +558,9 @@ export default function DrelfPaymentPage() {
             <CardTitle>1. Rangkuman Pesanan</CardTitle>
             </CardHeader>
           <CardContent className="space-y-4">
+            <div className="bg-pink-500 text-white p-3 rounded-md text-center font-bold animate-pulse">
+              Beli 3 pcs dan dapatkan diskon 50%
+            </div>
             <div className="flex justify-between items-center">
               <Label className="text-muted-foreground">Produk</Label>
               <span className="font-medium">{productName}</span>
@@ -604,6 +615,9 @@ export default function DrelfPaymentPage() {
                {isPromoApplied && (
                    <p className="text-green-600 text-sm mt-1 font-medium">✨ Diskon 70% aktif! (Min. 3 Paket)</p>
                )}
+               {!isPromoApplied && autoDiscountPercentage > 0 && (
+                   <p className="text-green-600 text-sm mt-1 font-medium">✨ Diskon Otomatis 50% aktif!</p>
+               )}
             </div>
             
             <Separator/>
@@ -611,10 +625,10 @@ export default function DrelfPaymentPage() {
             <div className="flex justify-between items-center">
               <Label className="text-muted-foreground">Total Harga</Label>
               <div className="text-right">
-                  {isPromoApplied && (
+                  {isAnyDiscountApplied && (
                       <span className="text-muted-foreground line-through text-sm mr-2">{formatCurrency(originalTotalAmount)}</span>
                   )}
-                  <span className={`font-bold text-lg ${isPromoApplied ? 'text-green-600' : 'text-primary'}`}>{formatCurrency(totalAmount)}</span>
+                  <span className={`font-bold text-lg ${isAnyDiscountApplied ? 'text-green-600' : 'text-primary'}`}>{formatCurrency(totalAmount)}</span>
               </div>
             </div>
             <div className="flex justify-between items-center text-green-600 font-bold">

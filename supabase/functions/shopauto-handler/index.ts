@@ -25,9 +25,31 @@ Deno.serve(async (req: Request) => {
     );
 
     const body = await req.json();
-    const waApiKey = Deno.env.get("WA_API") || "";
-    console.log(`[SHOPAUTO-DEBUG] Incoming Action: ${body.action || 'Webhook'}`);
-    if (!waApiKey) console.error("[SHOPAUTO-DEBUG] CRITICAL: WA_API key is missing in Deno env!");
+
+    // 0. Handle Manual Chat from Frontend (System AI)
+    if (body.action === "chat") {
+      const { prompt, user_email } = body;
+      console.log(`[ACTION:CHAT] Manual chat request from: ${user_email}`);
+      
+      const SYSTEM_KEY = Deno.env.get("OPENAI_API_KEY") || Deno.env.get("RENATA_KEY") || "";
+      
+      if (!SYSTEM_KEY) {
+        console.error("[ACTION:CHAT] ERROR: No API Key found in Environment Variables (OPENAI_API_KEY or RENATA_KEY)");
+        return new Response(JSON.stringify({ error: "System AI Key not configured. Please contact support." }), { 
+          status: 200, 
+          headers: jsonHeaders 
+        });
+      }
+
+      try {
+        const aiReply = await callOpenAI(prompt, SYSTEM_KEY);
+        console.log(`[ACTION:CHAT] SUCCESS: Generated response for ${user_email}`);
+        return new Response(JSON.stringify({ response: aiReply }), { headers: jsonHeaders });
+      } catch (err: any) {
+        console.error("[ACTION:CHAT] AI ERROR:", err.message);
+        return new Response(JSON.stringify({ error: "AI Engine Error: " + err.message }), { status: 200, headers: jsonHeaders });
+      }
+    }
 
     // 1. Handle Group ID fetching proxy (Securely use WA_API from Deno env)
     if (body.action === "get_groups") {
@@ -40,7 +62,7 @@ Deno.serve(async (req: Request) => {
       
       try {
         const resp = await fetch(fullUrl, {
-          headers: { 'x-api-key': waApiKey }
+
         });
         
         const responseStatus = resp.status;
@@ -76,8 +98,7 @@ Deno.serve(async (req: Request) => {
         const resp = await fetch(fullUrl, {
           method: "POST",
           headers: { 
-            'Content-Type': 'application/json',
-            'x-api-key': waApiKey 
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({ sender: sender || 'user' })
         });
@@ -210,7 +231,7 @@ async function forwardToWA(text: string, to: string, settings: any) {
   }
   targetUrl = targetUrl.replace(/\/$/, '');
   
-  const waApiKey = Deno.env.get("WA_API") || "";
+
 
   const payload: any = { 
     number: to,
@@ -228,8 +249,7 @@ async function forwardToWA(text: string, to: string, settings: any) {
     const resp = await fetch(`${targetUrl}/send-message`, {
       method: "POST",
       headers: { 
-        "Content-Type": "application/json",
-        "x-api-key": waApiKey
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(payload)
     });
@@ -246,9 +266,9 @@ async function handleShopeeChat(settings: any, data: any) {
   if (!customerMessage) return;
 
   const { aiProviderType, apiKey, aiEngine, aiKnowledgeEssay } = settings;
-  const RENATA_KEY = Deno.env.get("RENATA_KEY") || "";
+  const SYSTEM_KEY = Deno.env.get("OPENAI_API_KEY") || Deno.env.get("RENATA_KEY") || "";
   
-  const finalKey = aiProviderType === "system" ? RENATA_KEY : apiKey;
+  const finalKey = aiProviderType === "system" ? SYSTEM_KEY : apiKey;
   const finalEngine = aiProviderType === "system" ? "openai" : aiEngine;
 
   const prompt = `You are an AI Sales Assistant for a Shopee Store.\nKnowledge Base: ${aiKnowledgeEssay || "No specific instructions."}\nCustomer asked: "${customerMessage}"\nReply naturally and helpfully in Indonesian.`;
