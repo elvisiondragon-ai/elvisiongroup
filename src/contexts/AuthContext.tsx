@@ -900,6 +900,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(session?.user ?? null);
     setUserId(session?.user?.id ?? null);
     
+    // Unblock UI immediately after knowing auth state to make entry instant
+    setLoading(false);
+    
     // Check token expiry and log warning
     if (session?.expires_at) {
       const expiryTime = new Date(session.expires_at * 1000);

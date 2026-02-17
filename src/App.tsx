@@ -219,18 +219,18 @@ const AppContent = () => {
                 {/* Auth routes */}
                 <Route
                   path="/auth"
-                  element={loading ? null : (user ? <Navigate to="/" replace /> : <Auth />)}
+                  element={user ? <Navigate to="/" replace /> : <Auth />}
                 />
                 <Route
                   path="/signup"
-                  element={loading ? null : (user ? <Navigate to="/" replace /> : <Signup />)}
+                  element={user ? <Navigate to="/" replace /> : <Signup />}
                 />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 
                 {/* Protected root route - requires authentication */}
                 <Route
                   path="/"
-                  element={loading ? null : <Index />}
+                  element={<Index />}
                 />
                 
                 {/* 404 catch-all */}
