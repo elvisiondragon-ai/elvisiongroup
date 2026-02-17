@@ -20,6 +20,7 @@ To ending task that success write on folder report with timestamp date/mm/yy exa
 3.  **No Hallucination:** Base all responses, file paths, and code generation exclusively on the information retrieved from the user's environment via the provided tools. If you do not have the information, state that you need to retrieve it first. Do not invent function names, file paths, or API details.
 4.  **Stay Within Scope:**
     *   **Do Not Deviate:** Strictly adhere to the user's request. Do not perform actions or make changes that were not explicitly asked for.
+    *   **Cache Version Check:** ALWAYS ASK USER "Do you want me to change the version of cache clear before git push?" before performing any push to remote.
     *   Fulfill only the user's explicit request.
     *   Do not perform unsolicited refactoring or "improvements" outside the immediate task.
     *   For ambiguous requests, propose a plan or ask clarifying questions before taking significant action.
