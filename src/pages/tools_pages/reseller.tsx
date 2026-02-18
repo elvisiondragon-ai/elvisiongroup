@@ -264,13 +264,14 @@ export default function ResellerLanding() {
         <div className="bg-gradient-to-br from-yellow-100 to-amber-100 rounded-2xl p-8 mb-12">
           <h3 className="text-2xl font-bold text-center mb-6 text-gray-800">Bukti Nyata Pelanggan</h3>
           <div className="max-w-2xl mx-auto">
-            <video 
-              controls 
-              poster="https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/arif.jpg"
-              className="w-full rounded-xl shadow-2xl"
-            >
-              <source src="https://fjydiciehzqfhbyfbyke.supabase.co/storage/v1/object/public/Dagang%20Meta/arif.mp4" type="video/mp4" />
-            </video>
+            <div className="aspect-video w-full rounded-xl overflow-hidden shadow-2xl relative">
+              <iframe
+                src="https://www.youtube.com/embed/dPlA9jHzI0M"
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
             <p className="text-center mt-4 text-gray-700 italic">Testimoni Syarifudin Arif - Pemulihan Kesehatan</p>
           </div>
         </div>

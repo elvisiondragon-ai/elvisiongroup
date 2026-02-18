@@ -14,12 +14,12 @@ export function Finance({ onNavigate }: FinanceProps) {
 
   const videos = [
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/meditate1.mp4", 
-      title: "Dengarkan apa kata Ray Dalio"
+      url: "https://www.youtube.com/embed/dPlA9jHzI0M", 
+      title: "Arif - Mind Method for Recovery"
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/meditate2.mp4",
-      title: "Dengarkan apa kata Aguan"
+      url: "https://www.youtube.com/embed/iADevAyT7us",
+      title: "Arif - The Secret to Cellular Recovery"
     }
   ];
 
@@ -84,23 +84,18 @@ export function Finance({ onNavigate }: FinanceProps) {
       <div className="space-y-6">
         {videos.map((video, index) => (
           <div key={index} className="flex justify-center">
-            <div style={{ width: '300px' }}>
+            <div style={{ width: '100%', maxWidth: '300px' }}>
               <h3 className="text-lg font-semibold text-emerald-400 mb-4 text-center">
                 {video.title}
               </h3>
-              <video 
-                controls
-                preload="metadata"
-                className="w-full rounded-lg"
-                style={{ aspectRatio: '9/16' }}
-                onLoadedData={(e) => {
-                  const vid = e.target as HTMLVideoElement;
-                  vid.currentTime = 1;
-                }}
-              >
-                <source src={video.url} type="video/mp4" />
-                Browser Anda tidak mendukung video HTML5.
-              </video>
+              <div className="relative aspect-[9/16] w-full rounded-lg overflow-hidden shadow-xl border border-emerald-500/20">
+                <iframe
+                  src={video.url}
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
             </div>
           </div>
         ))}

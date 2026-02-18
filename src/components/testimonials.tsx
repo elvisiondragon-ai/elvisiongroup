@@ -3,74 +3,60 @@ import { Quote, Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Arif - Pro User",
-    text: "Defying the Odds: How I Used the Mind Method to Overcome Brain Cancer",
+    name: "Arif - Mind Method",
+    text: "Stop Battling Your Health: Try the Mind Method for Lasting Recovery",
     rating: 5,
     type: "video",
     videoIndex: 0
   },
   {
-    name: "eL Vision - Health",
-    text: "The Science of Healing: How eL Vision Realigned My Mind and Body",
+    name: "Arif - Cellular Recovery",
+    text: "The Secret to Cellular Recovery: What Nobody Tells You About Healing",
     rating: 5,
     type: "video",
     videoIndex: 1
-  },
-  {
-    name: "The Children",
-    text: "Building a Foundation of Joy: Teaching My Children the Power of Gratitude",
-    rating: 5,
-    type: "video",
-    videoIndex: 2
-  },
-  {
-    name: "Felicia",
-    text: "Finding My Stillness: My Journey from Constant Anxiety to Lasting Peace",
-    rating: 5,
-    type: "video",
-    videoIndex: 3
   },
   {
     name: "Habib Umar Assegaf",
     text: "Spiritual Elevation: A Testimony of Faith and Mental Clarity",
     rating: 5,
     type: "video",
-    videoIndex: 4
+    videoIndex: 2
   },
   {
     name: "Pak AGUS SH., MH.",
     text: "Professional Excellence & Inner Balance: A High-Achiever’s Perspective",
     rating: 5,
     type: "video",
-    videoIndex: 5
+    videoIndex: 3
   },
   {
     name: "Dr. Gumilar",
     text: "A Medical Endorsement: Why Mindset is the Ultimate Key to Recovery",
     rating: 5,
     type: "video",
-    videoIndex: 6
+    videoIndex: 4
   },
   {
     name: "eL Vision - Magnet",
     text: "The Root of the Solution: How I Stopped Managing Problems and Started Solving Them",
     rating: 5,
     type: "video",
-    videoIndex: 7
+    videoIndex: 5
   },
   {
     name: "Lena",
     text: "Manifesting Abundance: Moving from Scarcity to Being Chased by Prosperity",
     rating: 5,
     type: "video",
-    videoIndex: 8
+    videoIndex: 6
   },
   {
     name: "Gen Z",
     text: "The Ultimate Mental Edge: Why This is the Modern Life Hack We’ve Been Searching For",
     rating: 5,
     type: "video",
-    videoIndex: 9
+    videoIndex: 7
   },
   {
     name: "Hadi - Pro User",
@@ -94,21 +80,13 @@ interface TestimonialsProps {
 
 // Map testimonial names to their video URLs
 const videoMap: Record<string, { url: string; title: string }> = {
-  "Arif - Pro User": {
-    url: "https://www.youtube.com/embed/9L28-k3FAig",
-    title: "Defying the Odds: How I Used the Mind Method to Overcome Brain Cancer"
+  "Arif - Mind Method": {
+    url: "https://www.youtube.com/embed/dPlA9jHzI0M",
+    title: "Stop Battling Your Health: Try the Mind Method for Lasting Recovery"
   },
-  "eL Vision - Health": {
-    url: "https://www.youtube.com/embed/-xsxQ6cUP7M",
-    title: "The Science of Healing: How eL Vision Realigned My Mind and Body"
-  },
-  "The Children": {
-    url: "https://www.youtube.com/embed/1ZNFxjPdFr8",
-    title: "Building a Foundation of Joy: Teaching My Children the Power of Gratitude"
-  },
-  "Felicia": {
-    url: "https://www.youtube.com/embed/Rs_UDalr8q8",
-    title: "Finding My Stillness: My Journey from Constant Anxiety to Lasting Peace"
+  "Arif - Cellular Recovery": {
+    url: "https://www.youtube.com/embed/iADevAyT7us",
+    title: "The Secret to Cellular Recovery: What Nobody Tells You About Healing"
   },
   "Habib Umar Assegaf": {
     url: "https://www.youtube.com/embed/jD6XlkCL4sI",

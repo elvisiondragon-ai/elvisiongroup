@@ -75,17 +75,13 @@ export default function DrelfLanding() {
       {/* Video Section */}
       <section className="relative w-full overflow-hidden py-8">
         <div className="container mx-auto px-6 max-w-sm">
-          <div className="aspect-[9/16] w-full rounded-lg overflow-hidden shadow-xl">
-            <video
-              src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/drelf/rus.mp4"
-              poster={"https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/drelf/produk2.png"}
-              loop
-              playsInline
-              controls
-              className="w-full h-full object-cover"
-            >
-              Your browser does not support the video tag.
-            </video>
+          <div className="aspect-[9/16] w-full rounded-lg overflow-hidden shadow-xl relative">
+            <iframe
+              src="https://www.youtube.com/embed/U6NsL9RL9rY"
+              className="absolute inset-0 w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
           </div>
         </div>
       </section>

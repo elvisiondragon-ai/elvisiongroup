@@ -8,9 +8,6 @@ interface KecantikanFisikProps {
 }
 
 export function KecantikanFisik({ onNavigate }: KecantikanFisikProps) {
-  const [showPlayButton, setShowPlayButton] = useState(true);
-  const [thumbnailGenerated, setThumbnailGenerated] = useState(false);
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -243,7 +240,7 @@ export function KecantikanFisik({ onNavigate }: KecantikanFisikProps) {
           <div className="bg-gradient-to-r from-rose-700/20 to-pink-700/20 p-4 rounded-lg border border-rose-400/40 mt-4">
             <p className="text-rose-100 italic text-center">
               "Kecantikan sejati bukan tentang kesempurnaan fisik, tetapi tentang cahaya jiwa yang bersinar melalui mata, 
-              senyuman, dan energy positif yang terpancar dari dalam. Inilah mengapa orang yang menguasai stress management 
+              senyuman, and energy positif yang terpancar dari dalam. Inilah mengapa orang yang menguasai stress management 
               selalu terlihat lebih menarik dan menawan."
             </p>
           </div>
@@ -256,51 +253,13 @@ export function KecantikanFisik({ onNavigate }: KecantikanFisikProps) {
           <Play className="w-5 h-5" />
           Video: Rahasia Kecantikan Dari Dalam
         </h3>
-        <div className="relative rounded-lg overflow-hidden">
-          <video 
-            className="w-full rounded-lg"
-            controls={!showPlayButton}
-            preload="metadata"
-            crossOrigin="anonymous"
-            onPlay={() => setShowPlayButton(false)}
-            onCanPlay={(e) => {
-              if (!thumbnailGenerated) {
-                const video = e.target as HTMLVideoElement;
-                video.currentTime = 0;
-                setThumbnailGenerated(true);
-              }
-            }}
-            onSeeked={(e) => {
-              const video = e.target as HTMLVideoElement;
-              if (thumbnailGenerated && video.currentTime >= 0) {
-                video.pause();
-              }
-            }}
-            onError={(e) => {
-              console.error('Video error:', e);
-              setShowPlayButton(true);
-            }}
-            style={{ aspectRatio: '9/16', maxHeight: '600px' }}
-          >
-            <source src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/drelf/rus.mp4" type="video/mp4" />
-            Browser Anda tidak mendukung video HTML5.
-          </video>
-          
-          {/* Overlay Play Button */}
-          {showPlayButton && (
-            <div 
-              className="absolute inset-0 flex items-center justify-center cursor-pointer group bg-gradient-to-br from-rose-900/20 to-amber-900/20"
-              onClick={(e) => {
-                const video = e.currentTarget.previousElementSibling as HTMLVideoElement;
-                video.play();
-                setShowPlayButton(false);
-              }}
-            >
-              <div className="bg-gradient-to-r from-rose-600 to-amber-600 rounded-full p-6 group-hover:from-rose-500 group-hover:to-amber-500 transition-all duration-300 shadow-2xl">
-                <Play className="w-16 h-16 text-white group-hover:scale-110 transition-transform duration-300" fill="currentColor" />
-              </div>
-            </div>
-          )}
+        <div className="relative rounded-lg overflow-hidden aspect-[9/16] shadow-xl">
+          <iframe
+            src="https://www.youtube.com/embed/U6NsL9RL9rY"
+            className="absolute inset-0 w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
         </div>
         <p className="text-amber-200 text-sm mt-4 text-center">
           Pelajari lebih dalam tentang bagaimana kecantikan sejati terpancar dari kesehatan mental dan spiritual
@@ -349,7 +308,7 @@ export function KecantikanFisik({ onNavigate }: KecantikanFisikProps) {
           <strong>💎 Kecantikan & Spiritualitas:</strong> Ilmu pengetahuan modern membuktikan bahwa 
           praktik meditasi dan spiritual secara signifikan mempengaruhi kesehatan kulit, ekspresi wajah, 
           dan aura seseorang. Stress management yang baik tidak hanya membuat hidup lebih bahagia, 
-          tetapi juga membuat penampilan fisik menjadi lebih menarik dan menawan secara alami.
+          sedangkan penampilan fisik menjadi lebih menarik dan menawan secara alami.
         </div>
       </Card>
     </div>

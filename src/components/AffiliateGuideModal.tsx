@@ -9,16 +9,8 @@ interface AffiliateGuideModalProps {
 
 export function AffiliateGuideModal({ isOpen, onClose }: AffiliateGuideModalProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   if (!isOpen) return null;
-
-  const handlePlayVideo = () => {
-    if (videoRef.current) {
-      videoRef.current.play();
-      setIsPlaying(true);
-    }
-  };
 
   return (
     <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-[100] flex items-center justify-center p-2 sm:p-4">
@@ -64,37 +56,20 @@ export function AffiliateGuideModal({ isOpen, onClose }: AffiliateGuideModalProp
                 <div className="p-2 rounded-lg bg-purple-500/20 border border-purple-500/30">
                    <Video className="w-5 h-5 text-purple-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white tracking-tight">Video Tutorial</h3>
+                <h3 className="text-lg font-bold text-white tracking-tight">Video Panduan</h3>
              </div>
              
-             <div className="relative rounded-2xl overflow-hidden bg-black/80 border border-white/10 shadow-2xl group ring-1 ring-purple-500/20">
-                <video 
-                   ref={videoRef}
-                   src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/affiliate/Tutor_affiliate.mp4" 
-                   className="w-full h-auto aspect-video sm:aspect-auto"
-                   controls={isPlaying}
-                   playsInline
-                   preload="metadata"
-                   onPlay={() => setIsPlaying(true)}
-                   onPause={() => setIsPlaying(false)}
-                >
-                   Browser Anda tidak mendukung video HTML5.
-                </video>
-
-                {!isPlaying && (
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer group/play"
-                    onClick={handlePlayVideo}
-                  >
-                    <div className="w-20 h-20 rounded-full bg-purple-600/80 backdrop-blur-sm flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] group-hover/play:scale-110 group-hover/play:bg-purple-500 transition-all duration-300 border border-purple-400/50">
-                      <Play className="w-10 h-10 text-white fill-current ml-1" />
-                    </div>
-                  </div>
-                )}
+             <div className="relative rounded-2xl overflow-hidden bg-black/80 border border-white/10 shadow-2xl group ring-1 ring-purple-500/20 aspect-video">
+                <iframe
+                  src="https://www.youtube.com/embed/cPwGC0NW8s4"
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
              </div>
              
              <p className="text-center text-xs text-slate-500 font-medium italic">
-                {isPlaying ? "Video sedang diputar" : "Klik tombol play untuk memulai panduan"}
+                Klik tombol play untuk memulai panduan
              </p>
           </div>
           

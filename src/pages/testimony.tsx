@@ -2,64 +2,54 @@ import React, { useState } from 'react';
 import { Play, Quote, CheckCircle, Brain, Target, Shield, Zap, Eye, Triangle, Heart, Gem, Scale, ArrowRight, Sparkles } from 'lucide-react';
 
 const TestimonyPage = () => {
-  const [activeVideo, setActiveVideo] = useState(null);
-
   const testimonies = [
     {
-      name: "Agus",
-      title: "SH MH AGUS MULYADI",
-      description: "KEPALA INTELIJEN PANGANDARAN JAWA BARAT",
-      video: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/agus.mp4",
-      poster: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/agus.jpg"
+      name: "Arif - Mind Method",
+      title: "Penyintas Kanker Otak Stage 4",
+      description: "Stop Battling Your Health: Try the Mind Method for Lasting Recovery",
+      video: "https://www.youtube.com/embed/dPlA9jHzI0M"
     },
     {
-      name: "Vio",
-      title: "Influencer",
-      description: "",
-      video: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/vio.mp4",
-      poster: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/vio.jpg"
+      name: "Arif - Cellular Recovery",
+      title: "Mindset Transformation",
+      description: "The Secret to Cellular Recovery: What Nobody Tells You About Healing",
+      video: "https://www.youtube.com/embed/iADevAyT7us"
+    },
+    {
+      name: "Habib Umar Assegaf",
+      title: "Ustadz",
+      description: "Spiritual Elevation: A Testimony of Faith and Mental Clarity",
+      video: "https://www.youtube.com/embed/jD6XlkCL4sI"
+    },
+    {
+      name: "Pak AGUS SH., MH.",
+      title: "Kepala Intelijen",
+      description: "Professional Excellence & Inner Balance: A High-Achiever’s Perspective",
+      video: "https://www.youtube.com/embed/kVgfxHX_GeY"
+    },
+    {
+      name: "Dr. Gumilar",
+      title: "Hypnotherapist",
+      description: "A Medical Endorsement: Why Mindset is the Ultimate Key to Recovery",
+      video: "https://www.youtube.com/embed/U6NsL9RL9rY"
+    },
+    {
+      name: "eL Vision - Magnet",
+      title: "Problem Solver",
+      description: "The Root of the Solution: How I Stopped Managing Problems and Started Solving Them",
+      video: "https://www.youtube.com/embed/cPwGC0NW8s4"
     },
     {
       name: "Lena",
-      title: "ANAK SMA",
-      description: "",
-      video: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/lena.mp4",
-      poster: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/lena.jpg"
+      title: "Student",
+      description: "Manifesting Abundance: Moving from Scarcity to Being Chased by Prosperity",
+      video: "https://www.youtube.com/embed/-9u7v6vT5ds"
     },
     {
-      name: "Umi",
-      title: "Pemilik Pesantren",
-      description: "",
-      video: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/umi.mp4",
-      poster: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/umi.jpg"
-    },
-    {
-      name: "Habib",
-      title: "Umar",
-      description: "UStadz",
-      video: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/habib.mp4",
-      poster: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/habib.jpg"
-    },
-    {
-      name: "Arif",
-      title: "Penyintas Kanker Otak Stage 4",
-      description: "",
-      video: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif.mp4",
-      poster: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/arif.jpg"
-    },
-    {
-      name: "Felicia",
-      title: "Pengusaha",
-      description: "",
-      video: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/felicia.mp4",
-      poster: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/felicia.jpg"
-    },
-    {
-      name: "Dr Gumilar",
-      title: "HIPNOTERAPIST AND PEJABAT DAERAH",
-      description: "DR GUMILAR",
-      video: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/dr.mp4", // Placeholder
-      poster: "https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/dr.jpg" // Placeholder
+      name: "Gen Z",
+      title: "Modern Lifestyle",
+      description: "The Ultimate Mental Edge: Why This is the Modern Life Hack We’ve Been Searching For",
+      video: "https://www.youtube.com/embed/wQv7mHlE-5o"
     }
   ];
 
@@ -399,15 +389,12 @@ const TestimonyPage = () => {
               <div key={index} className="group">
                 <div className="bg-slate-900/50 border border-slate-700 rounded-xl overflow-hidden hover:border-purple-500/50 transition-all">
                   <div className="relative aspect-[9/16]">
-                    <video
-                      className="w-full h-full object-cover"
-                      poster={testimony.poster}
-                      controls
-                      preload="metadata"
-                    >
-                      <source src={testimony.video} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
+                    <iframe
+                      src={testimony.video}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
                   </div>
                   <div className="p-4 text-center">
                     <p className="font-semibold text-purple-400">{testimony.name}</p>

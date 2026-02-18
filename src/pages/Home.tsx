@@ -20,7 +20,7 @@ import { useAudioCache } from "@/hooks/useAudioCache";
 import { useToast } from "@/hooks/use-toast";
 import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
-import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity, Heart, Smile, Apple, Gem, HelpCircle, Crown, CircleUser, Sun, DollarSign, Globe, ShoppingBag } from "lucide-react";
+import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity, Heart, Smile, Apple, Gem, HelpCircle, Crown, CircleUser, Sun, DollarSign, Globe } from "lucide-react";
 import { AdminBadge } from "@/components/AdminBadge";
 import { AffiliateGuideModal } from "@/components/AffiliateGuideModal";
 import { cn } from "@/lib/utils";
@@ -172,8 +172,8 @@ export function Home({
   useEffect(() => {
     const handleOpenVioVideo = () => {
       setIndividualVideo({
-        url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/VIOVIDEO_WA.mp4",
-        title: "Pengalaman Vio"
+        url: "https://www.youtube.com/embed/Rs_UDalr8q8",
+        title: "Finding My Stillness: My Journey from Constant Anxiety to Lasting Peace"
       });
       setShowIndividualVideoModal(true);
     };
@@ -223,13 +223,6 @@ export function Home({
     icon: Activity,
     color: "text-emerald-500",
     key: "elite-habit",
-    isNew: true
-  }, {
-    title: "ShopAuto AI",
-    description: "Automate Store with AI and WA Forwarding",
-    icon: ShoppingBag,
-    color: "text-orange-500",
-    key: "shopauto",
     isNew: true
   }];
 
@@ -307,19 +300,14 @@ export function Home({
   const mediaFiles = [
     // All Videos First (YouTube Shorts)
     {
-      url: "https://www.youtube.com/embed/9L28-k3FAig",
+      url: "https://www.youtube.com/embed/dPlA9jHzI0M",
       type: "video" as const,
-      title: "Defying the Odds: How I Used the Mind Method to Overcome Brain Cancer"
+      title: "Stop Battling Your Health: Try the Mind Method for Lasting Recovery"
     },
     {
-      url: "https://www.youtube.com/embed/-xsxQ6cUP7M",
+      url: "https://www.youtube.com/embed/iADevAyT7us",
       type: "video" as const,
-      title: "The Science of Healing: How eL Vision Realigned My Mind and Body"
-    },
-    {
-      url: "https://www.youtube.com/embed/1ZNFxjPdFr8",
-      type: "video" as const,
-      title: "Building a Foundation of Joy: Teaching My Children the Power of Gratitude"
+      title: "The Secret to Cellular Recovery: What Nobody Tells You About Healing"
     },
     {
       url: "https://www.youtube.com/embed/Rs_UDalr8q8",
