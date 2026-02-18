@@ -22,7 +22,6 @@ import { cacheManager, CacheKeys } from "@/utils/cacheManager";
 import { getCachedMediaUrl, preloadAndCacheMedia } from "@/utils/mediaCache";
 import { Play, Headphones, BookOpen, Zap, Target, Lock, Sparkles, Flame, Video, Image as ImageIcon, X, ChevronLeft, ChevronRight, Radio, Scroll, Users, BarChart3, Activity, Heart, Smile, Apple, Gem, HelpCircle, Crown, CircleUser, Sun, DollarSign, Globe, ShoppingBag } from "lucide-react";
 import { AdminBadge } from "@/components/AdminBadge";
-import { TutorialButton } from "@/components/TutorialButton";
 import { AffiliateGuideModal } from "@/components/AffiliateGuideModal";
 import { cn } from "@/lib/utils";
 // import faviconImage from "@/assets/favicon.png"; // No longer needed, using /favicon.png directly
@@ -98,7 +97,6 @@ export function Home({
 
     return () => clearTimeout(timer); // Cleanup timer on unmount
   }, [userProfile, toast]);
-  const [showTutorialModal, setShowTutorialModal] = useState(false);
   const [showAffiliateGuide, setShowAffiliateGuide] = useState(false);
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<{url: string, type: 'video' | 'image', title: string} | null>(null);
@@ -297,61 +295,66 @@ export function Home({
     isPasangan: true
   }];
 
-  const tutorialFeature = {
-    title: "Tutorial",
-    description: "",
-    icon: Play,
-    color: "text-blue-500",
-    key: "tutorial"
+
+  const isYouTubeUrl = (url: string) => url.includes('youtube.com') || url.includes('youtu.be');
+
+  const getYouTubeVideoId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
   };
 
-
   const mediaFiles = [
-    // All Videos First
+    // All Videos First (YouTube Shorts)
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/kikireact.mp4",
+      url: "https://www.youtube.com/embed/9L28-k3FAig",
       type: "video" as const,
-      title: "Pengalaman Kiki"
+      title: "Defying the Odds: How I Used the Mind Method to Overcome Brain Cancer"
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/senoreact.mp4",
+      url: "https://www.youtube.com/embed/-xsxQ6cUP7M",
       type: "video" as const,
-      title: "Pengalaman Seno"
+      title: "The Science of Healing: How eL Vision Realigned My Mind and Body"
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/DRVIDEO_WA.mp4",
+      url: "https://www.youtube.com/embed/1ZNFxjPdFr8",
       type: "video" as const,
-      title: "Pengalaman Dr"
+      title: "Building a Foundation of Joy: Teaching My Children the Power of Gratitude"
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/FELVIDEO_WA.mp4",
+      url: "https://www.youtube.com/embed/Rs_UDalr8q8",
       type: "video" as const,
-      title: "Pengalaman Fel"
+      title: "Finding My Stillness: My Journey from Constant Anxiety to Lasting Peace"
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/HABIBVIDEO_WA.mp4",
+      url: "https://www.youtube.com/embed/jD6XlkCL4sI",
       type: "video" as const,
-      title: "Pengalaman Habib"
+      title: "Spiritual Elevation: A Testimony of Faith and Mental Clarity"
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/INTELVIDEO_WA.mp4",
+      url: "https://www.youtube.com/embed/kVgfxHX_GeY",
       type: "video" as const,
-      title: "Pengalaman Intel"
+      title: "Professional Excellence & Inner Balance: A High-Achiever’s Perspective"
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/LENA_WA.mp4",
+      url: "https://www.youtube.com/embed/U6NsL9RL9rY",
       type: "video" as const,
-      title: "Pengalaman Lena"
+      title: "A Medical Endorsement: Why Mindset is the Ultimate Key to Recovery"
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/VIOVIDEO_WA.mp4",
+      url: "https://www.youtube.com/embed/cPwGC0RW8s4",
       type: "video" as const,
-      title: "Pengalaman Vio"
+      title: "The Root of the Solution: How I Stopped Managing Problems and Started Solving Them"
     },
     {
-      url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/UMIVIDEO_WA.mp4",
+      url: "https://www.youtube.com/embed/-9u7v6vT5ds",
       type: "video" as const,
-      title: "Pengalaman Umi"
+      title: "Manifesting Abundance: Moving from Scarcity to Being Chased by Prosperity"
+    },
+    {
+      url: "https://www.youtube.com/embed/wQv7mHlE-5o",
+      type: "video" as const,
+      title: "The Ultimate Mental Edge: Why This is the Modern Life Hack We’ve Been Searching For"
     },
     // All Images After Videos
     {
@@ -558,46 +561,6 @@ export function Home({
         </div>
       )}
 
-      {/* Tutorial Section for All New Users */}
-      <div className="px-6 space-y-4">
-        <h2 className="text-xl font-semibold font-exo">CARA MENGGUNAKAN</h2>
-        
-        
-        <div className="grid grid-cols-1 gap-4">
-          {/* Tutorial Button */}
-          <Card
-            className="p-4 border-border transition-all duration-300 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 hover:from-indigo-500/20 hover:via-purple-500/10 hover:to-pink-500/20 border-indigo-500/20 hover:border-indigo-400/40 cursor-pointer relative overflow-hidden group"
-            onClick={(e) => {
-              e.preventDefault();
-              if (!showTutorialModal) setShowTutorialModal(true);
-            }}
-          >
-            {/* Background glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className="relative p-3 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 group-hover:scale-110 transition-all duration-300">
-                <tutorialFeature.icon className="w-6 h-6 text-white animate-pulse" />
-              </div>
-
-              <div>
-                <h3 className="font-medium text-foreground mb-1">
-                  {tutorialFeature.title}
-                </h3>
-                {tutorialFeature.description && (
-                  <p className="text-xs text-muted-foreground">
-                    {tutorialFeature.description}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Corner accent */}
-            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500/20 to-transparent rounded-bl-full opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
-          </Card>
-        </div>
-      </div>
-
       {/* Affiliate Guide Section - Hidden */}
       {false && (
         <div className="px-6 space-y-4 mt-8">
@@ -752,7 +715,7 @@ export function Home({
             }
             console.log("Feature clicked:", feature.key);
             if (feature.key === 'shopauto') {
-              navigate('/shopauto');
+              window.open('https://shopauto.elvisiongroup.com', '_blank');
             } else {
               onNavigate(feature.key);
             }
@@ -1054,7 +1017,7 @@ export function Home({
             }
             console.log("Feature clicked:", feature.key);
             if (feature.key === 'shopauto') {
-              navigate('/shopauto');
+              window.open('https://shopauto.elvisiongroup.com', '_blank');
             } else {
               onNavigate(feature.key);
             }
@@ -1254,12 +1217,6 @@ export function Home({
         </Card>
       </div>
 
-      {/* Tutorial Modal Component */}
-      <TutorialButton
-        isOpen={showTutorialModal}
-        onClose={() => setShowTutorialModal(false)}
-      />
-
       {/* Affiliate Guide Modal */}
       <AffiliateGuideModal
         isOpen={showAffiliateGuide}
@@ -1305,12 +1262,21 @@ export function Home({
                     <div className="relative aspect-video bg-muted">
                       {media.type === 'video' ? (
                         <>
-                          <video
-                            src={media.url}
-                            className="w-full h-full object-cover"
-                            preload="metadata"
-                            muted
-                          />
+                          {isYouTubeUrl(media.url) ? (
+                            <img
+                              src={`https://img.youtube.com/vi/${getYouTubeVideoId(media.url)}/0.jpg`}
+                              alt={media.title}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <video
+                              src={media.url}
+                              className="w-full h-full object-cover"
+                              preload="metadata"
+                              muted
+                            />
+                          )}
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors duration-300">
                             <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
                               <Play className="w-8 h-8 text-white" fill="currentColor" />
@@ -1379,19 +1345,29 @@ export function Home({
                   {/* Media Content */}
                   <div className="flex justify-center">
                     {media.type === 'video' ? (
-                      <video
-                        ref={(el) => {
-                          videoRefs.current[index] = el;
-                        }}
-                        src={cachedMediaUrls.get(media.url) || media.url}
-                        controls
-                        className="max-w-full rounded-lg"
-                        style={{ maxHeight: '60vh' }}
-                        preload="metadata"
-                        crossOrigin="anonymous"
-                      >
-                        Browser Anda tidak mendukung video HTML5.
-                      </video>
+                      isYouTubeUrl(media.url) ? (
+                        <iframe
+                          src={media.url}
+                          className="w-full aspect-video rounded-lg shadow-xl"
+                          style={{ maxHeight: '60vh' }}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      ) : (
+                        <video
+                          ref={(el) => {
+                            videoRefs.current[index] = el;
+                          }}
+                          src={cachedMediaUrls.get(media.url) || media.url}
+                          controls
+                          className="max-w-full rounded-lg"
+                          style={{ maxHeight: '60vh' }}
+                          preload="metadata"
+                          crossOrigin="anonymous"
+                        >
+                          Browser Anda tidak mendukung video HTML5.
+                        </video>
+                      )
                     ) : (
                       <img
                         src={cachedMediaUrls.get(media.url) || media.url}
@@ -1439,17 +1415,26 @@ export function Home({
             </div>
             <div className="p-6">
               <div className="relative flex justify-center">
-                <video
-                  src={individualVideo.url}
-                  controls
-                  autoPlay
-                  className="max-w-full rounded-lg"
-                  style={{ maxHeight: '70vh' }}
-                  preload="metadata"
-                  crossOrigin="anonymous"
-                >
-                  Browser Anda tidak mendukung video HTML5.
-                </video>
+                {isYouTubeUrl(individualVideo.url) ? (
+                  <iframe
+                    src={`${individualVideo.url}?autoplay=1`}
+                    className="w-full aspect-video rounded-lg shadow-xl"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                ) : (
+                  <video
+                    src={individualVideo.url}
+                    controls
+                    autoPlay
+                    className="max-w-full rounded-lg"
+                    style={{ maxHeight: '70vh' }}
+                    preload="metadata"
+                    crossOrigin="anonymous"
+                  >
+                    Browser Anda tidak mendukung video HTML5.
+                  </video>
+                )}
               </div>
             </div>
           </div>

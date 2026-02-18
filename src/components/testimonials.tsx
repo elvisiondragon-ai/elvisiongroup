@@ -4,79 +4,79 @@ import { Quote, Star } from "lucide-react";
 const testimonials = [
   {
     name: "Arif - Pro User",
-    text: "Berkali kali Lipat rezeki berdatangan setelah rutin mendengarkan Verse of eL Vision secara rutin. pertolongan dari Allah. Luar Biasa !",
+    text: "Defying the Odds: How I Used the Mind Method to Overcome Brain Cancer",
     rating: 5,
     type: "video",
     videoIndex: 0
+  },
+  {
+    name: "eL Vision - Health",
+    text: "The Science of Healing: How eL Vision Realigned My Mind and Body",
+    rating: 5,
+    type: "video",
+    videoIndex: 1
+  },
+  {
+    name: "The Children",
+    text: "Building a Foundation of Joy: Teaching My Children the Power of Gratitude",
+    rating: 5,
+    type: "video",
+    videoIndex: 2
+  },
+  {
+    name: "Felicia",
+    text: "Finding My Stillness: My Journey from Constant Anxiety to Lasting Peace",
+    rating: 5,
+    type: "video",
+    videoIndex: 3
+  },
+  {
+    name: "Habib Umar Assegaf",
+    text: "Spiritual Elevation: A Testimony of Faith and Mental Clarity",
+    rating: 5,
+    type: "video",
+    videoIndex: 4
+  },
+  {
+    name: "Pak AGUS SH., MH.",
+    text: "Professional Excellence & Inner Balance: A High-Achiever’s Perspective",
+    rating: 5,
+    type: "video",
+    videoIndex: 5
+  },
+  {
+    name: "Dr. Gumilar",
+    text: "A Medical Endorsement: Why Mindset is the Ultimate Key to Recovery",
+    rating: 5,
+    type: "video",
+    videoIndex: 6
+  },
+  {
+    name: "eL Vision - Magnet",
+    text: "The Root of the Solution: How I Stopped Managing Problems and Started Solving Them",
+    rating: 5,
+    type: "video",
+    videoIndex: 7
+  },
+  {
+    name: "Lena",
+    text: "Manifesting Abundance: Moving from Scarcity to Being Chased by Prosperity",
+    rating: 5,
+    type: "video",
+    videoIndex: 8
+  },
+  {
+    name: "Gen Z",
+    text: "The Ultimate Mental Edge: Why This is the Modern Life Hack We’ve Been Searching For",
+    rating: 5,
+    type: "video",
+    videoIndex: 9
   },
   {
     name: "Hadi - Pro User",
     text: "eL Vision Group bukan sekadar aplikasi - ini adalah teknologi spiritual yang mengubah kebiasaan digital menjadi kehidupan yang tercerahkan. Benar-benar mengubah cara manusia berhubungan dengan teknologi dan pertumbuhan batin.",
     rating: 5,
     type: "text"
-  },
-  {
-    name: "Kiki",
-    text: "Pengalaman luar biasa dengan eL Vision Group. Transformasi spiritual yang nyata dan profound.",
-    rating: 5,
-    type: "video",
-    videoIndex: 0 // kikireact.mp4
-  },
-  {
-    name: "Seno",
-    text: "Merasakan perubahan frekuensi yang sangat jelas. Aplikasi ini benar-benar mengubah hidup saya.",
-    rating: 5,
-    type: "video",
-    videoIndex: 1 // senoreact.mp4
-  },
-  {
-    name: "Dr. Gumilar S.Pd., M.M., CH, CHt, pNNLP",
-    text: "Sebagai doktor, saya skeptis awalnya. Tapi hasil yang saya rasakan tidak bisa dibantah.",
-    rating: 5,
-    type: "video",
-    videoIndex: 2 // DRVIDEO_WA.mp4
-  },
-  {
-    name: "Fel",
-    text: "Spiritual technology yang benar-benar bekerja. Meditasi dan frequency healing sangat efektif.",
-    rating: 5,
-    type: "video",
-    videoIndex: 3 // FELVIDEO_WA.mp4
-  },
-  {
-    name: "Lena",
-    text: "Mantap Pol cukup ikutin yang mudah rezeki malah datang sendiri guys",
-    rating: 5,
-    type: "video",
-    videoIndex: 6 // LENA_WA.mp4 (index 6 in mediaFiles array)
-  },
-  {
-    name: "Agus Mulyadi S.H., M.H.",
-    text: "Menggunakan eL vision Group sejak 2018 hingga hari ini, selalu menjadi pemandu hidup yang lebih kaya akan makna dan memudahkan.",
-    rating: 5,
-    type: "video",
-    videoIndex: 7 // Will need to find the correct index
-  },
-  {
-    name: "Umi",
-    text: "Transformasi luar biasa sejak bergabung dengan eL Vision Group. Hidup menjadi lebih bermakna dan terarah.",
-    rating: 5,
-    type: "video",
-    videoIndex: 8 // UMIVIDEO_WA.mp4
-  },
-  {
-    name: "Vio",
-    text: "Sebelumnya sering overthinking untuk sesuatu yang gak perlu, sangat merugikan secara finansial dan mental, ikut eL Vision Group semua jadi lebih ringan dan relax menghadapi hidup",
-    rating: 5,
-    type: "video",
-    videoIndex: 7 // VIOVIDEO_WA.mp4
-  },
-  {
-    name: "Habib",
-    text: "Alhamdulillah begini cara bersyukur saat tubuh lebih segar menerima hidup, rezeki jadi berdatangan, coba sendiri wahai umat",
-    rating: 5,
-    type: "video",
-    videoIndex: 4 // HABIBVIDEO_WA.mp4 (index 4 in mediaFiles array)
   },
   {
     name: "Putri - Tier Ignis 🔥",
@@ -95,44 +95,44 @@ interface TestimonialsProps {
 // Map testimonial names to their video URLs
 const videoMap: Record<string, { url: string; title: string }> = {
   "Arif - Pro User": {
-    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/arif.mp4",
-    title: "Pengalaman Arif"
+    url: "https://www.youtube.com/embed/9L28-k3FAig",
+    title: "Defying the Odds: How I Used the Mind Method to Overcome Brain Cancer"
   },
-  "Kiki": {
-    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/kikireact.mp4",
-    title: "Pengalaman Kiki"
+  "eL Vision - Health": {
+    url: "https://www.youtube.com/embed/-xsxQ6cUP7M",
+    title: "The Science of Healing: How eL Vision Realigned My Mind and Body"
   },
-  "Seno": {
-    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/senoreact.mp4",
-    title: "Pengalaman Seno"
+  "The Children": {
+    url: "https://www.youtube.com/embed/1ZNFxjPdFr8",
+    title: "Building a Foundation of Joy: Teaching My Children the Power of Gratitude"
   },
-  "Dr. Gumilar S.Pd., M.M., CH, CHt, pNNLP": {
-    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/DRVIDEO_WA.mp4",
-    title: "Pengalaman Dr. Gumilar"
+  "Felicia": {
+    url: "https://www.youtube.com/embed/Rs_UDalr8q8",
+    title: "Finding My Stillness: My Journey from Constant Anxiety to Lasting Peace"
   },
-  "Fel": {
-    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/FELVIDEO_WA.mp4",
-    title: "Pengalaman Fel"
+  "Habib Umar Assegaf": {
+    url: "https://www.youtube.com/embed/jD6XlkCL4sI",
+    title: "Spiritual Elevation: A Testimony of Faith and Mental Clarity"
+  },
+  "Pak AGUS SH., MH.": {
+    url: "https://www.youtube.com/embed/kVgfxHX_GeY",
+    title: "Professional Excellence & Inner Balance: A High-Achiever’s Perspective"
+  },
+  "Dr. Gumilar": {
+    url: "https://www.youtube.com/embed/U6NsL9RL9rY",
+    title: "A Medical Endorsement: Why Mindset is the Ultimate Key to Recovery"
+  },
+  "eL Vision - Magnet": {
+    url: "https://www.youtube.com/embed/cPwGC0NW8s4",
+    title: "The Root of the Solution: How I Stopped Managing Problems and Started Solving Them"
   },
   "Lena": {
-    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/LENA_WA.mp4",
-    title: "Pengalaman Lena"
+    url: "https://www.youtube.com/embed/-9u7v6vT5ds",
+    title: "Manifesting Abundance: Moving from Scarcity to Being Chased by Prosperity"
   },
-  "Agus Mulyadi S.H., M.H.": {
-    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/AGUS_WA.mp4",
-    title: "Pengalaman Agus Mulyadi"
-  },
-  "Umi": {
-    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/UMIVIDEO_WA.mp4",
-    title: "Pengalaman Umi"
-  },
-  "Vio": {
-    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/VIOVIDEO_WA.mp4",
-    title: "Pengalaman Vio"
-  },
-  "Habib": {
-    url: "https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/testi/HABIBVIDEO_WA.mp4",
-    title: "Pengalaman Habib"
+  "Gen Z": {
+    url: "https://www.youtube.com/embed/wQv7mHlE-5o",
+    title: "The Ultimate Mental Edge: Why This is the Modern Life Hack We’ve Been Searching For"
   }
 };
 
@@ -149,15 +149,18 @@ export function Testimonials({ onVideoClick, mediaAudit, user }: TestimonialsPro
             key={index}
             className={`p-4 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-cyan-500/5 border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 ${testimonial.type === "video" ? "cursor-pointer" : ""}`}
             onClick={() => {
-              if (testimonial.type === "video" && videoMap[testimonial.name]) {
+              if (testimonial.type === "video") {
                 const video = videoMap[testimonial.name];
-                if (mediaAudit && user) {
-                  mediaAudit.handleOpenOrPlay({
-                    object_name: video.url.substring(video.url.lastIndexOf('/') + 1),
-                    user_email: user.email
-                  });
+                
+                if (video) {
+                  if (mediaAudit && user) {
+                    mediaAudit.handleOpenOrPlay({
+                      object_name: video.title,
+                      user_email: user.email
+                    });
+                  }
+                  onVideoClick(testimonial.videoIndex || 0, video.url, video.title);
                 }
-                onVideoClick(testimonial.videoIndex || 0, video.url, video.title);
               }
             }}
           >
