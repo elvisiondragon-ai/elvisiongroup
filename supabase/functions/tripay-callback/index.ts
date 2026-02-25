@@ -35,7 +35,7 @@ function logAndRespond(message, status, data, isError = false) {
   });
 }
 // Fungsi verifyTriPaySignature dihilangkan
-serve(async (req)=>{
+serve(async (req) => {
   console.log('🚀 Tripay callback Edge Function started (Processing Only)');
   console.log('📝 Method:', req.method);
   if (req.method === 'OPTIONS') {
@@ -65,130 +65,130 @@ serve(async (req)=>{
   // --- SPECIAL HANDLING: PAYPAL CAPTURE TRIGGER ---
   // Frontend calls this manually after user approves payment
   if (body.action === 'CAPTURE_PAYPAL' && body.orderId) {
-      console.log(`🔵 PayPal Capture Triggered for Order: ${body.orderId}`);
-      
-      const clientId = Deno.env.get('PAYPAL_CLIENT_ID');
-      const clientSecret = Deno.env.get('PAYPAL_CLIENT_SECRET');
-      const isSandbox = Deno.env.get('PAYPAL_MODE') === 'sandbox';
-      const baseUrl = isSandbox ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
+    console.log(`🔵 PayPal Capture Triggered for Order: ${body.orderId}`);
 
-      if (!clientId || !clientSecret) return logAndRespond('Server config missing (PayPal)', 500, { success: false }, true);
+    const clientId = Deno.env.get('PAYPAL_CLIENT_ID');
+    const clientSecret = Deno.env.get('PAYPAL_CLIENT_SECRET');
+    const isSandbox = Deno.env.get('PAYPAL_MODE') === 'sandbox';
+    const baseUrl = isSandbox ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
 
-      try {
-          // 1. Get Token
-          const auth = btoa(`${clientId}:${clientSecret}`);
-          const tokenResp = await fetch(`${baseUrl}/v1/oauth2/token`, {
-              method: "POST",
-              headers: { "Authorization": `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" },
-              body: "grant_type=client_credentials"
-          });
-          const tokenData = await tokenResp.json();
-          const accessToken = tokenData.access_token;
+    if (!clientId || !clientSecret) return logAndRespond('Server config missing (PayPal)', 500, { success: false }, true);
 
-          // 2. Capture Order
-          const captureResp = await fetch(`${baseUrl}/v2/checkout/orders/${body.orderId}/capture`, {
-              method: "POST",
-              headers: { "Authorization": `Bearer ${accessToken}`, "Content-Type": "application/json" }
-          });
-          const captureData = await captureResp.json();
-          
-          if (!captureResp.ok) {
-              // If already captured, we might still want to proceed to ensure DB is synced
-               if (captureData.details && captureData.details[0]?.issue === 'ORDER_ALREADY_CAPTURED') {
-                   console.log('⚠️ Order already captured. Proceeding to sync DB.');
-               } else {
-                   return logAndRespond('PayPal Capture Failed', 400, { error: captureData }, true);
-               }
-          }
+    try {
+      // 1. Get Token
+      const auth = btoa(`${clientId}:${clientSecret}`);
+      const tokenResp = await fetch(`${baseUrl}/v1/oauth2/token`, {
+        method: "POST",
+        headers: { "Authorization": `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: "grant_type=client_credentials"
+      });
+      const tokenData = await tokenResp.json();
+      const accessToken = tokenData.access_token;
 
-          console.log('✅ PayPal Captured Successfully.');
-          
-          // 3. TRANSFORM PAYPAL DATA TO "TRIPAY STYLE" DATA
-          // This allows us to reuse the exact same logic below without rewriting it
-          // We overwrite 'body' so the rest of the script thinks it came from Tripay
-          body = {
-              reference: body.orderId, // The PayPal Order ID is our "Tripay Reference"
-              merchant_ref: null, // We let the script find it via reference
-              status: 'PAID',
-              payment_method: 'PAYPAL',
-              amount: captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || '20.00' // Get real amount
-          };
-          console.log('🔄 Transformed PayPal data for internal processing:', body);
+      // 2. Capture Order
+      const captureResp = await fetch(`${baseUrl}/v2/checkout/orders/${body.orderId}/capture`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${accessToken}`, "Content-Type": "application/json" }
+      });
+      const captureData = await captureResp.json();
 
-      } catch (err) {
-          return logAndRespond('PayPal Integration Error', 500, { error: err.message }, true);
+      if (!captureResp.ok) {
+        // If already captured, we might still want to proceed to ensure DB is synced
+        if (captureData.details && captureData.details[0]?.issue === 'ORDER_ALREADY_CAPTURED') {
+          console.log('⚠️ Order already captured. Proceeding to sync DB.');
+        } else {
+          return logAndRespond('PayPal Capture Failed', 400, { error: captureData }, true);
+        }
       }
+
+      console.log('✅ PayPal Captured Successfully.');
+
+      // 3. TRANSFORM PAYPAL DATA TO "TRIPAY STYLE" DATA
+      // This allows us to reuse the exact same logic below without rewriting it
+      // We overwrite 'body' so the rest of the script thinks it came from Tripay
+      body = {
+        reference: body.orderId, // The PayPal Order ID is our "Tripay Reference"
+        merchant_ref: null, // We let the script find it via reference
+        status: 'PAID',
+        payment_method: 'PAYPAL',
+        amount: captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || '20.00' // Get real amount
+      };
+      console.log('🔄 Transformed PayPal data for internal processing:', body);
+
+    } catch (err) {
+      return logAndRespond('PayPal Integration Error', 500, { error: err.message }, true);
+    }
   }
   // --- END SPECIAL HANDLING ---
 
-    const { reference: tripayReference, merchant_ref: merchantRef, status: paymentStatus, payment_method: paymentMethod, amount } = body;
-    console.log('✅ Callback data received:', {
-      tripayReference,
-      merchantRef,
-      paymentStatus,
-      amount
-    });
-  
-    if (!tripayReference || !paymentStatus) {
-      return logAndRespond('Missing required fields in payload (reference, status)', 400, {
+  const { reference: tripayReference, merchant_ref: merchantRef, status: paymentStatus, payment_method: paymentMethod, amount } = body;
+  console.log('✅ Callback data received:', {
+    tripayReference,
+    merchantRef,
+    paymentStatus,
+    amount
+  });
+
+  if (!tripayReference || !paymentStatus) {
+    return logAndRespond('Missing required fields in payload (reference, status)', 400, {
+      success: false,
+      error: 'Missing required fields'
+    }, true);
+  }
+
+  // ===================================
+  // ALUR A: Status PAID (Utama)
+  // ===================================
+  if (paymentStatus === 'PAID') {
+    console.log(`🎉 Payment PAID for ${tripayReference}. Processing...`);
+
+    // --- 1. Cek Global Product (Drelf/FitFactor) ---
+    console.log(`1. 🔍 Searching for product transaction '${tripayReference}' or merchant_ref '${merchantRef}' in global_product...`);
+
+    // FIX: Search by tripay_reference OR merchant_ref to handle cases where the update missed
+    let query = supabase.from('global_product')
+      .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, affiliate_email, fbc, fbp, ip_address, user_agent, capi_purchase_sent') // Added affiliate_email, ip_address, user_agent, capi_purchase_sent
+      .neq('status', 'PAID');
+
+    if (merchantRef) {
+      query = query.or(`tripay_reference.eq.${tripayReference},merchant_ref.eq.${merchantRef}`);
+    } else {
+      query = query.eq('tripay_reference', tripayReference);
+    }
+
+    const { data: globalProductTxData, error: selectGlobalError } = await query.limit(1);
+
+    if (selectGlobalError) {
+      console.error('   - ❌ CRITICAL DB Select Error (global_product):', selectGlobalError.message);
+      return logAndRespond('Database Select Error', 500, {
         success: false,
-        error: 'Missing required fields'
+        error: selectGlobalError.message
       }, true);
     }
-  
-    // ===================================
-    // ALUR A: Status PAID (Utama)
-    // ===================================
-    if (paymentStatus === 'PAID') {
-      console.log(`🎉 Payment PAID for ${tripayReference}. Processing...`);
-  
-      // --- 1. Cek Global Product (Drelf/FitFactor) ---
-      console.log(`1. 🔍 Searching for product transaction '${tripayReference}' or merchant_ref '${merchantRef}' in global_product...`);
-      
-            // FIX: Search by tripay_reference OR merchant_ref to handle cases where the update missed
-            let query = supabase.from('global_product')
-              .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, affiliate_email, fbc, fbp, ip_address, user_agent, capi_purchase_sent') // Added affiliate_email, ip_address, user_agent, capi_purchase_sent
-              .neq('status', 'PAID');
-      
-            if (merchantRef) {
-               query = query.or(`tripay_reference.eq.${tripayReference},merchant_ref.eq.${merchantRef}`);
-            } else {
-               query = query.eq('tripay_reference', tripayReference);
-            }
-            
-            const { data: globalProductTxData, error: selectGlobalError } = await query.limit(1);
-      
-            if (selectGlobalError) {
-              console.error('   - ❌ CRITICAL DB Select Error (global_product):', selectGlobalError.message);
-              return logAndRespond('Database Select Error', 500, {
-                success: false,
-                error: selectGlobalError.message
-              }, true);
-            }
-      
-            // Ambil data pertama dari hasil select (jika ada)
-            const globalProductTx = globalProductTxData ? globalProductTxData[0] : null;
-      
-            if (globalProductTx) {
-              console.log(`   - ✅ Found Global Product ID: ${globalProductTx.id}. Attempting atomic update to PAID.`);
-              
-              // Update object
-              const updatePayload: any = { 
-                  status: 'PAID'
-              };
-              // Ensure tripay_reference is synced if it was missing
-              if (!globalProductTx.tripay_reference && tripayReference) {
-                  updatePayload.tripay_reference = tripayReference;
-              }
-      
-        // 2. ATOMIC UPDATE (Optimistic Locking)
-        // Only update if the current status is NOT 'PAID'. This prevents race conditions.
-        const { data: updatedRows, error: updateError } = await supabase
-            .from('global_product')
-            .update(updatePayload)
-            .eq('id', globalProductTx.id)
-            .neq('status', 'PAID') // CRITICAL: Only update if it's NOT ALREADY PAID
-            .select();
+
+    // Ambil data pertama dari hasil select (jika ada)
+    const globalProductTx = globalProductTxData ? globalProductTxData[0] : null;
+
+    if (globalProductTx) {
+      console.log(`   - ✅ Found Global Product ID: ${globalProductTx.id}. Attempting atomic update to PAID.`);
+
+      // Update object
+      const updatePayload: any = {
+        status: 'PAID'
+      };
+      // Ensure tripay_reference is synced if it was missing
+      if (!globalProductTx.tripay_reference && tripayReference) {
+        updatePayload.tripay_reference = tripayReference;
+      }
+
+      // 2. ATOMIC UPDATE (Optimistic Locking)
+      // Only update if the current status is NOT 'PAID'. This prevents race conditions.
+      const { data: updatedRows, error: updateError } = await supabase
+        .from('global_product')
+        .update(updatePayload)
+        .eq('id', globalProductTx.id)
+        .neq('status', 'PAID') // CRITICAL: Only update if it's NOT ALREADY PAID
+        .select();
 
       if (updateError) {
         console.error('   - ❌ FAILED to update global_product status:', updateError.message);
@@ -200,61 +200,62 @@ serve(async (req)=>{
 
       // CHECK IF WE WON THE RACE
       if (!updatedRows || updatedRows.length === 0) {
-          console.log(`   - ⚠️ RACE CONDITION: Transaction ${globalProductTx.id} was already PAID by another process. Skipping CAPI & Email.`);
-          return logAndRespond('Transaction already processed by another worker.', 200, {
-            success: true,
-            info: 'Duplicate webhook handled gracefully.'
-          });
+        console.log(`   - ⚠️ RACE CONDITION: Transaction ${globalProductTx.id} was already PAID by another process. Skipping CAPI & Email.`);
+        return logAndRespond('Transaction already processed by another worker.', 200, {
+          success: true,
+          info: 'Duplicate webhook handled gracefully.'
+        });
       }
 
       console.log('   - ✅ Successfully updated global_product to PAID (Winner of race condition).');
 
       const pName = globalProductTx.product_name || '';
-      
+
       // --- 2.1 ADD TO USER WEBINAR TABLE ---
       // We check for 'webinar' to catch usa_webinar20, webinar_el, etc.
       if (pName.toLowerCase().includes('webinar')) {
-          console.log(`   - 🎟️ Webinar detected (${pName}). Inserting into user_webinar table...`);
-          
-          const origin = pName.toLowerCase().includes('usa_webinar') ? 'USA' : 'Indonesia';
-          
-          try {
-              await supabase.from('user_webinar').insert({
-                  email: globalProductTx.email,
-                  name: globalProductTx.name,
-                  phone_number: globalProductTx.phone,
-                  order_id: tripayReference,
-                  paid_at: new Date().toISOString(),
-                  origin: origin
-              });
-              console.log(`   - ✅ Inserted into user_webinar (Origin: ${origin})`);
-          } catch (webinarError) {
-              console.error('   - ⚠️ Failed to insert into user_webinar (non-critical):', webinarError);
-          }
+        console.log(`   - 🎟️ Webinar detected (${pName}). Inserting into user_webinar table...`);
+
+        const origin = pName.toLowerCase().includes('usa_webinar') ? 'USA' : 'Indonesia';
+
+        try {
+          await supabase.from('user_webinar').insert({
+            email: globalProductTx.email,
+            name: globalProductTx.name,
+            phone_number: globalProductTx.phone,
+            order_id: tripayReference,
+            paid_at: new Date().toISOString(),
+            origin: origin
+          });
+          console.log(`   - ✅ Inserted into user_webinar (Origin: ${origin})`);
+        } catch (webinarError) {
+          console.error('   - ⚠️ Failed to insert into user_webinar (non-critical):', webinarError);
+        }
       }
 
       // 3. Kirim email sukses (Opsional)
       try {
         console.log('3. 📧 Sending success email...');
         const lowerPName = pName.toLowerCase();
-        
+
         // Specific keywords based on Product Catalog names to route to send-ebooks-email
         const ebookSpecificKeywords = [
-            'program diet el-vision',
-            'ebook el vision',
-            'ebook uang panas',
-            'ebook pria alpha',
-            'feminine magnetism',
-            'ebook health recovery',
-            'vip session 6 week',
-            '3000 coaching',
-            'webinar'
+          'program diet el-vision',
+          'ebook el vision',
+          'ebook uang panas',
+          'ebook pria alpha',
+          'feminine magnetism',
+          'ebook health recovery',
+          'vip session 6 week',
+          '3000 coaching',
+          'webinar',
+          'raja ranjang'
         ];
 
         const isEbook = ebookSpecificKeywords.some(key => lowerPName.includes(key));
-        
+
         let functionToInvoke = isEbook ? 'send-ebooks-email' : 'send-payment-email';
-        
+
         // --- CAPI & EMAIL CONFIGURATION ---
         let capiPixelId = null;
         let capiValue = 0;
@@ -272,60 +273,80 @@ serve(async (req)=>{
         const isJewelry = pName.toLowerCase().includes('jewelry');
         const isDrelf = pName.toLowerCase().includes('drelf');
         const isWebinar = pName.toLowerCase().includes('webinar');
-        
+        const isRajaRanjang = lowerPName.includes('raja ranjang');
+
         // SG/MY eL Vision Editions
         const isSGElvision = pName.includes('sg_elvision_en') || pName.includes('English Edition');
         const isMYElvision = pName.includes('sg_elvision_malay') || pName.includes('Malay Edition');
 
-        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}, isWebinar=${isWebinar}, isDrelf=${isDrelf}, isJewelry=${isJewelry}, isSGElvision=${isSGElvision}, isMYElvision=${isMYElvision}`);
+        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}, isWebinar=${isWebinar}, isDrelf=${isDrelf}, isJewelry=${isJewelry}, isSGElvision=${isSGElvision}, isMYElvision=${isMYElvision}, isRajaRanjang=${isRajaRanjang}`);
 
         if (isEbookHealth || isCoaching3000 || isVIP6Week || pName.includes('usa_ebookfeminine')) {
-            capiPixelId = '1393383179182528'; // Manifestation Pixel (USA)
-            if (isCoaching3000) capiValue = 3000.00;
-            else if (isVIP6Week) capiValue = 1500.00;
-            else capiValue = 20.00;
-            
-            capiCurrency = 'USD';
-            emailCurrency = 'USD';
-            displayAmount = capiValue;
+          capiPixelId = '1393383179182528'; // Manifestation Pixel (USA)
+          if (isCoaching3000) capiValue = 3000.00;
+          else if (isVIP6Week) capiValue = 1500.00;
+          else capiValue = 20.00;
+
+          capiCurrency = 'USD';
+          emailCurrency = 'USD';
+          displayAmount = capiValue;
         } else if (isSGElvision) {
-            capiPixelId = '3319324491540889'; // EbookIndo Pixel
-            capiCurrency = 'SGD';
-            emailCurrency = 'SGD';
-            // Logic: if amount is 564000 IDR, convert back to 47 SGD
-            displayAmount = (amount || globalProductTx.amount) / 12000;
-            capiValue = displayAmount;
+          capiPixelId = '3319324491540889'; // EbookIndo Pixel
+          capiCurrency = 'SGD';
+          emailCurrency = 'SGD';
+          // Logic: if amount is 564000 IDR, convert back to 47 SGD
+          displayAmount = (amount || globalProductTx.amount) / 12000;
+          capiValue = displayAmount;
         } else if (isMYElvision) {
-            capiPixelId = '3319324491540889'; // EbookIndo Pixel
-            capiCurrency = 'MYR';
-            emailCurrency = 'MYR';
-            // Logic: if amount is 311500 IDR, convert back to 89 MYR
-            displayAmount = (amount || globalProductTx.amount) / 3500;
-            capiValue = displayAmount;
+          capiPixelId = '3319324491540889'; // EbookIndo Pixel
+          capiCurrency = 'MYR';
+          emailCurrency = 'MYR';
+          // Logic: if amount is 311500 IDR, convert back to 89 MYR
+          displayAmount = (amount || globalProductTx.amount) / 3500;
+          capiValue = displayAmount;
+        } else if (isRajaRanjang) {
+          capiPixelId = '934836615539666'; // Raja Ranjang Pixel
+          capiCurrency = 'IDR';
+          emailCurrency = 'IDR';
+          capiValue = amount || globalProductTx.amount || 149000;
+          displayAmount = capiValue;
         } else if (isDrelf) {
-            capiPixelId = '1749197952320359'; // Drelf SG Pixel
-            capiCurrency = 'SGD';
-            emailCurrency = 'SGD';
-            displayAmount = (amount || globalProductTx.amount) / 12000; // Convert back to SGD
-            capiValue = displayAmount;
+          capiPixelId = '1749197952320359'; // Drelf SG Pixel
+          capiCurrency = 'SGD';
+          emailCurrency = 'SGD';
+          displayAmount = (amount || globalProductTx.amount) / 12000; // Convert back to SGD
+          capiValue = displayAmount;
         } else if (isJewelry) {
-            capiPixelId = 'CAPI_JEWELRY'; // Jewelry Pixel (Uses JEWELRY_PIXEL_ID env)
-            capiCurrency = 'SGD';
-            emailCurrency = 'SGD';
-            displayAmount = (amount || globalProductTx.amount) / 12000; // Convert back to SGD
-            capiValue = displayAmount;
+          capiPixelId = '874165095242407'; // New Ramadhan Ring / Jewelry Pixel
+          capiCurrency = 'SGD';
+          emailCurrency = 'SGD';
+          displayAmount = (amount || globalProductTx.amount) / 12000; // Convert back to SGD
+          capiValue = displayAmount;
         } else if (isEbookPercayaDiri || isEbookFeminine || isUangPanas || isWebinar || pName.includes('ebook_elvision') || pName.includes('ebook_adhd') || pName.includes('ebook_arif') || pName.includes('ebook_grief') || pName.includes('ebook_langsing') || pName.includes('ebook_tracker') || pName.includes('vip_15jt') || pName.includes('webinar_el')) {
-            capiPixelId = '3319324491540889'; // EbookIndo Pixel
-            capiValue = amount || globalProductTx.amount || 100000;
-            capiCurrency = 'IDR';
-            emailCurrency = 'IDR';
-            displayAmount = capiValue;
+          capiPixelId = '3319324491540889'; // EbookIndo Pixel
+          capiValue = amount || globalProductTx.amount || 100000;
+          capiCurrency = 'IDR';
+          emailCurrency = 'IDR';
+          displayAmount = capiValue;
         } else if (isFitFactor) {
-            capiPixelId = '1797660474333865'; // Fit Factor Pixel
-            capiValue = amount || globalProductTx.amount || 0;
-            capiCurrency = 'IDR';
-            emailCurrency = 'IDR';
-            displayAmount = capiValue;
+          capiPixelId = '1797660474333865'; // Fit Factor Pixel
+          capiValue = amount || globalProductTx.amount || 0;
+          capiCurrency = 'IDR';
+          emailCurrency = 'IDR';
+          displayAmount = capiValue;
+        } else {
+          // --- UNIVERSAL FALLBACK ---
+          // Automatically handles new products without needing backend edits.
+          console.log(`   - 🌐 Universal Product Fallback Triggered for: ${pName}`);
+          capiPixelId = '3319324491540889'; // Default to Main Indo Pixel
+          capiValue = amount || globalProductTx.amount || 0;
+
+          // Auto-detect currency from amount size as a fallback if not explicitly defined
+          // If the amount is very small (e.g., < 1000), it might be SGD/USD, but create-payment 
+          // converts everything to IDR in the database. So the DB amount is always IDR.
+          capiCurrency = 'IDR';
+          emailCurrency = 'IDR';
+          displayAmount = capiValue;
         }
 
         console.log(`   - CAPI Pixel Selected: ${capiPixelId}`);
@@ -335,6 +356,7 @@ serve(async (req)=>{
         await supabase.functions.invoke(functionToInvoke, {
           body: {
             userEmail: globalProductTx.email,
+            phone: globalProductTx.phone,
             amount: displayAmount,
             currency: emailCurrency,
             reference: tripayReference,
@@ -351,46 +373,47 @@ serve(async (req)=>{
         // --- UNIVERSAL CAPI TRACKING ---
         // We check capi_purchase_sent to ensure we only send ONCE (Winner-Takes-All between Frontend and Backend)
         if (capiPixelId && !globalProductTx.capi_purchase_sent) {
-             try {
-                // TEST MODE CHECK
-                const isTestUser = globalProductTx.email === 'elvisiondragon@gmail.com';
-                const eventName = isTestUser ? 'Test_Purchase' : 'Purchase';
-                if (isTestUser) console.log('   - 🧪 TEST MODE: Sending Test_Purchase event');
+          try {
+            // TEST MODE CHECK
+            const isTestUser = globalProductTx.email === 'elvisiondragon@gmail.com';
+            const eventName = isTestUser ? 'Test_Purchase' : 'Purchase';
+            if (isTestUser) console.log('   - 🧪 TEST MODE: Sending Test_Purchase event');
 
-                console.log(`   - 🎯 Sending CAPI ${eventName} event via capi-universal to Pixel ${capiPixelId}...`);
-                await supabase.functions.invoke('capi-universal', {
-                  body: {
-                    pixelId: capiPixelId,
-                    eventName: eventName,
-                    userData: {
-                      email: globalProductTx.email,
-                      ph: globalProductTx.phone,
-                      fn: globalProductTx.name ? globalProductTx.name.split(' ')[0] : undefined,
-                      fbc: globalProductTx.fbc,
-                      fbp: globalProductTx.fbp,
-                      client_ip_address: globalProductTx.ip_address || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
-                      client_user_agent: globalProductTx.user_agent || req.headers.get('user-agent')
-                    },
-                    customData: {
-                      value: capiValue,
-                      currency: capiCurrency,
-                      content_name: globalProductTx.product_name,
-                      order_id: tripayReference
-                    },
-                    eventId: tripayReference,
-                    testCode: (globalProductTx.product_name.includes('ebook_feminine') || globalProductTx.product_name.includes('Feminine Magnetism')) ? 'TEST9597' : undefined
-                  }
-                });
-                
-                // Mark as sent in DB
-                await supabase.from('global_product').update({ capi_purchase_sent: true }).eq('id', globalProductTx.id);
-                console.log('   - ✅ CAPI sent (marked as sent in DB)');
+            console.log(`   - 🎯 Sending CAPI ${eventName} event via capi-universal to Pixel ${capiPixelId}...`);
+            await supabase.functions.invoke('capi-universal', {
+              body: {
+                pixelId: capiPixelId,
+                eventName: eventName,
+                customAccessToken: isRajaRanjang ? Deno.env.get('CAPI_RAJA_RANJANG') : undefined,
+                userData: {
+                  email: globalProductTx.email,
+                  ph: globalProductTx.phone,
+                  fn: globalProductTx.name ? globalProductTx.name.split(' ')[0] : undefined,
+                  fbc: globalProductTx.fbc,
+                  fbp: globalProductTx.fbp,
+                  client_ip_address: globalProductTx.ip_address || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+                  client_user_agent: globalProductTx.user_agent || req.headers.get('user-agent')
+                },
+                customData: {
+                  value: capiValue,
+                  currency: capiCurrency,
+                  content_name: globalProductTx.product_name,
+                  order_id: tripayReference
+                },
+                eventId: tripayReference,
+                testCode: (globalProductTx.product_name.includes('ebook_feminine') || globalProductTx.product_name.includes('Feminine Magnetism')) ? 'TEST9597' : (globalProductTx.product_name.includes('Jewelry')) ? 'TEST54644' : undefined
+              }
+            });
 
-             } catch (capiError) {
-                console.error('   - ⚠️ CAPI Universal Error (non-critical):', capiError);
-             }
+            // Mark as sent in DB
+            await supabase.from('global_product').update({ capi_purchase_sent: true }).eq('id', globalProductTx.id);
+            console.log('   - ✅ CAPI sent (marked as sent in DB)');
+
+          } catch (capiError) {
+            console.error('   - ⚠️ CAPI Universal Error (non-critical):', capiError);
+          }
         } else {
-             console.log(`   - ⏭️ CAPI Skipped: PixelId=${capiPixelId}, SentFlag=${globalProductTx.capi_purchase_sent}`);
+          console.log(`   - ⏭️ CAPI Skipped: PixelId=${capiPixelId}, SentFlag=${globalProductTx.capi_purchase_sent}`);
         }
       } catch (emailError) {
         console.log('   - ⚠️ Process Error (Email/CAPI):', emailError);
@@ -405,41 +428,41 @@ serve(async (req)=>{
         amount: amount || globalProductTx.amount
       });
     }
-        // --- OLD FLOW: Fallback ke waiting_payment (Hanya dijalankan jika global_product tidak ditemukan) ---
-        console.log(`2. 🔍 Searching for pending transaction '${tripayReference}' in waiting_payment...`);
-        // FIX: Menggunakan .maybeSingle() agar tidak crash jika tidak ada transaksi
-        // Added affiliate_id to selection
-        const { data: waitingTx, error: selectError } = await supabase.from('waiting_payment').select('*').eq('tripay_reference', tripayReference).neq('status', 'paid').maybeSingle();
-    
-        if (selectError) {
-          console.error('   - ❌ DB Select Error (Waiting Payment):', selectError.message);
-          return logAndRespond('Critical DB Error: Duplicate pending transaction found.', 500, {
-            success: false,
-            error: selectError.message
-          }, true);
-        }
-    
-        if (!waitingTx) {
-          // Jika tidak ditemukan di global_product DAN tidak ditemukan di waiting_payment
-          return logAndRespond('Callback received but no matching pending transaction found.', 200, {
-            success: true,
-            info: 'No matching pending transaction'
-          }, true);
-        }
-    
-            // 3. Update status di waiting_payment
-            const { error: updateWaitingError } = await supabase.from('waiting_payment').update({
-              status: 'paid'
-            }).eq('id', waitingTx.id);
-            if (updateWaitingError) {
-              console.error('   - ❌ FAILED to update waiting_payment status:', updateWaitingError.message);
-              return logAndRespond('Failed to update waiting_payment status', 500, {
-                success: false,
-                error: updateWaitingError.message
-              }, true);
-            }
-            // 4. Aksi berdasarkan subscription_type
-            let rpcResult;
+    // --- OLD FLOW: Fallback ke waiting_payment (Hanya dijalankan jika global_product tidak ditemukan) ---
+    console.log(`2. 🔍 Searching for pending transaction '${tripayReference}' in waiting_payment...`);
+    // FIX: Menggunakan .maybeSingle() agar tidak crash jika tidak ada transaksi
+    // Added affiliate_id to selection
+    const { data: waitingTx, error: selectError } = await supabase.from('waiting_payment').select('*').eq('tripay_reference', tripayReference).neq('status', 'paid').maybeSingle();
+
+    if (selectError) {
+      console.error('   - ❌ DB Select Error (Waiting Payment):', selectError.message);
+      return logAndRespond('Critical DB Error: Duplicate pending transaction found.', 500, {
+        success: false,
+        error: selectError.message
+      }, true);
+    }
+
+    if (!waitingTx) {
+      // Jika tidak ditemukan di global_product DAN tidak ditemukan di waiting_payment
+      return logAndRespond('Callback received but no matching pending transaction found.', 200, {
+        success: true,
+        info: 'No matching pending transaction'
+      }, true);
+    }
+
+    // 3. Update status di waiting_payment
+    const { error: updateWaitingError } = await supabase.from('waiting_payment').update({
+      status: 'paid'
+    }).eq('id', waitingTx.id);
+    if (updateWaitingError) {
+      console.error('   - ❌ FAILED to update waiting_payment status:', updateWaitingError.message);
+      return logAndRespond('Failed to update waiting_payment status', 500, {
+        success: false,
+        error: updateWaitingError.message
+      }, true);
+    }
+    // 4. Aksi berdasarkan subscription_type
+    let rpcResult;
     if (waitingTx.subscription_type === 'credit') {
       console.log('4. 💳 Executing update_credit_by_email RPC...');
       const { data, error } = await supabase.rpc('update_credit_by_email', {
@@ -469,9 +492,9 @@ serve(async (req)=>{
       action: `${waitingTx.subscription_type}_activated`,
       rpcData: rpcResult
     });
-  // ===================================
-  // ALUR B, C, D (FAILED, EXPIRED, PARTIAL) remains the same
-  // ===================================
+    // ===================================
+    // ALUR B, C, D (FAILED, EXPIRED, PARTIAL) remains the same
+    // ===================================
   } else if (paymentStatus === 'PARTIAL_PAID') {
     console.log(`🟡 Payment PARTIAL_PAID for ${tripayReference}. No automated action taken.`);
     return logAndRespond(`Callback PARTIAL_PAID processed. No action taken.`, 200, {

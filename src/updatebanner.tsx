@@ -12,193 +12,107 @@ To HIDE the banner:
 - Remove the import and the component tag from src/App.tsx.
 */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState, useEffect } from 'react';
+import { App } from '@capacitor/app';
 
 // BANNER RULES
-// - The banner is shown once per user until they click the button.
-// - Deployments that clear localStorage will surface the banner again automatically.
-
-// Download target
-const UPDATE_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/apk/elvisionv2.apk';
-
-// Local, per-user dismissal key (cleared when SW purges cache)
-const dismissalKey = (userId?: string | null) =>
-  `updateBannerDismissed:${userId ?? 'anon'}`;
-
-// Pending outbox for offline inserts
-const OUTBOX_KEY = 'updateBannerOutbox'; // JSON array of { user_id, banner_version, clicked_at }
-
-type OutboxItem = { user_id: string; banner_version: string; clicked_at: string };
+// - If the user is on the web, do nothing.
+// - If the user is on Native Android and their version is not "3.0.0" or "3.0", show a blocking fullscreen update REQUIRED screen.
+const UPDATE_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/apk/elvision-v3.apk';
+const REQUIRED_VERSION = '3.0.0'; // We accept '3.0.0' or '3.0'
 
 const UpdateBanner: React.FC = () => {
-  const { user, userProfile } = useAuth();
-  const { toast } = useToast();
-  const [isVisible, setIsVisible] = useState(false);
-  const [checking, setChecking] = useState(true);
-
-  // Flush any pending offline clicks once we have a user/session
-  const flushOutbox = useCallback(async () => {
-    try {
-      const raw = localStorage.getItem(OUTBOX_KEY);
-      if (!raw) return;
-      const items: OutboxItem[] = JSON.parse(raw);
-      if (!Array.isArray(items) || items.length === 0) return;
-
-      const keep: OutboxItem[] = [];
-      for (const item of items) {
-        try {
-          const { error } = await supabase
-            .from('update_banner_clicks')
-            .insert({ user_id: item.user_id, banner_version: item.banner_version, clicked_at: item.clicked_at });
-          if (error) {
-            // Keep if transient error; drop on unique violation
-            if (String((error as any)?.code) === '23505') continue; // unique_violation
-            keep.push(item);
-          }
-        } catch {
-          keep.push(item);
-        }
-      }
-      if (keep.length > 0) {
-        localStorage.setItem(OUTBOX_KEY, JSON.stringify(keep));
-      } else {
-        localStorage.removeItem(OUTBOX_KEY);
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
+  const [isMandatoryUpdate, setIsMandatoryUpdate] = useState(false);
+  const [currentVer, setCurrentVer] = useState('');
 
   useEffect(() => {
-    flushOutbox();
-  }, [flushOutbox]);
-
-  // Decide visibility: prefer server truth, fallback to local to avoid flicker
-  useEffect(() => {
-    setChecking(true);
-
-    // Only show for authenticated users
-    if (!user?.id) {
-      setIsVisible(false);
-      setChecking(false);
-      return;
-    }
-
-    const key = dismissalKey(user.id);
-    const dismissed = localStorage.getItem(key) === 'true';
-    setIsVisible(!dismissed);
-    setChecking(false);
-  }, [user]);
-
-  const handleDownloadClick = async () => {
-    // Immediately close banner and mark local suppression
-    if (user?.id) localStorage.setItem(dismissalKey(user.id), 'true');
-    setIsVisible(false);
-
-    // Open download
-    window.open(UPDATE_URL, '_blank');
-
-    // Record click server-side (analytics + XP tracking)
-    if (user?.id) {
-      const nowIso = new Date().toISOString();
-      const clickVersion = `click-${Date.now()}`;
+    const checkNativeVersion = async () => {
       try {
-        const { error } = await supabase
-          .from('update_banner_clicks')
-          .insert({ user_id: user.id, banner_version: clickVersion, clicked_at: nowIso });
+        const info = await App.getInfo();
+        console.log('📱 Native App Info:', info);
+        // info.version is usually "1.0", "2.0", "3.0.0" etc
+        setCurrentVer(info.version);
 
-        if (error) {
-          if (String((error as any)?.code) !== '23505') {
-            // Queue for retry when back online
-            const raw = localStorage.getItem(OUTBOX_KEY);
-            const items: OutboxItem[] = raw ? JSON.parse(raw) : [];
-            items.push({ user_id: user.id, banner_version: clickVersion, clicked_at: nowIso });
-            localStorage.setItem(OUTBOX_KEY, JSON.stringify(items));
-          }
-        } else {
-          // Only award EXP on successful, unique insert
-          if (userProfile) {
-            try {
-              const experienceGained = 200;
-              const currentExperience = userProfile.experience_points || 0;
-              const newExperience = currentExperience + experienceGained;
-
-              const { error: xpError } = await supabase
-                .from('profiles')
-                .update({ experience_points: newExperience })
-                .eq('user_id', user.id);
-
-              if (xpError) {
-                console.error('Error updating XP for banner click:', xpError);
-                toast({
-                  title: 'Error',
-                  description: 'Failed to award XP. Please try again.',
-                  variant: 'destructive',
-                });
-              } else {
-                toast({
-                  title: '✨ Bonus EXP! ✨',
-                  description: `Kamu mendapatkan +${experienceGained} EXP untuk update aplikasi!`,
-                });
-              }
-            } catch (xpUnexpected) {
-              console.error('Unexpected error awarding XP for banner click:', xpUnexpected);
-              toast({
-                title: 'Error',
-                description: 'An unexpected error occurred while awarding XP.',
-                variant: 'destructive',
-              });
-            }
-          }
+        if (info.version !== REQUIRED_VERSION && info.version !== '3.0') {
+          console.warn(`⚠️ User is on outdated APK version (${info.version}). Forcing update to V3.`);
+          setIsMandatoryUpdate(true);
         }
       } catch (err) {
-        // Network failure: queue for retry
-        const raw = localStorage.getItem(OUTBOX_KEY);
-        const items: OutboxItem[] = raw ? JSON.parse(raw) : [];
-        items.push({ user_id: user.id, banner_version: clickVersion, clicked_at: nowIso });
-        localStorage.setItem(OUTBOX_KEY, JSON.stringify(items));
+        // Not running in Capacitor (e.g. standard Web browser) -> do not force update
+        console.log('🌐 Running in standard web browser. No APK update required.');
       }
-    }
+    };
+
+    checkNativeVersion();
+  }, []);
+
+  const handleDownloadClick = () => {
+    window.location.href = UPDATE_URL;
   };
 
-  if (!isVisible || checking) {
+  // Only show the banner if it is a mandatory native update
+  if (!isMandatoryUpdate) {
     return null;
   }
 
+  // Fullscreen blocking UI
   return (
     <div style={{
       position: 'fixed',
-      bottom: '80px', // 80px from the bottom
+      top: 0,
       left: 0,
       right: 0,
-      backgroundColor: '#FFD700', // Gold color for visibility
-      color: 'black',
-      padding: '8px',
-      textAlign: 'center',
-      zIndex: 1000,
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+      bottom: 0,
+      backgroundColor: '#0a0a0a',
+      color: 'white',
       display: 'flex',
+      flexDirection: 'column',
       justifyContent: 'center',
-      alignItems: 'center'
+      alignItems: 'center',
+      zIndex: 999999, // Extremely high z-index to block absolutely everything
+      padding: '24px',
+      textAlign: 'center',
     }}>
-      <span style={{ fontWeight: 'bold', marginRight: '10px' }}>Update</span>
-      <a
-        href={UPDATE_URL}
-        onClick={handleDownloadClick}
-        style={{
-          backgroundColor: '#007BFF',
-          color: 'white',
-          padding: '4px 12px',
-          borderRadius: '16px',
-          textDecoration: 'none',
-          fontWeight: 'bold',
-        }}
-      >
-        KLIK DISINI + 200EXP
-      </a>
+      <div style={{
+        backgroundColor: '#1f2937', // dark gray card
+        padding: '32px',
+        borderRadius: '16px',
+        maxWidth: '400px',
+        width: '100%',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+        border: '1px solid #374151'
+      }}>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚀</div>
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '12px', color: '#f3f4f6' }}>
+          Update Wajib V3
+        </h2>
+        <p style={{ fontSize: '16px', color: '#9ca3af', marginBottom: '8px' }}>
+          Versi aplikasi yang Anda gunakan ({currentVer}) sudah usang.
+        </p>
+        <p style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '24px' }}>
+          Demi keamanan dan pembaruan fitur terbaru, silakan unduh versi V3 untuk melanjutkan.
+        </p>
+        <button
+          onClick={handleDownloadClick}
+          style={{
+            backgroundColor: '#3b82f6', // blue-500
+            color: 'white',
+            padding: '14px 24px',
+            borderRadius: '12px',
+            border: 'none',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            width: '100%',
+            cursor: 'pointer',
+            boxShadow: '0 4px 6px rgba(59, 130, 246, 0.3)',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+        >
+          Download elvision-v3.apk
+        </button>
+      </div>
     </div>
   );
 };

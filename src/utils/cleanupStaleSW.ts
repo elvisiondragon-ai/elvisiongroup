@@ -1,17 +1,17 @@
 
 // Incremental version to force-clear stale service workers and caches on deployment
 // Update this string whenever you want to force a "nuke" of the client-side cache
-const CURRENT_APP_VERSION = '2026.02.18.02'; 
+const CURRENT_APP_VERSION = '2026.02.25.01'; // V3 Release
 
 export const cleanupStaleServiceWorkers = async () => {
   if (typeof window === 'undefined') return;
 
   const savedVersion = localStorage.getItem('app_deployment_version');
-  
+
   // If version mismatch, perform aggressive cleanup
   if (savedVersion !== CURRENT_APP_VERSION) {
     console.warn('🚀 New deployment detected! Performing aggressive cache cleanup...');
-    
+
     try {
       // 1. Unregister all service workers
       if ('serviceWorker' in navigator) {
@@ -36,9 +36,9 @@ export const cleanupStaleServiceWorkers = async () => {
 
       // 4. Update the saved version
       localStorage.setItem('app_deployment_version', CURRENT_APP_VERSION);
-      
+
       console.log('✅ Cleanup complete. Reloading page...');
-      
+
       // 5. Force a hard reload from server
       window.location.reload();
       return; // Stop execution, page is reloading

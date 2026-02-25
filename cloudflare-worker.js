@@ -1,6 +1,6 @@
 /**
- * Cloudflare Worker for handling Tripay and Moota webhooks
- * Provides static IP solution for payment gateway webhooks
+ * Cloudflare Worker for handling Tripay and Moota webhooks, and Macrodroid notifications
+ * Provides static IP solution for payment gateway webhooks and directly sends Macrodroid WhatsApp notifications.
  */
 
 export default {
@@ -12,7 +12,7 @@ export default {
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Callback-Signature',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Callback-Signature, X-Forwarded-For-Worker',
     };
 
     // Handle CORS preflight
@@ -28,6 +28,8 @@ export default {
         return await handleMootaWebhook(request, env);
       } else if (path === '/api/tripay-create-payment') {
         return await handleTripayCreatePayment(request, env);
+      } else if (path === '/macrodroid-webhook') { // Route for Macrodroid directly sending WhatsApp
+        return await handleMacrodroidWebhook(request, env);
       } else {
         return new Response('Webhook endpoint not found', { 
           status: 404,
@@ -273,6 +275,89 @@ async function handleTripayCreatePayment(request, env) {
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+/**
+ * Handle Macrodroid webhook (directly sends WhatsApp notification)
+ * This function will now send a WhatsApp notification for EVERY incoming request.
+ * MACRODROID THIS WA API must sent to one number only: 6285664733499
+ */
+async function handleMacrodroidWebhook(request, env) {
+  let incomingText = "";
+  
+  // Handle GET Request (Query Params)
+  if (request.method === 'GET') {
+    const url = new URL(request.url);
+    incomingText = url.searchParams.get("message") || url.searchParams.get("text") || url.searchParams.get("notification") || "";
+    console.log("📱 Incoming GET Request from Macrodroid:", incomingText);
+  } 
+  // Handle POST Request (JSON Body)
+  else if (request.method === 'POST') {
+    // Assuming JSON body as Macrodroid is configured to send JSON
+    try {
+      const body = await request.json();
+      incomingText = body.message || body.text || body.notification || body.content || "";
+      console.log("📱 Incoming POST Webhook from Macrodroid:", JSON.stringify(body, null, 2));
+    } catch (e) {
+      console.error("Failed to parse POST body as JSON:", e);
+      return new Response(JSON.stringify({ success: false, error: 'Invalid JSON body for Macrodroid webhook' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+  }
+
+  const targetNumber = "6285664733499"; // Target number for WhatsApp notification
+  console.log("📝 Received message content:", incomingText);
+
+  // Send the WhatsApp notification for every incoming request
+  console.log("🚀 Sending WhatsApp to", targetNumber);
+  
+  // WhatsApp API Configuration
+  const waApiUrl = "https://watzapp.web.id/api/message";
+  
+  // Get WA API Key from Cloudflare Worker environment variables, fallback to default
+  const waApiKey = env.WA_API_KEY || "4f46b29bf8e0e4443d9e631007324b29199443786d8b4befab3a2d529208583f"; 
+  
+  const payload = {
+    token: waApiKey, 
+    to: targetNumber, 
+    message: `🔔 NOTIFIKASI BARU:\n\n${incomingText}`
+  };
+
+  console.log("📡 Calling WhatsApp API:", waApiUrl);
+  
+  try {
+    const resp = await fetch(waApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const responseText = await resp.text();
+    console.log("✅ WhatsApp API Response:", responseText);
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      sent: true,
+      api_response: responseText 
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (fetchError) {
+    console.error("💥 Error calling WhatsApp API:", fetchError);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      sent: false,
+      error: `Failed to call WhatsApp API: ${fetchError.message}`
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 }

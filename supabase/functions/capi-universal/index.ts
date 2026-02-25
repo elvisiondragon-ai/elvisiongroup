@@ -49,20 +49,20 @@ Deno.serve(async (req) => {
   }
 
   const body = await req.json();
-  
+
   // --- Configuration ---
-  const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl, eventTime } = body;
+  const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl, eventTime, customAccessToken } = body;
 
   // Resolution for Jewelry Pixel ID (must be in environment, not code)
   let resolvedPixelId = pixelId;
   if (pixelId === 'CAPI_JEWELRY') {
     resolvedPixelId = Deno.env.get('JEWELRY_PIXEL_ID') || '';
     if (!resolvedPixelId) {
-        console.error("Configuration Error: JEWELRY_PIXEL_ID not set in environment.");
-        return new Response(JSON.stringify({ error: "JEWELRY_PIXEL_ID not configured." }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      console.error("Configuration Error: JEWELRY_PIXEL_ID not set in environment.");
+      return new Response(JSON.stringify({ error: "JEWELRY_PIXEL_ID not configured." }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
   }
 
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
   }
 
   // 🎯 RESTRICTED EVENTS FILTER
-  const allowedEvents = ['Purchase', 'AddToCart', 'AddPaymentInfo'];
+  const allowedEvents = ['Purchase', 'AddToCart', 'AddPaymentInfo', 'ViewContent'];
   if (!allowedEvents.includes(eventName)) {
     console.log(`⚠️ Skipping event '${eventName}' (not in allowed list) | Product: ${productName || 'N/A'} | URL: ${eventSourceUrl || 'N/A'}`);
     return new Response(JSON.stringify({ message: `Event '${eventName}' skipped (not in allowed list)` }), {
@@ -98,14 +98,14 @@ Deno.serve(async (req) => {
       .from('pixel_events')
       .select('status')
       .eq('event_id', eventId)
-      .eq('pixel_id', resolvedPixelId) 
+      .eq('pixel_id', resolvedPixelId)
       .maybeSingle();
 
     // If we found ANY record, we stop immediately.
     // Even if it failed before, we don't want to risk a double-send race condition without manual intervention.
     if (existingEvent) {
-       console.log(`♻️ Deduplication: Event '${eventName}' (ID: ${eventId}) already exists (Status: ${existingEvent.status}). Skipping.`);
-       return new Response(JSON.stringify({ message: `Event skipped (duplicate ${existingEvent.status})` }), {
+      console.log(`♻️ Deduplication: Event '${eventName}' (ID: ${eventId}) already exists (Status: ${existingEvent.status}). Skipping.`);
+      return new Response(JSON.stringify({ message: `Event skipped (duplicate ${existingEvent.status})` }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
 
   // Determine which secret to use
   const secretName = PIXEL_CONFIG[pixelId] || 'METACAPI';
-  let FACEBOOK_ACCESS_TOKEN = Deno.env.get(secretName);
+  let FACEBOOK_ACCESS_TOKEN = customAccessToken || Deno.env.get(secretName);
 
   if (!FACEBOOK_ACCESS_TOKEN) {
     console.error(`Configuration Error: ${secretName} Access Token not configured.`);
@@ -127,30 +127,30 @@ Deno.serve(async (req) => {
   try {
     // 2. ATOMIC LOCKING via DB INSERT
     const dbLog: any = {
-        pixel_id: resolvedPixelId,
-        event_name: eventName,
-        event_id: eventId,
-        user_data: userData,
-        custom_data: customData,
-        page_url: eventSourceUrl || req.headers.get('referer'),
-        status: 'processing',
-        product_name: productName,
-        external_id: userData?.external_id
+      pixel_id: resolvedPixelId,
+      event_name: eventName,
+      event_id: eventId,
+      user_data: userData,
+      custom_data: customData,
+      page_url: eventSourceUrl || req.headers.get('referer'),
+      status: 'processing',
+      product_name: productName,
+      external_id: userData?.external_id
     };
 
     const { data: logData, error: logError } = await supabase
-        .from('pixel_events')
-        .insert(dbLog)
-        .select()
-        .single();
+      .from('pixel_events')
+      .insert(dbLog)
+      .select()
+      .single();
 
     // CRITICAL FIX: Stop if insert fails (likely due to unique constraint race condition)
     if (logError) {
-        console.warn('⚠️ Stopped: Failed to acquire event lock (likely duplicate):', logError.message);
-        return new Response(JSON.stringify({ message: 'Event skipped (race condition lock)' }), {
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      console.warn('⚠️ Stopped: Failed to acquire event lock (likely duplicate):', logError.message);
+      return new Response(JSON.stringify({ message: 'Event skipped (race condition lock)' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (!pixelId) {
@@ -178,10 +178,10 @@ Deno.serve(async (req) => {
       if (userData.st) processedUserData.st = await hashSha256(userData.st);
       if (userData.zp) processedUserData.zp = await hashSha256(userData.zp);
       if (userData.country) processedUserData.country = await hashSha256(userData.country);
-      
+
       // Unhashed fields from client (with strict FBC case-sensitivity check)
       if (userData.fbp) processedUserData.fbp = userData.fbp;
-      
+
       if (userData.fbc) {
         // Validate fbclid case-sensitivity to prevent Meta warnings about modified/lowercased values
         // Structure: fb.1.timestamp.fbclid
@@ -190,7 +190,7 @@ Deno.serve(async (req) => {
           const fbclidPart = fbcParts.slice(3).join('.');
           const hasUpper = /[A-Z]/.test(fbclidPart);
           const hasLower = /[a-z]/.test(fbclidPart);
-          
+
           // Meta fbclids MUST be mixed-case if they contain letters.
           // If it has letters but no uppercase, it is corrupted/lowercased.
           if (!hasUpper && hasLower) {
@@ -206,7 +206,7 @@ Deno.serve(async (req) => {
       if (userData.external_id) processedUserData.external_id = userData.external_id;
       if (userData.db_id) processedUserData.facebook_login_id = userData.db_id;
     }
-    
+
     // IP and User Agent handling
     const clientIpAddressHeader = userData?.client_ip_address || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
     if (clientIpAddressHeader) {
@@ -215,13 +215,13 @@ Deno.serve(async (req) => {
         // IP BLOCKING LOGIC
         const ignoredIps = Deno.env.get('IGNORED_IPS');
         if (ignoredIps) {
-            const ipList = ignoredIps.split(',').map(ip => ip.trim());
-            if (ipList.includes(firstIp)) {
-                return new Response(JSON.stringify({ message: 'Event blocked by IP filter', skipped: true }), {
-                    status: 200,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                });
-            }
+          const ipList = ignoredIps.split(',').map(ip => ip.trim());
+          if (ipList.includes(firstIp)) {
+            return new Response(JSON.stringify({ message: 'Event blocked by IP filter', skipped: true }), {
+              status: 200,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
         }
         processedUserData.client_ip_address = firstIp;
       }
@@ -238,24 +238,24 @@ Deno.serve(async (req) => {
       event_time: eventTime || Math.floor(Date.now() / 1000), // Use provided eventTime or current server time
       action_source: 'website',
       event_source_url: eventSourceUrl || req.headers.get('referer'),
-      custom_data: customData, 
-      event_id: eventId || undefined, 
+      custom_data: customData,
+      event_id: eventId || undefined,
     };
-    
+
     if (Object.keys(processedUserData).length > 0) {
       event.user_data = processedUserData;
     }
 
     const events = [event];
     const payload: any = { data: events };
-    
+
     // Resolve Test Code (lookup in mapping or use direct value)
     if (testCode) {
-        payload.test_event_code = TEST_CODE_MAPPING[testCode] || testCode;
+      payload.test_event_code = TEST_CODE_MAPPING[testCode] || testCode;
     }
 
     const facebookApiUrl = `https://graph.facebook.com/v19.0/${resolvedPixelId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
-    
+
     const response = await fetch(facebookApiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -266,13 +266,13 @@ Deno.serve(async (req) => {
 
     // Update the log
     if (logData) {
-        await supabase
-            .from('pixel_events')
-            .update({ 
-                status: response.ok ? 'sent' : 'failed',
-                meta_response: result 
-            })
-            .eq('id', logData.id);
+      await supabase
+        .from('pixel_events')
+        .update({
+          status: response.ok ? 'sent' : 'failed',
+          meta_response: result
+        })
+        .eq('id', logData.id);
     }
 
     if (!response.ok) {

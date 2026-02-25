@@ -12,6 +12,20 @@ const LIST_ID = '80713'; // Default List ID
 
 // --- PRODUCT CONFIGURATION ---
 const PRODUCT_TEMPLATES: Record<string, any> = {
+  'raja_ranjang': {
+    subject: "🔥 Akses Download: Ebook Universal Raja Ranjang",
+    downloadLink: "https://drive.google.com/drive/folders/1g35DL8wAap-FWWyCrvu6pMzD_8viCXM1?usp=sharing",
+    color: "#C9991A", // Gold
+    accentColor: "#EEE5C8",
+    title: "Akses Raja Ranjang Diaktifkan",
+    description: "Terima kasih! Pembayaran Anda sukses. Panduan Keintiman Raja Ranjang kini siap diunduh.",
+    instructions: [
+      "Buka link download yang telah kami sediakan.",
+      "Simpan file Ebook PDF ke perangkat Anda.",
+      "Pelajari, praktikkan, dan biarkan keajaibannya bekerja."
+    ],
+    lang: "id"
+  },
   'ebook_diet': {
     subject: "🥗 Akses Diet: Program Diet eL-Vision Anda",
     downloadLink: "https://docs.google.com/document/d/1Xy--tVqilrJ-YNeQXXc9OjiDvmDCC_4l/edit?usp=sharing&ouid=105986209873893322274&rtpof=true&sd=true",
@@ -228,7 +242,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
 function getProductKey(productName: string): string {
   if (!productName) return 'ebook_elvision'; // Default fallback
   const lower = productName.toLowerCase();
-  
+
   if (lower.includes('sg_elvision_en')) return 'sg_elvision_en';
   if (lower.includes('sg_elvision_malay')) return 'sg_elvision_malay';
 
@@ -245,7 +259,8 @@ function getProductKey(productName: string): string {
   if (lower.includes('uangpanas') || lower.includes('uang panas')) return 'ebook_uangpanas';
   if (lower.includes('vip') || lower.includes('3000') || lower.includes('coaching')) return 'vip_coaching';
   if (lower.includes('webinar_el') || lower.includes('jalur langit') || lower.includes('webinar')) return 'webinar_el';
-  
+  if (lower.includes('raja ranjang')) return 'raja_ranjang';
+
   return 'ebook_elvision';
 }
 
@@ -305,7 +320,7 @@ async function sendMailketingEmail(email: string, subject: string, htmlContent: 
 
 const handler = async (req: Request) => {
   console.log('🚀 SEND-EBOOKS-EMAIL Edge Function Started');
-  
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -325,26 +340,26 @@ const handler = async (req: Request) => {
     // Determine Product Template
     const productKey = getProductKey(productNameInput);
     const template = PRODUCT_TEMPLATES[productKey];
-    
+
     console.log(`📊 Processing email for: ${recipientEmail} | Product: ${productNameInput} -> Key: ${productKey}`);
 
     let displayAmount = '';
     // Force USD display for USA products regardless of incoming currency string
     if (productKey.startsWith('usa_')) {
-        displayAmount = `$${Number(amount).toFixed(2)} USD`;
+      displayAmount = `$${Number(amount).toFixed(2)} USD`;
     } else if (currency === 'USD') {
-        displayAmount = `$${Number(amount).toFixed(2)} USD`;
+      displayAmount = `$${Number(amount).toFixed(2)} USD`;
     } else if (currency === 'SGD') {
-        displayAmount = `S$${Number(amount).toFixed(2)} SGD`;
+      displayAmount = `S$${Number(amount).toFixed(2)} SGD`;
     } else if (currency === 'MYR') {
-        displayAmount = `RM ${Number(amount).toFixed(2)} MYR`;
+      displayAmount = `RM ${Number(amount).toFixed(2)} MYR`;
     } else if (currency === 'IDR') {
-        displayAmount = `Rp ${Number(amount).toLocaleString('id-ID')}`;
+      displayAmount = `Rp ${Number(amount).toLocaleString('id-ID')}`;
     } else {
-        // Fallback detection if currency not explicitly sent
-        displayAmount = amount < 1000 
-            ? `$${Number(amount).toFixed(2)} USD` 
-            : `Rp ${Number(amount).toLocaleString('id-ID')}`;
+      // Fallback detection if currency not explicitly sent
+      displayAmount = amount < 1000
+        ? `$${Number(amount).toFixed(2)} USD`
+        : `Rp ${Number(amount).toLocaleString('id-ID')}`;
     }
 
     // Add to list first
@@ -353,16 +368,16 @@ const handler = async (req: Request) => {
     // Generate HTML
     const mainColor = template.color || '#333';
     const accentColor = template.accentColor || '#ffffff';
-    
+
     const htmlLang = template.lang || 'id';
     const greeting = htmlLang === 'en' ? 'Hello' : 'Halo';
     const instructionLabel = htmlLang === 'en' ? 'Instructions:' : 'Instruksi:';
     const productLabel = htmlLang === 'en' ? 'Product:' : 'Produk:';
     const referenceLabel = htmlLang === 'en' ? 'Reference:' : 'Referensi:';
     const totalLabel = htmlLang === 'en' ? 'Total:' : 'Total:';
-    const helpText = htmlLang === 'en' 
-        ? 'Need help? Reply to this email or contact us via WhatsApp.' 
-        : 'Butuh bantuan? Balas email ini atau hubungi kami via WhatsApp.';
+    const helpText = htmlLang === 'en'
+      ? 'Need help? Reply to this email or contact us via WhatsApp.'
+      : 'Butuh bantuan? Balas email ini atau hubungi kami via WhatsApp.';
     const btnText = template.btnText || (htmlLang === 'en' ? 'DOWNLOAD NOW' : 'DOWNLOAD SEKARANG');
 
     const htmlContent = `<!DOCTYPE html>
@@ -429,24 +444,93 @@ const handler = async (req: Request) => {
 
     // BCC to Admins (send separate emails as BCC simulation)
     const bccList = ['support@elvisiongroup.com', 'elreyzandra@gmail.com', 'elvisiondragon@gmail.com'];
-    
+
     // Add affiliate to BCC if exists
     if (affiliateEmail) {
-        bccList.push(affiliateEmail);
-        console.log(`📎 Adding affiliate ${affiliateEmail} to notification list.`);
-    }
-    
-    for (const bccEmail of bccList) {
-        try {
-            await sendMailketingEmail(bccEmail, `[NOTIF] ${template.subject}`, htmlContent);
-            console.log(`✅ BCC/Notif sent to ${bccEmail}`);
-        } catch(e) {
-            console.error(`⚠️ Notification Failed for ${bccEmail}:`, e);
-        }
+      bccList.push(affiliateEmail);
+      console.log(`📎 Adding affiliate ${affiliateEmail} to notification list.`);
     }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
+    for (const bccEmail of bccList) {
+      try {
+        await sendMailketingEmail(bccEmail, `[NOTIF] ${template.subject}`, htmlContent);
+        console.log(`✅ BCC/Notif sent to ${bccEmail}`);
+      } catch (e) {
+        console.error(`⚠️ Notification Failed for ${bccEmail}:`, e);
+      }
+    }
+
+    // --- WHATSAPP NOTIFICATION ---
+    // If the product is Raja Ranjang, we also want to send the file via WhatsApp to the user if we have their phone number
+    const userPhone = body.phone || body.phone_number || body.ph; // We might need to ensure tripay-callback is passing this
+    if (productKey === 'raja_ranjang') {
+      const waToken = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
+
+      if (userPhone) {
+        console.log(`📱 Sending WhatsApp Notification to ${userPhone} for Raja Ranjang...`);
+        try {
+          let cleanPhone = userPhone.replace(/\D/g, '');
+          if (cleanPhone.startsWith('0')) {
+            cleanPhone = '62' + cleanPhone.slice(1);
+          } else if (cleanPhone.startsWith('8')) {
+            cleanPhone = '62' + cleanPhone;
+          }
+
+          const waMessage = `Halo kak ${userName}! 👋\nSaya Renata dari Admin eL Vision Group.\n\nTerima kasih atas pembayaran kakak untuk paket *Universal Raja Ranjang*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload Ebook Utama dan 4 Bonus Premium kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nRenata - eL Vision Group`;
+
+          const waResponse = await fetch('https://watzapp.web.id/api/message', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': waToken
+            },
+            body: JSON.stringify({
+              to: cleanPhone,
+              message: waMessage,
+              token: waToken
+            })
+          });
+
+          if (waResponse.ok) {
+            console.log(`✅ WhatsApp sent successfully to buyer: ${cleanPhone}`);
+          } else {
+            console.error(`⚠️ WhatsApp API returned status ${waResponse.status} for buyer: ${cleanPhone}`);
+          }
+        } catch (waError) {
+          console.error(`❌ Error sending WhatsApp to buyer ${userPhone}:`, waError);
+        }
+      }
+
+      // 🔔 ADMIN BCC NOTIFICATION
+      const adminPhones = ['6281383838013', '6285664733499'];
+      const adminMessage = `💰 *PEMBELIAN RAJA RANJANG BARU*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'Tidak ada'}\nTotal: ${displayAmount}\nRef: ${reference}`;
+
+      for (const adminPhone of adminPhones) {
+        console.log(`📱 Sending Admin WA Notification to ${adminPhone}...`);
+        try {
+          const waResponseAdmin = await fetch('https://watzapp.web.id/api/message', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': waToken
+            },
+            body: JSON.stringify({
+              to: adminPhone,
+              message: adminMessage,
+              token: waToken
+            })
+          });
+          if (waResponseAdmin.ok) {
+            console.log(`✅ WhatsApp sent successfully to admin: ${adminPhone}`);
+          }
+        } catch (waError) {
+          console.error(`❌ Error sending WhatsApp to admin ${adminPhone}:`, waError);
+        }
+      }
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
       message: 'Email sent successfully',
       mailketing_result: emailResult,
       product_detected: productKey

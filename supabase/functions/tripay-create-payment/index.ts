@@ -52,7 +52,7 @@ const productCatalog = {
     requiresAuth: true,
     physical: false
   },
-  
+
   // Physical/Public Products (do not require authentication)
   'webinar_el': {
     name: 'Elvision Webinar',
@@ -179,10 +179,16 @@ const productCatalog = {
     price: 0,
     requiresAuth: false,
     physical: true
-  } // Price determined by request
+  }, // Price determined by request
+  'universal': {
+    name: 'Universal Product',
+    price: 0,
+    requiresAuth: false,
+    physical: true
+  }
 };
 // Main server function
-serve(async (req)=>{
+serve(async (req) => {
   console.log('🚀 UNIFIED CREATE PAYMENT [V7-UNIVERSAL-NAME-FIX] - Edge Function Started');
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
@@ -193,30 +199,30 @@ serve(async (req)=>{
     // --- 1. INITIALIZE & VALIDATE INPUT ---
     const body = await req.json();
     const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate, fbc, fbp, userId: bodyUserId, clientIp } = body;
-    
+
     console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod}`);
     console.log(`🕵️ Tracking Data - FBC: ${fbc}, FBP: ${fbp}, IP: ${clientIp || 'Auto'}`);
 
     // --- AUTO-ADD TO MAILKETING LIST ---
     try {
-        const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
-        if (MAILKETING_API_KEY && userEmail) {
-            console.log(`📋 Adding ${userEmail} to Mailketing Lead List (pre-payment)...`);
-            const params = new URLSearchParams({
-              api_token: MAILKETING_API_KEY,
-              list_id: '80713',
-              email: userEmail,
-              first_name: userName ? userName.split(' ')[0] : userEmail.split('@')[0],
-              last_name: userName ? userName.split(' ').slice(1).join(' ') : ''
-            });
-            fetch(`https://api.mailketing.co.id/api/v1/addsubtolist`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: params
-            }).then(r => r.json()).then(res => console.log('Mailketing lead res:', res)).catch(e => console.error('Mailketing lead error:', e));
-        }
-    } catch(e) {
-        console.error('Mailketing pre-registration failed:', e);
+      const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
+      if (MAILKETING_API_KEY && userEmail) {
+        console.log(`📋 Adding ${userEmail} to Mailketing Lead List (pre-payment)...`);
+        const params = new URLSearchParams({
+          api_token: MAILKETING_API_KEY,
+          list_id: '80713',
+          email: userEmail,
+          first_name: userName ? userName.split(' ')[0] : userEmail.split('@')[0],
+          last_name: userName ? userName.split(' ').slice(1).join(' ') : ''
+        });
+        fetch(`https://api.mailketing.co.id/api/v1/addsubtolist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params
+        }).then(r => r.json()).then(res => console.log('Mailketing lead res:', res)).catch(e => console.error('Mailketing lead error:', e));
+      }
+    } catch (e) {
+      console.error('Mailketing pre-registration failed:', e);
     }
 
     const product = productCatalog[subscriptionType];
@@ -232,7 +238,7 @@ serve(async (req)=>{
     let formattedProductName = body.productName || product.name;
     // If the product is physical and the name doesn't already seem to have a quantity, format it.
     if (product.physical && !formattedProductName.includes('(x')) {
-      formattedProductName = `${product.name} (x${quantity})`;
+      formattedProductName = `${formattedProductName} (x${quantity})`;
     }
     console.log(`Processing order for: ${formattedProductName}`);
     // --- 2. AUTHENTICATION (IF REQUIRED) ---
@@ -252,12 +258,12 @@ serve(async (req)=>{
         });
       }
       const token = authHeader.replace('Bearer ', '');
-      
+
 
 
       const supabaseClient = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_ANON_KEY'));
       const { data: authData, error: authError } = await supabaseClient.auth.getUser(token);
-      
+
       if (authError || !authData.user) {
         console.error('Authentication error:', authError);
         return new Response(JSON.stringify({
@@ -274,7 +280,7 @@ serve(async (req)=>{
     // --- 3. CALCULATE AMOUNT & GENERATE ORDER DETAILS ---
     // Dynamic Pricing: Priority is given to amount sent from frontend
     let amount = product.price * quantity;
-    
+
     if (body.amount !== undefined && body.amount !== null) {
       console.log(`💰 Using dynamic price from frontend: ${body.amount}`);
       amount = body.amount;
@@ -361,100 +367,100 @@ serve(async (req)=>{
       dbRecordId = data.id;
     }
     console.log(`✅ Pre-payment DB record created with ID: ${dbRecordId} for merchant_ref: ${merchantRef}`);
-    
+
     // --- 5. BRANCHING LOGIC: PAYPAL VS TRIPAY ---
     if (paymentMethod === 'PAYPAL') {
-        console.log('🔵 Processing PayPal Order Creation...');
-        const clientId = Deno.env.get('PAYPAL_CLIENT_ID');
-        const clientSecret = Deno.env.get('PAYPAL_CLIENT_SECRET');
-        const isSandbox = Deno.env.get('PAYPAL_MODE') === 'sandbox'; // Set PAYPAL_MODE in secrets
-        const baseUrl = isSandbox ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
+      console.log('🔵 Processing PayPal Order Creation...');
+      const clientId = Deno.env.get('PAYPAL_CLIENT_ID');
+      const clientSecret = Deno.env.get('PAYPAL_CLIENT_SECRET');
+      const isSandbox = Deno.env.get('PAYPAL_MODE') === 'sandbox'; // Set PAYPAL_MODE in secrets
+      const baseUrl = isSandbox ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
 
-        if (!clientId || !clientSecret) {
-             throw new Error("PayPal credentials missing in Supabase secrets.");
+      if (!clientId || !clientSecret) {
+        throw new Error("PayPal credentials missing in Supabase secrets.");
+      }
+
+      // 5a. Get Access Token
+      const auth = btoa(`${clientId}:${clientSecret}`);
+      const tokenResp = await fetch(`${baseUrl}/v1/oauth2/token`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${auth}`,
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "grant_type=client_credentials"
+      });
+      const tokenData = await tokenResp.json();
+      if (!tokenResp.ok) throw new Error(`PayPal Token Error: ${JSON.stringify(tokenData)}`);
+      const accessToken = tokenData.access_token;
+
+      // 5b. Create Order
+      // Note: We hardcode USD for specific products, otherwise convert IDR to USD approx
+      let usdAmount = "20.00";
+      if (subscriptionType === 'VIP6WEEK') {
+        usdAmount = "1500.00";
+      } else if (subscriptionType === 'usa_3000') {
+        usdAmount = "3000.00";
+      } else if (subscriptionType === 'usa_webinar20' || subscriptionType === 'ebookhealthlp' || subscriptionType === 'ebook_health20' || subscriptionType === 'usa_ebookslim' || subscriptionType === 'usa_ebookfeminine') {
+        usdAmount = "20.00";
+      } else {
+        usdAmount = (amount / 16000).toFixed(2);
+      }
+
+      const orderPayload = {
+        intent: "CAPTURE",
+        purchase_units: [{
+          reference_id: merchantRef, // Link PayPal to our Merchant Ref
+          amount: {
+            currency_code: "USD",
+            value: usdAmount
+          },
+          description: formattedProductName
+        }],
+        application_context: {
+          return_url: "https://app.elvisiongroup.com/usa/usa_paypal_finish",
+          cancel_url: "https://app.elvisiongroup.com/usa/usa_ebookhealth",
+          user_action: "PAY_NOW",
+          landing_page: "BILLING"
         }
+      };
 
-        // 5a. Get Access Token
-        const auth = btoa(`${clientId}:${clientSecret}`);
-        const tokenResp = await fetch(`${baseUrl}/v1/oauth2/token`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Basic ${auth}`,
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: "grant_type=client_credentials"
-        });
-        const tokenData = await tokenResp.json();
-        if (!tokenResp.ok) throw new Error(`PayPal Token Error: ${JSON.stringify(tokenData)}`);
-        const accessToken = tokenData.access_token;
+      const orderResp = await fetch(`${baseUrl}/v2/checkout/orders`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(orderPayload)
+      });
+      const orderData = await orderResp.json();
+      if (!orderResp.ok) throw new Error(`PayPal Create Order Error: ${JSON.stringify(orderData)}`);
 
-        // 5b. Create Order
-        // Note: We hardcode USD for specific products, otherwise convert IDR to USD approx
-        let usdAmount = "20.00"; 
-        if (subscriptionType === 'VIP6WEEK') {
-            usdAmount = "1500.00";
-        } else if (subscriptionType === 'usa_3000') {
-            usdAmount = "3000.00";
-        } else if (subscriptionType === 'usa_webinar20' || subscriptionType === 'ebookhealthlp' || subscriptionType === 'ebook_health20' || subscriptionType === 'usa_ebookslim' || subscriptionType === 'usa_ebookfeminine') {
-            usdAmount = "20.00";
-        } else {
-             usdAmount = (amount / 16000).toFixed(2);
-        }
+      console.log(`✅ PayPal Order Created: ${orderData.id}`);
 
-        const orderPayload = {
-            intent: "CAPTURE",
-            purchase_units: [{
-                reference_id: merchantRef, // Link PayPal to our Merchant Ref
-                amount: {
-                    currency_code: "USD",
-                    value: usdAmount
-                },
-                description: formattedProductName
-            }],
-            application_context: {
-                return_url: "https://app.elvisiongroup.com/usa/usa_paypal_finish",
-                cancel_url: "https://app.elvisiongroup.com/usa/usa_ebookhealth",
-                user_action: "PAY_NOW",
-                landing_page: "BILLING"
-            }
-        };
+      // Get the approval link
+      const approvalUrl = orderData.links.find((l: any) => l.rel === 'approve')?.href;
 
-        const orderResp = await fetch(`${baseUrl}/v2/checkout/orders`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${accessToken}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(orderPayload)
-        });
-        const orderData = await orderResp.json();
-        if (!orderResp.ok) throw new Error(`PayPal Create Order Error: ${JSON.stringify(orderData)}`);
-        
-        console.log(`✅ PayPal Order Created: ${orderData.id}`);
+      // 5c. Update DB with PayPal Order ID (as tripay_reference equivalent)
+      const tableToUpdate = product.physical ? 'global_product' : 'waiting_payment';
+      let updateQuery;
+      if (product.physical) {
+        updateQuery = supabase.from(tableToUpdate).update({ tripay_reference: orderData.id }).eq('merchant_ref', merchantRef);
+      } else {
+        updateQuery = supabase.from(tableToUpdate).update({ tripay_reference: orderData.id }).eq('id', dbRecordId);
+      }
+      await updateQuery;
 
-        // Get the approval link
-        const approvalUrl = orderData.links.find((l: any) => l.rel === 'approve')?.href;
-
-        // 5c. Update DB with PayPal Order ID (as tripay_reference equivalent)
-        const tableToUpdate = product.physical ? 'global_product' : 'waiting_payment';
-        let updateQuery;
-        if (product.physical) {
-             updateQuery = supabase.from(tableToUpdate).update({ tripay_reference: orderData.id }).eq('merchant_ref', merchantRef);
-        } else {
-             updateQuery = supabase.from(tableToUpdate).update({ tripay_reference: orderData.id }).eq('id', dbRecordId);
-        }
-        await updateQuery;
-
-        // 5d. Return to Client
-        return new Response(JSON.stringify({
-            success: true,
-            paymentType: 'PAYPAL',
-            paypalOrderId: orderData.id,
-            checkoutUrl: approvalUrl, // Use the official link
-            merchantRef: merchantRef,
-            amount: usdAmount,
-            currency: 'USD'
-        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 });
+      // 5d. Return to Client
+      return new Response(JSON.stringify({
+        success: true,
+        paymentType: 'PAYPAL',
+        paypalOrderId: orderData.id,
+        checkoutUrl: approvalUrl, // Use the official link
+        merchantRef: merchantRef,
+        amount: usdAmount,
+        currency: 'USD'
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 });
     }
 
     // --- 6. EXISTING TRIPAY FLOW (Generic PHP Proxy) ---
@@ -489,20 +495,19 @@ serve(async (req)=>{
     const tripayReference = tripayData.reference;
     if (vpsResult.success && tripayReference) {
       const tableToUpdate = product.physical ? 'global_product' : 'waiting_payment';
-      let updateQuery;
-      if (product.physical) {
-        updateQuery = supabase.from(tableToUpdate).update({
-          tripay_reference: tripayReference
-        }).eq('merchant_ref', merchantRef);
-      } else {
-        updateQuery = supabase.from(tableToUpdate).update({
-          tripay_reference: tripayReference
-        }).eq('id', dbRecordId);
-      }
-      const { error } = await updateQuery;
+
+      console.log(`[Update Ref] Updating ${tableToUpdate} ID ${dbRecordId} with Tripay Ref: ${tripayReference}`);
+      const { data: updatedData, error } = await supabase
+        .from(tableToUpdate)
+        .update({ tripay_reference: tripayReference })
+        .eq('id', dbRecordId)
+        .select();
+
       if (error) {
         console.error(`⚠️ Failed to update ${tableToUpdate} with Tripay reference: ${error.message}`);
         vpsResult.warning = "Failed to link payment reference in database.";
+      } else if (!updatedData || updatedData.length === 0) {
+        console.error(`⚠️ Warning: Update ran but no rows were modified in ${tableToUpdate} for ID ${dbRecordId}.`);
       } else {
         console.log(`✅ Updated ${tableToUpdate} with Tripay reference ${tripayReference}`);
       }
