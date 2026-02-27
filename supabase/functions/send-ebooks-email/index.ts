@@ -80,17 +80,40 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_feminine': {
-    subject: "✨ Akses Download: Paket Feminine Magnetism Anda",
-    downloadLink: "https://drive.google.com/drive/folders/1B_SmtekAodf5G8fWF3tVjgcenjjVtbTZ?usp=sharing", // Update link if needed
+    subject: "✨ Akses Download: Paket Dark Feminine Anda",
+    downloadLink: "https://drive.google.com/drive/folders/19Hrs9fYFm_PNAQkOGJwI3OWdDb86dkuy?usp=share_link",
     color: "#e11d48", // Rose 600
     accentColor: "#ffffff",
-    title: "Akses Feminine Magnetism Terbuka",
-    description: "Selamat! Anda sekarang memiliki akses penuh ke Paket Feminine Magnetism (Audio & Ebook).",
+    title: "Akses Dark Feminine Terbuka",
+    description: "Selamat! Anda sekarang memiliki akses penuh ke Paket Dark Feminine.",
+    instructions: [
+      "Silahkan klik tombol di bawah untuk mendownload seluruh ebook Anda."
+    ],
+    lang: "id"
+  },
+  'ebook_feminine_lovemagnet': {
+    subject: "✨ Akses Download: Paket Feminine Magnetism + Audio Love Magnet",
+    downloadLink: "https://drive.google.com/drive/folders/1IZmSrzPDSgGSYwq1sQhhGgBaUExJjhgd?usp=sharing",
+    color: "#e11d48", // Rose 600
+    accentColor: "#facc15", // Gold Accent
+    title: "Akses Feminine Magnetism LENGKAP Terbuka",
+    description: "Selamat! Anda sekarang memiliki akses penuh ke Paket Feminine Magnetism beserta Bonus Spesial Audio Love Magnet.",
     instructions: [
       "Gunakan earphone agar gelombang Theta bekerja maksimal.",
+      "Dengarkan Audio 'Love Magnet' untuk memancarkan aura daya tarik.",
       "Dengarkan 'Goddess Awakening' setiap malam sebelum tidur.",
       "Dengarkan 'Morning Radiance' untuk memulai hari dengan energi feminin."
     ],
+    lang: "id"
+  },
+  'darkfeminine_free_ebook': {
+    subject: "",
+    downloadLink: "",
+    color: "#e11d48",
+    title: "",
+    description: "",
+    instructions: [],
+    btnText: "",
     lang: "id"
   },
   'ebook_uangpanas': {
@@ -255,7 +278,9 @@ function getProductKey(productName: string): string {
   if (lower.includes('diet')) return 'ebook_diet';
   if (lower.includes('health') || lower.includes('pemulihan')) return 'ebook_health20';
   if (lower.includes('percayadiri') || lower.includes('pria alpha') || lower.includes('alpha')) return 'ebook_percayadiri';
-  if (lower.includes('feminine') || lower.includes('magnetism')) return 'ebook_feminine';
+  if (lower.includes('darkfeminine_free_ebook')) return 'darkfeminine_free_ebook';
+  if (lower.includes('love magnet')) return 'ebook_feminine_lovemagnet';
+  if (lower.includes('feminine') || lower.includes('magnetism') || lower.includes('dark feminine')) return 'ebook_feminine';
   if (lower.includes('uangpanas') || lower.includes('uang panas')) return 'ebook_uangpanas';
   if (lower.includes('vip') || lower.includes('3000') || lower.includes('coaching')) return 'vip_coaching';
   if (lower.includes('webinar_el') || lower.includes('jalur langit') || lower.includes('webinar')) return 'webinar_el';
@@ -340,6 +365,7 @@ const handler = async (req: Request) => {
     // Determine Product Template
     const productKey = getProductKey(productNameInput);
     const template = PRODUCT_TEMPLATES[productKey];
+    const isFreeEbook = productKey === 'darkfeminine_free_ebook';
 
     console.log(`📊 Processing email for: ${recipientEmail} | Product: ${productNameInput} -> Key: ${productKey}`);
 
@@ -439,35 +465,41 @@ const handler = async (req: Request) => {
 </html>`;
 
     // Send Email to Buyer
-    const emailResult = await sendMailketingEmail(recipientEmail, template.subject, htmlContent);
-    console.log("✅ Email sent successfully to buyer");
+    let emailResult = null;
+    if (!isFreeEbook) {
+      emailResult = await sendMailketingEmail(recipientEmail, template.subject, htmlContent);
+      console.log("✅ Email sent successfully to buyer");
 
-    // BCC to Admins (send separate emails as BCC simulation)
-    const bccList = ['support@elvisiongroup.com', 'elreyzandra@gmail.com', 'elvisiondragon@gmail.com'];
+      // BCC to Admins (send separate emails as BCC simulation)
+      const bccList = ['support@elvisiongroup.com', 'elreyzandra@gmail.com', 'elvisiondragon@gmail.com'];
 
-    // Add affiliate to BCC if exists
-    if (affiliateEmail) {
-      bccList.push(affiliateEmail);
-      console.log(`📎 Adding affiliate ${affiliateEmail} to notification list.`);
-    }
-
-    for (const bccEmail of bccList) {
-      try {
-        await sendMailketingEmail(bccEmail, `[NOTIF] ${template.subject}`, htmlContent);
-        console.log(`✅ BCC/Notif sent to ${bccEmail}`);
-      } catch (e) {
-        console.error(`⚠️ Notification Failed for ${bccEmail}:`, e);
+      // Add affiliate to BCC if exists
+      if (affiliateEmail) {
+        bccList.push(affiliateEmail);
+        console.log(`📎 Adding affiliate ${affiliateEmail} to notification list.`);
       }
+
+      for (const bccEmail of bccList) {
+        try {
+          await sendMailketingEmail(bccEmail, `[NOTIF] ${template.subject}`, htmlContent);
+          console.log(`✅ BCC/Notif sent to ${bccEmail}`);
+        } catch (e) {
+          console.error(`⚠️ Notification Failed for ${bccEmail}:`, e);
+        }
+      }
+    } else {
+      console.log("ℹ️ Skipping Mailketing email dispatch since product is Free Ebook.");
     }
 
     // --- WHATSAPP NOTIFICATION ---
-    // If the product is Raja Ranjang, we also want to send the file via WhatsApp to the user if we have their phone number
+    // If the product is Raja Ranjang or Dark Feminine, we also want to send the file via WhatsApp to the user
     const userPhone = body.phone || body.phone_number || body.ph; // We might need to ensure tripay-callback is passing this
-    if (productKey === 'raja_ranjang') {
+
+    if (productKey === 'raja_ranjang' || productKey === 'ebook_feminine' || productKey === 'ebook_feminine_lovemagnet' || isFreeEbook) {
       const waToken = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
 
       if (userPhone) {
-        console.log(`📱 Sending WhatsApp Notification to ${userPhone} for Raja Ranjang...`);
+        console.log(`📱 Sending WhatsApp Notification to ${userPhone} for ${productKey}...`);
         try {
           let cleanPhone = userPhone.replace(/\D/g, '');
           if (cleanPhone.startsWith('0')) {
@@ -476,55 +508,90 @@ const handler = async (req: Request) => {
             cleanPhone = '62' + cleanPhone;
           }
 
-          const waMessage = `Halo kak ${userName}! 👋\nSaya Renata dari Admin eL Vision Group.\n\nTerima kasih atas pembayaran kakak untuk paket *Universal Raja Ranjang*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload Ebook Utama dan 4 Bonus Premium kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nRenata - eL Vision Group`;
+          if (isFreeEbook) {
+            // Handle Free Ebook Text Delivery
+            console.log(`📱 Sending Free Ebook GDrive Link to ${cleanPhone}...`);
 
-          const waResponse = await fetch('https://watzapp.web.id/api/message', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': waToken
-            },
-            body: JSON.stringify({
-              to: cleanPhone,
-              message: waMessage,
-              token: waToken
-            })
-          });
+            const gdriveUrl = "https://drive.google.com/drive/folders/1DLPquWef9HaOsPS--8jDTfb36QhKYuv2?usp=sharing";
+            const messageBody = `Halo kak, Silahkan Ambil Ebook Gratis Dark Feminine:\n${gdriveUrl}\n\nTolong ketik *Ok* agar saya bisa hubungi kakak kedepannya ya.`;
 
-          if (waResponse.ok) {
-            console.log(`✅ WhatsApp sent successfully to buyer: ${cleanPhone}`);
+            const waResponse = await fetch('https://watzapp.web.id/api/message', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': waToken
+              },
+              body: JSON.stringify({
+                to: cleanPhone,
+                message: messageBody,
+                token: waToken
+              })
+            });
+
+            if (waResponse.ok) {
+              console.log(`✅ Free Ebook WhatsApp link sent successfully to buyer: ${cleanPhone}`);
+            } else {
+              console.error(`⚠️ WhatsApp API returned status ${waResponse.status} for buyer: ${cleanPhone}`);
+            }
+
           } else {
-            console.error(`⚠️ WhatsApp API returned status ${waResponse.status} for buyer: ${cleanPhone}`);
+            // Standard Purchase Notification Flow
+            const isDarkFeminine = productKey === 'ebook_feminine' || productKey === 'ebook_feminine_lovemagnet';
+            const productNameDisplay = productKey === 'ebook_feminine_lovemagnet' ? "Universal Dark Feminine + Love Magnet" : (isDarkFeminine ? "Universal Dark Feminine" : "Universal Raja Ranjang");
+            const adminName = isDarkFeminine ? "Admin eL Vision" : "Renata dari Admin eL Vision Group";
+
+            const waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nAdmin - eL Vision Group`;
+
+            const waResponse = await fetch('https://watzapp.web.id/api/message', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': waToken
+              },
+              body: JSON.stringify({
+                to: cleanPhone,
+                message: waMessage,
+                token: waToken
+              })
+            });
+
+            if (waResponse.ok) {
+              console.log(`✅ WhatsApp sent successfully to buyer: ${cleanPhone}`);
+            } else {
+              console.error(`⚠️ WhatsApp API returned status ${waResponse.status} for buyer: ${cleanPhone}`);
+            }
           }
         } catch (waError) {
           console.error(`❌ Error sending WhatsApp to buyer ${userPhone}:`, waError);
         }
       }
 
-      // 🔔 ADMIN BCC NOTIFICATION
-      const adminPhones = ['6281383838013', '6285664733499'];
-      const adminMessage = `💰 *PEMBELIAN RAJA RANJANG BARU*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'Tidak ada'}\nTotal: ${displayAmount}\nRef: ${reference}`;
+      // 🔔 ADMIN BCC NOTIFICATION (Only for paid products)
+      if (!isFreeEbook) {
+        const adminPhones = ['6281383838013', '6285664733499'];
+        const adminMessage = `💰 *PEMBELIAN ${productKey === 'ebook_feminine' || productKey === 'ebook_feminine_lovemagnet' ? 'DARK FEMININE' : 'RAJA RANJANG'} BARU*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'Tidak ada'}\nTotal: ${displayAmount}\nRef: ${reference}`;
 
-      for (const adminPhone of adminPhones) {
-        console.log(`📱 Sending Admin WA Notification to ${adminPhone}...`);
-        try {
-          const waResponseAdmin = await fetch('https://watzapp.web.id/api/message', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': waToken
-            },
-            body: JSON.stringify({
-              to: adminPhone,
-              message: adminMessage,
-              token: waToken
-            })
-          });
-          if (waResponseAdmin.ok) {
-            console.log(`✅ WhatsApp sent successfully to admin: ${adminPhone}`);
+        for (const adminPhone of adminPhones) {
+          console.log(`📱 Sending Admin WA Notification to ${adminPhone}...`);
+          try {
+            const waResponseAdmin = await fetch('https://watzapp.web.id/api/message', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': waToken
+              },
+              body: JSON.stringify({
+                to: adminPhone,
+                message: adminMessage,
+                token: waToken
+              })
+            });
+            if (waResponseAdmin.ok) {
+              console.log(`✅ WhatsApp sent successfully to admin: ${adminPhone}`);
+            }
+          } catch (waError) {
+            console.error(`❌ Error sending WhatsApp to admin ${adminPhone}:`, waError);
           }
-        } catch (waError) {
-          console.error(`❌ Error sending WhatsApp to admin ${adminPhone}:`, waError);
         }
       }
     }

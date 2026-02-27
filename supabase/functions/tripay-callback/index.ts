@@ -249,7 +249,9 @@ serve(async (req) => {
           'vip session 6 week',
           '3000 coaching',
           'webinar',
-          'raja ranjang'
+          'raja ranjang',
+          'dark feminine',
+          'love magnet'
         ];
 
         const isEbook = ebookSpecificKeywords.some(key => lowerPName.includes(key));

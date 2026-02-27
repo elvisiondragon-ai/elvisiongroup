@@ -8,7 +8,9 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "supabase:backup": "supabase db dump --data-only -f supabase/backups/latest_data.sql && supabase db dump -f supabase/backups/latest_schema.sql",
+    "supabase:start": "npm run supabase:backup && supabase start"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.2",

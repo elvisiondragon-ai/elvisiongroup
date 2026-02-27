@@ -91,9 +91,9 @@ export function ResetPassword() {
           {/* Logo/Brand Section */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <img 
-                src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/favicon.png" 
-                alt="eL Vision Group Logo" 
+              <img
+                src="/favicon.png"
+                alt="eL Vision Group Logo"
                 className="w-24 h-24 object-contain"
               />
             </div>
@@ -112,7 +112,7 @@ export function ResetPassword() {
                 Success!
               </h3>
               <p className="text-muted-foreground">
-                Your password has been updated successfully. 
+                Your password has been updated successfully.
                 You will be redirected to the home page shortly.
               </p>
             </div>
@@ -137,9 +137,9 @@ export function ResetPassword() {
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <img 
-              src="https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/admin-image/favicon.png" 
-              alt="eL Vision Group Logo" 
+            <img
+              src="/favicon.png"
+              alt="eL Vision Group Logo"
               className="w-24 h-24 object-contain"
             />
           </div>
