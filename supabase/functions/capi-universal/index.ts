@@ -21,6 +21,7 @@ const PIXEL_CONFIG: Record<string, string> = {
   '3319324491540889': 'METACAPI', // EbookIndo Pixel
   '1393383179182528': 'CAPI_USA',  // USA KAYA Pixel
   '1749197952320359': 'CAPI_DRELF', // Drelf SG Pixel
+  '2158382114674235': 'CAPI_UMKM', // UMKM Pixel
   'CAPI_JEWELRY': 'CAPI_JEWELRY', // Special mapping for Jewelry
 };
 
@@ -51,7 +52,7 @@ Deno.serve(async (req) => {
   const body = await req.json();
 
   // --- Configuration ---
-  const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl, eventTime, customAccessToken } = body;
+  const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl, eventTime, customAccessToken, secret } = body;
 
   // Resolution for Jewelry Pixel ID (must be in environment, not code)
   let resolvedPixelId = pixelId;
@@ -82,7 +83,7 @@ Deno.serve(async (req) => {
   }
 
   // 🎯 RESTRICTED EVENTS FILTER
-  const allowedEvents = ['Purchase', 'AddToCart', 'AddPaymentInfo', 'ViewContent'];
+  const allowedEvents = ['Purchase', 'AddToCart', 'AddPaymentInfo', 'ViewContent', 'InitiateCheckout'];
   if (!allowedEvents.includes(eventName)) {
     console.log(`⚠️ Skipping event '${eventName}' (not in allowed list) | Product: ${productName || 'N/A'} | URL: ${eventSourceUrl || 'N/A'}`);
     return new Response(JSON.stringify({ message: `Event '${eventName}' skipped (not in allowed list)` }), {
@@ -113,7 +114,7 @@ Deno.serve(async (req) => {
   }
 
   // Determine which secret to use
-  const secretName = PIXEL_CONFIG[pixelId] || 'METACAPI';
+  const secretName = secret || PIXEL_CONFIG[pixelId] || 'METACAPI';
   let FACEBOOK_ACCESS_TOKEN = customAccessToken || Deno.env.get(secretName);
 
   if (!FACEBOOK_ACCESS_TOKEN) {

@@ -12,6 +12,20 @@ const LIST_ID = '80713'; // Default List ID
 
 // --- PRODUCT CONFIGURATION ---
 const PRODUCT_TEMPLATES: Record<string, any> = {
+  'universal_Id_parenting_paid': {
+    subject: "✨ Akses Download: Co-Parenting Tracker & Tutorial",
+    downloadLink: "https://docs.google.com/spreadsheets/d/1u1H6Pv0O5noENH7_P-SEqheHmIqlixAo_0DncVYMuqlY/edit?gid=612184692#gid=612184692",
+    color: "#4F46E5", // Indigo
+    accentColor: "#ffffff",
+    title: "Akses Co-Parenting Tracker Terbuka",
+    description: "Selamat! Anda sekarang memiliki akses penuh ke Template Co-Parenting Tracker.",
+    instructions: [
+      "Silahkan copy file sheet tersebut ke Google Anda melalui link di atas.",
+      "Tonton Tutorial Penggunaan di sini: https://www.youtube.com/watch?v=H9O0kV7zTAM"
+    ],
+    lang: "id"
+  },
+
   'raja_ranjang': {
     subject: "🔥 Akses Download: Ebook Universal Raja Ranjang",
     downloadLink: "https://drive.google.com/drive/folders/1g35DL8wAap-FWWyCrvu6pMzD_8viCXM1?usp=sharing",
@@ -266,7 +280,8 @@ function getProductKey(productName: string): string {
   if (!productName) return 'ebook_elvision'; // Default fallback
   const lower = productName.toLowerCase();
 
-  if (lower.includes('sg_elvision_en')) return 'sg_elvision_en';
+    if (lower.includes('parenting_paid') || lower.includes('universal_id_parenting_paid')) return 'universal_Id_parenting_paid';
+if (lower.includes('sg_elvision_en')) return 'sg_elvision_en';
   if (lower.includes('sg_elvision_malay')) return 'sg_elvision_malay';
 
   if (lower.includes('usa_ebookhealth') || lower.includes('ebookhealthlp')) return 'usa_ebookhealth';
@@ -495,7 +510,7 @@ const handler = async (req: Request) => {
     // If the product is Raja Ranjang or Dark Feminine, we also want to send the file via WhatsApp to the user
     const userPhone = body.phone || body.phone_number || body.ph; // We might need to ensure tripay-callback is passing this
 
-    if (productKey === 'raja_ranjang' || productKey === 'ebook_feminine' || productKey === 'ebook_feminine_lovemagnet' || isFreeEbook) {
+    if (productKey === 'raja_ranjang' || productKey === 'ebook_feminine' || productKey === 'ebook_feminine_lovemagnet' || productKey === 'universal_Id_parenting_paid' || isFreeEbook) {
       const waToken = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
 
       if (userPhone) {
@@ -537,7 +552,9 @@ const handler = async (req: Request) => {
           } else {
             // Standard Purchase Notification Flow
             const isDarkFeminine = productKey === 'ebook_feminine' || productKey === 'ebook_feminine_lovemagnet';
-            const productNameDisplay = productKey === 'ebook_feminine_lovemagnet' ? "Universal Dark Feminine + Love Magnet" : (isDarkFeminine ? "Universal Dark Feminine" : "Universal Raja Ranjang");
+            const isParenting = productKey === 'universal_Id_parenting_paid';
+
+            const productNameDisplay = isParenting ? "Co-Parenting Tracker" : (productKey === 'ebook_feminine_lovemagnet' ? "Universal Dark Feminine + Love Magnet" : (isDarkFeminine ? "Universal Dark Feminine" : "Universal Raja Ranjang"));
             const adminName = isDarkFeminine ? "Admin eL Vision" : "Renata dari Admin eL Vision Group";
 
             const waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nAdmin - eL Vision Group`;
@@ -569,7 +586,7 @@ const handler = async (req: Request) => {
       // 🔔 ADMIN BCC NOTIFICATION (Only for paid products)
       if (!isFreeEbook) {
         const adminPhones = ['6281383838013', '6285664733499'];
-        const adminMessage = `💰 *PEMBELIAN ${productKey === 'ebook_feminine' || productKey === 'ebook_feminine_lovemagnet' ? 'DARK FEMININE' : 'RAJA RANJANG'} BARU*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'Tidak ada'}\nTotal: ${displayAmount}\nRef: ${reference}`;
+        const adminMessage = `💰 *PEMBELIAN ${isParenting ? 'CO-PARENTING TRACKER' : (productKey === 'ebook_feminine' || productKey === 'ebook_feminine_lovemagnet' ? 'DARK FEMININE' : 'RAJA RANJANG')} BARU*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'Tidak ada'}\nTotal: ${displayAmount}\nRef: ${reference}`;
 
         for (const adminPhone of adminPhones) {
           console.log(`📱 Sending Admin WA Notification to ${adminPhone}...`);

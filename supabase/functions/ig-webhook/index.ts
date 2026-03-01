@@ -83,8 +83,9 @@ serve(async (req) => {
                                 const commentText = (change.value.message || '').toLowerCase().trim();
                                 const fromUserId = change.value.from?.id;
                                 const commentId = change.value.comment_id;
+                                const pageId = entry.id;
 
-                                console.log(`💬 FB Page Comment: "${commentText}" from ${fromUserId}`);
+                                console.log(`💬 FB Page Comment: "${commentText}" from ${fromUserId} on Page ${pageId}`);
 
                                 // Fetch triggers
                                 const { data: triggers, error } = await supabase
@@ -103,7 +104,7 @@ serve(async (req) => {
 
                                 if (matchedTrigger) {
                                     console.log(`✅ Match: "${matchedTrigger.keyword}" → Sending FB Private Reply...`);
-                                    await sendFBPrivateReply(commentId, fromUserId, matchedTrigger);
+                                    await sendFBPrivateReply(commentId, fromUserId, matchedTrigger, pageId);
                                 } else {
                                     console.log(`⏭️ No trigger matched`);
                                 }
@@ -135,8 +136,25 @@ async function sendDMviaComment(commentId: string, userId: string, trigger: any)
     // Jika ada button_url dan button_text → kirim sebagai Generic Template dengan tombol
     // Jika tidak ada → kirim sebagai teks biasa
     let messagePayload: any;
+    const buttons = [];
 
     if (trigger.button_url && trigger.button_text) {
+        buttons.push({
+            type: "web_url",
+            url: trigger.button_url,
+            title: trigger.button_text
+        });
+    }
+
+    if (trigger.button_url_2 && trigger.button_text_2) {
+        buttons.push({
+            type: "web_url",
+            url: trigger.button_url_2,
+            title: trigger.button_text_2
+        });
+    }
+
+    if (buttons.length > 0) {
         // Template Message dengan tombol klik
         messagePayload = {
             attachment: {
@@ -146,19 +164,13 @@ async function sendDMviaComment(commentId: string, userId: string, trigger: any)
                     elements: [
                         {
                             title: trigger.reply_message,
-                            buttons: [
-                                {
-                                    type: "web_url",
-                                    url: trigger.button_url,
-                                    title: trigger.button_text
-                                }
-                            ]
+                            buttons: buttons
                         }
                     ]
                 }
             }
         };
-        console.log('📤 Sending BUTTON template DM');
+        console.log(`📤 Sending BUTTON template DM with ${buttons.length} button(s)`);
     } else {
         // Plain text fallback
         messagePayload = { text: trigger.reply_message };
@@ -225,19 +237,36 @@ async function sendDMviaComment(commentId: string, userId: string, trigger: any)
 }
 
 // ====== Send FB Private Reply ======
-async function sendFBPrivateReply(commentId: string, userId: string, trigger: any) {
+async function sendFBPrivateReply(commentId: string, userId: string, trigger: any, pageId: string) {
     const FB_PAGE_TOKEN = Deno.env.get('FB_PAGE_TOKEN') || Deno.env.get('FB2_PAGE_TOKEN');
     if (!FB_PAGE_TOKEN) {
         console.error('❌ Missing FB_PAGE_TOKEN!');
         return;
     }
 
-    const apiUrl = `https://graph.facebook.com/v21.0/${commentId}/private_replies`;
+    const apiUrl = `https://graph.facebook.com/v21.0/${pageId}/messages`;
 
     // FB Private Replies API accepts 'message' payload similarly
     let messagePayload: any;
+    const buttons = [];
 
     if (trigger.button_url && trigger.button_text) {
+        buttons.push({
+            type: "web_url",
+            url: trigger.button_url,
+            title: trigger.button_text
+        });
+    }
+
+    if (trigger.button_url_2 && trigger.button_text_2) {
+        buttons.push({
+            type: "web_url",
+            url: trigger.button_url_2,
+            title: trigger.button_text_2
+        });
+    }
+
+    if (buttons.length > 0) {
         messagePayload = {
             attachment: {
                 type: "template",
@@ -246,19 +275,13 @@ async function sendFBPrivateReply(commentId: string, userId: string, trigger: an
                     elements: [
                         {
                             title: trigger.reply_message,
-                            buttons: [
-                                {
-                                    type: "web_url",
-                                    url: trigger.button_url,
-                                    title: trigger.button_text
-                                }
-                            ]
+                            buttons: buttons
                         }
                     ]
                 }
             }
         };
-        console.log('📤 Sending FB BUTTON template DM');
+        console.log(`📤 Sending FB BUTTON template DM with ${buttons.length} button(s)`);
     } else {
         messagePayload = { text: trigger.reply_message };
         console.log('📤 Sending FB TEXT DM');
@@ -272,6 +295,7 @@ async function sendFBPrivateReply(commentId: string, userId: string, trigger: an
             },
             body: JSON.stringify({
                 access_token: FB_PAGE_TOKEN,
+                recipient: { comment_id: commentId },
                 message: messagePayload
             })
         });
@@ -281,22 +305,28 @@ async function sendFBPrivateReply(commentId: string, userId: string, trigger: an
 
         if (response.ok) {
             console.log(`✅ FB DM SENT to ${userId}! 🎉`);
-            // Opsional: Reply ke komentar FB juga
-            const replyUrl = `https://graph.facebook.com/v21.0/${commentId}/comments?access_token=${FB_PAGE_TOKEN}`;
-            try {
-                const replyRes = await fetch(replyUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: "Halo kak, cek inbox Messenger ya! Link PDF-nya sudah aku kirim ke sana 😊🤫"
-                    })
-                });
-                if (replyRes.ok) console.log(`✅ FB Comment REPLY sent!`);
-            } catch (e) {
-                console.error(`❌ FB Comment REPLY failed:`, e);
-            }
         } else {
             console.error(`❌ FB DM FAILED:`, result.error);
+        }
+
+        // Opsional: Reply ke komentar FB juga (Tetap jalan meski pesan DM gagal terkirim)
+        const replyUrl = `https://graph.facebook.com/v21.0/${commentId}/comments?access_token=${FB_PAGE_TOKEN}`;
+        try {
+            const replyRes = await fetch(replyUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: "kak silahkan cek dm sudah dikirim 🚀"
+                })
+            });
+            if (replyRes.ok) {
+                console.log(`✅ FB Comment REPLY sent!`);
+            } else {
+                const replyErr = await replyRes.json();
+                console.error(`❌ FB Comment REPLY failed:`, replyErr);
+            }
+        } catch (e) {
+            console.error(`❌ FB Comment REPLY failed:`, e);
         }
 
         await supabase.from('ig_logs').insert({
