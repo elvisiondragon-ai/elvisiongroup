@@ -6,9 +6,12 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function ResetPassword() {
+  const [searchParams] = useSearchParams();
+  const nextUrl = searchParams.get('next');
+  
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,9 +66,13 @@ export function ResetPassword() {
         description: "Your password has been successfully updated.",
       });
 
-      // Redirect to home after 2 seconds
+      // Redirect to nextUrl or home after 2 seconds
       setTimeout(() => {
-        navigate('/');
+        if (nextUrl) {
+          window.location.href = nextUrl;
+        } else {
+          navigate('/');
+        }
       }, 2000);
 
     } catch (error: any) {
@@ -118,10 +125,16 @@ export function ResetPassword() {
             </div>
 
             <Button
-              onClick={() => navigate('/')}
+              onClick={() => {
+                if (nextUrl) {
+                  window.location.href = nextUrl;
+                } else {
+                  navigate('/');
+                }
+              }}
               className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
             >
-              Go to Home
+              {nextUrl ? "Return to App" : "Go to Home"}
             </Button>
           </Card>
         </div>
