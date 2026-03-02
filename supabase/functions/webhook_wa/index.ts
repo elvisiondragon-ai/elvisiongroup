@@ -33,53 +33,58 @@ serve(async (req) => {
     // Handle POST Request (JSON Body)
     else if (req.method === 'POST') {
       const body = await req.json();
-      console.log("📱 Incoming POST Webhook from Macrodroid:", JSON.stringify(body, null, 2));
+      console.log("📱 Incoming POST Webhook:", JSON.stringify(body, null, 2));
+      
+      // 1. Check for DIRECT SEND (WA Blast Mode)
+      if (body.to && body.message) {
+        const target = body.to.replace(/\D/g, '');
+        const content = body.message;
+        const apiKey = body.key || Deno.env.get("WA_API_KEY") || "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
+        
+        console.log("🚀 WA Blast mode detected! Sending to", target);
+        
+        const resp = await fetch("https://watzapp.web.id/api/message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "key": apiKey },
+          body: JSON.stringify({ number: target, message: content })
+        });
+
+        const result = await resp.json();
+        return new Response(JSON.stringify({ success: true, api_response: result }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200
+        });
+      }
+
       incomingText = body.message || body.text || body.notification || body.content || "";
     }
 
-    // MACRODROID THIS WA API must sent to one number only: 6285664733499 (dengan format json barusan)
-    const targetNumber = "6285664733499"; // Updated target number
+    // 2. OLD LOGIC: MACRODROID / SHOPEE TRIGGER (Sent to multiple numbers)
+    const legacyTargetNumbers = ["6285664733499", "6281383838013"]; 
+    console.log("📝 Received message content for trigger check:", incomingText);
 
-    console.log("📝 Received message content:", incomingText);
-
-    // If message contains "ada notif !", send the WhatsApp notification
     if (incomingText && incomingText.toLowerCase().includes("ada notif !")) {
-      console.log("🚀 Trigger match! Sending WhatsApp to", targetNumber);
+      console.log("🚀 Shopee Trigger match! Sending notifications...");
       
-      /**
-       * WhatsApp API Configuration from Global Context:
-       * The ShopAuto WhatsApp VPS API is located at 'https://watzapp.web.id' (standard HTTPS port 443).
-       */
-      const waApiUrl = "https://watzapp.web.id/api/message"; // Updated API Endpoint
+      const waApiUrl = "https://watzapp.web.id/api/message"; 
+      const waApiKey = Deno.env.get("WA_API_KEY") || "4f46b29bf8e0e4443d9e631007324b29199443786d8b4befab3a2d529208583f";
       
-      // Attempt to get API Key from env, fallback to new provided default
-      const waApiKey = Deno.env.get("WA_API_KEY") || "4f46b29bf8e0e4443d9e631007324b29199443786d8b4befab3a2d529208583f"; // Updated API Key
-      
-      const payload = {
-        token: waApiKey, // Corrected: Use 'token' instead of 'api_key'
-        to: targetNumber, // Corrected: Use 'to' instead of 'phone_no'
-        message: `🔔 NOTIFIKASI BARU:\n\n${incomingText}`
-      };
+      const results = [];
+      for (const num of legacyTargetNumbers) {
+        const payload = {
+          number: num,
+          message: `🔔 NOTIFIKASI BARU:\n\n${incomingText}`
+        };
 
-      console.log("📡 Calling WhatsApp API:", waApiUrl);
-      
-      const resp = await fetch(waApiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // "x-api-key": waApiKey // x-api-key might not be needed if token is in payload
-        },
-        body: JSON.stringify(payload)
-      });
+        const resp = await fetch(waApiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "key": waApiKey },
+          body: JSON.stringify(payload)
+        });
+        results.push(await resp.json());
+      }
 
-      const responseText = await resp.text();
-      console.log("✅ WhatsApp API Response:", responseText);
-
-      return new Response(JSON.stringify({ 
-        success: true, 
-        sent: true,
-        api_response: responseText 
-      }), {
+      return new Response(JSON.stringify({ success: true, sent: true, api_responses: results }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200
       });

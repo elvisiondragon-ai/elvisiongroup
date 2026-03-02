@@ -295,7 +295,7 @@ if (lower.includes('sg_elvision_en')) return 'sg_elvision_en';
   if (lower.includes('percayadiri') || lower.includes('pria alpha') || lower.includes('alpha')) return 'ebook_percayadiri';
   if (lower.includes('darkfeminine_free_ebook')) return 'darkfeminine_free_ebook';
   if (lower.includes('love magnet')) return 'ebook_feminine_lovemagnet';
-  if (lower.includes('feminine') || lower.includes('magnetism') || lower.includes('dark feminine')) return 'ebook_feminine';
+  if (lower.includes('feminine') || lower.includes('feminin') || lower.includes('magnetism') || lower.includes('dark feminine') || lower.includes('dark feminin')) return 'ebook_feminine';
   if (lower.includes('uangpanas') || lower.includes('uang panas')) return 'ebook_uangpanas';
   if (lower.includes('vip') || lower.includes('3000') || lower.includes('coaching')) return 'vip_coaching';
   if (lower.includes('webinar_el') || lower.includes('jalur langit') || lower.includes('webinar')) return 'webinar_el';

@@ -211,6 +211,49 @@ serve(async (req) => {
 
       const pName = globalProductTx.product_name || '';
 
+      // --- AUTO INSERT INTO PROFILES AND REVIEWS FOR DARK FEMININE ---
+      if (pName.toLowerCase().includes('dark feminine') || pName.toLowerCase().includes('dark feminin') || pName.toLowerCase().includes('feminine magnetism')) {
+        console.log(`   - 🌙 Dark Feminine detected (${pName}). Auto-creating profile and review...`);
+        try {
+          // 1. Create auth user using Admin API (if not exists)
+          // This will trigger public.handle_new_user() to insert into profiles automatically
+          const { data: adminAuthData, error: adminAuthError } = await supabase.auth.admin.createUser({
+            email: globalProductTx.email,
+            email_confirm: true,
+            password: 'DfUser' + Math.floor(Math.random() * 1000000), // Random password
+            user_metadata: { full_name: globalProductTx.name, phone: globalProductTx.phone }
+          });
+
+          if (adminAuthError && !adminAuthError.message.includes('already exists') && !adminAuthError.message.includes('User already registered')) {
+            console.error('   - ⚠️ Error creating auth user for DF:', adminAuthError.message);
+          } else {
+            console.log('   - ✅ Auth user verified/created for DF. They can use Forgot Password to login.');
+          }
+
+          // 2. Insert into darkfeminine_reviews (Null comment initially)
+          // Detect country from pName if possible
+          let defaultCountry = 'ID';
+          if (pName.includes('SG')) defaultCountry = 'SG';
+          if (pName.includes('EN')) defaultCountry = 'US';
+
+          const { error: reviewErr } = await supabase.from('darkfeminine_reviews').insert({
+            user_email: globalProductTx.email,
+            name: globalProductTx.name,
+            comment: null,
+            rating: 5,
+            country: defaultCountry
+          });
+          
+          if (reviewErr && !reviewErr.message.includes('duplicate key')) {
+             console.error('   - ⚠️ Error inserting into darkfeminine_reviews:', reviewErr.message);
+          } else {
+             console.log('   - ✅ Inserted default review into darkfeminine_reviews');
+          }
+        } catch (dfErr) {
+          console.error('   - ⚠️ Failed to auto-insert DF review/profile:', dfErr);
+        }
+      }
+
       // --- 2.1 ADD TO USER WEBINAR TABLE ---
       // We check for 'webinar' to catch usa_webinar20, webinar_el, etc.
       if (pName.toLowerCase().includes('webinar')) {
