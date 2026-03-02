@@ -10,7 +10,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function ResetPassword() {
   const [searchParams] = useSearchParams();
-  const nextUrl = searchParams.get('next');
+  // this is redirect parameter based on what website forget password
+  const nextUrl = searchParams.get('darkfemininereviews');
   
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
