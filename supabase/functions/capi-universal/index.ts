@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
   }
 
   // 🎯 RESTRICTED EVENTS FILTER
-  const allowedEvents = ['Purchase', 'AddToCart', 'AddPaymentInfo', 'ViewContent', 'InitiateCheckout'];
+  const allowedEvents = ['Purchase', 'AddToCart', 'AddPaymentInfo', 'ViewContent', 'InitiateCheckout', 'FreeEbook', 'Test_Purchase'];
   if (!allowedEvents.includes(eventName)) {
     console.log(`⚠️ Skipping event '${eventName}' (not in allowed list) | Product: ${productName || 'N/A'} | URL: ${eventSourceUrl || 'N/A'}`);
     return new Response(JSON.stringify({ message: `Event '${eventName}' skipped (not in allowed list)` }), {
