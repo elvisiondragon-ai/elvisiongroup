@@ -1,5 +1,13 @@
 STUPID GEMINI DO NOT FUCKING DO TASK THAT NO REQUESTED EXAMPLE ADD USER ID where user never ask to fix it, otherwise i will fucking bomb your google
 
+## ⛔ RULE #0 — MANDATORY BACKUP BEFORE ANY FILE OVERWRITE
+**GEMINI IS SO STUPID. BEFORE ANY CHANGE to an existing file, ALWAYS:**
+1. Run `git stash` OR copy the file to `/tmp/backup_<filename>_<timestamp>` FIRST.
+2. NEVER use `cp /tmp/... src/...` to overwrite a local file that has uncommitted changes.
+3. If you need to merge changes from git with local edits, do it MANUALLY LINE BY LINE — never overwrite.
+4. Violating this rule directly destroys user's work. There is NO undo for uncommitted changes once overwritten.
+
+
 ## Gemini Agent Directives
 
 This document contains the core operational principles for the Gemini agent. Adherence to these directives is mandatory to ensure safe, effective, and predictable behavior.
