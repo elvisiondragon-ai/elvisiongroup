@@ -73,12 +73,19 @@ const AppContent = () => {
   // Initialize update system (handles all update toasts)
   useUpdateToast();
 
-  // Redirect recovery URLs to clean URLs
+  // Redirect recovery URLs to clean URLs (BUT IGNORE ACTUAL PASSWORD RESET FLOWS)
   useEffect(() => {
+    // Check hash for Supabase implicit flow (e.g., #access_token=...&type=recovery)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    if (hashParams.get('type') === 'recovery') {
+      console.log('🔄 Password recovery flow detected - skipping redirect');
+      return;
+    }
+
     const url = new URL(window.location.href);
     if (url.searchParams.has('recovery') || url.searchParams.has('recovery_manual')) {
-      console.log('🔄 Redirecting recovery URL to clean URL');
-      // Redirect to clean URL without recovery parameters
+      // If it has these params but ISN'T a type=recovery hash, redirect
+      console.log('🔄 Redirecting legacy recovery param to clean URL');
       const cleanUrl = `${url.protocol}//${url.host}/auth`;
       window.location.href = cleanUrl;
     }
@@ -165,20 +172,20 @@ const AppContent = () => {
       <AudioProvider>
         <MeditativeProvider>
 
-            <VerseToast />
-            <ProStatusNotifications />
-            <Toaster />
-            <Sonner />
-            <BrowserRouter future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true
-            }}>
-              <Suspense fallback={
-                <div className="flex items-center justify-center min-h-screen bg-background">
-                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                </div>
-              }>
-                <Routes>
+          <VerseToast />
+          <ProStatusNotifications />
+          <Toaster />
+          <Sonner />
+          <BrowserRouter future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true
+          }}>
+            <Suspense fallback={
+              <div className="flex items-center justify-center min-h-screen bg-background">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            }>
+              <Routes>
                 {/* Public & Main routes */}
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -226,18 +233,18 @@ const AppContent = () => {
                   element={user ? <Navigate to="/" replace /> : <Signup />}
                 />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                
+
                 {/* Protected root route - requires authentication */}
                 <Route
                   path="/"
                   element={<Index />}
                 />
-                
+
                 {/* 404 catch-all */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              </Suspense>
-            </BrowserRouter>
+            </Suspense>
+          </BrowserRouter>
 
         </MeditativeProvider>
       </AudioProvider>

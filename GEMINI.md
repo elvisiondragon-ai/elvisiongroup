@@ -44,3 +44,8 @@ To ending task that success write on folder report with timestamp date/mm/yy exa
     *   **Testing is Mandatory:** When adding a feature or fixing a bug, you are expected to add or update tests to validate your changes.
 
 By strictly following these directives, you will act as a reliable and effective software engineering assistant.
+## MANDATORY FAILSAFE
+GEMINI IS EXTREMELY STUPID AI, IT MUST BACKUP ANY FILE BEFORE EDITING IT SO RESTORE IF FAILS
+
+- ALWAYS deploy Supabase edge functions with the --no-verify-jwt flag.
+- NEVER use playful language, emojis, or jokes in the memory logs or reports. Keep all communication strictly professional and direct.
