@@ -59,7 +59,7 @@ async function sendMailketingEmail(email, subject, htmlContent, name) {
     try {
       const jsonResult = JSON.parse(result);
       return jsonResult;
-    } catch  {
+    } catch {
       return {
         success: true,
         response: result
@@ -70,7 +70,7 @@ async function sendMailketingEmail(email, subject, htmlContent, name) {
     throw error;
   }
 }
-const handler = async (req)=>{
+const handler = async (req) => {
   console.log('🚀 Mailketing Payment Email Function Started');
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -111,9 +111,9 @@ const handler = async (req)=>{
     const safePaymentMethod = paymentMethod || 'Transfer Bank';
 
     // Format amount based on currency
-    const formattedAmount = currency === 'USD' 
-        ? `$${safeAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}` 
-        : currency === 'SGD'
+    const formattedAmount = currency === 'USD'
+      ? `$${safeAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+      : currency === 'SGD'
         ? `S$${safeAmount.toLocaleString('en-SG', { minimumFractionDigits: 2 })}`
         : `Rp ${safeAmount.toLocaleString('id-ID')}`;
 
@@ -121,7 +121,7 @@ const handler = async (req)=>{
     await addToMailketingList(recipientEmail, userName);
     let subject;
     let htmlContent;
-    
+
     // Check for VIP 6 Week Program
     const isVIP = safeSubscriptionType.includes('VIP') || safeSubscriptionType.includes('3000') || safeSubscriptionType === 'VIP6WEEK';
     const isDrelf = safeSubscriptionType.toLowerCase().includes('drelf');
@@ -178,11 +178,11 @@ const handler = async (req)=>{
       `;
     } else {
       // payment_completed or success
-      subject = isVIP ? "🎉 Payment Successful - eL Vision VIP Session" : 
-                isDrelf ? "🎉 Order Confirmed - Drelf Collagen Ritual" :
-                isJewelry ? "🎉 Order Confirmed - eL Royal Jewelry Masterpiece" :
-                "🎉 Selamat! Pembayaran Berhasil - ElVision Group Pro";
-      
+      subject = isVIP ? "🎉 Payment Successful - eL Vision VIP Session" :
+        isDrelf ? "🎉 Order Confirmed - Drelf Collagen Ritual" :
+          isJewelry ? "🎉 Order Confirmed - eL Royal Jewelry Masterpiece" :
+            "🎉 Selamat! Pembayaran Berhasil - ElVision Group Pro";
+
       if (isJewelry) {
         htmlContent = `
           <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
@@ -693,7 +693,7 @@ const handler = async (req)=>{
     <div class="container">
         <div class="header">
             <div class="logo-section">
-                <img src="https://gambarmailketing.b-cdn.net/uploaded_images/16720/FILE-20250720-0331PKYKC6MB57B9.png" height="150" width="150" alt="ElVision Group Logo" style="filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.8));" />
+                <!-- Logo removed because URL was broken -->
             </div>
             <h1 class="main-title">🎉 PEMBAYARAN BERHASIL!</h1>
             <p class="subtitle">Selamat datang di ElVision Group Pro!</p>
@@ -728,10 +728,10 @@ const handler = async (req)=>{
                 <div class="detail-row">
                     <span class="detail-label">📅 Berakhir Pada</span>
                     <span class="detail-value end-date">${new Date(endDate).toLocaleDateString('id-ID', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })}</span>
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}</span>
                 </div>
                 ` : ''}
             </div>
@@ -801,7 +801,7 @@ const handler = async (req)=>{
       console.log("✅ BCC copy sent to elvisiondragon@gmail.com");
     } catch (bccError) {
       console.error("⚠️ Failed to send BCC copy:", bccError);
-    // Continue even if BCC fails
+      // Continue even if BCC fails
     }
     return new Response(JSON.stringify({
       success: true,

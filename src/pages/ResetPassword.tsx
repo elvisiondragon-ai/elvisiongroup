@@ -6,13 +6,9 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export function ResetPassword() {
-  const [searchParams] = useSearchParams();
-  // this is redirect parameter based on what website forget password
-  const nextUrl = searchParams.get('darkfemininereviews');
-  
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -67,13 +63,9 @@ export function ResetPassword() {
         description: "Your password has been successfully updated.",
       });
 
-      // Redirect to nextUrl or home after 2 seconds
+      // Redirect to home after 2 seconds
       setTimeout(() => {
-        if (nextUrl) {
-          window.location.href = nextUrl;
-        } else {
-          navigate('/');
-        }
+        navigate('/');
       }, 2000);
 
     } catch (error: any) {
@@ -98,13 +90,7 @@ export function ResetPassword() {
         <div className="w-full max-w-md">
           {/* Logo/Brand Section */}
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <img
-                src="/favicon.png"
-                alt="eL Vision Group Logo"
-                className="w-24 h-24 object-contain"
-              />
-            </div>
+            {/* Logo Section Removed */}
             <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
               eL Vision Group
             </h1>
@@ -126,16 +112,10 @@ export function ResetPassword() {
             </div>
 
             <Button
-              onClick={() => {
-                if (nextUrl) {
-                  window.location.href = nextUrl;
-                } else {
-                  navigate('/');
-                }
-              }}
+              onClick={() => navigate('/')}
               className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
             >
-              {nextUrl ? "Return to App" : "Go to Home"}
+              Go to Home
             </Button>
           </Card>
         </div>
@@ -150,13 +130,7 @@ export function ResetPassword() {
       <div className="w-full max-w-md">
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <img
-              src="/favicon.png"
-              alt="eL Vision Group Logo"
-              className="w-24 h-24 object-contain"
-            />
-          </div>
+          {/* Logo Section Removed */}
           <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
             eL Vision Group
           </h1>
@@ -242,3 +216,5 @@ export function ResetPassword() {
     </div>
   );
 }
+
+export default ResetPassword;

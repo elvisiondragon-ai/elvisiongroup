@@ -73,18 +73,10 @@ const AppContent = () => {
   // Initialize update system (handles all update toasts)
   useUpdateToast();
 
-  // Redirect recovery URLs to clean URLs (BUT IGNORE ACTUAL PASSWORD RESET FLOWS)
+  // Redirect recovery URLs to clean URLs (Standard recovery handled by Supabase)
   useEffect(() => {
-    // Check hash for Supabase implicit flow (e.g., #access_token=...&type=recovery)
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    if (hashParams.get('type') === 'recovery') {
-      console.log('🔄 Password recovery flow detected - skipping redirect');
-      return;
-    }
-
     const url = new URL(window.location.href);
-    if (url.searchParams.has('recovery') || url.searchParams.has('recovery_manual')) {
-      // If it has these params but ISN'T a type=recovery hash, redirect
+    if (url.searchParams.has('recovery_manual')) {
       console.log('🔄 Redirecting legacy recovery param to clean URL');
       const cleanUrl = `${url.protocol}//${url.host}/auth`;
       window.location.href = cleanUrl;

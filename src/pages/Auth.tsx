@@ -48,7 +48,7 @@ export function Auth({ onLogin }: AuthProps) {
 
   // Track current view
   const [currentView, setCurrentView] = useState<'auth' | 'forgot-password' | 'reset-sent' | 'signup-success'>('auth');
-  
+
   // Track active tab and click states
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [isTabClicked, setIsTabClicked] = useState(false);
@@ -66,7 +66,7 @@ export function Auth({ onLogin }: AuthProps) {
     const checkUser = async () => {
       // iOS cache verification and cleanup
       await iOSCacheCleaner.verifyCleanState();
-      
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user && onLogin) {
         onLogin(session.user);
@@ -107,10 +107,10 @@ export function Auth({ onLogin }: AuthProps) {
         localStorage.removeItem('meditation-cache');
         localStorage.removeItem('audio-cache');
         sessionStorage.clear();
-        
+
         // Set login success flag for post-reload toast
         localStorage.setItem('login-success-pending', 'true');
-        
+
         // Force refresh after login
         window.location.reload();
       }
@@ -127,7 +127,7 @@ export function Auth({ onLogin }: AuthProps) {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (signupData.password !== signupData.confirmPassword) {
       toast({
         title: "Password Mismatch",
@@ -152,7 +152,7 @@ export function Auth({ onLogin }: AuthProps) {
 
     try {
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { data, error } = await supabase.auth.signUp({
         email: signupData.email,
         password: signupData.password,
@@ -176,10 +176,10 @@ export function Auth({ onLogin }: AuthProps) {
         localStorage.removeItem('meditation-cache');
         localStorage.removeItem('audio-cache');
         sessionStorage.clear();
-        
+
         // Set login success flag for post-reload toast
         localStorage.setItem('login-success-pending', 'true');
-        
+
         // Force refresh after login
         window.location.reload();
       }
@@ -196,11 +196,11 @@ export function Auth({ onLogin }: AuthProps) {
 
   const handleGoogleAuth = async () => {
     setIsLoading(true);
-    
+
     try {
       // Clean up any existing auth state first
       cleanupAuthState();
-      
+
       // Keep existing session if available - removed signOut to avoid conflicts
 
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -259,12 +259,12 @@ export function Auth({ onLogin }: AuthProps) {
 
     try {
       // Use Supabase's built-in reset password function
-      const { error } = await supabase.auth.resetPasswordForEmail(
-        forgotPasswordData.email,
-        {
+      const { error } = await supabase.functions.invoke('send-reset-password-email', {
+        body: {
+          email: forgotPasswordData.email,
           redirectTo: `${window.location.origin}/reset-password`
         }
-      );
+      });
 
       if (error) throw error;
 
@@ -272,7 +272,7 @@ export function Auth({ onLogin }: AuthProps) {
         title: "Reset Email Sent!",
         description: "Check your email for password reset instructions.",
       });
-      
+
       setCurrentView('reset-sent');
     } catch (error: any) {
       toast({
@@ -294,7 +294,7 @@ export function Auth({ onLogin }: AuthProps) {
     try {
       // iOS-specific: Clear form cache before login attempt
       await iOSCacheCleaner.quickLoginCacheClear();
-      
+
       // Clean up any existing auth state
       const trimmedEmail = loginData.email.trim();
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -306,7 +306,7 @@ export function Auth({ onLogin }: AuthProps) {
         // iOS-specific: If login fails, try comprehensive cache clear and retry ONCE
         if (error.message.includes('Invalid') || error.message.includes('incorrect')) {
           console.log('🚨 iOS Login failed - attempting cache clear and retry');
-          
+
           const shouldRetry = await iOSCacheCleaner.clearAllCaches();
           if (shouldRetry.success && shouldRetry.isIOS) {
             toast({
@@ -314,20 +314,20 @@ export function Auth({ onLogin }: AuthProps) {
               description: "Retrying login with fresh cache...",
               duration: 2000,
             });
-            
+
             // Wait a moment for cache clearing to complete
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             // Retry login once
             const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
               email: loginData.email,
               password: loginData.password,
             });
-            
+
             if (retryError) {
               throw retryError;
             }
-            
+
             if (retryData.user) {
               console.log('✅ iOS Login retry successful after cache clear');
               // Continue to success handling below
@@ -351,22 +351,22 @@ export function Auth({ onLogin }: AuthProps) {
         localStorage.removeItem('meditation-cache');
         localStorage.removeItem('audio-cache');
         sessionStorage.clear();
-        
+
         // Set login success flag for post-reload toast
         localStorage.setItem('login-success-pending', 'true');
-        
+
         // Navigate to the redirect path
         navigate(redirectPath);
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      
+
       toast({
         title: "Login Gagal",
         description: error.message || "Terjadi kesalahan saat login.",
         variant: "destructive",
       });
-      
+
       // iOS-specific: Clear form cache after failed login to prevent stuck state
       if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
         setTimeout(() => {
@@ -426,9 +426,9 @@ export function Auth({ onLogin }: AuthProps) {
 
       if (error) {
         // Specific handling for CAPTCHA verification failed
-        if (error.message.toLowerCase().includes('captcha') || 
-            error.message.toLowerCase().includes('verification failed') ||
-            error.message.toLowerCase().includes('invalid captcha')) {
+        if (error.message.toLowerCase().includes('captcha') ||
+          error.message.toLowerCase().includes('verification failed') ||
+          error.message.toLowerCase().includes('invalid captcha')) {
           setCaptchaToken(null);
           setTokenTimestamp(null);
           resetCaptcha(signupTurnstileRef);
@@ -496,7 +496,7 @@ export function Auth({ onLogin }: AuthProps) {
   // Forgot Password View
   if (currentView === 'forgot-password') {
     return (
-      <div 
+      <div
         className="min-h-screen bg-background flex items-center justify-center p-4"
         style={{
           minHeight: '100vh',
@@ -511,9 +511,9 @@ export function Auth({ onLogin }: AuthProps) {
           {/* Logo/Brand Section */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <img 
-                src="/favicon.png" 
-                alt="eL Vision Group Logo" 
+              <img
+                src="/favicon.png"
+                alt="eL Vision Group Logo"
                 className="w-24 h-24 object-contain"
               />
             </div>
@@ -533,16 +533,16 @@ export function Auth({ onLogin }: AuthProps) {
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                                          <Input
-                                                            id="forgot-email"
-                                                            type="email"
-                                                            placeholder="your@email.com"
-                                                            value={forgotPasswordData.email}
-                                                            onChange={(e) => setForgotPasswordData(prev => ({ ...prev, email: e.target.value }))}
-                                                            onBlur={() => setForgotPasswordData(prev => ({ ...prev, email: prev.email.trim() }))}
-                                                            className="pl-10 cyber-input"
-                                                            required
-                                                          />                </div>
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={forgotPasswordData.email}
+                    onChange={(e) => setForgotPasswordData(prev => ({ ...prev, email: e.target.value }))}
+                    onBlur={() => setForgotPasswordData(prev => ({ ...prev, email: prev.email.trim() }))}
+                    className="pl-10 cyber-input"
+                    required
+                  />                </div>
               </div>
 
 
@@ -573,7 +573,7 @@ export function Auth({ onLogin }: AuthProps) {
   // Reset Email Sent View
   if (currentView === 'signup-success') {
     return (
-      <div 
+      <div
         className="min-h-screen bg-background flex items-center justify-center p-4"
         style={{
           minHeight: '100vh',
@@ -596,14 +596,14 @@ export function Auth({ onLogin }: AuthProps) {
               Acount Created!
             </p>
             <div className="space-y-3 pt-4">
-              <Button 
+              <Button
                 onClick={() => setCurrentView('auth')}
                 className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary transform hover:scale-105 active:scale-95 transition-all duration-200"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Start Explore
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => setCurrentView('auth')}
                 className="w-full"
@@ -619,7 +619,7 @@ export function Auth({ onLogin }: AuthProps) {
 
   if (currentView === 'reset-sent') {
     return (
-      <div 
+      <div
         className="min-h-screen bg-background flex items-center justify-center p-4"
         style={{
           minHeight: '100vh',
@@ -634,9 +634,9 @@ export function Auth({ onLogin }: AuthProps) {
           {/* Logo/Brand Section */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <img 
-                src="/favicon.png" 
-                alt="eL Vision Group Logo" 
+              <img
+                src="/favicon.png"
+                alt="eL Vision Group Logo"
                 className="w-24 h-24 object-contain"
               />
             </div>
@@ -652,10 +652,10 @@ export function Auth({ onLogin }: AuthProps) {
             <div className="mb-4">
               <Mail className="h-12 w-12 mx-auto text-primary mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                Check Email 
+                Check Email
               </h3>
               <p className="text-muted-foreground">
-                Reset Password sent 
+                Reset Password sent
                 Check Your Email
               </p>
             </div>
@@ -674,7 +674,7 @@ export function Auth({ onLogin }: AuthProps) {
 
   // Main Auth View
   return (
-    <div 
+    <div
       className="min-h-screen bg-background flex items-center justify-center p-4"
       style={{
         minHeight: '100vh',
@@ -685,7 +685,7 @@ export function Auth({ onLogin }: AuthProps) {
         padding: '1rem'
       }}
     >
-      <div 
+      <div
         className="w-full max-w-md"
         style={{
           width: '100%',
@@ -695,11 +695,11 @@ export function Auth({ onLogin }: AuthProps) {
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-                          <img 
-                            src="/favicon.png" 
-                            alt="eL Vision Group Logo" 
-                            className="w-24 h-24 object-contain"
-                          />          </div>
+            <img
+              src="/favicon.png"
+              alt="eL Vision Group Logo"
+              className="w-24 h-24 object-contain"
+            />          </div>
           <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
             eL Vision Group
           </h1>
@@ -711,42 +711,38 @@ export function Auth({ onLogin }: AuthProps) {
         <Card className="p-6 bg-gradient-secondary border-border">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'signup')} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-2 rounded-lg backdrop-blur-sm gap-2">
-              <TabsTrigger 
-                value="login" 
-                className={`font-bold text-white transition-all duration-300 relative overflow-hidden rounded-md ${
-                  activeTab === 'login' 
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg' 
+              <TabsTrigger
+                value="login"
+                className={`font-bold text-white transition-all duration-300 relative overflow-hidden rounded-md ${activeTab === 'login'
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg'
                     : 'hover:bg-muted/50'
-                }`}
+                  }`}
                 onClick={() => {
                   setIsTabClicked(true);
                   setTimeout(() => setIsTabClicked(false), 150);
                 }}
               >
-                <span className={`transition-transform duration-150 ${
-                  isTabClicked && activeTab === 'login' ? 'scale-95' : 'scale-100'
-                }`}>
+                <span className={`transition-transform duration-150 ${isTabClicked && activeTab === 'login' ? 'scale-95' : 'scale-100'
+                  }`}>
                   Login
                 </span>
                 {activeTab === 'login' && (
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 animate-pulse rounded-md" />
                 )}
               </TabsTrigger>
-              <TabsTrigger 
-                value="signup" 
-                className={`font-bold text-white transition-all duration-300 relative overflow-hidden rounded-md ${
-                  activeTab === 'signup' 
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg' 
+              <TabsTrigger
+                value="signup"
+                className={`font-bold text-white transition-all duration-300 relative overflow-hidden rounded-md ${activeTab === 'signup'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg'
                     : 'hover:bg-muted/50'
-                }`}
+                  }`}
                 onClick={() => {
                   setIsTabClicked(true);
                   setTimeout(() => setIsTabClicked(false), 150);
                 }}
               >
-                <span className={`transition-transform duration-150 ${
-                  isTabClicked && activeTab === 'signup' ? 'scale-95' : 'scale-100'
-                }`}>
+                <span className={`transition-transform duration-150 ${isTabClicked && activeTab === 'signup' ? 'scale-95' : 'scale-100'
+                  }`}>
                   Daftar
                 </span>
                 {activeTab === 'signup' && (
@@ -840,7 +836,7 @@ export function Auth({ onLogin }: AuthProps) {
                 >
                   Login Problem?
                 </button>
-                
+
                 {/* Troubleshoot Options */}
                 {showTroubleshoot && (
                   <div className="mt-3 p-3 bg-muted/30 rounded-lg border border-border/50 space-y-2">
@@ -854,7 +850,7 @@ export function Auth({ onLogin }: AuthProps) {
                           description: "Clear all stale cache..",
                           duration: 2000,
                         });
-                        
+
                         await iOSCacheCleaner.forceCleanReload();
                         // Will reload automatically
                       }}
@@ -926,7 +922,7 @@ export function Auth({ onLogin }: AuthProps) {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="signup-email" className="text-foreground">
                     Email
