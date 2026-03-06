@@ -262,7 +262,7 @@ export function Auth({ onLogin }: AuthProps) {
       const { error } = await supabase.functions.invoke('send-reset-password-email', {
         body: {
           email: forgotPasswordData.email,
-          redirectTo: `${window.location.origin}/reset-password`
+          redirectTo: `https://app.elvisiongroup.com/reset-password?return=${window.location.origin}`
         }
       });
 
@@ -714,8 +714,8 @@ export function Auth({ onLogin }: AuthProps) {
               <TabsTrigger
                 value="login"
                 className={`font-bold text-white transition-all duration-300 relative overflow-hidden rounded-md ${activeTab === 'login'
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg'
-                    : 'hover:bg-muted/50'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg'
+                  : 'hover:bg-muted/50'
                   }`}
                 onClick={() => {
                   setIsTabClicked(true);
@@ -733,8 +733,8 @@ export function Auth({ onLogin }: AuthProps) {
               <TabsTrigger
                 value="signup"
                 className={`font-bold text-white transition-all duration-300 relative overflow-hidden rounded-md ${activeTab === 'signup'
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg'
-                    : 'hover:bg-muted/50'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg'
+                  : 'hover:bg-muted/50'
                   }`}
                 onClick={() => {
                   setIsTabClicked(true);

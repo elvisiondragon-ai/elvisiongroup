@@ -17,6 +17,9 @@ export function ResetPassword() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Get return URL from query params
+  const returnUrl = new URLSearchParams(window.location.search).get('return');
+
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
@@ -63,10 +66,14 @@ export function ResetPassword() {
         description: "Your password has been successfully updated.",
       });
 
-      // Redirect to home after 2 seconds
+      // Redirect to returnUrl or home after 3 seconds
       setTimeout(() => {
-        navigate('/');
-      }, 2000);
+        if (returnUrl) {
+          window.location.href = returnUrl;
+        } else {
+          navigate('/');
+        }
+      }, 3000);
 
     } catch (error: any) {
       toast({
@@ -80,7 +87,11 @@ export function ResetPassword() {
   };
 
   const handleBackToLogin = () => {
-    navigate('/auth');
+    if (returnUrl) {
+      window.location.href = `${returnUrl}/auth`;
+    } else {
+      navigate('/auth');
+    }
   };
 
   // Success View
@@ -90,7 +101,6 @@ export function ResetPassword() {
         <div className="w-full max-w-md">
           {/* Logo/Brand Section */}
           <div className="text-center mb-8">
-            {/* Logo Section Removed */}
             <h1 className="text-2xl font-bold font-exo bg-gradient-primary bg-clip-text text-transparent">
               eL Vision Group
             </h1>
@@ -107,15 +117,21 @@ export function ResetPassword() {
               </h3>
               <p className="text-muted-foreground">
                 Your password has been updated successfully.
-                You will be redirected to the home page shortly.
+                You will be redirected {returnUrl ? "back" : "to the home page"} shortly.
               </p>
             </div>
 
             <Button
-              onClick={() => navigate('/')}
+              onClick={() => {
+                if (returnUrl) {
+                  window.location.href = returnUrl;
+                } else {
+                  navigate('/');
+                }
+              }}
               className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium h-11"
             >
-              Go to Home
+              {returnUrl ? "Back to Site" : "Go to Home"}
             </Button>
           </Card>
         </div>
