@@ -59,6 +59,9 @@ verify_jwt = false
 [functions.webhook_wa]
 verify_jwt = false
 
+[functions.refresh-ig-token]
+verify_jwt = false
+
 [functions.tripay_create-payment]
 enabled = true
 verify_jwt = true

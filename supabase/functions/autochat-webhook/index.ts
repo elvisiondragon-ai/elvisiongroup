@@ -325,7 +325,7 @@ async function handleIgMessage(
         matchedTrigger = triggers.find((t) => {
             const keywordStr = (t.keyword as string).toLowerCase().trim();
             const isMatch = t.is_any_word || searchStr.includes(keywordStr) || rawText.toLowerCase().includes(keywordStr) || rawPayload.toLowerCase().includes(keywordStr);
-            const isChatTrigger = t.trigger_source === 'chat_ig_fb' || !t.trigger_source;
+            const isChatTrigger = !t.trigger_source || t.trigger_source === 'chat_ig_fb' || t.trigger_source === 'komentar_ig_fb';
             return isMatch && isChatTrigger;
         });
 
@@ -505,7 +505,7 @@ async function handleFbMessage(
         matchedTrigger = triggers.find((t) => {
             const keywordStr = (t.keyword as string).toLowerCase().trim();
             const isMatch = t.is_any_word || searchStr.includes(keywordStr) || rawText.toLowerCase().includes(keywordStr) || rawPayload.toLowerCase().includes(keywordStr);
-            const isChatTrigger = t.trigger_source === 'chat_ig_fb' || !t.trigger_source;
+            const isChatTrigger = !t.trigger_source || t.trigger_source === 'chat_ig_fb' || t.trigger_source === 'komentar_ig_fb';
             return isMatch && isChatTrigger;
         });
 
@@ -548,6 +548,7 @@ async function handleFbMessage(
 // ─── MAIN HTTP HANDLER ──────────────────────────────────────────────────────
 
 serve(async (req) => {
+    console.log(`🔌 [Incoming Request] ${req.method} ${req.url}`);
     if (req.method === "GET") {
         const url = new URL(req.url);
         if (url.searchParams.get("hub.verify_token") === META_VERIFY_TOKEN) {
@@ -573,17 +574,32 @@ serve(async (req) => {
         for (const entry of body.entry) {
             const pageOrIgId = entry.id;
 
-            // Fetch active clients matching this Page/IG ID
-            const { data: clients } = await supabase
-                .from("autochat_clients")
-                .select("*")
-                .or(`meta_page_id.eq.${pageOrIgId},meta_instagram_id.eq.${pageOrIgId}`);
+            // ⚡ Resilience: Also extract recipient_id (for messages) or from_id (for comments)
+            // as these often contain the other ID (Page vs IG) that Meta might have used for entry.id
+            let secondaryId = null;
+            if (entry.messaging && entry.messaging[0]) {
+                secondaryId = entry.messaging[0].recipient?.id;
+            } else if (entry.changes && entry.changes[0]?.value) {
+                secondaryId = entry.changes[0].value.from?.id;
+            }
+
+            console.log(`🆔 [Step 1.5] IDs for lookup -> Entry: ${pageOrIgId}, Secondary: ${secondaryId} (Object: ${body.object})`);
+
+            // Fetch active clients matching either of the IDs found in the payload
+            let query = supabase.from("autochat_clients").select("*");
+
+            let filter = `meta_page_id.eq.${pageOrIgId},meta_instagram_id.eq.${pageOrIgId}`;
+            if (secondaryId) {
+                filter += `,meta_page_id.eq.${secondaryId},meta_instagram_id.eq.${secondaryId}`;
+            }
+
+            const { data: clients } = await query.or(filter);
 
             if (!clients || clients.length === 0) {
-                console.log(`⏭️ [Step 2 Fail] No registered client for ID ${pageOrIgId}`);
+                console.log(`⏭️ [Step 2 Fail] No registered client found for IDs ${pageOrIgId}${secondaryId ? ' or ' + secondaryId : ''}`);
                 continue;
             }
-            console.log(`✅ [Step 2] Found ${clients.length} matching client(s) for ID ${pageOrIgId}`);
+            console.log(`✅ [Step 2] Found ${clients.length} matching client(s).`);
 
             for (const client of clients) {
                 try {
