@@ -1,0 +1,92 @@
+{
+  "nav": {
+    "home": "Home",
+    "chat": "Chat",
+    "leaderboard": "Leaderboard", 
+    "profile": "Profile"
+  },
+  "home": {
+    "welcome": "Welcome to eL Vision Group",
+    "subtitle": "Transform yourself through spiritual technology",
+    "audioTherapy": "Audio Therapy",
+    "spiritualJournal": "Spiritual Journal",
+    "meditationSessions": "Meditation Sessions",
+    "xpSystem": "XP System"
+  },
+  "audioTherapy": {
+    "title": "Audio Therapy",
+    "subtitle": "Unlock spiritual verses as you progress",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "levelRequired": "Level {{level}} required",
+    "readTutorial": "READ TUTORIAL",
+    "availableTracks": "Available Tracks",
+    "loading": "Loading audio therapy..."
+  },
+  "verses": {
+    "verse1": {
+      "title": "Verse 1: The Foundation",
+      "subtitle": "Begin your spiritual journey"
+    },
+    "verse2": {
+      "title": "Verse 2: Inner Peace",
+      "subtitle": "Find tranquility within"
+    },
+    "verse3": {
+      "title": "Verse 3: Divine Connection",
+      "subtitle": "Connect with the divine"
+    },
+    "verse4": {
+      "title": "Verse 4: Spiritual Awakening",
+      "subtitle": "Awaken your spiritual consciousness"
+    },
+    "verse5": {
+      "title": "Verse 5: Cosmic Harmony",
+      "subtitle": "Align with cosmic frequencies"
+    },
+    "verse6": {
+      "title": "Verse 6: Universal Love",
+      "subtitle": "Embrace universal love"
+    },
+    "verse7": {
+      "title": "Verse 7: Enlightenment",
+      "subtitle": "Reach spiritual enlightenment"
+    },
+    "verse8": {
+      "title": "Verse 8: Higher Dimensions",
+      "subtitle": "Access higher dimensions"
+    },
+    "verse9": {
+      "title": "Verse 9: Unity Consciousness", 
+      "subtitle": "Experience unity consciousness"
+    },
+    "verse10": {
+      "title": "Verse 10: Divine Mastery",
+      "subtitle": "Master your divine nature"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "level": "Level",
+    "experience": "Experience",
+    "settings": "Settings",
+    "logout": "Logout",
+    "editProfile": "Edit Profile",
+    "notifications": "Notifications",
+    "language": "Language"
+  },
+  "language": {
+    "english": "English",
+    "indonesian": "Indonesian", 
+    "auto": "Auto Detect",
+    "switchLanguage": "Switch Language"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "back": "Back"
+  }
+}

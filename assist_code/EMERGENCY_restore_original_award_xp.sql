@@ -1,0 +1,62 @@
+-- EMERGENCY: Restore ORIGINAL award_xp function from backup
+
+-- Use the EXACT original function from your backup
+CREATE OR REPLACE FUNCTION public.award_xp(p_user_id uuid, p_xp_amount integer, p_activity_type text, p_reason text DEFAULT NULL::text, p_metadata jsonb DEFAULT '{}'::jsonb)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  new_total_xp INTEGER;
+  new_level INTEGER;
+  old_level INTEGER;
+BEGIN
+  -- Get current level
+  SELECT level INTO old_level FROM public.profiles WHERE user_id = p_user_id;
+  
+  -- Update experience points and calculate new level
+  UPDATE public.profiles 
+  SET experience_points = COALESCE(experience_points, 0) + p_xp_amount,
+      updated_at = now()
+  WHERE user_id = p_user_id
+  RETURNING experience_points INTO new_total_xp;
+  
+  -- Calculate new level
+  new_level := public.calculate_level_from_xp(new_total_xp);
+  
+  -- Update level if changed
+  IF new_level != COALESCE(old_level, 1) THEN
+    UPDATE public.profiles 
+    SET level = new_level
+    WHERE user_id = p_user_id;
+  END IF;
+  
+  -- Update activity counters based on activity type
+  UPDATE public.profiles
+  SET experience_points = new_total_xp,
+      level = new_level,
+      updated_at = now(),
+      total_verses = CASE
+        WHEN p_activity_type IN ('verse_completion', 'audio_completion') THEN COALESCE(total_verses, 0) + 1
+        ELSE COALESCE(total_verses, 0)
+      END,
+      total_journal = CASE
+        WHEN p_activity_type = 'journal_completion' THEN COALESCE(total_journal, 0) + 1
+        ELSE COALESCE(total_journal, 0)
+      END,
+      total_elite_habit = CASE
+        WHEN p_activity_type = 'elite_habit_completion' THEN COALESCE(total_elite_habit, 0) + 1
+        ELSE COALESCE(total_elite_habit, 0)
+      END
+  WHERE user_id = p_user_id;
+  
+  -- Log the activity
+  INSERT INTO public.user_activities (user_id, activity_type, xp_earned, metadata)
+  VALUES (p_user_id, p_activity_type, p_xp_amount, p_metadata);
+  
+  -- Log the XP transaction
+  INSERT INTO public.xp_transactions (user_id, xp_amount, transaction_type, reason)
+  VALUES (p_user_id, p_xp_amount, 'earned', COALESCE(p_reason, p_activity_type));
+END;
+$function$;

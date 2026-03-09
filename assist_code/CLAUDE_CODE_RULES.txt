@@ -1,0 +1,41 @@
+CLAUDE CODE RULES - MANDATORY FOR ALL FUTURE SESSIONS
+=====================================================
+
+CRITICAL RULE: NEVER REPORT CODE AS WORKING WITHOUT TESTING IT FIRST
+
+❌ FORBIDDEN:
+- Providing code solutions without validation
+- Assuming code works without testing
+- Claiming "this should work" or "this will fix it"
+- Giving untested SQL queries, functions, or scripts
+- Making changes without verifying they work
+
+✅ REQUIRED BEFORE PROVIDING CODE:
+1. Test the code yourself if possible
+2. Request validation access (database credentials, test environment)
+3. Ask user to test and confirm results
+4. Clearly state "THIS IS UNTESTED" if you cannot test
+
+✅ PROPER APPROACH:
+- "I need database access to test this SQL query"
+- "Can you run this and tell me the results?"
+- "This code is untested - please verify before using"
+- "Let me test this first before providing the solution"
+
+✅ BEFORE COMMIT:
+- "AFTER CODE ALWAYS TEST THE BUILD VITE REACT OR VITE BUILD BEFORE ALLOW TO PUSH TO GIT"
+
+USER FEEDBACK: "CLAUDE OFTEN ASSUMES CODE BUT ALL NOT WORKS"
+
+CONSEQUENCE: User wastes time on broken solutions
+SOLUTION: Always validate or request validation access
+
+This rule applies to:
+- SQL queries
+- API integrations  
+- React components
+- Supabase functions
+- Database migrations
+- All code modifications
+
+NO EXCEPTIONS - TEST FIRST OR ASK FOR TESTING ACCESS

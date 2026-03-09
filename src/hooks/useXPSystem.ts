@@ -1,0 +1,177 @@
+import { useState, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface XPSystemHook {
+  awardXP: (activityType: string, xpAmount: number, reason?: string, metadata?: any, showNotification?: boolean) => Promise<void>;
+  calculateXPProgress: (currentXP: number, level: number) => { currentLevelXP: number; xpForNextLevel: number; progress: number };
+  isLoading: boolean;
+}
+
+export function useXPSystem(): XPSystemHook {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const { refreshUserProfile } = useAuth();
+
+  const awardXP = useCallback(async (
+    activityType: string,
+    xpAmount: number,
+    reason?: string,
+    metadata: any = {},
+    showNotification: boolean = true
+  ) => {
+    try {
+      setIsLoading(true);
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Award XP using the basic system (daily limits not implemented yet)
+      const { data, error } = await supabase.rpc('award_xp', {
+        p_user_id: user.id,
+        p_xp_amount: xpAmount,
+        p_activity_type: activityType,
+        p_reason: reason,
+        p_metadata: metadata
+      });
+
+      if (error) throw error;
+
+      // Manually refresh profile to ensure UI is up-to-date
+      await refreshUserProfile();
+
+      // Show success toast with level up information
+      const result = data as any;
+      
+      // Only show notifications if showNotification is true
+      if (showNotification) {
+        // Check if daily limit was reached (either fully or partially)
+        if (result.limit_reached) {
+          let toastTitle = "";
+          let toastDescription = "";
+
+          if (activityType === 'verse_completion') {
+            toastTitle = "🎵 Verse Terselesaikan";
+            toastDescription = "Total Verses +1";
+          } else if (activityType === 'elite_habit_completion') {
+            toastTitle = "🏋️ Elite Habit Tersimpan";
+            toastDescription = "Total Elite Habit +1";
+          } else if (activityType === 'journal_completion') {
+            toastTitle = "✨ Renungan Tersimpan";
+            toastDescription = "Total Journal +1";
+          } else {
+            // Fallback for other activity types if limit reached
+            toastTitle = `🎯 Daily Limit Reached`;
+            toastDescription = `You've earned 30/30 XP today! Come back tomorrow for more XP.`;
+          }
+          
+          toast({
+            title: toastTitle,
+            description: toastDescription,
+            variant: "default", // Keep default variant for limit reached
+          });
+        } else if (result?.level_up) {
+          toast({
+            title: `🎉 SELAMAT ANDA MASUK KE LEVEL SELANJUTNYA!`,
+            description: `Sekarang Level ${result.new_level}! +${result.xp_awarded} XP earned! ${result.achievement_earned ? '⚡ Achievement baru terbuka!' : ''}`,
+          });
+        } else if (result.success) {
+          // Regular success message (if limit not reached and no level up)
+          toast({
+            title: `+${result.xp_awarded} XP Earned!`,
+            description: reason || `${activityType} completed`,
+          });
+        }
+      }
+
+    } catch (error) {
+      console.error('Error awarding XP:', error);
+      toast({
+        title: "Error awarding XP",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
+
+  const calculateXPProgress = useCallback((currentXP: number, level: number) => {
+    // Updated level requirements with new thresholds
+    let totalXPForLevel = 0;
+    let xpForNextLevel = 0;
+
+    switch (level) {
+      case 1:
+        totalXPForLevel = 0;
+        xpForNextLevel = 150;
+        break;
+      case 2:
+        totalXPForLevel = 150;
+        xpForNextLevel = 300;
+        break;
+      case 3:
+        totalXPForLevel = 300;
+        xpForNextLevel = 1200;
+        break;
+      case 4:
+        totalXPForLevel = 1200;
+        xpForNextLevel = 2500;
+        break;
+      case 5:
+        totalXPForLevel = 2500;
+        xpForNextLevel = 4500;
+        break;
+      case 6:
+        totalXPForLevel = 4500;
+        xpForNextLevel = 7000;
+        break;
+      case 7:
+        totalXPForLevel = 7000;
+        xpForNextLevel = 9000;
+        break;
+      case 8:
+        totalXPForLevel = 9000;
+        xpForNextLevel = 12000;
+        break;
+      case 9:
+        totalXPForLevel = 12000;
+        xpForNextLevel = 15000;
+        break;
+      case 10:
+        totalXPForLevel = 15000;
+        xpForNextLevel = 15000; // Max level
+        break;
+      default:
+        totalXPForLevel = 15000;
+        xpForNextLevel = 15000; // Max level
+    }
+
+    // XP for current level progress - FIXED CALCULATION
+    const currentLevelXP = Math.max(0, currentXP - totalXPForLevel);
+    
+    // XP needed for next level from current level start
+    const xpNeededForNextLevel = xpForNextLevel - totalXPForLevel;
+    
+    // Progress percentage (for max level, show 100%)
+    let progress = 0;
+    if (level >= 10) {
+      progress = 100;
+    } else if (xpNeededForNextLevel > 0) {
+      progress = Math.min((currentLevelXP / xpNeededForNextLevel) * 100, 100);
+    }
+
+    return {
+      currentLevelXP,
+      xpForNextLevel: xpNeededForNextLevel,
+      progress
+    };
+  }, []);
+
+  return {
+    awardXP,
+    calculateXPProgress,
+    isLoading
+  };
+}

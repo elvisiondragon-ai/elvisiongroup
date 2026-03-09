@@ -1,0 +1,330 @@
+import { Lock, Music, Crown, Zap, Check, X, FileText } from 'lucide-react';
+import { useProtectedAudio } from '@/contexts/AudioContext';
+import { useXPSystem } from '@/hooks/useXPSystem';
+import { useState, useEffect, useRef } from 'react';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface Verse {
+  id: number;
+  title: string;
+  subtitle?: string;
+  unlocked: boolean;
+  requiredLevel: number;
+  artwork?: string;
+  audioPath: string | null;
+  language: string;
+}
+
+interface VerseAudioCardProps {
+  verse: Verse;
+  onWarning?: () => Promise<boolean>;
+  currentPlayingVerse: number | null;
+  setCurrentPlayingVerse: (id: number | null) => void;
+  currentVerseAudio: HTMLAudioElement | null;
+  setCurrentVerseAudio: (audio: HTMLAudioElement | null) => void;
+  onShowSacredNotification?: (verseName: string) => void;
+  onNavigate?: (tab: string) => void;
+  onVerse4Usage?: () => Promise<boolean>;
+}
+
+export function VerseAudioCard({ 
+  verse, 
+  onWarning, 
+  currentPlayingVerse, 
+  setCurrentPlayingVerse,
+  currentVerseAudio,
+  setCurrentVerseAudio,
+  onShowSacredNotification,
+  onNavigate,
+  onVerse4Usage
+}: VerseAudioCardProps) {
+  const { createProtectedAudio, createStreamingAudio, isCached } = useProtectedAudio();
+  const { awardXP } = useXPSystem();
+  const { toast } = useToast();
+  
+  const [audioDuration, setAudioDuration] = useState<number | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  
+  const isPlaying = currentPlayingVerse === verse.id;
+  const attachedAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Ensure timer UI stays in sync after tab/page switches by
+  // re-attaching to the global audio element when relevant.
+  useEffect(() => {
+    const audio = currentVerseAudio;
+    const isThisVerse = currentPlayingVerse === verse.id || currentPlayingVerse === -verse.id;
+
+    // Cleanup helper
+    const detach = () => {
+      const prev = attachedAudioRef.current;
+      if (!prev) return;
+      prev.removeEventListener('loadedmetadata', onLoadedMetadata);
+      prev.removeEventListener('timeupdate', onTimeUpdate);
+      prev.removeEventListener('ended', onEnded);
+      prev.removeEventListener('pause', onPause);
+      prev.removeEventListener('play', onPlay);
+      attachedAudioRef.current = null;
+    };
+
+    // Event handlers defined once for stable cleanup
+    function onLoadedMetadata(this: HTMLAudioElement) {
+      setAudioDuration(this.duration || 0);
+    }
+    function onTimeUpdate(this: HTMLAudioElement) {
+      setCurrentTime(this.currentTime || 0);
+    }
+    function onEnded() {
+      // Keep last known time at 0 and duration cleared after end
+      setCurrentTime(0);
+      setAudioDuration(null);
+    }
+    function onPause(this: HTMLAudioElement) {
+      // Preserve last paused time for UI consistency
+      setCurrentTime(this.currentTime || 0);
+    }
+    function onPlay(this: HTMLAudioElement) {
+      // Refresh duration/time on resume
+      if (!isNaN(this.duration)) setAudioDuration(this.duration);
+      setCurrentTime(this.currentTime || 0);
+    }
+
+    // If no audio or not this verse, detach and bail
+    if (!audio || !isThisVerse) {
+      detach();
+      return;
+    }
+
+    // Attach if not already
+    if (attachedAudioRef.current !== audio) {
+      detach();
+      // Initialize snapshot immediately
+      if (!isNaN(audio.duration)) setAudioDuration(audio.duration);
+      setCurrentTime(audio.currentTime || 0);
+
+      audio.addEventListener('loadedmetadata', onLoadedMetadata);
+      audio.addEventListener('timeupdate', onTimeUpdate);
+      audio.addEventListener('ended', onEnded);
+      audio.addEventListener('pause', onPause);
+      audio.addEventListener('play', onPlay);
+      attachedAudioRef.current = audio;
+    } else {
+      // Ensure state is in sync even if already attached
+      if (!isNaN(audio.duration)) setAudioDuration(audio.duration);
+      setCurrentTime(audio.currentTime || 0);
+    }
+
+    return () => {
+      detach();
+    };
+  }, [currentVerseAudio, currentPlayingVerse, verse.id]);
+
+
+
+  const handlePlayClick = async () => {
+    if (!verse.unlocked || !verse.audioPath) return;
+
+    if (currentPlayingVerse === verse.id && currentVerseAudio) { // Verse is playing
+      currentVerseAudio.pause();
+      setCurrentPlayingVerse(-verse.id); // Mark as paused
+      return;
+    }
+
+    if (currentPlayingVerse === -verse.id && currentVerseAudio) { // Verse is paused
+      await currentVerseAudio.play();
+      setCurrentPlayingVerse(verse.id); // Mark as playing
+      return;
+    }
+
+    if (currentPlayingVerse && currentPlayingVerse !== verse.id && onWarning) {
+      const shouldContinue = await onWarning();
+      if (!shouldContinue) return;
+    }
+
+    if (currentVerseAudio) {
+      currentVerseAudio.pause();
+      setCurrentVerseAudio(null);
+      window.dispatchEvent(new CustomEvent('updateCurrentlyPlaying', { detail: null }));
+    }
+
+    if (verse.id === 4 && onVerse4Usage) {
+      const canPlay = await onVerse4Usage();
+      if (!canPlay) return;
+    }
+
+    try {
+      const cached = await isCached(verse.audioPath);
+      let audio: HTMLAudioElement;
+
+      if (cached) {
+        console.log('🎵 Using cached audio for instant play');
+        audio = await createProtectedAudio(verse.audioPath);
+      } else {
+        console.log('🎵 Using streaming audio for instant play');
+        audio = createStreamingAudio(verse.audioPath);
+      }
+
+      const updatePlaybackFlags = (playing: boolean, reason: string) => {
+        const currentTimeSnapshot = audio.currentTime;
+        (window as any).isAudioPlaying = playing;
+        if ('mediaSession' in navigator && navigator.mediaSession) {
+          try {
+            navigator.mediaSession.playbackState = playing ? 'playing' : 'paused';
+          } catch (mediaSessionError) {
+            console.debug('MediaSession playbackState update failed:', mediaSessionError);
+          }
+        }
+        window.dispatchEvent(new CustomEvent('audio-playback-state-change', {
+          detail: {
+            verseId: verse.id,
+            playing,
+            reason,
+            currentTime: currentTimeSnapshot
+          }
+        }));
+        console.log('[AudioDebug] playback state change', {
+          verseId: verse.id,
+          playing,
+          reason,
+          hidden: document.hidden,
+          currentTime: currentTimeSnapshot
+        });
+      };
+
+      const handleMetadata = () => setAudioDuration(audio.duration);
+      const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+      const handlePlay = () => updatePlaybackFlags(true, 'play-event');
+      const handlePause = () => {
+        updatePlaybackFlags(false, audio.ended ? 'pause-after-ended' : 'pause-event');
+      };
+
+      const handleEnded = async () => {
+        console.log('🎵 Audio ended for verse:', verse.title, 'ID:', verse.id);
+        updatePlaybackFlags(false, 'ended-event');
+        setCurrentPlayingVerse(null);
+        setCurrentVerseAudio(null);
+        setAudioDuration(null);
+        setCurrentTime(0);
+        
+        const xpAmount = 10;
+        awardXP('verse_completion', xpAmount, `Completed ${verse.title}`, { verse_title: verse.title, verse_id: verse.id });
+      };
+
+      const handleError = (error: any) => {
+        console.error('Error playing audio:', error);
+        updatePlaybackFlags(false, 'error-event');
+        setCurrentPlayingVerse(null);
+        setCurrentVerseAudio(null);
+        setAudioDuration(null);
+        setCurrentTime(0);
+      };
+
+      audio.addEventListener('loadedmetadata', handleMetadata);
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('pause', handlePause);
+      audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('error', handleError);
+
+      await audio.play();
+      setCurrentPlayingVerse(verse.id);
+      setCurrentVerseAudio(audio);
+
+      const insertVerseNotification = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          let displayName = user.user_metadata?.display_name || 'Someone';
+          const { error } = await supabase.from('verse_notif').insert({ user_id: user.id, display_name: displayName, verse_title: verse.title, verse_id: verse.id });
+          if (error) console.error('❌ Error inserting verse notification:', error);
+        }
+      };
+      await insertVerseNotification();
+      
+      if (onShowSacredNotification) {
+        setTimeout(() => onShowSacredNotification(verse.title), 3000);
+      }
+      
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      (window as any).isAudioPlaying = false;
+      setCurrentPlayingVerse(null);
+      setCurrentVerseAudio(null);
+    }
+  };
+
+  const canPlay = verse.unlocked && verse.audioPath;
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleSeek = (value: number[]) => {
+    if (currentVerseAudio && audioDuration) {
+      const newTime = (value[0] / 100) * audioDuration;
+      currentVerseAudio.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+
+  const progress = audioDuration ? (currentTime / audioDuration) * 100 : 0;
+
+  return (
+    <div className="relative group cursor-pointer" data-verse-title={verse.title}>
+      {verse.unlocked && verse.artwork ? (
+        <div>
+          <div className="absolute inset-0 w-40 h-40 rounded-full bg-gradient-to-r from-primary via-accent to-primary opacity-30 blur-xl animate-pulse"></div>
+          <div className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-gradient-to-r from-primary/60 to-accent/60 shadow-2xl shadow-primary/40">
+            <img src={verse.artwork} alt={`${verse.title} cosmic artwork`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-accent/20"></div>
+          </div>
+          
+          <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center transition-all duration-500 cursor-pointer" onClick={handlePlayClick}>
+            <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center backdrop-blur-lg border border-white/20 shadow-xl transform group-hover:scale-110 transition-transform duration-300">
+              {!canPlay ? <Lock className="w-6 h-6 text-white/60" /> : isPlaying ? (
+                <div className="flex gap-1 items-center justify-center"><div className="w-1.5 h-5 bg-white rounded-sm"></div><div className="w-1.5 h-5 bg-white rounded-sm"></div></div>
+              ) : (
+                <div className="relative flex items-center justify-center"><div className="w-0 h-0 ml-1" style={{ borderLeft: '14px solid white', borderTop: '10px solid transparent', borderBottom: '10px solid transparent', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} /></div>
+              )}
+            </div>
+          </div>
+          
+          {audioDuration && (currentPlayingVerse === verse.id || currentPlayingVerse === -verse.id) && (
+            <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-48 bg-black/80 backdrop-blur-lg rounded-lg p-2 border border-primary/20">
+              <Progress value={progress} className="h-1 cursor-pointer bg-white/10" onClick={(e) => { const rect = e.currentTarget.getBoundingClientRect(); const percent = ((e.clientX - rect.left) / rect.width) * 100; handleSeek([Math.max(0, Math.min(100, percent))]); }} />
+              <div className="flex justify-between text-xs text-white/60 mt-1"><span>{formatTime(currentTime)}</span><span>{formatTime(audioDuration)}</span></div>
+            </div>
+          )}
+
+        </div>
+      ) : (
+        <div className="relative"> 
+          <div className={`w-36 h-36 rounded-full flex items-center justify-center border-2 border-dashed transition-all duration-500 ${!verse.unlocked ? verse.requiredLevel === 10 ? "bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-400/40 shadow-lg shadow-purple-500/20" : "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/40 shadow-lg shadow-rose-500/20" : "bg-gradient-to-br from-muted/20 to-background border-muted-foreground/40"}`}>
+            <div className="text-center space-y-3">
+              {!verse.unlocked ? (
+                <>{verse.requiredLevel === 10 ? <Zap className="w-12 h-12 text-purple-400 mx-auto animate-pulse" /> : <Crown className="w-12 h-12 text-rose-400 mx-auto animate-pulse" />}<div className="relative"><Lock className="w-6 h-6 text-muted-foreground mx-auto" /></div></>
+              ) : (
+                <><Music className="w-12 h-12 text-muted-foreground mx-auto" /><div className="text-xs text-muted-foreground font-medium">Coming Soon</div></>
+              )}
+            </div>
+          </div>
+          
+          {!verse.unlocked && (
+            <>
+              <div className="text-sm font-bold mt-3 text-center text-red-400 flex items-center justify-center gap-1">{/* Lock level logic */}</div>
+              <div className={`absolute inset-0 rounded-full animate-pulse ${verse.requiredLevel === 10 ? "bg-gradient-to-r from-purple-500/10 to-violet-500/10" : "bg-gradient-to-r from-rose-500/10 to-pink-500/10"} blur-xl`}></div>
+            </>
+          )}
+        </div>
+      )}
+      
+      {showTermsModal && verse.id === 8 && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">{/* Terms Modal Content */}</div>
+      )}
+    </div>
+  );
+}

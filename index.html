@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <!-- iOS-specific meta tags for better compatibility -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Android-specific optimizations -->
+    <meta name="theme-color" content="#000000" />
+    <meta name="msapplication-navbutton-color" content="#000000" />
+    <meta name="msapplication-TileColor" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <title>eL Vision Group</title>
+    <meta name="description" content="eL Vision Group Ecosystem" />
+    <meta name="author" content="eL Vision Group" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <meta property="og:title" content="eL Vision Group" />
+    <meta property="og:description" content="eL Vision Group Ecosystem" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/favicon.png" />
+
+
+    
+    <style>
+      /* Initial loading styles to prevent white flash */
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0A0A0F;
+        color: white;
+        font-family: system-ui, -apple-system, sans-serif;
+        touch-action: pan-x pan-y;
+        -webkit-text-size-adjust: none;
+        -moz-text-size-adjust: none;
+        -ms-text-size-adjust: none;
+        text-size-adjust: none;
+      }
+
+      #root {
+        min-height: 100vh;
+        background: #0A0A0F;
+      }
+      
+      /* Loading spinner for initial load */
+      .initial-loader {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+      
+      .initial-loader img {
+        width: 150px;
+        height: 150px;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+    </style>
+    
+    <script>
+      // SAFARI CACHE & SW CLEANER (Fixes Black Screen/Stale Cache)
+      (function() {
+        var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        
+        // Configuration: Bump this version to force a re-clean for all Safari users
+        var CLEANUP_VERSION = 'safari_fix_2026_01_13_v2';
+        
+        if (isSafari) {
+          try {
+            var hasCleaned = localStorage.getItem(CLEANUP_VERSION);
+            
+            if (!hasCleaned) {
+              console.log('🦁 Safari detected: Executing one-time Service Worker & Cache cleanup...');
+              
+              // 1. Unregister all Service Workers
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  if (registrations.length === 0) {
+                     // No SW found, just mark as cleaned
+                     localStorage.setItem(CLEANUP_VERSION, 'true');
+                     return;
+                  }
+                  
+                  var promises = registrations.map(function(r) {
+                    console.log('🗑️ Unregistering SW:', r.scope);
+                    return r.unregister();
+                  });
+                  
+                  Promise.all(promises).then(function() {
+                    console.log('✅ All SWs unregistered');
+                    // Continue to clear caches
+                    clearCachesAndReload();
+                  });
+                });
+              } else {
+                // No SW support, just clear caches
+                clearCachesAndReload();
+              }
+              
+              function clearCachesAndReload() {
+                if ('caches' in window) {
+                  caches.keys().then(function(names) {
+                    Promise.all(names.map(function(name) {
+                      console.log('🗑️ Deleting Cache:', name);
+                      return caches.delete(name);
+                    })).then(function() {
+                      console.log('✅ All Caches cleared');
+                      finish();
+                    });
+                  });
+                } else {
+                  finish();
+                }
+              }
+              
+              function finish() {
+                localStorage.setItem(CLEANUP_VERSION, 'true');
+                console.log('🔄 Reloading to apply fresh state...');
+                window.location.reload();
+              }
+              
+              // Halt execution to prevent app from booting in broken state while we clean
+              // (This is a soft halt, we can't truly stop the parser, but we can reload fast)
+              return; 
+            }
+          } catch (e) {
+            console.error('Safari cleanup failed:', e);
+            // Fallback: mark as cleaned to prevent loops
+            localStorage.setItem(CLEANUP_VERSION, 'true');
+          }
+        }
+      })();
+      
+      // Service worker registration for development (production uses Vite PWA auto-registration)
+      if ('serviceWorker' in navigator && location.hostname === 'localhost') {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js', { 
+            updateViaCache: 'none'
+          })
+          .then((registration) => {
+            console.log('✅ Development SW registered:', registration);
+            registration.update();
+          })
+          .catch((error) => {
+            console.log('❌ SW registration failed:', error);
+          });
+        });
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="root">
+      <!-- Initial loading indicator -->
+      <div class="initial-loader">
+        <img src="/favicon.png" alt="Loading..." />
+        <div style="margin-top: 20px; font-size: 18px; background: linear-gradient(to right, #fb923c, #facc15); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 600; text-shadow: 0 0 15px rgba(251, 146, 60, 0.4);">🚀 Initiate Ecosystem..</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

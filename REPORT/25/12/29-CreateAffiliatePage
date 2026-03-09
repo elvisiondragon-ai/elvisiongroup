@@ -1,0 +1,53 @@
+25/12/29-CreateAffiliatePage
+- Created `src/pages/affiliate.tsx` with UI for displaying user's unique affiliate code, an affiliate link generator, and a commission history table.
+- Added a new route `/affiliate` in `src/App.tsx` to render the `AffiliatePage` component.
+
+**Backend Requirements for Affiliate System:**
+
+The newly created `src/pages/affiliate.tsx` provides the frontend UI for an affiliate system. However, for this system to function correctly and securely, significant backend development and database modifications are required. Here’s a detailed breakdown:
+
+1.  **Supabase Database Schema Changes:**
+    *   **`profiles` table modification:**
+        *   Add a new column: `affiliate_code` (TEXT, UNIQUE, nullable). This will store a unique identifier for each user participating in the affiliate program. This code could be automatically generated upon user registration or when a user first accesses the affiliate page if their `affiliate_code` is null.
+    *   **New `commissions` table:**
+        *   `id`: Primary Key (UUID or SERIAL).
+        *   `affiliate_user_id`: Foreign Key (UUID) linking to `auth.users.id` (or `profiles.id`). This identifies the affiliate who earned the commission.
+        *   `product_name`: TEXT, name of the product sold (e.g., "Fitfactor", "EL Vision 3000").
+        *   `sale_date`: TIMESTAMP WITH TIME ZONE, when the sale occurred.
+        *   `sale_amount`: DECIMAL, the total amount of the sale (e.g., $100).
+        *   `commission_percentage`: DECIMAL, the agreed commission rate (e.g., 0.30 for 30%).
+        *   `commission_amount`: DECIMAL, the calculated commission amount (e.g., $30).
+        *   `transaction_id`: TEXT (optional, but recommended), to link back to the original payment transaction.
+
+2.  **Affiliate Code Generation Logic:**
+    *   **Initial Generation:** When a user first visits the `/affiliate` page and they don't have an `affiliate_code` in their profile, a unique code needs to be generated and stored in their `profiles` table. The frontend code currently includes a basic example using `user.id.substring(0, 8)`, but a more robust, truly unique, and collision-resistant generation strategy should be implemented (e.g., UUIDs or a custom alphanumeric string generator with collision checks).
+
+3.  **Affiliate Link Tracking Mechanism:**
+    *   **Frontend Logic (on product pages):** When a user arrives at a product page (e.g., `src/pages/fitfactor.tsx`, `src/pages/3000.tsx`) via an affiliate link (e.g., `https://app.elvisiongroup.com/fitfactor?ref=YOUR_AFFILIATE_CODE`), the `ref` parameter must be extracted from the URL.
+    *   **Cookie/Session Storage:** This `affiliate_code` (`ref` parameter) needs to be stored client-side (e.g., in a cookie with a reasonable expiration, or in local storage) to persist across page navigations and until a purchase is made. This ensures the affiliate is credited even if the user browses other pages before buying.
+
+4.  **Commission Calculation and Attribution (CRITICAL Backend Logic):**
+    *   **Payment Success Hook/Webhook:** When a payment is successfully processed for any product (e.g., through PayPal, Stripe, etc.), a server-side event or webhook must be triggered.
+    *   **Affiliate ID Retrieval:** This server-side logic needs to retrieve the stored `affiliate_code` from the user's session/cookie (which was set during the initial visit via the affiliate link).
+    *   **Sale Data Recording:** Record details of the sale (product, amount, date).
+    *   **Commission Calculation:** Calculate 30% of the `sale_amount`.
+    *   **Database Insertion:** Insert a new record into the `commissions` table with all relevant details, linking it to the `affiliate_user_id` corresponding to the `affiliate_code`.
+    *   **Supabase Functions/Edge Functions:** This entire process would likely be implemented using a Supabase Function (or a similar serverless function) that is called by your payment gateway's webhook or by your own backend API after a successful payment.
+
+5.  **Displaying Commissions on Affiliate Page:**
+    *   The frontend code in `src/pages/affiliate.tsx` already includes logic to fetch commission data from the `commissions` table via Supabase. This will work once the `commissions` table is created and populated by the backend process described above.
+
+**Example Flow for a Sale:**
+1.  Affiliate shares `https://app.elvisiongroup.com/fitfactor?ref=ABCDEFG`.
+2.  Customer clicks the link and lands on `/fitfactor`.
+3.  The frontend extracts `ABCDEFG` and stores it in a cookie `affiliate_ref=ABCDEFG`.
+4.  Customer proceeds to purchase Fitfactor.
+5.  Payment is successful.
+6.  A backend webhook/function is triggered.
+7.  This function reads the `affiliate_ref` cookie/session data (or passes it from the client-side during payment initiation if secure).
+8.  It identifies the affiliate user associated with `ABCDEFG`.
+9.  Calculates 30% commission on the Fitfactor sale amount.
+10. Inserts a record into the `commissions` table.
+11. The affiliate user then visits `/affiliate` and sees the new commission.
+
+Implementing the backend components is crucial for the affiliate system to function beyond a UI display.

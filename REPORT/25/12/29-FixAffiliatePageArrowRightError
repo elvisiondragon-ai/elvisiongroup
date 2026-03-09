@@ -1,0 +1,2 @@
+25/12/29-FixAffiliatePageArrowRightError
+- Fixed `Uncaught ReferenceError: ArrowRight is not defined` in `src/pages/affiliate.tsx` by adding `ArrowRight` to the import statement from `lucide-react`.

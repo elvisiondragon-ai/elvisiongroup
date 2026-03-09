@@ -1,0 +1,51 @@
+| id                                   | email                      | raw_user_meta_data                                                                                                                                    | raw_app_meta_data                          | created_at                    | updated_at                    |
+| ------------------------------------ | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ----------------------------- | ----------------------------- |
+| a8a834c2-7761-4e6e-95b1-2a3a81190fd4 | sasandomlg43@gmail.com     | {"sub":"a8a834c2-7761-4e6e-95b1-2a3a81190fd4","email":"sasandomlg43@gmail.com","email_confirm":true,"email_verified":true,"phone_verified":false}     | {"provider":"email","providers":["email"]} | 2025-09-23 17:45:41.374337+00 | 2025-09-23 17:45:41.392358+00 |
+| 2a8a6482-3898-4ce6-a9b2-48285eb5b703 | riyadfahrudin340@gmail.com | {"sub":"2a8a6482-3898-4ce6-a9b2-48285eb5b703","email":"riyadfahrudin340@gmail.com","email_confirm":true,"email_verified":true,"phone_verified":false} | {"provider":"email","providers":["email"]} | 2025-09-23 16:51:59.95327+00  | 2025-09-23 17:32:29.584334+00 |
+| 859c9492-e8a7-4d14-b1df-31c174c13d0a | mock11@yahoo.com           | {"display_name":"Mega Sari"}                                                                                                                          | null                                       | 2025-09-23 03:22:08.408703+00 | 2025-09-23 03:22:08.408703+00 |
+| 2f9af795-b3f0-4bf6-b2c7-d517ef16f9c9 | mock13@yahoo.com           | {"display_name":"Lina Maharani"}                                                                                                                      | null                                       | 2025-09-23 03:22:08.408703+00 | 2025-09-23 03:22:08.408703+00 |
+| ba9ff5cb-bc04-4734-ba4e-d0765d6c8a2b | mock7@yahoo.com            | {"display_name":"Sari Kusuma"}                                                                                                                        | null                                       | 2025-09-23 03:22:08.408703+00 | 2025-09-23 03:22:08.408703+00 |
+| 9f70dac9-dd00-4875-aee5-db4d7e5c23d3 | mock8@yahoo.com            | {"display_name":"Ahmad Santoso"}                                                                                                                      | null                                       | 2025-09-23 03:22:08.408703+00 | 2025-09-23 03:22:08.408703+00 |
+| 02ea17ec-b799-4873-84a2-f2272aad53a6 | mock10@yahoo.com           | {"display_name":"Dr. Hendro Wijaya"}                                                                                                                  | null                                       | 2025-09-23 03:22:08.408703+00 | 2025-09-23 03:22:08.408703+00 |
+| 86d4c662-8a7f-48ee-be65-5eccb530cd33 | mock12@yahoo.com           | {"display_name":"Dani Pratama"}                                                                                                                       | null                                       | 2025-09-23 03:22:08.408703+00 | 2025-09-23 03:22:08.408703+00 |
+| fa3cefa6-bd80-403e-b874-9143b65bcf5b | mock9@yahoo.com            | {"display_name":"Rika Permata"}                                                                                                                       | null                                       | 2025-09-23 03:22:08.408703+00 | 2025-09-23 03:22:08.408703+00 |
+| 608b5f46-d69b-4136-b224-1fab997563ba | mock14@yahoo.com           | {"display_name":"Budi Hartono"}                                                                                                                       | null                                       | 2025-09-23 03:22:08.408703+00 | 2025-09-23 03:22:08.408703+00 |
+
+
+| id                                   | email                      | metadata_display_name | metadata_full_name | metadata_name | metadata_phone | metadata_avatar | provider | providers |
+| ------------------------------------ | -------------------------- | --------------------- | ------------------ | ------------- | -------------- | --------------- | -------- | --------- |
+| a8a834c2-7761-4e6e-95b1-2a3a81190fd4 | sasandomlg43@gmail.com     | null                  | null               | null          | null           | null            | email    | ["email"] |
+| 2a8a6482-3898-4ce6-a9b2-48285eb5b703 | riyadfahrudin340@gmail.com | null                  | null               | null          | null           | null            | email    | ["email"] |
+| 859c9492-e8a7-4d14-b1df-31c174c13d0a | mock11@yahoo.com           | Mega Sari             | null               | null          | null           | null            | null     | null      |
+| 2f9af795-b3f0-4bf6-b2c7-d517ef16f9c9 | mock13@yahoo.com           | Lina Maharani         | null               | null          | null           | null            | null     | null      |
+| ba9ff5cb-bc04-4734-ba4e-d0765d6c8a2b | mock7@yahoo.com            | Sari Kusuma           | null               | null          | null           | null            | null     | null      |
+| 9f70dac9-dd00-4875-aee5-db4d7e5c23d3 | mock8@yahoo.com            | Ahmad Santoso         | null               | null          | null           | null            | null     | null      |
+| 02ea17ec-b799-4873-84a2-f2272aad53a6 | mock10@yahoo.com           | Dr. Hendro Wijaya     | null               | null          | null           | null            | null     | null      |
+| 86d4c662-8a7f-48ee-be65-5eccb530cd33 | mock12@yahoo.com           | Dani Pratama          | null               | null          | null           | null            | null     | null      |
+| fa3cefa6-bd80-403e-b874-9143b65bcf5b | mock9@yahoo.com            | Rika Permata          | null               | null          | null           | null            | null     | null      |
+| 608b5f46-d69b-4136-b224-1fab997563ba | mock14@yahoo.com           | Budi Hartono          | null               | null          | null           | null            | null     | null      |
+
+
+| auth_user_id                         | email                      | auth_metadata_name | profiles_table_name      | profiles_phone | metadata_status     | profile_status     |
+| ------------------------------------ | -------------------------- | ------------------ | ------------------------ | -------------- | ------------------- | ------------------ |
+| a8a834c2-7761-4e6e-95b1-2a3a81190fd4 | sasandomlg43@gmail.com     | null               | sasandomlg43             | null           | ❌ NO METADATA NAME  | ✅ HAS PROFILE NAME |
+| 2a8a6482-3898-4ce6-a9b2-48285eb5b703 | riyadfahrudin340@gmail.com | null               | riyadfahrudin340         | null           | ❌ NO METADATA NAME  | ✅ HAS PROFILE NAME |
+| 859c9492-e8a7-4d14-b1df-31c174c13d0a | mock11@yahoo.com           | Mega Sari          | Mega Sari                | null           | ✅ HAS METADATA NAME | ✅ HAS PROFILE NAME |
+| 2f9af795-b3f0-4bf6-b2c7-d517ef16f9c9 | mock13@yahoo.com           | Lina Maharani      | Lina Maharani            | null           | ✅ HAS METADATA NAME | ✅ HAS PROFILE NAME |
+| ba9ff5cb-bc04-4734-ba4e-d0765d6c8a2b | mock7@yahoo.com            | Sari Kusuma        | Sari Kusuma              | null           | ✅ HAS METADATA NAME | ✅ HAS PROFILE NAME |
+| 9f70dac9-dd00-4875-aee5-db4d7e5c23d3 | mock8@yahoo.com            | Ahmad Santoso      | Ahmad Santoso            | null           | ✅ HAS METADATA NAME | ✅ HAS PROFILE NAME |
+| 02ea17ec-b799-4873-84a2-f2272aad53a6 | mock10@yahoo.com           | Dr. Hendro Wijaya  | Dr. Hendro Wijaya        | null           | ✅ HAS METADATA NAME | ✅ HAS PROFILE NAME |
+| 86d4c662-8a7f-48ee-be65-5eccb530cd33 | mock12@yahoo.com           | Dani Pratama       | Dani Pratama             | null           | ✅ HAS METADATA NAME | ✅ HAS PROFILE NAME |
+| fa3cefa6-bd80-403e-b874-9143b65bcf5b | mock9@yahoo.com            | Rika Permata       | Dewi Anggraini, A.Md.Keb | null           | ✅ HAS METADATA NAME | ✅ HAS PROFILE NAME |
+| 608b5f46-d69b-4136-b224-1fab997563ba | mock14@yahoo.com           | Budi Hartono       | Budi Hartono             | null           | ✅ HAS METADATA NAME | ✅ HAS PROFILE NAME |
+
+| app_metadata_keys |
+| ----------------- |
+| provider          |
+| providers         |
+
+| info                           | raw_user_meta_data                                                                                                                                             | raw_app_meta_data                          |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| SAMPLE AUTH METADATA STRUCTURE | {"sub":"38625adb-dcfb-4bac-b473-2e6ee37af72e","email":"mochseno91@gmail.com","email_verified":true,"phone_verified":false}                                     | {"provider":"email","providers":["email"]} |
+| SAMPLE AUTH METADATA STRUCTURE | {"sub":"71a968fa-20e2-40a3-b260-004d43cca420","email":"deliais@yahoo.com","email_verified":true,"phone_verified":false}                                        | {"provider":"email","providers":["email"]} |
+| SAMPLE AUTH METADATA STRUCTURE | {"sub":"93819275-d50f-40d7-b404-6e1043b33265","email":"thomasakbar66@gmail.com","display_name":"Thomas Al Akbar","email_verified":true,"phone_verified":false} | {"provider":"email","providers":["email"]} |

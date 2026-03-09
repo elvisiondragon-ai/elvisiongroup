@@ -1,0 +1,16 @@
+25/12/29-FixAffiliatePageError
+- Modified `src/pages/affiliate.tsx` to use `user.id` directly as the `affiliateCode` instead of relying on a `affiliate_code` column in the `profiles` table.
+- Removed the logic that attempted to fetch or create an `affiliate_code` from the `profiles` table.
+- Updated commission fetching to filter by `affiliate_user_id` using the current `user.id`.
+
+**Implications of this change:**
+By using `user.id` as the affiliate code, the immediate error "column profiles.affiliate_code does not exist" is resolved, allowing the frontend to function.
+
+However, the backend requirements for the affiliate system still stand, with a slight adjustment:
+*   The `commissions` table must have an `affiliate_user_id` column (UUID) that stores the `id` of the user who referred the sale.
+*   When a sale occurs via an affiliate link, the server-side logic must:
+    1.  Extract the `user.id` (which is now the affiliate code) from the `ref` parameter in the URL (stored in cookie/session).
+    2.  Use this `user.id` to populate the `affiliate_user_id` column when inserting a new record into the `commissions` table.
+*   The `profiles.affiliate_code` column is no longer strictly necessary for the basic functionality implemented, but could be added later if custom, human-readable affiliate codes are desired.
+
+The core need for backend server-side logic (e.g., Supabase Functions/Edge Functions) for tracking sales, calculating commissions, and populating the `commissions` table remains crucial for the full functionality of the affiliate system.

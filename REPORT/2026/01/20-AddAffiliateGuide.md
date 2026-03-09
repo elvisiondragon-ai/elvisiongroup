@@ -1,0 +1,1 @@
+# Affiliate Guide Update - 20/01/26\n\n- Added Affiliate Guide Section to Home.tsx\n- Created AffiliateGuideModal component with dark purple theme\n- Integrated video tutorial with custom play button overlay\n- Video URL updated to: https://tgojzhjujhjboboqygub.supabase.co/storage/v1/object/public/meta/0120.mp4

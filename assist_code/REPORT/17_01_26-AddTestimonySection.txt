@@ -1,0 +1,12 @@
+Task: Fix mobile ordering in 'Apa yang Dilakukan eL Vision' section
+Date: 17/01/26
+Status: Success
+
+Details:
+- Modified 'order-*' and 'md:order-*' classes for all 3 stages.
+- Ensured Text/Title blocks always appear first (order-1) on mobile.
+- Preserved alternating layout on desktop:
+  - Stage 1: Text (Left) - Image (Right)
+  - Stage 2: Image (Left) - Text (Right)
+  - Stage 3: Text (Left) - Image (Right)
+

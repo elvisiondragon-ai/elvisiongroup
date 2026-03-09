@@ -1,0 +1,10 @@
+25/12/29-RemoveSubscriptionButtonAndAutoDiscount_Final
+- Removed the "Gabung Subscription dan dapatkan diskon 30% sepanjang tahun" button/section from the following files:
+    - `src/pages/drelf.tsx`
+    - `src/pages/fitfactor.tsx`
+    - `src/pages/jewelry.tsx`
+    - `src/pages/parfum.tsx`
+    - `src/pages/hungrylater.tsx`
+- Removed the automatic discount calculation based on `proStatus.isPro` (i.e., `Math.round(price * quantity * 0.7)` or similar) from these files, ensuring `totalAmount` is always `price * quantity` (or `calculatedTotalAmount`).
+- Removed the "DISC PRO MEMBER" visual indicator `<span>` element from these files.
+- `src/pages/diet.tsx` did not require any changes as the specified elements were not present.

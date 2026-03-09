@@ -1,0 +1,11 @@
+Task: Fix 404 for old users on /testimony
+Date: 17/01/26
+Status: Success
+
+Details:
+- Identified issue as stale Service Worker cache preventing client-side routing from recognizing new routes.
+- Modified 'src/pages/NotFound.tsx' to implement a 'retry-on-404' mechanism.
+- The mechanism uses sessionStorage to track if a specific path has been retried.
+- If not retried, it forces a 'window.location.reload()', which bypasses the immediate SW cache issue and triggers the 'autoUpdate' logic in 'vite-plugin-pwa'.
+- Validated 'src/pages/testimony.tsx' exists and is correct.
+

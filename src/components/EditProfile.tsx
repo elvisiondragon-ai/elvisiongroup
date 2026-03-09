@@ -1,0 +1,298 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Upload, Save, X, User, Phone } from "lucide-react";
+
+import imageCompression from 'browser-image-compression';
+
+interface EditProfileProps {
+  user: any;
+  userProfile: any;
+  onSave: () => void;
+  onCancel: () => void;
+}
+
+export function EditProfile({ user, userProfile, onSave, onCancel }: EditProfileProps) {
+  const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phoneNumber, setPhoneNumber] = useState(userProfile?.phone_number || '');
+  const [avatarUrl, setAvatarUrl] = useState(userProfile?.avatar_url || '');
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
+
+      const file = event.target.files[0];
+
+      // --- Compression Step ---
+      console.log(`Original file size: ${file.size / 1024 / 1024} MB`);
+      const options = {
+        maxSizeMB: 0.020, // 20KB
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      console.log(`Compressed file size: ${compressedFile.size / 1024} KB`);
+      // --- End Compression ---
+
+      const formData = new FormData();
+      // Important: Use the compressedFile, but give it the original file's name
+      formData.append('file', compressedFile, file.name);
+
+      const { data, error: invokeError } = await supabase.functions.invoke('save-avatar', {
+        body: formData,
+      });
+
+      if (invokeError) {
+        throw new Error(invokeError.message || 'Failed to upload avatar via invoke.');
+      }
+
+      if (data && data.url) {
+        const newAvatarUrl = `${data.url}?t=${new Date().getTime()}`;
+        setAvatarUrl(newAvatarUrl);
+      } else {
+        throw new Error("Edge Function did not return a valid URL.");
+      }
+      
+      toast({
+        title: "Success",
+        description: "Profile picture uploaded successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload profile picture",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+
+      const { data: { user: authUser }, error: authErr } = await supabase.auth.getUser()
+      if (authErr || !authUser) throw new Error('Not authenticated')
+
+      // --- Handle Email Change in Supabase Auth ---
+      if (email && email.toLowerCase() !== authUser.email) {
+        const { error: updateUserError } = await supabase.auth.updateUser({ email: email.toLowerCase() });
+        if (updateUserError) throw updateUserError;
+        console.log('DEBUG: Email change toast should appear now.');
+        toast({
+          title: 'Confirm your new email',
+          description: 'A confirmation link has been sent to your new email address.',
+        });
+        onSave(); // Close the edit modal
+        return; // Stop execution here if email changed, to prevent other toasts and allow user to confirm email
+      }
+
+      // --- XP Award Logic for First Avatar ---
+      let experienceGained = 0;
+      const isFirstAvatar = !userProfile?.avatar_url && avatarUrl;
+      if (isFirstAvatar) {
+        experienceGained = 200;
+      }
+      const currentExperience = userProfile?.experience_points || 0;
+      const newExperience = currentExperience + experienceGained;
+      // --- End XP Logic ---
+
+      const profileData: any = {
+        user_id: authUser.id,                 // must match RLS
+        display_name: displayName ?? undefined,
+        avatar_url: avatarUrl ?? undefined,   // final URL/path only
+        user_email: email ?? undefined,
+        phone_number: phoneNumber ?? undefined,
+        updated_at: new Date().toISOString(),
+      }
+
+      // Only include experience_points in the update if it has changed
+      if (isFirstAvatar) {
+        profileData.experience_points = newExperience;
+      }
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert(profileData, { onConflict: 'user_id' })
+
+      if (profileError) throw profileError
+
+      // Show XP bonus toast if awarded
+      if (isFirstAvatar) {
+        toast({ 
+          title: '✨ Bonus EXP! ✨',
+          description: `Kamu mendapatkan +${experienceGained} EXP untuk upload avatar pertamamu!`,
+        })
+      }
+
+      toast({ title: 'Success', description: 'Profile updated successfully' })
+      onSave()
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update profile',
+        variant: 'destructive',
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold font-exo text-foreground">
+          Edit Profil
+        </h1>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onCancel}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <X className="w-4 h-4" />
+        </Button>
+      </div>
+
+      {/* Profile Picture Section */}
+      <Card className="p-6 bg-gradient-secondary border-border">
+        <div className="text-center space-y-4">
+          <Avatar className="w-24 h-24 mx-auto border-2 border-primary glow-primary">
+            <AvatarImage src={avatarUrl} />
+            <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xl font-exo">
+              {displayName.charAt(0).toUpperCase() || 'U'}
+            </AvatarFallback>
+          </Avatar>
+          
+          <div>
+            <Label htmlFor="avatar-upload" className="cursor-pointer">
+              <Button
+                variant="outline"
+                disabled={uploading}
+                className="border-border hover:border-primary"
+                asChild
+              >
+                <span>
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploading ? 'Uploading avatar...' : 'Change Picture'}
+                </span>
+              </Button>
+            </Label>
+            <input
+              id="avatar-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
+          </div>
+        </div>
+      </Card>
+
+      {/* Form Fields */}
+      <Card className="p-6 bg-gradient-secondary border-border space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="display-name" className="text-foreground">
+            Display Name
+          </Label>
+          <Input
+            id="display-name"
+            value={displayName}
+            onChange={(e) => {
+              // Sanitize input to prevent XSS
+              const sanitized = e.target.value.replace(/<[^>]*>?/gm, '').substring(0, 50);
+              setDisplayName(sanitized);
+            }}
+            placeholder="Enter your display name"
+            className="bg-background border-border focus:border-primary"
+            maxLength={50}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-foreground">
+            Email Address
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => {
+              // Basic email validation and sanitization
+              const sanitized = e.target.value.replace(/[<>]/g, '').toLowerCase();
+              setEmail(sanitized);
+            }}
+            placeholder="Enter your email address"
+            className="bg-background border-border focus:border-primary"
+            pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone-number" className="text-foreground">
+            Phone Number
+          </Label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="phone-number"
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => {
+                // Phone number validation and sanitization - must start with 08
+                let sanitized = e.target.value.replace(/[^0-9]/g, '');
+                // Ensure it starts with 08
+                if (sanitized.length > 0 && !sanitized.startsWith('08')) {
+                  sanitized = '08' + sanitized.replace(/^0+/, '');
+                }
+                // Limit to 15 characters max (08 + 13 digits)
+                if (sanitized.length > 15) {
+                  sanitized = sanitized.substring(0, 15);
+                }
+                setPhoneNumber(sanitized);
+              }}
+              placeholder="08123456789"
+              className="pl-10 bg-background border-border focus:border-primary"
+              maxLength={15}
+            />
+          </div>
+        </div>
+      </Card>
+
+      {/* Action Buttons */}
+      <div className="flex gap-3">
+        <Button
+          onClick={handleSave}
+          disabled={saving || uploading}
+          className="flex-1 bg-gradient-primary hover:opacity-90 text-primary-foreground glow-primary transition-all duration-200 transform hover:scale-105 active:scale-95"
+        >
+          <Save className="w-4 h-4 mr-2" />
+          {saving ? 'Saving...' : 'Save Changes'}
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={onCancel}
+          className="flex-1 border-border hover:border-primary transition-all duration-200 transform hover:scale-105 active:scale-95"
+        >
+          Cancel
+        </Button>
+      </div>
+    </div>
+  );
+}

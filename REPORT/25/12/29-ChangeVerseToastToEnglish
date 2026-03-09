@@ -1,0 +1,4 @@
+25/12/29-ChangeVerseToastToEnglish
+- Translated the `activities` array in `src/components/VerseToast.tsx` to English.
+- Updated the `verseTitle` extraction logic to match the new English phrases.
+- Changed toast titles in `showRandomActivity` and `showVerseNotification` from Indonesian to English.

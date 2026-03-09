@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bersihkan Cache - eL Vision Ecosystem Technology</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            overflow-x: hidden;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 100vw;
+        }
+        
+        body {
+            font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: 
+                linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%),
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.6), transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.6), transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.5), transparent 50%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #ffffff; /* Ensure white text */
+            overflow: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            background: 
+                rgba(0, 0, 0, 0.7), /* Dark background fallback */
+                linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%),
+                linear-gradient(225deg, rgba(120, 119, 198, 0.15) 0%, transparent 50%);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 45px 35px;
+            text-align: center;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.8),
+                0 0 0 1px rgba(255, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            color: #ffffff; /* Ensure text is white */
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        }
+        
+        .container::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg,
+                transparent,
+                rgba(120, 119, 198, 0.1),
+                transparent,
+                rgba(255, 119, 198, 0.1),
+                transparent
+            );
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
+        }
+        
+        .logo {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 25px;
+            background: 
+                linear-gradient(135deg, #00d4ff, #7c3aed, #ff6b6b),
+                linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+            background-size: 200% 200%, 100% 100%;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            box-shadow: 
+                0 10px 25px rgba(0, 212, 255, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            animation: logoGlow 3s ease-in-out infinite alternate;
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 30%, #e2e8f0 60%, #ffffff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 
+                0 0 30px rgba(255, 255, 255, 0.8),
+                0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+        }
+        
+        .subtitle {
+            opacity: 0.9;
+            margin-bottom: 35px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #e5e7eb; /* Light gray for better visibility */
+        }
+        
+        .device-section {
+            margin-bottom: 25px;
+        }
+        
+        .device-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            opacity: 0.95;
+            color: #f3f4f6; /* Ensure visibility */
+        }
+        
+        .btn {
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 16px 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 12px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-android {
+            background: linear-gradient(135deg, #00ff87, #34d399, #10b981);
+            box-shadow: 
+                0 8px 25px rgba(52, 211, 153, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 135, 0.3);
+        }
+        
+        .btn-android:hover {
+            box-shadow: 
+                0 12px 35px rgba(52, 211, 153, 0.5),
+                0 0 0 1px rgba(0, 255, 135, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, #00ff87, #22c55e);
+        }
+        
+        .btn-iphone {
+            background: linear-gradient(135deg, #00d4ff, #60a5fa, #3b82f6);
+            box-shadow: 
+                0 8px 25px rgba(96, 165, 250, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn-iphone:hover {
+            box-shadow: 
+                0 12px 35px rgba(96, 165, 250, 0.5),
+                0 0 0 1px rgba(0, 212, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, #00d4ff, #2563eb);
+        }
+        
+        .btn-manual {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 14px;
+            padding: 12px 20px;
+            margin-top: 15px;
+        }
+        
+        .info {
+            background: rgba(0, 0, 0, 0.4); /* Dark background for contrast */
+            border-radius: 16px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: left;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff; /* White text */
+        }
+        
+        .info h3 {
+            margin-bottom: 12px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .info li {
+            margin-bottom: 6px;
+            opacity: 0.9;
+            font-size: 14px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .info li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #fbbf24;
+            font-weight: bold;
+        }
+        
+        .warning {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+        }
+        
+        .status {
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+            font-size: 16px;
+            font-weight: 600;
+            display: none;
+            position: relative;
+            z-index: 10;
+            animation: slideIn 0.3s ease-out;
+            color: #ffffff;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status.success {
+            background: 
+                rgba(34, 197, 94, 0.9),
+                linear-gradient(135deg, rgba(34, 197, 94, 0.8), rgba(16, 185, 129, 0.8));
+            border: 2px solid rgba(34, 197, 94, 1);
+        }
+        
+        .status.error {
+            background: 
+                rgba(239, 68, 68, 0.9),
+                linear-gradient(135deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 127, 0.8));
+            border: 2px solid rgba(239, 68, 68, 1);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .device-icon {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚀</div>
+        <h1>eL Vision Ecosystem Technology</h1>
+        <p class="subtitle">Bersihkan Cache Browser untuk Performa Optimal</p>
+        
+        <div class="device-section">
+            <h3 class="device-title">📱 Pilih Perangkat Anda:</h3>
+            
+            <button class="btn btn-android" onclick="clearCacheAndroid()">
+                <span class="device-icon">🤖</span>
+                Bersihkan Cache Android
+            </button>
+            
+            <button class="btn btn-iphone" onclick="clearCacheIPhone()">
+                <span class="device-icon">🍎</span>
+                Bersihkan Cache iPhone/iPad
+            </button>
+        </div>
+        
+        <button class="btn btn-manual" onclick="showManualInstructions()">
+            📋 Panduan Manual Lengkap
+        </button>
+        
+        <div class="info">
+            <h3>🔄 Kapan perlu bersihkan cache?</h3>
+            <ul>
+                <li>Setelah update aplikasi eL Vision</li>
+                <li>Aplikasi loading lambat atau error</li>
+                <li>Fitur baru tidak muncul</li>
+                <li>Tampilan tidak sesuai/rusak</li>
+                <li>Audio tidak bisa diputar</li>
+            </ul>
+        </div>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="warning">
+            ⚠️ <strong>Penting:</strong> Cache yang dibersihkan akan mengunduh ulang data terbaru dari server eL Vision
+        </div>
+    </div>
+
+    <script>
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.innerHTML = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            // Scroll to status message
+            status.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Also show browser alert as backup
+            if (type === 'success' && message.includes('Sudah Bersih')) {
+                setTimeout(() => {
+                    alert('✅ Browser Cache Anda Sudah Bersih!\nHalaman akan reload untuk memuat data terbaru.');
+                }, 500);
+            }
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 8000); // Extended to 8 seconds
+        }
+        
+        async function clearCacheAndroid() {
+            // Immediate visual feedback
+            const button = event.target;
+            button.innerHTML = '⏳ Membersihkan...';
+            button.disabled = true;
+            
+            showStatus('🤖 Membersihkan cache untuk Android...', 'success');
+            
+            try {
+                // Universal cache clearing for all browsers
+                await clearAllCaches();
+                
+                showStatus(`
+                    ✅ <strong>Browser Cache Anda Sudah Bersih!</strong><br>
+                    📱 Halaman akan reload untuk memuat data terbaru eL Vision...
+                `, 'success');
+                
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 3000);
+                
+            } catch (error) {
+                showStatus('🔄 Melakukan reload untuk membersihkan cache Android...', 'success');
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 2000);
+            }
+        }
+        
+        async function clearCacheIPhone() {
+            // Immediate visual feedback
+            const button = event.target;
+            button.innerHTML = '⏳ Membersihkan...';
+            button.disabled = true;
+            
+            showStatus('🍎 Membersihkan cache untuk iPhone/iPad...', 'success');
+            
+            try {
+                // Universal cache clearing for Safari/iOS
+                await clearAllCaches();
+                
+                showStatus(`
+                    ✅ <strong>Browser Cache Anda Sudah Bersih!</strong><br>
+                    📱 Halaman akan reload untuk memuat data terbaru eL Vision...
+                `, 'success');
+                
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 3000);
+                
+            } catch (error) {
+                showStatus('🔄 Melakukan reload untuk membersihkan cache iPhone/iPad...', 'success');
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 2000);
+            }
+        }
+        
+        async function clearAllCaches() {
+            // Method 1: Service Worker cache clear
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map(registration => registration.unregister()));
+            }
+
+            // Method 2: Clear cache storage
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+            }
+
+            // Method 3: Clear storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Method 4: Clear IndexedDB (for PWA data)
+            if ('indexedDB' in window) {
+                try {
+                    const databases = await indexedDB.databases();
+                    await Promise.all(
+                        databases.map(db => {
+                            if (db.name) {
+                                const deleteReq = indexedDB.deleteDatabase(db.name);
+                                return new Promise((resolve) => {
+                                    deleteReq.onsuccess = () => resolve();
+                                    deleteReq.onerror = () => resolve(); // Continue even if fails
+                                });
+                            }
+                        })
+                    );
+                } catch (e) {
+                    console.log('IndexedDB clear failed, continuing...');
+                }
+            }
+        }
+        
+        function showManualInstructions() {
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            
+            let instructions = `📋 PANDUAN MANUAL BERSIHKAN CACHE\n\n`;
+            
+            if (isAndroid) {
+                instructions += `🤖 ANDROID - Chrome/Browser:\n`;
+                instructions += `1. Buka menu (⋮) di pojok kanan atas\n`;
+                instructions += `2. Pilih "Setelan" atau "Settings"\n`;
+                instructions += `3. Pilih "Privasi dan keamanan"\n`;
+                instructions += `4. Pilih "Hapus data browsing"\n`;
+                instructions += `5. Centang "Gambar dan file dalam cache"\n`;
+                instructions += `6. Tekan "Hapus data"\n\n`;
+                instructions += `🤖 ANDROID - Firefox:\n`;
+                instructions += `1. Menu (⋮) → Setelan\n`;
+                instructions += `2. Hapus data browsing\n`;
+                instructions += `3. Centang "Cache"\n`;
+                instructions += `4. Tekan "Hapus data"\n\n`;
+            }
+            
+            if (isiOS) {
+                instructions += `🍎 iPhone/iPad - Safari:\n`;
+                instructions += `1. Buka app "Setelan" iOS\n`;
+                instructions += `2. Scroll ke bawah, pilih "Safari"\n`;
+                instructions += `3. Pilih "Hapus Riwayat dan Data Website"\n`;
+                instructions += `4. Konfirmasi "Hapus Riwayat dan Data"\n\n`;
+                instructions += `🍎 iPhone/iPad - Chrome:\n`;
+                instructions += `1. Buka Chrome → Menu (⋯)\n`;
+                instructions += `2. Setelan → Privasi\n`;
+                instructions += `3. Hapus Data Browsing\n`;
+                instructions += `4. Pilih "Cache" → Hapus Data\n\n`;
+            }
+            
+            if (!isAndroid && !isiOS) {
+                instructions += `💻 DESKTOP - Keyboard Shortcut:\n`;
+                instructions += `• Windows: Ctrl + Shift + Delete\n`;
+                instructions += `• Mac: Cmd + Shift + Delete\n\n`;
+                instructions += `💻 DESKTOP - Manual:\n`;
+                instructions += `• Chrome: Menu → More Tools → Clear Browsing Data\n`;
+                instructions += `• Firefox: Menu → History → Clear Recent History\n`;
+                instructions += `• Safari: Develop → Empty Caches\n\n`;
+            }
+            
+            instructions += `💡 TIPS TAMBAHAN:\n`;
+            instructions += `• Bookmark halaman ini untuk akses cepat\n`;
+            instructions += `• Lakukan setiap setelah update eL Vision\n`;
+            instructions += `• Tutup aplikasi sebelum bersihkan cache\n`;
+            instructions += `• Pastikan koneksi internet stabil saat reload\n\n`;
+            instructions += `🚀 eL Vision Ecosystem Technology\n`;
+            instructions += `Untuk dukungan: support@elvisiongroup.com`;
+            
+            alert(instructions);
+        }
+        
+        // Auto-detect device and show appropriate styling
+        document.addEventListener('DOMContentLoaded', function() {
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            
+            if (isAndroid) {
+                document.querySelector('.btn-android').style.order = '-1';
+                document.querySelector('.device-title').innerHTML = '🤖 Android Device Detected:';
+            } else if (isiOS) {
+                document.querySelector('.btn-iphone').style.order = '-1';
+                document.querySelector('.device-title').innerHTML = '🍎 iOS Device Detected:';
+            }
+            
+            // Add entrance animation
+            document.querySelector('.container').style.animation = 'fadeInUp 0.6s ease-out';
+        });
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes rotate {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+            
+            @keyframes logoGlow {
+                0% {
+                    background-position: 0% 50%;
+                    box-shadow: 
+                        0 10px 25px rgba(0, 212, 255, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+                }
+                50% {
+                    background-position: 100% 50%;
+                    box-shadow: 
+                        0 10px 25px rgba(124, 58, 237, 0.4),
+                        0 0 0 1px rgba(255, 255, 255, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+                }
+                100% {
+                    background-position: 200% 50%;
+                    box-shadow: 
+                        0 10px 25px rgba(255, 107, 107, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+                }
+            }
+            
+            @keyframes pulse {
+                0%, 100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.8;
+                }
+            }
+            
+            @keyframes gradientShift {
+                0% {
+                    background-position: 0% 50%;
+                }
+                50% {
+                    background-position: 100% 50%;
+                }
+                100% {
+                    background-position: 0% 50%;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
