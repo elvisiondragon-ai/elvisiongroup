@@ -1,3 +1,12 @@
+// ==================================================================================
+// 1. FREE PRODUK DIGITAL ada di send-ebooks-free
+// 2. SUbscription bulanan dan fisik di send-payment-email
+// 3. Khusus Ebook Paid ada di send-ebooks-email
+//
+// PRODUK SUBSCRIPTION BULANAN DAN FISIK DISINI
+// EBOOK JANGAN DISINI tapi di send-ebooks-email
+// ==================================================================================
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -126,6 +135,7 @@ const handler = async (req) => {
     const isVIP = safeSubscriptionType.includes('VIP') || safeSubscriptionType.includes('3000') || safeSubscriptionType === 'VIP6WEEK';
     const isDrelf = safeSubscriptionType.toLowerCase().includes('drelf');
     const isJewelry = safeSubscriptionType.toLowerCase().includes('jewelry');
+    const isParenting = safeSubscriptionType.toLowerCase().includes('parenting');
 
     if (type === 'payment_created' || type === 'created') {
       subject = isVIP ? "Payment Pending - eL Vision VIP Session" : "Pembayaran Menunggu - ElVision Group Pro";
@@ -307,45 +317,43 @@ const handler = async (req) => {
             </div>
           </div>
         `;
-      } else if (safeSubscriptionType === 'Program Diet eL-Vision' || safeSubscriptionType === 'ebook_diet' || safeSubscriptionType === 'Ebook Diet' || safeSubscriptionType === 'Ebook_diet' || safeSubscriptionType === 'Ebook Diet PAID') {
-        subject = "🎉 Pembayaran Berhasil! Link Ebook Diet Anda";
+      } else if (isParenting) {
+        // --- CO-PARENTING TRACKER TEMPLATE (INDIGO) ---
+        subject = "✨ Akses Download: Co-Parenting Tracker & Tutorial";
         htmlContent = `
           <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px 15px 0 0; text-align: center;">
-              <h1 style="margin: 0; font-size: 28px;">🎉 PEMBAYARAN BERHASIL!</h1>
-              <p style="margin: 15px 0 0 0; font-size: 16px;">Terima kasih telah membeli Ebook Diet eL-Vision!</p>
+            <div style="background: #4F46E5; color: white; padding: 30px; border-radius: 15px 15px 0 0; text-align: center;">
+              <h1 style="margin: 0; font-size: 24px;">✨ Akses Perangkat Co-Parenting</h1>
+              <p style="margin: 15px 0 0 0; font-size: 16px;">Selamat! Akses Template Co-Parenting Tracker Anda telah dibuka.</p>
             </div>
             <div style="background: white; padding: 40px; border-radius: 0 0 15px 15px;">
               <h2 style="color: #333; margin-bottom: 25px;">Halo ${userName}! 👋</h2>
               <p style="color: #666; line-height: 1.7; margin-bottom: 25px;">
-                Pembayaran Anda telah kami terima. Silakan unduh Ebook Diet Anda melalui tautan di bawah ini.
+                Terima kasih telah bergabung. Anda sekarang memiliki akses penuh ke Template Co-Parenting Tracker.
               </p>
+              
+              <div style="background: #f8f9ff; border: 1px dashed #4F46E5; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
+                <p style="font-weight: bold; margin-top: 0; color: #4F46E5;">Instruksi Akses:</p>
+                <ul style="color: #555; padding-left: 20px;">
+                  <li>Silahkan klik tombol di bawah untuk membuka Google Sheets.</li>
+                  <li><strong>WAJIB:</strong> Klik 'File' -> 'Make a copy' untuk menyimpan ke akun Google Anda sendiri.</li>
+                  <li>Tonton Tutorial di sini: <a href="https://www.youtube.com/watch?v=H9O0kV7zTAM" style="color: #4F46E5;">Klik Tutorial YouTube</a></li>
+                </ul>
+              </div>
+
               <div style="text-align: center; margin: 30px 0;">
-                <a href="https://drive.google.com/file/d/1rf0yCAtllTFYjyFaSyMh8crp-B0jASHw/view?usp=share_link" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold;">
-                  📥 Unduh Ebook Sekarang
+                <a href="https://docs.google.com/spreadsheets/d/1u1H6Pv0O5noENH7_P-SEqheHmIqlixAo_0DncVYMuqlY/edit?gid=612184692#gid=612184692" style="background: #4F46E5; color: white; padding: 18px 35px; text-decoration: none; border-radius: 50px; display: inline-block; font-weight: bold; font-size: 16px;">
+                  📥 BUKA TRACKER SEKARANG
                 </a>
               </div>
-               <div style="background: #f8f9ff; padding: 25px; border-radius: 12px; border-left: 5px solid #667eea; margin: 25px 0;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                  <span style="color: #666;">Produk:</span>
-                  <span style="font-weight: bold; color: #333;">${safeSubscriptionType}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                  <span style="color: #666;">Jumlah:</span>
-                  <span style="font-weight: bold; color: #00c851;">Rp ${safeAmount.toLocaleString('id-ID')}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                  <span style="color: #666;">Referensi:</span>
-                  <span style="font-weight: bold; color: #333;">${safeReference}</span>
-                </div>
+
+               <div style="background: #f9f9f9; padding: 20px; border-radius: 12px; font-size: 14px; border: 1px solid #eee;">
+                  <p><strong>Produk:</strong> ${safeSubscriptionType}</p>
+                  <p><strong>Referensi:</strong> ${safeReference}</p>
               </div>
-              <p style="color: #666; line-height: 1.7;">
-                Jika Anda mengalami kesulitan, jangan ragu untuk menghubungi kami di <a href="mailto:support@elvisiongroup.com" style="color: #667eea;">support@elvisiongroup.com</a>.
-              </p>
             </div>
           </div>
         `;
-        console.log('DEBUG: Ebook htmlContent length:', htmlContent.length); // ADDED LOG
       } else {
         // Original Pro content
         htmlContent = `<!DOCTYPE html>

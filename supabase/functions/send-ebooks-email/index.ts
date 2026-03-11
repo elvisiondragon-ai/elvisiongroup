@@ -1,3 +1,12 @@
+// ==================================================================================
+// 1. FREE PRODUK DIGITAL ada di send-ebooks-free
+// 2. SUbscription bulanan dan fisik di send-payment-email
+// 3. Khusus Ebook Paid ada di send-ebooks-email
+//
+// KHUSUS EBOOK PAID DISINI
+// PRODUK FISIK DAN SUBSCRIPTION DI send-payment-email JANGAN DISINI
+// ==================================================================================
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -12,19 +21,6 @@ const LIST_ID = '80713'; // Default List ID
 
 // --- PRODUCT CONFIGURATION ---
 const PRODUCT_TEMPLATES: Record<string, any> = {
-  'universal_Id_parenting_paid': {
-    subject: "✨ Akses Download: Co-Parenting Tracker & Tutorial",
-    downloadLink: "https://docs.google.com/spreadsheets/d/1u1H6Pv0O5noENH7_P-SEqheHmIqlixAo_0DncVYMuqlY/edit?gid=612184692#gid=612184692",
-    color: "#4F46E5", // Indigo
-    accentColor: "#ffffff",
-    title: "Akses Co-Parenting Tracker Terbuka",
-    description: "Selamat! Anda sekarang memiliki akses penuh ke Template Co-Parenting Tracker.",
-    instructions: [
-      "Silahkan copy file sheet tersebut ke Google Anda melalui link di atas.",
-      "Tonton Tutorial Penggunaan di sini: https://www.youtube.com/watch?v=H9O0kV7zTAM"
-    ],
-    lang: "id"
-  },
 
   'raja_ranjang': {
     subject: "🔥 Akses Download: Ebook Universal Raja Ranjang",
@@ -322,6 +318,20 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     ],
     btnText: "MUAT TURUN SEKARANG",
     lang: "ms"
+  },
+  'universal_saham_ultimate': {
+    subject: "📈 Akses Download: Ebook Saham Ultimate Anda",
+    downloadLink: "https://drive.google.com/drive/folders/1sJ9vf8NLuH3ccVjc3ofPk2Ew3IjKTDFJ?usp=sharing",
+    color: "#3b82f6", // Blue
+    accentColor: "#ffffff",
+    title: "Akses Saham Ultimate Terbuka",
+    description: "Terima kasih! Pembayaran Anda sukses. Folder ini berisi Ebook Saham Ultimate untuk membantu Anda menganalisis pasar.",
+    instructions: [
+      "Buka link download yang telah kami sediakan.",
+      "Simpan file Ebook PDF ke perangkat Anda.",
+      "Gunakan data ini untuk meningkatkan strategi investasi Anda."
+    ],
+    lang: "id"
   }
 };
 
@@ -331,7 +341,6 @@ function getProductKey(productName: string): string {
   const lower = productName.toLowerCase();
 
   // --- Exact / specific matches first ---
-  if (lower.includes('parenting_paid') || lower.includes('universal_id_parenting_paid')) return 'universal_Id_parenting_paid';
   if (lower.includes('sg_elvision_en')) return 'sg_elvision_en';
   if (lower.includes('sg_elvision_malay')) return 'sg_elvision_malay';
 
@@ -359,6 +368,7 @@ function getProductKey(productName: string): string {
   if (lower.includes('vip') || lower.includes('3000') || lower.includes('coaching')) return 'vip_coaching';
   if (lower.includes('webinar_el') || lower.includes('jalur langit') || lower.includes('webinar')) return 'webinar_el';
   if (lower.includes('raja ranjang')) return 'raja_ranjang';
+  if (lower.includes('saham_ultimate') || lower.includes('saham ultimate')) return 'universal_saham_ultimate';
 
   return 'ebook_elvision';
 }
@@ -565,7 +575,8 @@ const handler = async (req: Request) => {
 
     const waProductKeys = ['raja_ranjang', 'ebook_feminine', 'ebook_feminine_lovemagnet', 'universal_Id_parenting_paid',
       'universal_darkfeminine_en', 'universal_darkfeminine_en_audio',
-      'universal_darkfeminine_ph', 'universal_darkfeminine_ph_audio'];
+      'universal_darkfeminine_ph', 'universal_darkfeminine_ph_audio',
+      'universal_saham_ultimate'];
 
     if (waProductKeys.includes(productKey)) {
       const waToken = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
@@ -606,6 +617,8 @@ const handler = async (req: Request) => {
             waMessage = `Hi ${userName}! 👋\nI am ${adminName}.\n\nThank you for purchasing *${productNameDisplay}*.\n\nYour payment of ${displayAmount} has been received.\n\nHere is your exclusive download link:\n👉 ${template.downloadLink}\n\nPlease download and save it! Feel free to reply if you have any questions.\n\nWarm regards,\neL Vision Group`;
           } else if (isFilipino) {
             waMessage = `Halo ${userName}! 👋\nAko si ${adminName}.\n\nSalamat sa iyong pagbili ng *${productNameDisplay}*.\n\nNatanggap na namin ang iyong bayad na ${displayAmount}.\n\nNarito ang iyong eksklusibong download link:\n👉 ${template.downloadLink}\n\nPaki-download at i-save na! Huwag mag-atubiling sumagot kung may katanungan ka.\n\nMainit na pagbati,\neL Vision Group`;
+          } else if (productKey === 'universal_saham_ultimate') {
+            waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Saham Ultimate.\n\nTerima kasih atas pembayaran kakak untuk paket *Saham Ultimate*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSemoga data ini membantu kakak dalam berinvestasi di pasar modal Indonesia.\n\nSalam hangat,\nAdmin - Saham Ultimate`;
           } else {
             waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nKakak juga mendapat Kupon diskon 70% Dari 1.800.000 menjadi 540.000 (hemat 1,3juta!)\nUntuk produk https://drelf.id\nCheckout disini https://export.elvisiongroup.com/id_drelf\nSUDAH Bpom yah\n\nSalam hangat,\nAdmin - eL Vision Group`;
           }

@@ -1,3 +1,11 @@
+// ==================================================================================
+// 1. FREE PRODUK DIGITAL ada di send-ebooks-free
+// 2. SUbscription bulanan dan fisik di send-payment-email
+// 3. Khusus Ebook Paid ada di send-ebooks-email
+//
+// KHUSUS FREE PRODUK DIGITAL DISINI
+// ==================================================================================
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -65,6 +73,23 @@ const FREE_EBOOK_TEMPLATES: Record<string, any> = {
         waMessage: (name: string, link: string) =>
             `Halo ${name}, Narito ang iyong LIBRENG Dark Feminine Ebook:\n${link}\n\nPakilagay ng *Ok* para makontak kita sa susunod ha.`,
         lang: "tl"
+    },
+    'free_ebook_saham': {
+        subject: "🎁 Ebook GRATIS: Strategi Saham Ultimate - Khusus Untukmu!",
+        downloadLink: "https://drive.google.com/file/d/1bNqIBaKrV5I8wqrWXJ2LRfv_NBoFId6K/view?usp=sharing",
+        color: "#3b82f6",
+        accentColor: "#ffffff",
+        title: "Ebook Gratis Saham Ultimate",
+        description: "Halo! Berikut adalah link download Ebook Gratis Saham Ultimate yang kamu minta. Selamat membaca dan semoga membantu strategi investasi Anda!",
+        instructions: [
+            "Klik tombol di bawah untuk mengakses ebook gratis kamu.",
+            "Simpan file di perangkat kamu agar bisa dibaca kapan saja.",
+            "Tolong ketik <strong>Ok</strong> agar kami bisa menghubungi anda untuk update data whale terbaru ya."
+        ],
+        btnText: "DOWNLOAD EBOOK GRATIS",
+        waMessage: (name: string, link: string) =>
+            `Halo kak ${name}, Silahkan Ambil Ebook Gratis Strategi Saham Ultimate:\n${link}\n\nTolong ketik *Ok* agar saya bisa hubungi kakak untuk update data whale terbaru ya.`,
+        lang: "id"
     }
 };
 
@@ -73,6 +98,7 @@ function getProductKey(lang: string): string {
     switch (lang?.toLowerCase()) {
         case 'en': return 'free_ebook_darkfeminine_en';
         case 'ph': return 'free_ebook_darkfeminine_ph';
+        case 'saham': return 'free_ebook_saham';
         case 'id':
         default: return 'free_ebook_darkfeminine_id';
     }

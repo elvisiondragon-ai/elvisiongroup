@@ -243,14 +243,33 @@ serve(async (req) => {
             rating: 5,
             country: defaultCountry
           });
-          
+
           if (reviewErr && !reviewErr.message.includes('duplicate key')) {
-             console.error('   - ⚠️ Error inserting into darkfeminine_reviews:', reviewErr.message);
+            console.error('   - ⚠️ Error inserting into darkfeminine_reviews:', reviewErr.message);
           } else {
-             console.log('   - ✅ Inserted default review into darkfeminine_reviews');
+            console.log('   - ✅ Inserted default review into darkfeminine_reviews');
           }
         } catch (dfErr) {
           console.error('   - ⚠️ Failed to auto-insert DF review/profile:', dfErr);
+        }
+      }
+
+      // --- AUTO INSERT INTO SAHAM CLIENTS ---
+      if (pName.toLowerCase().includes('saham')) {
+        console.log(`   - 📈 Saham product detected (${pName}). Auto-inserting into saham_clients...`);
+        try {
+          const { error: clientErr } = await supabase.from('saham_clients').insert({
+            user_email: globalProductTx.email.trim().toLowerCase(),
+            status: 'active'
+          });
+
+          if (clientErr && !clientErr.message.includes('already exists') && !clientErr.message.includes('duplicate key')) {
+            console.error('   - ⚠️ Error inserting into saham_clients:', clientErr.message);
+          } else {
+            console.log('   - ✅ User added to saham_clients for instant fulfillment');
+          }
+        } catch (sahamErr) {
+          console.error('   - ⚠️ Failed to auto-insert into saham_clients:', sahamErr);
         }
       }
 
@@ -289,12 +308,11 @@ serve(async (req) => {
           'ebook pria alpha',
           'feminine magnetism',
           'ebook health recovery',
-          'vip session 6 week',
-          '3000 coaching',
           'webinar',
           'raja ranjang',
           'dark feminine',
-          'love magnet'
+          'love magnet',
+          'saham'
         ];
 
         const isEbook = ebookSpecificKeywords.some(key => lowerPName.includes(key));

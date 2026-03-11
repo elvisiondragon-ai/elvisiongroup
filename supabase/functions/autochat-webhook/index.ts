@@ -187,13 +187,18 @@ async function handleIgComment(
     const matched = triggers.find((t) => t.is_any_word || commentText.toLowerCase().includes((t.keyword as string).toLowerCase()));
     if (!matched) return;
 
-    console.log(`✅ [IG Comment] Matched Keyword: ${matched.keyword}`);
+    const profile = await getMetaUserProfile(fromUserId, "instagram", token);
+    const keyword = matched.keyword as string;
+
+    // log 1. Check Request
+    console.log(`🚀 Keyword Focus Requested from instagram @${profile.username} status ${profile.followStatus}`);
+
+    // log 2. matching
+    console.log(`matching autochat_triggers exist ${keyword} and autochat_clients valid`);
 
     // 1. Send Step 4 DM
     const payload = buildMessagePayload(matched, "instagram", 4);
     const dmApiUrl = `https://graph.instagram.com/v22.0/${igUserId}/messages`;
-
-    console.log(`📤 Sending IG DM to ${fromUserId}:\n${JSON.stringify(payload, null, 2)}`);
 
     const dmRes = await fetch(dmApiUrl, {
         method: "POST",
@@ -202,7 +207,6 @@ async function handleIgComment(
     });
 
     const dmResult = await dmRes.json();
-    console.log("📨 IG DM Result:", JSON.stringify(dmResult));
 
     // 2. Reply to the actual comment publicly
     const replies = [matched.comment_reply, matched.comment_reply_2, matched.comment_reply_3].filter(Boolean) as string[];
@@ -216,8 +220,10 @@ async function handleIgComment(
 
     if (!replyRes.ok) console.error("❌ IG Comment Reply failed:", await replyRes.json());
 
-    const profile = await getMetaUserProfile(fromUserId, "instagram", token);
-    await logResult(ownerId, "instagram", profile.username, matched.keyword as string, dmRes.ok, "comment", matched.id as string, dmResult?.error?.message, profile.followStatus);
+    // log 3. Sent
+    console.log(`Sent 🚀 Reply Comment ${replyText} sending dm {Step 4}`);
+
+    await logResult(ownerId, "instagram", profile.username, keyword, dmRes.ok, "comment", matched.id as string, dmResult?.error?.message, profile.followStatus);
 }
 
 async function handleIgMessage(
@@ -335,18 +341,19 @@ async function handleIgMessage(
         }
     }
 
-    if (!matchedTrigger) {
-        console.log(`⏭️ [Step 4 Fail] No trigger matched for: "${searchStr}" (Exiting)`);
-        return;
-    }
-    console.log(`✅ [Step 4 Success] Matched Trigger ID: ${matchedTrigger.id}, Keyword: "${matchedTrigger.keyword}"`);
+    if (!matchedTrigger) return; // Silent exit if no match
 
-    console.log(`🎯 [IG DM] Final Decision: Serving Step ${nextStep} payload...`);
+    const profile = await getMetaUserProfile(senderId, "instagram", token);
+    const keyword = matchedTrigger.keyword as string;
+
+    // log 1. Check Request
+    console.log(`🚀 Keyword Focus Requested from instagram DM @${profile.username} status ${profile.followStatus}`);
+
+    // log 2. matching
+    console.log(`matching autochat_triggers exist ${keyword} and autochat_clients valid`);
 
     const payload = buildMessagePayload(matchedTrigger, "instagram", nextStep);
     const dmApiUrl = `https://graph.instagram.com/v22.0/${igUserId}/messages`;
-
-    console.log(`📤 Sending IG DM to ${senderId}:\n${JSON.stringify(payload, null, 2)}`);
 
     const res = await fetch(dmApiUrl, {
         method: "POST",
@@ -357,13 +364,12 @@ async function handleIgMessage(
     const result = await res.json();
     if (!res.ok) {
         console.error("❌ META API ERROR (IG DM):", JSON.stringify(result, null, 2));
-        console.error("Payload attempted:", JSON.stringify(payload, null, 2));
-    } else {
-        console.log("📨 IG DM Success Result:", JSON.stringify(result));
     }
 
-    const profile = await getMetaUserProfile(senderId, "instagram", token);
-    await logResult(ownerId, "instagram", profile.username, matchedTrigger.keyword as string, res.ok, "dm", matchedTrigger.id as string, result?.error?.message, profile.followStatus);
+    // log 3. Sent
+    console.log(`Sent 🚀 sending dm {Step ${nextStep}}`);
+
+    await logResult(ownerId, "instagram", profile.username, keyword, res.ok, "dm", matchedTrigger.id as string, result?.error?.message, profile.followStatus);
 }
 
 // ─── FACEBOOK HANDLERS ──────────────────────────────────────────────────────
@@ -384,7 +390,14 @@ async function handleFbComment(
     const matched = triggers.find((t) => t.is_any_word || commentText.toLowerCase().includes((t.keyword as string).toLowerCase()));
     if (!matched) return;
 
-    console.log(`✅ [FB Comment] Matched: ${matched.keyword}`);
+    const profile = await getMetaUserProfile(fromUserId, "facebook", token);
+    const keyword = matched.keyword as string;
+
+    // log 1. Check Request
+    console.log(`🚀 Keyword Focus Requested from facebook @${profile.username} status ${profile.followStatus}`);
+
+    // log 2. matching
+    console.log(`matching autochat_triggers exist ${keyword} and autochat_clients valid`);
 
     // FB Private Replies must be plain text
     const payload = buildMessagePayload(matched, "facebook", 4);
@@ -399,8 +412,6 @@ async function handleFbComment(
         finalPayload = { text: instruction };
     }
 
-    console.log(`📤 Sending FB Private Reply DM to ${fromUserId}:\n${JSON.stringify(finalPayload, null, 2)}`);
-
     const dmRes = await fetch(`https://graph.facebook.com/v22.0/${pageId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -408,7 +419,6 @@ async function handleFbComment(
     });
 
     const dmResult = await dmRes.json();
-    console.log("📨 FB DM Result:", JSON.stringify(dmResult));
 
     // Reply to comment publicly
     const replies = [matched.comment_reply, matched.comment_reply_2, matched.comment_reply_3].filter(Boolean) as string[];
@@ -422,8 +432,10 @@ async function handleFbComment(
 
     if (!replyRes.ok) console.error("❌ FB Comment Reply failed:", await replyRes.json());
 
-    const profile = await getMetaUserProfile(fromUserId, "facebook", token);
-    await logResult(ownerId, "facebook", profile.username, matched.keyword as string, dmRes.ok, "comment", matched.id as string, dmResult?.error?.message, profile.followStatus);
+    // log 3. Sent
+    console.log(`Sent 🚀 Reply Comment ${replyText} sending dm {Step 4}`);
+
+    await logResult(ownerId, "facebook", profile.username, keyword, dmRes.ok, "comment", matched.id as string, dmResult?.error?.message, profile.followStatus);
 }
 
 async function handleFbMessage(
@@ -515,17 +527,18 @@ async function handleFbMessage(
         }
     }
 
-    if (!matchedTrigger) {
-        console.log(`⏭️ [Step 4 Fail] No trigger matched for: "${searchStr}" (Exiting)`);
-        return;
-    }
-    console.log(`✅ [Step 4 Success] Matched Trigger ID: ${matchedTrigger.id}, Keyword: "${matchedTrigger.keyword}"`);
+    if (!matchedTrigger) return; // Silent exit
 
-    console.log(`🎯 [FB DM] Final Decision: Serving Step ${nextStep} payload...`);
+    const profile = await getMetaUserProfile(senderId, "facebook", token);
+    const keyword = matchedTrigger.keyword as string;
+
+    // log 1. Check Request
+    console.log(`🚀 Keyword Focus Requested from facebook DM @${profile.username} status ${profile.followStatus}`);
+
+    // log 2. matching
+    console.log(`matching autochat_triggers exist ${keyword} and autochat_clients valid`);
 
     const payload = buildMessagePayload(matchedTrigger, "facebook", nextStep);
-
-    console.log(`📤 Sending FB DM to ${senderId}:\n${JSON.stringify(payload, null, 2)}`);
 
     const res = await fetch(`https://graph.facebook.com/v22.0/${pageId}/messages`, {
         method: "POST",
@@ -536,13 +549,12 @@ async function handleFbMessage(
     const result = await res.json();
     if (!res.ok) {
         console.error("❌ META API ERROR (FB DM):", JSON.stringify(result, null, 2));
-        console.error("Payload attempted:", JSON.stringify(payload, null, 2));
-    } else {
-        console.log("📨 FB DM Success Result:", JSON.stringify(result));
     }
 
-    const profile = await getMetaUserProfile(senderId, "facebook", token);
-    await logResult(ownerId, "facebook", profile.username, matchedTrigger.keyword as string, res.ok, "dm", matchedTrigger.id as string, result?.error?.message, profile.followStatus);
+    // log 3. Sent
+    console.log(`Sent 🚀 sending dm {Step ${nextStep}}`);
+
+    await logResult(ownerId, "facebook", profile.username, keyword, res.ok, "dm", matchedTrigger.id as string, result?.error?.message, profile.followStatus);
 }
 
 // ─── MAIN HTTP HANDLER ──────────────────────────────────────────────────────
@@ -562,28 +574,20 @@ serve(async (req) => {
     let body;
     try {
         body = await req.json();
-        console.log("✅ [Step 1] Webhook received & JSON parsed.");
     } catch {
-        console.error("❌ [Step 1 Fail] Invalid JSON received.");
         return new Response("Invalid JSON", { status: 400 });
     }
-
-    console.log("📩 Webhook received body:", JSON.stringify(body, null, 2));
 
     if (body.object === "instagram" || body.object === "page") {
         for (const entry of body.entry) {
             const pageOrIgId = entry.id;
 
-            // ⚡ Resilience: Also extract recipient_id (for messages) or from_id (for comments)
-            // as these often contain the other ID (Page vs IG) that Meta might have used for entry.id
             let secondaryId = null;
             if (entry.messaging && entry.messaging[0]) {
                 secondaryId = entry.messaging[0].recipient?.id;
             } else if (entry.changes && entry.changes[0]?.value) {
                 secondaryId = entry.changes[0].value.from?.id;
             }
-
-            console.log(`🆔 [Step 1.5] IDs for lookup -> Entry: ${pageOrIgId}, Secondary: ${secondaryId} (Object: ${body.object})`);
 
             // Fetch active clients matching either of the IDs found in the payload
             let query = supabase.from("autochat_clients").select("*");
@@ -596,10 +600,8 @@ serve(async (req) => {
             const { data: clients } = await query.or(filter);
 
             if (!clients || clients.length === 0) {
-                console.log(`⏭️ [Step 2 Fail] No registered client found for IDs ${pageOrIgId}${secondaryId ? ' or ' + secondaryId : ''}`);
                 continue;
             }
-            console.log(`✅ [Step 2] Found ${clients.length} matching client(s).`);
 
             for (const client of clients) {
                 try {
@@ -611,53 +613,42 @@ serve(async (req) => {
                         .eq("is_active", true);
 
                     if (!triggers || triggers.length === 0) {
-                        console.log(`⏭️ [Step 3 Fail] No active triggers found for user ${client.user_id}`);
                         continue;
                     }
-                    console.log(`✅ [Step 3] Found ${triggers.length} active triggers for user ${client.user_id}`);
 
                     // 1. Process Comments
                     const changes = entry.changes || [];
-                    console.log(`🔎 [Loop] Checking ${changes.length} changes...`);
                     for (let i = 0; i < changes.length; i++) {
                         const change = changes[i];
                         const val = change.value;
                         if (!val) continue;
 
-                        console.log(`   🔸 [Change ${i}] Field: ${change.field}, Object: ${body.object}`);
-
                         if (change.field === "comments" && val.text && body.object === "instagram") {
                             const fromId = val.from?.id;
-                            if (!fromId) { console.log(`   ⚠️ [Change ${i}] Missing from.id, skipping.`); continue; }
-                            await handleIgComment(val.id, fromId, val.text, client, triggers);
+                            if (fromId) await handleIgComment(val.id, fromId, val.text, client, triggers);
                         } else if (change.field === "feed" && val.item === "comment" && val.verb === "add" && body.object === "page") {
                             const fromId = val.from?.id;
-                            if (fromId === pageOrIgId || !fromId) continue;
-                            await handleFbComment(val.comment_id, fromId, val.message, pageOrIgId, client, triggers);
+                            if (fromId && fromId !== pageOrIgId) {
+                                await handleFbComment(val.comment_id, fromId, val.message, pageOrIgId, client, triggers);
+                            }
                         }
                     }
 
                     // 2. Process DMs
                     const messaging = entry.messaging || [];
-                    console.log(`🔎 [Loop] Checking ${messaging.length} messaging events...`);
                     for (let i = 0; i < messaging.length; i++) {
                         const msg = messaging[i];
                         const senderId = msg.sender?.id;
-                        if (!senderId || senderId === pageOrIgId) {
-                            console.log(`   ⏭️ [Msg ${i}] skipping (sender: ${senderId} == receiver: ${pageOrIgId})`);
-                            continue;
-                        }
+                        if (!senderId || senderId === pageOrIgId) continue;
 
                         if (msg.message) {
                             const text = msg.message.text || "";
                             const payload = msg.message.quick_reply?.payload || msg.postback?.payload || null;
-                            console.log(`   ✅ [Msg ${i}] Type: message, search: "${payload || text}"`);
                             if (body.object === "instagram") await handleIgMessage(senderId, text, payload, client, triggers);
                             else await handleFbMessage(senderId, text, payload, pageOrIgId, client, triggers);
                         } else if (msg.postback) {
                             const payload = msg.postback.payload || null;
                             const title = msg.postback.title || "";
-                            console.log(`   ✅ [Msg ${i}] Type: postback, title: "${title}"`);
                             if (body.object === "instagram") await handleIgMessage(senderId, title, payload, client, triggers);
                             else await handleFbMessage(senderId, title, payload, pageOrIgId, client, triggers);
                         }
