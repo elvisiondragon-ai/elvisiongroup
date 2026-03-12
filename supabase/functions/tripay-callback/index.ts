@@ -145,10 +145,10 @@ serve(async (req) => {
     // --- 1. Cek Global Product (Drelf/FitFactor) ---
     console.log(`1. 🔍 Searching for product transaction '${tripayReference}' or merchant_ref '${merchantRef}' in global_product...`);
 
-    // FIX: Search by tripay_reference OR merchant_ref to handle cases where the update missed
+    // FIX: Search regardless of status to allow manual re-triggering via curl
+    console.log(`🔍 Searching global_product for reference: ${tripayReference} or merchantRef: ${merchantRef}`);
     let query = supabase.from('global_product')
-      .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, affiliate_email, fbc, fbp, ip_address, user_agent, capi_purchase_sent') // Added affiliate_email, ip_address, user_agent, capi_purchase_sent
-      .neq('status', 'PAID');
+      .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, affiliate_email, fbc, fbp, address, ip_address, user_agent');
 
     if (merchantRef) {
       query = query.or(`tripay_reference.eq.${tripayReference},merchant_ref.eq.${merchantRef}`);
@@ -157,6 +157,8 @@ serve(async (req) => {
     }
 
     const { data: globalProductTxData, error: selectGlobalError } = await query.limit(1);
+    console.log(`📊 Query Result count: ${globalProductTxData?.length || 0}`);
+    if (selectGlobalError) console.error(`❌ Query Error: ${selectGlobalError.message}`);
 
     if (selectGlobalError) {
       console.error('   - ❌ CRITICAL DB Select Error (global_product):', selectGlobalError.message);
@@ -200,16 +202,14 @@ serve(async (req) => {
 
       // CHECK IF WE WON THE RACE
       if (!updatedRows || updatedRows.length === 0) {
-        console.log(`   - ⚠️ RACE CONDITION: Transaction ${globalProductTx.id} was already PAID by another process. Skipping CAPI & Email.`);
-        return logAndRespond('Transaction already processed by another worker.', 200, {
-          success: true,
-          info: 'Duplicate webhook handled gracefully.'
-        });
+        console.log(`   - ⚠️ Transaction ${globalProductTx.id} was already PAID. Skipping duplicate fulfillment.`);
+        return logAndRespond('Transaction already processed.', 200, { success: true });
+      } else {
+        console.log('   - ✅ Successfully updated global_product to PAID (Winner of race condition).');
       }
 
-      console.log('   - ✅ Successfully updated global_product to PAID (Winner of race condition).');
-
       const pName = globalProductTx.product_name || '';
+      console.log(`🚀 [ACTIVAING PRODUCT] ${pName} for ${globalProductTx.email}`);
 
       // --- AUTO INSERT INTO PROFILES AND REVIEWS FOR DARK FEMININE ---
       if (pName.toLowerCase().includes('dark feminine') || pName.toLowerCase().includes('dark feminin') || pName.toLowerCase().includes('feminine magnetism')) {
@@ -272,6 +272,7 @@ serve(async (req) => {
           console.error('   - ⚠️ Failed to auto-insert into saham_clients:', sahamErr);
         }
       }
+      console.log(`✅ [SUCCESS] Fulfillment complete for ${pName}`);
 
       // --- 2.1 ADD TO USER WEBINAR TABLE ---
       // We check for 'webinar' to catch usa_webinar20, webinar_el, etc.
@@ -337,12 +338,13 @@ serve(async (req) => {
         const isDrelf = pName.toLowerCase().includes('drelf');
         const isWebinar = pName.toLowerCase().includes('webinar');
         const isRajaRanjang = lowerPName.includes('raja ranjang');
+        const isSaham = lowerPName.includes('saham');
 
         // SG/MY eL Vision Editions
         const isSGElvision = pName.includes('sg_elvision_en') || pName.includes('English Edition');
         const isMYElvision = pName.includes('sg_elvision_malay') || pName.includes('Malay Edition');
 
-        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}, isWebinar=${isWebinar}, isDrelf=${isDrelf}, isJewelry=${isJewelry}, isSGElvision=${isSGElvision}, isMYElvision=${isMYElvision}, isRajaRanjang=${isRajaRanjang}`);
+        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}, isWebinar=${isWebinar}, isDrelf=${isDrelf}, isJewelry=${isJewelry}, isSGElvision=${isSGElvision}, isMYElvision=${isMYElvision}, isRajaRanjang=${isRajaRanjang}, isSaham=${isSaham}`);
 
         if (isEbookHealth || isCoaching3000 || isVIP6Week || pName.includes('usa_ebookfeminine')) {
           capiPixelId = '1393383179182528'; // Manifestation Pixel (USA)
@@ -385,6 +387,12 @@ serve(async (req) => {
           emailCurrency = 'SGD';
           displayAmount = (amount || globalProductTx.amount) / 12000; // Convert back to SGD
           capiValue = displayAmount;
+        } else if (isSaham) {
+          capiPixelId = '1941160619993263'; // Saham Crypto Pixel
+          capiCurrency = 'IDR';
+          emailCurrency = 'IDR';
+          capiValue = amount || globalProductTx.amount || 99000;
+          displayAmount = capiValue;
         } else if (isEbookPercayaDiri || isEbookFeminine || isUangPanas || isWebinar || pName.includes('ebook_elvision') || pName.includes('ebook_adhd') || pName.includes('ebook_arif') || pName.includes('ebook_grief') || pName.includes('ebook_langsing') || pName.includes('ebook_tracker') || pName.includes('vip_15jt') || pName.includes('webinar_el')) {
           capiPixelId = '3319324491540889'; // EbookIndo Pixel
           capiValue = amount || globalProductTx.amount || 100000;
@@ -415,7 +423,8 @@ serve(async (req) => {
         console.log(`   - CAPI Pixel Selected: ${capiPixelId}`);
 
         // --- EMAIL INVOKE ---
-        console.log(`   - Invoking email function for product: ${pName} with currency ${emailCurrency}`);
+        console.log(`   - ⏱️ [TIMING] Invoking email function ${functionToInvoke} for product: ${pName} with currency ${emailCurrency}...`);
+        const emailStartTime = Date.now();
         await supabase.functions.invoke(functionToInvoke, {
           body: {
             userEmail: globalProductTx.email,
@@ -431,6 +440,7 @@ serve(async (req) => {
             address: globalProductTx.address
           }
         });
+        console.log(`   - ⏱️ [TIMING] ✅ Email function ${functionToInvoke} finished in ${Date.now() - emailStartTime}ms.`);
         console.log('   - 📧 Email sent to:', globalProductTx.email);
 
         // --- UNIVERSAL CAPI TRACKING ---
@@ -442,12 +452,13 @@ serve(async (req) => {
             const eventName = isTestUser ? 'Test_Purchase' : 'Purchase';
             if (isTestUser) console.log('   - 🧪 TEST MODE: Sending Test_Purchase event');
 
-            console.log(`   - 🎯 Sending CAPI ${eventName} event via capi-universal to Pixel ${capiPixelId}...`);
+            console.log(`   - ⏱️ [TIMING] 🎯 Sending CAPI ${eventName} event via capi-universal to Pixel ${capiPixelId}...`);
+            const capiStartTime = Date.now();
             await supabase.functions.invoke('capi-universal', {
               body: {
                 pixelId: capiPixelId,
                 eventName: eventName,
-                customAccessToken: isRajaRanjang ? Deno.env.get('CAPI_RAJA_RANJANG') : undefined,
+                customAccessToken: isSaham ? Deno.env.get('CAPI_SAHAM') : (isRajaRanjang ? Deno.env.get('CAPI_RAJA_RANJANG') : undefined),
                 userData: {
                   email: globalProductTx.email,
                   ph: globalProductTx.phone,
@@ -464,9 +475,11 @@ serve(async (req) => {
                   order_id: tripayReference
                 },
                 eventId: tripayReference,
-                testCode: (globalProductTx.product_name.includes('ebook_feminine') || globalProductTx.product_name.includes('Feminine Magnetism')) ? 'TEST9597' : (globalProductTx.product_name.includes('Jewelry')) ? 'TEST54644' : undefined
+                testCode: isSaham ? 'TEST88338' : ((globalProductTx.product_name.includes('ebook_feminine') || globalProductTx.product_name.includes('Feminine Magnetism')) ? 'TEST9597' : (globalProductTx.product_name.includes('Jewelry')) ? 'TEST54644' : undefined)
               }
             });
+
+            console.log(`   - ⏱️ [TIMING] ✅ CAPI function finished in ${Date.now() - capiStartTime}ms.`);
 
             // Mark as sent in DB
             await supabase.from('global_product').update({ capi_purchase_sent: true }).eq('id', globalProductTx.id);
@@ -481,8 +494,14 @@ serve(async (req) => {
       } catch (emailError) {
         console.log('   - ⚠️ Process Error (Email/CAPI):', emailError);
       }
+      
+      console.log(`   - ⏱️ [TIMING] Deleting from waiting_payment...`);
+      const deleteStartTime = Date.now();
       // 4. Hapus dari waiting_payment (jika ada)
       await supabase.from('waiting_payment').delete().eq('tripay_reference', tripayReference);
+      console.log(`   - ⏱️ [TIMING] ✅ Deletion finished in ${Date.now() - deleteStartTime}ms.`);
+      
+      console.log(`   - ⏱️ [TIMING] 🏁 ABOUT TO RETURN FINAL RESPONSE TO CLIENT...`);
       // RETURN HERE: Tidak melanjutkan ke FALLBACK
       return logAndRespond('Global Product purchase processed successfully and global_product updated.', 200, {
         success: true,

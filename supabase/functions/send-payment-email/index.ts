@@ -6,6 +6,9 @@
 // PRODUK SUBSCRIPTION BULANAN DAN FISIK DISINI
 // EBOOK JANGAN DISINI tapi di send-ebooks-email
 // ==================================================================================
+// THIS ONLY FOR SUBSCRIPTION AND FISIK, FOR EBOOK AND DIGITAL AT send-ebooks-email 
+// YOU STUPID AI LEAVE THIS IF NOT FOR YOU
+// ==================================================================================
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 const corsHeaders = {

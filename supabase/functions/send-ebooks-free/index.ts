@@ -18,8 +18,9 @@ const MAILKETING_API_URL = Deno.env.get('MAILKETING_API_URL') || 'https://api.ma
 const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
 const LIST_ID = '80713';
 
-// WhatsApp Token
-const WA_TOKEN = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
+// WhatsApp API Configuration
+const WATZAP_TOKEN = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
+const WA_API_URL = "https://watzapp.web.id/api/message";
 
 // --- FREE EBOOK PRODUCT CONFIGURATION (Dark Feminine) ---
 const FREE_EBOOK_TEMPLATES: Record<string, any> = {
@@ -156,26 +157,42 @@ async function sendMailketingEmail(email: string, subject: string, htmlContent: 
     }
 }
 
-// Send WhatsApp message via watzapp
+// Send WhatsApp message via ShopAuto VPS
 async function sendWhatsApp(phone: string, message: string) {
     try {
-        const response = await fetch('https://watzapp.web.id/api/message', {
+        let cleanPhone = phone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) {
+            cleanPhone = '62' + cleanPhone.slice(1);
+        } else if (cleanPhone.startsWith('8')) {
+            cleanPhone = '62' + cleanPhone;
+        }
+
+        console.log(`🚀 [WATZAPP] Sending message to ${cleanPhone}...`);
+        
+        const response = await fetch(WA_API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': WA_TOKEN
+            headers: { 
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({ to: phone, message, token: WA_TOKEN })
+            body: JSON.stringify({ 
+                token: WATZAP_TOKEN,
+                to: cleanPhone, 
+                message: message 
+            })
         });
+        
+        const resultText = await response.text();
+        console.log(`📡 [WATZAPP] Response Status: ${response.status}`, resultText);
+        
         if (response.ok) {
-            console.log(`✅ WhatsApp sent to ${phone}`);
+            console.log(`✅ WhatsApp sent to ${cleanPhone}`);
             return true;
         } else {
-            console.error(`⚠️ WhatsApp API status ${response.status} for ${phone}`);
+            console.error(`⚠️ Failed to send WA to ${cleanPhone}:`, resultText);
             return false;
         }
-    } catch (err) {
-        console.error(`❌ WhatsApp error for ${phone}:`, err);
+    } catch (error) {
+        console.error('❌ WhatsApp Error:', error);
         return false;
     }
 }

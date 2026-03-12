@@ -19,6 +19,10 @@ const MAILKETING_API_URL = Deno.env.get('MAILKETING_API_URL') || 'https://api.ma
 const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
 const LIST_ID = '80713'; // Default List ID
 
+// WhatsApp API Configuration
+const WATZAP_TOKEN = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
+const WA_API_URL = "https://watzapp.web.id/api/message";
+
 // --- PRODUCT CONFIGURATION ---
 const PRODUCT_TEMPLATES: Record<string, any> = {
 
@@ -329,6 +333,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     instructions: [
       "Buka link download yang telah kami sediakan.",
       "Simpan file Ebook PDF ke perangkat Anda.",
+      "Akses Dashboard Saham Ultimate: <a href='https://saham.elvisiongroup.com/auth' style='color:#3b82f6; font-weight:bold;'>KLIK DISINI UNTUK LOGIN</a>",
       "Gunakan data ini untuk meningkatkan strategi investasi Anda."
     ],
     lang: "id"
@@ -579,8 +584,6 @@ const handler = async (req: Request) => {
       'universal_saham_ultimate'];
 
     if (waProductKeys.includes(productKey)) {
-      const waToken = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
-
       if (userPhone) {
         console.log(`📱 Sending WhatsApp Notification to ${userPhone} for ${productKey}...`);
         try {
@@ -618,16 +621,25 @@ const handler = async (req: Request) => {
           } else if (isFilipino) {
             waMessage = `Halo ${userName}! 👋\nAko si ${adminName}.\n\nSalamat sa iyong pagbili ng *${productNameDisplay}*.\n\nNatanggap na namin ang iyong bayad na ${displayAmount}.\n\nNarito ang iyong eksklusibong download link:\n👉 ${template.downloadLink}\n\nPaki-download at i-save na! Huwag mag-atubiling sumagot kung may katanungan ka.\n\nMainit na pagbati,\neL Vision Group`;
           } else if (productKey === 'universal_saham_ultimate') {
-            waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Saham Ultimate.\n\nTerima kasih atas pembayaran kakak untuk paket *Saham Ultimate*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSemoga data ini membantu kakak dalam berinvestasi di pasar modal Indonesia.\n\nSalam hangat,\nAdmin - Saham Ultimate`;
+            waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Saham Ultimate.\n\nTerima kasih atas pembayaran kakak untuk paket *Saham Ultimate*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak.\n\nSetelah download, kakak bisa langsung Login ke dashboard Saham Ultimate di sini:\n🔐 https://saham.elvisiongroup.com/auth\n\nJika sudah selesai membaca, bantu kami ya kak dengan memberikan *Review Jujur* kakak di sini:\n⭐ https://saham.elvisiongroup.com/review\n\nJika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSemoga data ini membantu kakak dalam berinvestasi di pasar modal Indonesia.\n\nSalam hangat,\nAdmin - Saham Ultimate`;
           } else {
             waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nKakak juga mendapat Kupon diskon 70% Dari 1.800.000 menjadi 540.000 (hemat 1,3juta!)\nUntuk produk https://drelf.id\nCheckout disini https://export.elvisiongroup.com/id_drelf\nSUDAH Bpom yah\n\nSalam hangat,\nAdmin - eL Vision Group`;
           }
 
-          const waResponse = await fetch('https://watzapp.web.id/api/message', {
+          const waResponse = await fetch(WA_API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': waToken },
-            body: JSON.stringify({ to: cleanPhone, message: waMessage, token: waToken })
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token: WATZAP_TOKEN,
+                to: cleanPhone,
+                message: waMessage
+            })
           });
+
+          const resultText = await waResponse.text();
+          console.log(`📡 [WATZAPP] API Response Status: ${waResponse.status}`, resultText);
 
           if (waResponse.ok) {
             console.log(`✅ WhatsApp sent successfully to buyer: ${cleanPhone}`);
@@ -644,12 +656,18 @@ const handler = async (req: Request) => {
       const adminMessage = `💰 *PEMBELIAN BARU: ${productKey.toUpperCase()}*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'N/A'}\nTotal: ${displayAmount}\nRef: ${reference}`;
 
       for (const adminPhone of adminPhones) {
-        console.log(`📱 Sending Admin WA Notification to ${adminPhone}...`);
         try {
-          const waResponseAdmin = await fetch('https://watzapp.web.id/api/message', {
+          const cleanAdminPhone = adminPhone.replace(/\D/g, '');
+          const waResponseAdmin = await fetch(WA_API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': waToken },
-            body: JSON.stringify({ to: adminPhone, message: adminMessage, token: waToken })
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token: WATZAP_TOKEN,
+                to: cleanAdminPhone,
+                message: adminMessage
+            })
           });
           if (waResponseAdmin.ok) console.log(`✅ WhatsApp sent to admin: ${adminPhone}`);
         } catch (waError) {

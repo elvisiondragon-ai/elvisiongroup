@@ -22,6 +22,7 @@ const PIXEL_CONFIG: Record<string, string> = {
   '1393383179182528': 'CAPI_USA',  // USA KAYA Pixel
   '1749197952320359': 'CAPI_DRELF', // Drelf SG Pixel
   '2158382114674235': 'CAPI_UMKM', // UMKM Pixel
+  '1941160619993263': 'CAPI_SAHAM', // Saham Ultimate Pixel
   'CAPI_JEWELRY': 'CAPI_JEWELRY', // Special mapping for Jewelry
 };
 
