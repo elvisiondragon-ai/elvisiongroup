@@ -1,7 +1,7 @@
 
 // Incremental version to force-clear stale service workers and caches on deployment
 // Update this string whenever you want to force a "nuke" of the client-side cache
-const CURRENT_APP_VERSION = '2026.03.07.01'; // Updated for Reset Password subdomain fix
+const CURRENT_APP_VERSION = '2026.03.15.01'; // Updated APK download link to v3
 
 export const cleanupStaleServiceWorkers = async () => {
   if (typeof window === 'undefined') return;

@@ -20,7 +20,7 @@ const LIST_ID = '80713';
 
 // WhatsApp API Configuration
 const WATZAP_TOKEN = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
-const WA_API_URL = "https://watzapp.web.id/api/message";
+const WATZAP_URL = "https://watzapp.web.id/api/message";
 
 // --- FREE EBOOK PRODUCT CONFIGURATION (Dark Feminine) ---
 const FREE_EBOOK_TEMPLATES: Record<string, any> = {
@@ -169,7 +169,7 @@ async function sendWhatsApp(phone: string, message: string) {
 
         console.log(`🚀 [WATZAPP] Sending message to ${cleanPhone}...`);
         
-        const response = await fetch(WA_API_URL, {
+        const response = await fetch(WATZAP_URL, {
             method: 'POST',
             headers: { 
                 "Content-Type": "application/json"

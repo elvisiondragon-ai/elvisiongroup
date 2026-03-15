@@ -814,7 +814,7 @@ export function Auth({ onLogin }: AuthProps) {
 
               {showApkButton && (
                 <Button
-                  onClick={() => window.open('https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/apk/elvisionv2.apk', '_blank')}
+                  onClick={() => window.open('https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/apk/elvision-v3.apk', '_blank')}
                   className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-medium h-9 py-1 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
                 >
                   Download APK

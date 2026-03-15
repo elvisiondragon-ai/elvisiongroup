@@ -20,6 +20,11 @@ const MAILKETING_API_URL = Deno.env.get('MAILKETING_API_URL') || 'https://api.ma
 const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
 const MAILKETING_EMAIL = Deno.env.get('MAILKETING_EMAIL');
 const LIST_ID = '80713'; // Your list ID
+
+// WA Configuration
+const WATZAP_TOKEN = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
+const WATZAP_URL = "https://watzapp.web.id/api/message";
+
 // Add subscriber to Mailketing list
 async function addToMailketingList(email, name) {
   try {
@@ -139,6 +144,7 @@ const handler = async (req) => {
     const isDrelf = safeSubscriptionType.toLowerCase().includes('drelf');
     const isJewelry = safeSubscriptionType.toLowerCase().includes('jewelry');
     const isParenting = safeSubscriptionType.toLowerCase().includes('parenting');
+    const isFitfactor = safeSubscriptionType.toLowerCase().includes('fitfactor');
 
     if (type === 'payment_created' || type === 'created') {
       subject = isVIP ? "Payment Pending - eL Vision VIP Session" : "Pembayaran Menunggu - ElVision Group Pro";
@@ -803,6 +809,61 @@ const handler = async (req) => {
 </html>`;
       }
     }
+
+    // --- WHATSAPP NOTIFICATION FOR FITFACTOR ---
+    if ((type === 'payment_completed' || type === 'success') && isFitfactor) {
+      const userPhone = body.userPhone || body.phone || body.phone_number || body.ph;
+      if (userPhone) {
+        console.log(`📱 Sending WhatsApp Notification to ${userPhone} for Fitfactor...`);
+        try {
+          let cleanPhone = userPhone.replace(/\D/g, '');
+          if (cleanPhone.startsWith('0')) {
+            cleanPhone = '62' + cleanPhone.slice(1);
+          } else if (cleanPhone.startsWith('8')) {
+            cleanPhone = '62' + cleanPhone;
+          }
+
+          const bonusEbookLink = "https://drive.google.com/file/d/1bIG1_u2PFXWIrXxygojTyUlmSC-J1A5R/view?usp=sharing";
+          const waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Fit Factor.\n\nTerima kasih atas pembayaran kakak untuk paket *Fit Factor Imun Booster*.\n\nPembayaran kakak telah kami terima senilai ${formattedAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload Ebook Bonus kakak:\n👉 ${bonusEbookLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nAdmin - Fit Factor Herbal`;
+
+          const waResponse = await fetch(WATZAP_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              token: WATZAP_TOKEN,
+              to: cleanPhone,
+              message: waMessage
+            })
+          });
+
+          const resultText = await waResponse.text();
+          console.log(`📡 [WATZAPP] Fitfactor Response: ${waResponse.status}`, resultText);
+        } catch (waError) {
+          console.error(`❌ Error sending WhatsApp to buyer ${userPhone}:`, waError);
+        }
+      }
+
+      // 🔔 ADMIN NOTIFICATION
+      const adminPhones = ['6281383838013', '6285664733499'];
+      const adminMessage = `💰 *FITFACTOR PAID*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'N/A'}\nTotal: ${formattedAmount}\nRef: ${safeReference}`;
+
+      for (const adminPhone of adminPhones) {
+        try {
+          await fetch(WATZAP_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              token: WATZAP_TOKEN,
+              to: adminPhone,
+              message: adminMessage
+            })
+          });
+        } catch (waError) {
+          console.error(`❌ Error sending WhatsApp to admin ${adminPhone}:`, waError);
+        }
+      }
+    }
+
     // Send email via Mailketing
     const emailResult = await sendMailketingEmail(recipientEmail, subject, htmlContent, userName);
     console.log("✅ Mailketing payment email sent successfully");

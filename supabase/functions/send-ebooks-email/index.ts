@@ -21,7 +21,7 @@ const LIST_ID = '80713'; // Default List ID
 
 // WhatsApp API Configuration
 const WATZAP_TOKEN = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
-const WA_API_URL = "https://watzapp.web.id/api/message";
+const WATZAP_URL = "https://watzapp.web.id/api/message";
 
 // --- PRODUCT CONFIGURATION ---
 const PRODUCT_TEMPLATES: Record<string, any> = {
@@ -626,7 +626,7 @@ const handler = async (req: Request) => {
             waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nKakak juga mendapat Kupon diskon 70% Dari 1.800.000 menjadi 540.000 (hemat 1,3juta!)\nUntuk produk https://drelf.id\nCheckout disini https://export.elvisiongroup.com/id_drelf\nSUDAH Bpom yah\n\nSalam hangat,\nAdmin - eL Vision Group`;
           }
 
-          const waResponse = await fetch(WA_API_URL, {
+          const waResponse = await fetch(WATZAP_URL, {
             method: 'POST',
             headers: { 
                 "Content-Type": "application/json"
@@ -658,7 +658,7 @@ const handler = async (req: Request) => {
       for (const adminPhone of adminPhones) {
         try {
           const cleanAdminPhone = adminPhone.replace(/\D/g, '');
-          const waResponseAdmin = await fetch(WA_API_URL, {
+          const waResponseAdmin = await fetch(WATZAP_URL, {
             method: 'POST',
             headers: { 
                 "Content-Type": "application/json"
