@@ -94,29 +94,26 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('📨 Sending email via Mailketing...');
     const senderEmail = Deno.env.get('MAILKETING_EMAIL') || 'support@elvisiongroup.com';
 
-    const params = new URLSearchParams();
-    params.append('api_token', MAILKETING_API_KEY || '');
-    params.append('email', senderEmail);
-    params.append('from_name', 'Support El Vision Group');
-    params.append('from_email', 'support@elvisiongroup.com');
-    params.append('recipient', email);
-    params.append('subject', subject);
-    params.append('content', rawHtml);
-
-    console.log('📊 Stats:', {
-      sender: senderEmail,
+    const mailketingParams = {
+      api_token: MAILKETING_API_KEY || '',
+      email: senderEmail,
+      from_name: 'Support El Vision Group',
+      from_email: 'support@elvisiongroup.com',
       recipient: email,
-      htmlSize: rawHtml.length,
-      hasToken: !!MAILKETING_API_KEY
-    });
+      subject: subject,
+      content: rawHtml
+    };
+
+    console.log('📤 Sending to Mailketing /send:', JSON.stringify(mailketingParams, null, 2));
 
     const emailResponse = await fetch(`${MAILKETING_API_URL}/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params
+      body: new URLSearchParams(mailketingParams).toString()
     });
 
     const resultText = await emailResponse.text();
+    console.log('RAW RESULT:', resultText);
     console.log('📧 Mailketing Response:', resultText);
 
     return new Response(JSON.stringify({

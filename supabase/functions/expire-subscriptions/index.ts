@@ -72,15 +72,28 @@ async function sendExpiryWarningEmail(email, name, daysRemaining) {
       content: htmlContent
     });
 
+    const mailketingParams = {
+      api_token: MAILKETING_API_KEY,
+      email: MAILKETING_EMAIL,
+      from_name: 'Support eL Vision Group',
+      from_email: 'support@elvisiongroup.com',
+      recipient: email,
+      subject: subject,
+      content: htmlContent
+    };
+
+    console.log('📤 Sending to Mailketing /send:', JSON.stringify(mailketingParams, null, 2));
+
     const response = await fetch(`${MAILKETING_API_URL}/send`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: params
+      body: new URLSearchParams(mailketingParams).toString()
     });
 
     const result = await response.text();
+    console.log('RAW RESULT:', result);
     console.log(`📧 Expiry warning email result for ${email}:`, result);
     return response.ok;
   } catch (error) {

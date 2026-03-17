@@ -18,14 +18,15 @@ const MAILKETING_API_URL = Deno.env.get('MAILKETING_API_URL') || 'https://api.ma
 const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
 const LIST_ID = '80713';
 
-// WhatsApp API Configuration
-const WATZAP_TOKEN = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
-const WATZAP_URL = "https://watzapp.web.id/api/message";
+// WhatsApp API Configuration (WAPI)
+const WAPI_TOKEN = Deno.env.get('WAPI_TOKEN') || "rvpwk8dkih9m";
+const WAPI_URL = Deno.env.get('WAPI_URL') || "https://api.elvisiongroup.com/api/send";
+const WAPI_SESSION = Deno.env.get('WAPI_SESSION') || "renata";
 
 // --- FREE EBOOK PRODUCT CONFIGURATION (Dark Feminine) ---
 const FREE_EBOOK_TEMPLATES: Record<string, any> = {
     'free_ebook_darkfeminine_id': {
-        subject: "🌙 Ebook GRATIS Dark Feminine - Khusus Untukmu!",
+        subject: "Ebook Gratis Dark Feminine - Khusus Untukmu!",
         downloadLink: "https://drive.google.com/file/d/1F8Y7CT76b41MhiZ-osqec8W3olhHEag7/view?usp=sharing",
         color: "#e11d48",
         accentColor: "#ffffff",
@@ -42,7 +43,7 @@ const FREE_EBOOK_TEMPLATES: Record<string, any> = {
         lang: "id"
     },
     'free_ebook_darkfeminine_en': {
-        subject: "🌙 FREE Dark Feminine Ebook - Just For You!",
+        subject: "Free Dark Feminine Ebook - Just For You!",
         downloadLink: "https://drive.google.com/file/d/17LcRV9eRblAPqGZqeQtiilWNtzrwnQGY/view?usp=sharing",
         color: "#e11d48",
         accentColor: "#ffffff",
@@ -59,7 +60,7 @@ const FREE_EBOOK_TEMPLATES: Record<string, any> = {
         lang: "en"
     },
     'free_ebook_darkfeminine_ph': {
-        subject: "🌙 LIBRENG Dark Feminine Ebook - Para Sa Iyo!",
+        subject: "Libreng Dark Feminine Ebook - Para Sa Iyo!",
         downloadLink: "https://drive.google.com/file/d/1fl0AJ9yTxn6srHRyagWZMju38FilYR83/view?usp=sharing",
         color: "#e11d48",
         accentColor: "#ffffff",
@@ -76,7 +77,7 @@ const FREE_EBOOK_TEMPLATES: Record<string, any> = {
         lang: "tl"
     },
     'free_ebook_saham': {
-        subject: "🎁 Ebook GRATIS: Strategi Saham Ultimate - Khusus Untukmu!",
+        subject: "Ebook Gratis: Strategi Saham Ultimate - Khusus Untukmu!",
         downloadLink: "https://drive.google.com/file/d/1bNqIBaKrV5I8wqrWXJ2LRfv_NBoFId6K/view?usp=sharing",
         color: "#3b82f6",
         accentColor: "#ffffff",
@@ -135,7 +136,7 @@ async function sendMailketingEmail(email: string, subject: string, htmlContent: 
             console.warn('⚠️ MAILKETING_API_KEY not set, skipping email.');
             return { skipped: true };
         }
-        const params = new URLSearchParams({
+        const mailketingParams = {
             api_token: MAILKETING_API_KEY,
             email: 'support@elvisiongroup.com',
             from_name: 'eL Vision Group',
@@ -143,13 +144,17 @@ async function sendMailketingEmail(email: string, subject: string, htmlContent: 
             recipient: email,
             subject: subject,
             content: htmlContent
-        });
+        };
+        
+        console.log('📤 Sending to Mailketing /send:', JSON.stringify(mailketingParams, null, 2));
+
         const response = await fetch(`${MAILKETING_API_URL}/send`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params
+            body: new URLSearchParams(mailketingParams).toString()
         });
         const result = await response.text();
+        console.log('RAW RESULT:', result);
         try { return JSON.parse(result); } catch { return { success: true, response: result }; }
     } catch (error) {
         console.error('❌ Mailketing send failed:', error);
@@ -169,26 +174,24 @@ async function sendWhatsApp(phone: string, message: string) {
 
         console.log(`🚀 [WATZAPP] Sending message to ${cleanPhone}...`);
         
-        const response = await fetch(WATZAP_URL, {
+        const response = await fetch(WAPI_URL, {
             method: 'POST',
             headers: { 
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({ 
-                token: WATZAP_TOKEN,
+                session: WAPI_SESSION,
+                token: WAPI_TOKEN,
                 to: cleanPhone, 
                 message: message 
             })
         });
         
-        const resultText = await response.text();
-        console.log(`📡 [WATZAPP] Response Status: ${response.status}`, resultText);
-        
         if (response.ok) {
             console.log(`✅ WhatsApp sent to ${cleanPhone}`);
             return true;
         } else {
-            console.error(`⚠️ Failed to send WA to ${cleanPhone}:`, resultText);
+            console.error(`⚠️ Failed to send WA (WAPI) to ${cleanPhone}`);
             return false;
         }
     } catch (error) {
@@ -231,53 +234,47 @@ const handler = async (req: Request) => {
                 ? 'Kailangan ng tulong? Sumagot sa email na ito o makipag-ugnayan sa amin sa WhatsApp.'
                 : 'Butuh bantuan? Balas email ini atau hubungi kami via WhatsApp.');
 
+        // //YOU DEV DONT ACT SMARTASS, this has rule standar no fancy email will be error Must light theme must with unsubscribe, no emote in subject (emote only in content)
         const htmlContent = `<!DOCTYPE html>
 <html lang="${htmlLang}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${template.title}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f4f9; color: #333; line-height: 1.6; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .header { background: ${template.color}; color: ${template.accentColor}; padding: 40px 20px; text-align: center; border-bottom: 4px solid rgba(255,255,255,0.2); }
-        .header h1 { margin: 0; font-size: 24px; }
-        .content { padding: 40px 30px; }
-        .btn { display: inline-block; background: ${template.color}; color: ${template.accentColor}; padding: 16px 32px; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 20px 0; text-transform: uppercase; letter-spacing: 1px; }
-        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #eee; }
-        .instruction-list { background: #fff; border: 1px dashed ${template.color}; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .instruction-list ul { margin: 0; padding-left: 20px; }
-        .instruction-list li { margin-bottom: 8px; }
-        .free-badge { display: inline-block; background: #facc15; color: #000; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; margin-bottom: 12px; }
+        body { font-family: Arial, sans-serif; background-color: #f6f8fc; margin: 0; padding: 20px; color: #202124; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; padding: 20px; background-color: #ffffff; border-radius: 8px; }
+        .header { border-bottom: 1px solid #e0e0e0; padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
+        .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #5f6368; text-align: center; }
+        .details-box { background-color: #f8f9fa; padding: 15px; border: 1px solid #e0e0e0; margin: 20px 0; border-radius: 4px; }
+        .button { display: inline-block; background-color: #1a73e8; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; margin: 20px 0; }
+        .unsubscribe { color: #5f6368; text-decoration: underline; margin-top: 10px; display: block; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <span class="free-badge">FREE EBOOK 🎁</span>
-            <h1>${template.title}</h1>
+            <h1 style="margin: 0; font-size: 24px;">${template.title}</h1>
         </div>
         <div class="content">
-            <h2>${greeting} ${userName},</h2>
+            <h2 style="font-size: 18px;">${greeting} ${userName},</h2>
             <p>${template.description}</p>
 
             <div style="text-align: center;">
-                <a href="${template.downloadLink}" class="btn">
-                    ${template.btnText}
-                </a>
+                <a href="${template.downloadLink}" class="button">${template.btnText}</a>
             </div>
 
-            <div class="instruction-list">
-                <p style="font-weight: bold; margin-top: 0; color: ${template.color};">${instructionLabel}</p>
+            <div class="details-box">
+                <p style="margin-top: 0;"><strong>${instructionLabel}</strong></p>
                 <ul>
                     ${template.instructions.map((inst: string) => `<li>${inst}</li>`).join('')}
                 </ul>
             </div>
         </div>
         <div class="footer">
-            <p>&copy; 2026 eL Vision Group. All Rights Reserved.</p>
+            <p>© 2026 eL Vision Group. All Rights Reserved.</p>
             <p>${helpText}</p>
+            <a href="https://track.mailketing.co.id/unsubscribex.php?id=16720&em=${encodeURIComponent(recipientEmail)}" class="unsubscribe">Unsubscribe</a>
         </div>
     </div>
 </body>

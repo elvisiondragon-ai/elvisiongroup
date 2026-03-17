@@ -45,78 +45,75 @@ async function sendWelcomeEmail(email, name) {
   try {
     console.log(`📧 Sending welcome email via Mailketing to: ${email}`);
     
-    const subject = "🎉 Selamat Datang di ElVision Group!";
-    const htmlContent = `
-      <div style="width: 90%; max-width: none; margin: 0 auto; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border-radius: 15px; overflow: hidden;">
-        <!-- Header Section -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 15px; text-align: center; border-radius: 15px 15px 0 0;">
-          <h1 style="margin: 0; font-size: 26px; font-weight: 700;">🎉 Selamat Datang!</h1>
-          <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 16px;">Terima kasih telah bergabung dengan ElVision Group!</p>
+    // YOU DEV DONT ACT SMARTASS, this has rule standar no fancy email will be error 
+    // Must light theme must with unsubscribe, no emote in subject (emote only in content)
+    // and must use Email subject line (use dynamic tags like %%first_name%%) to feel personalized
+    const subject = "Selamat Datang di ElVision Group";
+    
+    const fullHtml = `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${subject}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f6f8fc; margin: 0; padding: 20px; color: #202124; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; padding: 20px; background-color: #ffffff; border-radius: 8px; }
+        .header { border-bottom: 1px solid #e0e0e0; padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
+        .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #5f6368; text-align: center; }
+        .button { display: inline-block; background-color: #1a73e8; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; margin: 20px 0; }
+        .unsubscribe { color: #5f6368; text-decoration: underline; margin-top: 10px; display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 24px;">Selamat Datang!</h1>
         </div>
-        
-        <!-- Main Content -->
-        <div style="background: white; padding: 20px 15px; border-radius: 0 0 15px 15px;">
-          <h2 style="color: #333; margin: 0 0 15px 0; font-size: 22px;">Halo ${name}! 👋</h2>
-          
-          <p style="color: #666; line-height: 1.6; margin: 0 0 15px 0; font-size: 16px;">
-            Selamat datang di ElVision Group! Kami senang Anda telah bergabung dengan komunitas transformasi diri melalui teknologi spiritual.
-          </p>
-          
-          <!-- Features Box -->
-          <div style="background: #f8f9ff; padding: 15px; border-left: 4px solid #667eea; margin: 15px 0; border-radius: 10px;">
-            <h3 style="color: #333; margin: 0 0 12px 0; font-size: 18px;">✨ Apa yang Anda dapatkan:</h3>
-            <ul style="color: #666; line-height: 1.6; margin: 0; padding-left: 18px; font-size: 15px;">
-              <li>Akses ke konten spiritual dan teknologi terdepan</li>
-              <li>Fitur chat dengan AI spiritual</li>
-              <li>Audio therapy untuk meditasi dan relaksasi</li>
-              <li>Spiritual journal untuk refleksi diri</li>
-              <li>Komunitas yang mendukung pertumbuhan spiritual Anda</li>
+        <div class="content">
+            <p>Halo ${name || 'Sahabat'},</p>
+            <p>Terima kasih telah bergabung dengan ElVision Group. Kami senang Anda telah memilih kami untuk mendampingi perjalanan transformasi diri Anda.</p>
+            
+            <p><strong>Akses Anda sudah aktif:</strong></p>
+            <ul>
+                <li>Spiritual AI Chat</li>
+                <li>Audio Therapy</li>
+                <li>Spiritual Journal</li>
             </ul>
-          </div>
-          
-          <!-- Promo Box -->
-          <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border: 1px solid #ffeaa7; padding: 15px; margin: 15px 0; border-radius: 10px;">
-            <p style="margin: 0; color: #856404; text-align: center; font-weight: 500; font-size: 15px;">
-              <strong>💝 Ini Gratis,</strong> namun jika anda ingin merasakan Verse lengkap dan audio yang lebih powerful silahkan Upgrade pro hanya 4Ribu per hari dengan Manfaat ratusan kali lipat.
-            </p>
-          </div>
-          
-          <!-- CTA Button -->
-          <div style="text-align: center; margin: 20px 0;">
-            <a href="https://app.elvisiongroup.com" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 28px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
-              🚀 Mulai Perjalanan Anda
-            </a>
-          </div>
-          
-          <!-- Footer -->
-          <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px; text-align: center;">
-            <p style="color: #999; font-size: 14px; margin: 0;">
-              Butuh bantuan? Hubungi kami di <a href="mailto:support@elvisiongroup.com" style="color: #667eea; text-decoration: none;">support@elvisiongroup.com</a>
-            </p>
-          </div>
-        </div>
-      </div>
-    `;
 
-    const params = new URLSearchParams({
+            <div style="text-align: center;">
+                <a href="https://app.elvisiongroup.com" class="button">Mulai Sekarang</a>
+            </div>
+
+            <p>Jika ada pertanyaan, silakan hubungi tim kami di support@elvisiongroup.com.</p>
+        </div>
+        <div class="footer">
+            <p>© 2026 ElVision Group. All rights reserved.</p>
+            <a href="https://app.elvisiongroup.com/unsubscribe" class="unsubscribe">Unsubscribe from these emails</a>
+        </div>
+    </div>
+</body>
+</html>`;
+
+    const mailketingParams = {
       api_token: MAILKETING_API_KEY,
-      email: MAILKETING_EMAIL,
       from_name: 'Support eL Vision Group',
       from_email: 'support@elvisiongroup.com',
       recipient: email,
       subject: subject,
-      content: htmlContent
-    });
+      content: fullHtml
+    };
+    
+    console.log('📤 Sending to Mailketing /send:', JSON.stringify({ ...mailketingParams, content: '[HTML CONTENT TRUNCATED]' }, null, 2));
 
     const response = await fetch(`${MAILKETING_API_URL}/send`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: params
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(mailketingParams).toString()
     });
 
     const result = await response.text();
+    console.log('RAW RESULT:', result);
     console.log('📧 Mailketing welcome email result:', result);
     
     try {

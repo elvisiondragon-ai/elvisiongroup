@@ -19,18 +19,19 @@ const MAILKETING_API_URL = Deno.env.get('MAILKETING_API_URL') || 'https://api.ma
 const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
 const LIST_ID = '80713'; // Default List ID
 
-// WhatsApp API Configuration
-const WATZAP_TOKEN = "23b62c4255c43489f55fa84693dc0451d89ea5a5c9ec00021a7b77287cdce0b8";
-const WATZAP_URL = "https://watzapp.web.id/api/message";
+// WhatsApp API Configuration (WAPI)
+const WAPI_TOKEN = Deno.env.get('WAPI_TOKEN') || "rvpwk8dkih9m";
+const WAPI_URL = Deno.env.get('WAPI_URL') || "https://api.elvisiongroup.com/api/send";
+const WAPI_SESSION = Deno.env.get('WAPI_SESSION') || "renata";
 
 // --- PRODUCT CONFIGURATION ---
 const PRODUCT_TEMPLATES: Record<string, any> = {
 
   'raja_ranjang': {
-    subject: "🔥 Akses Download: Ebook Universal Raja Ranjang",
+    subject: "Akses Download: Ebook Universal Raja Ranjang",
     downloadLink: "https://drive.google.com/drive/folders/1g35DL8wAap-FWWyCrvu6pMzD_8viCXM1?usp=sharing",
-    color: "#C9991A", // Gold
-    accentColor: "#EEE5C8",
+    color: "#C9991A",
+    accentColor: "#FFFFFF",
     title: "Akses Raja Ranjang Diaktifkan",
     description: "Terima kasih! Pembayaran Anda sukses. Panduan Keintiman Raja Ranjang kini siap diunduh.",
     instructions: [
@@ -41,9 +42,9 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_diet': {
-    subject: "🥗 Akses Diet: Program Diet eL-Vision Anda",
+    subject: "Akses Diet: Program Diet eL-Vision Anda",
     downloadLink: "https://docs.google.com/document/d/1Xy--tVqilrJ-YNeQXXc9OjiDvmDCC_4l/edit?usp=sharing&ouid=105986209873893322274&rtpof=true&sd=true",
-    color: "#4CAF50", // Green
+    color: "#4CAF50",
     title: "Program Diet Dimulai!",
     description: "Terima kasih telah bergabung. Panduan lengkap diet Anda siap diakses.",
     instructions: [
@@ -54,9 +55,9 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_elvision': {
-    subject: "📘 Download: Ebook eL Vision Premium",
+    subject: "Download: Ebook eL Vision Premium",
     downloadLink: "https://drive.google.com/drive/folders/17yvGGDVqT4BbymvKsTXZhoU_XKM4qD3S?usp=sharing",
-    color: "#2196F3", // Blue
+    color: "#2196F3",
     title: "Akses Ebook Terbuka",
     description: "Selamat! Anda kini memiliki akses ke perpustakaan pengetahuan eL Vision.",
     instructions: [
@@ -67,9 +68,9 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_health20': {
-    subject: "🌿 Akses Download: Protokol Pemulihan Kesehatan Anda",
+    subject: "Akses Download: Protokol Pemulihan Kesehatan Anda",
     downloadLink: "https://drive.google.com/drive/folders/1E2iYI6JLtZ73F3jggHEHkke6IniRWaxB?usp=sharing",
-    color: "#004d40", // Teal/Dark Green
+    color: "#004d40",
     title: "Mulai Perjalanan Kesembuhan",
     description: "Terima kasih atas kepercayaan Anda. Folder ini berisi Ebook dan Terapi Audio untuk pemulihan.",
     instructions: [
@@ -80,10 +81,10 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_percayadiri': {
-    subject: "🔥 Akses Download: Paket Pria Alpha Anda",
+    subject: "Akses Download: Paket Pria Alpha Anda",
     downloadLink: "https://drive.google.com/drive/folders/1P4wdc44vaPquxw6vL2OpmQcENZeUIuNO?usp=sharing",
-    color: "#1a2a3a", // Dark Navy
-    accentColor: "#c5a059", // Gold
+    color: "#1a2a3a",
+    accentColor: "#FFFFFF",
     title: "Akses Pria Alpha Terbuka",
     description: "Selamat! Anda sekarang memiliki akses penuh ke Paket Pria Alpha (Audio & Ebook).",
     instructions: [
@@ -94,7 +95,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_feminine': {
-    subject: "✨ Akses Download: Paket Dark Feminine Anda",
+    subject: "Akses Download: Paket Dark Feminine Anda",
     downloadLink: "https://drive.google.com/drive/folders/19Hrs9fYFm_PNAQkOGJwI3OWdDb86dkuy?usp=share_link",
     color: "#e11d48",
     accentColor: "#ffffff",
@@ -106,7 +107,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_feminine_lovemagnet': {
-    subject: "✨ Akses Download: Paket Feminine Magnetism + Audio Love Magnet",
+    subject: "Akses Download: Paket Feminine Magnetism + Audio Love Magnet",
     downloadLink: "https://drive.google.com/drive/folders/1IZmSrzPDSgGSYwq1sQhhGgBaUExJjhgd?usp=sharing",
     color: "#e11d48",
     accentColor: "#facc15",
@@ -122,7 +123,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
   },
   // --- DARK FEMININE EN ---
   'universal_darkfeminine_en': {
-    subject: "✨ Download Access: Dark Feminine Package (PDF)",
+    subject: "Download Access: Dark Feminine Package (PDF)",
     downloadLink: "https://drive.google.com/drive/folders/1xxikmQHs860wJL-uoZjw15Erb8FCsZ4H?usp=share_link",
     color: "#e11d48",
     accentColor: "#ffffff",
@@ -136,7 +137,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "en"
   },
   'universal_darkfeminine_en_audio': {
-    subject: "✨ Download Access: Dark Feminine Package (PDF + Audio)",
+    subject: "Download Access: Dark Feminine Package (PDF + Audio)",
     downloadLink: "https://drive.google.com/drive/folders/1Otb4SkWN34Wv7lnHFiMSTjPUjbMAXk9Z?usp=share_link",
     color: "#e11d48",
     accentColor: "#facc15",
@@ -152,7 +153,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
   },
   // --- DARK FEMININE PH ---
   'universal_darkfeminine_ph': {
-    subject: "✨ I-download Na: Dark Feminine Package (PDF)",
+    subject: "I-download Na: Dark Feminine Package (PDF)",
     downloadLink: "https://drive.google.com/drive/folders/1CYBeQOBAgSHCLjxU6a6d3qEa_-t35cXe?usp=share_link",
     color: "#e11d48",
     accentColor: "#ffffff",
@@ -166,7 +167,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "tl"
   },
   'universal_darkfeminine_ph_audio': {
-    subject: "✨ I-download Na: Dark Feminine Package (PDF + Audio)",
+    subject: "I-download Na: Dark Feminine Package (PDF + Audio)",
     downloadLink: "https://drive.google.com/drive/folders/1Z7ArFWDe0lhDlcTfPWSV0MM0zeytYMqk?usp=share_link",
     color: "#e11d48",
     accentColor: "#facc15",
@@ -181,10 +182,10 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "tl"
   },
   'ebook_uangpanas': {
-    subject: "🔥 Akses Download: Sistem Uang Panas (Lead Magnet + Audio)",
-    downloadLink: "https://drive.google.com/file/d/1R_AEFpjaxBwYnxLGevVPKHf548pMn9gE/view?usp=sharing", // Placeholder link, please update
-    color: "#b91c1c", // Red 700
-    accentColor: "#facc15", // Yellow 400
+    subject: "Akses Download: Sistem Uang Panas (Lead Magnet + Audio)",
+    downloadLink: "https://drive.google.com/file/d/1R_AEFpjaxBwYnxLGevVPKHf548pMn9gE/view?usp=sharing",
+    color: "#b91c1c",
+    accentColor: "#facc15",
     title: "Sistem Uang Panas Diaktifkan!",
     description: "Terima kasih! Anda telah mengambil langkah cerdas. Berikut adalah akses ke 'senjata' rahasia Anda.",
     instructions: [
@@ -195,7 +196,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'webinar_el': {
-    subject: "🎟️ Webinar Ticket: eL Vision & Bonus Ebook",
+    subject: "Webinar Ticket: eL Vision & Bonus Ebook",
     downloadLink: "https://drive.google.com/drive/folders/1ZQ4LsWFnuuRJTNu1vfZc5-hJDfOGzJsU?usp=share_link",
     color: "#b91c1c",
     accentColor: "#facc15",
@@ -211,9 +212,9 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     btnText: "GET BONUS EBOOK"
   },
   'vip_coaching': {
-    subject: "💎 VIP Confirmation: 6 Weeks eL Vision Program",
+    subject: "VIP Confirmation: 6 Weeks eL Vision Program",
     downloadLink: "https://wa.me/62895325633487?text=HI%20I%20have%20paid%20for%20VIP%206%20weeks",
-    color: "#004d40", // Teal/Dark Green
+    color: "#004d40",
     title: "Welcome to the VIP Program",
     description: "Your payment has been received. The next step is to confirm your 1:1 session schedule.",
     instructions: [
@@ -226,9 +227,9 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
   },
   // --- USA PRODUCTS (ENGLISH) ---
   'usa_ebookhealth': {
-    subject: "🌿 Download Access: Your Health Recovery Protocol",
+    subject: "Download Access: Your Health Recovery Protocol",
     downloadLink: "https://drive.google.com/drive/folders/1E2iYI6JLtZ73F3jggHEHkke6IniRWaxB?usp=sharing",
-    color: "#004d40", // Teal/Dark Green
+    color: "#004d40",
     title: "Start Your Healing Journey",
     description: "Thank you for your trust. This folder contains your Recovery Ebook and Audio Therapy.",
     instructions: [
@@ -239,9 +240,9 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "en"
   },
   'usa_ebookslim': {
-    subject: "🥗 Download Access: Slim Without Suffering Program",
-    downloadLink: "https://docs.google.com/document/d/1Xy--tVqilrJ-YNeQXXc9OjiDvmDCC_4l/edit?usp=sharing&ouid=105986209873893322274&rtpof=true&sd=true", // Using existing diet link placeholder
-    color: "#4CAF50", // Green
+    subject: "Download Access: Slim Without Suffering Program",
+    downloadLink: "https://docs.google.com/document/d/1Xy--tVqilrJ-YNeQXXc9OjiDvmDCC_4l/edit?usp=sharing&ouid=105986209873893322274&rtpof=true&sd=true",
+    color: "#4CAF50",
     title: "Your Slimming Journey Begins!",
     description: "Thank you for joining. Your complete diet guide is ready to access.",
     instructions: [
@@ -252,7 +253,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "en"
   },
   'usa_3000': {
-    subject: "💎 VIP Confirmation: 6 Weeks eL Vision Program",
+    subject: "VIP Confirmation: 6 Weeks eL Vision Program",
     downloadLink: "https://wa.me/62895325633487?text=HI%20I%20have%20paid%20for%20VIP%206%20weeks",
     color: "#004d40",
     title: "Welcome to the VIP Program",
@@ -266,9 +267,9 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "en"
   },
   'usa_ebookfeminine': {
-    subject: "✨ Download Access: Feminine Magnetism (USA)",
+    subject: "Download Access: Feminine Magnetism (USA)",
     downloadLink: "https://drive.google.com/drive/folders/1Pxz5nYxblo-rzllG6SsYUQq4039Kbd9C?usp=share_link",
-    color: "#e11d48", // Rose 600
+    color: "#e11d48",
     accentColor: "#ffffff",
     title: "Access Granted: Feminine Magnetism",
     description: "Congratulations! You now have full access to the Feminine Magnetism Package (Audio & Ebook).",
@@ -280,7 +281,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "en"
   },
   'usa_webinar20': {
-    subject: "🎟️ Webinar Access: eL Vision Webinar & Materials",
+    subject: "Webinar Access: eL Vision Webinar & Materials",
     downloadLink: "https://chat.whatsapp.com/KxDQ29iKvAQBVvS3deckVC",
     color: "#004d40",
     title: "Welcome to the eL Vision Webinar",
@@ -296,7 +297,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "en"
   },
   'sg_elvision_en': {
-    subject: "📘 Download: eL Vision Ebook (English Edition)",
+    subject: "Download: eL Vision Ebook (English Edition)",
     downloadLink: "https://drive.google.com/drive/folders/17yvGGDVqT4BbymvKsTXZhoU_XKM4qD3S?usp=sharing",
     color: "#2196F3",
     title: "Access Granted: eL Vision Ebook",
@@ -310,7 +311,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "en"
   },
   'sg_elvision_malay': {
-    subject: "📘 Muat Turun: Ebook eL Vision (Edisi Bahasa Melayu)",
+    subject: "Muat Turun: Ebook eL Vision (Edisi Bahasa Melayu)",
     downloadLink: "https://drive.google.com/drive/folders/17yvGGDVqT4BbymvKsTXZhoU_XKM4qD3S?usp=sharing",
     color: "#2196F3",
     title: "Akses Diberikan: Ebook eL Vision",
@@ -324,9 +325,9 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "ms"
   },
   'universal_saham_ultimate': {
-    subject: "📈 Akses Download: Ebook Saham Ultimate Anda",
+    subject: "Akses Download: Ebook Saham Ultimate Anda",
     downloadLink: "https://drive.google.com/drive/folders/1sJ9vf8NLuH3ccVjc3ofPk2Ew3IjKTDFJ?usp=sharing",
-    color: "#3b82f6", // Blue
+    color: "#3b82f6",
     accentColor: "#ffffff",
     title: "Akses Saham Ultimate Terbuka",
     description: "Terima kasih! Pembayaran Anda sukses. Folder ini berisi Ebook Saham Ultimate untuk membantu Anda menganalisis pasar.",
@@ -414,13 +415,26 @@ async function sendMailketingEmail(email: string, subject: string, htmlContent: 
       content: htmlContent
     });
 
+    const mailketingParams = {
+      api_token: MAILKETING_API_KEY!,
+      email: 'support@elvisiongroup.com',
+      from_name: 'eL Vision Group',
+      from_email: 'support@elvisiongroup.com',
+      recipient: email,
+      subject: subject,
+      content: htmlContent
+    };
+
+    console.log('📤 Sending to Mailketing /send:', JSON.stringify(mailketingParams, null, 2));
+
     const response = await fetch(`${MAILKETING_API_URL}/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params
+      body: new URLSearchParams(mailketingParams).toString()
     });
 
     const result = await response.text();
+    console.log('RAW RESULT:', result);
     try {
       return JSON.parse(result);
     } catch {
@@ -494,59 +508,54 @@ const handler = async (req: Request) => {
       : 'Butuh bantuan? Balas email ini atau hubungi kami via WhatsApp.';
     const btnText = template.btnText || (htmlLang === 'en' ? 'DOWNLOAD NOW' : 'DOWNLOAD SEKARANG');
 
+    // //YOU DEV DONT ACT SMARTASS, this has rule standar no fancy email will be error Must light theme must with unsubscribe, no emote in subject (emote only in content)
     const htmlContent = `<!DOCTYPE html>
 <html lang="${htmlLang}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${template.title}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f4f9; color: #333; line-height: 1.6; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .header { background: ${mainColor}; color: ${accentColor}; padding: 40px 20px; text-align: center; border-bottom: 4px solid ${template.accentColor ? template.accentColor : 'rgba(255,255,255,0.2)'}; }
-        .header h1 { margin: 0; font-size: 24px; }
-        .content { padding: 40px 30px; }
-        .btn { display: inline-block; background: ${mainColor}; color: ${accentColor}; padding: 16px 32px; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 20px 0; text-transform: uppercase; letter-spacing: 1px; transition: opacity 0.3s; }
-        .btn:hover { opacity: 0.9; }
-        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #eee; }
-        .details { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 14px; border: 1px solid #eee; }
-        .instruction-list { background: #fff; border: 1px dashed ${mainColor}; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .instruction-list ul { margin: 0; padding-left: 20px; }
-        .instruction-list li { margin-bottom: 8px; }
+        body { font-family: Arial, sans-serif; background-color: #f6f8fc; margin: 0; padding: 20px; color: #202124; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; padding: 20px; background-color: #ffffff; border-radius: 8px; }
+        .header { border-bottom: 1px solid #e0e0e0; padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
+        .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #5f6368; text-align: center; }
+        .details-box { background-color: #f8f9fa; padding: 15px; border: 1px solid #e0e0e0; margin: 20px 0; border-radius: 4px; }
+        .button { display: inline-block; background-color: #1a73e8; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; margin: 20px 0; }
+        .unsubscribe { color: #5f6368; text-decoration: underline; margin-top: 10px; display: block; }
+        .details-grid { margin-top: 20px; font-size: 14px; color: #5f6368; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>${template.title}</h1>
+            <h1 style="margin: 0; font-size: 24px;">${template.title}</h1>
         </div>
         <div class="content">
-            <h2>${greeting} ${userName},</h2>
+            <h2 style="font-size: 18px;">${greeting} ${userName},</h2>
             <p>${template.description}</p>
             
             <div style="text-align: center;">
-                <a href="${template.downloadLink}" class="btn">
-                    ${btnText}
-                </a>
+                <a href="${template.downloadLink}" class="button">${btnText}</a>
             </div>
 
-            <div class="instruction-list">
-                <p style="font-weight: bold; margin-top: 0; color: ${mainColor};">${instructionLabel}</p>
+            <div class="details-box">
+                <p style="margin-top: 0;"><strong>${instructionLabel}</strong></p>
                 <ul>
                     ${template.instructions.map((inst: string) => `<li>${inst}</li>`).join('')}
                 </ul>
             </div>
 
-            <div class="details">
-                <p><strong>${productLabel}</strong> ${productNameInput}</p>
-                <p><strong>${referenceLabel}</strong> ${reference}</p>
-                <p><strong>${totalLabel}</strong> ${displayAmount}</p>
+            <div class="details-grid">
+                <p style="margin: 5px 0;"><strong>${productLabel}</strong> ${productNameInput}</p>
+                <p style="margin: 5px 0;"><strong>${referenceLabel}</strong> ${reference}</p>
+                <p style="margin: 5px 0;"><strong>${totalLabel}</strong> ${displayAmount}</p>
             </div>
         </div>
         <div class="footer">
-            <p>&copy; 2026 eL Vision Group. All Rights Reserved.</p>
+            <p>© 2026 eL Vision Group. All Rights Reserved.</p>
             <p>${helpText}</p>
+            <a href="https://track.mailketing.co.id/unsubscribex.php?id=16720&em=${encodeURIComponent(recipientEmail)}" class="unsubscribe">Unsubscribe</a>
         </div>
     </div>
 </body>
@@ -626,25 +635,23 @@ const handler = async (req: Request) => {
             waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nKakak juga mendapat Kupon diskon 70% Dari 1.800.000 menjadi 540.000 (hemat 1,3juta!)\nUntuk produk https://drelf.id\nCheckout disini https://export.elvisiongroup.com/id_drelf\nSUDAH Bpom yah\n\nSalam hangat,\nAdmin - eL Vision Group`;
           }
 
-          const waResponse = await fetch(WATZAP_URL, {
+          const waResponse = await fetch(WAPI_URL, {
             method: 'POST',
             headers: { 
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                token: WATZAP_TOKEN,
+                session: WAPI_SESSION,
+                token: WAPI_TOKEN,
                 to: cleanPhone,
                 message: waMessage
             })
           });
 
-          const resultText = await waResponse.text();
-          console.log(`📡 [WATZAPP] API Response Status: ${waResponse.status}`, resultText);
-
           if (waResponse.ok) {
             console.log(`✅ WhatsApp sent successfully to buyer: ${cleanPhone}`);
           } else {
-            console.error(`⚠️ WhatsApp API returned status ${waResponse.status} for buyer: ${cleanPhone}`);
+            console.error(`⚠️ WhatsApp API (WAPI) returned status ${waResponse.status} for buyer: ${cleanPhone}`);
           }
         } catch (waError) {
           console.error(`❌ Error sending WhatsApp to buyer ${userPhone}:`, waError);
@@ -658,13 +665,14 @@ const handler = async (req: Request) => {
       for (const adminPhone of adminPhones) {
         try {
           const cleanAdminPhone = adminPhone.replace(/\D/g, '');
-          const waResponseAdmin = await fetch(WATZAP_URL, {
+          const waResponseAdmin = await fetch(WAPI_URL, {
             method: 'POST',
             headers: { 
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                token: WATZAP_TOKEN,
+                session: WAPI_SESSION,
+                token: WAPI_TOKEN,
                 to: cleanAdminPhone,
                 message: adminMessage
             })
