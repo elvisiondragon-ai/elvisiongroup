@@ -65,6 +65,9 @@ verify_jwt = false
 [functions.refresh-ig-token]
 verify_jwt = false
 
+[functions.moota-callback]
+verify_jwt = false
+
 [functions.tripay_create-payment]
 enabled = true
 verify_jwt = true

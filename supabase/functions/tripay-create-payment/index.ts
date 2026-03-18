@@ -335,6 +335,7 @@ serve(async (req) => {
         product_name: formattedProductName,
         amount: amount,
         status: 'UNPAID',
+        tripay_reference: paymentMethod === 'BCA_MANUAL' ? "MANUAL-" + merchantRef : null,
         merchant_ref: merchantRef,
         user_id: userId,
         affiliate_id: validAffiliateId, // Save affiliate ID
@@ -357,7 +358,7 @@ serve(async (req) => {
         amount_paid: amount,
         currency: body.currency || 'IDR',
         status: 'pending',
-        tripay_reference: null,
+        tripay_reference: paymentMethod === 'BCA_MANUAL' ? "MANUAL-" + merchantRef : null,
         ip_address: ipAddress,
         user_agent: userAgent,
         affiliate_id: validAffiliateId, // Save affiliate ID
@@ -463,6 +464,28 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 });
     }
 
+    // --- 5.1 BRANCHING LOGIC: BCA MANUAL (Direct to DB) ---
+    if (paymentMethod === 'BCA_MANUAL') {
+      console.log('✅ BCA_MANUAL detected. Skipping Tripay proxy and returning DB record.');
+      return new Response(JSON.stringify({
+        success: true,
+        paymentType: 'DIRECT',
+        tripay_reference: `MANUAL-${merchantRef}`, // We use merchantRef to keep it unique
+        reference: `MANUAL-${merchantRef}`,
+        merchantRef: merchantRef,
+        amount: amount,
+        paymentMethod: 'BCA_MANUAL',
+        status: 'UNPAID',
+        instructions: [] // Instructions already in static frontend
+      }), {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
+        status: 200
+      });
+    }
+
     // --- 6. EXISTING TRIPAY FLOW (Generic PHP Proxy) ---
     const vpsUrl = "https://payment.elvisiongroup.com/create-payment";
     const vpsPayload = {
@@ -513,9 +536,10 @@ serve(async (req) => {
       }
     }
     // --- 8. FLATTEN & RETURN RESPONSE TO CLIENT ---
+    const redirectMethods = ['DANA', 'OVO', 'SHOPEEPAY', 'LINKAJA', 'SAKUKU'];
     const clientResponse = {
       success: vpsResult.success,
-      paymentType: tripayData.pay_url ? 'REDIRECT' : 'DIRECT',
+      paymentType: (tripayData.pay_url || redirectMethods.includes(paymentMethod)) ? 'REDIRECT' : 'DIRECT',
       checkoutUrl: tripayData.checkout_url,
       payCode: tripayData.pay_code,
       tripay_reference: tripayReference,
