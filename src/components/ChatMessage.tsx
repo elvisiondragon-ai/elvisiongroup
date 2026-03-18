@@ -43,7 +43,7 @@ export function ChatMessage({ id, user, message, timestamp, currentUserId, curre
 
   const handleDelete = async () => {
     // Make message disappear from UI with slide left animation
-    const messageElement = document.querySelector(`[data-message-id="${id}"]`);
+    const messageElement = document.querySelector(`[data-message-id="${id}"]`) as HTMLElement;
     if (messageElement) {
       messageElement.style.opacity = '0';
       messageElement.style.transform = 'translateX(-100%)';

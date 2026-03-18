@@ -73,7 +73,7 @@ export function ProUpgrade({ onClose, onNavigate }: ProUpgradeProps) {
             {proStatus.subscriptionType === 'trial' ? (
               <Badge variant="secondary" className="gap-1">
                 <Clock className="w-3 h-3" />
-                Trial - {proStatus.daysRemaining} days left
+                Trial - {(proStatus as any).daysRemaining} days left
               </Badge>
             ) : (
               <Badge variant="default" className="gap-1 bg-pro">

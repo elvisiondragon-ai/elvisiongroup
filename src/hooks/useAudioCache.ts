@@ -61,7 +61,7 @@ export function useAudioCache() {
       // Cache the blob for 30 days
       cacheManager.set(cacheKey, blob, 'audioFiles');
       
-      setCachedFiles(prev => new Set([...prev, fileName]));
+      setCachedFiles(prev => { const s = new Set(prev); s.add(fileName); return s; });
       setCacheSize(prev => prev + blob.size);
       
       console.log(`✅ Audio cached: ${fileName} (${(blob.size / 1024 / 1024).toFixed(2)} MB)`);

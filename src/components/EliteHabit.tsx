@@ -64,23 +64,25 @@ export function EliteHabit() {
       const { data: todayData } = await supabase
         .from('elite_habits')
         .select('*')
-        .eq('user_id', userId)
+
+        .eq('user_id', userId as string)
         .gte('created_at', new Date(today).toISOString())
         .lt('created_at', new Date(new Date(today).getTime() + 24*60*60*1000).toISOString());
 
       if (todayData) {
-        setTodayEntries(todayData);
+        setTodayEntries(todayData as any);
       }
 
       // Load all entries for reports (all time)
       const { data: allData } = await supabase
         .from('elite_habits')
         .select('*')
-        .eq('user_id', userId)
+
+        .eq('user_id', userId as string)
         .order('created_at', { ascending: false });
 
       if (allData) {
-        setAllEntries(allData);
+        setAllEntries(allData as any);
       }
 
     } catch (error) {
@@ -135,7 +137,7 @@ export function EliteHabit() {
           duration_minutes: duration,
           date: today,
           notes: notes.trim()
-        })
+        } as any)
         .select(); // Return the inserted data to verify
 
       if (insertError) throw insertError;
@@ -152,7 +154,7 @@ export function EliteHabit() {
       });
 
       // Optimistically update local state
-      const newHabit = data[0] as EliteHabitEntry;
+      const newHabit = data[0] as any as EliteHabitEntry;
       setAllEntries(prev => [newHabit, ...prev]);
       if (new Date(newHabit.date).toDateString() === today) {
         setTodayEntries(prev => [newHabit, ...prev]);
@@ -186,8 +188,10 @@ export function EliteHabit() {
       const { error } = await supabase
         .from('elite_habits')
         .delete()
+
         .eq('id', habitId)
-        .eq('user_id', userId);
+
+        .eq('user_id', userId as string);
 
       if (error) {
         toast({
@@ -370,7 +374,7 @@ export function EliteHabit() {
                 <Button
                   onClick={() => {
                     // Make habit disappear with cool slide left animation
-                    const habitElement = document.querySelector(`[data-habit-id="${entry.id}"]`);
+                    const habitElement = document.querySelector(`[data-habit-id="${entry.id}"]`) as HTMLElement;
                     if (habitElement) {
                       habitElement.style.opacity = '0';
                       habitElement.style.transform = 'translateX(-100%)';
@@ -556,7 +560,7 @@ export function EliteHabit() {
                   <Button
                     onClick={() => {
                       // Make habit disappear with cool slide left animation
-                      const habitElement = document.querySelector(`[data-habit-id="${entry.id}"]`);
+                      const habitElement = document.querySelector(`[data-habit-id="${entry.id}"]`) as HTMLElement;
                       if (habitElement) {
                         habitElement.style.opacity = '0';
                         habitElement.style.transform = 'translateX(-100%)';

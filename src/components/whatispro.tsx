@@ -1,14 +1,14 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Crown, BarChart, Headphones, Percent } from 'lucide-react';
 
 export const WhatIsPro: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubscribeClick = () => {
-    navigate('/payment');
+    router.push('/payment');
   };
 
   const proBenefits = [

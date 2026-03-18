@@ -15,6 +15,7 @@ interface UserSubscriptionData {
   email: string;
   display_name: string;
   subscription_type: string;
+  days_remaining: number;
   subscription_start_date: string;
   subscription_end_date: string;
   trial_start_date: string;
@@ -59,7 +60,7 @@ export function DaysRemainingDashboard() {
       }
 
       // Transform the data to match our interface
-      const transformedData: UserSubscriptionData[] = (data || []).map(item => ({
+      const transformedData: UserSubscriptionData[] = (data || []).map((item: any) => ({
         user_id: item.user_id,
         email: item.email,
         display_name: (item.profiles as any)?.display_name || 'N/A',

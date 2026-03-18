@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioSession } from "@/hooks/useAudioSession";
-import { useAudio } from "@/contexts/AudioContext";
+import { useProtectedAudio as useAudio } from "@/contexts/AudioContext";
 
 interface AudioPlayerProps {
   title: string;

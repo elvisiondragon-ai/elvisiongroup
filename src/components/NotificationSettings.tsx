@@ -35,6 +35,7 @@ export function NotificationSettings() {
       const { data, error } = await supabase
         .from('notification_settings')
         .select('*')
+
         .eq('user_id', user.id)
         .single();
 
@@ -44,10 +45,11 @@ export function NotificationSettings() {
       }
 
       if (data) {
+        const d = data as any;
         setSettings({
-          chat_notifications_enabled: data.chat_notifications_enabled,
-          quiet_hours_start: data.quiet_hours_start,
-          quiet_hours_end: data.quiet_hours_end
+          chat_notifications_enabled: d.chat_notifications_enabled,
+          quiet_hours_start: d.quiet_hours_start,
+          quiet_hours_end: d.quiet_hours_end
         });
       }
     } catch (error) {
@@ -69,7 +71,7 @@ export function NotificationSettings() {
           user_id: user.id,
           ...newSettings,
           updated_at: new Date().toISOString()
-        }, {
+        } as any, {
           onConflict: 'user_id'
         });
 

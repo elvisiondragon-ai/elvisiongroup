@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { getAudioUrl } from '@/utils/audioUtils';
 import { indexedDBCache } from '@/utils/indexedDBCache';
@@ -144,7 +146,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         throw new Error(`Download incomplete: expected ${total} bytes, got ${loaded} bytes.`);
       }
 
-      const blob = new Blob(chunks, { type: 'audio/mpeg' });
+      const blob = new Blob(chunks as BlobPart[], { type: 'audio/mpeg' });
       await indexedDBCache.store(cacheKey, blob, audioUrl);
       
       const blobUrl = URL.createObjectURL(blob);

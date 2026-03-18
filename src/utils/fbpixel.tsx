@@ -39,7 +39,7 @@ export const sha256 = async (message: string): Promise<string> => {
 
 // 🍪 Cookie Helper - Set cookie with domain handling
 export const setCookieHelper = (name: string, value: string, days: number = 90) => {
-    if (typeof document === 'undefined') return;
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
     
     const date = new Date();
     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -303,7 +303,7 @@ export const initFacebookPixelWithLogging = (pixelId: string, userData?: Advance
         };
         if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
         t = b.createElement(e); t.async = !0; t.src = v; 
-        t.onerror = function() { window.fbq = function() {}; };
+        t.onerror = function() { (window as any).fbq = function() {}; };
         s = b.getElementsByTagName(e)[0]; 
         try { s.parentNode.insertBefore(t, s); } catch (e) {}
       })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');

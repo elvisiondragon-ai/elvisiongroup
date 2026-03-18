@@ -57,6 +57,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('analytics_used, last_analytics_date')
+
         .eq('user_id', user.id)
         .single();
 
@@ -69,9 +70,9 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
       }
 
       const currentMonth = new Date().toISOString().slice(0, 7); // "2025-01"
-      const lastUsedMonth = profile?.last_analytics_date?.slice(0, 7);
+      const lastUsedMonth = (profile as any)?.last_analytics_date?.slice(0, 7);
 
-      console.log('📅 Month comparison:', { currentMonth, lastUsedMonth, analyticsUsed: profile?.analytics_used });
+      console.log('📅 Month comparison:', { currentMonth, lastUsedMonth, analyticsUsed: (profile as any)?.analytics_used });
 
       if (lastUsedMonth !== currentMonth) {
         // New month - reset counter in database
@@ -82,8 +83,9 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
             .update({
               analytics_used: 0,
               last_analytics_date: new Date().toISOString().split('T')[0]
-            })
-            .eq('user_id', user.id);
+            } as any)
+    
+        .eq('user_id', user.id);
           console.log('✅ Counter reset for new month');
         } catch (resetError) {
           console.error('❌ Failed to reset counter:', resetError);
@@ -91,7 +93,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
         return { canUse: true, used: 0 };
       }
 
-      const used = profile?.analytics_used || 0;
+      const used = (profile as any)?.analytics_used || 0;
       const canUse = used < 1;
 
       console.log('✅ Final result:', { canUse, used });
@@ -126,6 +128,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
       const { data: profile, error: fetchError } = await supabase
         .from('profiles')
         .select('analytics_used, last_analytics_date')
+
         .eq('user_id', user.id)
         .single();
 
@@ -134,8 +137,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
         throw fetchError;
       }
 
-      const lastUsedMonth = profile?.last_analytics_date?.slice(0, 7);
-      const currentUsage = (lastUsedMonth === currentMonth) ? (profile?.analytics_used || 0) : 0;
+      const lastUsedMonth = (profile as any)?.last_analytics_date?.slice(0, 7);
+      const currentUsage = (lastUsedMonth === currentMonth) ? ((profile as any)?.analytics_used || 0) : 0;
       const newUsage = currentUsage + 1;
 
       console.log('📊 Usage calculation:', { currentUsage, newUsage, lastUsedMonth, currentMonth });
@@ -145,7 +148,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
         .update({
           analytics_used: newUsage,
           last_analytics_date: today
-        })
+        } as any)
+
         .eq('user_id', user.id);
 
       if (error) {
@@ -194,6 +198,7 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
       const { data: reflections } = await supabase
         .from('reflections')
         .select('*')
+
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(20);
@@ -245,11 +250,11 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
       }
 
       // Prepare data for ChatGPT analysis
-      const journalTexts = reflections.map(r => r.reflection).join('\n\n');
+      const journalTexts = reflections.map((r: any) => r.reflection).join('\n\n');
 
       // Extract keywords for manifestation from journal entries
-      const manifestationKeywords = journalTexts.toLowerCase().match(/\b(dapat|dapatkan|ingin|mau|butuh|perlu|harapan|impian|cita-cita|keinginan|rezeki|uang|cinta|kesehatan|kebahagiaan|sukses|karir|pekerjaan|jodoh|keluarga|rumah|mobil|travel|bisnis)\b/g) || [];
-      const keywordCounts = manifestationKeywords.reduce((acc, word) => {
+      const manifestationKeywords = (journalTexts.toLowerCase().match(/\b(dapat|dapatkan|ingin|mau|butuh|perlu|harapan|impian|cita-cita|keinginan|rezeki|uang|cinta|kesehatan|kebahagiaan|sukses|karir|pekerjaan|jodoh|keluarga|rumah|mobil|travel|bisnis)\b/g) || []) as string[];
+      const keywordCounts = manifestationKeywords.reduce((acc: Record<string, number>, word: string) => {
         acc[word] = (acc[word] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
@@ -340,6 +345,8 @@ export function JournalAnalytics({ onUpgradeClick }: JournalAnalyticsProps) {
     } catch (error) {
       console.error('Final error in AI report generation:', error);
 
+      const userTotalVerses = userProfile?.total_verses || 0;
+      const userTotalJournal = userProfile?.total_journal || 0;
       // Provide meaningful fallback based on user data
       const meaningfulFallback = {
         totalEntries: userTotalJournal || 0,
