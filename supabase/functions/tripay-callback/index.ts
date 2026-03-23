@@ -376,11 +376,11 @@ serve(async (req) => {
           capiValue = amount || globalProductTx.amount || 149000;
           displayAmount = capiValue;
         } else if (isDrelf) {
-          capiPixelId = '1749197952320359'; // Drelf SG Pixel
-          capiCurrency = 'SGD';
-          emailCurrency = 'SGD';
-          displayAmount = (amount || globalProductTx.amount) / 12000; // Convert back to SGD
-          capiValue = displayAmount;
+          capiPixelId = '3319324491540889'; // Drelf Pixel (METACAPI)
+          capiValue = amount || globalProductTx.amount || 0;
+          capiCurrency = 'IDR';
+          emailCurrency = 'IDR';
+          displayAmount = capiValue;
         } else if (isJewelry) {
           capiPixelId = '874165095242407'; // New Ramadhan Ring / Jewelry Pixel
           capiCurrency = 'SGD';
@@ -400,7 +400,7 @@ serve(async (req) => {
           emailCurrency = 'IDR';
           displayAmount = capiValue;
         } else if (isFitFactor) {
-          capiPixelId = '1797660474333865'; // Fit Factor Pixel
+          capiPixelId = '3319324491540889'; // Fit Factor Pixel (METACAPI)
           capiValue = amount || globalProductTx.amount || 0;
           capiCurrency = 'IDR';
           emailCurrency = 'IDR';
@@ -448,7 +448,8 @@ serve(async (req) => {
         if (capiPixelId && !globalProductTx.capi_purchase_sent) {
           try {
             // TEST MODE CHECK
-            const isTestUser = globalProductTx.email === 'elvisiondragon@gmail.com';
+            const testEmails = ['elvisiondragon@gmail.com', 'dragon@yahoo.com', 'elclawvision@gmail.com'];
+            const isTestUser = testEmails.includes(globalProductTx.email);
             const eventName = isTestUser ? 'Test_Purchase' : 'Purchase';
             if (isTestUser) console.log('   - 🧪 TEST MODE: Sending Test_Purchase event');
 

@@ -97,7 +97,27 @@ const FREE_EBOOK_TEMPLATES: Record<string, any> = {
 
 // Map request lang param → product key
 function getProductKey(lang: string): string {
-    switch (lang?.toLowerCase()) {
+    const lowerLang = lang?.toLowerCase() || 'id';
+    
+    // --- SKU Mappings for send-ebooks-free ---
+    // ebookfree01: free_ebook_darkfeminine_id
+    // ebookfree02: free_ebook_darkfeminine_en
+    // ebookfree03: free_ebook_darkfeminine_ph
+    // ebookfree04: free_ebook_saham
+    const skuMap: Record<string, string> = {
+        'ebookfree01': 'free_ebook_darkfeminine_id',
+        'ebookfree02': 'free_ebook_darkfeminine_en',
+        'ebookfree03': 'free_ebook_darkfeminine_ph',
+        'ebookfree04': 'free_ebook_saham'
+    };
+    
+    const skuMatch = lowerLang.match(/^ebookfree?0?(\d+)$/);
+    if (skuMatch) {
+        const skuCode = `ebookfree${skuMatch[1].padStart(2, '0')}`;
+        if (skuMap[skuCode]) return skuMap[skuCode];
+    }
+
+    switch (lowerLang) {
         case 'en': return 'free_ebook_darkfeminine_en';
         case 'ph': return 'free_ebook_darkfeminine_ph';
         case 'saham': return 'free_ebook_saham';

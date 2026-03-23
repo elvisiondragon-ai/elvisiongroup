@@ -27,12 +27,12 @@ const WAPI_URL = Deno.env.get('WAPI_URL') || "https://api.elvisiongroup.com/api/
 const WAPI_SESSION = Deno.env.get('WAPI_SESSION') || "renata";
 
 // Add subscriber to Mailketing list
-async function addToMailketingList(email, name) {
+async function addToMailketingList(email, name, listId = LIST_ID) {
   try {
-    console.log(`📋 Adding ${email} to Mailketing list ${LIST_ID}...`);
+    console.log(`📋 Adding ${email} to Mailketing list ${listId}...`);
     const params = new URLSearchParams({
       api_token: MAILKETING_API_KEY,
-      list_id: LIST_ID,
+      list_id: listId,
       email: email,
       first_name: name ? name.split(' ')[0] : email.split('@')[0],
       last_name: name ? name.split(' ').slice(1).join(' ') : ''
@@ -45,10 +45,10 @@ async function addToMailketingList(email, name) {
       body: params
     });
     const result = await response.json();
-    console.log('📋 Add to list result:', result);
+    console.log(`📋 Add to list ${listId} result:`, result);
     return response.ok;
   } catch (error) {
-    console.error('❌ Failed to add to list:', error);
+    console.error(`❌ Failed to add to list ${listId}:`, error);
     return false;
   }
 }
@@ -138,7 +138,25 @@ const handler = async (req) => {
     // Ensure all variables are defined
     const safeReference = reference || 'N/A';
     const safeAmount = amount || 0;
-    const safeSubscriptionType = subscriptionType || 'Pro';
+    
+    // --- SKU Mappings for send-payment-email ---
+    const rawSubscriptionType = subscriptionType || 'Pro';
+    let safeSubscriptionType = rawSubscriptionType;
+    const paymentSkuMap: Record<string, string> = {
+      'paymentpaid01': 'VIP 6 Week Program',
+      'paymentpaid02': 'Drelf',
+      'paymentpaid03': 'Jewelry',
+      'paymentpaid04': 'Parenting',
+      'paymentpaid05': 'Fitfactor',
+      'paymentpaid06': 'Pro'
+    };
+    const paymentSkuMatch = String(rawSubscriptionType).toLowerCase().match(/^paymentpaid?0?(\d+)$/);
+    if (paymentSkuMatch) {
+      const skuCode = `paymentpaid${paymentSkuMatch[1].padStart(2, '0')}`;
+      if (paymentSkuMap[skuCode]) {
+        safeSubscriptionType = paymentSkuMap[skuCode];
+      }
+    }
     const safePaymentMethod = paymentMethod || 'Transfer Bank';
 
     // Format amount based on currency
@@ -148,8 +166,25 @@ const handler = async (req) => {
         ? `S$${safeAmount.toLocaleString('en-SG', { minimumFractionDigits: 2 })}`
         : `Rp ${safeAmount.toLocaleString('id-ID')}`;
 
-    // Add user to mailing list first
-    await addToMailketingList(recipientEmail, userName);
+    // Add user to mailing list first (Core List)
+    await addToMailketingList(recipientEmail, userName, '80713');
+    
+    // Add to specific Brand Lists
+    if (isFitfactor) {
+      console.log(`🌿 Fitfactor detected, adding to additional list 88217...`);
+      await addToMailketingList(recipientEmail, userName, '88217');
+    } else if (isDrelf) {
+      console.log(`✨ Drelf detected, adding to additional list 88218...`);
+      await addToMailketingList(recipientEmail, userName, '88218');
+    }
+
+    // Add to Dark Fem Unpaid list ONLY if status is created/pending
+    const isDarkFem = safeSubscriptionType.toLowerCase().includes('feminine') || safeSubscriptionType.toLowerCase().includes('dark');
+    if (isDarkFem && (type === 'payment_created' || type === 'created')) {
+      console.log(`🌙 Dark Feminine (Unpaid) detected, adding to list 88212...`);
+      await addToMailketingList(recipientEmail, userName, '88212');
+    }
+
     let subject;
     let htmlContent;
 
@@ -164,8 +199,59 @@ const handler = async (req) => {
     // Must light theme must with unsubscribe, no emote in subject (emote only in content)
     // and must use Email subject line (use dynamic tags like %%first_name%%) to feel personalized
     if (type === 'payment_created' || type === 'created') {
-      subject = isVIP ? "Payment Pending - eL Vision VIP Session" : "Pembayaran Menunggu - ElVision Group Pro";
-      htmlContent = `<!DOCTYPE html>
+      subject = isVIP ? "Payment Pending - eL Vision VIP Session" : 
+                isFitfactor ? "Instruksi Pembayaran - Fit Factor Herbal" :
+                "Pembayaran Menunggu - ElVision Group Pro";
+      
+      if (isFitfactor) {
+        htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${subject}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0fdf4; margin: 0; padding: 20px; color: #166534; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; border: 1px solid #bbf7d0; padding: 20px; background-color: #ffffff; border-radius: 12px; }
+        .header { border-bottom: 2px solid #22c55e; padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
+        .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #166534; text-align: center; }
+        .details-box { background-color: #f0fdf4; padding: 15px; border: 1px solid #bbf7d0; margin: 20px 0; border-radius: 8px; }
+        .button { display: inline-block; background-color: #22c55e; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
+        .unsubscribe { color: #166534; text-decoration: underline; margin-top: 10px; display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 24px; color: #15803d;">🌿 Fit Factor Herbal</h1>
+        </div>
+        <div class="content">
+            <p>Halo <strong>${userName}</strong>,</p>
+            <p>Satu langkah lagi untuk memulai perjalanan transformasi tubuh Anda! Pembayaran Anda untuk <strong>Fit Factor Imun Booster</strong> telah berhasil dibuat.</p>
+            
+            <div class="details-box">
+                <table style="width: 100%; color: #166534;">
+                    <tr><td>Total Tagihan:</td><td style="text-align: right; font-weight: bold; font-size: 18px;">${formattedAmount}</td></tr>
+                    <tr><td>Nomor Referensi:</td><td style="text-align: right;">${safeReference}</td></tr>
+                    <tr><td>Metode Pembayaran:</td><td style="text-align: right;">${safePaymentMethod}</td></tr>
+                </table>
+            </div>
+
+            <p style="text-align: center;">
+                <a href="https://wa.me/62895325633487?text=Halo%20Admin%2C%20saya%20ingin%20konfirmasi%20pembayaran%20Fitfactor%20Ref%3A%20${safeReference}" class="button">Konfirmasi via WhatsApp</a>
+            </p>
+
+            <p>Segera selesaikan pembayaran agar paket Anda dapat kami proses dan kirimkan hari ini.</p>
+        </div>
+        <div class="footer">
+            <p>© 2026 Fit Factor Herbal. All rights reserved.</p>
+            <a href="https://app.elvisiongroup.com/unsubscribe" class="unsubscribe">Unsubscribe from these emails</a>
+        </div>
+    </div>
+</body>
+</html>`;
+      } else {
+        htmlContent = `<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -211,11 +297,13 @@ const handler = async (req) => {
     </div>
 </body>
 </html>`;
+      }
     } else {
       // payment_completed or success
       subject = isVIP ? "Payment Successful - eL Vision VIP Session" :
         isDrelf ? "Order Confirmed - Drelf Collagen Ritual" :
           isJewelry ? "Order Confirmed - eL Royal Jewelry Masterpiece" :
+            isFitfactor ? "Pesanan Diterima - Fit Factor Herbal" :
             "Pembayaran Berhasil - ElVision Group Pro";
 
       if (isJewelry) {
@@ -306,6 +394,50 @@ const handler = async (req) => {
         <div class="footer">
             <p>© 2026 ElVision Group. All rights reserved.</p>
             <a href="https://app.elvisiongroup.com/unsubscribe" class="unsubscribe">Unsubscribe from these emails</a>
+        </div>
+    </div>
+</body>
+</html>`;
+      } else if (isFitfactor) {
+        htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesanan Diterima</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0fdf4; margin: 0; padding: 20px; color: #166534; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; border: 1px solid #bbf7d0; padding: 20px; background-color: #ffffff; border-radius: 12px; }
+        .header { border-bottom: 2px solid #22c55e; padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
+        .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #166534; text-align: center; }
+        .details-box { background-color: #f0fdf4; padding: 15px; border: 1px solid #bbf7d0; margin: 20px 0; border-radius: 8px; }
+        .button { display: inline-block; background-color: #22c55e; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 24px; color: #15803d;">🌿 Fit Factor Herbal</h1>
+        </div>
+        <div class="content">
+            <p>Halo <strong>${userName}</strong>,</p>
+            <p>Kabar gembira! Pembayaran Anda telah kami terima. Pesanan <strong>Fit Factor Imun Booster</strong> Anda sedang dalam proses pengemasan.</p>
+
+            <div class="details-box">
+                <p style="margin-top: 0;"><strong>Detail Pengiriman:</strong></p>
+                <p>Alamat: ${body.address || 'Alamat sesuai saat checkout'}</p>
+                <p>Estimasi Sampai: 2 - 4 Hari Kerja</p>
+            </div>
+
+            <p>Paket Anda akan segera dijemput oleh kurir. Kami akan memberikan update jika barang sudah dalam perjalanan.</p>
+            
+            <div style="border-top: 1px solid #eeeeee; padding-top: 15px; margin-top: 20px;">
+                <p>Total Pembayaran: <strong>${formattedAmount}</strong></p>
+                <p>Referensi: ${safeReference}</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p>© 2026 Fit Factor Herbal. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -457,10 +589,10 @@ const handler = async (req) => {
     }
 
     // --- WHATSAPP NOTIFICATION FOR FITFACTOR ---
-    if ((type === 'payment_completed' || type === 'success') && isFitfactor) {
+    if (isFitfactor) {
       const userPhone = body.userPhone || body.phone || body.phone_number || body.ph;
       if (userPhone) {
-        console.log(`📱 Sending WhatsApp Notification to ${userPhone} for Fitfactor...`);
+        console.log(`📱 [WATZAPP] Fitfactor processing for ${userPhone}, type: ${type}`);
         try {
           let cleanPhone = userPhone.replace(/\D/g, '');
           if (cleanPhone.startsWith('0')) {
@@ -469,45 +601,55 @@ const handler = async (req) => {
             cleanPhone = '62' + cleanPhone;
           }
 
-          const bonusEbookLink = "https://drive.google.com/file/d/1bIG1_u2PFXWIrXxygojTyUlmSC-J1A5R/view?usp=sharing";
-          const waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Fit Factor.\n\nTerima kasih atas pembayaran kakak untuk paket *Fit Factor Imun Booster*.\n\nPembayaran kakak telah kami terima senilai ${formattedAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload Ebook Bonus kakak:\n👉 ${bonusEbookLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nAdmin - Fit Factor Herbal`;
+          let waMessage = "";
+          
+          if (type === 'payment_completed' || type === 'success') {
+            const bonusEbookLink = "https://drive.google.com/file/d/1bIG1_u2PFXWIrXxygojTyUlmSC-J1A5R/view?usp=sharing";
+            waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Fit Factor.\n\nTerima kasih atas pembayaran kakak untuk paket *Fit Factor Imun Booster*.\n\nPembayaran kakak telah kami terima senilai ${formattedAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload Ebook Bonus kakak:\n👉 ${bonusEbookLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nAdmin - Fit Factor Herbal`;
+          } else if (type === 'payment_created' || type === 'created') {
+            waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari *Fit Factor Herbal*.\n\nPembayaran kakak untuk paket *Fit Factor Imun Booster* telah berhasil dibuat senilai *${formattedAmount}*.\n\nSilakan selesaikan pembayaran agar paket bisa segera kami proses dan kirimkan hari ini.\n\nJika sudah bayar namun status belum berubah, atau butuh bantuan cara bayar, silakan balas pesan ini ya kak.\n\nTerima kasih! 🌿`;
+          }
 
-          const waResponse = await fetch(WAPI_URL, {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              session: WAPI_SESSION,
-              token: WAPI_TOKEN,
-              to: cleanPhone,
-              message: waMessage
-            })
-          });
+          if (waMessage) {
+            const waResponse = await fetch(WAPI_URL, {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                session: WAPI_SESSION,
+                token: WAPI_TOKEN,
+                to: cleanPhone,
+                message: waMessage
+              })
+            });
 
-          const resultText = await waResponse.text();
-          console.log(`📡 [WATZAPP] Fitfactor Response: ${waResponse.status}`, resultText);
+            const resultText = await waResponse.text();
+            console.log(`📡 [WATZAPP] Fitfactor Response (${type}): ${waResponse.status}`, resultText);
+          }
         } catch (waError) {
-          console.error(`❌ Error sending WhatsApp to buyer ${userPhone}:`, waError);
+          console.error(`❌ Error sending WhatsApp for Fitfactor:`, waError);
         }
       }
 
-      // 🔔 ADMIN NOTIFICATION
-      const adminPhones = ['6281383838013', '6285664733499'];
-      const adminMessage = `💰 *FITFACTOR PAID*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'N/A'}\nTotal: ${formattedAmount}\nRef: ${safeReference}`;
+      // 🔔 ADMIN NOTIFICATION (Only for PAID)
+      if (type === 'payment_completed' || type === 'success') {
+        const adminPhones = ['6281383838013', '6285664733499'];
+        const adminMessage = `💰 *FITFACTOR PAID*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'N/A'}\nTotal: ${formattedAmount}\nRef: ${safeReference}`;
 
-      for (const adminPhone of adminPhones) {
-        try {
-          await fetch(WAPI_URL, {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              session: WAPI_SESSION,
-              token: WAPI_TOKEN,
-              to: adminPhone,
-              message: adminMessage
-            })
-          });
-        } catch (waError) {
-          console.error(`❌ Error sending WhatsApp to admin ${adminPhone}:`, waError);
+        for (const adminPhone of adminPhones) {
+          try {
+            await fetch(WAPI_URL, {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                session: WAPI_SESSION,
+                token: WAPI_TOKEN,
+                to: adminPhone,
+                message: adminMessage
+              })
+            });
+          } catch (waError) {
+            console.error(`❌ Error sending WhatsApp to admin ${adminPhone}:`, waError);
+          }
         }
       }
     }

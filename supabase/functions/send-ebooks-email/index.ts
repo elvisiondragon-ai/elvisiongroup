@@ -346,6 +346,60 @@ function getProductKey(productName: string): string {
   if (!productName) return 'ebook_elvision'; // Default fallback
   const lower = productName.toLowerCase();
 
+  // --- SKU Mappings ---
+  // ebookspaid01: raja_ranjang
+  // ebookspaid02: ebook_diet
+  // ebookspaid03: ebook_elvision
+  // ebookspaid04: ebook_health20
+  // ebookspaid05: ebook_percayadiri
+  // ebookspaid06: ebook_feminine (Dark Feminine Id Ebook Only)
+  // ebookspaid07: ebook_feminine_lovemagnet (Dark Feminine Id + Audio)
+  // ebookspaid08: universal_darkfeminine_en
+  // ebookspaid09: universal_darkfeminine_en_audio
+  // ebookspaid10: universal_darkfeminine_ph
+  // ebookspaid11: universal_darkfeminine_ph_audio
+  // ebookspaid12: ebook_uangpanas
+  // ebookspaid13: webinar_el
+  // ebookspaid14: vip_coaching
+  // ebookspaid15: usa_ebookhealth
+  // ebookspaid16: usa_ebookslim
+  // ebookspaid17: usa_3000
+  // ebookspaid18: usa_ebookfeminine
+  // ebookspaid19: usa_webinar20
+  // ebookspaid20: sg_elvision_en
+  // ebookspaid21: sg_elvision_malay
+  // ebookspaid22: universal_saham_ultimate
+  const skuMap: Record<string, string> = {
+    'ebookspaid01': 'raja_ranjang',
+    'ebookspaid02': 'ebook_diet',
+    'ebookspaid03': 'ebook_elvision',
+    'ebookspaid04': 'ebook_health20',
+    'ebookspaid05': 'ebook_percayadiri',
+    'ebookspaid06': 'ebook_feminine',
+    'ebookspaid07': 'ebook_feminine_lovemagnet',
+    'ebookspaid08': 'universal_darkfeminine_en',
+    'ebookspaid09': 'universal_darkfeminine_en_audio',
+    'ebookspaid10': 'universal_darkfeminine_ph',
+    'ebookspaid11': 'universal_darkfeminine_ph_audio',
+    'ebookspaid12': 'ebook_uangpanas',
+    'ebookspaid13': 'webinar_el',
+    'ebookspaid14': 'vip_coaching',
+    'ebookspaid15': 'usa_ebookhealth',
+    'ebookspaid16': 'usa_ebookslim',
+    'ebookspaid17': 'usa_3000',
+    'ebookspaid18': 'usa_ebookfeminine',
+    'ebookspaid19': 'usa_webinar20',
+    'ebookspaid20': 'sg_elvision_en',
+    'ebookspaid21': 'sg_elvision_malay',
+    'ebookspaid22': 'universal_saham_ultimate'
+  };
+
+  const skuMatch = lower.match(/^ebookspaid?0?(\d+)$/);
+  if (skuMatch) {
+    const skuCode = `ebookspaid${skuMatch[1].padStart(2, '0')}`;
+    if (skuMap[skuCode]) return skuMap[skuCode];
+  }
+
   // --- Exact / specific matches first ---
   if (lower.includes('sg_elvision_en')) return 'sg_elvision_en';
   if (lower.includes('sg_elvision_malay')) return 'sg_elvision_malay';
@@ -363,12 +417,12 @@ function getProductKey(productName: string): string {
   if (lower.includes('universal_darkfeminine_ph') || lower.includes('dark feminine ph')) return 'universal_darkfeminine_ph';
 
   // --- Dark Feminine ID (audio and non-audio both map to ebook_feminine folder) ---
+  if (lower.includes('love magnet')) return 'ebook_feminine_lovemagnet';
   if (lower.includes('universal_darkfeminine_id') || lower.includes('dark feminine id') || lower.includes('universal dark feminine id')) return 'ebook_feminine';
 
   if (lower.includes('diet')) return 'ebook_diet';
   if (lower.includes('health') || lower.includes('pemulihan')) return 'ebook_health20';
   if (lower.includes('percayadiri') || lower.includes('pria alpha') || lower.includes('alpha')) return 'ebook_percayadiri';
-  if (lower.includes('love magnet')) return 'ebook_feminine_lovemagnet';
   if (lower.includes('feminine') || lower.includes('feminin') || lower.includes('magnetism') || lower.includes('dark feminine') || lower.includes('dark feminin')) return 'ebook_feminine';
   if (lower.includes('uangpanas') || lower.includes('uang panas')) return 'ebook_uangpanas';
   if (lower.includes('vip') || lower.includes('3000') || lower.includes('coaching')) return 'vip_coaching';

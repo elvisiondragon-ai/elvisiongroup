@@ -203,23 +203,39 @@ serve(async (req) => {
     console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod}`);
     console.log(`🕵️ Tracking Data - FBC: ${fbc}, FBP: ${fbp}, IP: ${clientIp || 'Auto'}`);
 
-    // --- AUTO-ADD TO MAILKETING LIST ---
+    // --- AUTO-ADD TO MAILKETING LIST (LEAD CAPTURE) ---
     try {
       const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
       if (MAILKETING_API_KEY && userEmail) {
-        console.log(`📋 Adding ${userEmail} to Mailketing Lead List (pre-payment)...`);
-        const params = new URLSearchParams({
-          api_token: MAILKETING_API_KEY,
-          list_id: '80713',
-          email: userEmail,
-          first_name: userName ? userName.split(' ')[0] : userEmail.split('@')[0],
-          last_name: userName ? userName.split(' ').slice(1).join(' ') : ''
-        });
-        fetch(`https://api.mailketing.co.id/api/v1/addsubtolist`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: params
-        }).then(r => r.json()).then(res => console.log('Mailketing lead res:', res)).catch(e => console.error('Mailketing lead error:', e));
+        console.log(`📋 Adding ${userEmail} to Mailketing lists...`);
+        
+        // Helper to send to Mailketing
+        const pushToList = async (listId: string) => {
+          const params = new URLSearchParams({
+            api_token: MAILKETING_API_KEY,
+            list_id: listId,
+            email: userEmail,
+            first_name: userName ? userName.split(' ')[0] : userEmail.split('@')[0],
+            last_name: userName ? userName.split(' ').slice(1).join(' ') : ''
+          });
+          return fetch(`https://api.mailketing.co.id/api/v1/addsubtolist`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+          }).then(r => r.json());
+        };
+
+        // 1. ALWAYS push to eL Vision Core
+        pushToList('80713').then(res => console.log('Mailketing Core res:', res)).catch(e => console.error('Core list error:', e));
+
+        // 2. Conditional Brand Lists
+        if (subscriptionType === 'fitfactor') {
+          pushToList('88217').then(res => console.log('Mailketing Fitfactor res:', res));
+        } else if (subscriptionType === 'drelf') {
+          pushToList('88218').then(res => console.log('Mailketing Drelf res:', res));
+        } else if (subscriptionType.toLowerCase().includes('feminine') || subscriptionType.toLowerCase().includes('dark')) {
+          pushToList('88212').then(res => console.log('Mailketing DarkFem Unpaid res:', res));
+        }
       }
     } catch (e) {
       console.error('Mailketing pre-registration failed:', e);
