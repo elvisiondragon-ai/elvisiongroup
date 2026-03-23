@@ -22,8 +22,8 @@ serve(async (req) => {
       model: "gpt-4o-mini",
       messages: messages, // Rely strictly on the injected payload from server.js
       max_tokens: 1000,
-      temperature: 0.5,
-      top_p: 0.5
+      temperature: 0.8,
+      top_p: 1
     };
 
     const apiKey = Deno.env.get("OPENAI_API_KEY");
