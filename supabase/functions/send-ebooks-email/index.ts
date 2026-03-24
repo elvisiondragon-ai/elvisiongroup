@@ -107,17 +107,14 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_feminine_lovemagnet': {
-    subject: "Akses Download: Paket Feminine Magnetism + Audio Love Magnet",
+    subject: "Akses Download: Paket Dark Feminine Anda",
     downloadLink: "https://drive.google.com/drive/folders/1IZmSrzPDSgGSYwq1sQhhGgBaUExJjhgd?usp=sharing",
     color: "#e11d48",
-    accentColor: "#facc15",
-    title: "Akses Feminine Magnetism LENGKAP Terbuka",
-    description: "Selamat! Anda sekarang memiliki akses penuh ke Paket Feminine Magnetism beserta Bonus Spesial Audio Love Magnet.",
+    accentColor: "#ffffff",
+    title: "Akses Dark Feminine Terbuka",
+    description: "Selamat! Anda sekarang memiliki akses penuh ke Paket Dark Feminine.",
     instructions: [
-      "Gunakan earphone agar gelombang Theta bekerja maksimal.",
-      "Dengarkan Audio 'Love Magnet' untuk memancarkan aura daya tarik.",
-      "Dengarkan 'Goddess Awakening' setiap malam sebelum tidur.",
-      "Dengarkan 'Morning Radiance' untuk memulai hari dengan energi feminin."
+      "Silahkan klik tombol di bawah untuk mendownload seluruh ebook Anda."
     ],
     lang: "id"
   },
@@ -686,7 +683,7 @@ const handler = async (req: Request) => {
           } else if (productKey === 'universal_saham_ultimate') {
             waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Saham Ultimate.\n\nTerima kasih atas pembayaran kakak untuk paket *Saham Ultimate*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak.\n\nSetelah download, kakak bisa langsung Login ke dashboard Saham Ultimate di sini:\n🔐 https://saham.elvisiongroup.com/auth\n\nJika sudah selesai membaca, bantu kami ya kak dengan memberikan *Review Jujur* kakak di sini:\n⭐ https://saham.elvisiongroup.com/review\n\nJika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSemoga data ini membantu kakak dalam berinvestasi di pasar modal Indonesia.\n\nSalam hangat,\nAdmin - Saham Ultimate`;
           } else {
-            waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nKakak juga mendapat Kupon diskon 70% Dari 1.800.000 menjadi 540.000 (hemat 1,3juta!)\nUntuk produk https://drelf.id\nCheckout disini https://export.elvisiongroup.com/id_drelf\nSUDAH Bpom yah\n\nSalam hangat,\nAdmin - eL Vision Group`;
+            waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nAdmin - eL Vision Group`;
           }
 
           const waResponse = await fetch(WAPI_URL, {
