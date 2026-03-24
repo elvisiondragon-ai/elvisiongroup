@@ -201,7 +201,5 @@ class IndexedDBCache {
 // Singleton instance
 export const indexedDBCache = new IndexedDBCache();
 
-// Auto cleanup on initialization (browser only)
-if (typeof window !== 'undefined') {
-  indexedDBCache.cleanup().catch(console.error);
-}
+// Auto cleanup on initialization
+indexedDBCache.cleanup().catch(console.error);

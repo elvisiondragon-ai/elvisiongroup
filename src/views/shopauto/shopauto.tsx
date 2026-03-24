@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from 'next/navigation';
+import { useNavigate as useRouter } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -85,7 +85,7 @@ export default function ShopAuto() {
   const [waBackendUrl, setWaBackendUrl] = useState("http://148.230.101.96:3000");
   const [isSendingWaTest, setIsSendingWaTest] = useState(false);
   const [testWaMessage, setTestWaMessage] = useState("");
-  const [availableGroups, setAvailableGroups] = useState<{id: string, name: string}[]>([]);
+  const [availableGroups, setAvailableGroups] = useState<{id: string, name: string, count?: number}[]>([]);
   const [isFetchingGroups, setIsFetchingGroups] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const hasLoadedRef = React.useRef(false);
@@ -396,7 +396,27 @@ export default function ShopAuto() {
   };
 
   const fetchAvailableGroups = async () => {
-    toast({ title: "Fitur Nonaktif", description: "Pencarian grup sedang dalam pemeliharaan." });
+    if (!waBackendUrl) {
+      toast({ title: "Error", description: "WA Backend URL belum diset.", variant: "destructive" });
+      return;
+    }
+    
+    setIsFetchingGroups(true);
+    try {
+      // Direct fetch to VPS as per latest architecture
+      const resp = await fetch(`${waBackendUrl.replace(/\/$/, '')}/groups`);
+      if (!resp.ok) throw new Error("Gagal mengambil data grup dari VPS.");
+      const data = await resp.json();
+      setAvailableGroups(data);
+      if (data.length === 0) {
+        toast({ title: "Informasi", description: "Tidak ada grup yang ditemukan." });
+      }
+    } catch (err: any) {
+      console.error("Fetch Groups Error:", err);
+      toast({ title: "Error", description: "Gagal memuat grup: " + err.message, variant: "destructive" });
+    } finally {
+      setIsFetchingGroups(false);
+    }
   };
 
   const connectShopee = () => {
@@ -428,13 +448,13 @@ export default function ShopAuto() {
     try { 
       await cleanupSupabase();
       await supabase.auth.signOut(); 
-      router.push('/'); 
+      router('/'); 
     } catch (err) { 
       console.error(err); 
     } 
   };
 
-  if (!user) return <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white"><Button onClick={() => router.push('/auth')}>Login</Button></div>;
+  if (!user) return <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white"><Button onClick={() => router('/auth')}>Login</Button></div>;
 
   return (
     <div className="min-h-screen bg-black text-white p-6 pb-20 font-sans">
@@ -625,7 +645,17 @@ export default function ShopAuto() {
                     <div className="flex items-center justify-between border-b border-gray-800 pb-2"><p className="text-xs font-bold text-orange-400 uppercase">Grup Ditemukan</p><Button variant="ghost" size="sm" onClick={() => setAvailableGroups([])} className="h-6 text-[10px] hover:bg-red-500/10 hover:text-red-500">Tutup</Button></div>
                     {availableGroups.map(g => (
                       <div key={g.id} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-orange-500/50 transition-all group/item">
-                        <div className="overflow-hidden"><p className="text-sm font-bold truncate group-hover/item:text-orange-400">{g.name}</p><p className="text-[10px] text-gray-500 font-mono truncate">{g.id}</p></div>
+                        <div className="overflow-hidden">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-bold truncate group-hover/item:text-orange-400">{g.name}</p>
+                            {g.count !== undefined && (
+                              <Badge variant="outline" className="text-[9px] h-4 px-1 bg-orange-500/10 text-orange-500 border-orange-500/20 leading-none">
+                                {g.count}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-gray-500 font-mono truncate">{g.id}</p>
+                        </div>
                         <Button variant="secondary" size="sm" onClick={() => {setWhatsappDestination(g.id); setAvailableGroups([]); toast({title: "Grup Dipilih"});}} className="h-8 px-4 font-bold bg-orange-600/10 text-orange-500 border border-orange-600/20 hover:bg-orange-600 hover:text-white transition-all">Pilih</Button>
                       </div>
                     ))}

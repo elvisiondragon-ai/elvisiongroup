@@ -503,11 +503,10 @@ Quick Test:
     }
   };
 
-  // Expose to window (browser only)
-  if (typeof window !== 'undefined') {
-    (window as any).debug = debugTools;
-    console.log('🛠️ Debug tools loaded! Type window.debug.help() for available commands');
-  }
+  // Expose to window
+  (window as any).debug = debugTools;
+
+  console.log('🛠️ Debug tools loaded! Type window.debug.help() for available commands');
 
   return debugTools;
 };

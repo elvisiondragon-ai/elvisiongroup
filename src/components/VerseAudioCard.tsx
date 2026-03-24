@@ -16,9 +16,6 @@ interface Verse {
   artwork?: string;
   audioPath: string | null;
   language: string;
-  isFree?: boolean;
-  proOnly?: boolean;
-  isPrivate?: boolean;
 }
 
 interface VerseAudioCardProps {
@@ -240,7 +237,7 @@ export function VerseAudioCard({
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           let displayName = user.user_metadata?.display_name || 'Someone';
-          const { error } = await (supabase as any).from('verse_notif').insert({ user_id: user.id, display_name: displayName, verse_title: verse.title, verse_id: verse.id } as any);
+          const { error } = await supabase.from('verse_notif').insert({ user_id: user.id, display_name: displayName, verse_title: verse.title, verse_id: verse.id });
           if (error) console.error('❌ Error inserting verse notification:', error);
         }
       };

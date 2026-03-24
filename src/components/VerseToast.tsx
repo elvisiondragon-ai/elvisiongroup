@@ -151,7 +151,7 @@ export const VerseToast = () => {
       }
       
       // Calculate time difference back to local time for setTimeout
-      const timeUntilNext = nextMinute.getTime() - jakartaTime.getTime();
+      const timeUntilNext = nextMinute - jakartaTime;
       
       notificationTimeoutRef.current = setTimeout(() => {
         showRandomActivity();

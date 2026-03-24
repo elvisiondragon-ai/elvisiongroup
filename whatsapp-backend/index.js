@@ -107,7 +107,8 @@ app.get('/groups', auth, async (req, res) => {
             .filter(chat => chat.isGroup)
             .map(chat => ({
                 id: chat.id._serialized,
-                name: chat.name
+                name: chat.name,
+                count: chat.groupMetadata ? chat.groupMetadata.participants.length : 0
             }));
         res.json(groups);
     } catch (error) {

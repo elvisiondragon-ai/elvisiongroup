@@ -56,7 +56,7 @@ export const usePushNotifications = () => {
           token,
           platform,
           updated_at: new Date().toISOString()
-        } as any, {
+        }, {
           onConflict: 'user_id,token'
         });
 
@@ -73,7 +73,7 @@ export const usePushNotifications = () => {
             user_id: user.id,
             chat_notifications_enabled: true,
             updated_at: new Date().toISOString()
-          } as any, {
+          }, {
             onConflict: 'user_id'
           });
       }

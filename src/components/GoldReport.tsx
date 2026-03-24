@@ -27,10 +27,9 @@ export function GoldReport({ messageId, isAdmin, isGoldReported = false, onToggl
     try {
       if (previousState) {
         // Remove gold report
-        const { error } = await (supabase as any)
+        const { error } = await supabase
           .from('gold_reports')
           .delete()
-
           .eq('message_id', messageId);
 
         if (error) throw error;
@@ -49,13 +48,13 @@ export function GoldReport({ messageId, isAdmin, isGoldReported = false, onToggl
 
         if (!user) throw new Error("Not authenticated");
 
-        const { error } = await (supabase as any)
+        const { error } = await supabase
           .from('gold_reports')
           .insert({
             message_id: messageId,
             reported_by: user.id,
             message_content: messageContent
-          } as any);
+          });
 
         if (error) throw error;
 

@@ -1,5 +1,3 @@
-"use client";
-
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -101,7 +99,6 @@ interface AuthContextType {
   broadcastGoldReportAdded: (messageId: string) => void;
   broadcastGoldReportRemoved: (messageId: string) => void;
   cleanupSupabase: () => Promise<void>;
-  signOut: () => Promise<void>;
   refreshSession: () => Promise<{ success: boolean; error?: string }>;
   refreshUserProfile: () => Promise<void>;
   mediaAudit: { handleOpenOrPlay: (params: any) => void; } | null;
@@ -115,7 +112,6 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   chatChannel: null,
   isPro: false,
-  isAdmin: false,
   proStatus: null,
   messages: [],
   setMessages: () => {},
@@ -126,7 +122,6 @@ const AuthContext = createContext<AuthContextType>({
   broadcastGoldReportAdded: () => {},
   broadcastGoldReportRemoved: () => {},
   cleanupSupabase: async () => {},
-  signOut: async () => {},
   refreshSession: async () => ({ success: false, error: 'Context not initialized' }),
   refreshUserProfile: async () => {},
   mediaAudit: null,
@@ -137,7 +132,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
-    if (typeof window === 'undefined') return null;
     const cached = localStorage.getItem('user-profile-cache');
     if (cached) {
       try {
@@ -334,15 +328,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-
         .eq('user_id', user.id)
         .single();
 
               if (error) {
                 console.error('Error manually refreshing profile:', error);
               } else if (data) {
-                console.log('✅ Profile manually refreshed. total_journal:', (data as any).total_journal);
-                setUserProfile(data as unknown as UserProfile);
+                console.log('✅ Profile manually refreshed. total_journal:', data.total_journal);
+                setUserProfile(data as UserProfile);
                 localStorage.setItem('user-profile-cache', JSON.stringify(data));      }
     } catch (e) {
       console.error('Error in refreshUserProfile:', e);
@@ -362,7 +355,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Chat messages state with localStorage cache and validation
   const [messages, setMessages] = useState<ChatMessageData[]>(() => {
-    if (typeof window === 'undefined') return [];
     const cached = localStorage.getItem('chat-messages-cache');
     if (cached) {
       try {
@@ -604,11 +596,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const { data: userProfiles } = await supabase
               .from('profiles')
               .select('user_id, display_name, streak_days, level, is_admin, avatar_url')
-      
               .eq('user_id', newMessage.user_id)
               .single();
 
-            const { data: subscriptions } = await (supabase as any)
+            const { data: subscriptions } = await supabase
               .rpc('get_public_pro_status', { user_ids: [newMessage.user_id] });
 
             const subscriptionData = subscriptions?.[0];
@@ -617,14 +608,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Enrich message with fresh badge data
             const enrichedMessage: ChatMessageData = {
               ...newMessage,
-              user_name: (userProfiles as any)?.display_name || newMessage.user_name,
-              user_level: (userProfiles as any)?.level || newMessage.user_level || 1,
-              is_pro: (subscriptionData as any)?.is_pro || false,
-              is_admin: newMessage.user_id === knownAdminId || (userProfiles as any)?.is_admin || false,
-              streak_days: (userProfiles as any)?.streak_days || 0,
-              subscription_type: (subscriptionData as any)?.subscription_type || null,
-              // @ts-expect-error missing property in type
-              avatar_url: (userProfiles as any)?.avatar_url || undefined
+              user_name: userProfiles?.display_name || newMessage.user_name,
+              user_level: userProfiles?.level || newMessage.user_level || 1,
+              is_pro: subscriptionData?.is_pro || false,
+              is_admin: newMessage.user_id === knownAdminId || userProfiles?.is_admin || false,
+              streak_days: userProfiles?.streak_days || 0,
+              subscription_type: subscriptionData?.subscription_type || null,
+              avatar_url: userProfiles?.avatar_url || undefined
             };
 
             setMessages(current => {
@@ -733,11 +723,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const { data: userProfiles } = await supabase
               .from('profiles')
               .select('user_id, display_name, streak_days, level, is_admin, avatar_url')
-      
               .eq('user_id', newMessage.user_id)
               .single();
 
-            const { data: subscriptions } = await (supabase as any)
+            const { data: subscriptions } = await supabase
               .rpc('get_public_pro_status', { user_ids: [newMessage.user_id] });
 
             const subscriptionData = subscriptions?.[0];
@@ -746,14 +735,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Enrich message with fresh badge data
             const enrichedMessage: ChatMessageData = {
               ...newMessage,
-              user_name: (userProfiles as any)?.display_name || newMessage.user_name,
-              user_level: (userProfiles as any)?.level || newMessage.user_level || 1,
-              is_pro: (subscriptionData as any)?.is_pro || false,
-              is_admin: newMessage.user_id === knownAdminId || (userProfiles as any)?.is_admin || false,
-              streak_days: (userProfiles as any)?.streak_days || 0,
-              subscription_type: (subscriptionData as any)?.subscription_type || null,
-              // @ts-expect-error missing property in type
-              avatar_url: (userProfiles as any)?.avatar_url || undefined
+              user_name: userProfiles?.display_name || newMessage.user_name,
+              user_level: userProfiles?.level || newMessage.user_level || 1,
+              is_pro: subscriptionData?.is_pro || false,
+              is_admin: newMessage.user_id === knownAdminId || userProfiles?.is_admin || false,
+              streak_days: userProfiles?.streak_days || 0,
+              subscription_type: subscriptionData?.subscription_type || null,
+              avatar_url: userProfiles?.avatar_url || undefined
             };
 
             console.log('📢🎯 Broadcast message enriched with fresh badge data:', enrichedMessage);
@@ -956,7 +944,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }).format(new Date());
 
     try {
-      const { error } = await (supabase as any).rpc('update_profile_last_login', {
+      const { error } = await supabase.rpc('update_profile_last_login', {
         p_user_id: userId,
         p_last_login_date: jakartaDate
       });
@@ -965,8 +953,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('RPC update_profile_last_login failed, attempting direct update fallback:', error);
         const { error: fallbackError } = await supabase
           .from('profiles')
-          .update({ last_login_date: jakartaDate } as any)
-  
+          .update({ last_login_date: jakartaDate })
           .eq('user_id', userId);
 
         if (fallbackError) {
@@ -1566,11 +1553,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('unified_pro_status_cache');
   };
 
-  const signOut = async () => {
-    await cleanupSupabase();
-    await supabase.auth.signOut();
-  };
-
   const checkProStatus = async (userId: string, force: boolean = false) => {
     const now = Date.now();
     const cacheAge = proStatusCache ? now - proStatusCache.timestamp : Infinity;
@@ -1602,11 +1584,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
 
       const status = {
-        isPro: (data?.[0] as any)?.is_pro || false,
-        subscriptionType: (data?.[0] as any)?.subscription_type,
-        status: (data?.[0] as any)?.status,
-        expiresAt: (data?.[0] as any)?.expires_at,
-        daysRemaining: (data?.[0] as any)?.days_remaining,
+        isPro: data?.[0]?.is_pro || false,
+        subscriptionType: data?.[0]?.subscription_type,
+        status: data?.[0]?.status,
+        expiresAt: data?.[0]?.expires_at,
+        daysRemaining: data?.[0]?.days_remaining,
       };
 
       // Cache the result
@@ -1819,14 +1801,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const { data, error } = await supabase
             .from('profiles')
             .select('*')
-    
-        .eq('user_id', user.id)
+            .eq('user_id', user.id)
             .single();
 
           if (error) {
             console.error('Error fetching initial profile:', error);
           } else if (data) {
-            setUserProfile(data as unknown as UserProfile);
+            setUserProfile(data as UserProfile);
             localStorage.setItem('user-profile-cache', JSON.stringify(data));
           }
         } catch (e) {
@@ -1881,7 +1862,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         broadcastGoldReportAdded,
         broadcastGoldReportRemoved,
         cleanupSupabase,
-        signOut,
         refreshSession,
         refreshUserProfile,
         mediaAudit,

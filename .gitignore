@@ -26,12 +26,6 @@ dist-ssr
 # Supabase Edge Functions - DO NOT COMMIT
 .env.supabase
 
-# Next.js
-.next/
-out/
-
 # Environment variables
 .env
-.env*.local
 .env.production
-.env.supabase

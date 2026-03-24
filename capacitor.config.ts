@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'app.elvisiongroup.com',
   appName: 'eL Vision Group',
-  webDir: 'out',
+  webDir: 'dist',
   // server: {
   //   hostname: 'app.elvisiongroup.com',
   //   androidScheme: 'https'
@@ -23,7 +23,6 @@ const config: CapacitorConfig = {
     }
   },
   android: {
-    // @ts-expect-error - icon is a valid capacitor-assets property but not in core typings
     icon: "assets/icon.png"
   }
 };

@@ -1,13 +1,32 @@
 import { useEffect } from 'react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 
 function ServiceWorkerUpdater() {
-  useEffect(() => {
-    // Next.js handles caching differently.
-    // If a service worker is needed in the future, it should be implemented 
-    // using next-pwa or the native App Router service worker support.
-  }, []);
+  const {
+    needRefresh: [needRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(r) {
+      console.log('SW Registered:', r);
+      if (r) {
+        setInterval(() => {
+          r.update();
+        }, 60 * 1000); // Check every minute
+      }
+    },
+    onRegisterError(error) {
+      console.log('SW registration error:', error);
+    },
+  });
 
-  return null;
+  useEffect(() => {
+    if (needRefresh) {
+      console.log('New content available, updating service worker...');
+      updateServiceWorker(true); // This will force a reload
+    }
+  }, [needRefresh, updateServiceWorker]);
+
+  return null; // This component doesn't render anything
 }
 
 export default ServiceWorkerUpdater;

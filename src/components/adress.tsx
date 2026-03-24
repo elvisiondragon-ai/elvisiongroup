@@ -43,7 +43,7 @@ const Adress: React.FC<AdressProps> = ({
       <div>
         <Label htmlFor="selectedProvince"><Home className="inline-block w-4 h-4 mr-2"/>Provinsi</Label>
         <Select onValueChange={setSelectedProvince} value={selectedProvince}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" autoComplete="address-level1">
             <SelectValue placeholder="Pilih Provinsi" />
           </SelectTrigger>
           <SelectContent>

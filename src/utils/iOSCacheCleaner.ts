@@ -185,7 +185,7 @@ class IOSCacheCleaner {
       const emailInputs = document.querySelectorAll('input[type="email"], input[name="email"]');
       const passwordInputs = document.querySelectorAll('input[type="password"], input[name="password"]');
       
-      Array.from(emailInputs).concat(Array.from(passwordInputs)).forEach(input => {
+      [...emailInputs, ...passwordInputs].forEach(input => {
         (input as HTMLInputElement).value = '';
         (input as HTMLInputElement).autocomplete = 'off';
         (input as HTMLInputElement).setAttribute('autocomplete', 'new-password');

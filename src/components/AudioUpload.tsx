@@ -124,7 +124,7 @@ export function AudioUpload({ onUploadComplete }: AudioUploadProps) {
           category: 'verse',
           created_by: user.id,
           is_public: true,
-        } as any)
+        })
         .select()
         .single();
 
