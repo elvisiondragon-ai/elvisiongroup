@@ -138,6 +138,7 @@ const handler = async (req) => {
     // Ensure all variables are defined
     const safeReference = reference || 'N/A';
     const safeAmount = amount || 0;
+    const quantity = body.quantity || body.qty || 1;
     
     // --- SKU Mappings for send-payment-email ---
     const rawSubscriptionType = subscriptionType || 'Pro';
@@ -165,6 +166,8 @@ const handler = async (req) => {
     const isJewelry = safeSubscriptionType.toLowerCase().includes('jewelry');
     const isParenting = safeSubscriptionType.toLowerCase().includes('parenting');
     const isFitfactor = safeSubscriptionType.toLowerCase().includes('fitfactor');
+    const isPhysical = isFitfactor || isDrelf || isJewelry;
+    const brandName = isFitfactor ? "FitFactor Herbal" : isDrelf ? "Drelf" : isJewelry ? "Jewelry" : "ElVision";
 
     // Format amount based on currency
     const formattedAmount = currency === 'USD'
@@ -646,6 +649,42 @@ const handler = async (req) => {
         console.log(`⏳ Waiting for ${notificationPromises.length} WhatsApp notifications...`);
         await Promise.all(notificationPromises);
         console.log(`✅ All WhatsApp notifications processed.`);
+      }
+    }
+
+    // --- NEW: WHATSAPP BCC FOR ALL PHYSICAL PRODUCTS (To Admin Group) ---
+    if (isPhysical && (type === 'payment_completed' || type === 'success')) {
+      const userPhone = body.userPhone || body.phone || body.phone_number || body.ph || 'N/A';
+      const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
+      const bccGroupId = "120363401536138177@g.us";
+      const bccSenderNumber = "+62 895-3256-33487";
+      
+      const bccMessage = `Penerima :
+${userName}
+${userPhone}
+
+Alamat: ${userAddress}
+
+${quantity}x ${brandName}
+
+Pengirim :
+${brandName}
+${bccSenderNumber}`;
+
+      console.log(`🚀 [BCC] Sending Physical Order Notification to Group ${bccGroupId}`);
+      try {
+        await fetch(WAPI_URL, {
+          method: 'POST',
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            session: WAPI_SESSION, 
+            token: WAPI_TOKEN, 
+            to: bccGroupId, 
+            message: bccMessage 
+          })
+        }).then(res => res.text().then(txt => console.log(`📡 [BCC] Group Res: ${res.status}`, txt)));
+      } catch (err) {
+        console.error(`❌ [BCC] Group Alert Error:`, err);
       }
     }
 
