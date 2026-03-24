@@ -143,6 +143,10 @@ serve(async (req) => {
           email: order.email,
           name: order.name,
           phone_number: order.phone,
+          phone: order.phone, // Added
+          userPhone: order.phone, // Added
+          reference: order.tripay_reference, // Added
+          address: order.address, // Added
           order_id: `MOOTA-${mutation_id}`,
           paid_at: new Date().toISOString(),
           origin: pName.toLowerCase().includes('usa_webinar') ? 'USA' : 'Indonesia'
@@ -154,7 +158,7 @@ serve(async (req) => {
     try {
       const ebookSpecificKeywords = ['program diet', 'ebook', 'feminine magnetism', 'webinar', 'raja ranjang', 'dark feminine', 'love magnet', 'saham'];
       const isEbook = ebookSpecificKeywords.some(key => pName.toLowerCase().includes(key));
-      const functionToInvoke = isEbook ? 'send-ebooks-email' : 'send-payment-email';
+      const functionToInvoke = 'send-paid-notif';
       
       console.log(`📧 Invoking ${functionToInvoke}...`);
       await supabase.functions.invoke(functionToInvoke, {
@@ -167,14 +171,10 @@ serve(async (req) => {
       });
     } catch (e) { console.error('Email invocation error:', e.message); }
 
-    // 5. CAPI Tracking
+    // 5. CAPI Tracking (PIXEL EL VISION CONSOLIDATION)
     try {
-      let capiPixelId = '3319324491540889'; // Default Indo
-      if (pName.includes('Health Recovery') || pName.includes('usa_')) capiPixelId = '1393383179182528';
-      else if (pName.includes('Raja Ranjang')) capiPixelId = '934836615539666';
-      else if (pName.includes('Saham')) capiPixelId = '1941160619993263';
-      
-      console.log(`🎯 Sending CAPI event to Pixel ${capiPixelId}...`);
+      const capiPixelId = '3319324491540889';
+      console.log(`🎯 Sending CAPI event...`);
       await supabase.functions.invoke('capi-universal', {
         body: {
           pixelId: capiPixelId, eventName: 'Purchase',

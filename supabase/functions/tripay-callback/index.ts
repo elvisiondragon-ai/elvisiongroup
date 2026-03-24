@@ -301,7 +301,7 @@ serve(async (req) => {
         console.log('3. 📧 Sending success email...');
         const lowerPName = pName.toLowerCase();
 
-        // Specific keywords based on Product Catalog names to route to send-ebooks-email
+        // Specific keywords based on Product Catalog names to route to send-paid-notif
         const ebookSpecificKeywords = [
           'program diet el-vision',
           'ebook el vision',
@@ -320,105 +320,13 @@ serve(async (req) => {
 
         let functionToInvoke = isEbook ? 'send-ebooks-email' : 'send-payment-email';
 
-        // --- CAPI & EMAIL CONFIGURATION ---
-        let capiPixelId = null;
-        let capiValue = 0;
-        let capiCurrency = 'IDR';
-        let emailCurrency = 'IDR';
-        let displayAmount = amount || globalProductTx.amount;
-
-        const isEbookHealth = pName.includes('Health Recovery') || pName.includes('ebook_health20') || pName.includes('usa_ebookslim') || pName.includes('Slim Without Suffering') || pName.includes('usa_ebookhealth') || pName.includes('usa_webinar');
-        const isCoaching3000 = pName.includes('3000 Coaching') || pName.includes('usa_3000') || pName.includes('usa_pay3000');
-        const isVIP6Week = pName.includes('VIP SESSION 6 Week') || pName.includes('VIP6WEEK');
-        const isEbookPercayaDiri = pName.includes('ebook_percayadiri') || pName.includes('Ebook Percaya Diri') || pName.includes('Ebook Pria Alpha') || pName.includes('Paket Pria Alpha');
-        const isEbookFeminine = pName.includes('ebook_feminine') || pName.includes('Feminine Magnetism');
-        const isUangPanas = pName.includes('ebook_uangpanas') || pName.includes('Uang Panas') || pName.includes('Sistem Uang Panas');
-        const isFitFactor = pName.includes('Fitfactor');
-        const isJewelry = pName.toLowerCase().includes('jewelry');
-        const isDrelf = pName.toLowerCase().includes('drelf');
-        const isWebinar = pName.toLowerCase().includes('webinar');
-        const isRajaRanjang = lowerPName.includes('raja ranjang');
-        const isSaham = lowerPName.includes('saham');
-
-        // SG/MY eL Vision Editions
-        const isSGElvision = pName.includes('sg_elvision_en') || pName.includes('English Edition');
-        const isMYElvision = pName.includes('sg_elvision_malay') || pName.includes('Malay Edition');
-
-        console.log(`   - CAPI Logic Check: isEbookHealth=${isEbookHealth}, isCoaching3000=${isCoaching3000}, isVIP6Week=${isVIP6Week}, isEbookPercayaDiri=${isEbookPercayaDiri}, isEbookFeminine=${isEbookFeminine}, isUangPanas=${isUangPanas}, isFitFactor=${isFitFactor}, isWebinar=${isWebinar}, isDrelf=${isDrelf}, isJewelry=${isJewelry}, isSGElvision=${isSGElvision}, isMYElvision=${isMYElvision}, isRajaRanjang=${isRajaRanjang}, isSaham=${isSaham}`);
-
-        if (isEbookHealth || isCoaching3000 || isVIP6Week || pName.includes('usa_ebookfeminine')) {
-          capiPixelId = '1393383179182528'; // Manifestation Pixel (USA)
-          if (isCoaching3000) capiValue = 3000.00;
-          else if (isVIP6Week) capiValue = 1500.00;
-          else capiValue = 20.00;
-
-          capiCurrency = 'USD';
-          emailCurrency = 'USD';
-          displayAmount = capiValue;
-        } else if (isSGElvision) {
-          capiPixelId = '3319324491540889'; // EbookIndo Pixel
-          capiCurrency = 'SGD';
-          emailCurrency = 'SGD';
-          // Logic: if amount is 564000 IDR, convert back to 47 SGD
-          displayAmount = (amount || globalProductTx.amount) / 12000;
-          capiValue = displayAmount;
-        } else if (isMYElvision) {
-          capiPixelId = '3319324491540889'; // EbookIndo Pixel
-          capiCurrency = 'MYR';
-          emailCurrency = 'MYR';
-          // Logic: if amount is 311500 IDR, convert back to 89 MYR
-          displayAmount = (amount || globalProductTx.amount) / 3500;
-          capiValue = displayAmount;
-        } else if (isRajaRanjang) {
-          capiPixelId = '934836615539666'; // Raja Ranjang Pixel
-          capiCurrency = 'IDR';
-          emailCurrency = 'IDR';
-          capiValue = amount || globalProductTx.amount || 149000;
-          displayAmount = capiValue;
-        } else if (isDrelf) {
-          capiPixelId = '3319324491540889'; // Drelf Pixel (METACAPI)
-          capiValue = amount || globalProductTx.amount || 0;
-          capiCurrency = 'IDR';
-          emailCurrency = 'IDR';
-          displayAmount = capiValue;
-        } else if (isJewelry) {
-          capiPixelId = '874165095242407'; // New Ramadhan Ring / Jewelry Pixel
-          capiCurrency = 'SGD';
-          emailCurrency = 'SGD';
-          displayAmount = (amount || globalProductTx.amount) / 12000; // Convert back to SGD
-          capiValue = displayAmount;
-        } else if (isSaham) {
-          capiPixelId = '1941160619993263'; // Saham Crypto Pixel
-          capiCurrency = 'IDR';
-          emailCurrency = 'IDR';
-          capiValue = amount || globalProductTx.amount || 99000;
-          displayAmount = capiValue;
-        } else if (isEbookPercayaDiri || isEbookFeminine || isUangPanas || isWebinar || pName.includes('ebook_elvision') || pName.includes('ebook_adhd') || pName.includes('ebook_arif') || pName.includes('ebook_grief') || pName.includes('ebook_langsing') || pName.includes('ebook_tracker') || pName.includes('vip_15jt') || pName.includes('webinar_el')) {
-          capiPixelId = '3319324491540889'; // EbookIndo Pixel
-          capiValue = amount || globalProductTx.amount || 100000;
-          capiCurrency = 'IDR';
-          emailCurrency = 'IDR';
-          displayAmount = capiValue;
-        } else if (isFitFactor) {
-          capiPixelId = '3319324491540889'; // Fit Factor Pixel (METACAPI)
-          capiValue = amount || globalProductTx.amount || 0;
-          capiCurrency = 'IDR';
-          emailCurrency = 'IDR';
-          displayAmount = capiValue;
-        } else {
-          // --- UNIVERSAL FALLBACK ---
-          // Automatically handles new products without needing backend edits.
-          console.log(`   - 🌐 Universal Product Fallback Triggered for: ${pName}`);
-          capiPixelId = '3319324491540889'; // Default to Main Indo Pixel
-          capiValue = amount || globalProductTx.amount || 0;
-
-          // Auto-detect currency from amount size as a fallback if not explicitly defined
-          // If the amount is very small (e.g., < 1000), it might be SGD/USD, but create-payment 
-          // converts everything to IDR in the database. So the DB amount is always IDR.
-          capiCurrency = 'IDR';
-          emailCurrency = 'IDR';
-          displayAmount = capiValue;
-        }
+        // --- PIXEL EL VISION (META CAPI CONSOLIDATION) ---
+        const capiPixelId = '3319324491540889';
+        const capiValue = amount || globalProductTx.amount || 0;
+        const capiCurrency = 'IDR';
+        const emailCurrency = 'IDR';
+        const displayAmount = capiValue;
+        const eventName = 'Purchase';
 
         console.log(`   - CAPI Pixel Selected: ${capiPixelId}`);
 
@@ -447,19 +355,11 @@ serve(async (req) => {
         // We check capi_purchase_sent to ensure we only send ONCE (Winner-Takes-All between Frontend and Backend)
         if (capiPixelId && !globalProductTx.capi_purchase_sent) {
           try {
-            // TEST MODE CHECK
-            const testEmails = ['elvisiondragon@gmail.com', 'dragon@yahoo.com', 'elclawvision@gmail.com'];
-            const isTestUser = testEmails.includes(globalProductTx.email);
-            const eventName = isTestUser ? 'Test_Purchase' : 'Purchase';
-            if (isTestUser) console.log('   - 🧪 TEST MODE: Sending Test_Purchase event');
-
             console.log(`   - ⏱️ [TIMING] 🎯 Sending CAPI ${eventName} event via capi-universal to Pixel ${capiPixelId}...`);
             const capiStartTime = Date.now();
             await supabase.functions.invoke('capi-universal', {
               body: {
-                pixelId: capiPixelId,
                 eventName: eventName,
-                customAccessToken: isSaham ? Deno.env.get('CAPI_SAHAM') : (isRajaRanjang ? Deno.env.get('CAPI_RAJA_RANJANG') : undefined),
                 userData: {
                   email: globalProductTx.email,
                   ph: globalProductTx.phone,
@@ -475,8 +375,7 @@ serve(async (req) => {
                   content_name: globalProductTx.product_name,
                   order_id: tripayReference
                 },
-                eventId: tripayReference,
-                testCode: isSaham ? 'TEST88338' : ((globalProductTx.product_name.includes('ebook_feminine') || globalProductTx.product_name.includes('Feminine Magnetism')) ? 'TEST9597' : (globalProductTx.product_name.includes('Jewelry')) ? 'TEST54644' : undefined)
+                eventId: tripayReference
               }
             });
 

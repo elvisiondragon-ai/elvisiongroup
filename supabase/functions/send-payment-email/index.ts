@@ -158,6 +158,13 @@ const handler = async (req) => {
       }
     }
     const safePaymentMethod = paymentMethod || 'Transfer Bank';
+    
+    // --- Define Product Flags EARLY to avoid TDZ ---
+    const isVIP = safeSubscriptionType.includes('VIP') || safeSubscriptionType.includes('3000') || safeSubscriptionType === 'VIP6WEEK';
+    const isDrelf = safeSubscriptionType.toLowerCase().includes('drelf');
+    const isJewelry = safeSubscriptionType.toLowerCase().includes('jewelry');
+    const isParenting = safeSubscriptionType.toLowerCase().includes('parenting');
+    const isFitfactor = safeSubscriptionType.toLowerCase().includes('fitfactor');
 
     // Format amount based on currency
     const formattedAmount = currency === 'USD'
@@ -187,13 +194,6 @@ const handler = async (req) => {
 
     let subject;
     let htmlContent;
-
-    // Check for VIP 6 Week Program
-    const isVIP = safeSubscriptionType.includes('VIP') || safeSubscriptionType.includes('3000') || safeSubscriptionType === 'VIP6WEEK';
-    const isDrelf = safeSubscriptionType.toLowerCase().includes('drelf');
-    const isJewelry = safeSubscriptionType.toLowerCase().includes('jewelry');
-    const isParenting = safeSubscriptionType.toLowerCase().includes('parenting');
-    const isFitfactor = safeSubscriptionType.toLowerCase().includes('fitfactor');
 
     // YOU DEV DONT ACT SMARTASS, this has rule standar no fancy email will be error 
     // Must light theme must with unsubscribe, no emote in subject (emote only in content)
@@ -590,81 +590,77 @@ const handler = async (req) => {
 
     // --- WHATSAPP NOTIFICATION FOR FITFACTOR ---
     if (isFitfactor) {
+      let waMessage = "";
+      const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
+      const displayProduct = body.product_name || safeSubscriptionType || "FitFactor Herbal";
+      
+      if (type === 'payment_completed' || type === 'success') {
+        const bonusEbookLink = "https://drive.google.com/file/d/1bIG1_u2PFXWIrXxygojTyUlmSC-J1A5R/view?usp=sharing";
+        waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Fit Factor.\n\nTerima kasih atas pembayaran kakak untuk paket *Fit Factor Imun Booster*.\n\nPembayaran kakak telah kami terima senilai ${formattedAmount}.\n\n*DATA PENGIRIMAN:*\nNama: ${userName}\nEmail: ${recipientEmail}\nTotal: ${formattedAmount}\nRef: ${safeReference}\nAlamat: ${userAddress}\nProduk: ${displayProduct}\n\nBerikut adalah link akses eksklusif untuk mendownload Ebook Bonus kakak:\n👉 ${bonusEbookLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nAdmin - Fit Factor Herbal`;
+      } else if (type === 'payment_created' || type === 'created') {
+        waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari *Fit Factor Herbal*.\n\nPembayaran kakak untuk paket *Fit Factor Imun Booster* telah berhasil dibuat senilai *${formattedAmount}*.\n\n*DATA PESANAN:*\nNama: ${userName}\nEmail: ${recipientEmail}\nTotal: ${formattedAmount}\nRef: ${safeReference}\nAlamat: ${userAddress}\nProduk: ${displayProduct}\n\nSilakan selesaikan pembayaran agar paket bisa segera kami proses dan kirimkan hari ini.\n\nJika sudah bayar namun status belum berubah, atau butuh bantuan cara bayar, silakan balas pesan ini ya kak.\n\nTerima kasih! 🌿`;
+      }
+
+      // 🔔 CONCURRENT NOTIFICATIONS
+      const notificationPromises = [];
+
+      // 1. Customer Notification
       const userPhone = body.userPhone || body.phone || body.phone_number || body.ph;
-      if (userPhone) {
-        console.log(`📱 [WATZAPP] Fitfactor processing for ${userPhone}, type: ${type}`);
-        try {
-          let cleanPhone = userPhone.replace(/\D/g, '');
-          if (cleanPhone.startsWith('0')) {
-            cleanPhone = '62' + cleanPhone.slice(1);
-          } else if (cleanPhone.startsWith('8')) {
-            cleanPhone = '62' + cleanPhone;
-          }
+      if (userPhone && waMessage) {
+        let cleanPhone = userPhone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+        else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
 
-          let waMessage = "";
-          
-          if (type === 'payment_completed' || type === 'success') {
-            const bonusEbookLink = "https://drive.google.com/file/d/1bIG1_u2PFXWIrXxygojTyUlmSC-J1A5R/view?usp=sharing";
-            waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Fit Factor.\n\nTerima kasih atas pembayaran kakak untuk paket *Fit Factor Imun Booster*.\n\nPembayaran kakak telah kami terima senilai ${formattedAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload Ebook Bonus kakak:\n👉 ${bonusEbookLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nAdmin - Fit Factor Herbal`;
-          } else if (type === 'payment_created' || type === 'created') {
-            waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari *Fit Factor Herbal*.\n\nPembayaran kakak untuk paket *Fit Factor Imun Booster* telah berhasil dibuat senilai *${formattedAmount}*.\n\nSilakan selesaikan pembayaran agar paket bisa segera kami proses dan kirimkan hari ini.\n\nJika sudah bayar namun status belum berubah, atau butuh bantuan cara bayar, silakan balas pesan ini ya kak.\n\nTerima kasih! 🌿`;
-          }
+        console.log(`📱 [WATZAPP] Queuing Customer Message to ${cleanPhone}`);
+        notificationPromises.push(
+          fetch(WAPI_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: cleanPhone, message: waMessage })
+          }).then(res => res.text().then(txt => console.log(`📡 [WATZAPP] Customer Res: ${res.status}`, txt)))
+            .catch(err => console.error(`❌ [WATZAPP] Customer Err:`, err))
+        );
+      }
 
-          if (waMessage) {
-            const waResponse = await fetch(WAPI_URL, {
+      // 2. Admin Notification (For PAID and created)
+      if (type === 'payment_completed' || type === 'success' || type === 'payment_created' || type === 'created') {
+        const adminPhones = ['6281383838013', '6285664733499'];
+        console.log(`🚀 [WATZAPP] Fitfactor Admin Notifications triggered for:`, adminPhones);
+        const adminMessage = `🚀 *FITFACTOR NOTIFICATION (${type})*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'N/A'}\nTotal: ${formattedAmount}\nRef: ${safeReference}\nAlamat: ${userAddress}\nProduk: ${displayProduct}`;
+
+        for (const adminPhone of adminPhones) {
+          console.log(`🚀 [WATZAPP] Queuing Admin Message to ${adminPhone}`);
+          notificationPromises.push(
+            fetch(WAPI_URL, {
               method: 'POST',
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                session: WAPI_SESSION,
-                token: WAPI_TOKEN,
-                to: cleanPhone,
-                message: waMessage
-              })
-            });
-
-            const resultText = await waResponse.text();
-            console.log(`📡 [WATZAPP] Fitfactor Response (${type}): ${waResponse.status}`, resultText);
-          }
-        } catch (waError) {
-          console.error(`❌ Error sending WhatsApp for Fitfactor:`, waError);
+              body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: adminPhone, message: adminMessage })
+            }).then(res => res.text().then(txt => console.log(`📡 [WATZAPP] Admin ${adminPhone} Res: ${res.status}`, txt)))
+              .catch(err => console.error(`❌ [WATZAPP] Admin ${adminPhone} Err:`, err))
+          );
         }
       }
 
-      // 🔔 ADMIN NOTIFICATION (Only for PAID)
-      if (type === 'payment_completed' || type === 'success') {
-        const adminPhones = ['6281383838013', '6285664733499'];
-        const adminMessage = `💰 *FITFACTOR PAID*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'N/A'}\nTotal: ${formattedAmount}\nRef: ${safeReference}`;
-
-        for (const adminPhone of adminPhones) {
-          try {
-            await fetch(WAPI_URL, {
-              method: 'POST',
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                session: WAPI_SESSION,
-                token: WAPI_TOKEN,
-                to: adminPhone,
-                message: adminMessage
-              })
-            });
-          } catch (waError) {
-            console.error(`❌ Error sending WhatsApp to admin ${adminPhone}:`, waError);
-          }
-        }
+      // Wait for all WhatsApp notifications to finish before proceeding to Email
+      if (notificationPromises.length > 0) {
+        console.log(`⏳ Waiting for ${notificationPromises.length} WhatsApp notifications...`);
+        await Promise.all(notificationPromises);
+        console.log(`✅ All WhatsApp notifications processed.`);
       }
     }
 
     // Send email via Mailketing
     const emailResult = await sendMailketingEmail(recipientEmail, subject, htmlContent, userName);
     console.log("✅ Mailketing payment email sent successfully");
+
     // Send BCC copy to support@elvisiongroup.com
     try {
       await sendMailketingEmail('elvisiondragon@gmail.com', `SENT: ${subject}`, htmlContent, 'Support Team');
       console.log("✅ BCC copy sent to elvisiondragon@gmail.com");
     } catch (bccError) {
       console.error("⚠️ Failed to send BCC copy:", bccError);
-      // Continue even if BCC fails
     }
+
     return new Response(JSON.stringify({
       success: true,
       message: 'Payment email sent successfully via Mailketing',
@@ -678,12 +674,13 @@ const handler = async (req) => {
         ...corsHeaders
       }
     });
-  } catch (error) {
-    console.error("❌ Error sending Mailketing payment email:", error);
+
+  } catch (error: any) {
+    console.error("❌ Error in handler:", error);
     return new Response(JSON.stringify({
       success: false,
-      error: error.message,
-      details: error.stack
+      error: error.message || 'Unknown error',
+      details: error.stack || ''
     }), {
       status: 500,
       headers: {
@@ -693,4 +690,6 @@ const handler = async (req) => {
     });
   }
 };
+
 serve(handler);
+

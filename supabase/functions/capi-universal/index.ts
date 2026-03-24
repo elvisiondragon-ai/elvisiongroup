@@ -16,21 +16,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
 
-// 🎯 HARDCODED PIXEL CONFIGURATION (Non-Confidential Mapping)
-const PIXEL_CONFIG: Record<string, string> = {
-  '3319324491540889': 'METACAPI', // EbookIndo Pixel
-  '1393383179182528': 'CAPI_USA',  // USA KAYA Pixel
-  '1749197952320359': 'CAPI_DRELF', // Drelf SG Pixel
-  '2158382114674235': 'CAPI_UMKM', // UMKM Pixel
-  '1941160619993263': 'CAPI_SAHAM', // Saham Ultimate Pixel
-  'CAPI_JEWELRY': 'CAPI_JEWELRY', // Special mapping for Jewelry
-};
-
-// 🎯 TEST CODE MAPPING (Dynamic Source of Truth)
-const TEST_CODE_MAPPING: Record<string, string> = {
-  'testcode_indo': 'TEST23224', // Current Indo Test Code
-  'testcode_usa': 'TEST88049',  // Current USA Test Code
-};
+// 🎯 PIXEL EL VISION (META CAPI)
+const PIXEL_ID_EL_VISION = '3319324491540889';
+const PIXEL_SECRET_NAME = 'METACAPI';
 
 // Initialize Supabase Client for Logging (Global Scope for Warm Starts)
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -52,75 +40,15 @@ Deno.serve(async (req) => {
 
   const body = await req.json();
 
-  // --- Configuration ---
-  const { pixelId, eventName, userData, customData, eventId, testCode, eventSourceUrl, eventTime, customAccessToken, secret } = body;
+  // --- Configuration (ALways PIXEL EL VISION) ---
+  const { eventName, userData, customData, eventId, eventSourceUrl, eventTime, customAccessToken } = body;
 
-  // Resolution for Jewelry Pixel ID (must be in environment, not code)
-  let resolvedPixelId = pixelId;
-  if (pixelId === 'CAPI_JEWELRY') {
-    resolvedPixelId = Deno.env.get('JEWELRY_PIXEL_ID') || '';
-    if (!resolvedPixelId) {
-      console.error("Configuration Error: JEWELRY_PIXEL_ID not set in environment.");
-      return new Response(JSON.stringify({ error: "JEWELRY_PIXEL_ID not configured." }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-  }
-
-  let productName: string | null = null;
-  if (customData) {
-    if (customData.content_name) {
-      productName = customData.content_name;
-    } else if (customData.content_ids && Array.isArray(customData.content_ids) && customData.content_ids.length > 0) {
-      productName = customData.content_ids[0];
-    } else if (customData.contents && Array.isArray(customData.contents) && customData.contents.length > 0) {
-      if (customData.contents[0].title) {
-        productName = customData.contents[0].title;
-      } else if (customData.contents[0].product_id) {
-        productName = customData.contents[0].product_id;
-      }
-    }
-  }
-
-  // 🎯 RESTRICTED EVENTS FILTER
-  const allowedEvents = ['Purchase', 'AddToCart', 'AddPaymentInfo', 'ViewContent', 'InitiateCheckout', 'FreeEbook', 'Test_Purchase'];
-  if (!allowedEvents.includes(eventName)) {
-    console.log(`⚠️ Skipping event '${eventName}' (not in allowed list) | Product: ${productName || 'N/A'} | URL: ${eventSourceUrl || 'N/A'}`);
-    return new Response(JSON.stringify({ message: `Event '${eventName}' skipped (not in allowed list)` }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
-  // 1. ROBUST DEDUPLICATION CHECK
-  // Check if event exists with ANY status (sent, processing, or failed)
-  if (eventId) {
-    const { data: existingEvent } = await supabase
-      .from('pixel_events')
-      .select('status')
-      .eq('event_id', eventId)
-      .eq('pixel_id', resolvedPixelId)
-      .maybeSingle();
-
-    // If we found ANY record, we stop immediately.
-    // Even if it failed before, we don't want to risk a double-send race condition without manual intervention.
-    if (existingEvent) {
-      console.log(`♻️ Deduplication: Event '${eventName}' (ID: ${eventId}) already exists (Status: ${existingEvent.status}). Skipping.`);
-      return new Response(JSON.stringify({ message: `Event skipped (duplicate ${existingEvent.status})` }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-  }
-
-  // Determine which secret to use
-  const secretName = secret || PIXEL_CONFIG[pixelId] || 'METACAPI';
-  let FACEBOOK_ACCESS_TOKEN = customAccessToken || Deno.env.get(secretName);
+  const resolvedPixelId = PIXEL_ID_EL_VISION;
+  const FACEBOOK_ACCESS_TOKEN = customAccessToken || Deno.env.get(PIXEL_SECRET_NAME);
 
   if (!FACEBOOK_ACCESS_TOKEN) {
-    console.error(`Configuration Error: ${secretName} Access Token not configured.`);
-    return new Response(JSON.stringify({ error: `${secretName} Access Token not configured in environment variables.` }), {
+    console.error(`Configuration Error: ${PIXEL_SECRET_NAME} Access Token not configured.`);
+    return new Response(JSON.stringify({ error: `${PIXEL_SECRET_NAME} Access Token not configured in environment variables.` }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -136,7 +64,6 @@ Deno.serve(async (req) => {
       custom_data: customData,
       page_url: eventSourceUrl || req.headers.get('referer'),
       status: 'processing',
-      product_name: productName,
       external_id: userData?.external_id
     };
 
@@ -155,13 +82,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (!pixelId) {
-      return new Response(JSON.stringify({ error: 'pixelId is required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     if (!eventName) {
       return new Response(JSON.stringify({ error: 'eventName is required' }), {
         status: 400,
@@ -173,13 +93,17 @@ Deno.serve(async (req) => {
     const processedUserData: Record<string, string | undefined> = {};
     if (userData) {
       if (userData.email) processedUserData.em = await hashSha256(userData.email);
-      if (userData.phone) processedUserData.ph = await hashSha256(userData.phone);
-      if (userData.fn) processedUserData.fn = await hashSha256(userData.fn);
-      if (userData.ln) processedUserData.ln = await hashSha256(userData.ln);
-      if (userData.ct) processedUserData.ct = await hashSha256(userData.ct);
-      if (userData.st) processedUserData.st = await hashSha256(userData.st);
-      if (userData.zp) processedUserData.zp = await hashSha256(userData.zp);
       if (userData.country) processedUserData.country = await hashSha256(userData.country);
+      
+      // --- PHONE SANITIZATION (E.164) ---
+      if (userData.phone || userData.ph) {
+        let rawPhone = userData.phone || userData.ph;
+        let cleanPhone = rawPhone.replace(/\D/g, '');
+        // Indonesia default normalization
+        if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+        else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+        processedUserData.ph = await hashSha256(cleanPhone);
+      }
 
       // Unhashed fields from client (with strict FBC case-sensitivity check)
       if (userData.fbp) processedUserData.fbp = userData.fbp;
@@ -237,10 +161,14 @@ Deno.serve(async (req) => {
     // Construct the event payload
     const event: any = {
       event_name: eventName,
-      event_time: eventTime || Math.floor(Date.now() / 1000), // Use provided eventTime or current server time
+      event_time: eventTime || Math.floor(Date.now() / 1000),
       action_source: 'website',
       event_source_url: eventSourceUrl || req.headers.get('referer'),
-      custom_data: customData,
+      custom_data: {
+        ...customData,
+        // Ensure content_type is 'product' for Purchase events if not specified
+        content_type: customData?.content_type || (eventName === 'Purchase' ? 'product' : undefined),
+      },
       event_id: eventId || undefined,
     };
 
@@ -250,11 +178,6 @@ Deno.serve(async (req) => {
 
     const events = [event];
     const payload: any = { data: events };
-
-    // Resolve Test Code (lookup in mapping or use direct value)
-    if (testCode) {
-      payload.test_event_code = TEST_CODE_MAPPING[testCode] || testCode;
-    }
 
     const facebookApiUrl = `https://graph.facebook.com/v19.0/${resolvedPixelId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
 
