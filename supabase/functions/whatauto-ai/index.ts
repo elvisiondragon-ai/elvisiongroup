@@ -12,7 +12,14 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { messages } = body;
+    const { 
+      messages, 
+      temperature = 0.8, 
+      top_p = 1, 
+      frequency_penalty = 0.7, 
+      presence_penalty = 0.6,
+      max_tokens = 1000 
+    } = body;
 
     if (!messages || !Array.isArray(messages)) {
       throw new Error("Missing or invalid 'messages' array in request body");
@@ -20,10 +27,12 @@ serve(async (req) => {
 
     const payload = {
       model: "gpt-4o-mini",
-      messages: messages, // Rely strictly on the injected payload from server.js
-      max_tokens: 1000,
-      temperature: 0.8,
-      top_p: 1
+      messages: messages,
+      max_tokens,
+      temperature,
+      top_p,
+      frequency_penalty,
+      presence_penalty
     };
 
     const apiKey = Deno.env.get("OPENAI_API_KEY");

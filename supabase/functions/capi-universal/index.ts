@@ -18,7 +18,9 @@ const corsHeaders = {
 
 // 🎯 PIXEL EL VISION (META CAPI)
 const PIXEL_ID_EL_VISION = '3319324491540889';
+const PIXEL_ID_FITFACTOR = '1797660474333865';
 const PIXEL_SECRET_NAME = 'METACAPI';
+const PIXEL_SECRET_FITFACTOR = 'CAPI_FITFACTOR';
 
 // Initialize Supabase Client for Logging (Global Scope for Warm Starts)
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -40,11 +42,20 @@ Deno.serve(async (req) => {
 
   const body = await req.json();
 
-  // --- Configuration (ALways PIXEL EL VISION) ---
-  const { eventName, userData, customData, eventId, eventSourceUrl, eventTime, customAccessToken } = body;
+  // --- Configuration ---
+  const { eventName, userData, customData, eventId, eventSourceUrl, eventTime, customAccessToken, pixelId, test_event_code } = body;
 
-  const resolvedPixelId = PIXEL_ID_EL_VISION;
-  const FACEBOOK_ACCESS_TOKEN = customAccessToken || Deno.env.get(PIXEL_SECRET_NAME);
+  // Resolve which Pixel ID and Access Token to use
+  let resolvedPixelId = pixelId || PIXEL_ID_EL_VISION;
+  let FACEBOOK_ACCESS_TOKEN = customAccessToken;
+  let offlineEventSetId = body.offline_event_set_id;
+
+  if (resolvedPixelId === PIXEL_ID_FITFACTOR) {
+    FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_FITFACTOR);
+    offlineEventSetId = offlineEventSetId || '806455815316878';
+  } else {
+    FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_NAME);
+  }
 
   if (!FACEBOOK_ACCESS_TOKEN) {
     console.error(`Configuration Error: ${PIXEL_SECRET_NAME} Access Token not configured.`);
@@ -131,6 +142,36 @@ Deno.serve(async (req) => {
 
       if (userData.external_id) processedUserData.external_id = userData.external_id;
       if (userData.db_id) processedUserData.facebook_login_id = userData.db_id;
+
+      // --- CTWA Business Messaging Fields ---
+      let resolvedCtwaClid = userData.ctwa_clid;
+      
+      // If ctwa_clid is missing but we have a phone number, try to look it up in global_ctwa
+      if (!resolvedCtwaClid && (userData.phone || userData.ph)) {
+        let rawPhone = userData.phone || userData.ph;
+        let cleanPhone = rawPhone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+        else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+
+        const { data: ctwaData } = await supabase
+          .from('global_ctwa')
+          .select('ctwa_clid')
+          .eq('phone', cleanPhone)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (ctwaData?.ctwa_clid) {
+          resolvedCtwaClid = ctwaData.ctwa_clid;
+          console.log(`🎯 CAPI: Found CTWA Attribution for ${cleanPhone}: ${resolvedCtwaClid}`);
+        }
+      }
+
+      if (resolvedCtwaClid) {
+        processedUserData.ctwa_clid = resolvedCtwaClid;
+        // Automatically inject WABA_ID if not provided
+        processedUserData.whatsapp_business_account_id = userData.whatsapp_business_account_id || Deno.env.get('WABA_ID');
+      }
     }
 
     // IP and User Agent handling
@@ -162,7 +203,7 @@ Deno.serve(async (req) => {
     const event: any = {
       event_name: eventName,
       event_time: eventTime || Math.floor(Date.now() / 1000),
-      action_source: 'website',
+      action_source: body.action_source || (userData?.ctwa_clid ? 'business_messaging' : 'website'),
       event_source_url: eventSourceUrl || req.headers.get('referer'),
       custom_data: {
         ...customData,
@@ -172,14 +213,22 @@ Deno.serve(async (req) => {
       event_id: eventId || undefined,
     };
 
+    if (userData?.ctwa_clid) {
+      event.messaging_channel = 'whatsapp';
+    }
+
     if (Object.keys(processedUserData).length > 0) {
       event.user_data = processedUserData;
     }
 
     const events = [event];
     const payload: any = { data: events };
+    if (test_event_code) {
+      payload.test_event_code = test_event_code;
+    }
 
-    const facebookApiUrl = `https://graph.facebook.com/v19.0/${resolvedPixelId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
+    const endpointId = offlineEventSetId || resolvedPixelId;
+    const facebookApiUrl = `https://graph.facebook.com/v19.0/${endpointId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
 
     const response = await fetch(facebookApiUrl, {
       method: 'POST',

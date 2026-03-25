@@ -148,7 +148,7 @@ serve(async (req) => {
     // FIX: Search regardless of status to allow manual re-triggering via curl
     console.log(`🔍 Searching global_product for reference: ${tripayReference} or merchantRef: ${merchantRef}`);
     let query = supabase.from('global_product')
-      .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, affiliate_email, fbc, fbp, address, ip_address, user_agent');
+      .select('id, name, email, phone, product_name, amount, status, tripay_reference, affiliate_id, affiliate_email, fbc, fbp, address, ip_address, user_agent, ctwa_clid');
 
     if (merchantRef) {
       query = query.or(`tripay_reference.eq.${tripayReference},merchant_ref.eq.${merchantRef}`);
@@ -321,12 +321,17 @@ serve(async (req) => {
         let functionToInvoke = isEbook ? 'send-ebooks-email' : 'send-payment-email';
 
         // --- PIXEL EL VISION (META CAPI CONSOLIDATION) ---
-        const capiPixelId = '3319324491540889';
+        let capiPixelId = '3319324491540889';
         const capiValue = amount || globalProductTx.amount || 0;
         const capiCurrency = 'IDR';
         const emailCurrency = 'IDR';
         const displayAmount = capiValue;
         const eventName = 'Purchase';
+
+        // 🎯 FITFACTOR PIXEL OVERRIDE
+        if (pName.toLowerCase().includes('fitfactor')) {
+          capiPixelId = '1797660474333865';
+        }
 
         console.log(`   - CAPI Pixel Selected: ${capiPixelId}`);
 
@@ -359,7 +364,10 @@ serve(async (req) => {
             const capiStartTime = Date.now();
             await supabase.functions.invoke('capi-universal', {
               body: {
+                pixelId: capiPixelId,
                 eventName: eventName,
+                action_source: 'physical_store', // Offline conversion for WA purchase
+                test_event_code: 'TEST14945', // Added test code
                 userData: {
                   email: globalProductTx.email,
                   ph: globalProductTx.phone,
@@ -367,7 +375,9 @@ serve(async (req) => {
                   fbc: globalProductTx.fbc,
                   fbp: globalProductTx.fbp,
                   client_ip_address: globalProductTx.ip_address || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
-                  client_user_agent: globalProductTx.user_agent || req.headers.get('user-agent')
+                  client_user_agent: globalProductTx.user_agent || req.headers.get('user-agent'),
+                  ctwa_clid: globalProductTx.ctwa_clid,
+                  whatsapp_business_account_id: Deno.env.get('WABA_ID')
                 },
                 customData: {
                   value: capiValue,

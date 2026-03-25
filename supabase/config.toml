@@ -68,6 +68,12 @@ verify_jwt = false
 [functions.moota-callback]
 verify_jwt = false
 
+[functions.global-ctwa-track]
+verify_jwt = false
+
+[functions.capi-universal]
+verify_jwt = false
+
 [functions.tripay_create-payment]
 enabled = true
 verify_jwt = true

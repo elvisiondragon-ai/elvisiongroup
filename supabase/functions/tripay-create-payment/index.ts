@@ -332,8 +332,34 @@ serve(async (req) => {
         'image_url': 'https://elvisiongroup.com/assets/premium-icon.jpg'
       }
     ];
-    // --- 4. PRE-PAYMENT DATABASE INSERTION ---
     const supabase = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
+
+    // --- 3.5. CTWA ATTRIBUTION LOOKUP ---
+    let ctwaClid = null;
+    if (product.physical && phoneNumber) {
+      try {
+        let cleanPhone = phoneNumber.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+        else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+
+        const { data: ctwaData } = await supabase
+          .from('global_ctwa')
+          .select('ctwa_clid')
+          .eq('phone', cleanPhone)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (ctwaData) {
+          ctwaClid = ctwaData.ctwa_clid;
+          console.log(`🎯 CTWA Match Found: ${ctwaClid} for ${cleanPhone}`);
+        }
+      } catch (e) {
+        console.error('CTWA Lookup Error:', e);
+      }
+    }
+
+    // --- 4. PRE-PAYMENT DATABASE INSERTION ---
     const ipAddress = clientIp || req.headers.get('x-forwarded-for') || req.headers.get('remote-addr');
     const userAgent = req.headers.get('user-agent');
     let dbRecordId = null;
@@ -359,7 +385,8 @@ serve(async (req) => {
         fbc: fbc || null,
         fbp: fbp || null,
         ip_address: ipAddress,
-        user_agent: userAgent
+        user_agent: userAgent,
+        ctwa_clid: ctwaClid
       }).select('id').single();
       if (error) throw new Error(`Database insert (global_product) failed: ${error.message}`);
       dbRecordId = data.id;

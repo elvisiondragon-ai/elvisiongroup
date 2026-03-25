@@ -3,7 +3,7 @@ import App from './App.tsx'
 import './index.css'
 import './i18n'
 
-(window as any).APP_VERSION = '2026.03.24.17'
+(window as any).APP_VERSION = '2026.03.25.01'
 
 // Global error handler for chunk load failures (stale app)
 window.addEventListener('error', (event) => {
