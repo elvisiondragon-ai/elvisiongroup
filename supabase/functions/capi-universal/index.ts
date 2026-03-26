@@ -17,10 +17,13 @@ const corsHeaders = {
 };
 
 // 🎯 PIXEL EL VISION (META CAPI)
-const PIXEL_ID_EL_VISION = '3319324491540889';
+const PIXEL_ID_EL_VISION = '326442656911776';
 const PIXEL_ID_FITFACTOR = '1797660474333865';
-const PIXEL_SECRET_NAME = 'METACAPI';
+const PIXEL_ID_PARFUM = '1315644686235886';
+
+const PIXEL_SECRET_NAME = 'FACEBOOK_ACCESS_TOKEN';
 const PIXEL_SECRET_FITFACTOR = 'CAPI_FITFACTOR';
+const PIXEL_SECRET_PARFUM = 'CAPI_PARFUM';
 
 // Initialize Supabase Client for Logging (Global Scope for Warm Starts)
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -48,18 +51,18 @@ Deno.serve(async (req) => {
   // Resolve which Pixel ID and Access Token to use
   let resolvedPixelId = pixelId || PIXEL_ID_EL_VISION;
   let FACEBOOK_ACCESS_TOKEN = customAccessToken;
-  let offlineEventSetId = body.offline_event_set_id;
 
   if (resolvedPixelId === PIXEL_ID_FITFACTOR) {
     FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_FITFACTOR);
-    offlineEventSetId = offlineEventSetId || '806455815316878';
+  } else if (resolvedPixelId === PIXEL_ID_PARFUM) {
+    FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_PARFUM);
   } else {
     FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_NAME);
   }
 
   if (!FACEBOOK_ACCESS_TOKEN) {
-    console.error(`Configuration Error: ${PIXEL_SECRET_NAME} Access Token not configured.`);
-    return new Response(JSON.stringify({ error: `${PIXEL_SECRET_NAME} Access Token not configured in environment variables.` }), {
+    console.error(`Configuration Error: Access Token not configured for Pixel ${resolvedPixelId}.`);
+    return new Response(JSON.stringify({ error: `Access Token not configured for Pixel ${resolvedPixelId} in environment variables.` }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -105,6 +108,11 @@ Deno.serve(async (req) => {
     if (userData) {
       if (userData.email) processedUserData.em = await hashSha256(userData.email);
       if (userData.country) processedUserData.country = await hashSha256(userData.country);
+      if (userData.fn) processedUserData.fn = await hashSha256(userData.fn);
+      if (userData.ln) processedUserData.ln = await hashSha256(userData.ln);
+      if (userData.city || userData.ct) processedUserData.ct = await hashSha256(userData.city || userData.ct);
+      if (userData.state || userData.st) processedUserData.st = await hashSha256(userData.state || userData.st);
+      if (userData.zip || userData.zp) processedUserData.zp = await hashSha256(userData.zip || userData.zp);
       
       // --- PHONE SANITIZATION (E.164) ---
       if (userData.phone || userData.ph) {
@@ -121,15 +129,12 @@ Deno.serve(async (req) => {
 
       if (userData.fbc) {
         // Validate fbclid case-sensitivity to prevent Meta warnings about modified/lowercased values
-        // Structure: fb.1.timestamp.fbclid
         const fbcParts = userData.fbc.split('.');
         if (fbcParts.length >= 4) {
           const fbclidPart = fbcParts.slice(3).join('.');
           const hasUpper = /[A-Z]/.test(fbclidPart);
           const hasLower = /[a-z]/.test(fbclidPart);
 
-          // Meta fbclids MUST be mixed-case if they contain letters.
-          // If it has letters but no uppercase, it is corrupted/lowercased.
           if (!hasUpper && hasLower) {
             console.warn(`⚠️ CAPI: Stripping corrupted (lowercased) FBC: ${userData.fbc}`);
           } else {
@@ -146,7 +151,6 @@ Deno.serve(async (req) => {
       // --- CTWA Business Messaging Fields ---
       let resolvedCtwaClid = userData.ctwa_clid;
       
-      // If ctwa_clid is missing but we have a phone number, try to look it up in global_ctwa
       if (!resolvedCtwaClid && (userData.phone || userData.ph)) {
         let rawPhone = userData.phone || userData.ph;
         let cleanPhone = rawPhone.replace(/\D/g, '');
@@ -169,7 +173,6 @@ Deno.serve(async (req) => {
 
       if (resolvedCtwaClid) {
         processedUserData.ctwa_clid = resolvedCtwaClid;
-        // Automatically inject WABA_ID if not provided
         processedUserData.whatsapp_business_account_id = userData.whatsapp_business_account_id || Deno.env.get('WABA_ID');
       }
     }
@@ -179,7 +182,6 @@ Deno.serve(async (req) => {
     if (clientIpAddressHeader) {
       const firstIp = clientIpAddressHeader.split(',')[0].trim();
       if (firstIp && (firstIp.includes('.') || firstIp.includes(':'))) {
-        // IP BLOCKING LOGIC
         const ignoredIps = Deno.env.get('IGNORED_IPS');
         if (ignoredIps) {
           const ipList = ignoredIps.split(',').map(ip => ip.trim());
@@ -207,7 +209,6 @@ Deno.serve(async (req) => {
       event_source_url: eventSourceUrl || req.headers.get('referer'),
       custom_data: {
         ...customData,
-        // Ensure content_type is 'product' for Purchase events if not specified
         content_type: customData?.content_type || (eventName === 'Purchase' ? 'product' : undefined),
       },
       event_id: eventId || undefined,
@@ -227,8 +228,7 @@ Deno.serve(async (req) => {
       payload.test_event_code = test_event_code;
     }
 
-    const endpointId = offlineEventSetId || resolvedPixelId;
-    const facebookApiUrl = `https://graph.facebook.com/v19.0/${endpointId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
+    const facebookApiUrl = `https://graph.facebook.com/v19.0/${resolvedPixelId}/events?access_token=${FACEBOOK_ACCESS_TOKEN}`;
 
     const response = await fetch(facebookApiUrl, {
       method: 'POST',

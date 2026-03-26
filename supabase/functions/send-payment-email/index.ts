@@ -166,8 +166,10 @@ const handler = async (req) => {
     const isJewelry = safeSubscriptionType.toLowerCase().includes('jewelry');
     const isParenting = safeSubscriptionType.toLowerCase().includes('parenting');
     const isFitfactor = safeSubscriptionType.toLowerCase().includes('fitfactor');
-    const isPhysical = isFitfactor || isDrelf || isJewelry;
-    const brandName = isFitfactor ? "FitFactor Herbal" : isDrelf ? "Drelf" : isJewelry ? "Jewelry" : "ElVision";
+    const isParfum = safeSubscriptionType.toLowerCase().includes('parfum');
+    const isHungry = safeSubscriptionType.toLowerCase().includes('hungry');
+    const isPhysical = isFitfactor || isDrelf || isJewelry || isParfum || isHungry;
+    const brandName = isFitfactor ? "FitFactor Herbal" : isDrelf ? "Drelf" : isJewelry ? "Jewelry" : isParfum ? "eL Royale Parfum" : isHungry ? "HungryLater" : "ElVision";
 
     // Format amount based on currency
     const formattedAmount = currency === 'USD'
@@ -445,6 +447,192 @@ const handler = async (req) => {
     </div>
 </body>
 </html>`;
+      } else if (isHungry) {
+        // --- HUNGRYLATER EMAIL TEMPLATE (VIBRANT/FOODIE) ---
+        htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesanan Diterima - HungryLater</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #fff5f5; margin: 0; padding: 20px; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; border: 2px solid #ff7675; padding: 25px; background-color: #ffffff; border-radius: 20px; box-shadow: 0 15px 35px rgba(255, 118, 117, 0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px dashed #fab1a0; text-align: center; font-size: 13px; color: #636e72; }
+        .details-box { background-color: #fff9f9; border-left: 5px solid #ff7675; padding: 20px; margin: 25px 0; border-radius: 0 15px 15px 0; }
+        .accent { color: #d63031; font-weight: bold; }
+        .button { display: inline-block; background-color: #ff7675; color: #ffffff !important; padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; color: #d63031; font-size: 28px;">🔥 HungryLater!</h1>
+            <p style="margin: 5px 0 0; font-weight: bold; color: #636e72;">Your Hunger Ends Here.</p>
+        </div>
+        <div class="content">
+            <p>Halo Foodies <strong>${userName}</strong>!</p>
+            <p>Pembayaran Anda sudah masuk and kami sudah terima dengan hangat! Tim kami sedang menyiapkan paket lezat Anda untuk segera dikirim secepat kilat.</p>
+
+            <div class="details-box">
+                <p style="margin-top: 0;"><strong>📦 DATA PENGIRIMAN:</strong></p>
+                <p>Nama: ${userName}</p>
+                <p>Alamat: ${body.address || 'Cek dashboard'}</p>
+                <p>Produk: ${safeSubscriptionType}</p>
+                <p>Status: <span class="accent">SIAP KIRIM</span></p>
+            </div>
+
+            <p>Tunggu kedatangan kurir kami di depan pintu Anda. Selamat menikmati!</p>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <p style="margin-bottom: 5px;">Total Transaksi:</p>
+                <h2 style="margin: 0; color: #d63031;">${formattedAmount}</h2>
+                <p style="font-size: 12px; color: #b2bec3;">Order Ref: ${safeReference}</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p>© 2026 HungryLater. Satisfy your soul.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+      } else if (isJewelry) {
+        // --- JEWELRY EMAIL TEMPLATE (ELEGANT/ROYAL) ---
+        htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesanan Diterima - eL Royale Jewelry</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; background-color: #ffffff; margin: 0; padding: 20px; color: #333; line-height: 1.8; }
+        .container { max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; padding: 40px; background-color: #ffffff; border-radius: 4px; }
+        .header { text-align: center; border-bottom: 1px double #c5a028; padding-bottom: 30px; margin-bottom: 35px; }
+        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #999; letter-spacing: 2px; text-transform: uppercase; }
+        .details-box { border: 1px solid #c5a028; padding: 30px; margin: 30px 0; background: #fffcf5; }
+        .gold-accent { color: #c5a028; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-weight: normal; font-size: 24px; letter-spacing: 4px;">eL ROYALE JEWELRY</h1>
+            <p style="margin: 10px 0 0; font-size: 14px; font-style: italic; color: #c5a028;">Exquisite Elegance for the Sovereign</p>
+        </div>
+        <div class="content">
+            <p>Selamat siang yang terhormat <strong>${userName}</strong>,</p>
+            <p>Kami dengan bangga mengonfirmasi penerimaan pembayaran Anda untuk perhiasan eksklusif pilihan Anda. Setiap detail sedang kami persiapkan dengan ketelitian tertinggi untuk memastikan kesempurnaan saat tiba di tangan Anda.</p>
+
+            <div class="details-box">
+                <p style="margin-top: 0; text-align: center; border-bottom: 1px solid #c5a028; padding-bottom: 15px;"><strong class="gold-accent">NOTIFIKASI PENGIRIMAN PERSONAL</strong></p>
+                <p><strong>Penerima:</strong> ${userName}</p>
+                <p><strong>Alamat:</strong> ${body.address || 'Terdaftar'}</p>
+                <p><strong>Item:</strong> ${safeSubscriptionType}</p>
+                <p><strong>Investasi:</strong> ${formattedAmount}</p>
+            </div>
+
+            <p>Kami akan segera mengirimkan nomor pelacakan segera setelah asuransi and pengemasan eksklusif selesai diproses.</p>
+        </div>
+        <div class="footer">
+            <p>© 2026 eL Royale Jewelry. Time-Honored Brilliance.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+      } else if (isDrelf) {
+        // --- DRELF EMAIL TEMPLATE (PRESTIGE/CLINICAL) ---
+        htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfirmasi Pesanan - Drelf</title>
+    <style>
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: #f4f7f9; margin: 0; padding: 20px; color: #1e293b; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; border-top: 8px solid #0f172a; padding: 30px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .header { margin-bottom: 30px; text-align: center; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; text-align: center; }
+        .details-box { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 25px; margin: 25px 0; border-radius: 8px; }
+        .title { color: #0f172a; font-weight: 800; font-size: 24px; text-transform: uppercase; letter-spacing: -0.5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">DRELF</div>
+            <p style="margin: 5px 0 0; color: #64748b;">Premium Performance & Health</p>
+        </div>
+        <div class="content">
+            <p>Halo, <strong>${userName}</strong>.</p>
+            <p>Pesanan Drelf Anda telah resmi kami terima. Kepercayaan Anda pada kualitas and performa adalah prioritas kami. Saat ini, pesanan Anda sedang diverifikasi and disiapkan untuk pengiriman prioritas.</p>
+
+            <div class="details-box">
+                <p style="margin-top: 0; font-weight: bold; color: #0f172a;">Ringkasan Pesanan:</p>
+                <p>Nominal: ${formattedAmount}</p>
+                <p>Alamat: ${body.address || 'Terlampir'}</p>
+                <p>Referensi: ${safeReference}</p>
+                <p>Status: <span style="color: #2563eb; font-weight: bold;">Verified</span></p>
+            </div>
+
+            <p>Nomor resi akan otomatis dikirimkan ke email and WhatsApp Anda segera setelah tim logistik melakukan scan pengiriman.</p>
+        </div>
+        <div class="footer">
+            <p>© 2026 Drelf. High-Performance Essentials.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+      } else if (isParfum) {
+        // --- PARFUM EMAIL TEMPLATE (GOLD LUXURY) ---
+        htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesanan Diterima - eL Royale Parfum</title>
+    <style>
+        body { font-family: 'Georgia', serif; background-color: #faf9f6; margin: 0; padding: 20px; color: #1a1a1a; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; border: 1px solid #d4af37; padding: 20px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(212, 175, 55, 0.1); }
+        .header { border-bottom: 2px solid #d4af37; padding-bottom: 20px; margin-bottom: 25px; text-align: center; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 11px; color: #888; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+        .details-box { background-color: #fffaf0; padding: 20px; border: 1px solid #f3e5ab; margin: 25px 0; border-radius: 12px; }
+        .gold-text { color: #d4af37; font-weight: bold; }
+        .button { display: inline-block; background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%); color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 26px; color: #1a1a1a; letter-spacing: 2px;">eL ROYALE PARFUM</h1>
+            <p style="margin: 5px 0 0; color: #d4af37; font-style: italic;">The Essence of Authority</p>
+        </div>
+        <div class="content">
+            <p>Halo Tuan <strong>${userName}</strong>,</p>
+            <p>Terima kasih telah memilih eL Royale Parfum. Kami mengonfirmasi bahwa pembayaran Anda telah berhasil kami terima. Saat ini, mahakarya aroma Anda sedang dalam tahap inspeksi kualitas dan pengemasan eksklusif.</p>
+
+            <div class="details-box">
+                <p style="margin-top: 0; border-bottom: 1px solid #f3e5ab; padding-bottom: 10px;"><strong class="gold-text uppercase">Data Pengiriman</strong></p>
+                <p><strong>Penerima:</strong> ${userName}</p>
+                <p><strong>Alamat:</strong> ${body.address || 'Alamat sesuai sistem'}</p>
+                <p><strong>Produk:</strong> ${safeSubscriptionType}</p>
+                <p><strong>Estimasi Tiba:</strong> 2 - 4 Hari Kerja</p>
+            </div>
+
+            <p>Tim logistik kami akan segera memberitahukan nomor pelacakan segera setelah paket meninggalkan galeri kami.</p>
+            
+            <div style="border-top: 1px solid #f3e5ab; padding-top: 20px; margin-top: 30px; text-align: right;">
+                <p style="margin: 0;">Total Investasi: <strong style="font-size: 20px;">${formattedAmount}</strong></p>
+                <p style="margin: 5px 0 0; font-size: 12px; color: #888;">Referensi: ${safeReference}</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p>© 2026 eL Royale Parfum. All rights reserved.</p>
+            <p>Uniqueness in Every Drop</p>
+        </div>
+    </div>
+</body>
+</html>`;
       } else if (isVIP) {
         htmlContent = `<!DOCTYPE html>
 <html lang="id">
@@ -650,6 +838,206 @@ const handler = async (req) => {
         await Promise.all(notificationPromises);
         console.log(`✅ All WhatsApp notifications processed.`);
       }
+    }
+
+    // --- WHATSAPP NOTIFICATION FOR PARFUM ---
+    if (isParfum) {
+      let waMessage = "";
+      const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
+      const displayProduct = body.product_name || safeSubscriptionType || "eL Royale Parfum";
+      
+      if (type === 'payment_completed' || type === 'success') {
+        waMessage = `Halo Tuan ${userName}! 👋\n\nTerima kasih telah memilih *eL Royale Parfum*.\n\nPembayaran Anda senilai *${formattedAmount}* telah berhasil kami terima. Aroma eksklusif pilihan Anda kini sedang memasuki tahap pengemasan premium.\n\n*DETAIL PENGIRIMAN:*\nNama: ${userName}\nProduk: ${displayProduct}\nAlamat: ${userAddress}\nRef: ${safeReference}\n\nKami akan segera menginformasikan nomor resi setelah paket dikirim.\n\nTerima kasih atas kepercayaan Anda.\n\n*eL Royale Parfum*\n_The Essence of Authority_`;
+      } else if (type === 'payment_created' || type === 'created') {
+        waMessage = `Halo Tuan ${userName}! 👋\n\nPesanan *eL Royale Parfum* Anda telah berhasil dibuat senilai *${formattedAmount}*.\n\n*DATA PESANAN:*\nNama: ${userName}\nAlamat: ${userAddress}\nTotal: ${formattedAmount}\nRef: ${safeReference}\n\nSilakan selesaikan pembayaran agar kami dapat segera memproses aroma eksklusif Anda hari ini.\n\nJika butuh bantuan, silakan balas pesan ini.\n\n*eL Royale Parfum*`;
+      }
+
+      const notificationPromises = [];
+      const userPhone = body.userPhone || body.phone || body.phone_number || body.ph;
+      if (userPhone && waMessage) {
+        let cleanPhone = userPhone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+        else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+
+        console.log(`📱 [WATZAPP] Queuing Parfum Customer Message to ${cleanPhone}`);
+        notificationPromises.push(
+          fetch(WAPI_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: cleanPhone, message: waMessage })
+          }).then(res => res.text())
+            .catch(err => console.error(`❌ [WATZAPP] Customer Err:`, err))
+        );
+      }
+
+      // Admin Notification
+      if (type === 'payment_completed' || type === 'success' || type === 'payment_created' || type === 'created') {
+        const adminPhones = ['6281383838013', '6285664733499'];
+        const adminMessage = `💰 *PARFUM SALES NOTIFICATION (${type})*\n\nNama: ${userName}\nWA: ${userPhone || 'N/A'}\nTotal: ${formattedAmount}\nRef: ${safeReference}\nAlamat: ${userAddress}\nProduk: ${displayProduct}`;
+
+        for (const adminPhone of adminPhones) {
+          notificationPromises.push(
+            fetch(WAPI_URL, {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: adminPhone, message: adminMessage })
+            }).then(res => res.text())
+              .catch(err => console.error(`❌ [WATZAPP] Admin ${adminPhone} Err:`, err))
+          );
+        }
+      }
+
+      if (notificationPromises.length > 0) await Promise.all(notificationPromises);
+    }
+
+    // --- WHATSAPP NOTIFICATION FOR JEWELRY ---
+    if (isJewelry) {
+      let waMessage = "";
+      const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
+      const displayProduct = body.product_name || safeSubscriptionType || "eL Royale Jewelry";
+      
+      if (type === 'payment_completed' || type === 'success') {
+        waMessage = `Halo ${userName}! 💎✨\n\nSelamat! Pembayaran Anda senilai *${formattedAmount}* untuk koleksi *eL Royale Jewelry* telah kami terima.\n\nMahakarya pilihan Anda sedang kami persiapkan dengan ketelitian tertinggi untuk memastikan kesempurnaan saat tiba di tangan Anda.\n\n*DATA PENGIRIMAN:*\nNama: ${userName}\nProduk: ${displayProduct}\nAlamat: ${userAddress}\nRef: ${safeReference}\n\nKami akan segera menginformasikan nomor resi asuransi pengiriman setelah paket siap dijemput kurir khusus kami.\n\nTerima kasih telah memilih kemewahan sejati.\n\n*eL Royale Jewelry*\n_Exquisite Elegance_`;
+      } else if (type === 'payment_created' || type === 'created') {
+        waMessage = `Halo ${userName}! 💎\n\nPesanan koleksi *eL Royale Jewelry* Anda telah berhasil dibuat senilai *${formattedAmount}*.\n\n*DETAIL PESANAN:*\nNama: ${userName}\nAlamat: ${userAddress}\nTotal: ${formattedAmount}\nRef: ${safeReference}\n\nSilakan selesaikan pembayaran untuk mengamankan item eksklusif ini. Kami akan langsung memproses pengemasan setelah verifikasi.\n\nJika ada pertanyaan mengenai metode pembayaran, silakan hubungi kami.\n\n*eL Royale Jewelry*`;
+      }
+
+      const notificationPromises = [];
+      const userPhone = body.userPhone || body.phone || body.phone_number || body.ph;
+      if (userPhone && waMessage) {
+        let cleanPhone = userPhone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+        else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+
+        console.log(`📱 [WATZAPP] Queuing Jewelry Customer Message to ${cleanPhone}`);
+        notificationPromises.push(
+          fetch(WAPI_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: cleanPhone, message: waMessage })
+          }).then(res => res.text())
+            .catch(err => console.error(`❌ [WATZAPP] Customer Err:`, err))
+        );
+      }
+
+      // Admin Notification
+      if (type === 'payment_completed' || type === 'success' || type === 'payment_created' || type === 'created') {
+        const adminPhones = ['6281383838013', '6285664733499'];
+        const adminMessage = `💍 *JEWELRY ORDER NOTIFICATION (${type})*\n\nNama: ${userName}\nWA: ${userPhone || 'N/A'}\nTotal: ${formattedAmount}\nRef: ${safeReference}\nAlamat: ${userAddress}\nProduk: ${displayProduct}`;
+
+        for (const adminPhone of adminPhones) {
+          notificationPromises.push(
+            fetch(WAPI_URL, {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: adminPhone, message: adminMessage })
+            }).then(res => res.text())
+              .catch(err => console.error(`❌ [WATZAPP] Admin ${adminPhone} Err:`, err))
+          );
+        }
+      }
+
+      if (notificationPromises.length > 0) await Promise.all(notificationPromises);
+    }
+
+    // --- WHATSAPP NOTIFICATION FOR DRELF ---
+    if (isDrelf) {
+      let waMessage = "";
+      const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
+      const displayProduct = body.product_name || safeSubscriptionType || "Drelf Store";
+      
+      if (type === 'payment_completed' || type === 'success') {
+        waMessage = `Halo ${userName}! ⚡️\n\nPembayaran Anda untuk *Drelf* senilai *${formattedAmount}* telah kami terima.\n\nProduk performa tinggi Anda sedang disiapkan oleh tim logistik untuk pengiriman prioritas.\n\n*RINGKASAN PENGIRIMAN:*\nNama: ${userName}\nProduk: ${displayProduct}\nAlamat: ${userAddress}\nRef: ${safeReference}\n\nNomor resi akan otomatis dikirimkan ke WhatsApp Anda segera setelah tim logistik melakukan scan pengiriman.\n\nStay Sharp,\n*Drelf Team*`;
+      } else if (type === 'payment_created' || type === 'created') {
+        waMessage = `Halo ${userName}! ⚡️\n\nPesanan *Drelf* Anda telah berhasil dibuat senilai *${formattedAmount}*.\n\n*DATA PESANAN:*\nNama: ${userName}\nAlamat: ${userAddress}\nTotal: ${formattedAmount}\nRef: ${safeReference}\n\nSelesaikan pembayaran sekarang untuk memastikan pengiriman prioritas hari ini.\n\n*Drelf Store*`;
+      }
+
+      const notificationPromises = [];
+      const userPhone = body.userPhone || body.phone || body.phone_number || body.ph;
+      if (userPhone && waMessage) {
+        let cleanPhone = userPhone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+        else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+
+        console.log(`📱 [WATZAPP] Queuing Drelf Customer Message to ${cleanPhone}`);
+        notificationPromises.push(
+          fetch(WAPI_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: cleanPhone, message: waMessage })
+          }).then(res => res.text())
+            .catch(err => console.error(`❌ [WATZAPP] Customer Err:`, err))
+        );
+      }
+
+      // Admin Notification
+      if (type === 'payment_completed' || type === 'success' || type === 'payment_created' || type === 'created') {
+        const adminPhones = ['6281383838013', '6285664733499'];
+        const adminMessage = `🛡️ *DRELF ORDER NOTIFICATION (${type})*\n\nNama: ${userName}\nWA: ${userPhone || 'N/A'}\nTotal: ${formattedAmount}\nRef: ${safeReference}\nAlamat: ${userAddress}\nProduk: ${displayProduct}`;
+
+        for (const adminPhone of adminPhones) {
+          notificationPromises.push(
+            fetch(WAPI_URL, {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: adminPhone, message: adminMessage })
+            }).then(res => res.text())
+              .catch(err => console.error(`❌ [WATZAPP] Admin ${adminPhone} Err:`, err))
+          );
+        }
+      }
+
+      if (notificationPromises.length > 0) await Promise.all(notificationPromises);
+    }
+
+    // --- WHATSAPP NOTIFICATION FOR HUNGRYLATER ---
+    if (isHungry) {
+      let waMessage = "";
+      const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
+      const displayProduct = body.product_name || safeSubscriptionType || "HungryLater";
+      
+      if (type === 'payment_completed' || type === 'success') {
+        waMessage = `Halo ${userName}! 🔥\n\nKabar gembira! Pembayaran Anda senilai *${formattedAmount}* telah kami terima dengan hangat.\n\nTim *HungryLater* sedang menyiapkan paket diet lezat Anda untuk segera dikirim secepat kilat supaya program kakak tidak terhambat!\n\n*📦 DATA PENGIRIMAN:*\nNama: ${userName}\nProduk: ${displayProduct}\nAlamat: ${userAddress}\nStatus: *SIAP KIRIM*\nRef: ${safeReference}\n\nTunggu kedatangan kurir kami di depan pintu Anda. Selamat bertransformasi!\n\n*HungryLater*\n_Your Hunger Ends Here_`;
+      } else if (type === 'payment_created' || type === 'created') {
+        waMessage = `Halo ${userName}! 🔥\n\nPesanan *HungryLater* Anda telah berhasil dibuat senilai *${formattedAmount}*.\n\n*DATA PESANAN:*\nNama: ${userName}\nAlamat: ${userAddress}\nTotal: ${formattedAmount}\nRef: ${safeReference}\n\nSegera selesaikan pembayaran agar paket akselerasi diet Anda bisa kami kirimkan hari ini juga.\n\n*HungryLater*`;
+      }
+
+      const notificationPromises = [];
+      const userPhone = body.userPhone || body.phone || body.phone_number || body.ph;
+      if (userPhone && waMessage) {
+        let cleanPhone = userPhone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+        else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+
+        console.log(`📱 [WATZAPP] Queuing HungryLater Customer Message to ${cleanPhone}`);
+        notificationPromises.push(
+          fetch(WAPI_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: cleanPhone, message: waMessage })
+          }).then(res => res.text())
+            .catch(err => console.error(`❌ [WATZAPP] Customer Err:`, err))
+        );
+      }
+
+      // Admin Notification
+      if (type === 'payment_completed' || type === 'success' || type === 'payment_created' || type === 'created') {
+        const adminPhones = ['6281383838013', '6285664733499'];
+        const adminMessage = `🥗 *HUNGRYLATER ORDER NOTIFICATION (${type})*\n\nNama: ${userName}\nWA: ${userPhone || 'N/A'}\nTotal: ${formattedAmount}\nRef: ${safeReference}\nAlamat: ${userAddress}\nProduk: ${displayProduct}`;
+
+        for (const adminPhone of adminPhones) {
+          notificationPromises.push(
+            fetch(WAPI_URL, {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: adminPhone, message: adminMessage })
+            }).then(res => res.text())
+              .catch(err => console.error(`❌ [WATZAPP] Admin ${adminPhone} Err:`, err))
+          );
+        }
+      }
+
+      if (notificationPromises.length > 0) await Promise.all(notificationPromises);
     }
 
     // --- NEW: WHATSAPP BCC FOR ALL PHYSICAL PRODUCTS (To Admin Group) ---

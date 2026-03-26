@@ -198,10 +198,10 @@ serve(async (req) => {
   try {
     // --- 1. INITIALIZE & VALIDATE INPUT ---
     const body = await req.json();
-    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate, fbc, fbp, userId: bodyUserId, clientIp } = body;
+    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate, fbc, fbp, ctwa_id, userId: bodyUserId, clientIp } = body;
 
     console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod}`);
-    console.log(`🕵️ Tracking Data - FBC: ${fbc}, FBP: ${fbp}, IP: ${clientIp || 'Auto'}`);
+    console.log(`🕵️ Tracking Data - FBC: ${fbc}, FBP: ${fbp}, CTWA: ${ctwa_id || 'N/A'}, IP: ${clientIp || 'Auto'}`);
 
     // --- AUTO-ADD TO MAILKETING LIST (LEAD CAPTURE) ---
     try {
@@ -335,7 +335,7 @@ serve(async (req) => {
     const supabase = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
 
     // --- 3.5. CTWA ATTRIBUTION LOOKUP ---
-    let ctwaClid = null;
+    let ctwaClid = ctwa_id || null;
     if (product.physical && phoneNumber) {
       try {
         let cleanPhone = phoneNumber.replace(/\D/g, '');

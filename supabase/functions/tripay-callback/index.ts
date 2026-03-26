@@ -328,9 +328,17 @@ serve(async (req) => {
         const displayAmount = capiValue;
         const eventName = 'Purchase';
 
-        // 🎯 FITFACTOR PIXEL OVERRIDE
+        // 🎯 BRAND PIXEL OVERRIDES
         if (pName.toLowerCase().includes('fitfactor')) {
           capiPixelId = '1797660474333865';
+        } else if (pName.toLowerCase().includes('parfum')) {
+          capiPixelId = '1315644686235886';
+        } else if (pName.toLowerCase().includes('hungry')) {
+          capiPixelId = '952231486339176';
+        } else if (pName.toLowerCase().includes('drelf')) {
+          capiPixelId = '1749197952320359';
+        } else if (pName.toLowerCase().includes('jewelry')) {
+          capiPixelId = '874165095242407';
         }
 
         console.log(`   - CAPI Pixel Selected: ${capiPixelId}`);

@@ -61,7 +61,7 @@ async function handleTripayWebhook(request, env) {
   const signature = request.headers.get('X-Callback-Signature');
   
   // Verify Tripay signature
-  const privateKey = env.TRIPAY_PRIVATE_KEY || 'DEV-Wr3eLhJGnGECQ1WsRGh9fvNjVZi6vLKpW52ksKmS';
+  const privateKey = env.TRIPAY_PRIVATE_KEY;
   const expectedSignature = await generateHMAC(privateKey, body);
   
   if (signature !== expectedSignature) {
@@ -124,7 +124,7 @@ async function handleMootaWebhook(request, env) {
   }
 
   // Verify Moota webhook token
-  const webhookToken = env.MOOTA_WEBHOOK_SECRET || 'FPtVHJck';
+  const webhookToken = env.MOOTA_WEBHOOK_SECRET;
   const providedToken = webhookData.token || request.headers.get('X-Webhook-Token');
   
   if (providedToken !== webhookToken) {
@@ -243,7 +243,7 @@ async function handleTripayCreatePayment(request, env) {
       headers: {
         'Authorization': `Bearer ${authToken}`,
         'Content-Type': 'application/json',
-        'apikey': env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5scmdkaHBtc2l0dHV3aWlpbmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NDM2MDUsImV4cCI6MjA4OTgwMzYwNX0.2zDvAe28Ho3BWUZC2Sxk7-PopwW0do2139xelPgEwLo'
+        'apikey': env.SUPABASE_ANON_KEY
       },
       body: JSON.stringify({
         subscriptionType,
@@ -319,7 +319,7 @@ async function handleMacrodroidWebhook(request, env) {
   const waApiUrl = "https://watzapp.web.id/api/message";
   
   // Get WA API Key from Cloudflare Worker environment variables, fallback to default
-  const waApiKey = env.WA_API_KEY || "4f46b29bf8e0e4443d9e631007324b29199443786d8b4befab3a2d529208583f"; 
+  const waApiKey = env.WA_API_KEY; 
   
   const payload = {
     token: waApiKey, 
