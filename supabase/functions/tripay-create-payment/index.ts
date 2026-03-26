@@ -34,24 +34,6 @@ const productCatalog = {
     requiresAuth: true,
     physical: false
   },
-  '10_credit': {
-    name: 'Photo Credit - 10 Credits',
-    price: 100000,
-    requiresAuth: true,
-    physical: false
-  },
-  '50_credit': {
-    name: 'Photo Credit - 50 Credits',
-    price: 450000,
-    requiresAuth: true,
-    physical: false
-  },
-  '100_credit': {
-    name: 'Photo Credit - 100 Credits',
-    price: 1000000,
-    requiresAuth: true,
-    physical: false
-  },
 
   // Physical/Public Products (do not require authentication)
   'webinar_el': {
@@ -252,11 +234,16 @@ serve(async (req) => {
     }
     // --- UNIVERSAL PRODUCT NAME FORMATTING ---
     let formattedProductName = body.productName || product.name;
-    // If the product is physical and the name doesn't already seem to have a quantity, format it.
-    if (product.physical && !formattedProductName.includes('(x')) {
+    
+    // For physical products, we strictly prioritize the name passed from frontend if available
+    if (product.physical && body.productName) {
+      formattedProductName = body.productName;
+      console.log(`📦 Physical Product Detected - Using Frontend Name: ${formattedProductName}`);
+    } else if (product.physical && !formattedProductName.includes('(x')) {
       formattedProductName = `${formattedProductName} (x${quantity})`;
     }
-    console.log(`Processing order for: ${formattedProductName}`);
+    
+    console.log(`Processing order for: ${formattedProductName} (ID: ${subscriptionType})`);
     // --- 2. AUTHENTICATION (IF REQUIRED) ---
     let userId = bodyUserId || null; // Use passed userId if available, otherwise null
     let user = null;
@@ -363,12 +350,12 @@ serve(async (req) => {
     const ipAddress = clientIp || req.headers.get('x-forwarded-for') || req.headers.get('remote-addr');
     const userAgent = req.headers.get('user-agent');
     let dbRecordId = null;
-
+    
     // Validate affiliateRef is a valid UUID if present (basic check)
     const validAffiliateId = affiliateRef && affiliateRef.length > 20 ? affiliateRef : null;
-
+    
     if (product.physical) {
-      console.log('Inserting into global_product (UNPAID)');
+      console.log(`📝 Inserting into global_product (UNPAID) for ${userEmail}`);
       const { data, error } = await supabase.from('global_product').insert({
         name: userName,
         phone: phoneNumber,
@@ -380,18 +367,23 @@ serve(async (req) => {
         tripay_reference: paymentMethod === 'BCA_MANUAL' ? "MANUAL-" + merchantRef : null,
         merchant_ref: merchantRef,
         user_id: userId,
-        affiliate_id: validAffiliateId, // Save affiliate ID
-        commission_rate: commissionRate || 0.30, // Default to 30% if not provided
+        affiliate_id: validAffiliateId,
+        commission_rate: commissionRate || 0.30,
         fbc: fbc || null,
         fbp: fbp || null,
         ip_address: ipAddress,
         user_agent: userAgent,
         ctwa_clid: ctwaClid
       }).select('id').single();
-      if (error) throw new Error(`Database insert (global_product) failed: ${error.message}`);
+      
+      if (error) {
+        console.error('❌ Database insert (global_product) FAILED:', error);
+        throw new Error(`Database insert (global_product) failed: ${error.message}`);
+      }
       dbRecordId = data.id;
+      console.log(`✅ Success: Physical record created with ID: ${dbRecordId}`);
     } else if (product.requiresAuth) {
-      console.log('Inserting into waiting_payment (pending)');
+      console.log(`📝 Inserting into waiting_payment (pending) for ${userEmail}`);
       const { data, error } = await supabase.from('waiting_payment').insert({
         user_id: userId,
         user_email: userEmail || user.email,
@@ -404,13 +396,18 @@ serve(async (req) => {
         tripay_reference: paymentMethod === 'BCA_MANUAL' ? "MANUAL-" + merchantRef : null,
         ip_address: ipAddress,
         user_agent: userAgent,
-        affiliate_id: validAffiliateId, // Save affiliate ID
-        commission_rate: commissionRate || 0.30 // Default to 30%
+        affiliate_id: validAffiliateId,
+        commission_rate: commissionRate || 0.30
       }).select('id').single();
-      if (error) throw new Error(`Database insert (waiting_payment) failed: ${error.message}`);
+      
+      if (error) {
+        console.error('❌ Database insert (waiting_payment) FAILED:', error);
+        throw new Error(`Database insert (waiting_payment) failed: ${error.message}`);
+      }
       dbRecordId = data.id;
+      console.log(`✅ Success: Subscription record created with ID: ${dbRecordId}`);
     }
-    console.log(`✅ Pre-payment DB record created with ID: ${dbRecordId} for merchant_ref: ${merchantRef}`);
+    console.log(`🚀 Pre-payment DB record created with ID: ${dbRecordId} for merchant_ref: ${merchantRef}`);
 
     // --- 5. BRANCHING LOGIC: PAYPAL VS TRIPAY ---
     if (paymentMethod === 'PAYPAL') {

@@ -16,14 +16,17 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
 
-// 🎯 PIXEL EL VISION (META CAPI)
 const PIXEL_ID_EL_VISION = '326442656911776';
 const PIXEL_ID_FITFACTOR = '1797660474333865';
 const PIXEL_ID_PARFUM = '1315644686235886';
+const PIXEL_ID_JEWELRY = '952231486339176'; // Also shared by HungryLater
+const PIXEL_ID_DARKFEMININE = '3319324491540889';
 
 const PIXEL_SECRET_NAME = 'FACEBOOK_ACCESS_TOKEN';
 const PIXEL_SECRET_FITFACTOR = 'CAPI_FITFACTOR';
 const PIXEL_SECRET_PARFUM = 'CAPI_PARFUM';
+const PIXEL_SECRET_JEWELRY = 'CAPI_JEWELRY';
+const PIXEL_SECRET_DARKFEMININE = 'METACAPI';
 
 // Initialize Supabase Client for Logging (Global Scope for Warm Starts)
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -56,6 +59,10 @@ Deno.serve(async (req) => {
     FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_FITFACTOR);
   } else if (resolvedPixelId === PIXEL_ID_PARFUM) {
     FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_PARFUM);
+  } else if (resolvedPixelId === PIXEL_ID_JEWELRY) {
+    FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_JEWELRY);
+  } else if (resolvedPixelId === PIXEL_ID_DARKFEMININE) {
+    FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_DARKFEMININE);
   } else {
     FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_NAME);
   }
