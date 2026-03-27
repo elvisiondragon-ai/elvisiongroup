@@ -114,7 +114,7 @@ serve(async (req) => {
           password: 'DfUser' + Math.floor(Math.random() * 1000000),
           user_metadata: { full_name: order.name, phone: order.phone }
         });
-        await supabase.from('reviews_darkfeminine').insert({
+        await supabase.from('darkfeminine_reviews').insert({
           user_email: order.email,
           name: order.name,
           comment: null,

@@ -230,12 +230,13 @@ serve(async (req) => {
             console.log('   - ✅ Auth user verified/created for DF. They can use Forgot Password to login.');
           }
 
+          // 2. Insert into darkfeminine_reviews (Null comment initially)
           // Detect country from pName if possible
           let defaultCountry = 'ID';
           if (pName.includes('SG')) defaultCountry = 'SG';
           if (pName.includes('EN')) defaultCountry = 'US';
-          // 2. Insert into reviews_darkfeminine (Null comment initially)
-          const { error: reviewErr } = await supabase.from('reviews_darkfeminine').insert({
+
+          const { error: reviewErr } = await supabase.from('darkfeminine_reviews').insert({
             user_email: globalProductTx.email,
             name: globalProductTx.name,
             comment: null,
@@ -244,9 +245,9 @@ serve(async (req) => {
           });
 
           if (reviewErr && !reviewErr.message.includes('duplicate key')) {
-            console.error('   - ⚠️ Error inserting into reviews_darkfeminine:', reviewErr.message);
+            console.error('   - ⚠️ Error inserting into darkfeminine_reviews:', reviewErr.message);
           } else {
-            console.log('   - ✅ Inserted default review into reviews_darkfeminine');
+            console.log('   - ✅ Inserted default review into darkfeminine_reviews');
           }
         } catch (dfErr) {
           console.error('   - ⚠️ Failed to auto-insert DF review/profile:', dfErr);
