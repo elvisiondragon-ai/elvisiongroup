@@ -1047,7 +1047,9 @@ const handler = async (req) => {
       const bccGroupId = "120363401536138177@g.us";
       const bccSenderNumber = "+62 895-3256-33487";
       
-      const bccMessage = `Penerima :
+      const bccMessage = `Ref:${safeReference} (Gudang Silahkan Kirimkan Resi dengan format) Resi_cs_${safeReference} JNT 12312412 (contoh) saya akan langsung mengirimkan data itu ke customer
+
+Penerima :
 ${userName}
 ${userPhone}
 
