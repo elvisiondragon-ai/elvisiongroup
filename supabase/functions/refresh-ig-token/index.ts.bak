@@ -71,11 +71,10 @@ serve(async () => {
                 continue;
             }
 
-            // Valid! Page Token tidak pernah expire — update expiry ke 2099 dan catat waktu check
+            // Valid! Update refreshed_at to mark we checked it recently
             const { error: updateErr } = await supabase
                 .from("autochat_clients")
                 .update({
-                    ig_token_expires_at: new Date('2099-01-01T00:00:00.000Z').toISOString(),
                     ig_token_refreshed_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                 })

@@ -283,23 +283,16 @@ async function processFulfillment(order: any) {
     else if (/jewelry/i.test(pName)) pixelId = '874165095242407';
     else if (/rumah|apartemen|dreamhome/i.test(pName)) pixelId = '1572796670108871';
 
-    // FBC fallback: extract fbclid from page_url if order.fbc is missing
-    let resolvedFbc = order.fbc || null;
-    if (!resolvedFbc && order.page_url) {
-      try {
-        const urlObj = new URL(order.page_url);
-        const fbclid = urlObj.searchParams.get('fbclid');
-        if (fbclid) resolvedFbc = `fb.1.${Date.now()}.${fbclid}`;
-      } catch (_) {}
-    }
+    const testEventCode = Deno.env.get('CAPI_TEST') || null;
 
     await supabase.functions.invoke('capi-universal', {
       body: {
         pixelId, eventName: 'Purchase', action_source: 'website',
         eventSourceUrl: order.page_url || null,
-        userData: { email: order.email, ph: order.phone, fn: order.name?.split(' ')[0], fbc: resolvedFbc, fbp: order.fbp, client_ip_address: order.ip_address, client_user_agent: order.user_agent, ctwa_clid: order.ctwa_clid },
+        userData: { email: order.email, ph: order.phone, fn: order.name?.split(' ')[0], fbc: order.fbc, fbp: order.fbp, client_ip_address: order.ip_address, client_user_agent: order.user_agent, ctwa_clid: order.ctwa_clid },
         customData: { value: order.amount, currency: 'IDR', content_name: pName, order_id: order.reference },
-        eventId: order.reference
+        eventId: order.reference,
+        test_event_code: testEventCode
       }
     });
     await supabase.from('global_product').update({ capi_purchase_sent: true }).eq('id', order.id);

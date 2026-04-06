@@ -179,16 +179,31 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "tl"
   },
   'ebook_uangpanas': {
-    subject: "Akses Download: Sistem Uang Panas (Lead Magnet + Audio)",
-    downloadLink: "https://drive.google.com/file/d/1R_AEFpjaxBwYnxLGevVPKHf548pMn9gE/view?usp=sharing",
+    subject: "Akses Download: Sistem Uang Panas",
+    downloadLink: "https://drive.google.com/drive/folders/184nCdZgEMj61JLUXyXt6pPU-7XOMMljd?usp=sharing",
     color: "#b91c1c",
     accentColor: "#facc15",
     title: "Sistem Uang Panas Diaktifkan!",
-    description: "Terima kasih! Anda telah mengambil langkah cerdas. Berikut adalah akses ke 'senjata' rahasia Anda.",
+    description: "Terima kasih! Anda telah mengambil langkah cerdas. Berikut adalah akses ke Ebook Uang Panas Anda.",
     instructions: [
       "Download Ebook & Lead Magnet Pack segera.",
-      "Dengarkan Audio 'Money Magnet' setiap pagi dan malam.",
-      "Pelajari modul Affiliate untuk mulai hasilkan komisi 50%."
+      "Pelajari modul Affiliate untuk mulai hasilkan komisi 50%.",
+      "Garansi uang kembali berlaku 30 hari jika tidak ada manfaat."
+    ],
+    lang: "id"
+  },
+  'ebook_uangpanas_bundle': {
+    subject: "Akses Download: Sistem Uang Panas + Audio Rezeki",
+    downloadLink: "https://drive.google.com/drive/folders/1gleXB_unqviCcBPJ1TOZNfkbwjzMGCzd?usp=share_link",
+    color: "#b91c1c",
+    accentColor: "#facc15",
+    title: "Uang Panas + Audio Rezeki Diaktifkan!",
+    description: "Terima kasih! Anda mendapat akses penuh Ebook + 3 Audio Rezeki Bio-Energetik.",
+    instructions: [
+      "Download Ebook & semua file Audio Rezeki segera.",
+      "Dengarkan Audio Rezeki setiap pagi dan malam (wajib earphone).",
+      "Pelajari modul Affiliate untuk mulai hasilkan komisi 50%.",
+      "Garansi uang kembali berlaku jika tidak ada manfaat setelah 30 hari."
     ],
     lang: "id"
   },
@@ -421,6 +436,7 @@ function getProductKey(productName: string): string {
   if (lower.includes('health') || lower.includes('pemulihan')) return 'ebook_health20';
   if (lower.includes('percayadiri') || lower.includes('pria alpha') || lower.includes('alpha')) return 'ebook_percayadiri';
   if (lower.includes('feminine') || lower.includes('feminin') || lower.includes('magnetism') || lower.includes('dark feminine') || lower.includes('dark feminin')) return 'ebook_feminine';
+  if (lower.includes('uangpanas_bundle') || lower.includes('uang panas bundle')) return 'ebook_uangpanas_bundle';
   if (lower.includes('uangpanas') || lower.includes('uang panas')) return 'ebook_uangpanas';
   if (lower.includes('vip') || lower.includes('3000') || lower.includes('coaching')) return 'vip_coaching';
   if (lower.includes('webinar_el') || lower.includes('jalur langit') || lower.includes('webinar')) return 'webinar_el';
@@ -511,11 +527,10 @@ const handler = async (req: Request) => {
 
     const amount = body.amount || 0;
     const reference = body.reference || 'N/A';
-    const productNameInput = body.subscriptionType || body.productName || 'Unknown Product';
+    const productNameInput = body.productName || body.subscriptionType || 'Unknown Product';
     const userName = body.userName || recipientEmail.split('@')[0];
     const currency = body.currency || 'IDR';
     const affiliateEmail = body.affiliateEmail;
-
     // Determine Product Template
     const productKey = getProductKey(productNameInput);
     const template = PRODUCT_TEMPLATES[productKey];

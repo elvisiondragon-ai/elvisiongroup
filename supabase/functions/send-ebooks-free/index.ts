@@ -92,6 +92,23 @@ const FREE_EBOOK_TEMPLATES: Record<string, any> = {
         waMessage: (name: string, link: string) =>
             `Halo kak ${name}, Silahkan Ambil Ebook Gratis Strategi Saham Ultimate:\n${link}\n\nTolong ketik *Ok* agar saya bisa hubungi kakak untuk update data whale terbaru ya.`,
         lang: "id"
+    },
+    'free_ebook_uangpanas': {
+        subject: "Ebook Gratis: 3 Rahasia Rezeki - Khusus Untukmu!",
+        downloadLink: "https://drive.google.com/drive/folders/1x3YOQDLlEnYgd-6x9elGAw_14yAaknyL?usp=sharing",
+        color: "#c0392b",
+        accentColor: "#f39c12",
+        title: "Ebook Gratis: 3 Rahasia Rezeki",
+        description: "Halo! Berikut adalah link download Ebook Gratis '3 Rahasia Rezeki yang Tidak Diajarkan di Sekolah' yang kamu minta. Selamat membaca dan semoga rezekimu terus mengalir!",
+        instructions: [
+            "Klik tombol di bawah untuk mengakses ebook gratis kamu.",
+            "Baca dengan sungguh-sungguh, ada 3 rahasia rezeki di dalamnya.",
+            "Tolong ketik <strong>Ok</strong> agar kami bisa menghubungi kamu kedepannya ya."
+        ],
+        btnText: "DOWNLOAD EBOOK GRATIS SEKARANG",
+        waMessage: (name: string, link: string) =>
+            `Halo kak ${name}! 🎁\n\nSilahkan ambil Ebook Gratis:\n*"3 Rahasia Rezeki yang Tidak Diajarkan di Sekolah"*\n\n${link}\n\nTolong ketik *Ok* agar saya bisa hubungi kakak kedepannya ya.\n\nSemoga rezekinya mengalir deras! 🌊`,
+        lang: "id"
     }
 };
 
@@ -104,11 +121,13 @@ function getProductKey(lang: string): string {
     // ebookfree02: free_ebook_darkfeminine_en
     // ebookfree03: free_ebook_darkfeminine_ph
     // ebookfree04: free_ebook_saham
+    // ebookfree05: free_ebook_uangpanas
     const skuMap: Record<string, string> = {
         'ebookfree01': 'free_ebook_darkfeminine_id',
         'ebookfree02': 'free_ebook_darkfeminine_en',
         'ebookfree03': 'free_ebook_darkfeminine_ph',
-        'ebookfree04': 'free_ebook_saham'
+        'ebookfree04': 'free_ebook_saham',
+        'ebookfree05': 'free_ebook_uangpanas'
     };
     
     const skuMatch = lowerLang.match(/^ebookfree?0?(\d+)$/);
@@ -121,6 +140,8 @@ function getProductKey(lang: string): string {
         case 'en': return 'free_ebook_darkfeminine_en';
         case 'ph': return 'free_ebook_darkfeminine_ph';
         case 'saham': return 'free_ebook_saham';
+        case 'free_ebook_uangpanas':
+        case 'uangpanas': return 'free_ebook_uangpanas';
         case 'id':
         default: return 'free_ebook_darkfeminine_id';
     }

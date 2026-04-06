@@ -331,7 +331,7 @@ async function handleIgMessage(
         matchedTrigger = triggers.find((t) => {
             const keywordStr = (t.keyword as string).toLowerCase().trim();
             const isMatch = t.is_any_word || searchStr.includes(keywordStr) || rawText.toLowerCase().includes(keywordStr) || rawPayload.toLowerCase().includes(keywordStr);
-            const isChatTrigger = !t.trigger_source || t.trigger_source === 'chat_ig_fb';
+            const isChatTrigger = !t.trigger_source || t.trigger_source === 'chat_ig_fb' || t.trigger_source === 'komentar_ig_fb';
             return isMatch && isChatTrigger;
         });
 
@@ -341,18 +341,7 @@ async function handleIgMessage(
         }
     }
 
-    if (!matchedTrigger) {
-        // No trigger matched — forward to Renata AI if enabled
-        if (client.ig_autoreply_enabled) {
-            console.log(`[IG DM] No trigger match for "${messageText}" — forwarding to Renata AI`);
-            fetch("https://api.elvisiongroup.com/api/meta-dm", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ platform: "instagram", senderId, messageText, token, igUserId })
-            }).catch((e: Error) => console.error("[IG DM] Renata forward error:", e.message));
-        }
-        return;
-    }
+    if (!matchedTrigger) return; // Silent exit if no match
 
     const profile = await getMetaUserProfile(senderId, "instagram", token);
     const keyword = matchedTrigger.keyword as string;
@@ -528,7 +517,7 @@ async function handleFbMessage(
         matchedTrigger = triggers.find((t) => {
             const keywordStr = (t.keyword as string).toLowerCase().trim();
             const isMatch = t.is_any_word || searchStr.includes(keywordStr) || rawText.toLowerCase().includes(keywordStr) || rawPayload.toLowerCase().includes(keywordStr);
-            const isChatTrigger = !t.trigger_source || t.trigger_source === 'chat_ig_fb';
+            const isChatTrigger = !t.trigger_source || t.trigger_source === 'chat_ig_fb' || t.trigger_source === 'komentar_ig_fb';
             return isMatch && isChatTrigger;
         });
 
@@ -538,18 +527,7 @@ async function handleFbMessage(
         }
     }
 
-    if (!matchedTrigger) {
-        // No trigger matched — forward to Renata AI if enabled
-        if (client.fb_autoreply_enabled) {
-            console.log(`[FB DM] No trigger match for "${messageText}" — forwarding to Renata AI`);
-            fetch("https://api.elvisiongroup.com/api/meta-dm", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ platform: "facebook", senderId, messageText, token })
-            }).catch((e: Error) => console.error("[FB DM] Renata forward error:", e.message));
-        }
-        return;
-    }
+    if (!matchedTrigger) return; // Silent exit
 
     const profile = await getMetaUserProfile(senderId, "facebook", token);
     const keyword = matchedTrigger.keyword as string;

@@ -32,7 +32,7 @@ const PIXEL_SECRET_JEWELRY = 'CAPI_JEWELRY';
 const PIXEL_SECRET_HUNGRY = 'CAPI_HUNGRY';
 const PIXEL_SECRET_DRELF = 'CAPI_DRELF';
 const PIXEL_SECRET_DARKFEMININE = 'METACAPI';
-const PIXEL_SECRET_DREAMHOME = 'CAPI_HOME';
+const PIXEL_SECRET_DREAMHOME = 'CAPI_TEST';
 
 // Initialize Supabase Client for Logging (Global Scope for Warm Starts)
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';

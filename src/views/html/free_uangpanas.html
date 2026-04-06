@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FREE: 3 Rahasia Rezeki yang Tidak Diajarkan di Sekolah</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Roboto:wght@300;400;500;700&display=swap');
+
+        :root {
+            --red: #c0392b;
+            --gold: #f39c12;
+            --dark: #0d0d0d;
+            --gray: #1a1a2e;
+            --cream: #fdf6e3;
+            --text: #2c3e50;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #111;
+            color: white;
+            line-height: 1.7;
+        }
+
+        /* ====== COVER ====== */
+        .cover {
+            background: linear-gradient(160deg, #0d0d0d 0%, #1a0000 50%, #0d0d0d 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(192,57,43,0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .free-badge {
+            background: var(--gold);
+            color: #000;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            padding: 8px 24px;
+            border-radius: 30px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        .cover h1 {
+            font-family: 'Merriweather', serif;
+            font-size: clamp(1.8em, 4vw, 3.2em);
+            line-height: 1.25;
+            max-width: 750px;
+            margin-bottom: 20px;
+        }
+
+        .cover h1 span { color: var(--gold); }
+
+        .cover .sub {
+            font-size: 1.1em;
+            color: rgba(255,255,255,0.65);
+            max-width: 550px;
+            margin-bottom: 40px;
+        }
+
+        .cover-divider {
+            width: 60px;
+            height: 3px;
+            background: var(--gold);
+            margin: 30px auto;
+        }
+
+        .cover-author {
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 1px;
+        }
+
+        /* ====== PAGE CONTAINER ====== */
+        .page {
+            max-width: 750px;
+            margin: 0 auto;
+            background: #fff;
+            color: var(--text);
+        }
+
+        .section {
+            padding: 60px 50px;
+            border-bottom: 1px solid #eee;
+        }
+
+        @media (max-width: 600px) {
+            .section { padding: 40px 24px; }
+        }
+
+        /* ====== DARK SECTION ====== */
+        .section-dark {
+            background: var(--gray);
+            color: white;
+            padding: 60px 50px;
+        }
+
+        /* ====== TYPOGRAPHY ====== */
+        .section-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--red);
+            margin-bottom: 12px;
+        }
+
+        .section-dark .section-label { color: var(--gold); }
+
+        h2 {
+            font-family: 'Merriweather', serif;
+            font-size: clamp(1.4em, 3vw, 2em);
+            line-height: 1.3;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .section-dark h2 { color: white; }
+
+        p { margin-bottom: 16px; font-size: 1.02em; }
+
+        blockquote {
+            border-left: 4px solid var(--gold);
+            padding: 16px 24px;
+            background: #fffbf0;
+            margin: 24px 0;
+            font-style: italic;
+            color: #444;
+            font-size: 1.05em;
+            line-height: 1.7;
+        }
+
+        .section-dark blockquote {
+            background: rgba(243,156,18,0.08);
+            color: rgba(255,255,255,0.85);
+            border-left-color: var(--gold);
+        }
+
+        /* ====== MYSTERY BOX ====== */
+        .mystery-box {
+            background: #0d0d0d;
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mystery-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--red), var(--gold));
+        }
+
+        .mystery-box .label {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--gold);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .mystery-box h3 {
+            font-family: 'Merriweather', serif;
+            font-size: 1.25em;
+            margin-bottom: 12px;
+            color: white;
+        }
+
+        .mystery-box p {
+            font-size: 0.95em;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 0;
+        }
+
+        .mystery-box .locked {
+            margin-top: 16px;
+            font-size: 0.82em;
+            color: rgba(255,255,255,0.35);
+            font-style: italic;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 12px;
+        }
+
+        /* ====== STORY CARD ====== */
+        .story-card {
+            background: #f8f8f8;
+            border-radius: 12px;
+            padding: 28px;
+            margin: 24px 0;
+            border-left: 4px solid var(--red);
+            position: relative;
+        }
+
+        .story-card .name {
+            font-weight: 700;
+            font-size: 1em;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .story-card .profile {
+            font-size: 0.82em;
+            color: #888;
+            margin-bottom: 14px;
+        }
+
+        .story-card .result-tag {
+            display: inline-block;
+            background: var(--gold);
+            color: #000;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+        }
+
+        .story-card p { font-size: 0.95em; color: #444; margin-bottom: 8px; }
+
+        .story-card .day-marker {
+            display: inline-block;
+            background: #0d0d0d;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        /* ====== REVEAL LIST ====== */
+        .reveal-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .reveal-list li {
+            padding: 14px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            font-size: 0.97em;
+        }
+
+        .reveal-list li:last-child { border-bottom: none; }
+
+        .reveal-list .icon {
+            font-size: 1.4em;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .reveal-list .content strong {
+            display: block;
+            color: var(--dark);
+            font-size: 1em;
+            margin-bottom: 3px;
+        }
+
+        .reveal-list .content span { color: #666; font-size: 0.9em; }
+
+        /* ====== BLURRED / TEASER ====== */
+        .teaser-blur {
+            filter: blur(4px);
+            user-select: none;
+            pointer-events: none;
+            color: #333;
+            font-size: 0.95em;
+            line-height: 1.8;
+            margin: 8px 0;
+        }
+
+        .teaser-wrapper {
+            position: relative;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .teaser-wrapper::after {
+            content: '🔒 Konten ini hanya untuk pembeli Sistem Uang Panas';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            font-weight: 700;
+            color: #333;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(1px);
+        }
+
+        /* ====== CTA SECTION ====== */
+        .cta-section {
+            background: linear-gradient(135deg, #0d0d0d, #1a0000);
+            color: white;
+            padding: 70px 50px;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-family: 'Merriweather', serif;
+            color: white;
+            font-size: clamp(1.5em, 3vw, 2.2em);
+            margin-bottom: 16px;
+        }
+
+        .cta-section p { color: rgba(255,255,255,0.7); max-width: 500px; margin: 0 auto 30px; }
+
+        .bonus-pills {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 24px 0 36px;
+        }
+
+        .bonus-pills span {
+            background: rgba(243,156,18,0.15);
+            border: 1px solid rgba(243,156,18,0.4);
+            color: var(--gold);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #c0392b, #8e1a10);
+            color: white;
+            font-size: 1.1em;
+            font-weight: 700;
+            padding: 20px 50px;
+            border-radius: 50px;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 30px rgba(192,57,43,0.4);
+        }
+
+        .cta-btn:hover { transform: scale(1.03); box-shadow: 0 12px 40px rgba(192,57,43,0.5); }
+
+        .cta-note { font-size: 0.8em; color: rgba(255,255,255,0.35); margin-top: 16px; }
+
+        /* ====== HIGHLIGHT ====== */
+        .highlight { color: var(--red); font-weight: 700; }
+        .highlight-gold { color: var(--gold); font-weight: 700; }
+
+        .number-big {
+            font-family: 'Merriweather', serif;
+            font-size: 3em;
+            color: var(--red);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .stat-row .stat { padding: 20px; background: #f8f8f8; border-radius: 10px; }
+        .stat-row .stat .n { font-family: 'Merriweather', serif; font-size: 2em; font-weight: 900; color: var(--red); }
+        .stat-row .stat .l { font-size: 0.82em; color: #666; margin-top: 4px; }
+
+    </style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+    <span class="free-badge">Ebook Gratis — eL Vision Group</span>
+    <h1>3 Rahasia Rezeki yang<br><span>Tidak Pernah Diajarkan</span><br>di Sekolah Manapun</h1>
+    <div class="cover-divider"></div>
+    <p class="sub">Bagaimana ribuan orang biasa — pedagang kaki lima, karyawan PHK, ibu rumah tangga — menemukan rezeki tak terduga setelah menerapkan satu protokol sederhana ini.</p>
+    <p class="cover-author">OLEH eL REYZANDRA &nbsp;·&nbsp; FOUNDER eL VISION GROUP</p>
+</div>
+
+<div class="page">
+
+    <!-- SECTION 1: PEMBUKA -->
+    <div class="section">
+        <p class="section-label">Untuk Anda yang Membaca Ini</p>
+        <h2>Anda Tidak Malas.<br>Anda Tidak Bodoh.<br>Sistemnya yang Salah.</h2>
+
+        <p>Selama bertahun-tahun, saya mendengar cerita yang sama berulang-ulang:</p>
+
+        <blockquote>"Saya sudah kerja keras, sudah ikut seminar, sudah coba berbagai bisnis. Tapi rezeki rasanya seret terus. Ada yang salah dengan saya?"</blockquote>
+
+        <p>Jawabannya: <span class="highlight">tidak ada yang salah dengan Anda.</span></p>
+
+        <p>Yang salah adalah tidak ada yang pernah memberitahu Anda bahwa <strong>rezeki bukan hanya soal kerja keras</strong>. Ada satu lapisan yang lebih dalam — lapisan yang 95% orang tidak pernah sentuh.</p>
+
+        <p>Ebook gratis ini akan membuka tiga dari lapisan itu. Hanya tiga. Sisanya? Ada di dalam Sistem Uang Panas yang lengkap.</p>
+
+        <p>Tapi ketiga ini saja — jika Anda sungguh-sungguh memahaminya — akan mengubah cara Anda melihat uang, bisnis, dan rezeki selamanya.</p>
+    </div>
+
+    <!-- SECTION 2: RAHASIA 1 -->
+    <div class="section">
+        <p class="section-label">Rahasia #1</p>
+        <h2>Mengapa Orang Pintar<br>dan Rajin Bisa Tetap Miskin</h2>
+
+        <p>Ini adalah pertanyaan yang saya obsesikan selama 7 tahun.</p>
+
+        <p>Saya bertemu dengan orang-orang luar biasa cerdas — lulusan S2, mantan direktur perusahaan, wirausahawan yang sudah 10 kali mencoba membangun bisnis — namun tetap kesulitan finansial.</p>
+
+        <p>Dan di sisi lain, saya melihat orang-orang "biasa" yang pendidikannya SMA, tidak punya koneksi, tidak punya modal besar — tapi rezeki terus mengalir ke mereka.</p>
+
+        <p><strong>Apa bedanya?</strong></p>
+
+        <div class="mystery-box">
+            <div class="label">Temuan Riset eL Vision</div>
+            <h3>Masalahnya Bukan di Pikiran Sadar. Masalahnya di 95% Lainnya.</h3>
+            <p>Otak sadar Anda hanya mengendalikan 5% dari keputusan dan tindakan Anda. 95% sisanya dikendalikan oleh pikiran bawah sadar — dan pikiran bawah sadar Anda kemungkinan besar masih menjalankan program lama:</p>
+            <p style="margin-top:12px; color: rgba(255,255,255,0.85);">"Uang itu sulit."<br>"Orang seperti saya tidak bisa kaya."<br>"Rezeki saya segini-segini saja."</p>
+            <p class="locked">Program lengkap untuk menghapus dan mengganti pola ini ada di Bab 4-6 Sistem Uang Panas...</p>
+        </div>
+
+        <p>Selama program ini masih berjalan, <span class="highlight">strategi apapun yang Anda pelajari akan disabotase dari dalam.</span></p>
+
+        <p>Bukan oleh orang lain. Oleh diri Anda sendiri.</p>
+
+        <p>Inilah mengapa saya tidak pernah mengajarkan strategi sebelum kita bersihkan dulu sistem internalnya.</p>
+
+        <blockquote>"Saya sudah baca 47 buku bisnis. Semua gagal saya praktikkan. Setelah 14 hari pakai sistem ini, saya tidak baca satu buku pun — tapi ada 3 klien baru yang datang sendiri." <br><br><strong>— Hendri, 38 tahun, konsultan IT, Jakarta</strong></blockquote>
+    </div>
+
+    <!-- SECTION 3: KISAH NYATA 1 -->
+    <div class="section" style="background: #fafafa;">
+        <p class="section-label">Kisah Nyata</p>
+        <h2>Dari Warung yang Hampir Tutup<br>ke Omzet Rp47 Juta Bulan Itu</h2>
+
+        <div class="story-card">
+            <div class="name">Ibu Sumarni</div>
+            <div class="profile">Pemilik warung makan, Yogyakarta — 52 tahun</div>
+            <div class="result-tag">Hari ke-17: Omzet naik 340%</div>
+            <div class="day-marker">SEBELUM</div>
+            <p>"Warung saya hampir tutup. Sudah 3 bulan sepi. Saya pikir karena ada warung baru di sebelah yang lebih bagus. Tabungan tinggal cukup untuk 2 minggu operasional."</p>
+            <div class="day-marker">HARI KE-1 SAMPAI 14</div>
+            <p>"Saya ikuti protokolnya. Setiap pagi saya jalan cepat 20 menit keliling kampung — sambil dengarkan audio lewat HP. Rasanya aneh awalnya. Tapi saya tetap lakukan."</p>
+            <p>"Di hari ke-7, ada ibu-ibu komplek yang tanya apakah warung saya bisa terima pesanan katering untuk arisan. Saya bilang bisa. Itu pesanan pertama Rp2,3 juta."</p>
+            <div class="day-marker">HARI KE-17</div>
+            <p>"Ada bapak dari kantor kecamatan yang datang. Katanya dapat rekomendasi dari... dia sendiri lupa dari siapa. Dia minta saya handle makan siang untuk 85 pegawai kecamatan setiap hari. Kontrak 3 bulan. Total Rp47 juta bulan itu."</p>
+            <p><strong>"Saya tidak jualan. Saya tidak promosi. Mereka yang datang. Saya masih tidak percaya ini nyata."</strong></p>
+        </div>
+
+        <p>Apakah ini kebetulan? Mungkin. Tapi setelah ribuan cerita seperti ini, saya berhenti menyebutnya kebetulan.</p>
+    </div>
+
+    <!-- SECTION 4: RAHASIA 2 -->
+    <div class="section">
+        <p class="section-label">Rahasia #2</p>
+        <h2>Formula yang Ditemukan<br>dari Ribuan Orang Sukses</h2>
+
+        <p>Selama 7 tahun, saya meriset satu pertanyaan: <em>apa yang dimiliki orang sukses yang tidak dimiliki orang gagal?</em></p>
+
+        <p>Saya mewawancarai pengusaha, seniman, atlet, ulama, aktivis. Dari berbagai latar belakang, budaya, agama.</p>
+
+        <p>Dan satu pola terus muncul:</p>
+
+        <div class="mystery-box">
+            <div class="label">Penemuan Founder eL Vision</div>
+            <h3>Mereka Semua Menjalani Dua Kondisi Secara Bersamaan</h3>
+            <p>Kondisi pertama: <strong style="color:white;">kekacauan</strong> — keinginan kuat, urgensi, energi aktif yang tidak bisa diam.</p>
+            <p style="margin-top:8px;">Kondisi kedua: <strong style="color:var(--gold);">kedamaian</strong> — pasrah, percaya, bahagia tanpa bergantung pada hasil.</p>
+            <p style="margin-top:12px; color:rgba(255,255,255,0.7);">Kebanyakan orang hanya punya satu. Kekacauan tanpa kedamaian = stres dan desperate. Kedamaian tanpa kekacauan = pasif dan tidak bergerak.</p>
+            <p class="locked">Protokol lengkap 30 hari untuk menciptakan keduanya secara bersamaan ada di workbook eksklusif Sistem Uang Panas...</p>
+        </div>
+
+        <p>Yang membuat penemuan ini luar biasa adalah: <span class="highlight">kondisi ini bisa diciptakan secara sengaja.</span> Bukan hanya menunggu "mood" atau "inspirasi".</p>
+
+        <p>Setiap hari. Dengan protokol yang bisa dilakukan siapapun. Bahkan tanpa pengalaman meditasi sekalipun.</p>
+
+        <div class="stat-row">
+            <div class="stat"><div class="n">14+</div><div class="l">Hari rata-rata tanda pertama muncul</div></div>
+            <div class="stat"><div class="n">3x</div><div class="l">Sesi per hari yang direkomendasikan</div></div>
+            <div class="stat"><div class="n">30</div><div class="l">Hari untuk perubahan permanen</div></div>
+        </div>
+    </div>
+
+    <!-- SECTION 5: KISAH NYATA 2 -->
+    <div class="section" style="background: #fafafa;">
+        <p class="section-label">Kisah Nyata</p>
+        <h2>Karyawan PHK yang Menemukan<br>Bisnis Senilai Rp200 Juta</h2>
+
+        <div class="story-card">
+            <div class="name">Budi Santoso</div>
+            <div class="profile">Mantan supervisor pabrik, Tangerang — 41 tahun</div>
+            <div class="result-tag">Hari ke-21: Kontrak bisnis Rp200 juta</div>
+            <div class="day-marker">KONTEKS</div>
+            <p>"Kena PHK gelombang kedua. Istri baru melahirkan anak ketiga. Tabungan cukup untuk 4 bulan. Saya panik total."</p>
+            <div class="day-marker">PROTOKOL</div>
+            <p>"Saya lari setiap pagi jam 5. 30 menit. Sambil dengarkan audio di telinga. Awalnya saya rasa bodoh lari-lari sambil denger audio. Tapi saya terus lakukan karena tidak ada yang bisa saya rugi."</p>
+            <p>"Di workbook saya tulis keinginan: 'Saya ingin bisnis yang menghasilkan minimal 20 juta per bulan.' Setiap hari saya tulis ulang keinginan itu. Bukan dengan desperate — tapi dengan yakin seperti itu sudah terjadi."</p>
+            <div class="day-marker">HARI KE-21</div>
+            <p>"Teman lama dari SMA tiba-tiba WA. Dia punya toko bangunan, mau ekspansi, butuh orang yang paham logistik. Dia tawarkan kemitraan. Saya tidak pernah berpikir soal toko bangunan seumur hidup saya."</p>
+            <p><strong>"Kontrak pertama Rp200 juta. Komisi saya 15%. Bulan pertama Rp30 juta. Saya tidak pernah menghubungi dia. Dia yang datang."</strong></p>
+        </div>
+    </div>
+
+    <!-- SECTION 6: RAHASIA 3 -->
+    <div class="section">
+        <p class="section-label">Rahasia #3</p>
+        <h2>Mengapa Audio Lebih Kuat<br>dari Buku Motivasi Manapun</h2>
+
+        <p>Saya pernah skeptis dengan audio hipnosis. Saya seorang rasionalis. Saya percaya data dan sains.</p>
+
+        <p>Lalu saya membaca riset neurosains tentang <strong>brainwave entrainment</strong>.</p>
+
+        <p>Fakta ilmiah yang mengubah pandangan saya:</p>
+
+        <ul class="reveal-list">
+            <li>
+                <span class="icon">🧠</span>
+                <div class="content">
+                    <strong>Gelombang Beta (14-30Hz) = Mode Stres</strong>
+                    <span>Ini kondisi otak Anda saat bekerja, khawatir, dan overthinking. Dalam kondisi ini, otak Anda TIDAK BISA menerima program baru.</span>
+                </div>
+            </li>
+            <li>
+                <span class="icon">🌊</span>
+                <div class="content">
+                    <strong>Gelombang Theta (4-7Hz) = Pintu Bawah Sadar</strong>
+                    <span>Ini kondisi otak saat baru bangun tidur atau hampir tidur. Saat inilah pikiran bawah sadar terbuka dan bisa diprogram ulang.</span>
+                </div>
+            </li>
+            <li>
+                <span class="icon">🔑</span>
+                <div class="content">
+                    <strong>Audio Kami Menggunakan Frekuensi Theta</strong>
+                    <span>Teknologi binaural beats membawa gelombang otak dari Beta ke Theta dalam 8-12 menit pertama. Tidak perlu keahlian meditasi. Cukup pakai earphone.</span>
+                </div>
+            </li>
+            <li>
+                <span class="icon">📅</span>
+                <div class="content">
+                    <strong>21 Hari = 80% Perubahan. 30 Hari = Permanen.</strong>
+                    <span>Bukan klaim motivasional. Ini neuroplastisitas — kemampuan otak untuk membentuk jalur neural baru berdasarkan stimulasi berulang.</span>
+                </div>
+            </li>
+        </ul>
+
+        <div class="mystery-box">
+            <div class="label">Yang Tidak Akan Saya Ungkap di Sini</div>
+            <h3>Apa yang Sebenarnya Diucapkan dalam Audio</h3>
+            <p>Ada rangkaian kata, frekuensi, dan teknik yang tertanam di dalam audio. Ini dikembangkan selama 4 tahun dan diuji pada lebih dari 10.000 pengguna. Saya tidak akan ungkap di sini.</p>
+            <p class="locked">Akses audio lengkap (3 sesi) tersedia di paket Bundle Sistem Uang Panas...</p>
+        </div>
+    </div>
+
+    <!-- SECTION 7: KISAH NYATA 3 -->
+    <div class="section" style="background:#fafafa;">
+        <p class="section-label">Kisah Nyata</p>
+        <h2>Ibu Rumah Tangga yang Tidak<br>Pernah Berbisnis Seumur Hidup</h2>
+
+        <div class="story-card">
+            <div class="name">Dewi Rahayu</div>
+            <div class="profile">Ibu rumah tangga, Bandung — 34 tahun, 2 anak</div>
+            <div class="result-tag">Hari ke-9: Komisi affiliate pertama Rp450.000</div>
+            <div class="day-marker">KONTEKS</div>
+            <p>"Suami saya wiraswasta, hasilnya tidak menentu. Saya tidak punya pengalaman bisnis apapun. Saya bahkan tidak tahu apa itu affiliate marketing."</p>
+            <div class="day-marker">PROSES</div>
+            <p>"Saya dengarkan audio setiap pagi sambil masak. Sore setelah anak tidur siang. Malam sebelum tidur. Tiga kali sehari. Workbook saya isi tiap malam — keinginan saya sederhana: cukupin kebutuhan dapur tanpa minta suami terus."</p>
+            <p>"Di hari ke-5, saya iseng share link ke grup WA ibu-ibu. Tidak ada yang beli. Saya tidak sedih — anehnya saya sudah tidak cemas. Entah kenapa."</p>
+            <div class="day-marker">HARI KE-9</div>
+            <p>"Notifikasi masuk: komisi Rp150.000. Saya kira salah. Terus Rp150.000 lagi. Sore hari Rp150.000 lagi. Total Rp450.000 dalam satu hari."</p>
+            <p><strong>"Hari ini pendapatan bulanan saya sudah konsisten Rp4-6 juta. Saya kerja 1-2 jam sehari dari rumah. Anak saya tidak kehilangan ibunya."</strong></p>
+        </div>
+    </div>
+
+    <!-- SECTION 8: APA YANG ANDA LEWATKAN -->
+    <div class="section-dark">
+        <p class="section-label">Yang Ada di Versi Lengkap</p>
+        <h2>Ini Baru Permukaannya.</h2>
+
+        <p style="color:rgba(255,255,255,0.75);">Tiga rahasia di atas hanyalah pembuka. Di dalam Sistem Uang Panas yang lengkap, ada:</p>
+
+        <ul class="reveal-list" style="margin-top: 20px;">
+            <li style="border-color: rgba(255,255,255,0.1);">
+                <span class="icon">🔓</span>
+                <div class="content">
+                    <strong style="color:white;">Protokol Kekacauan + Kedamaian — 30 Hari Penuh</strong>
+                    <span style="color:rgba(255,255,255,0.6);">Workbook harian lengkap dengan panduan step-by-step. Bukan teori — ini jadwal harian yang bisa langsung diikuti.</span>
+                </div>
+            </li>
+            <li style="border-color: rgba(255,255,255,0.1);">
+                <span class="icon">🔓</span>
+                <div class="content">
+                    <strong style="color:white;">7 Strategi Affiliate yang Sudah Terbukti</strong>
+                    <span style="color:rgba(255,255,255,0.6);">Dari viral WhatsApp sampai paid ads dengan modal Rp20rb/hari. Termasuk script dan template siap pakai.</span>
+                </div>
+            </li>
+            <li style="border-color: rgba(255,255,255,0.1);">
+                <span class="icon">🔓</span>
+                <div class="content">
+                    <strong style="color:white;">3 Audio Bio-Energetik Lengkap (Paket Bundle)</strong>
+                    <span style="color:rgba(255,255,255,0.6);">Audio Rezeki Pagi, Malam, dan Sesi Kalibrasi. Teknologi Theta Wave yang sudah diuji pada 10.000+ pengguna.</span>
+                </div>
+            </li>
+            <li style="border-color: rgba(255,255,255,0.1);">
+                <span class="icon">🔓</span>
+                <div class="content">
+                    <strong style="color:white;">4 Bonus Ebook Eksklusif</strong>
+                    <span style="color:rgba(255,255,255,0.6);">Gorilla Mindset, Rahasia Orang Kaya Makin Kaya, Think and Grow Rich (Bahasa Indonesia), 250 Afirmasi Kuat — senilai Rp750.000, gratis di dalam paket.</span>
+                </div>
+            </li>
+            <li style="border-color: rgba(255,255,255,0.1);">
+                <span class="icon">🔓</span>
+                <div class="content">
+                    <strong style="color:white;">Akses Affiliate 50% Komisi Seumur Hidup</strong>
+                    <span style="color:rgba(255,255,255,0.6);">Setiap orang yang beli lewat link Anda = Rp99.500–149.500 masuk ke rekening Anda. Otomatis. Selamanya.</span>
+                </div>
+            </li>
+        </ul>
+
+        <blockquote>"Saya pikir ini seperti seminar motivasi biasa yang berisi kalimat-kalimat besar tapi tidak bisa dieksekusi. Ternyata salah total. Hari pertama sudah ada yang bisa dilakukan. Hari ke-14 sudah ada hasilnya." <br><br><strong>— Reza, 29 tahun, freelance desainer, Surabaya</strong></blockquote>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section">
+        <h2>Anda Sudah Tahu Rahasianya.<br>Sekarang Waktunya Buktikan.</h2>
+        <p>Sistem Uang Panas tersedia mulai Rp199.000. Garansi uang kembali 30 hari — jika tidak ada manfaat atau rezeki yang datang setelah mengikuti protokol, uang kembali tanpa pertanyaan.</p>
+
+        <div class="bonus-pills">
+            <span>Ebook Lengkap</span>
+            <span>3 Audio Rezeki (Bundle)</span>
+            <span>Workbook 30 Hari</span>
+            <span>Gorilla Mindset</span>
+            <span>Think & Grow Rich Indo</span>
+            <span>250 Afirmasi Kuat</span>
+            <span>Rahasia Orang Kaya</span>
+            <span>Affiliate 50%</span>
+            <span>Google Sheets Workbook</span>
+        </div>
+
+        <a href="https://ai.elvisiongroup.com/ebook_uangpanas" class="cta-btn">AKSES SISTEM UANG PANAS SEKARANG</a>
+
+        <p class="cta-note">Garansi 30 hari uang kembali · Akses langsung setelah bayar · Sekali bayar selamanya</p>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -62,7 +62,13 @@ const productCatalog = {
   }, // New Ebook Product
   'ebook_uangpanas': {
     name: 'Ebook Uang Panas',
-    price: 100000,
+    price: 0,
+    requiresAuth: false,
+    physical: true
+  },
+  'ebook_uangpanas_bundle': {
+    name: 'Ebook Uang Panas + Audio Rezeki',
+    price: 0,
     requiresAuth: false,
     physical: true
   },
@@ -180,7 +186,7 @@ serve(async (req) => {
   try {
     // --- 1. INITIALIZE & VALIDATE INPUT ---
     const body = await req.json();
-    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate, fbc, fbp, ctwa_id, userId: bodyUserId, clientIp } = body;
+    const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate, fbc, fbp, ctwa_id, userId: bodyUserId, clientIp, pageUrl } = body;
 
     console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod}`);
     console.log(`🕵️ Tracking Data - FBC: ${fbc}, FBP: ${fbp}, CTWA: ${ctwa_id || 'N/A'}, IP: ${clientIp || 'Auto'}`);
@@ -373,7 +379,8 @@ serve(async (req) => {
         fbp: fbp || null,
         ip_address: ipAddress,
         user_agent: userAgent,
-        ctwa_clid: ctwaClid
+        ctwa_clid: ctwaClid,
+        page_url: pageUrl || null
       }).select('id').single();
       
       if (error) {
@@ -507,16 +514,21 @@ serve(async (req) => {
     // --- 5.1 BRANCHING LOGIC: BCA MANUAL (Direct to DB) ---
     if (paymentMethod === 'BCA_MANUAL') {
       console.log('✅ BCA_MANUAL detected. Skipping Tripay proxy and returning DB record.');
+      
+      const uniqueCode = Math.floor(Math.random() * 900) + 100;
+      const finalAmount = amount + uniqueCode;
+
       return new Response(JSON.stringify({
         success: true,
         paymentType: 'DIRECT',
-        tripay_reference: `MANUAL-${merchantRef}`, // We use merchantRef to keep it unique
+        tripay_reference: `MANUAL-${merchantRef}`,
         reference: `MANUAL-${merchantRef}`,
         merchantRef: merchantRef,
-        amount: amount,
+        amount: finalAmount,
+        unique_code: uniqueCode,
         paymentMethod: 'BCA_MANUAL',
         status: 'UNPAID',
-        instructions: [] // Instructions already in static frontend
+        instructions: []
       }), {
         headers: {
           ...corsHeaders,

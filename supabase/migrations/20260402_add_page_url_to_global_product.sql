@@ -1,0 +1,1 @@
+ALTER TABLE global_product ADD COLUMN IF NOT EXISTS page_url TEXT;

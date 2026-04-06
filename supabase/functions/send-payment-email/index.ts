@@ -113,7 +113,7 @@ const handler = async (req) => {
     const body = await req.json();
     console.log('📨 Received payload:', body);
     // Extract email from various possible fields
-    const recipientEmail = body.userEmail || body.email;
+    const recipientEmail = body.recipientEmail || body.userEmail || body.email;
     if (!recipientEmail) {
       throw new Error('Email address is required');
     }
@@ -168,8 +168,17 @@ const handler = async (req) => {
     const isFitfactor = safeSubscriptionType.toLowerCase().includes('fitfactor');
     const isParfum = safeSubscriptionType.toLowerCase().includes('parfum');
     const isHungry = safeSubscriptionType.toLowerCase().includes('hungry');
-    const isPhysical = isFitfactor || isDrelf || isJewelry || isParfum || isHungry;
+    const cleanProductName = (body.product_name || '').toLowerCase();
+    const isPhysical = isFitfactor || isDrelf || isJewelry || isParfum || isHungry || 
+                       cleanProductName.includes('fitfactor') || 
+                       cleanProductName.includes('parfum') || 
+                       cleanProductName.includes('jewelry') ||
+                       cleanProductName.includes('drelf') ||
+                       cleanProductName.includes('hungry');
     const brandName = isFitfactor ? "FitFactor Herbal" : isDrelf ? "Drelf" : isJewelry ? "Jewelry" : isParfum ? "eL Royale Parfum" : isHungry ? "HungryLater" : "ElVision";
+
+    // Clean product name by removing (xN) suffix
+    const displayProduct = (body.product_name || safeSubscriptionType || brandName).replace(/\s*\(x\d+\)$/, "");
 
     // Format amount based on currency
     const formattedAmount = currency === 'USD'
@@ -783,7 +792,6 @@ const handler = async (req) => {
     if (isFitfactor) {
       let waMessage = "";
       const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
-      const displayProduct = body.product_name || safeSubscriptionType || "FitFactor Herbal";
       
       if (type === 'payment_completed' || type === 'success') {
         const bonusEbookLink = "https://drive.google.com/file/d/1bIG1_u2PFXWIrXxygojTyUlmSC-J1A5R/view?usp=sharing";
@@ -844,7 +852,6 @@ const handler = async (req) => {
     if (isParfum) {
       let waMessage = "";
       const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
-      const displayProduct = body.product_name || safeSubscriptionType || "eL Royale Parfum";
       
       if (type === 'payment_completed' || type === 'success') {
         waMessage = `Halo Tuan ${userName}! 👋\n\nTerima kasih telah memilih *eL Royale Parfum*.\n\nPembayaran Anda senilai *${formattedAmount}* telah berhasil kami terima. Aroma eksklusif pilihan Anda kini sedang memasuki tahap pengemasan premium.\n\n*DETAIL PENGIRIMAN:*\nNama: ${userName}\nProduk: ${displayProduct}\nAlamat: ${userAddress}\nRef: ${safeReference}\n\nKami akan segera menginformasikan nomor resi setelah paket dikirim.\n\nTerima kasih atas kepercayaan Anda.\n\n*eL Royale Parfum*\n_The Essence of Authority_`;
@@ -894,7 +901,6 @@ const handler = async (req) => {
     if (isJewelry) {
       let waMessage = "";
       const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
-      const displayProduct = body.product_name || safeSubscriptionType || "eL Royale Jewelry";
       
       if (type === 'payment_completed' || type === 'success') {
         waMessage = `Halo ${userName}! 💎✨\n\nSelamat! Pembayaran Anda senilai *${formattedAmount}* untuk koleksi *eL Royale Jewelry* telah kami terima.\n\nMahakarya pilihan Anda sedang kami persiapkan dengan ketelitian tertinggi untuk memastikan kesempurnaan saat tiba di tangan Anda.\n\n*DATA PENGIRIMAN:*\nNama: ${userName}\nProduk: ${displayProduct}\nAlamat: ${userAddress}\nRef: ${safeReference}\n\nKami akan segera menginformasikan nomor resi asuransi pengiriman setelah paket siap dijemput kurir khusus kami.\n\nTerima kasih telah memilih kemewahan sejati.\n\n*eL Royale Jewelry*\n_Exquisite Elegance_`;
@@ -944,7 +950,6 @@ const handler = async (req) => {
     if (isDrelf) {
       let waMessage = "";
       const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
-      const displayProduct = body.product_name || safeSubscriptionType || "Drelf Store";
       
       if (type === 'payment_completed' || type === 'success') {
         waMessage = `Halo ${userName}! ⚡️\n\nPembayaran Anda untuk *Drelf* senilai *${formattedAmount}* telah kami terima.\n\nProduk performa tinggi Anda sedang disiapkan oleh tim logistik untuk pengiriman prioritas.\n\n*RINGKASAN PENGIRIMAN:*\nNama: ${userName}\nProduk: ${displayProduct}\nAlamat: ${userAddress}\nRef: ${safeReference}\n\nNomor resi akan otomatis dikirimkan ke WhatsApp Anda segera setelah tim logistik melakukan scan pengiriman.\n\nStay Sharp,\n*Drelf Team*`;
@@ -994,7 +999,6 @@ const handler = async (req) => {
     if (isHungry) {
       let waMessage = "";
       const userAddress = body.address || body.userAddress || "Alamat tidak tersedia";
-      const displayProduct = body.product_name || safeSubscriptionType || "HungryLater";
       
       if (type === 'payment_completed' || type === 'success') {
         waMessage = `Halo ${userName}! 🔥\n\nKabar gembira! Pembayaran Anda senilai *${formattedAmount}* telah kami terima dengan hangat.\n\nTim *HungryLater* sedang menyiapkan paket diet lezat Anda untuk segera dikirim secepat kilat supaya program kakak tidak terhambat!\n\n*📦 DATA PENGIRIMAN:*\nNama: ${userName}\nProduk: ${displayProduct}\nAlamat: ${userAddress}\nStatus: *SIAP KIRIM*\nRef: ${safeReference}\n\nTunggu kedatangan kurir kami di depan pintu Anda. Selamat bertransformasi!\n\n*HungryLater*\n_Your Hunger Ends Here_`;
@@ -1047,15 +1051,20 @@ const handler = async (req) => {
       const bccGroupId = "120363401536138177@g.us";
       const bccSenderNumber = "+62 895-3256-33487";
       
-      const bccMessage = `Ref:${safeReference} (Gudang Silahkan Kirimkan Resi dengan format) Resi_cs_${safeReference} JNT 12312412 (contoh) saya akan langsung mengirimkan data itu ke customer
 
-Penerima :
+      const cleanRef = safeReference.replace(/_fitfactor|_parfum|_jewelry|_drelf|_hungry|_umkm|_parenting|_lovemagnet|_feminine/gi, ''); // Remove brand suffixes
+      const bccMessage = `Penerima :
 ${userName}
 ${userPhone}
 
 Alamat: ${userAddress}
 
-${quantity}x ${brandName}
+${quantity}x ${displayProduct}
+
+Ref:${safeReference} 
+(Gudang Silahkan Kirimkan Resi dengan format) Resi_cs_${cleanRef} JNT 12312412 (contoh) saya akan langsung mengirimkan data itu ke customer
+
+Mohon ketikan resi tinggal copy paste pesan kedua saya resi_cs_referensi dengan foto resi seperti itu, saya akan menangkap data dan mengotomatiskan semua, Grup hanya perlu fokus jualan, biarkan saya handle customer service
 
 Pengirim :
 ${brandName}
@@ -1063,6 +1072,7 @@ ${bccSenderNumber}`;
 
       console.log(`🚀 [BCC] Sending Physical Order Notification to Group ${bccGroupId}`);
       try {
+        // Message 1: Details
         await fetch(WAPI_URL, {
           method: 'POST',
           headers: { "Content-Type": "application/json" },
@@ -1071,6 +1081,18 @@ ${bccSenderNumber}`;
             token: WAPI_TOKEN, 
             to: bccGroupId, 
             message: bccMessage 
+          })
+        });
+
+        // Message 2: Copy-Paste Command
+        await fetch(WAPI_URL, {
+          method: 'POST',
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            session: WAPI_SESSION, 
+            token: WAPI_TOKEN, 
+            to: bccGroupId, 
+            message: `resi_cs_${cleanRef} `
           })
         }).then(res => res.text().then(txt => console.log(`📡 [BCC] Group Res: ${res.status}`, txt)));
       } catch (err) {
