@@ -44,7 +44,7 @@ const DisplayPage = React.lazy(() => import("./pages/display"));
 const ReportSales = React.lazy(() => import("./pages/tools_pages/reportsales"));
 const ReportSalesAdmin = React.lazy(() => import("./pages/tools_pages/reportsalesadmin"));
 const DrelfLpPage = React.lazy(() => import("./pages/brands/drelflp"));
-const Testimony = React.lazy(() => import("./pages/testimony"));
+const Testimony = React.lazy(() => import("./pages/tools_pages/testimony"));
 const CreatorPage = React.lazy(() => import("./pages/tools_pages/creator_api"));
 const ResellerLanding = React.lazy(() => import("./pages/tools_pages/reseller"));
 const Pixels = React.lazy(() => import("./pages/tools_pages/pixels"));
@@ -189,10 +189,10 @@ const AppContent = () => {
                 <Route path="/prostatus" element={<ProUpgradePage />} />
                 <Route path="/intro" element={<Intro />} />
                 <Route path="/display" element={<DisplayPage />} />
-                <Route path="/testimony" element={<Testimony />} />
                 <Route path="/visionlibrary" element={<VisionLibrary />} />
 
                 {/* // SEction Tools_pages */}
+                <Route path="/testimony" element={<Testimony />} />
                 <Route path="/affiliate" element={<AffiliatePage />} />
                 <Route path="/reportsales" element={<ReportSales />} />
                 <Route path="/reportsalesadmin" element={<ReportSalesAdmin />} />

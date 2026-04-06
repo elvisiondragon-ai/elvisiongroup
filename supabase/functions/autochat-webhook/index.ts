@@ -11,8 +11,86 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || "
 const META_VERIFY_TOKEN = Deno.env.get('AUTOCHAT_WEBHOOK_VERIFY_TOKEN') || "autochatelvision";
 const GLOBAL_META_TOKEN = Deno.env.get('META_ACCESS_TOKEN') || "";
 const IG_ACCESS_TOKEN = Deno.env.get('IG_ACCESS_TOKEN') || "";
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') || "";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+async function callRenataAI(senderId: string, userMessage: string): Promise<string> {
+    // Load history from Supabase
+    const { data: chat } = await supabase.from('wapivps_vip_chats')
+        .select('messages').eq('ref', senderId).single();
+    const messages: {role:string,content:string,ts:string}[] = chat?.messages || [];
+    const history = messages.slice(-10).map((m: any) => ({ role: m.role, content: m.content }));
+    history.push({ role: 'user', content: userMessage });
+
+    // Load Renata KB
+    const { data: kb } = await supabase.from('wapivps_knowledge')
+        .select('knowledge_text').eq('uid', '8c2cd3b1-6b77-4df9-92c5-467182ecd13d').eq('session_name', 'renata').eq('status', 'active').single();
+    const systemInstruction = kb?.knowledge_text || '';
+
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+                ...(systemInstruction ? [{ role: 'system', content: systemInstruction }] : []),
+                ...history
+            ],
+            temperature: 0.3, top_p: 0.9, frequency_penalty: 0.5, presence_penalty: 0.4, max_tokens: 1000
+        })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || '';
+
+    if (reply) {
+        const now = new Date().toISOString();
+        const newMessages = [
+            ...messages,
+            { role: 'user', content: userMessage, ts: now },
+            { role: 'assistant', content: reply, ts: now }
+        ];
+        await supabase.from('wapivps_vip_chats')
+            .upsert({ ref: senderId, messages: newMessages, topic: 'meta_dm', updated_at: now }, { onConflict: 'ref' });
+
+        // Booking trigger — detect confirmation in AI reply
+        if (reply.toLowerCase().includes('you are booked')) {
+            await triggerBookingActions(senderId, newMessages, reply);
+        }
+    }
+    return reply;
+}
+
+async function triggerBookingActions(senderId: string, allMessages: any[], aiReply: string) {
+    const wapiUrl = 'https://api.elvisiongroup.com';
+    const wapiToken = 'rvpwk8dkih9m';
+    const adminNumbers = ['62895325633487', '6285664733499'];
+
+    // Build full conversation summary from messages
+    const transcript = allMessages.slice(-20)
+        .map((m: any) => `${m.role === 'user' ? 'Client' : 'Renata'}: ${m.content}`)
+        .join('\n');
+
+    const notifText = `*NEW VIP BOOKING - eL Vision Group*\n\n${aiReply}\n\n*Full Conversation:*\n${transcript}`;
+
+    for (const adminNumber of adminNumbers) {
+        try {
+            await fetch(`${wapiUrl}/api/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session: 'renata',
+                    token: wapiToken,
+                    to: adminNumber,
+                    message: notifText
+                })
+            });
+            console.log(`[BOOKING] Notif sent to ${adminNumber}`);
+        } catch(e: any) {
+            console.error(`[BOOKING] Failed to notify ${adminNumber}: ${e.message}`);
+        }
+    }
+}
 
 // ─── UTILS ──────────────────────────────────────────────────────────────────
 
@@ -71,6 +149,9 @@ function buildMessagePayload(trigger: Record<string, unknown>, platform: "facebo
     let btn2Text = "";
     let btn2Url = "";
 
+    let btn3Text = "";
+    let btn3Url = "";
+
     if (step === 4) {
         text = (trigger.step4_text as string) || "";
         btnType = (trigger.step4_button_type as string) || "quick_reply";
@@ -78,6 +159,8 @@ function buildMessagePayload(trigger: Record<string, unknown>, platform: "facebo
         btn1Url = (trigger.step4_button1_url as string) || "";
         btn2Text = (trigger.step4_button2_text as string) || "";
         btn2Url = (trigger.step4_button2_url as string) || "";
+        btn3Text = (trigger.step4_button3_text as string) || "";
+        btn3Url = (trigger.step4_button3_url as string) || "";
     } else if (step === 5) {
         text = (trigger.step5_text as string) || "";
         btnType = (trigger.step5_button_type as string) || "quick_reply";
@@ -85,6 +168,8 @@ function buildMessagePayload(trigger: Record<string, unknown>, platform: "facebo
         btn1Url = (trigger.step5_button1_url as string) || "";
         btn2Text = (trigger.step5_button2_text as string) || "";
         btn2Url = (trigger.step5_button2_url as string) || "";
+        btn3Text = (trigger.step5_button3_text as string) || "";
+        btn3Url = (trigger.step5_button3_url as string) || "";
     } else if (step === 6) {
         text = (trigger.step6_text as string) || "";
         btnType = "web_url";
@@ -100,6 +185,7 @@ function buildMessagePayload(trigger: Record<string, unknown>, platform: "facebo
     const buttons = [
         { text: btn1Text, url: btn1Url },
         { text: btn2Text, url: btn2Url },
+        { text: btn3Text, url: btn3Url },
     ];
 
     for (let i = 0; i < buttons.length; i++) {
@@ -262,14 +348,18 @@ async function handleIgMessage(
             if (stepDetail === "S4") {
                 const leadsTo = (buttonIndex === "B1")
                     ? matchedTrigger.step4_button1_leads_to
-                    : matchedTrigger.step4_button2_leads_to;
+                    : (buttonIndex === "B2")
+                    ? matchedTrigger.step4_button2_leads_to
+                    : matchedTrigger.step4_button3_leads_to;
 
                 nextStep = (leadsTo === "step6" || leadsTo === "step6_follower_only") ? 6 : 5;
                 console.log(`🎯 [IG DM] Payload Match! Trigger ${triggerId}, Step 4, Button ${buttonIndex} (leads: ${leadsTo}) -> next ${nextStep}`);
             } else if (stepDetail === "S5") {
                 const leadsTo = (buttonIndex === "B1")
                     ? matchedTrigger.step5_button1_leads_to
-                    : matchedTrigger.step5_button2_leads_to;
+                    : (buttonIndex === "B2")
+                    ? matchedTrigger.step5_button2_leads_to
+                    : matchedTrigger.step5_button3_leads_to;
 
                 if (leadsTo === "repeat_step5") {
                     nextStep = 5;
@@ -342,14 +432,20 @@ async function handleIgMessage(
     }
 
     if (!matchedTrigger) {
-        // No trigger matched — forward to Renata AI if enabled
-        if (client.ig_autoreply_enabled) {
-            console.log(`[IG DM] No trigger match for "${messageText}" — forwarding to Renata AI`);
-            fetch("https://api.elvisiongroup.com/api/meta-dm", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ platform: "instagram", senderId, messageText, token, igUserId })
-            }).catch((e: Error) => console.error("[IG DM] Renata forward error:", e.message));
+        if (client.ig_autoreply_enabled && messageText) {
+            const reply = await callRenataAI(senderId, messageText);
+            if (reply) {
+                const igToken = IG_ACCESS_TOKEN || token;
+                const dmApiUrl = `https://graph.instagram.com/v22.0/${igUserId}/messages`;
+                const sendRes = await fetch(dmApiUrl, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${igToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipient: { id: senderId }, message: { text: reply } })
+                });
+                const sendData = await sendRes.json();
+                if (sendData.error) console.error(`[RENATA-IG] Send error: ${JSON.stringify(sendData.error)}`);
+                else console.log(`[RENATA-IG] Replied to ${senderId}`);
+            }
         }
         return;
     }
@@ -484,14 +580,18 @@ async function handleFbMessage(
             if (stepDetail === "S4") {
                 const leadsTo = (buttonIndex === "B1")
                     ? matchedTrigger.step4_button1_leads_to
-                    : matchedTrigger.step4_button2_leads_to;
+                    : (buttonIndex === "B2")
+                    ? matchedTrigger.step4_button2_leads_to
+                    : matchedTrigger.step4_button3_leads_to;
 
                 nextStep = (leadsTo === "step6" || leadsTo === "step6_follower_only") ? 6 : 5;
                 console.log(`🎯 [FB DM] Payload Match! Trigger ${triggerId}, Step 4, Button ${buttonIndex} (leads: ${leadsTo}) -> next ${nextStep}`);
             } else if (stepDetail === "S5") {
                 const leadsTo = (buttonIndex === "B1")
                     ? matchedTrigger.step5_button1_leads_to
-                    : matchedTrigger.step5_button2_leads_to;
+                    : (buttonIndex === "B2")
+                    ? matchedTrigger.step5_button2_leads_to
+                    : matchedTrigger.step5_button3_leads_to;
 
                 if (leadsTo === "repeat_step5") {
                     nextStep = 5;
@@ -539,14 +639,16 @@ async function handleFbMessage(
     }
 
     if (!matchedTrigger) {
-        // No trigger matched — forward to Renata AI if enabled
-        if (client.fb_autoreply_enabled) {
-            console.log(`[FB DM] No trigger match for "${messageText}" — forwarding to Renata AI`);
-            fetch("https://api.elvisiongroup.com/api/meta-dm", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ platform: "facebook", senderId, messageText, token })
-            }).catch((e: Error) => console.error("[FB DM] Renata forward error:", e.message));
+        if (client.fb_autoreply_enabled && messageText) {
+            const reply = await callRenataAI(senderId, messageText);
+            if (reply) {
+                await fetch(`https://graph.facebook.com/v22.0/${pageId}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipient: { id: senderId }, message: { text: reply }, access_token: token })
+                });
+                console.log(`[RENATA-FB] Replied to ${senderId}`);
+            }
         }
         return;
     }
