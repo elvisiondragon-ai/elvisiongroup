@@ -19,7 +19,7 @@ import { App } from '@capacitor/app';
 // - If the user is on the web, do nothing.
 // - If the user is on Native Android and their version is not "3.0.0" or "3.0", show a blocking fullscreen update REQUIRED screen.
 const UPDATE_URL = 'https://nlrgdhpmsittuwiiindq.supabase.co/storage/v1/object/public/apk/elvision-v3.apk';
-const REQUIRED_VERSION = '3.0.0'; // We accept '3.0.0' or '3.0'
+const REQUIRED_VERSION = '3.0.1'; // We accept '3.0.1' or '3.0'
 
 const UpdateBanner: React.FC = () => {
   const [isMandatoryUpdate, setIsMandatoryUpdate] = useState(false);

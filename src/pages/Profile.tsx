@@ -905,6 +905,11 @@ export function Profile({ onNavigate }: ProfileProps) {
           )}
         </div>
         )}
+        <div className="mt-8 mb-4 text-center">
+          <p className="text-[10px] text-muted-foreground/30 font-mono">
+            v3.0.1-stable
+          </p>
+        </div>
       </div>
     </div>
     </>
