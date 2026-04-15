@@ -220,7 +220,7 @@ export default function Pixels() {
                              {/* Product Info from Custom Data */}
                              {log.custom_data && (
                                  <div className="bg-slate-50 p-2 rounded border border-slate-200 font-mono text-[10px] text-slate-800 max-h-[100px] overflow-auto">
-                                     {Object.entries(log.custom_data).map(([key, val]: [string, any]) => (
+                             {log.custom_data && Object.entries(log.custom_data).map(([key, val]: [string, any]) => (
                                          <div key={key} className="truncate">
                                              <span className="font-bold text-slate-500">{key}:</span> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
                                          </div>

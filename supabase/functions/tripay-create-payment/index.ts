@@ -177,7 +177,7 @@ const productCatalog = {
 };
 // Main server function
 serve(async (req) => {
-  console.log('🚀 UNIFIED CREATE PAYMENT [V7-UNIVERSAL-NAME-FIX] - Edge Function Started');
+  console.log('🚀 UNIFIED CREATE PAYMENT [V8-BODY-SAFE] - Edge Function Started');
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
       headers: corsHeaders
@@ -185,7 +185,11 @@ serve(async (req) => {
   }
   try {
     // --- 1. INITIALIZE & VALIDATE INPUT ---
-    const body = await req.json();
+    const rawBody = await req.text();
+    if (!rawBody || rawBody.trim() === '') {
+      return new Response(JSON.stringify({ error: 'Empty request body' }), { status: 400, headers: corsHeaders });
+    }
+    const body = JSON.parse(rawBody);
     const { subscriptionType, paymentMethod, userName, userEmail, phoneNumber, quantity = 1, address, affiliateRef, commissionRate, fbc, fbp, ctwa_id, userId: bodyUserId, clientIp, pageUrl } = body;
 
     console.log(`📧 User Attempting Payment: ${userEmail} for ${subscriptionType} via ${paymentMethod}`);

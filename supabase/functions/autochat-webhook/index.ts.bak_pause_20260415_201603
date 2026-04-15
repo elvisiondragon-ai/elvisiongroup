@@ -15,31 +15,11 @@ const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') || "";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-async function isMetaDmPaused(senderId: string): Promise<boolean> {
-    const { data } = await supabase.from('wapivps_vip_chats')
-        .select('messages').eq('ref', senderId).single();
-    const msgs: any = data?.messages;
-    if (msgs && !Array.isArray(msgs) && msgs.paused === true) return true;
-    return false;
-}
-
-async function setMetaDmPaused(senderId: string, paused: boolean): Promise<void> {
-    const { data } = await supabase.from('wapivps_vip_chats')
-        .select('messages').eq('ref', senderId).single();
-    const existing: any = data?.messages;
-    const history = Array.isArray(existing) ? existing : (existing?.history || []);
-    const now = new Date().toISOString();
-    await supabase.from('wapivps_vip_chats')
-        .upsert({ ref: senderId, messages: { history, paused }, topic: 'meta_dm', updated_at: now }, { onConflict: 'ref' });
-}
-
 async function callRenataAI(senderId: string, userMessage: string): Promise<string> {
-    // Load history from Supabase (tolerate legacy array shape and new {history, paused} shape)
+    // Load history from Supabase
     const { data: chat } = await supabase.from('wapivps_vip_chats')
         .select('messages').eq('ref', senderId).single();
-    const raw: any = chat?.messages;
-    const messages: {role:string,content:string,ts:string}[] = Array.isArray(raw) ? raw : (raw?.history || []);
-    const pausedFlag: boolean = (!Array.isArray(raw) && raw?.paused === true);
+    const messages: {role:string,content:string,ts:string}[] = chat?.messages || [];
     const history = messages.slice(-10).map((m: any) => ({ role: m.role, content: m.content }));
     history.push({ role: 'user', content: userMessage });
 
@@ -71,7 +51,7 @@ async function callRenataAI(senderId: string, userMessage: string): Promise<stri
             { role: 'assistant', content: reply, ts: now }
         ];
         await supabase.from('wapivps_vip_chats')
-            .upsert({ ref: senderId, messages: { history: newMessages, paused: pausedFlag }, topic: 'meta_dm', updated_at: now }, { onConflict: 'ref' });
+            .upsert({ ref: senderId, messages: newMessages, topic: 'meta_dm', updated_at: now }, { onConflict: 'ref' });
 
         // Booking trigger — detect confirmation in AI reply
         if (reply.toLowerCase().includes('you are booked')) {
@@ -783,31 +763,7 @@ serve(async (req) => {
                     for (let i = 0; i < messaging.length; i++) {
                         const msg = messaging[i];
                         const senderId = msg.sender?.id;
-
-                        // Owner echo — handle /pause, /stop, /wait, /sebentar, /start, /silahkan
-                        if (msg.message?.is_echo === true && msg.message?.text) {
-                            const recipientId = msg.recipient?.id;
-                            const echoCmd = msg.message.text.trim().toLowerCase();
-                            if (!recipientId) continue;
-                            if (echoCmd === '/pause' || echoCmd === '/stop' || echoCmd === '/wait' || echoCmd.includes('/sebentar')) {
-                                await setMetaDmPaused(recipientId, true);
-                                console.log(`[AUTOCHAT] AI PAUSED for ${recipientId}`);
-                                continue;
-                            }
-                            if (echoCmd === '/start' || echoCmd.includes('/silahkan')) {
-                                await setMetaDmPaused(recipientId, false);
-                                console.log(`[AUTOCHAT] AI RESUMED for ${recipientId}`);
-                                continue;
-                            }
-                            continue;
-                        }
-
                         if (!senderId || senderId === pageOrIgId) continue;
-
-                        if (await isMetaDmPaused(senderId)) {
-                            console.log(`[AUTOCHAT] AI silent (paused) for ${senderId}`);
-                            continue;
-                        }
 
                         if (msg.message) {
                             const text = msg.message.text || "";

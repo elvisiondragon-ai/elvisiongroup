@@ -118,21 +118,6 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     ],
     lang: "id"
   },
-  'ebook_feminine_ultimate': {
-    subject: "Akses Download: 👑 Ultimate Dark Feminine Anda",
-    downloadLink: "https://drive.google.com/drive/folders/1LHhYdZCezWKA3iNwDKfvJBnyKfgYsb8g?usp=sharing",
-    color: "#e91e8c",
-    accentColor: "#facc15",
-    title: "👑 Akses Ultimate Dark Feminine Terbuka",
-    description: "Selamat! Anda memiliki akses penuh ke paket paling lengkap — Ebook + Audio Love Magnet + Workbook 30 Hari.",
-    instructions: [
-      "Klik tombol di bawah untuk mendownload semua materi Ultimate Anda.",
-      "Workbook 30 Hari: isi dan kerjakan setiap hari untuk hasil maksimal.",
-      "Audio Love Magnet: dengarkan setiap malam sebelum tidur (wajib earphone).",
-      "Q&A dengan admin tersedia — balas pesan WhatsApp ini kapan saja."
-    ],
-    lang: "id"
-  },
   // --- DARK FEMININE EN ---
   'universal_darkfeminine_en': {
     subject: "Download Access: Dark Feminine Package (PDF)",
@@ -365,20 +350,6 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Gunakan data ini untuk meningkatkan strategi investasi Anda."
     ],
     lang: "id"
-  },
-  'womenconsult': {
-    subject: "Akses Download: Women AI Consultant — Materi & Bonus Anda",
-    downloadLink: "https://drive.google.com/drive/folders/17jZmbTi9n0Ltu4-2P0YDuvdOmcFuWLJO?usp=sharing",
-    color: "#9d174d",
-    accentColor: "#ffffff",
-    title: "Akses Women AI Consultant Terbuka!",
-    description: "Terima kasih! Pembayaran Anda sukses. Folder ini berisi seluruh materi dan bonus Women AI Consultant Anda.",
-    instructions: [
-      "Klik tombol di bawah untuk mengunduh seluruh materi.",
-      "Simpan ke perangkat Anda agar bisa dibaca kapan saja.",
-      "Tim support kami siap membantu 24 jam via WhatsApp."
-    ],
-    lang: "id"
   }
 };
 
@@ -410,7 +381,6 @@ function getProductKey(productName: string): string {
   // ebookspaid20: sg_elvision_en
   // ebookspaid21: sg_elvision_malay
   // ebookspaid22: universal_saham_ultimate
-  // ebookspaid23: womenconsult
   const skuMap: Record<string, string> = {
     'ebookspaid01': 'raja_ranjang',
     'ebookspaid02': 'ebook_diet',
@@ -433,8 +403,7 @@ function getProductKey(productName: string): string {
     'ebookspaid19': 'usa_webinar20',
     'ebookspaid20': 'sg_elvision_en',
     'ebookspaid21': 'sg_elvision_malay',
-    'ebookspaid22': 'universal_saham_ultimate',
-    'ebookspaid23': 'womenconsult'
+    'ebookspaid22': 'universal_saham_ultimate'
   };
 
   const skuMatch = lower.match(/^ebookspaid?0?(\d+)$/);
@@ -460,7 +429,6 @@ function getProductKey(productName: string): string {
   if (lower.includes('universal_darkfeminine_ph') || lower.includes('dark feminine ph')) return 'universal_darkfeminine_ph';
 
   // --- Dark Feminine ID (audio and non-audio both map to ebook_feminine folder) ---
-  if (lower.includes('ultimate')) return 'ebook_feminine_ultimate';
   if (lower.includes('love magnet')) return 'ebook_feminine_lovemagnet';
   if (lower.includes('universal_darkfeminine_id') || lower.includes('dark feminine id') || lower.includes('universal dark feminine id')) return 'ebook_feminine';
 
@@ -474,7 +442,6 @@ function getProductKey(productName: string): string {
   if (lower.includes('webinar_el') || lower.includes('jalur langit') || lower.includes('webinar')) return 'webinar_el';
   if (lower.includes('raja ranjang')) return 'raja_ranjang';
   if (lower.includes('saham_ultimate') || lower.includes('saham ultimate')) return 'universal_saham_ultimate';
-  if (lower.includes('womenconsult') || lower.includes('women ai consultant') || lower.includes('women consultant')) return 'womenconsult';
 
   return 'ebook_elvision';
 }
@@ -686,7 +653,7 @@ const handler = async (req: Request) => {
     // --- WHATSAPP NOTIFICATION ---
     const userPhone = body.phone || body.phone_number || body.ph;
 
-    const waProductKeys = ['raja_ranjang', 'ebook_feminine', 'ebook_feminine_lovemagnet', 'ebook_feminine_ultimate', 'universal_Id_parenting_paid',
+    const waProductKeys = ['raja_ranjang', 'ebook_feminine', 'ebook_feminine_lovemagnet', 'universal_Id_parenting_paid',
       'universal_darkfeminine_en', 'universal_darkfeminine_en_audio',
       'universal_darkfeminine_ph', 'universal_darkfeminine_ph_audio',
       'universal_saham_ultimate'];
@@ -709,9 +676,7 @@ const handler = async (req: Request) => {
 
           const productNameDisplay = isParenting
             ? "Co-Parenting Tracker"
-            : productKey === 'ebook_feminine_ultimate'
-              ? "Ultimate Dark Feminine"
-              : productKey === 'ebook_feminine_lovemagnet'
+            : productKey === 'ebook_feminine_lovemagnet'
               ? "Universal Dark Feminine + Love Magnet"
               : productKey === 'universal_darkfeminine_en_audio'
                 ? "Dark Feminine (PDF + Audio) EN"
@@ -726,9 +691,7 @@ const handler = async (req: Request) => {
           const adminName = (isDarkFeminine || isEnglish || isFilipino) ? "Admin eL Vision" : "Renata dari Admin eL Vision Group";
 
           let waMessage: string;
-          if (productKey === 'ebook_feminine_ultimate') {
-            waMessage = `Halo kak ${userName}! 👋\nSaya Admin eL Vision.\n\nTerima kasih atas kepercayaan kakak untuk paket *Ultimate Dark Feminine* senilai ${displayAmount}.\n\nBerikut adalah link download semua materi Ultimate kakak:\n👉 ${template.downloadLink}\n\nDi dalam folder tersedia:\n📖 *Ebook Dark Feminine* — baca dari awal sampai akhir\n🎧 *Audio Love Magnet* — dengarkan setiap malam sebelum tidur (wajib pakai earphone)\n📝 *Workbook 30 Hari* — isi dan kerjakan setiap hari untuk hasil maksimal\n\nJika kakak ada pertanyaan atau butuh panduan, langsung balas pesan ini — admin siap membantu.\n\nSalam hangat,\nAdmin - eL Vision Group`;
-          } else if (isEnglish) {
+          if (isEnglish) {
             waMessage = `Hi ${userName}! 👋\nI am ${adminName}.\n\nThank you for purchasing *${productNameDisplay}*.\n\nYour payment of ${displayAmount} has been received.\n\nHere is your exclusive download link:\n👉 ${template.downloadLink}\n\nPlease download and save it! Feel free to reply if you have any questions.\n\nWarm regards,\neL Vision Group`;
           } else if (isFilipino) {
             waMessage = `Halo ${userName}! 👋\nAko si ${adminName}.\n\nSalamat sa iyong pagbili ng *${productNameDisplay}*.\n\nNatanggap na namin ang iyong bayad na ${displayAmount}.\n\nNarito ang iyong eksklusibong download link:\n👉 ${template.downloadLink}\n\nPaki-download at i-save na! Huwag mag-atubiling sumagot kung may katanungan ka.\n\nMainit na pagbati,\neL Vision Group`;

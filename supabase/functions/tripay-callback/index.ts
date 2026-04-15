@@ -151,25 +151,45 @@ serve(async (req: Request) => {
   const { reference: tripayReference, merchant_ref: merchantRef, status: paymentStatus, payment_method: paymentMethod } = body;
   
   if (paymentStatus === 'PAID') {
-    console.log(`🎉 [Standard] Processing PAID: ${tripayReference}`);
-    
-    // A. Try global_product
-    let query = supabase.from('global_product').select('*');
+    console.log(`🎉 [Standard] Processing PAID | reference: ${tripayReference} | merchant_ref: ${merchantRef}`);
+
+    // A. Try global_product — search by tripay_reference OR merchant_ref
+    let query = supabase.from('global_product').select('*').neq('status', 'PAID');
     if (merchantRef) query = query.or(`tripay_reference.eq.${tripayReference},merchant_ref.eq.${merchantRef}`);
     else query = query.eq('tripay_reference', tripayReference);
 
-    const { data: globalOrders } = await query.limit(1);
+    const { data: globalOrders, error: globalErr } = await query.limit(1);
+    console.log(`🔍 global_product query result: ${globalOrders?.length ?? 0} rows | error: ${globalErr?.message ?? 'none'}`);
+
     if (globalOrders && globalOrders.length > 0) {
         const order = globalOrders[0];
+        console.log(`✅ Found global_product order id:${order.id} status:${order.status} ref:${order.tripay_reference}`);
         const res = await processFulfillment({ ...order, reference: tripayReference, payment_method: paymentMethod || 'Standard' });
         return logAndRespond(res.message, 200, res);
+    }
+
+    // A2. Fallback — search by merchant_ref only (in case tripay_reference was not stored yet)
+    if (merchantRef) {
+      const { data: fallbackOrders } = await supabase
+        .from('global_product')
+        .select('*')
+        .eq('merchant_ref', merchantRef)
+        .neq('status', 'PAID')
+        .limit(1);
+      console.log(`🔍 fallback merchant_ref query: ${fallbackOrders?.length ?? 0} rows`);
+      if (fallbackOrders && fallbackOrders.length > 0) {
+        const order = fallbackOrders[0];
+        console.log(`✅ Found via fallback merchant_ref id:${order.id} status:${order.status}`);
+        const res = await processFulfillment({ ...order, reference: tripayReference, payment_method: paymentMethod || 'Standard' });
+        return logAndRespond(res.message, 200, res);
+      }
     }
 
     // B. Try waiting_payment (Legacy/Subscription)
     const { data: waitingTx } = await supabase.from('waiting_payment').select('*').eq('tripay_reference', tripayReference).neq('status', 'paid').maybeSingle();
     if (waitingTx) {
-      const res = await processFulfillment({ 
-        id: waitingTx.id, 
+      const res = await processFulfillment({
+        id: waitingTx.id,
         isLegacy: true,
         reference: tripayReference,
         email: waitingTx.user_email,
@@ -179,6 +199,10 @@ serve(async (req: Request) => {
       });
       return logAndRespond(res.message, 200, res);
     }
+
+    // C. Not found anywhere — log for manual review
+    console.error(`❌ PAID callback not matched | tripay_reference: ${tripayReference} | merchant_ref: ${merchantRef}`);
+    return logAndRespond(`PAID callback received but no matching UNPAID order found. Manual review needed.`, 200, { success: true, tripayReference, merchantRef });
   }
 
   return logAndRespond(`Status ${paymentStatus} received. No action taken.`, 200, { success: true });
@@ -256,15 +280,12 @@ async function processFulfillment(order: any) {
     } catch (e: any) { console.error('Webinar Error:', e.message); }
   }
 
-  // 3. Email & CAPI Notifications
+  // 3. Email Notification (isolated — failure does NOT block CAPI)
   try {
     const isEbook = /program diet|ebook|feminine magnetism|webinar|raja ranjang|dark feminine|love magnet|saham/i.test(pName);
     const functionToInvoke = isEbook ? 'send-ebooks-email' : 'send-payment-email';
-    
-    // Extract quantity from product name (e.g., "(x3)")
     const qtyMatch = pName.match(/\(x(\d+)\)/);
     const parsedQty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
-
     await supabase.functions.invoke(functionToInvoke, {
       body: {
         userEmail: order.email, phone: order.phone, amount: order.amount, currency: 'IDR',
@@ -273,8 +294,10 @@ async function processFulfillment(order: any) {
         quantity: parsedQty
       }
     });
+  } catch (e: any) { console.error('Email Notify Error:', e.message); }
 
-    // Brand Pixel Logic
+  // 4. CAPI Notification (isolated — always runs regardless of email result)
+  try {
     let pixelId = '3319324491540889'; // Default DarkFeminine
     if (/fitfactor/i.test(pName)) pixelId = '1797660474333865';
     else if (/parfum/i.test(pName)) pixelId = '1315644686235886';
@@ -283,7 +306,6 @@ async function processFulfillment(order: any) {
     else if (/jewelry/i.test(pName)) pixelId = '874165095242407';
     else if (/rumah|apartemen|dreamhome/i.test(pName)) pixelId = '1572796670108871';
 
-    // FBC fallback: extract fbclid from page_url if order.fbc is missing
     let resolvedFbc = order.fbc || null;
     if (!resolvedFbc && order.page_url) {
       try {
@@ -303,7 +325,7 @@ async function processFulfillment(order: any) {
       }
     });
     await supabase.from('global_product').update({ capi_purchase_sent: true }).eq('id', order.id);
-  } catch (e: any) { console.error('Notify Error:', e.message); }
+  } catch (e: any) { console.error('CAPI Notify Error:', e.message); }
 
   await supabase.from('waiting_payment').delete().eq('tripay_reference', order.reference);
   return { success: true, message: 'Fulfillment complete' };
