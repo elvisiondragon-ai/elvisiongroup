@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
   const body = await req.json();
   const { eventName, userData, customData, eventId, eventSourceUrl, eventTime, customAccessToken, pixelId, test_event_code } = body;
 
-  const ALLOWED_EVENTS = ["Purchase", "AddPaymentInfo"];
+  const ALLOWED_EVENTS = ["Purchase", "AddPaymentInfo", "Lead", "Schedule", "ViewContent"];
   if (!ALLOWED_EVENTS.includes(eventName)) {
     console.log(`ℹ️ CAPI-UNIVERSAL: Skipping restricted event: ${eventName}`);
     return new Response(JSON.stringify({ 
@@ -130,6 +130,29 @@ Deno.serve(async (req) => {
     if (!eventName) {
       return new Response(JSON.stringify({ error: 'eventName is required' }), {
         status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // --- ADMIN EMAIL & TEST URL BLOCKER (Prevent Test Purchases from Hitting Ads Manager) ---
+    const rawEmail = userData?.email || userData?.em;
+    if (rawEmail) {
+      const lowerEmail = rawEmail.trim().toLowerCase();
+      const blockedEmails = ['elvisiondragon@gmail.com'];
+      if (blockedEmails.includes(lowerEmail)) {
+        console.log(`🚫 CAPI-UNIVERSAL: Blocked test event for admin email: ${lowerEmail}`);
+        return new Response(JSON.stringify({ message: 'Event blocked by Admin Email filter', skipped: true }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    const sourceUrl = eventSourceUrl || req.headers.get('referer') || '';
+    if (sourceUrl.includes('test=true') || sourceUrl.includes('test=1')) {
+      console.log(`🚫 CAPI-UNIVERSAL: Blocked test event due to test flag in URL: ${sourceUrl}`);
+      return new Response(JSON.stringify({ message: 'Event blocked by Test URL flag', skipped: true }), {
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -287,60 +310,6 @@ Deno.serve(async (req) => {
     // SUCCESS LOG (One single line)
     console.log(`✅ CAPI Success | Event: ${eventName} | Pixel: ${resolvedPixelId} | ID: ${eventId || 'N/A'}`);
 
-    // TikTok CAPI — darkfeminine pixel only
-    if (resolvedPixelId === '3319324491540889') {
-      try {
-        const tiktokToken = Deno.env.get('CAPI_DARKFEM_TIKTOK');
-        if (tiktokToken) {
-          const tiktokEventName = eventName === 'Purchase' ? 'CompletePayment' : eventName;
-          const tiktokPayload = {
-            pixel_code: 'D1JVHKJC77U2K3H7GGHG',
-            event: tiktokEventName,
-            timestamp: new Date().toISOString(),
-            context: {
-              user: {
-                email: processedUserData.em,
-                phone_number: processedUserData.ph,
-              },
-              page: {
-                url: eventSourceUrl || req.headers.get('referer') || '',
-              },
-              ip: processedUserData.client_ip_address || '',
-              user_agent: processedUserData.client_user_agent || '',
-            },
-            properties: {
-              contents: [
-                {
-                  content_id: customData?.content_name || '',
-                  content_name: customData?.content_name || '',
-                  quantity: 1,
-                  price: customData?.value || 0,
-                },
-              ],
-              value: customData?.value || 0,
-              currency: customData?.currency || 'IDR',
-            },
-          };
-
-          const tiktokResp = await fetch('https://business-api.tiktok.com/open_api/v1.3/event/track/', {
-            method: 'POST',
-            headers: {
-              'Access-Token': tiktokToken,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(tiktokPayload),
-          });
-          const tiktokResult = await tiktokResp.json();
-          if (tiktokResp.ok && tiktokResult.code === 0) {
-            console.log(`✅ TikTok CAPI Success | Event: ${tiktokEventName} | Pixel: D1JVHKJC77U2K3H7GGHG`);
-          } else {
-            console.error(`❌ TikTok CAPI Failed | ${JSON.stringify(tiktokResult)}`);
-          }
-        }
-      } catch (tiktokErr: any) {
-        console.error(`❌ TikTok CAPI Failed | ${tiktokErr.message}`);
-      }
-    }
 
     return new Response(JSON.stringify({ message: `Event '${eventName}' sent successfully`, result }), {
       status: 200,
