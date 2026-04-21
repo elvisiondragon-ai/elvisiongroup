@@ -3,7 +3,7 @@ import App from './App.tsx'
 import './index.css'
 import './i18n'
 
-const APP_VERSION = '2026.04.06.02';
+const APP_VERSION = '1.0.5';
 (window as any).APP_VERSION = APP_VERSION;
 
 // Global error handler for chunk load failures (stale app)

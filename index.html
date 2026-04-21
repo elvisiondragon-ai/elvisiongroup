@@ -25,7 +25,6 @@
     <meta property="og:title" content="eL Vision Group" />
     <meta property="og:description" content="eL Vision Group Ecosystem" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="" />
 
 
     
@@ -71,38 +70,29 @@
     </style>
     
     <script>
-      // SIMPLIFIED CACHE BUSTER (Works on iOS Safari & All Browsers)
+      // 🚀 iOS SAFARI FOOLPROOF CACHE BUSTER (Hardcoded Version 1.0.4)
       (function() {
-        var APP_VERSION = '2026.03.26.03';
-        var savedVersion = localStorage.getItem('v_cache');
-        var urlParams = new URLSearchParams(window.location.search);
-        
-        if (savedVersion !== APP_VERSION) {
-          console.log('🔄 New version detected. Nuking cache...');
-          localStorage.setItem('v_cache', APP_VERSION);
-          
-          // 1. Kill Service Workers
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(regs) {
-              for (var i = 0; i < regs.length; i++) { regs[i].unregister(); }
-            });
+        var APP_VERSION = '1.0.5';
+        try {
+          var url = new URL(window.location.href);
+          var v = url.searchParams.get('v');
+          var lastV = localStorage.getItem('app_version_tag');
+
+          // 1. Force Redirect ONLY if we don't have the param AND the stored version is old
+          if (v !== APP_VERSION && lastV !== APP_VERSION) {
+            url.searchParams.set('v', APP_VERSION);
+            window.location.replace(url.toString());
+          } 
+          // 2. If we ARE on the new version, save it to stop future redirects and clean the URL
+          else if (v === APP_VERSION) {
+            localStorage.setItem('app_version_tag', APP_VERSION);
+            setTimeout(function() {
+              var cleanUrl = window.location.origin + window.location.pathname + window.location.hash;
+              window.history.replaceState({}, document.title, cleanUrl);
+            }, 1500);
           }
-          
-          // 2. Nuke Cache Storage
-          if ('caches' in window) {
-            caches.keys().then(function(names) {
-              for (var j = 0; j < names.length; j++) { caches.delete(names[j]); }
-            });
-          }
-          
-          // 3. Force URL redirect to break iOS Safari aggressive memory cache
-          window.location.replace(window.location.pathname + '?v=' + APP_VERSION + window.location.hash);
-        } else if (urlParams.has('v')) {
-          // 4. Silently clean up the URL
-          urlParams.delete('v');
-          var newSearch = urlParams.toString();
-          var newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + window.location.hash;
-          window.history.replaceState(null, '', newUrl);
+        } catch (e) {
+          console.error('Cache buster error:', e);
         }
       })();
     </script>

@@ -1,57 +1,80 @@
-import React from 'react';
-import { Quote } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Quote, Play } from 'lucide-react';
 
 const TestimonyPage = () => {
+  const [playingId, setPlayingId] = useState<number | null>(null);
+  const videoRefs = useRef<{[key: number]: HTMLVideoElement | null}>({});
+
+  const togglePlay = (id: number) => {
+    const video = videoRefs.current[id];
+    if (video) {
+      if (!video.paused) {
+        video.pause();
+      } else {
+        // Pause any other playing video first
+        if (playingId !== null && playingId !== id) {
+          videoRefs.current[playingId]?.pause();
+        }
+        video.play();
+      }
+    }
+  };
   const testimonies = [
     {
       name: "Arif - Mind Method",
       title: "Penyintas Kanker Otak Stage 4",
       description: "Stop Battling Your Health: Try the Mind Method for Lasting Recovery",
-      localVideo: "/assets/arif/Arif_interview_indo_comp.mp4",
-      poster: "/assets/arif/arif_interview_indo.jpg"
+      localVideo: "/assets/testimony/arif_interview_en.mp4",
+      poster: "/assets/testimony/arif_interview_en.jpg"
     },
     {
       name: "Arif - Cellular Recovery",
       title: "Mindset Transformation",
       description: "The Secret to Cellular Recovery: What Nobody Tells You About Healing",
-      localVideo: "/assets/arif/arifindo_comp.mp4",
-      poster: "/assets/arif/arifindo.jpeg"
+      localVideo: "/assets/testimony/arif_en.mp4",
+      poster: "/assets/testimony/arif_en.jpg"
     },
     {
       name: "Habib Umar Assegaf",
       title: "Ustadz",
       description: "Spiritual Elevation: A Testimony of Faith and Mental Clarity",
-      video: "https://www.youtube.com/embed/jD6XlkCL4sI"
+      localVideo: "/assets/testimony/habib.mp4",
+      poster: "/assets/testimony/habib.jpg"
     },
     {
       name: "Pak AGUS SH., MH.",
       title: "Kepala Intelijen",
       description: "Professional Excellence & Inner Balance: A High-Achiever’s Perspective",
-      video: "https://www.youtube.com/embed/kVgfxHX_GeY"
+      localVideo: "/assets/testimony/agus.mp4",
+      poster: "/assets/testimony/agus.jpg"
     },
     {
       name: "Dr. Gumilar",
       title: "Hypnotherapist",
       description: "A Medical Endorsement: Why Mindset is the Ultimate Key to Recovery",
-      video: "https://www.youtube.com/embed/U6NsL9RL9rY"
+      localVideo: "/assets/testimony/gumilar.mp4",
+      poster: "/assets/testimony/gumilar.jpg"
     },
     {
       name: "eL Vision - Magnet",
       title: "Problem Solver",
       description: "The Root of the Solution: How I Stopped Managing Problems and Started Solving Them",
-      video: "https://www.youtube.com/embed/cPwGC0NW8s4"
+      localVideo: "/assets/testimony/magnet.mp4",
+      poster: "/assets/testimony/magnet.jpg"
     },
     {
       name: "Lena",
       title: "Student",
       description: "Manifesting Abundance: Moving from Scarcity to Being Chased by Prosperity",
-      video: "https://www.youtube.com/embed/-9u7v6vT5ds"
+      localVideo: "/assets/testimony/lena.mp4",
+      poster: "/assets/testimony/lena.jpg"
     },
     {
       name: "Gen Z",
       title: "Modern Lifestyle",
       description: "The Ultimate Mental Edge: Why This is the Modern Life Hack We’ve Been Searching For",
-      video: "https://www.youtube.com/embed/wQv7mHlE-5o"
+      localVideo: "/assets/testimony/gen_z.mp4",
+      poster: "/assets/testimony/gen_z.jpg"
     }
   ];
 
@@ -117,15 +140,40 @@ const TestimonyPage = () => {
             {testimonies.map((testimony, index) => (
               <div key={index} className="group">
                 <div className="bg-slate-900/50 border border-slate-700 rounded-xl overflow-hidden hover:border-purple-500/50 transition-all h-full flex flex-col">
-                  <div className="relative aspect-[9/16] bg-black">
+                  <div className="relative aspect-[9/16] bg-black group/video cursor-pointer">
                     {testimony.localVideo ? (
-                      <video
-                        src={testimony.localVideo}
-                        poster={testimony.poster}
-                        controls
-                        playsInline
-                        className="w-full h-full object-cover"
-                      />
+                      <>
+                        <video
+                          ref={el => videoRefs.current[index] = el}
+                          src={`${testimony.localVideo}?v=1.0.5`}
+                          poster={testimony.poster}
+                          preload="metadata"
+                          controls
+                          playsInline
+                          onClick={(e) => e.stopPropagation()}
+                          onPlay={() => setPlayingId(index)}
+                          onPause={() => setPlayingId(null)}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Play Button Overlay - only visible when NOT playing */}
+                        {playingId !== index && (
+                          <div 
+                            className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/video:bg-black/40 transition-all z-10"
+                            onClick={() => togglePlay(index)}
+                          >
+                            <div className="w-20 h-20 bg-purple-500/80 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-2xl transform hover:scale-110 transition-transform">
+                              <Play className="w-10 h-10 text-white fill-white ml-1" />
+                            </div>
+                          </div>
+                        )}
+                        {/* Invisible Toggle layer over video when playing to allow "Click to Pause" */}
+                        {playingId === index && (
+                          <div 
+                            className="absolute inset-0 z-0" 
+                            onClick={() => togglePlay(index)}
+                          />
+                        )}
+                      </>
                     ) : (
                       <iframe
                         src={testimony.video}
