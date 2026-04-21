@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
   }
 
   const body = await req.json();
-  const { eventName, userData, customData, eventId, eventSourceUrl, eventTime, customAccessToken, pixelId, test_event_code } = body;
+  const { eventName, userData, customData, eventId, eventSourceUrl, eventTime, customAccessToken, pixelId, test_event_code, secretName } = body;
 
   const ALLOWED_EVENTS = ["Purchase", "AddPaymentInfo", "Lead", "Schedule", "ViewContent"];
   if (!ALLOWED_EVENTS.includes(eventName)) {
@@ -73,6 +73,10 @@ Deno.serve(async (req) => {
   let resolvedPixelId = pixelId || PIXEL_ID_EL_VISION;
   let FACEBOOK_ACCESS_TOKEN = customAccessToken;
 
+  if (secretName && !FACEBOOK_ACCESS_TOKEN) {
+    FACEBOOK_ACCESS_TOKEN = Deno.env.get(secretName);
+  }
+
   if (resolvedPixelId === PIXEL_ID_FITFACTOR) {
     FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_FITFACTOR);
   } else if (resolvedPixelId === PIXEL_ID_PARFUM) {
@@ -87,6 +91,8 @@ Deno.serve(async (req) => {
     FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_DARKFEMININE);
   } else if (resolvedPixelId === PIXEL_ID_DREAMHOME) {
     FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_DREAMHOME);
+  } else if (resolvedPixelId === '1290886492233491') {
+    FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get('CAPI30JUTA');
   } else {
     FACEBOOK_ACCESS_TOKEN = FACEBOOK_ACCESS_TOKEN || Deno.env.get(PIXEL_SECRET_DEFAULT);
   }
