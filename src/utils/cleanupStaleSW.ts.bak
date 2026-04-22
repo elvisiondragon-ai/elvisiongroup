@@ -1,14 +1,12 @@
 
-// Version is defined in index.html (single source of truth) and exposed via window.APP_VERSION
-// Bump APP_VERSION in index.html to force a "nuke" of the client-side cache
+// Incremental version to force-clear stale service workers and caches on deployment
+// Update this string whenever you want to force a "nuke" of the client-side cache
+const CURRENT_APP_VERSION = '2026.04.22.01'; // Force stale cache cleanup for v1.0.6 rollout
 
 export const cleanupStaleServiceWorkers = async () => {
   if (typeof window === 'undefined') return;
 
-  const CURRENT_APP_VERSION = (window as unknown as { APP_VERSION?: string }).APP_VERSION;
-  if (!CURRENT_APP_VERSION) return;
-
-  const savedVersion = localStorage.getItem('app_version_tag');
+  const savedVersion = localStorage.getItem('app_deployment_version');
 
   // If version mismatch, perform aggressive cleanup
   if (savedVersion !== CURRENT_APP_VERSION) {
@@ -37,7 +35,7 @@ export const cleanupStaleServiceWorkers = async () => {
       // localStorage.removeItem('some-stale-item');
 
       // 4. Update the saved version
-      localStorage.setItem('app_version_tag', CURRENT_APP_VERSION);
+      localStorage.setItem('app_deployment_version', CURRENT_APP_VERSION);
 
       console.log('✅ Cleanup complete. Reloading page...');
 

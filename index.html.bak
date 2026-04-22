@@ -70,10 +70,9 @@
     </style>
     
     <script>
-      // 🚀 iOS SAFARI FOOLPROOF CACHE BUSTER — Single Source of Truth (Version 1.0.7)
+      // 🚀 iOS SAFARI FOOLPROOF CACHE BUSTER (Hardcoded Version 1.0.6)
       (function() {
-        var APP_VERSION = '1.0.7';
-        window.APP_VERSION = APP_VERSION;
+        var APP_VERSION = '1.0.6';
         try {
           var url = new URL(window.location.href);
           var v = url.searchParams.get('v');
@@ -81,31 +80,16 @@
 
           // 1. Force Redirect ONLY if we don't have the param AND the stored version is old
           if (v !== APP_VERSION && lastV !== APP_VERSION) {
-            // Stale version detected — unregister SW + clear all caches BEFORE redirect
-            try {
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(regs) {
-                  regs.forEach(function(reg) { reg.unregister(); });
-                });
-              }
-              if ('caches' in window) {
-                caches.keys().then(function(keys) {
-                  keys.forEach(function(k) { caches.delete(k); });
-                });
-              }
-            } catch (swErr) {
-              console.error('SW/cache cleanup error:', swErr);
-            }
             url.searchParams.set('v', APP_VERSION);
             window.location.replace(url.toString());
-          }
+          } 
           // 2. If we ARE on the new version, save it to stop future redirects and clean the URL
           else if (v === APP_VERSION) {
             localStorage.setItem('app_version_tag', APP_VERSION);
             setTimeout(function() {
               var cleanUrl = window.location.origin + window.location.pathname + window.location.hash;
               window.history.replaceState({}, document.title, cleanUrl);
-            }, 20000);
+            }, 1500);
           }
         } catch (e) {
           console.error('Cache buster error:', e);
