@@ -1,7 +1,7 @@
 
 // Incremental version to force-clear stale service workers and caches on deployment
 // Update this string whenever you want to force a "nuke" of the client-side cache
-const CURRENT_APP_VERSION = '2026.03.17.01'; // Standardized email templates and fixed subjects
+const CURRENT_APP_VERSION = '2026.04.22.01'; // Force stale cache cleanup for v1.0.6 rollout
 
 export const cleanupStaleServiceWorkers = async () => {
   if (typeof window === 'undefined') return;
