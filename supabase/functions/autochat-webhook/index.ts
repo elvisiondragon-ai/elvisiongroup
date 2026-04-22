@@ -701,6 +701,66 @@ async function handleFbMessage(
     await logResult(ownerId, "facebook", profile.username, keyword, res.ok, "dm", matchedTrigger.id as string, result?.error?.message, profile.followStatus);
 }
 
+async function handleMetaLead(leadgenId: string, pageId: string, client: Record<string, unknown>) {
+    const token = GLOBAL_META_TOKEN || (client.meta_access_token as string);
+    if (!token) return;
+
+    try {
+        console.log(`🚀 [LEADGEN] Fetching Lead ID: ${leadgenId}`);
+        const res = await fetch(`https://graph.facebook.com/v20.0/${leadgenId}?access_token=${token}`);
+        const data = await res.json();
+
+        if (data.error) {
+            console.error("❌ META API ERROR (LeadGen):", data.error);
+            return;
+        }
+
+        const fieldData: { name: string; values: string[] }[] = data.field_data || [];
+        let name = "Unknown", email = "", phone = "";
+        let surveyAnswers: Record<string, string> = {};
+
+        // Parse Standard & Custom Fields
+        for (const field of fieldData) {
+            const fieldName = field.name.toLowerCase();
+            const val = field.values[0] || "";
+            if (fieldName.includes("name")) name = val;
+            else if (fieldName.includes("email")) email = val;
+            else if (fieldName.includes("phone")) phone = val;
+            else {
+                surveyAnswers[fieldName] = val;
+            }
+        }
+
+        let q1 = "", q2 = "", q3 = "", q4 = "", q5 = "";
+        const customKeys = Object.keys(surveyAnswers);
+        if (customKeys.length > 0) q1 = `${customKeys[0]}: ${surveyAnswers[customKeys[0]]}`;
+        if (customKeys.length > 1) q2 = `${customKeys[1]}: ${surveyAnswers[customKeys[1]]}`;
+        if (customKeys.length > 2) q3 = `${customKeys[2]}: ${surveyAnswers[customKeys[2]]}`;
+        if (customKeys.length > 3) q4 = `${customKeys[3]}: ${surveyAnswers[customKeys[3]]}`;
+        if (customKeys.length > 4) q5 = `${customKeys[4]}: ${surveyAnswers[customKeys[4]]}`;
+
+        // Insert into global_leads
+        const { error } = await supabase.from('global_leads').insert({
+            name: name,
+            email: email,
+            phone: phone,
+            source: 'Meta Lead Ad Form',
+            meta_lead_id: leadgenId,
+            status: 'New',
+            survey_q1: q1,
+            survey_q2: q2,
+            survey_q3: q3,
+            survey_q4: q4,
+            survey_q5: q5
+        });
+
+        if (error) console.error("❌ DB Insert Error (LeadGen):", error.message);
+        else console.log(`✅ [LEADGEN] Lead inserted into global_leads: ${name} / ${phone}`);
+    } catch (e: any) {
+        console.error("❌ Exception (LeadGen):", e.message);
+    }
+}
+
 // ─── MAIN HTTP HANDLER ──────────────────────────────────────────────────────
 
 serve(async (req) => {
@@ -775,6 +835,8 @@ serve(async (req) => {
                             if (fromId && fromId !== pageOrIgId) {
                                 await handleFbComment(val.comment_id, fromId, val.message, pageOrIgId, client, triggers);
                             }
+                        } else if (change.field === "leadgen" && val.leadgen_id) {
+                            await handleMetaLead(val.leadgen_id, pageOrIgId, client);
                         }
                     }
 
