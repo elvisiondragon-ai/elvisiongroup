@@ -732,12 +732,20 @@ async function handleMetaLead(leadgenId: string, pageId: string, client: Record<
         }
 
         let q1 = "", q2 = "", q3 = "", q4 = "", q5 = "";
-        const customKeys = Object.keys(surveyAnswers);
-        if (customKeys.length > 0) q1 = surveyAnswers[customKeys[0]];
-        if (customKeys.length > 1) q2 = surveyAnswers[customKeys[1]];
-        if (customKeys.length > 2) q3 = surveyAnswers[customKeys[2]];
-        if (customKeys.length > 3) q4 = surveyAnswers[customKeys[3]];
-        if (customKeys.length > 4) q5 = surveyAnswers[customKeys[4]];
+        
+        for (const [key, value] of Object.entries(surveyAnswers)) {
+            if (key.includes("alasan") || key.includes("masalah")) {
+                q1 = value;
+            } else if (key.includes("detail") || key.includes("cerita")) {
+                q2 = value;
+            } else if (key.includes("1x_seminggu") || key.includes("komitmen_1x")) {
+                q3 = value;
+            } else if (key.includes("penghasilan") || key.includes("budget")) {
+                q4 = value;
+            } else if (key.includes("30_juta") || key.includes("investasi")) {
+                q5 = value;
+            }
+        }
 
         // Insert into global_leads
         const { error } = await supabase.from('global_leads').insert({
