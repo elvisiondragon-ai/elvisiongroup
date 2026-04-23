@@ -733,11 +733,11 @@ async function handleMetaLead(leadgenId: string, pageId: string, client: Record<
 
         let q1 = "", q2 = "", q3 = "", q4 = "", q5 = "";
         const customKeys = Object.keys(surveyAnswers);
-        if (customKeys.length > 0) q1 = `${customKeys[0]}: ${surveyAnswers[customKeys[0]]}`;
-        if (customKeys.length > 1) q2 = `${customKeys[1]}: ${surveyAnswers[customKeys[1]]}`;
-        if (customKeys.length > 2) q3 = `${customKeys[2]}: ${surveyAnswers[customKeys[2]]}`;
-        if (customKeys.length > 3) q4 = `${customKeys[3]}: ${surveyAnswers[customKeys[3]]}`;
-        if (customKeys.length > 4) q5 = `${customKeys[4]}: ${surveyAnswers[customKeys[4]]}`;
+        if (customKeys.length > 0) q1 = surveyAnswers[customKeys[0]];
+        if (customKeys.length > 1) q2 = surveyAnswers[customKeys[1]];
+        if (customKeys.length > 2) q3 = surveyAnswers[customKeys[2]];
+        if (customKeys.length > 3) q4 = surveyAnswers[customKeys[3]];
+        if (customKeys.length > 4) q5 = surveyAnswers[customKeys[4]];
 
         // Insert into global_leads
         const { error } = await supabase.from('global_leads').insert({
