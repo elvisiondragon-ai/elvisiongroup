@@ -38,6 +38,7 @@ const productOptions = [
   { name: 'Uang Panas (Lead Magnet)', url: 'https://ai.elvisiongroup.com/ebook_uangpanas', commission: '50%' },
   { name: 'eL Vision Ebook', url: 'https://ai.elvisiongroup.com/ebook_elvision', commission: '50%' },
   { name: 'Feminine Magnetism Ebook', url: 'https://ai.elvisiongroup.com/ebook_feminine', commission: '30%' },
+  { name: 'Dr. Elf', url: 'https://drelf.id', commission: '30%' },
 ];
 
 type TimeFilter = 'today' | 'last7' | 'last30' | 'all';

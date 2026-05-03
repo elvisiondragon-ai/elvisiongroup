@@ -11,6 +11,12 @@
 // ==================================================================================
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
@@ -1097,6 +1103,49 @@ ${bccSenderNumber}`;
         }).then(res => res.text().then(txt => console.log(`📡 [BCC] Group Res: ${res.status}`, txt)));
       } catch (err) {
         console.error(`❌ [BCC] Group Alert Error:`, err);
+      }
+    }
+
+    // --- NEW: WHATSAPP NOTIFICATION FOR AFFILIATE ---
+    if (type === 'payment_completed' || type === 'success') {
+      try {
+        console.log(`🔍 Checking if transaction ${safeReference} has affiliate commission...`);
+        const { data: commData, error: commError } = await supabase
+          .from('commissions')
+          .select('affiliate_user_id, commission_amount, commission_percentage')
+          .eq('transaction_id', safeReference)
+          .maybeSingle();
+
+        if (commData && commData.affiliate_user_id) {
+          console.log(`✅ Affiliate commission found! Amount: ${commData.commission_amount}`);
+          const { data: authData } = await supabase.auth.admin.getUserById(commData.affiliate_user_id);
+          const affiliatePhone = authData?.user?.phone || authData?.user?.user_metadata?.phone;
+          const affiliateName = authData?.user?.user_metadata?.full_name || authData?.user?.user_metadata?.name || 'Afiliator';
+
+          if (affiliatePhone) {
+            let cleanPhone = affiliatePhone.replace(/\D/g, '');
+            if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+            else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+
+            const commissionFormatted = `Rp ${commData.commission_amount.toLocaleString('id-ID')}`;
+            const percentage = (commData.commission_percentage * 100).toFixed(0);
+
+            const waMessage = `🎉 *SELAMAT ${affiliateName}!* 🎉\n\nAnda baru saja mendapatkan komisi afiliasi sebesar *${percentage}%* dari penjualan produk *${displayProduct}*.\n\n💰 *Total Komisi:* ${commissionFormatted}\n🧾 *Ref:* ${safeReference}\n\nKomisi Anda telah otomatis ditambahkan ke saldo dashboard eL Vision Group Anda.\nTerus semangat promosinya! 🔥\n\n*eL Vision Group*`;
+
+            console.log(`📱 [WATZAPP] Queuing Affiliate Message to ${cleanPhone}`);
+            await fetch(WAPI_URL, {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: cleanPhone, message: waMessage })
+            });
+          } else {
+             console.log(\`⚠️ Affiliate user found but no phone number in auth.users\`);
+          }
+        } else {
+          console.log(\`ℹ️ No affiliate commission found for \${safeReference}\`);
+        }
+      } catch (err) {
+        console.error(\`❌ [AFFILIATE WA] Error checking/sending affiliate WA:\`, err);
       }
     }
 

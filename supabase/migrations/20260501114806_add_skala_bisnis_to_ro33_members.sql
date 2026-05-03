@@ -1,0 +1,1 @@
+ALTER TABLE ro33_members ADD COLUMN IF NOT EXISTS skala_bisnis TEXT;
