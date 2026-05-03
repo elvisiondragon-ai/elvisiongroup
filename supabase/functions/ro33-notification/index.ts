@@ -9,6 +9,10 @@ const WAPI_TOKEN = Deno.env.get('WAPI_TOKEN') || "rvpwk8dkih9m";
 const WAPI_URL = Deno.env.get('WAPI_URL') || "https://api.elvisiongroup.com/api/send";
 const WAPI_SESSION = Deno.env.get('WAPI_SESSION') || "renata";
 
+const MAILKETING_API_URL = Deno.env.get('MAILKETING_API_URL') || 'https://api.mailketing.co.id/api/v1';
+const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
+const RO33_LIST_ID = '89219';
+
 serve(async (req) => {
   console.log("🚀 RO33-NOTIFICATION Triggered");
 
@@ -86,6 +90,29 @@ serve(async (req) => {
         if (waResponseAdmin.ok) console.log(`✅ WhatsApp sent to admin: ${adminPhone}`);
       } catch (waError) {
         console.error(`❌ Error sending WhatsApp to admin ${adminPhone}:`, waError);
+      }
+    }
+
+    // 3. Add to Mailketing list (Ro33)
+    if (email && MAILKETING_API_KEY) {
+      try {
+        const firstName = nama ? nama.split(' ')[0] : email.split('@')[0];
+        const lastName = nama ? nama.split(' ').slice(1).join(' ') : '';
+        const params = new URLSearchParams({
+          api_token: MAILKETING_API_KEY,
+          list_id: RO33_LIST_ID,
+          email: email,
+          first_name: firstName,
+          last_name: lastName
+        });
+        await fetch(`${MAILKETING_API_URL}/addsubtolist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params
+        });
+        console.log(`✅ Added to Mailketing Ro33 list: ${email}`);
+      } catch (mkError) {
+        console.error('❌ Mailketing add failed:', mkError);
       }
     }
 
