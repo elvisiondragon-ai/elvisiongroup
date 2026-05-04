@@ -13,6 +13,17 @@ const MAILKETING_API_URL = Deno.env.get('MAILKETING_API_URL') || 'https://api.ma
 const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
 const RO33_LIST_ID = '89219';
 
+const ADMIN_PHONES = ['6281383838013', '6285664733499'];
+
+async function sendWA(to: string, message: string) {
+  const cleanPhone = to.replace(/\D/g, '');
+  await fetch(WAPI_URL, {
+    method: 'POST',
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: cleanPhone, message })
+  });
+}
+
 serve(async (req) => {
   console.log("🚀 RO33-NOTIFICATION Triggered");
 
@@ -22,74 +33,94 @@ serve(async (req) => {
 
   try {
     const bodyText = await req.text();
-    console.log("Raw body:", bodyText);
-    
     if (!bodyText) {
-      return new Response(JSON.stringify({ error: "Empty request body" }), { 
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      return new Response(JSON.stringify({ error: "Empty request body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
     const payload = JSON.parse(bodyText);
-    console.log("📥 Received Webhook Payload:", JSON.stringify(payload, null, 2));
+    const record = payload.record;
 
-    const newMember = payload.record;
-    
-    if (!newMember || !newMember.whatsapp) {
-      return new Response(JSON.stringify({ error: "No valid record or whatsapp found" }), { 
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } 
+    if (!record) {
+      return new Response(JSON.stringify({ error: "No record in payload" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    const { nama, whatsapp, email, status, company, bidang_usaha, domisili, tujuan_meetup, skala_bisnis } = newMember;
+    // ─── SURVEY SUBMISSION (ro33_surveys) ───────────────────────────────────
+    if (record.pain_point !== undefined) {
+      console.log("📋 Survey submission detected");
 
-    let cleanPhone = whatsapp.replace(/\D/g, '');
-    if (cleanPhone.startsWith('0')) {
-      cleanPhone = '62' + cleanPhone.slice(1);
-    } else if (cleanPhone.startsWith('8')) {
-      cleanPhone = '62' + cleanPhone;
+      const { nama, pain_point, kronologis, ekspektasi, kesiapan, meetup } = record;
+
+      const surveyMessage =
+        `📋 *RO33 SURVEY BARU*\n\n` +
+        `*Nama:* ${nama || '-'}\n\n` +
+        `*Pain Point Utama:*\n${pain_point || '-'}\n\n` +
+        `*Kronologis:*\n${kronologis || '-'}\n\n` +
+        `*Ekspektasi dari Ro33:*\n${ekspektasi || '-'}\n\n` +
+        `*Kesiapan Berbagi:* ${kesiapan || '-'}\n\n` +
+        `*Kesiapan Meet-up (Jakarta Barat):* ${meetup || '-'}`;
+
+      for (const phone of ADMIN_PHONES) {
+        try {
+          await sendWA(phone, surveyMessage);
+          console.log(`✅ Survey notif sent to admin: ${phone}`);
+        } catch (e) {
+          console.error(`❌ Failed to send survey notif to ${phone}:`, e);
+        }
+      }
+
+      return new Response(JSON.stringify({ success: true, type: 'survey' }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
 
+    // ─── MEMBER REGISTRATION (ro33_members) ─────────────────────────────────
+    if (!record.whatsapp) {
+      return new Response(JSON.stringify({ error: "No valid record or whatsapp found" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    const { nama, whatsapp, email, status, company, bidang_usaha, domisili, tujuan_meetup, skala_bisnis } = record;
+
+    let cleanPhone = whatsapp.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+    else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+
     // 1. Pesan ke Member
-    const memberMessage = `Halo ${nama}, salam kenal.\n\nSaya El Reyzandra.\n\nTerima kasih telah mendaftarkan diri di *Ro33 (Organization of Result Orientation 33)*.\n\nInformasi Anda telah saya terima:\nNama: ${nama}\nStatus: ${status}\nCompany: ${company}\nDomisili: ${domisili}\n\nRo33 adalah ruang bagi founder untuk menjernihkan pikiran dan berbagi energi. Jika profil Anda cocok dengan visi lingkaran kecil ini, saya atau tim akan segera menghubungi Anda kembali untuk mengatur jadwal pertemuan (meet-up) di Jakarta Barat.\n\nSampai jumpa.\n\nSalam,\nEl Reyzandra\neL Vision Group`;
+    const memberMessage =
+      `Halo ${nama}, salam kenal.\n\nSaya El Reyzandra.\n\n` +
+      `Terima kasih telah mendaftarkan diri di *Ro33 (Result Origin 33)*.\n\n` +
+      `Informasi Anda telah saya terima:\nNama: ${nama}\nStatus: ${status}\nCompany: ${company}\nDomisili: ${domisili}\n\n` +
+      `Ro33 adalah ruang bagi founder untuk menjernihkan pikiran dan berbagi energi. ` +
+      `Jika profil Anda cocok dengan visi lingkaran kecil ini, saya atau tim akan segera menghubungi Anda untuk mengatur jadwal meet-up di Jakarta Barat.\n\n` +
+      `Sampai jumpa.\n\nSalam,\nEl Reyzandra\neL Vision Group`;
 
-    const waResponse = await fetch(WAPI_URL, {
-      method: 'POST',
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-          session: WAPI_SESSION,
-          token: WAPI_TOKEN,
-          to: cleanPhone,
-          message: memberMessage
-      })
-    });
-
-    if (waResponse.ok) {
-      console.log(`✅ WhatsApp sent successfully to member: ${cleanPhone}`);
-    } else {
-      console.error(`⚠️ WhatsApp API returned status ${waResponse.status} for member: ${cleanPhone}`);
+    try {
+      await sendWA(cleanPhone, memberMessage);
+      console.log(`✅ WhatsApp sent to member: ${cleanPhone}`);
+    } catch (e) {
+      console.error(`❌ Failed to send WA to member:`, e);
     }
 
     // 2. Pesan ke Admin
-    const adminPhones = ['6281383838013', '6285664733499'];
-    const adminMessage = `🔔 *RO33 MEMBER BARU*\n\nAda pendaftar baru untuk Organization of Result Orientation 33:\n\n*Nama:* ${nama}\n*Status:* ${status}\n*Company:* ${company}\n*Bidang:* ${bidang_usaha}\n*Skala Bisnis:* ${skala_bisnis || '-'}\n*Domisili:* ${domisili}\n*WA:* ${whatsapp}\n*Email:* ${email}\n\n*Tujuan:* ${tujuan_meetup}\n\nMohon direview apakah cocok untuk diundang meet-up.`;
+    const adminMessage =
+      `🔔 *RO33 MEMBER BARU*\n\n` +
+      `*Nama:* ${nama}\n*Status:* ${status}\n*Company:* ${company}\n` +
+      `*Bidang:* ${bidang_usaha}\n*Skala Bisnis:* ${skala_bisnis || '-'}\n` +
+      `*Domisili:* ${domisili}\n*WA:* ${whatsapp}\n*Email:* ${email}\n\n` +
+      `*Tujuan:* ${tujuan_meetup}\n\nMohon direview apakah cocok untuk diundang meet-up.`;
 
-    for (const adminPhone of adminPhones) {
+    for (const phone of ADMIN_PHONES) {
       try {
-        const cleanAdminPhone = adminPhone.replace(/\D/g, '');
-        const waResponseAdmin = await fetch(WAPI_URL, {
-          method: 'POST',
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-              session: WAPI_SESSION,
-              token: WAPI_TOKEN,
-              to: cleanAdminPhone,
-              message: adminMessage
-          })
-        });
-        if (waResponseAdmin.ok) console.log(`✅ WhatsApp sent to admin: ${adminPhone}`);
-      } catch (waError) {
-        console.error(`❌ Error sending WhatsApp to admin ${adminPhone}:`, waError);
+        await sendWA(phone, adminMessage);
+        console.log(`✅ WhatsApp sent to admin: ${phone}`);
+      } catch (e) {
+        console.error(`❌ Failed to send WA to admin ${phone}:`, e);
       }
     }
 
@@ -101,9 +132,7 @@ serve(async (req) => {
         const params = new URLSearchParams({
           api_token: MAILKETING_API_KEY,
           list_id: RO33_LIST_ID,
-          email: email,
-          first_name: firstName,
-          last_name: lastName
+          email, first_name: firstName, last_name: lastName
         });
         await fetch(`${MAILKETING_API_URL}/addsubtolist`, {
           method: 'POST',
@@ -116,7 +145,7 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, type: 'member' }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
