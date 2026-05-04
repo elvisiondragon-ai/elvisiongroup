@@ -13,7 +13,7 @@ const MAILKETING_API_URL = Deno.env.get('MAILKETING_API_URL') || 'https://api.ma
 const MAILKETING_API_KEY = Deno.env.get('MAILKETING_API_KEY');
 const RO33_LIST_ID = '89219';
 
-const ADMIN_PHONES = ['6281383838013', '6285664733499'];
+const ADMIN_PHONES = ['62895325633487', '6281383838013', '6285664733499'];
 
 async function sendWA(to: string, message: string) {
   const cleanPhone = to.replace(/\D/g, '');
