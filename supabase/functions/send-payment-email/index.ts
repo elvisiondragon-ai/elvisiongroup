@@ -1139,13 +1139,13 @@ ${bccSenderNumber}`;
               body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: cleanPhone, message: waMessage })
             });
           } else {
-             console.log(\`⚠️ Affiliate user found but no phone number in auth.users\`);
+             console.log(`⚠️ Affiliate user found but no phone number in auth.users`);
           }
         } else {
-          console.log(\`ℹ️ No affiliate commission found for \${safeReference}\`);
+          console.log(`ℹ️ No affiliate commission found for ${safeReference}`);
         }
       } catch (err) {
-        console.error(\`❌ [AFFILIATE WA] Error checking/sending affiliate WA:\`, err);
+        console.error(`❌ [AFFILIATE WA] Error checking/sending affiliate WA:`, err);
       }
     }
 

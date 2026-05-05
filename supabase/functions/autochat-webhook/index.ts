@@ -281,6 +281,7 @@ async function handleIgComment(
     commentId: string,
     fromUserId: string,
     commentText: string,
+    mediaId: string | undefined,
     client: Record<string, unknown>,
     triggers: Record<string, unknown>[]
 ) {
@@ -290,7 +291,21 @@ async function handleIgComment(
 
     if (!token || !igUserId || fromUserId === igUserId) return;
 
-    const matched = triggers.find((t) => t.is_any_word || commentText.toLowerCase().includes((t.keyword as string).toLowerCase()));
+    const matched = triggers.find((t) => {
+        // 1. Platform Filter
+        const platform = (t.platform_filter as string) || "both";
+        if (platform !== "both" && platform !== "ig") return false;
+
+        // 2. Post Filter
+        const target = (t.target_post as string) || "any_post";
+        if (target !== "any_post" && target !== "semua_post") {
+            const allowedIds = target.split(",");
+            if (!mediaId || !allowedIds.includes(mediaId)) return false;
+        }
+
+        // 3. Keyword Match
+        return t.is_any_word || commentText.toLowerCase().includes((t.keyword as string).toLowerCase());
+    });
     if (!matched) return;
 
     const profile = await getMetaUserProfile(fromUserId, "instagram", token);
@@ -345,6 +360,12 @@ async function handleIgMessage(
 
     if (!token || !igUserId) return;
 
+    // Filter triggers for IG platform only
+    const igTriggers = triggers.filter(t => {
+        const p = (t.platform_filter as string) || "both";
+        return p === "both" || p === "ig";
+    });
+
     let matchedTrigger: Record<string, unknown> | undefined;
     let nextStep: 4 | 5 | 6 = 4;
 
@@ -362,7 +383,7 @@ async function handleIgMessage(
         const stepDetail = parts[2]; // S4 or S5
         const buttonIndex = parts[3]; // B1 or B2
 
-        matchedTrigger = triggers.find(t => t.id === triggerId);
+        matchedTrigger = igTriggers.find(t => t.id === triggerId);
 
         if (matchedTrigger) {
             if (stepDetail === "S4") {
@@ -418,7 +439,7 @@ async function handleIgMessage(
     // 2. Fallback to Text-based matching
     if (!matchedTrigger && searchStr) {
         // Check Step 4 Buttons
-        matchedTrigger = triggers.find(t => {
+        matchedTrigger = igTriggers.find(t => {
             const b1 = (t.step4_button1_text as string || "").toLowerCase().trim();
             const b2 = (t.step4_button2_text as string || "").toLowerCase().trim();
             if (b1 === searchStr) { nextStep = 5; return true; }
@@ -428,7 +449,7 @@ async function handleIgMessage(
 
         if (!matchedTrigger) {
             // Check Step 5 Buttons
-            matchedTrigger = triggers.find(t => {
+            matchedTrigger = igTriggers.find(t => {
                 const b1 = (t.step5_button1_text as string || "").toLowerCase().trim();
                 const b2 = (t.step5_button2_text as string || "").toLowerCase().trim();
                 if (b1 === searchStr || b2 === searchStr) { nextStep = 6; return true; }
@@ -438,7 +459,7 @@ async function handleIgMessage(
     }
 
     if (!matchedTrigger) {
-        matchedTrigger = triggers.find((t) => {
+        matchedTrigger = igTriggers.find((t) => {
             const keywordStr = (t.keyword as string).toLowerCase().trim();
             const isMatch = t.is_any_word || searchStr.includes(keywordStr) || rawText.toLowerCase().includes(keywordStr) || rawPayload.toLowerCase().includes(keywordStr);
             const isChatTrigger = !t.trigger_source || t.trigger_source === 'chat_ig_fb';
@@ -505,6 +526,7 @@ async function handleFbComment(
     commentId: string,
     fromUserId: string,
     commentText: string,
+    postId: string | undefined,
     pageId: string,
     client: Record<string, unknown>,
     triggers: Record<string, unknown>[]
@@ -514,7 +536,21 @@ async function handleFbComment(
 
     if (!token) return;
 
-    const matched = triggers.find((t) => t.is_any_word || commentText.toLowerCase().includes((t.keyword as string).toLowerCase()));
+    const matched = triggers.find((t) => {
+        // 1. Platform Filter
+        const platform = (t.platform_filter as string) || "both";
+        if (platform !== "both" && platform !== "fb") return false;
+
+        // 2. Post Filter
+        const target = (t.target_post as string) || "any_post";
+        if (target !== "any_post" && target !== "semua_post") {
+            const allowedIds = target.split(",");
+            if (!postId || !allowedIds.includes(postId)) return false;
+        }
+
+        // 3. Keyword Match
+        return t.is_any_word || commentText.toLowerCase().includes((t.keyword as string).toLowerCase());
+    });
     if (!matched) return;
 
     const profile = await getMetaUserProfile(fromUserId, "facebook", token);
@@ -578,6 +614,12 @@ async function handleFbMessage(
 
     if (!token) return;
 
+    // Filter triggers for FB platform only
+    const fbTriggers = triggers.filter(t => {
+        const p = (t.platform_filter as string) || "both";
+        return p === "both" || p === "fb";
+    });
+
     let matchedTrigger: Record<string, unknown> | undefined;
     let nextStep: 4 | 5 | 6 = 4;
 
@@ -595,7 +637,7 @@ async function handleFbMessage(
         const stepDetail = parts[2];
         const buttonIndex = parts[3];
 
-        matchedTrigger = triggers.find(t => t.id === triggerId);
+        matchedTrigger = fbTriggers.find(t => t.id === triggerId);
         if (matchedTrigger) {
             if (stepDetail === "S4") {
                 const leadsTo = (buttonIndex === "B1")
@@ -626,7 +668,7 @@ async function handleFbMessage(
 
     // 2. Fallback to Text
     if (!matchedTrigger && searchStr) {
-        matchedTrigger = triggers.find(t => {
+        matchedTrigger = fbTriggers.find(t => {
             const b1 = (t.step4_button1_text as string || "").toLowerCase().trim();
             const b2 = (t.step4_button2_text as string || "").toLowerCase().trim();
             if (b1 === searchStr) { nextStep = 5; return true; }
@@ -635,7 +677,7 @@ async function handleFbMessage(
         });
 
         if (!matchedTrigger) {
-            matchedTrigger = triggers.find(t => {
+            matchedTrigger = fbTriggers.find(t => {
                 const b1 = (t.step5_button1_text as string || "").toLowerCase().trim();
                 const b2 = (t.step5_button2_text as string || "").toLowerCase().trim();
                 if (b1 === searchStr || b2 === searchStr) { nextStep = 6; return true; }
@@ -645,7 +687,7 @@ async function handleFbMessage(
     }
 
     if (!matchedTrigger) {
-        matchedTrigger = triggers.find((t) => {
+        matchedTrigger = fbTriggers.find((t) => {
             const keywordStr = (t.keyword as string).toLowerCase().trim();
             const isMatch = t.is_any_word || searchStr.includes(keywordStr) || rawText.toLowerCase().includes(keywordStr) || rawPayload.toLowerCase().includes(keywordStr);
             const isChatTrigger = !t.trigger_source || t.trigger_source === 'chat_ig_fb';
@@ -829,11 +871,13 @@ serve(async (req) => {
 
                         if (change.field === "comments" && val.text && body.object === "instagram") {
                             const fromId = val.from?.id;
-                            if (fromId) await handleIgComment(val.id, fromId, val.text, client, triggers);
+                            const mediaId = val.media?.id;
+                            if (fromId) await handleIgComment(val.id, fromId, val.text, mediaId, client, triggers);
                         } else if (change.field === "feed" && val.item === "comment" && val.verb === "add" && body.object === "page") {
                             const fromId = val.from?.id;
+                            const postId = val.post_id;
                             if (fromId && fromId !== pageOrIgId) {
-                                await handleFbComment(val.comment_id, fromId, val.message, pageOrIgId, client, triggers);
+                                await handleFbComment(val.comment_id, fromId, val.message, postId, pageOrIgId, client, triggers);
                             }
                         } else if (change.field === "leadgen" && val.leadgen_id) {
                             await handleMetaLead(val.leadgen_id, pageOrIgId, client);
