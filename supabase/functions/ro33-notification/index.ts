@@ -1,9 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
+
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const WAPI_TOKEN = Deno.env.get('WAPI_TOKEN') || "rvpwk8dkih9m";
 const WAPI_URL = Deno.env.get('WAPI_URL') || "https://api.elvisiongroup.com/api/send";
@@ -54,6 +59,24 @@ serve(async (req) => {
 
       const { nama, pain_point, kronologis, ekspektasi, kesiapan, meetup } = record;
 
+      // 1. CRM Sync (global_leads)
+      try {
+        await supabase.from('global_leads').insert({
+          name: nama,
+          source: 'RO33 Survey',
+          campaign_name: 'RO33_SURVEY',
+          survey_q1: pain_point,
+          survey_q2: kronologis,
+          survey_q3: ekspektasi,
+          survey_q4: kesiapan,
+          survey_q5: meetup,
+          status: 'New'
+        });
+        console.log("✅ Sync to global_leads (Survey) successful");
+      } catch (err) {
+        console.error("❌ Sync to global_leads (Survey) failed:", err);
+      }
+
       const surveyMessage =
         `📋 *RO33 SURVEY BARU*\n\n` +
         `*Nama:* ${nama || '-'}\n\n` +
@@ -86,6 +109,26 @@ serve(async (req) => {
     }
 
     const { nama, whatsapp, email, status, company, bidang_usaha, domisili, tujuan_meetup, skala_bisnis } = record;
+
+    // 1. CRM Sync (global_leads)
+    try {
+      await supabase.from('global_leads').insert({
+        name: nama,
+        email: email,
+        phone: whatsapp,
+        source: 'RO33 Registration',
+        campaign_name: 'RO33_LEAD',
+        status: 'New',
+        survey_q1: `Company: ${company}`,
+        survey_q2: `Bidang: ${bidang_usaha}`,
+        survey_q3: `Domisili: ${domisili}`,
+        survey_q4: `Tujuan: ${tujuan_meetup}`,
+        survey_q5: `Skala: ${skala_bisnis || '-'}`
+      });
+      console.log("✅ Sync to global_leads (Member) successful");
+    } catch (err) {
+      console.error("❌ Sync to global_leads (Member) failed:", err);
+    }
 
     let cleanPhone = whatsapp.replace(/\D/g, '');
     if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
