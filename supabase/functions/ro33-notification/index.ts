@@ -145,6 +145,38 @@ serve(async (req) => {
       }
     }
 
+    // 4. Trigger Meta CAPI Lead (Server-Side)
+    try {
+      const eventIdLead = 'ld_' + new Date().getTime() + '_' + Math.floor(Math.random() * 1000);
+      const capiPayload = {
+        pixelId: '3723313531141818',
+        eventName: 'Lead',
+        eventId: eventIdLead,
+        eventSourceUrl: record.page_url || "https://ro33.org/",
+        secretName: 'CAPI_RO33',
+        customData: { value: 1, currency: 'IDR' },
+        userData: {
+          em: email,
+          ph: whatsapp,
+          fn: nama ? nama.split(' ')[0] : null,
+          ln: nama ? nama.split(' ').slice(1).join(' ') : null,
+          client_user_agent: record.user_agent || null,
+          client_ip_address: record.ip_address || null
+        }
+      };
+
+      // Call capi-universal directly from this edge function
+      await fetch('https://nlrgdhpmsittuwiiindq.supabase.co/functions/v1/capi-universal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(capiPayload)
+      }).then(r => r.json()).then(res => {
+        console.log('✅ CAPI Lead Sent via Server:', JSON.stringify(res));
+      });
+    } catch (capiError) {
+      console.error('❌ Server-side CAPI Lead failed:', capiError);
+    }
+
     return new Response(JSON.stringify({ success: true, type: 'member' }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
