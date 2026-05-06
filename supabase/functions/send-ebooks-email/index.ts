@@ -379,6 +379,21 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
       "Tim support kami siap membantu 24 jam via WhatsApp."
     ],
     lang: "id"
+  },
+  'ro33_sesi': {
+    subject: "Konfirmasi Sesi Personal Ro33 — Anda Terdaftar",
+    downloadLink: "https://wa.me/62895325633487?text=Halo%20Admin%20Ro33%2C%20saya%20sudah%20bayar%20sesi%20personal.",
+    color: "#b8954a",
+    accentColor: "#000000",
+    title: "Sesi Personal Ro33 Dikonfirmasi",
+    description: "Terima kasih! Pembayaran Anda telah kami terima. Sesi 1:1 eksklusif Anda bersama Founder Ro33 telah terkonfirmasi.",
+    instructions: [
+      "Admin Ro33 akan menghubungi Anda melalui WhatsApp untuk konfirmasi final.",
+      "Siapkan diri Anda untuk sesi di jadwal yang telah dipilih.",
+      "Jika ada keperluan mendesak, langsung hubungi Admin via tombol di bawah."
+    ],
+    btnText: "HUBUNGI ADMIN RO33",
+    lang: "id"
   }
 };
 
@@ -475,6 +490,7 @@ function getProductKey(productName: string): string {
   if (lower.includes('raja ranjang')) return 'raja_ranjang';
   if (lower.includes('saham_ultimate') || lower.includes('saham ultimate')) return 'universal_saham_ultimate';
   if (lower.includes('womenconsult') || lower.includes('women ai consultant') || lower.includes('women consultant')) return 'womenconsult';
+  if (lower.includes('ro33 sesi') || lower.includes('ro33_sesi') || lower.includes('ro33 personal')) return 'ro33_sesi';
 
   return 'ebook_elvision';
 }
@@ -728,7 +744,7 @@ const handler = async (req: Request) => {
     const waProductKeys = ['raja_ranjang', 'ebook_feminine', 'ebook_feminine_lovemagnet', 'ebook_feminine_ultimate', 'universal_Id_parenting_paid',
       'universal_darkfeminine_en', 'universal_darkfeminine_en_audio',
       'universal_darkfeminine_ph', 'universal_darkfeminine_ph_audio',
-      'universal_saham_ultimate'];
+      'universal_saham_ultimate', 'ro33_sesi'];
 
     if (waProductKeys.includes(productKey)) {
       if (userPhone) {
@@ -773,6 +789,11 @@ const handler = async (req: Request) => {
             waMessage = `Halo ${userName}! 👋\nAko si ${adminName}.\n\nSalamat sa iyong pagbili ng *${productNameDisplay}*.\n\nNatanggap na namin ang iyong bayad na ${displayAmount}.\n\nNarito ang iyong eksklusibong download link:\n👉 ${template.downloadLink}\n\nPaki-download at i-save na! Huwag mag-atubiling sumagot kung may katanungan ka.\n\nMainit na pagbati,\neL Vision Group`;
           } else if (productKey === 'universal_saham_ultimate') {
             waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Saham Ultimate.\n\nTerima kasih atas pembayaran kakak untuk paket *Saham Ultimate*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak.\n\nSetelah download, kakak bisa langsung Login ke dashboard Saham Ultimate di sini:\n🔐 https://saham.elvisiongroup.com/auth\n\nJika sudah selesai membaca, bantu kami ya kak dengan memberikan *Review Jujur* kakak di sini:\n⭐ https://saham.elvisiongroup.com/review\n\nJika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSemoga data ini membantu kakak dalam berinvestasi di pasar modal Indonesia.\n\nSalam hangat,\nAdmin - Saham Ultimate`;
+          } else if (productKey === 'ro33_sesi') {
+            // Extract schedule from product name e.g. "Ro33 Sesi Personal (2026-05-10 10:00)"
+            const scheduleMatch = productNameInput.match(/\(([^)]+)\)/);
+            const jadwal = scheduleMatch ? scheduleMatch[1] : 'sesuai jadwal yang dipilih';
+            waMessage = `Halo kak ${userName}! 👋\nSaya Admin Ro33.\n\nPembayaran Anda untuk *Sesi Personal Ro33* telah kami terima senilai *${displayAmount}*.\n\n📅 *Jadwal Sesi Anda:*\n${jadwal}\n\nHarap pastikan Anda siap pada jadwal tersebut. Admin akan menghubungi Anda kembali melalui nomor ini untuk konfirmasi teknis dan link sesi.\n\nJika ada perubahan atau pertanyaan, balas pesan ini langsung.\n\nSalam hangat,\nAdmin - Ro33`;
           } else {
             waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nAdmin - eL Vision Group`;
           }
