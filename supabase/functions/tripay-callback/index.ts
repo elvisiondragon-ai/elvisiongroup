@@ -247,6 +247,17 @@ async function processFulfillment(order: any) {
 
   const pName = order.product_name || '';
 
+  // 1.5 Clean up leads from darkfeminine_free
+  if (/dark feminine|dark feminin|feminine magnetism/i.test(pName)) {
+    try {
+      const cleanPhone = order.phone?.replace(/\D/g, '');
+      await (supabase.from('darkfeminine_free' as any) as any)
+        .delete()
+        .or(`user_email.eq.${order.email},phone.eq.${cleanPhone}`);
+      console.log(`🧹 Cleaned up darkfeminine_free for ${order.email}`);
+    } catch (e: any) { console.error('Lead Cleanup Error:', e.message); }
+  }
+
   // 2. Specialized Logic (Dark Feminine, Saham, Webinar)
   if (/dark feminine|dark feminin|feminine magnetism/i.test(pName)) {
     try {

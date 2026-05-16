@@ -834,32 +834,54 @@ export function Auth({ onLogin }: AuthProps) {
                   onClick={() => setShowTroubleshoot(!showTroubleshoot)}
                   className="text-sm bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent font-medium hover:from-orange-300 hover:to-yellow-300 transition-all duration-200 cursor-pointer"
                 >
-                  Login Problem?
+                  Update Version?
                 </button>
 
                 {/* Troubleshoot Options */}
                 {showTroubleshoot && (
                   <div className="mt-3 p-3 bg-muted/30 rounded-lg border border-border/50 space-y-2">
                     <p className="text-xs text-muted-foreground">
-                      Login Problem?
+                      Update to latest version?
                     </p>
                     <button
                       onClick={async () => {
                         toast({
-                          title: "Clearing Cache",
-                          description: "Clear all stale cache..",
-                          duration: 2000,
+                          title: "Updating System",
+                          description: "Downloading latest version...",
+                          duration: 3000,
                         });
 
-                        await iOSCacheCleaner.forceCleanReload();
-                        // Will reload automatically
+                        try {
+                          // Unregister SW
+                          if ('serviceWorker' in navigator) {
+                            const regs = await navigator.serviceWorker.getRegistrations();
+                            for (const r of regs) await r.unregister();
+                          }
+                          // Clear Cache
+                          if ('caches' in window) {
+                            const keys = await caches.keys();
+                            for (const k of keys) await caches.delete(k);
+                          }
+                          
+                          localStorage.removeItem('app_version_tag');
+                          
+                          // Force reload with version
+                          const NEW_VERSION = '1.0.8';
+                          const url = new URL(window.location.href);
+                          url.searchParams.set('v', NEW_VERSION);
+                          url.searchParams.set('upd', Date.now().toString());
+                          
+                          window.location.replace(url.toString());
+                        } catch (e) {
+                          window.location.reload();
+                        }
                       }}
                       className="w-full text-sm font-medium py-3 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
                     >
-                      🧹 Clear Cache & Reload
+                      🚀 Update Application
                     </button>
                     <p className="text-xs text-muted-foreground/70">
-                      Refresh system
+                      Force sync with server
                     </p>
                   </div>
                 )}

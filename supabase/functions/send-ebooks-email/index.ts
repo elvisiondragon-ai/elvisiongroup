@@ -95,35 +95,35 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     lang: "id"
   },
   'ebook_feminine': {
-    subject: "Akses Download: Paket Dark Feminine Anda",
+    subject: "Akses Download: Paket Cleopatra Magnet - Dark Feminine Anda",
     downloadLink: "https://drive.google.com/drive/folders/19Hrs9fYFm_PNAQkOGJwI3OWdDb86dkuy?usp=share_link",
     color: "#e11d48",
     accentColor: "#ffffff",
-    title: "Akses Dark Feminine Terbuka",
-    description: "Selamat! Anda sekarang memiliki akses penuh ke Paket Dark Feminine.",
+    title: "Akses Cleopatra Magnet - Dark Feminine Terbuka",
+    description: "Selamat! Anda sekarang memiliki akses penuh ke Paket Cleopatra Magnet - Dark Feminine.",
     instructions: [
       "Silahkan klik tombol di bawah untuk mendownload seluruh ebook Anda."
     ],
     lang: "id"
   },
   'ebook_feminine_lovemagnet': {
-    subject: "Akses Download: Paket Dark Feminine Anda",
+    subject: "Akses Download: Paket Cleopatra Magnet - Dark Feminine Anda",
     downloadLink: "https://drive.google.com/drive/folders/1IZmSrzPDSgGSYwq1sQhhGgBaUExJjhgd?usp=sharing",
     color: "#e11d48",
     accentColor: "#ffffff",
-    title: "Akses Dark Feminine Terbuka",
-    description: "Selamat! Anda sekarang memiliki akses penuh ke Paket Dark Feminine.",
+    title: "Akses Cleopatra Magnet - Dark Feminine Terbuka",
+    description: "Selamat! Anda sekarang memiliki akses penuh ke Paket Cleopatra Magnet - Dark Feminine.",
     instructions: [
       "Silahkan klik tombol di bawah untuk mendownload seluruh ebook Anda."
     ],
     lang: "id"
   },
   'ebook_feminine_ultimate': {
-    subject: "Akses Download: 👑 Ultimate Dark Feminine Anda",
+    subject: "Akses Download: 👑 Ultimate Cleopatra Magnet - Dark Feminine Anda",
     downloadLink: "https://drive.google.com/drive/folders/1LHhYdZCezWKA3iNwDKfvJBnyKfgYsb8g?usp=sharing",
     color: "#e91e8c",
     accentColor: "#facc15",
-    title: "👑 Akses Ultimate Dark Feminine Terbuka",
+    title: "👑 Akses Ultimate Cleopatra Magnet - Dark Feminine Terbuka",
     description: "Selamat! Anda memiliki akses penuh ke paket paling lengkap — Ebook + Audio Love Magnet + Workbook 30 Hari.",
     instructions: [
       "Klik tombol di bawah untuk mendownload semua materi Ultimate Anda.",
@@ -620,6 +620,12 @@ const handler = async (req: Request) => {
     const productKey = getProductKey(productNameInput);
     const template = PRODUCT_TEMPLATES[productKey];
 
+    // Clean display name for the email
+    let productDisplayName = productNameInput;
+    if (productKey.startsWith('ebook_feminine') || productKey.startsWith('universal_darkfeminine')) {
+      productDisplayName = 'Cleopatra Magnet - Dark Feminine';
+    }
+
     console.log(`📊 Processing email for: ${recipientEmail} | Product: ${productNameInput} -> Key: ${productKey}`);
 
     let displayAmount = '';
@@ -698,7 +704,7 @@ const handler = async (req: Request) => {
             </div>
 
             <div class="details-grid">
-                <p style="margin: 5px 0;"><strong>${productLabel}</strong> ${productNameInput}</p>
+                <p style="margin: 5px 0;"><strong>${productLabel}</strong> ${productDisplayName}</p>
                 <p style="margin: 5px 0;"><strong>${referenceLabel}</strong> ${reference}</p>
                 <p style="margin: 5px 0;"><strong>${totalLabel}</strong> ${displayAmount}</p>
             </div>
@@ -714,33 +720,32 @@ const handler = async (req: Request) => {
 
     // Send Email to Buyer (paid only)
     let emailResult = null;
-    emailResult = await sendMailketingEmail(recipientEmail, template.subject, htmlContent);
-    console.log("✅ Email sent successfully to buyer");
+    try {
+        emailResult = await sendMailketingEmail(recipientEmail, template.subject, htmlContent);
+        console.log(`✅ Email sent successfully to buyer ${recipientEmail}`);
+    } catch (e) {
+        console.error("❌ Failed to send email to buyer:", e);
+    }
 
-    // Fire-and-forget: BCC + WhatsApp run in background so response returns immediately
+    // --- START BACKGROUND PROCESS ---
     // @ts-ignore EdgeRuntime is available in Supabase Edge Functions runtime
     EdgeRuntime.waitUntil((async () => {
-    // BCC to Admins (send separate emails as BCC simulation)
+    
+    // 1. IMMEDIATE BCC/NOTIF TO ADMIN (EMAIL)
+    // We do this first because it is independent of the VPS.
     const bccList = ['support@elvisiongroup.com', 'elreyzandra@gmail.com', 'elvisiondragon@gmail.com'];
-
-    // Add affiliate to BCC if exists
-    if (affiliateEmail) {
-      bccList.push(affiliateEmail);
-      console.log(`📎 Adding affiliate ${affiliateEmail} to notification list.`);
-    }
+    if (affiliateEmail) bccList.push(affiliateEmail);
 
     for (const bccEmail of bccList) {
       try {
         await sendMailketingEmail(bccEmail, `[NOTIF] ${template.subject}`, htmlContent);
-        console.log(`✅ BCC/Notif sent to ${bccEmail}`);
       } catch (e) {
-        console.error(`⚠️ Notification Failed for ${bccEmail}:`, e);
+        console.error(`⚠️ Notification Email Failed for ${bccEmail}:`, e);
       }
     }
 
-    // --- WHATSAPP NOTIFICATION ---
-    // userPhone is already extracted and potentially auto-filled above
-
+    // 2. WHATSAPP NOTIFICATION (VPS DEPENDENT)
+    let waStatus = "Bukan Produk Ebook (Skipped)";
     const waProductKeys = ['raja_ranjang', 'ebook_feminine', 'ebook_feminine_lovemagnet', 'ebook_feminine_ultimate', 'universal_Id_parenting_paid',
       'universal_darkfeminine_en', 'universal_darkfeminine_en_audio',
       'universal_darkfeminine_ph', 'universal_darkfeminine_ph_audio',
@@ -748,103 +753,82 @@ const handler = async (req: Request) => {
 
     if (waProductKeys.includes(productKey)) {
       if (userPhone) {
-        console.log(`📱 Sending WhatsApp Notification to ${userPhone} for ${productKey}...`);
         try {
           let cleanPhone = userPhone.replace(/\D/g, '');
-          if (cleanPhone.startsWith('0')) {
-            cleanPhone = '62' + cleanPhone.slice(1);
-          } else if (cleanPhone.startsWith('8')) {
-            cleanPhone = '62' + cleanPhone;
-          }
+          if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+          else if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
 
           const isDarkFeminine = productKey.startsWith('ebook_feminine') || productKey.startsWith('universal_darkfeminine');
           const isParenting = productKey === 'universal_Id_parenting_paid';
           const isEnglish = productKey.includes('_en');
           const isFilipino = productKey.includes('_ph');
 
-          const productNameDisplay = isParenting
-            ? "Co-Parenting Tracker"
-            : productKey === 'ebook_feminine_ultimate'
-              ? "Ultimate Dark Feminine"
-              : productKey === 'ebook_feminine_lovemagnet'
-              ? "Universal Dark Feminine + Love Magnet"
-              : productKey === 'universal_darkfeminine_en_audio'
-                ? "Dark Feminine (PDF + Audio) EN"
-                : productKey === 'universal_darkfeminine_en'
-                  ? "Dark Feminine (PDF) EN"
-                  : productKey === 'universal_darkfeminine_ph_audio'
-                    ? "Dark Feminine (PDF + Audio) PH"
-                    : productKey === 'universal_darkfeminine_ph'
-                      ? "Dark Feminine (PDF) PH"
-                      : isDarkFeminine ? "Universal Dark Feminine" : "Universal Raja Ranjang";
-
-          const adminName = (isDarkFeminine || isEnglish || isFilipino) ? "Admin eL Vision" : "Renata dari Admin eL Vision Group";
+          const productNameDisplay = isParenting ? "Co-Parenting Tracker" : productKey === 'ebook_feminine_ultimate' ? "Ultimate Cleopatra Magnet - Dark Feminine" : productKey === 'ebook_feminine_lovemagnet' ? "Cleopatra Magnet - Dark Feminine + Love Magnet" : productKey === 'universal_darkfeminine_en_audio' ? "Dark Feminine (PDF + Audio) EN" : productKey === 'universal_darkfeminine_en' ? "Dark Feminine (PDF) EN" : productKey === 'universal_darkfeminine_ph_audio' ? "Dark Feminine (PDF + Audio) PH" : productKey === 'universal_darkfeminine_ph' ? "Dark Feminine (PDF) PH" : isDarkFeminine ? "Cleopatra Magnet - Dark Feminine" : "Universal Raja Ranjang";
+          const adminName = isDarkFeminine ? "Admin Cleopatra Magnet - Dark Feminine" : (isEnglish || isFilipino) ? "Admin eL Vision" : "Renata dari Admin eL Vision Group";
 
           let waMessage: string;
+          // ... (waMessage logic remains the same)
           if (productKey === 'ebook_feminine_ultimate') {
-            waMessage = `Halo kak ${userName}! 👋\nSaya Admin eL Vision.\n\nTerima kasih atas kepercayaan kakak untuk paket *Ultimate Dark Feminine* senilai ${displayAmount}.\n\nBerikut adalah link download semua materi Ultimate kakak:\n👉 ${template.downloadLink}\n\nDi dalam folder tersedia:\n📖 *Ebook Dark Feminine* — baca dari awal sampai akhir\n🎧 *Audio Love Magnet* — dengarkan setiap malam sebelum tidur (wajib pakai earphone)\n📝 *Workbook 30 Hari* — isi dan kerjakan setiap hari untuk hasil maksimal\n\nJika kakak ada pertanyaan atau butuh panduan, langsung balas pesan ini — admin siap membantu.\n\nSalam hangat,\nAdmin - eL Vision Group`;
+            waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas kepercayaan kakak untuk paket *${productNameDisplay}* senilai ${displayAmount}.\n\nBerikut adalah link download semua materi Ultimate kakak:\n👉 ${template.downloadLink}\n\nDi dalam folder tersedia:\n📖 *Ebook Dark Feminine* — baca dari awal sampai akhir\n🎧 *Audio Love Magnet* — dengarkan setiap malam sebelum tidur (wajib pakai earphone)\n📝 *Workbook 30 Hari* — isi dan kerjakan setiap hari untuk hasil maksimal\n📚 *Bundle Bonus Ebook* — termasuk Ebook Cleopatra Secret\n\nEbook juga sudah kami kirim ke email *${recipientEmail}*. Silahkan cek Inbox/Important Anda.\n\nJika kakak ada pertanyaan atau butuh panduan, langsung balas pesan ini — admin siap membantu.\n\nSalam hangat,\nAdmin Cleopatra Magnet - Dark Feminine`;
           } else if (isEnglish) {
             waMessage = `Hi ${userName}! 👋\nI am ${adminName}.\n\nThank you for purchasing *${productNameDisplay}*.\n\nYour payment of ${displayAmount} has been received.\n\nHere is your exclusive download link:\n👉 ${template.downloadLink}\n\nPlease download and save it! Feel free to reply if you have any questions.\n\nWarm regards,\neL Vision Group`;
           } else if (isFilipino) {
             waMessage = `Halo ${userName}! 👋\nAko si ${adminName}.\n\nSalamat sa iyong pagbili ng *${productNameDisplay}*.\n\nNatanggap na namin ang iyong bayad na ${displayAmount}.\n\nNarito ang iyong eksklusibong download link:\n👉 ${template.downloadLink}\n\nPaki-download at i-save na! Huwag mag-atubiling sumagot kung may katanungan ka.\n\nMainit na pagbati,\neL Vision Group`;
           } else if (productKey === 'universal_saham_ultimate') {
-            waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Saham Ultimate.\n\nTerima kasih atas pembayaran kakak untuk paket *Saham Ultimate*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak.\n\nSetelah download, kakak bisa langsung Login ke dashboard Saham Ultimate di sini:\n🔐 https://saham.elvisiongroup.com/auth\n\nJika sudah selesai membaca, bantu kami ya kak dengan memberikan *Review Jujur* kakak di sini:\n⭐ https://saham.elvisiongroup.com/review\n\nJika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSemoga data ini membantu kakak dalam berinvestasi di pasar modal Indonesia.\n\nSalam hangat,\nAdmin - Saham Ultimate`;
+            waMessage = `Halo kak ${userName}! 👋\nSaya Admin dari Saham Ultimate.\n\nTerima kasih atas pembayaran kakak untuk paket *Saham Ultimate*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak.\n\nEbook juga sudah kami kirim ke email *${recipientEmail}*. Silahkan cek Inbox/Important Anda.\n\nSetelah download, kakak bisa langsung Login ke dashboard Saham Ultimate di sini:\n🔐 https://saham.elvisiongroup.com/auth\n\nJika sudah selesai membaca, bantu kami ya kak dengan memberikan *Review Jujur* kakak di sini:\n⭐ https://saham.elvisiongroup.com/review\n\nJika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSemoga data ini membantu kakak dalam berinvestasi di pasar modal Indonesia.\n\nSalam hangat,\nAdmin - Saham Ultimate`;
           } else if (productKey === 'ro33_sesi') {
-            // Extract schedule from product name e.g. "Ro33 Sesi Personal (2026-05-10 10:00)"
             const scheduleMatch = productNameInput.match(/\(([^)]+)\)/);
             const jadwal = scheduleMatch ? scheduleMatch[1] : 'sesuai jadwal yang dipilih';
             waMessage = `Halo kak ${userName}! 👋\nSaya Admin Ro33.\n\nPembayaran Anda untuk *Sesi Personal Ro33* telah kami terima senilai *${displayAmount}*.\n\n📅 *Jadwal Sesi Anda:*\n${jadwal}\n\nHarap pastikan Anda siap pada jadwal tersebut. Admin akan menghubungi Anda kembali melalui nomor ini untuk konfirmasi teknis dan link sesi.\n\nJika ada perubahan atau pertanyaan, balas pesan ini langsung.\n\nSalam hangat,\nAdmin - Ro33`;
           } else {
-            waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak. Jika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\nAdmin - eL Vision Group`;
+            const signOff = isDarkFeminine ? "Admin Cleopatra Magnet - Dark Feminine" : "Admin - eL Vision Group";
+            const bonusText = isDarkFeminine ? "\n\n📚 *Bundle Bonus Ebook* — termasuk Ebook Cleopatra Secret\n" : "";
+            waMessage = `Halo kak ${userName}! 👋\nSaya ${adminName}.\n\nTerima kasih atas pembayaran kakak untuk paket *${productNameDisplay}*.\n\nPembayaran kakak telah kami terima senilai ${displayAmount}.\n\nBerikut adalah link akses eksklusif untuk mendownload materi kakak:\n👉 ${template.downloadLink}\n\nSilakan di-download dan disimpan ya kak.${bonusText}\nEbook juga sudah kami kirim ke email *${recipientEmail}*. Silahkan cek Inbox/Important Anda.\n\nJika ada pertanyaan, kakak bisa langsung balas pesan ini.\n\nSalam hangat,\n${signOff}`;
           }
 
           const waResponse = await fetch(WAPI_URL, {
             method: 'POST',
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                session: WAPI_SESSION,
-                token: WAPI_TOKEN,
-                to: cleanPhone,
-                message: waMessage
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: cleanPhone, message: waMessage })
           });
 
           if (waResponse.ok) {
-            console.log(`✅ WhatsApp sent successfully to buyer: ${cleanPhone}`);
+            waStatus = "✅ Ceklis Send";
+            console.log(`✅ Whatsapp sent successfully to buyer ${cleanPhone}`);
           } else {
-            console.error(`⚠️ WhatsApp API (WAPI) returned status ${waResponse.status} for buyer: ${cleanPhone}`);
+            waStatus = `❌ Gagal (Status ${waResponse.status})`;
           }
         } catch (waError) {
-          console.error(`❌ Error sending WhatsApp to buyer ${userPhone}:`, waError);
+          waStatus = `❌ Error (WAPI Down/502)`;
         }
+      } else {
+        waStatus = "⚠️ No Phone Provided";
       }
+    }
 
-      // 🔔 ADMIN NOTIFICATION
-      const adminPhones = ['6281383838013', '6285664733499', '62895325633487'];
-      const adminMessage = `💰 *PEMBELIAN BARU: ${productKey.toUpperCase()}*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'N/A'}\nTotal: ${displayAmount}\nRef: ${reference}`;
+    // 3. ADMIN WHATSAPP NOTIFICATION (LAST STEP)
+    // If this fails, user has already received the Email BCC in step 1.
+    const adminPhones = ['6281383838013-1590651777@g.us', '6285664733499', '62895325633487'];
+    const adminMessage = `💰 *PEMBELIAN BARU: ${productKey.toUpperCase()}*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'N/A'}\nTotal: ${displayAmount}\nRef: ${reference}\n\nWhatsapp: ${waStatus}`;
 
-      for (const adminPhone of adminPhones) {
-        try {
-          const cleanAdminPhone = adminPhone.replace(/\D/g, '');
-          const waResponseAdmin = await fetch(WAPI_URL, {
-            method: 'POST',
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                session: WAPI_SESSION,
-                token: WAPI_TOKEN,
-                to: cleanAdminPhone,
-                message: adminMessage
-            })
-          });
-          if (waResponseAdmin.ok) console.log(`✅ WhatsApp sent to admin: ${adminPhone}`);
-        } catch (waError) {
-          console.error(`❌ Error sending WhatsApp to admin ${adminPhone}:`, waError);
-        }
+    for (const adminPhone of adminPhones) {
+      try {
+        const cleanAdminPhone = adminPhone.includes('@g.us') ? adminPhone : adminPhone.replace(/\D/g, '');
+        await fetch(WAPI_URL, {
+          method: 'POST',
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session: WAPI_SESSION, token: WAPI_TOKEN, to: cleanAdminPhone, message: adminMessage })
+        });
+      } catch (waError) {
+        console.error(`❌ Admin WA Notification Failed for ${adminPhone}`);
       }
+    }
+
+    // 4. FINAL LOG TO CS (EMAIL)
+    try {
+      await sendMailketingEmail('support@elvisiongroup.com', `[FINAL LOG] ${waStatus === '✅ Ceklis Send' ? 'SUCCESS' : 'ATTENTION'}`, `Pemesanan ${recipientEmail} selesai.\nProduk: ${productDisplayName}\nWhatsApp Status: ${waStatus}`);
+    } catch (e) {
+      console.error('❌ Failed to send final log to CS:', e);
     }
     })());
 
