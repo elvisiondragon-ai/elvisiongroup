@@ -824,9 +824,9 @@ const handler = async (req: Request) => {
       // Detect version from full pageUrl first
       const lowerUrl = pageUrl.toLowerCase();
       if (lowerUrl.includes('value') || lowerUrl.includes('pay')) {
-        versionDetected = 'VALUE 💎 (Rp 199k)';
+        versionDetected = 'VALUE 💎';
       } else if (lowerUrl.includes('normal')) {
-        versionDetected = 'NORMAL 🟢 (Rp 99k)';
+        versionDetected = 'NORMAL 🟢';
       }
       
       const cutoffMatch = shortenedPageUrl.match(/&utm_|&fbclid/);
