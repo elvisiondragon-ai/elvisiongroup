@@ -62,8 +62,7 @@ const PRODUCT_TEMPLATES: Record<string, any> = {
     description: "Selamat! Anda kini memiliki akses ke perpustakaan pengetahuan eL Vision.",
     instructions: [
       "Unduh ebook ke perangkat Anda.",
-      "Pelajari materi dasar terlebih dahulu.",
-      "Gabung komunitas Telegram jika tersedia."
+      "Pelajari materi dasar terlebih dahulu."
     ],
     lang: "id"
   },
@@ -571,17 +570,18 @@ const handler = async (req: Request) => {
 
   try {
     const body = await req.json();
-    let recipientEmail = body.userEmail || body.email;
+    let recipientEmail = body.userEmail || body.email || body.user_email;
     let amount = body.amount || 0;
-    let reference = body.reference || 'N/A';
-    let productNameInput = body.productName || body.subscriptionType || 'Unknown Product';
-    let userName = body.userName;
+    let reference = body.reference || body.tripay_reference || 'N/A';
+    let productNameInput = body.productName || body.product_name || body.subscriptionType || 'Unknown Product';
+    let userName = body.userName || body.name;
     let currency = body.currency || 'IDR';
-    let affiliateEmail = body.affiliateEmail;
+    let affiliateEmail = body.affiliateEmail || body.affiliate_email;
     let userPhone = body.phone || body.phone_number || body.ph;
+    let pageUrl = body.pageUrl || body.page_url || '';
 
     // --- AUTO-LOOKUP DARI GLOBAL_PRODUCT ---
-    if (reference && reference !== 'N/A' && (!recipientEmail || productNameInput === 'Unknown Product')) {
+    if (reference && reference !== 'N/A') {
       try {
         const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || 'https://nlrgdhpmsittuwiiindq.supabase.co';
         const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -604,6 +604,7 @@ const handler = async (req: Request) => {
             if (amount === 0 || !amount) amount = p.amount;
             if (!userPhone) userPhone = p.phone;
             if (!affiliateEmail) affiliateEmail = p.affiliate_email;
+            if (!pageUrl) pageUrl = p.page_url;
           } else {
             console.log(`⚠️ Reference ${reference} not found in global_product.`);
           }
@@ -745,13 +746,18 @@ const handler = async (req: Request) => {
     }
 
     // 2. WHATSAPP NOTIFICATION (VPS DEPENDENT)
-    let waStatus = "Bukan Produk Ebook (Skipped)";
     const waProductKeys = ['raja_ranjang', 'ebook_feminine', 'ebook_feminine_lovemagnet', 'ebook_feminine_ultimate', 'universal_Id_parenting_paid',
       'universal_darkfeminine_en', 'universal_darkfeminine_en_audio',
       'universal_darkfeminine_ph', 'universal_darkfeminine_ph_audio',
-      'universal_saham_ultimate', 'ro33_sesi'];
+      'universal_saham_ultimate', 'ro33_sesi', 'ebook_diet', 'ebook_health20', 'ebook_percayadiri', 'ebook_elvision'];
+
+    let waStatus = "Skipped";
+    if (!waProductKeys.includes(productKey)) {
+      waStatus = `Skipped: Produk '${productKey}' tidak masuk daftar notif WA`;
+    }
 
     if (waProductKeys.includes(productKey)) {
+
       if (userPhone) {
         try {
           let cleanPhone = userPhone.replace(/\D/g, '');
@@ -809,7 +815,29 @@ const handler = async (req: Request) => {
     // 3. ADMIN WHATSAPP NOTIFICATION (LAST STEP)
     // If this fails, user has already received the Email BCC in step 1.
     const adminPhones = ['6281383838013-1590651777@g.us', '6285664733499', '62895325633487'];
-    const adminMessage = `💰 *PEMBELIAN BARU: ${productKey.toUpperCase()}*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'N/A'}\nTotal: ${displayAmount}\nRef: ${reference}\n\nWhatsapp: ${waStatus}`;
+    let shortenedPageUrl = 'Organic / Default';
+    let versionDetected = 'Default / Unknown';
+    
+    if (pageUrl) {
+      shortenedPageUrl = pageUrl;
+      
+      // Detect version from full pageUrl first
+      const lowerUrl = pageUrl.toLowerCase();
+      if (lowerUrl.includes('value') || lowerUrl.includes('pay')) {
+        versionDetected = 'VALUE 💎 (Rp 199k)';
+      } else if (lowerUrl.includes('normal')) {
+        versionDetected = 'NORMAL 🟢 (Rp 99k)';
+      }
+      
+      const cutoffMatch = shortenedPageUrl.match(/&utm_|&fbclid/);
+      if (cutoffMatch) {
+        shortenedPageUrl = shortenedPageUrl.substring(0, cutoffMatch.index);
+      }
+    }
+
+    const adminMessage = `💰 *PEMBELIAN BARU: ${productKey.toUpperCase()}*\n\nNama: ${userName}\nEmail: ${recipientEmail}\nWA: ${userPhone || 'N/A'}\nTotal: ${displayAmount}\nRef: ${reference}\nPageUrl: ${shortenedPageUrl}\nVersion: ${versionDetected}\n\nWhatsapp: ${waStatus}`;
+
+
 
     for (const adminPhone of adminPhones) {
       try {
